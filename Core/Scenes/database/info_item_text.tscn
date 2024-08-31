@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://n5xa418dln6i"]
+
+[ext_resource type="Script" path="res://Core/gui/InfoDB/child/info_item_text.gd" id="1_33dhd"]
+
+[node name="info_item_text" type="HBoxContainer"]
+script = ExtResource("1_33dhd")
+
+[node name="label" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+text = "label:"
+
+[node name="content" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+text = "content"

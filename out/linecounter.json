@@ -1,0 +1,3097 @@
+{
+    "extension": "linecounter",
+    "version": "0.2.7",
+    "workspace": "e:\\_dev\\RPGMDataTableLike",
+    "linecount": [
+        {
+            "version": "0.2.7",
+            "counttime": "2024-08-29 23:49:20",
+            "filesum": 227,
+            "codesum": 5245,
+            "commentsum": 68,
+            "blanksum": 862,
+            "statistics": {
+                ".godot": {
+                    "code": 2,
+                    "comment": 0,
+                    "blank": 0
+                },
+                ".import": {
+                    "code": 101,
+                    "comment": 0,
+                    "blank": 21
+                },
+                ".svg": {
+                    "code": 1,
+                    "comment": 0,
+                    "blank": 0
+                },
+                ".gd": {
+                    "code": 1920,
+                    "comment": 0,
+                    "blank": 668
+                },
+                ".tres": {
+                    "code": 66,
+                    "comment": 0,
+                    "blank": 8
+                },
+                ".tscn": {
+                    "code": 425,
+                    "comment": 0,
+                    "blank": 86
+                },
+                ".md5": {
+                    "code": 8,
+                    "comment": 0,
+                    "blank": 4
+                },
+                ".csv": {
+                    "code": 9,
+                    "comment": 0,
+                    "blank": 0
+                },
+                ".txt": {
+                    "code": 2,
+                    "comment": 0,
+                    "blank": 0
+                },
+                ".cfg": {
+                    "code": 2560,
+                    "comment": 5,
+                    "blank": 74
+                },
+                ".Object": {
+                    "code": 2,
+                    "comment": 0,
+                    "blank": 0
+                },
+                "": {
+                    "code": 135,
+                    "comment": 63,
+                    "blank": 1
+                },
+                ".CanvasItem": {
+                    "code": 0,
+                    "comment": 0,
+                    "blank": 0
+                },
+                ".Node": {
+                    "code": 14,
+                    "comment": 0,
+                    "blank": 0
+                }
+            },
+            "filelist": [
+                {
+                    "blank": 0,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".gitattributes"
+                },
+                {
+                    "blank": 0,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".gitignore"
+                },
+                {
+                    "blank": 1,
+                    "code": 0,
+                    "comment": 0,
+                    "filename": ".godot\\.gdignore"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\box_entities.gd-folding-9ef6493df412b23b39725af6c20aa9ca.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\box_entities.tscn-editstate-e0f96aa2b2ea6d7891c2286de807653a.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\box_entities.tscn-folding-e0f96aa2b2ea6d7891c2286de807653a.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\buttonStyle-Focus.tres-folding-a62a5828313bedbdb1f1aa2d249a0b9d.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\Character.gd-folding-fb6e740837535d1a8e3beba1b9dacef5.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\control.tscn-editstate-e66311c87c39ec8c25379305b5ae724b.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\control.tscn-folding-e66311c87c39ec8c25379305b5ae724b.cfg"
+                },
+                {
+                    "blank": 0,
+                    "code": 14,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\create_recent.Node"
+                },
+                {
+                    "blank": 0,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\create_recent.Object"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\custom_list.tscn-editstate-089c95122c605aa965f3a541260c606e.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\custom_list.tscn-folding-089c95122c605aa965f3a541260c606e.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\custom_list_item.tscn-editstate-a5e52624754e419d0d3bbd395561af76.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\custom_list_item.tscn-folding-a5e52624754e419d0d3bbd395561af76.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\customList.tscn-editstate-86f5d8c1213701a9eeb8074af1422d25.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\customList.tscn-folding-86f5d8c1213701a9eeb8074af1422d25.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\CustomListItem.tscn-editstate-d513803078104d08801a1de792537483.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\CustomListItem.tscn-folding-d513803078104d08801a1de792537483.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\customListItemPanel.gd-folding-473727a25ba1953d7d9046068e27faf0.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\database.gd-folding-3bad2e6558d857a0b1c6d9a6da1e5552.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\database.gd-folding-86dd4bbc332894d9e60cffac2454dbb3.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\database.tscn-editstate-a0e72aadfbecbc4de80fc3083041ccf1.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\database.tscn-editstate-c0878e08b46f07a4d91150f60e4bb0ad.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\database.tscn-folding-3cd8d45a07e66dc82a0036ed33024a96.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\database.tscn-folding-a0e72aadfbecbc4de80fc3083041ccf1.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\database.tscn-folding-c0878e08b46f07a4d91150f60e4bb0ad.cfg"
+                },
+                {
+                    "blank": 7,
+                    "code": 42,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\editor_layout.cfg"
+                },
+                {
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\favorites"
+                },
+                {
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\favorites.CanvasItem"
+                },
+                {
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\favorites.Node"
+                },
+                {
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\favorites.Object"
+                },
+                {
+                    "blank": 0,
+                    "code": 107,
+                    "comment": 39,
+                    "filename": ".godot\\editor\\filesystem_cache8"
+                },
+                {
+                    "blank": 0,
+                    "code": 16,
+                    "comment": 16,
+                    "filename": ".godot\\editor\\filesystem_update4"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\GUI.gd-folding-99d8c51b3f2df819a8f2e7764da0fbef.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\id_generator.gd-folding-2d585966ebeefd5bbbdd3109552d2f49.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\info_entities.gd-folding-955c0174a1473a55a2ec9ac641e98367.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\info_entities.tscn-editstate-efde6c7ed9c27f2338b4d5d423529767.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\info_entities.tscn-folding-efde6c7ed9c27f2338b4d5d423529767.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\info_item_lineedit.tscn-editstate-f6be59c953fa5f89b888fb3f47f4e78f.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\info_item_lineedit.tscn-folding-f6be59c953fa5f89b888fb3f47f4e78f.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\info_item_spinbox.gd-folding-944ddb28e58f5f0ea6a38ec5b38474c2.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\info_item_text.gd-folding-92b300fba1cd3aab7ca4103ddec8737e.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\info_item_text.tscn-editstate-1bc00586ae9b3582ab09138b39d191ca.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\info_item_text.tscn-folding-1bc00586ae9b3582ab09138b39d191ca.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\json_storage.gd-folding-b5231758c06c7d89ce834f4114ab2386.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\LeftMenu.tres-folding-7233995a9ab0d100afad1e8fc15d5dd5.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\main.en.translation-folding-794ca82b8e1476d1fd746dc1c4ca9e21.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\main.fr.translation-folding-a84a524e8b91e04db9ef48a2af1281b1.cfg"
+                },
+                {
+                    "blank": 15,
+                    "code": 47,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\project_metadata.cfg"
+                },
+                {
+                    "blank": 0,
+                    "code": 8,
+                    "comment": 8,
+                    "filename": ".godot\\editor\\recent_dirs"
+                },
+                {
+                    "blank": 9,
+                    "code": 60,
+                    "comment": 5,
+                    "filename": ".godot\\editor\\script_editor_cache.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\sdlite_storage.gd-folding-446c51f3466b8f6f842574bada77c2d0.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\test_xml_parser.gd-folding-128ce6e8028ca3d4798172ecae29caee.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\test_xml_parser.tscn-editstate-0533cd9173949892a586accba13ba0ea.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\test_xml_parser.tscn-folding-0533cd9173949892a586accba13ba0ea.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\theme.tres-folding-2ea84a46ddacc2644725cc4064a66c50.cfg"
+                },
+                {
+                    "blank": 0,
+                    "code": 235,
+                    "comment": 0,
+                    "filename": ".godot\\global_script_class_cache.cfg"
+                },
+                {
+                    "filename": ".godot\\imported\\128x128.png-84aba5cccf78bf37ac19a82c9f4131b1.ctex",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\imported\\128x128.png-84aba5cccf78bf37ac19a82c9f4131b1.md5"
+                },
+                {
+                    "filename": ".godot\\imported\\600x400.png-d6d596c32ed1bb9c114f5990a0fdf6fc.ctex",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\imported\\600x400.png-d6d596c32ed1bb9c114f5990a0fdf6fc.md5"
+                },
+                {
+                    "filename": ".godot\\imported\\icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\imported\\icon.svg-218a8f2b3041327d8a5756f3a245f83b.md5"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\imported\\main.csv-409356e503b05f52c3e53773d1c06be0.md5"
+                },
+                {
+                    "blank": 0,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\mono\\metadata\\ide_messaging_meta.txt"
+                },
+                {
+                    "filename": ".godot\\shader_cache\\BlitShaderRD\\72c6e59fbd6bdca88a055003cd3614ebdbc4b9fed5efefb796128c188d379986\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\BokehDofShaderRD\\c8b02e9d9aed942a821d35f533288d4fd0a2faaf2c7b58b53c8a92c6c3544feb\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CanvasOcclusionShaderRD\\6e1f14f7d04af941e1d2300431ef37d7e2742684dce4fbe7495def98a3b1cb4d\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CanvasSdfShaderRD\\ccda596da71a96af6897be3bc63633145694ec79105c5674ee719a025f168249\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CanvasShaderRD\\f2af9ca0e26c0e8049ed431865d8fd5d14faf79f1ba8dade11df8dbd611652c3\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CanvasShaderRD\\f2af9ca0e26c0e8049ed431865d8fd5d14faf79f1ba8dade11df8dbd611652c3\\45fb1ddc6499e56682916a355ce2839e61f42dfe.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CanvasShaderRD\\f2af9ca0e26c0e8049ed431865d8fd5d14faf79f1ba8dade11df8dbd611652c3\\6b3b870743b828dcd054fdf31e0034e036dad94f.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CanvasShaderRD\\f2af9ca0e26c0e8049ed431865d8fd5d14faf79f1ba8dade11df8dbd611652c3\\8a7277c8d3ac029b087c3fa9c55de85560be5119.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CanvasShaderRD\\f2af9ca0e26c0e8049ed431865d8fd5d14faf79f1ba8dade11df8dbd611652c3\\c0a681ae42aa3e0b5abba232ccae0b036be455e4.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CanvasShaderRD\\f2af9ca0e26c0e8049ed431865d8fd5d14faf79f1ba8dade11df8dbd611652c3\\c58570947be7f76937b1582424c0fd3d81be0352.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CanvasShaderRD\\f2af9ca0e26c0e8049ed431865d8fd5d14faf79f1ba8dade11df8dbd611652c3\\ddbe30d4d1be5d69b00075293fd27da8decd4af2.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CanvasShaderRD\\f2af9ca0e26c0e8049ed431865d8fd5d14faf79f1ba8dade11df8dbd611652c3\\f3e258e8f7ec2e7e740b62f3bc48ecf5c99fb0db.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\ClusterDebugShaderRD\\96afdc9dc3999abd6dc9e98643b3d58644ec856e4fa4ea20f9f69e1b225d6af8\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\ClusterRenderShaderRD\\2135e66bae082ab8c6b6d9b8513777bd4aae70f47ed40a170cc241c0696d57dd\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\ClusterStoreShaderRD\\e7c19c07bf7cf7209e469a9fbb06d30b27bf29d7ad91bc47e74e0631765b2d86\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CopyShaderRD\\b3d9672c50ef509a18599d840e170b4531f88fdffb8f3b73d085bf572599743d\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CopyToFbShaderRD\\100799ce54eea0950d2a761842afbdb825c4274cd7ae712042a99dd1738b306b\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CubemapDownsamplerShaderRD\\7fa47c7b9bdb49d907907d1270a1c655307ed89c6d440c039a74c00a0f65519e\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CubemapFilterShaderRD\\1f5612e43bd985ba7545d1f652d72bb4a8251a8320475ebca00f62518d75f98b\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CubemapRoughnessShaderRD\\10ad3612c713073a9477ce1395ccb37e510a332370ed0c0a810e1a066533c13a\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CubeToDpShaderRD\\660d8fbdedf9d936fc5b9136a097854da9e921113edfdd404a556bcd4fad6f8a\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\FsrUpscaleShaderRD\\97473aaafdc6cfc3cba5818be25c133e3aeadec6f6856023826a36711f724ccc\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\GiShaderRD\\7ed242f683587794cbfe6c6bdbb3d96c32891eb915235b121d8c535601789a3e\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\LuminanceReduceShaderRD\\ad94b0824e25b988f4792cd9be4cb80f042918016d83b4d9683034bbeffdd811\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\MotionVectorsShaderRD\\ca45f570f7b085fd508662270a09a17e42436227dd37e8f5a22034bbb70d8a94\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\ParticlesCopyShaderRD\\b640b70d21ec3903c8e257f1d54ef3c64236018b36feffb7a955f8cbf2b977c4\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\ParticlesShaderRD\\bfea0e55dd78696fd416c3513873f5a94bc956c2a61b8292eb5d078690e41591\\f128cab0b22fb7e0d9f023d6cdb81309be392d95.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\ResolveShaderRD\\bbae2281243fdb9a2fc1e014df1debab098cfa3fcafe9ee75283d37df2d1fddf\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\048236defb6bf03aff4593ae5e1ee179e6446005.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\12ebab518252ae4276b8badba1a6fc1b95a33c8b.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\337ea6b97264113d27fc0db223410da3aac4cf18.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\44a3b542d1a7aa433841301aac88e07ec68bb95b.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\513036325ff64a2245643eae4a83f8c916df1372.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\54202eec702711805ef2e96464566c5d36cf146f.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\6f9f221665bfceef9ee7104462ade0892fae85b4.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\7e4276feb9e7788110465d53faa6226c57f8116f.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\7fb66440f65dac23b75016fc52fb82ae26e9393f.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\7fdaf9a9f33dad9936aaccf6e0d8586657dd71d5.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\9192e10d5d060dba18a014008198b12b09a48e50.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\91a7b7c4f6a2d81e1b66e70a1bdca580a0276806.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\979584fc9058fc31b2a6d1e00d2ae8801f62209b.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\a3c143fc7cc5e43b3cd10abbecaa4001e645acad.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\a6d99b637dfee75712ae57f13dc63ae39e299a45.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\c4c828897f8a3fe72e3713d35b4ba452d7ed9acf.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\dfe2cd8f6a54d8a4d9cde5047b4dc131c46d8b1d.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\f24bd7cfaf611a139286a23d4d013a86b1753920.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\ScreenSpaceReflectionFilterShaderRD\\60f8b0befc8ae01c09adc3d4b34f7900bc1430b089054913d923605e7a0ca9c4\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\ScreenSpaceReflectionScaleShaderRD\\c17a8a99b2bfaf1a0e3fdeaf2afc912e685a8f581ca9ad3208b2637c78d43699\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\ScreenSpaceReflectionShaderRD\\b5d41ffd66ed21e4cb5bb10d7d6c9f1b2575907979e8577ecaadc91765c64733\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SdfgiDebugProbesShaderRD\\90121919d39f8150a9149d5e7eca75d0f2b06d679f544f696bdb941a6cf51810\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SdfgiDebugShaderRD\\1d7fbd21ccb6e9825acc51d893c06bb4030178286b008b840821fd317fc5302b\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SdfgiDirectLightShaderRD\\2d9e0cdb42a45dcec8d6fa71bc0e820405887a0f06b540f9cfb9a3d5b0d05c53\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SdfgiIntegrateShaderRD\\15a2e64db17d8aafc8f3d8d2a528747c64d294e8034e7b9e4e86e5ee994d66c2\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SdfgiPreprocessShaderRD\\5d3bf192407ce0131d8d17e264d302c13eb17f8284e643e96071c3c2f09b45a8\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\ShadowFrustumShaderRD\\12fb0f35abe27d7c2578b5bdeaf4517d45f710f9b66ab66f57794d77f90c2fd5\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SkeletonShaderRD\\db547e2a7abfceddca6daece649af33b18189dc08eaa37cef9dc5860862b91ee\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SkyShaderRD\\c773b40a48cb349a2f34006aace7b0ef1aaa8fad530160990a9634fcf019aebe\\03e3b11c69e24394b2d955a8c0ba85587bb70839.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SkyShaderRD\\c773b40a48cb349a2f34006aace7b0ef1aaa8fad530160990a9634fcf019aebe\\373ee543239aa1af0bc6b8ffc3d8251e6104a5b4.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SkyShaderRD\\c773b40a48cb349a2f34006aace7b0ef1aaa8fad530160990a9634fcf019aebe\\de678811d1bad3cad4892a8db7b6ea0be197d51d.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SkyShaderRD\\c773b40a48cb349a2f34006aace7b0ef1aaa8fad530160990a9634fcf019aebe\\f0c584bf613e745cb630a0a20c515f41a21099e8.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SortShaderRD\\0635218ab1b23b93c0e100ad9a6fe7be993089593c96fb6f498e0f9d047ce9f4\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SpecularMergeShaderRD\\fee8ef8ea7ed18eeeebcfa2a626d54c6a503d5b75a9d775d7fb17a7e2dddc698\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SsaoBlurShaderRD\\6649d2399f3866ffbde70be4eae7644fbfe70907923fd36a10552342f768b48d\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SsaoImportanceMapShaderRD\\fc0834566ddf20cc312e6a1eafc6e4ead6ebc5874b1beec4f8b7100879adf9b9\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SsaoInterleaveShaderRD\\1420d433267675277657dbe4a189eb1a8ee79b1dfbd47038e6acf926e1b3b91b\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SsaoShaderRD\\21e4ef08ca2c349ce5ab040c40233a23516ece7c756639d914d6617b909985b7\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SsEffectsDownsampleShaderRD\\33191663db775b3239324c8e7c70b322003c7ba4f3bf509584e1cdc8ce90ca14\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SsilBlurShaderRD\\c4823d0e827d0dd34f66eeeb04a52753c801e7a782e63057003523827a7ebfac\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SsilImportanceMapShaderRD\\673bf3ed83df4540ff07c5b6592d8117847d322f44fc54c541a41052868672ad\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SsilInterleaveShaderRD\\18f771bd553cb304db576babd51d4c4cc63df20ac2052fb0e4133f9fbdf5aa3e\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SsilShaderRD\\7fd8e5f50a5704489ee2a7c2a433125ad7fa0d3a259d399af638bce1edcb8450\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SubsurfaceScatteringShaderRD\\91e1ac945dad61f48411d0a1244e6636634e9785333c014ac318fcee04b72741\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\TaaResolveShaderRD\\75850220cf4a882155831df3c46894bb18d5c770308ec844ff00d09520802a9b\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\TonemapShaderRD\\886811888c9b1fc45eecfdd383f8c7087ea62f74178fadb6ff561a568aade71b\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\VolumetricFogProcessShaderRD\\8d17101913be2888afe1d04fa9287ce1137a8385e86202f4b2a3c6946d3d8982\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\VolumetricFogShaderRD\\c6ff2f4ac52f1179cd0f6c29737304d12ed6b90feae4187f34b38d5228ae1765\\9a227745af2d65830f930370a9fbba551fbd6f60.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\VoxelGiDebugShaderRD\\10e6f56ab62c32c6283301052f7f3efd8733a2dd8c54b5c8e8875b4019be3530\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\VoxelGiShaderRD\\26adaa157a0dbc77aaeb10cd9840a3cfeddb4699002202c4069ea0aca1b684eb\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\uid_cache.bin",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 4,
+                    "code": 20,
+                    "comment": 0,
+                    "filename": "control.tscn"
+                },
+                {
+                    "filename": "Core\\Assets\\Placeholder\\128x128.png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 5,
+                    "code": 29,
+                    "comment": 0,
+                    "filename": "Core\\Assets\\Placeholder\\128x128.png.import"
+                },
+                {
+                    "filename": "Core\\Assets\\Placeholder\\600x400.png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 5,
+                    "code": 29,
+                    "comment": 0,
+                    "filename": "Core\\Assets\\Placeholder\\600x400.png.import"
+                },
+                {
+                    "blank": 0,
+                    "code": 9,
+                    "comment": 0,
+                    "filename": "Core\\Assets\\Translation\\main.csv"
+                },
+                {
+                    "blank": 6,
+                    "code": 11,
+                    "comment": 0,
+                    "filename": "Core\\Assets\\Translation\\main.csv.import"
+                },
+                {
+                    "filename": "Core\\Assets\\Translation\\main.en.translation",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "Core\\Assets\\Translation\\main.fr.translation",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 44,
+                    "code": 128,
+                    "comment": 0,
+                    "filename": "Core\\Class\\base.gd"
+                },
+                {
+                    "blank": 57,
+                    "code": 173,
+                    "comment": 0,
+                    "filename": "Core\\Class\\class_register.gd"
+                },
+                {
+                    "blank": 3,
+                    "code": 10,
+                    "comment": 0,
+                    "filename": "Core\\Class\\effect.gd"
+                },
+                {
+                    "blank": 0,
+                    "code": 3,
+                    "comment": 0,
+                    "filename": "Core\\Class\\engine\\GUI.gd"
+                },
+                {
+                    "blank": 45,
+                    "code": 81,
+                    "comment": 0,
+                    "filename": "Core\\Class\\engine\\settings.gd"
+                },
+                {
+                    "blank": 19,
+                    "code": 29,
+                    "comment": 0,
+                    "filename": "Core\\Class\\Entities.gd"
+                },
+                {
+                    "blank": 3,
+                    "code": 27,
+                    "comment": 0,
+                    "filename": "Core\\Class\\entities\\Animals.gd"
+                },
+                {
+                    "blank": 14,
+                    "code": 23,
+                    "comment": 0,
+                    "filename": "Core\\Class\\entities\\Character.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 3,
+                    "comment": 0,
+                    "filename": "Core\\Class\\entities\\Characters\\Hero.gd"
+                },
+                {
+                    "blank": 23,
+                    "code": 58,
+                    "comment": 0,
+                    "filename": "Core\\Class\\loottables.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 6,
+                    "comment": 0,
+                    "filename": "Core\\Class\\objects.gd"
+                },
+                {
+                    "blank": 3,
+                    "code": 7,
+                    "comment": 0,
+                    "filename": "Core\\Class\\objects\\exp.gd"
+                },
+                {
+                    "blank": 4,
+                    "code": 15,
+                    "comment": 0,
+                    "filename": "Core\\Class\\objects\\item.gd"
+                },
+                {
+                    "blank": 4,
+                    "code": 12,
+                    "comment": 0,
+                    "filename": "Core\\Class\\objects\\money.gd"
+                },
+                {
+                    "blank": 72,
+                    "code": 207,
+                    "comment": 0,
+                    "filename": "Core\\Class\\quest.gd"
+                },
+                {
+                    "blank": 9,
+                    "code": 25,
+                    "comment": 0,
+                    "filename": "Core\\Class\\quests\\objectives\\objectives_collect.gd"
+                },
+                {
+                    "blank": 7,
+                    "code": 22,
+                    "comment": 0,
+                    "filename": "Core\\Class\\quests\\objectives\\objectives_kill.gd"
+                },
+                {
+                    "blank": 7,
+                    "code": 18,
+                    "comment": 0,
+                    "filename": "Core\\Class\\quests\\objectives\\objectives_reach.gd"
+                },
+                {
+                    "blank": 7,
+                    "code": 22,
+                    "comment": 0,
+                    "filename": "Core\\Class\\quests\\objectives\\objectives_talk.gd"
+                },
+                {
+                    "blank": 9,
+                    "code": 19,
+                    "comment": 0,
+                    "filename": "Core\\Class\\quests\\quests_objectives.gd"
+                },
+                {
+                    "blank": 18,
+                    "code": 46,
+                    "comment": 0,
+                    "filename": "Core\\Class\\register\\character_register.gd"
+                },
+                {
+                    "blank": 12,
+                    "code": 57,
+                    "comment": 0,
+                    "filename": "Core\\Class\\register\\data_register.gd"
+                },
+                {
+                    "blank": 7,
+                    "code": 51,
+                    "comment": 0,
+                    "filename": "Core\\Class\\register\\enum_register.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 5,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\animals\\AnimalsDiet.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\animals\\AnimalsGender.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 5,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\animals\\AnimalsMovementType.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 5,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\effects\\effect_outcome.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 6,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\effects\\effect_target.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 5,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\effects\\effect_time.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 8,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\effects\\effect_type.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 5,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\gui\\entities\\box_entities_change.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\objects\\items\\item_dropability.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 6,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\objects\\items\\item_durability_type.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 7,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\objects\\items\\item_obtainability.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 9,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\objects\\items\\item_rarity.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\objects\\items\\item_repairability.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 11,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\objects\\items\\item_type.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\objects\\items\\item_usability.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 5,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\objects\\object_type.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 9,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\quests\\objective_type.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 8,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\quests\\quest_status.gd"
+                },
+                {
+                    "blank": 2,
+                    "code": 8,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\quests\\quest_type.gd"
+                },
+                {
+                    "blank": 11,
+                    "code": 15,
+                    "comment": 0,
+                    "filename": "Core\\gui\\BoxDB\\box_entities.gd"
+                },
+                {
+                    "blank": 20,
+                    "code": 95,
+                    "comment": 0,
+                    "filename": "Core\\gui\\Class\\List.gd"
+                },
+                {
+                    "blank": 22,
+                    "code": 73,
+                    "comment": 0,
+                    "filename": "Core\\gui\\Class\\ListItem.gd"
+                },
+                {
+                    "blank": 16,
+                    "code": 34,
+                    "comment": 0,
+                    "filename": "Core\\gui\\CustomList\\customList.gd"
+                },
+                {
+                    "blank": 12,
+                    "code": 48,
+                    "comment": 0,
+                    "filename": "Core\\gui\\CustomList\\customListItem.gd"
+                },
+                {
+                    "blank": 2,
+                    "code": 6,
+                    "comment": 0,
+                    "filename": "Core\\gui\\CustomList\\customListItemPanel.gd"
+                },
+                {
+                    "blank": 15,
+                    "code": 40,
+                    "comment": 0,
+                    "filename": "Core\\gui\\InfoDB\\child\\info_item_lineedit.gd"
+                },
+                {
+                    "blank": 23,
+                    "code": 58,
+                    "comment": 0,
+                    "filename": "Core\\gui\\InfoDB\\child\\info_item_options.gd"
+                },
+                {
+                    "blank": 16,
+                    "code": 41,
+                    "comment": 0,
+                    "filename": "Core\\gui\\InfoDB\\child\\info_item_spinbox.gd"
+                },
+                {
+                    "blank": 7,
+                    "code": 23,
+                    "comment": 0,
+                    "filename": "Core\\gui\\InfoDB\\child\\info_item_text.gd"
+                },
+                {
+                    "blank": 16,
+                    "code": 46,
+                    "comment": 0,
+                    "filename": "Core\\gui\\InfoDB\\child\\info_item_textedit.gd"
+                },
+                {
+                    "blank": 41,
+                    "code": 145,
+                    "comment": 0,
+                    "filename": "Core\\gui\\InfoDB\\info_entities.gd"
+                },
+                {
+                    "blank": 9,
+                    "code": 37,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\box_entities.tscn"
+                },
+                {
+                    "blank": 1,
+                    "code": 7,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\ButtonGroup\\buttonStyle-Focus.tres"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\ButtonGroup\\LeftMenu.tres"
+                },
+                {
+                    "blank": 7,
+                    "code": 33,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\custom_list.tscn"
+                },
+                {
+                    "blank": 7,
+                    "code": 36,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\custom_list_item.tscn"
+                },
+                {
+                    "blank": 34,
+                    "code": 53,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\database.gd"
+                },
+                {
+                    "blank": 19,
+                    "code": 108,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\database.tscn"
+                },
+                {
+                    "blank": 32,
+                    "code": 167,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\info_entities.tscn"
+                },
+                {
+                    "blank": 4,
+                    "code": 12,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\info_item_lineedit.tscn"
+                },
+                {
+                    "blank": 4,
+                    "code": 12,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\info_item_text.tscn"
+                },
+                {
+                    "blank": 6,
+                    "code": 57,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\theme.tres"
+                },
+                {
+                    "blank": 6,
+                    "code": 13,
+                    "comment": 0,
+                    "filename": "Core\\Utils\\id_generator.gd"
+                },
+                {
+                    "blank": 5,
+                    "code": 12,
+                    "comment": 0,
+                    "filename": "Core\\Utils\\storage\\base_storage.gd"
+                },
+                {
+                    "blank": 31,
+                    "code": 54,
+                    "comment": 0,
+                    "filename": "Core\\Utils\\storage\\json_storage.gd"
+                },
+                {
+                    "blank": 2,
+                    "code": 6,
+                    "comment": 0,
+                    "filename": "Core\\Utils\\utils.gd"
+                },
+                {
+                    "blank": 0,
+                    "code": 1,
+                    "comment": 0,
+                    "filename": "icon.svg"
+                },
+                {
+                    "blank": 5,
+                    "code": 32,
+                    "comment": 0,
+                    "filename": "icon.svg.import"
+                },
+                {
+                    "blank": 0,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": "project.godot"
+                }
+            ]
+        },
+        {
+            "version": "0.2.7",
+            "counttime": "2024-08-30 15:28:13",
+            "filesum": 232,
+            "codesum": 5727,
+            "commentsum": 84,
+            "blanksum": 917,
+            "statistics": {
+                ".gd": {
+                    "code": 2087,
+                    "comment": 0,
+                    "blank": 699
+                },
+                ".godot": {
+                    "code": 2,
+                    "comment": 0,
+                    "blank": 0
+                },
+                ".tscn": {
+                    "code": 528,
+                    "comment": 0,
+                    "blank": 108
+                },
+                ".import": {
+                    "code": 101,
+                    "comment": 0,
+                    "blank": 21
+                },
+                ".svg": {
+                    "code": 1,
+                    "comment": 0,
+                    "blank": 0
+                },
+                ".tres": {
+                    "code": 66,
+                    "comment": 0,
+                    "blank": 8
+                },
+                ".csv": {
+                    "code": 9,
+                    "comment": 0,
+                    "blank": 0
+                },
+                "": {
+                    "code": 156,
+                    "comment": 79,
+                    "blank": 1
+                },
+                ".cfg": {
+                    "code": 2751,
+                    "comment": 5,
+                    "blank": 76
+                },
+                ".Node": {
+                    "code": 14,
+                    "comment": 0,
+                    "blank": 0
+                },
+                ".md5": {
+                    "code": 8,
+                    "comment": 0,
+                    "blank": 4
+                },
+                ".Object": {
+                    "code": 2,
+                    "comment": 0,
+                    "blank": 0
+                },
+                ".txt": {
+                    "code": 2,
+                    "comment": 0,
+                    "blank": 0
+                },
+                ".CanvasItem": {
+                    "code": 0,
+                    "comment": 0,
+                    "blank": 0
+                }
+            },
+            "filelist": [
+                {
+                    "blank": 0,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".gitattributes"
+                },
+                {
+                    "blank": 0,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".gitignore"
+                },
+                {
+                    "blank": 1,
+                    "code": 0,
+                    "comment": 0,
+                    "filename": ".godot\\.gdignore"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\box_entities.gd-folding-9ef6493df412b23b39725af6c20aa9ca.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\box_entities.tscn-editstate-e0f96aa2b2ea6d7891c2286de807653a.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\box_entities.tscn-folding-e0f96aa2b2ea6d7891c2286de807653a.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\buttonStyle-Focus.tres-folding-a62a5828313bedbdb1f1aa2d249a0b9d.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\Character.gd-folding-fb6e740837535d1a8e3beba1b9dacef5.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\control.tscn-editstate-e66311c87c39ec8c25379305b5ae724b.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\control.tscn-folding-e66311c87c39ec8c25379305b5ae724b.cfg"
+                },
+                {
+                    "blank": 0,
+                    "code": 14,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\create_recent.Node"
+                },
+                {
+                    "blank": 0,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\create_recent.Object"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\custom_list.tscn-editstate-089c95122c605aa965f3a541260c606e.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\custom_list.tscn-folding-089c95122c605aa965f3a541260c606e.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\custom_list_item.tscn-editstate-a5e52624754e419d0d3bbd395561af76.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\custom_list_item.tscn-folding-a5e52624754e419d0d3bbd395561af76.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\customList.tscn-editstate-86f5d8c1213701a9eeb8074af1422d25.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\customList.tscn-folding-86f5d8c1213701a9eeb8074af1422d25.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\CustomListItem.tscn-editstate-d513803078104d08801a1de792537483.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\CustomListItem.tscn-folding-d513803078104d08801a1de792537483.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\customListItemPanel.gd-folding-473727a25ba1953d7d9046068e27faf0.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\database.gd-folding-3bad2e6558d857a0b1c6d9a6da1e5552.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\database.gd-folding-86dd4bbc332894d9e60cffac2454dbb3.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\database.tscn-editstate-a0e72aadfbecbc4de80fc3083041ccf1.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\database.tscn-editstate-c0878e08b46f07a4d91150f60e4bb0ad.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\database.tscn-folding-3cd8d45a07e66dc82a0036ed33024a96.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\database.tscn-folding-a0e72aadfbecbc4de80fc3083041ccf1.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\database.tscn-folding-c0878e08b46f07a4d91150f60e4bb0ad.cfg"
+                },
+                {
+                    "blank": 7,
+                    "code": 42,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\editor_layout.cfg"
+                },
+                {
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\favorites"
+                },
+                {
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\favorites.CanvasItem"
+                },
+                {
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\favorites.Node"
+                },
+                {
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\favorites.Object"
+                },
+                {
+                    "blank": 0,
+                    "code": 115,
+                    "comment": 42,
+                    "filename": ".godot\\editor\\filesystem_cache8"
+                },
+                {
+                    "blank": 0,
+                    "code": 29,
+                    "comment": 29,
+                    "filename": ".godot\\editor\\filesystem_update4"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\GUI.gd-folding-99d8c51b3f2df819a8f2e7764da0fbef.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\id_generator.gd-folding-2d585966ebeefd5bbbdd3109552d2f49.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\info_entities.gd-folding-955c0174a1473a55a2ec9ac641e98367.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\info_entities.tscn-editstate-efde6c7ed9c27f2338b4d5d423529767.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\info_entities.tscn-folding-efde6c7ed9c27f2338b4d5d423529767.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\info_item_lineedit.tscn-editstate-f6be59c953fa5f89b888fb3f47f4e78f.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\info_item_lineedit.tscn-folding-f6be59c953fa5f89b888fb3f47f4e78f.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\info_item_spinbox.gd-folding-944ddb28e58f5f0ea6a38ec5b38474c2.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\info_item_text.gd-folding-92b300fba1cd3aab7ca4103ddec8737e.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\info_item_text.tscn-editstate-1bc00586ae9b3582ab09138b39d191ca.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\info_item_text.tscn-folding-1bc00586ae9b3582ab09138b39d191ca.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\json_storage.gd-folding-b5231758c06c7d89ce834f4114ab2386.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\LeftMenu.tres-folding-7233995a9ab0d100afad1e8fc15d5dd5.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\main.en.translation-folding-794ca82b8e1476d1fd746dc1c4ca9e21.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\main.fr.translation-folding-a84a524e8b91e04db9ef48a2af1281b1.cfg"
+                },
+                {
+                    "blank": 15,
+                    "code": 48,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\project_metadata.cfg"
+                },
+                {
+                    "blank": 0,
+                    "code": 8,
+                    "comment": 8,
+                    "filename": ".godot\\editor\\recent_dirs"
+                },
+                {
+                    "blank": 9,
+                    "code": 60,
+                    "comment": 5,
+                    "filename": ".godot\\editor\\script_editor_cache.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\sdlite_storage.gd-folding-446c51f3466b8f6f842574bada77c2d0.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\Test_Graph01.tscn-editstate-4c9cae8ff424c6fb4ed4407424e86f2b.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\Test_Graph01.tscn-folding-4c9cae8ff424c6fb4ed4407424e86f2b.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\test_xml_parser.gd-folding-128ce6e8028ca3d4798172ecae29caee.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 174,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\test_xml_parser.tscn-editstate-0533cd9173949892a586accba13ba0ea.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\test_xml_parser.tscn-folding-0533cd9173949892a586accba13ba0ea.cfg"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\editor\\theme.tres-folding-2ea84a46ddacc2644725cc4064a66c50.cfg"
+                },
+                {
+                    "blank": 0,
+                    "code": 247,
+                    "comment": 0,
+                    "filename": ".godot\\global_script_class_cache.cfg"
+                },
+                {
+                    "filename": ".godot\\imported\\128x128.png-84aba5cccf78bf37ac19a82c9f4131b1.ctex",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\imported\\128x128.png-84aba5cccf78bf37ac19a82c9f4131b1.md5"
+                },
+                {
+                    "filename": ".godot\\imported\\600x400.png-d6d596c32ed1bb9c114f5990a0fdf6fc.ctex",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\imported\\600x400.png-d6d596c32ed1bb9c114f5990a0fdf6fc.md5"
+                },
+                {
+                    "filename": ".godot\\imported\\icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\imported\\icon.svg-218a8f2b3041327d8a5756f3a245f83b.md5"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\imported\\main.csv-409356e503b05f52c3e53773d1c06be0.md5"
+                },
+                {
+                    "blank": 0,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": ".godot\\mono\\metadata\\ide_messaging_meta.txt"
+                },
+                {
+                    "filename": ".godot\\shader_cache\\BlitShaderRD\\72c6e59fbd6bdca88a055003cd3614ebdbc4b9fed5efefb796128c188d379986\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\BokehDofShaderRD\\c8b02e9d9aed942a821d35f533288d4fd0a2faaf2c7b58b53c8a92c6c3544feb\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CanvasOcclusionShaderRD\\6e1f14f7d04af941e1d2300431ef37d7e2742684dce4fbe7495def98a3b1cb4d\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CanvasSdfShaderRD\\ccda596da71a96af6897be3bc63633145694ec79105c5674ee719a025f168249\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CanvasShaderRD\\f2af9ca0e26c0e8049ed431865d8fd5d14faf79f1ba8dade11df8dbd611652c3\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CanvasShaderRD\\f2af9ca0e26c0e8049ed431865d8fd5d14faf79f1ba8dade11df8dbd611652c3\\45fb1ddc6499e56682916a355ce2839e61f42dfe.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CanvasShaderRD\\f2af9ca0e26c0e8049ed431865d8fd5d14faf79f1ba8dade11df8dbd611652c3\\6b3b870743b828dcd054fdf31e0034e036dad94f.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CanvasShaderRD\\f2af9ca0e26c0e8049ed431865d8fd5d14faf79f1ba8dade11df8dbd611652c3\\8a7277c8d3ac029b087c3fa9c55de85560be5119.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CanvasShaderRD\\f2af9ca0e26c0e8049ed431865d8fd5d14faf79f1ba8dade11df8dbd611652c3\\c0a681ae42aa3e0b5abba232ccae0b036be455e4.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CanvasShaderRD\\f2af9ca0e26c0e8049ed431865d8fd5d14faf79f1ba8dade11df8dbd611652c3\\c58570947be7f76937b1582424c0fd3d81be0352.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CanvasShaderRD\\f2af9ca0e26c0e8049ed431865d8fd5d14faf79f1ba8dade11df8dbd611652c3\\ddbe30d4d1be5d69b00075293fd27da8decd4af2.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CanvasShaderRD\\f2af9ca0e26c0e8049ed431865d8fd5d14faf79f1ba8dade11df8dbd611652c3\\f3e258e8f7ec2e7e740b62f3bc48ecf5c99fb0db.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\ClusterDebugShaderRD\\96afdc9dc3999abd6dc9e98643b3d58644ec856e4fa4ea20f9f69e1b225d6af8\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\ClusterRenderShaderRD\\2135e66bae082ab8c6b6d9b8513777bd4aae70f47ed40a170cc241c0696d57dd\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\ClusterStoreShaderRD\\e7c19c07bf7cf7209e469a9fbb06d30b27bf29d7ad91bc47e74e0631765b2d86\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CopyShaderRD\\b3d9672c50ef509a18599d840e170b4531f88fdffb8f3b73d085bf572599743d\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CopyToFbShaderRD\\100799ce54eea0950d2a761842afbdb825c4274cd7ae712042a99dd1738b306b\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CubemapDownsamplerShaderRD\\7fa47c7b9bdb49d907907d1270a1c655307ed89c6d440c039a74c00a0f65519e\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CubemapFilterShaderRD\\1f5612e43bd985ba7545d1f652d72bb4a8251a8320475ebca00f62518d75f98b\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CubemapRoughnessShaderRD\\10ad3612c713073a9477ce1395ccb37e510a332370ed0c0a810e1a066533c13a\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\CubeToDpShaderRD\\660d8fbdedf9d936fc5b9136a097854da9e921113edfdd404a556bcd4fad6f8a\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\FsrUpscaleShaderRD\\97473aaafdc6cfc3cba5818be25c133e3aeadec6f6856023826a36711f724ccc\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\GiShaderRD\\7ed242f683587794cbfe6c6bdbb3d96c32891eb915235b121d8c535601789a3e\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\LuminanceReduceShaderRD\\ad94b0824e25b988f4792cd9be4cb80f042918016d83b4d9683034bbeffdd811\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\MotionVectorsShaderRD\\ca45f570f7b085fd508662270a09a17e42436227dd37e8f5a22034bbb70d8a94\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\ParticlesCopyShaderRD\\b640b70d21ec3903c8e257f1d54ef3c64236018b36feffb7a955f8cbf2b977c4\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\ParticlesShaderRD\\bfea0e55dd78696fd416c3513873f5a94bc956c2a61b8292eb5d078690e41591\\f128cab0b22fb7e0d9f023d6cdb81309be392d95.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\ResolveShaderRD\\bbae2281243fdb9a2fc1e014df1debab098cfa3fcafe9ee75283d37df2d1fddf\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\048236defb6bf03aff4593ae5e1ee179e6446005.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\12ebab518252ae4276b8badba1a6fc1b95a33c8b.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\337ea6b97264113d27fc0db223410da3aac4cf18.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\44a3b542d1a7aa433841301aac88e07ec68bb95b.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\513036325ff64a2245643eae4a83f8c916df1372.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\54202eec702711805ef2e96464566c5d36cf146f.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\6f9f221665bfceef9ee7104462ade0892fae85b4.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\7e4276feb9e7788110465d53faa6226c57f8116f.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\7fb66440f65dac23b75016fc52fb82ae26e9393f.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\7fdaf9a9f33dad9936aaccf6e0d8586657dd71d5.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\9192e10d5d060dba18a014008198b12b09a48e50.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\91a7b7c4f6a2d81e1b66e70a1bdca580a0276806.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\979584fc9058fc31b2a6d1e00d2ae8801f62209b.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\a3c143fc7cc5e43b3cd10abbecaa4001e645acad.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\a6d99b637dfee75712ae57f13dc63ae39e299a45.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\c4c828897f8a3fe72e3713d35b4ba452d7ed9acf.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\dfe2cd8f6a54d8a4d9cde5047b4dc131c46d8b1d.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SceneForwardClusteredShaderRD\\d5ded1b6d087f9d205de57ed54272037445fd80bbbab48e31e53a3fe33da0710\\f24bd7cfaf611a139286a23d4d013a86b1753920.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\ScreenSpaceReflectionFilterShaderRD\\60f8b0befc8ae01c09adc3d4b34f7900bc1430b089054913d923605e7a0ca9c4\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\ScreenSpaceReflectionScaleShaderRD\\c17a8a99b2bfaf1a0e3fdeaf2afc912e685a8f581ca9ad3208b2637c78d43699\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\ScreenSpaceReflectionShaderRD\\b5d41ffd66ed21e4cb5bb10d7d6c9f1b2575907979e8577ecaadc91765c64733\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SdfgiDebugProbesShaderRD\\90121919d39f8150a9149d5e7eca75d0f2b06d679f544f696bdb941a6cf51810\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SdfgiDebugShaderRD\\1d7fbd21ccb6e9825acc51d893c06bb4030178286b008b840821fd317fc5302b\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SdfgiDirectLightShaderRD\\2d9e0cdb42a45dcec8d6fa71bc0e820405887a0f06b540f9cfb9a3d5b0d05c53\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SdfgiIntegrateShaderRD\\15a2e64db17d8aafc8f3d8d2a528747c64d294e8034e7b9e4e86e5ee994d66c2\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SdfgiPreprocessShaderRD\\5d3bf192407ce0131d8d17e264d302c13eb17f8284e643e96071c3c2f09b45a8\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\ShadowFrustumShaderRD\\12fb0f35abe27d7c2578b5bdeaf4517d45f710f9b66ab66f57794d77f90c2fd5\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SkeletonShaderRD\\db547e2a7abfceddca6daece649af33b18189dc08eaa37cef9dc5860862b91ee\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SkyShaderRD\\c773b40a48cb349a2f34006aace7b0ef1aaa8fad530160990a9634fcf019aebe\\03e3b11c69e24394b2d955a8c0ba85587bb70839.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SkyShaderRD\\c773b40a48cb349a2f34006aace7b0ef1aaa8fad530160990a9634fcf019aebe\\373ee543239aa1af0bc6b8ffc3d8251e6104a5b4.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SkyShaderRD\\c773b40a48cb349a2f34006aace7b0ef1aaa8fad530160990a9634fcf019aebe\\de678811d1bad3cad4892a8db7b6ea0be197d51d.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SkyShaderRD\\c773b40a48cb349a2f34006aace7b0ef1aaa8fad530160990a9634fcf019aebe\\f0c584bf613e745cb630a0a20c515f41a21099e8.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SortShaderRD\\0635218ab1b23b93c0e100ad9a6fe7be993089593c96fb6f498e0f9d047ce9f4\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SpecularMergeShaderRD\\fee8ef8ea7ed18eeeebcfa2a626d54c6a503d5b75a9d775d7fb17a7e2dddc698\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SsaoBlurShaderRD\\6649d2399f3866ffbde70be4eae7644fbfe70907923fd36a10552342f768b48d\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SsaoImportanceMapShaderRD\\fc0834566ddf20cc312e6a1eafc6e4ead6ebc5874b1beec4f8b7100879adf9b9\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SsaoInterleaveShaderRD\\1420d433267675277657dbe4a189eb1a8ee79b1dfbd47038e6acf926e1b3b91b\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SsaoShaderRD\\21e4ef08ca2c349ce5ab040c40233a23516ece7c756639d914d6617b909985b7\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SsEffectsDownsampleShaderRD\\33191663db775b3239324c8e7c70b322003c7ba4f3bf509584e1cdc8ce90ca14\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SsilBlurShaderRD\\c4823d0e827d0dd34f66eeeb04a52753c801e7a782e63057003523827a7ebfac\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SsilImportanceMapShaderRD\\673bf3ed83df4540ff07c5b6592d8117847d322f44fc54c541a41052868672ad\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SsilInterleaveShaderRD\\18f771bd553cb304db576babd51d4c4cc63df20ac2052fb0e4133f9fbdf5aa3e\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SsilShaderRD\\7fd8e5f50a5704489ee2a7c2a433125ad7fa0d3a259d399af638bce1edcb8450\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\SubsurfaceScatteringShaderRD\\91e1ac945dad61f48411d0a1244e6636634e9785333c014ac318fcee04b72741\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\TaaResolveShaderRD\\75850220cf4a882155831df3c46894bb18d5c770308ec844ff00d09520802a9b\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\TonemapShaderRD\\886811888c9b1fc45eecfdd383f8c7087ea62f74178fadb6ff561a568aade71b\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\VolumetricFogProcessShaderRD\\8d17101913be2888afe1d04fa9287ce1137a8385e86202f4b2a3c6946d3d8982\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\VolumetricFogShaderRD\\c6ff2f4ac52f1179cd0f6c29737304d12ed6b90feae4187f34b38d5228ae1765\\9a227745af2d65830f930370a9fbba551fbd6f60.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\VoxelGiDebugShaderRD\\10e6f56ab62c32c6283301052f7f3efd8733a2dd8c54b5c8e8875b4019be3530\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\shader_cache\\VoxelGiShaderRD\\26adaa157a0dbc77aaeb10cd9840a3cfeddb4699002202c4069ea0aca1b684eb\\087916079fba7c625e62b0c2cca570e0fb87c99a.cache",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": ".godot\\uid_cache.bin",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 4,
+                    "code": 20,
+                    "comment": 0,
+                    "filename": "control.tscn"
+                },
+                {
+                    "filename": "Core\\Assets\\Placeholder\\128x128.png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 5,
+                    "code": 29,
+                    "comment": 0,
+                    "filename": "Core\\Assets\\Placeholder\\128x128.png.import"
+                },
+                {
+                    "filename": "Core\\Assets\\Placeholder\\600x400.png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 5,
+                    "code": 29,
+                    "comment": 0,
+                    "filename": "Core\\Assets\\Placeholder\\600x400.png.import"
+                },
+                {
+                    "blank": 0,
+                    "code": 9,
+                    "comment": 0,
+                    "filename": "Core\\Assets\\Translation\\main.csv"
+                },
+                {
+                    "blank": 6,
+                    "code": 11,
+                    "comment": 0,
+                    "filename": "Core\\Assets\\Translation\\main.csv.import"
+                },
+                {
+                    "filename": "Core\\Assets\\Translation\\main.en.translation",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "Core\\Assets\\Translation\\main.fr.translation",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 44,
+                    "code": 128,
+                    "comment": 0,
+                    "filename": "Core\\Class\\base.gd"
+                },
+                {
+                    "blank": 57,
+                    "code": 173,
+                    "comment": 0,
+                    "filename": "Core\\Class\\class_register.gd"
+                },
+                {
+                    "blank": 3,
+                    "code": 10,
+                    "comment": 0,
+                    "filename": "Core\\Class\\effect.gd"
+                },
+                {
+                    "blank": 0,
+                    "code": 3,
+                    "comment": 0,
+                    "filename": "Core\\Class\\engine\\GUI.gd"
+                },
+                {
+                    "blank": 45,
+                    "code": 81,
+                    "comment": 0,
+                    "filename": "Core\\Class\\engine\\settings.gd"
+                },
+                {
+                    "blank": 21,
+                    "code": 33,
+                    "comment": 0,
+                    "filename": "Core\\Class\\Entities.gd"
+                },
+                {
+                    "blank": 3,
+                    "code": 27,
+                    "comment": 0,
+                    "filename": "Core\\Class\\entities\\Animals.gd"
+                },
+                {
+                    "blank": 14,
+                    "code": 23,
+                    "comment": 0,
+                    "filename": "Core\\Class\\entities\\Character.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 3,
+                    "comment": 0,
+                    "filename": "Core\\Class\\entities\\Characters\\Hero.gd"
+                },
+                {
+                    "blank": 23,
+                    "code": 58,
+                    "comment": 0,
+                    "filename": "Core\\Class\\loottables.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 6,
+                    "comment": 0,
+                    "filename": "Core\\Class\\objects.gd"
+                },
+                {
+                    "blank": 3,
+                    "code": 7,
+                    "comment": 0,
+                    "filename": "Core\\Class\\objects\\exp.gd"
+                },
+                {
+                    "blank": 4,
+                    "code": 15,
+                    "comment": 0,
+                    "filename": "Core\\Class\\objects\\item.gd"
+                },
+                {
+                    "blank": 4,
+                    "code": 12,
+                    "comment": 0,
+                    "filename": "Core\\Class\\objects\\money.gd"
+                },
+                {
+                    "blank": 72,
+                    "code": 207,
+                    "comment": 0,
+                    "filename": "Core\\Class\\quest.gd"
+                },
+                {
+                    "blank": 9,
+                    "code": 25,
+                    "comment": 0,
+                    "filename": "Core\\Class\\quests\\objectives\\objectives_collect.gd"
+                },
+                {
+                    "blank": 7,
+                    "code": 22,
+                    "comment": 0,
+                    "filename": "Core\\Class\\quests\\objectives\\objectives_kill.gd"
+                },
+                {
+                    "blank": 7,
+                    "code": 18,
+                    "comment": 0,
+                    "filename": "Core\\Class\\quests\\objectives\\objectives_reach.gd"
+                },
+                {
+                    "blank": 7,
+                    "code": 22,
+                    "comment": 0,
+                    "filename": "Core\\Class\\quests\\objectives\\objectives_talk.gd"
+                },
+                {
+                    "blank": 9,
+                    "code": 19,
+                    "comment": 0,
+                    "filename": "Core\\Class\\quests\\quests_objectives.gd"
+                },
+                {
+                    "blank": 19,
+                    "code": 49,
+                    "comment": 0,
+                    "filename": "Core\\Class\\register\\character_register.gd"
+                },
+                {
+                    "blank": 15,
+                    "code": 132,
+                    "comment": 0,
+                    "filename": "Core\\Class\\register\\data_register.gd"
+                },
+                {
+                    "blank": 7,
+                    "code": 51,
+                    "comment": 0,
+                    "filename": "Core\\Class\\register\\enum_register.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 5,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\animals\\AnimalsDiet.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\animals\\AnimalsGender.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 5,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\animals\\AnimalsMovementType.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 5,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\effects\\effect_outcome.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 6,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\effects\\effect_target.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 5,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\effects\\effect_time.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 8,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\effects\\effect_type.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 5,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\gui\\entities\\box_entities_change.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\objects\\items\\item_dropability.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 6,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\objects\\items\\item_durability_type.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 7,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\objects\\items\\item_obtainability.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 9,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\objects\\items\\item_rarity.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\objects\\items\\item_repairability.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 11,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\objects\\items\\item_type.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\objects\\items\\item_usability.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 5,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\objects\\object_type.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 9,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\quests\\objective_type.gd"
+                },
+                {
+                    "blank": 1,
+                    "code": 8,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\quests\\quest_status.gd"
+                },
+                {
+                    "blank": 2,
+                    "code": 8,
+                    "comment": 0,
+                    "filename": "Core\\Enums\\quests\\quest_type.gd"
+                },
+                {
+                    "blank": 11,
+                    "code": 18,
+                    "comment": 0,
+                    "filename": "Core\\gui\\BoxDB\\box_entities.gd"
+                },
+                {
+                    "blank": 22,
+                    "code": 95,
+                    "comment": 0,
+                    "filename": "Core\\gui\\Class\\ListData.gd"
+                },
+                {
+                    "blank": 22,
+                    "code": 73,
+                    "comment": 0,
+                    "filename": "Core\\gui\\Class\\ListItemData.gd"
+                },
+                {
+                    "blank": 21,
+                    "code": 45,
+                    "comment": 0,
+                    "filename": "Core\\gui\\CustomList\\customList.gd"
+                },
+                {
+                    "blank": 12,
+                    "code": 48,
+                    "comment": 0,
+                    "filename": "Core\\gui\\CustomList\\customListItem.gd"
+                },
+                {
+                    "blank": 2,
+                    "code": 6,
+                    "comment": 0,
+                    "filename": "Core\\gui\\CustomList\\customListItemPanel.gd"
+                },
+                {
+                    "blank": 2,
+                    "code": 8,
+                    "comment": 0,
+                    "filename": "Core\\gui\\graph\\canvas\\graph_test.gd"
+                },
+                {
+                    "blank": 0,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": "Core\\gui\\graph\\graph_master.gd"
+                },
+                {
+                    "blank": 16,
+                    "code": 42,
+                    "comment": 0,
+                    "filename": "Core\\gui\\InfoDB\\child\\info_item_lineedit.gd"
+                },
+                {
+                    "blank": 24,
+                    "code": 59,
+                    "comment": 0,
+                    "filename": "Core\\gui\\InfoDB\\child\\info_item_options.gd"
+                },
+                {
+                    "blank": 16,
+                    "code": 41,
+                    "comment": 0,
+                    "filename": "Core\\gui\\InfoDB\\child\\info_item_spinbox.gd"
+                },
+                {
+                    "blank": 7,
+                    "code": 23,
+                    "comment": 0,
+                    "filename": "Core\\gui\\InfoDB\\child\\info_item_text.gd"
+                },
+                {
+                    "blank": 19,
+                    "code": 47,
+                    "comment": 0,
+                    "filename": "Core\\gui\\InfoDB\\child\\info_item_textedit.gd"
+                },
+                {
+                    "blank": 51,
+                    "code": 186,
+                    "comment": 0,
+                    "filename": "Core\\gui\\InfoDB\\info_entities.gd"
+                },
+                {
+                    "blank": 9,
+                    "code": 37,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\box_entities.tscn"
+                },
+                {
+                    "blank": 1,
+                    "code": 7,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\ButtonGroup\\buttonStyle-Focus.tres"
+                },
+                {
+                    "blank": 1,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\ButtonGroup\\LeftMenu.tres"
+                },
+                {
+                    "blank": 7,
+                    "code": 33,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\custom_list.tscn"
+                },
+                {
+                    "blank": 7,
+                    "code": 36,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\custom_list_item.tscn"
+                },
+                {
+                    "blank": 34,
+                    "code": 53,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\database.gd"
+                },
+                {
+                    "blank": 19,
+                    "code": 108,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\database.tscn"
+                },
+                {
+                    "blank": 53,
+                    "code": 262,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\info_entities.tscn"
+                },
+                {
+                    "blank": 4,
+                    "code": 12,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\info_item_lineedit.tscn"
+                },
+                {
+                    "blank": 4,
+                    "code": 12,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\info_item_text.tscn"
+                },
+                {
+                    "blank": 6,
+                    "code": 57,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\database\\theme.tres"
+                },
+                {
+                    "blank": 1,
+                    "code": 8,
+                    "comment": 0,
+                    "filename": "Core\\Scenes\\Tests\\Test_Graph01.tscn"
+                },
+                {
+                    "blank": 6,
+                    "code": 13,
+                    "comment": 0,
+                    "filename": "Core\\Utils\\id_generator.gd"
+                },
+                {
+                    "blank": 5,
+                    "code": 12,
+                    "comment": 0,
+                    "filename": "Core\\Utils\\storage\\base_storage.gd"
+                },
+                {
+                    "blank": 31,
+                    "code": 54,
+                    "comment": 0,
+                    "filename": "Core\\Utils\\storage\\json_storage.gd"
+                },
+                {
+                    "blank": 3,
+                    "code": 22,
+                    "comment": 0,
+                    "filename": "Core\\Utils\\utils.gd"
+                },
+                {
+                    "blank": 0,
+                    "code": 1,
+                    "comment": 0,
+                    "filename": "icon.svg"
+                },
+                {
+                    "blank": 5,
+                    "code": 32,
+                    "comment": 0,
+                    "filename": "icon.svg.import"
+                },
+                {
+                    "blank": 0,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": "project.godot"
+                }
+            ]
+        }
+    ]
+}

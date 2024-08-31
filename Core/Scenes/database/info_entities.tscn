@@ -1,0 +1,463 @@
+[gd_scene load_steps=9 format=3 uid="uid://bqk3n33rqfdbm"]
+
+[ext_resource type="Script" path="res://Core/gui/InfoDB/info_entities.gd" id="1_igoy3"]
+[ext_resource type="Script" path="res://Core/gui/InfoDB/child/info_item_lineedit.gd" id="2_3liey"]
+[ext_resource type="Texture2D" uid="uid://b3wrdy6g4fpkv" path="res://Core/Assets/Placeholder/128x128.png" id="2_qiwfc"]
+[ext_resource type="Script" path="res://Core/gui/InfoDB/child/info_item_spinbox.gd" id="3_d7kx8"]
+[ext_resource type="Script" path="res://Core/gui/InfoDB/child/info_item_options.gd" id="4_1fyov"]
+[ext_resource type="Script" path="res://Core/gui/InfoDB/child/info_item_textedit.gd" id="5_qv877"]
+[ext_resource type="PackedScene" uid="uid://chcj7up8k8pa8" path="res://addons/easy_charts/examples/line_chart/Control.tscn" id="7_34k7w"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j5l4w"]
+bg_color = Color(0.498039, 0.498039, 0.498039, 1)
+
+[node name="infoEntities" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -467.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.3
+script = ExtResource("1_igoy3")
+
+[node name="TabContainer" type="TabContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+tab_focus_mode = 1
+
+[node name="DETAILS" type="MarginContainer" parent="TabContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/DETAILS"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/DETAILS/VBoxContainer"]
+layout_mode = 2
+
+[node name="Panel" type="Panel" parent="TabContainer/DETAILS/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_j5l4w")
+
+[node name="TextureRect" type="TextureRect" parent="TabContainer/DETAILS/VBoxContainer/HBoxContainer/Panel"]
+custom_minimum_size = Vector2(62, 62)
+layout_mode = 2
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 63.0
+offset_bottom = 63.0
+texture = ExtResource("2_qiwfc")
+expand_mode = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/DETAILS/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/DETAILS/VBoxContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/DETAILS/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="infoName" type="HBoxContainer" parent="TabContainer/DETAILS/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("2_3liey")
+label_name = "NAME"
+content = "NaN"
+
+[node name="infoSurname" type="HBoxContainer" parent="TabContainer/DETAILS/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("2_3liey")
+label_name = "SURNAME"
+content = "NaN"
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="TabContainer/DETAILS/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.4
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/DETAILS/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+
+[node name="infoAge" type="HBoxContainer" parent="TabContainer/DETAILS/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.4
+script = ExtResource("3_d7kx8")
+label_name = "AGE"
+
+[node name="infoGender" type="HBoxContainer" parent="TabContainer/DETAILS/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.4
+script = ExtResource("4_1fyov")
+label_name = "GENDER"
+
+[node name="infoRace" type="HBoxContainer" parent="TabContainer/DETAILS/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/VBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "RACE"
+
+[node name="HSeparator" type="HSeparator" parent="TabContainer/DETAILS/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="TabContainer/DETAILS/VBoxContainer"]
+layout_mode = 2
+
+[node name="infoLVL" type="HBoxContainer" parent="TabContainer/DETAILS/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "LVL"
+
+[node name="infoLVLMax" type="HBoxContainer" parent="TabContainer/DETAILS/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "LVLMAX"
+content = 99
+
+[node name="HSeparator2" type="HSeparator" parent="TabContainer/DETAILS/VBoxContainer"]
+layout_mode = 2
+
+[node name="infoHistory" type="VBoxContainer" parent="TabContainer/DETAILS/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+script = ExtResource("5_qv877")
+label_name = "HISTORY"
+custom_min_size = Vector2(0, 200)
+
+[node name="STATS" type="MarginContainer" parent="TabContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/STATS"]
+layout_mode = 2
+
+[node name="HBoxContainer2" type="VBoxContainer" parent="TabContainer/STATS/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="HPMP" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2"]
+layout_mode = 2
+
+[node name="HP" type="VBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/HPMP"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/HPMP/HP"]
+layout_mode = 2
+
+[node name="infoPV" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/HPMP/HP/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "PV"
+
+[node name="infoPVMax" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/HPMP/HP/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "PVMAX"
+content = 100
+
+[node name="chartHP" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/HPMP/HP" node_paths=PackedStringArray("min_value_node", "max_value_node") instance=ExtResource("7_34k7w")]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+min_value_node = NodePath("../HBoxContainer/infoPV")
+max_value_node = NodePath("../HBoxContainer/infoPVMax")
+graph_color = Color(0.372549, 0.635294, 0.427451, 1)
+
+[node name="MP" type="VBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/HPMP"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/HPMP/MP"]
+layout_mode = 2
+
+[node name="infoMP" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/HPMP/MP/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "MP"
+
+[node name="infoMPMax" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/HPMP/MP/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "MPMAX"
+content = 100
+
+[node name="chartMP" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/HPMP/MP" node_paths=PackedStringArray("min_value_node", "max_value_node") instance=ExtResource("7_34k7w")]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+min_value_node = NodePath("../HBoxContainer/infoMP")
+max_value_node = NodePath("../HBoxContainer/infoMPMax")
+graph_color = Color(0.572549, 0.509804, 0.819608, 1)
+
+[node name="STRDEX" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2"]
+layout_mode = 2
+
+[node name="STR" type="VBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/STRDEX"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/STRDEX/STR"]
+layout_mode = 2
+
+[node name="infoSTR" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/STRDEX/STR/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "STR"
+
+[node name="infoSTRMax" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/STRDEX/STR/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "STRMAX"
+content = 100
+
+[node name="chartSTR" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/STRDEX/STR" node_paths=PackedStringArray("min_value_node", "max_value_node") instance=ExtResource("7_34k7w")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+easing = 2
+min_value_node = NodePath("../HBoxContainer/infoSTR")
+max_value_node = NodePath("../HBoxContainer/infoSTRMax")
+graph_color = Color(0.737255, 0.482353, 0.505882, 1)
+
+[node name="DEX" type="VBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/STRDEX"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/STRDEX/DEX"]
+layout_mode = 2
+
+[node name="infoDEX" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/STRDEX/DEX/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "DEX"
+
+[node name="infoDEXMax" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/STRDEX/DEX/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "DEXMAX"
+content = 100
+
+[node name="chartDEX" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/STRDEX/DEX" node_paths=PackedStringArray("min_value_node", "max_value_node") instance=ExtResource("7_34k7w")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+min_value_node = NodePath("../HBoxContainer/infoDEX")
+max_value_node = NodePath("../HBoxContainer/infoDEXMax")
+graph_color = Color(0.482353, 0.6, 0.505882, 1)
+
+[node name="CONINT" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2"]
+layout_mode = 2
+
+[node name="CON" type="VBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/CONINT"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/CONINT/CON"]
+layout_mode = 2
+
+[node name="infoCON" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/CONINT/CON/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "CON"
+
+[node name="infoCONMax" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/CONINT/CON/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "CONMAX"
+content = 100
+
+[node name="chartCON" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/CONINT/CON" node_paths=PackedStringArray("min_value_node", "max_value_node") instance=ExtResource("7_34k7w")]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+min_value_node = NodePath("../HBoxContainer/infoCON")
+max_value_node = NodePath("../HBoxContainer/infoCONMax")
+graph_color = Color(0.419608, 0.6, 0.631373, 1)
+
+[node name="INT" type="VBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/CONINT"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/CONINT/INT"]
+layout_mode = 2
+
+[node name="infoINT" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/CONINT/INT/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "INT"
+
+[node name="infoINTMax" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/CONINT/INT/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "INTMAX"
+content = 100
+
+[node name="chartINT" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/CONINT/INT" node_paths=PackedStringArray("min_value_node", "max_value_node") instance=ExtResource("7_34k7w")]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+min_value_node = NodePath("../HBoxContainer/infoINT")
+max_value_node = NodePath("../HBoxContainer/infoINTMax")
+graph_color = Color(0.545098, 0.54902, 0.701961, 1)
+
+[node name="WISCHA" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2"]
+layout_mode = 2
+
+[node name="WIS" type="VBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/WISCHA"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/WISCHA/WIS"]
+layout_mode = 2
+
+[node name="infoWIS" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/WISCHA/WIS/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "WIS"
+
+[node name="infoWISMax" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/WISCHA/WIS/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "WISMAX"
+content = 100
+
+[node name="chartWIS" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/WISCHA/WIS" node_paths=PackedStringArray("min_value_node", "max_value_node") instance=ExtResource("7_34k7w")]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+min_value_node = NodePath("../HBoxContainer/infoWIS")
+max_value_node = NodePath("../HBoxContainer/infoWISMax")
+graph_color = Color(0.537255, 0.580392, 0.498039, 1)
+
+[node name="CHA" type="VBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/WISCHA"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/WISCHA/CHA"]
+layout_mode = 2
+
+[node name="infoCHA" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/WISCHA/CHA/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "CHA"
+
+[node name="infoCHAMax" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/WISCHA/CHA/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "CHAMAX"
+content = 100
+
+[node name="chartCHA" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/WISCHA/CHA" node_paths=PackedStringArray("min_value_node", "max_value_node") instance=ExtResource("7_34k7w")]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+easing = 14
+min_value_node = NodePath("../HBoxContainer/infoCHA")
+max_value_node = NodePath("../HBoxContainer/infoCHAMax")
+graph_color = Color(0.756863, 0.431373, 0.682353, 1)
+
+[node name="LUCK" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2"]
+layout_mode = 2
+
+[node name="LUCK" type="VBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/LUCK"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/LUCK/LUCK"]
+layout_mode = 2
+
+[node name="infoLUCK" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/LUCK/LUCK/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "LUCK"
+
+[node name="infoLUCKMax" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/LUCK/LUCK/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("3_d7kx8")
+label_name = "LUCKMAX"
+content = 100
+
+[node name="chartLUCK" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/LUCK/LUCK" node_paths=PackedStringArray("min_value_node", "max_value_node") instance=ExtResource("7_34k7w")]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+min_value_node = NodePath("../HBoxContainer/infoLUCK")
+max_value_node = NodePath("../HBoxContainer/infoLUCKMax")
+graph_color = Color(0.776471, 0.486275, 0.156863, 1)
+
+[node name="SKILLS" type="MarginContainer" parent="TabContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="INVENTORY" type="MarginContainer" parent="TabContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="SETTINGS" type="MarginContainer" parent="TabContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4

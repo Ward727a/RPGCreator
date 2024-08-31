@@ -1,0 +1,5 @@
+
+enum AnimalsGender{
+    MALE,
+    FEMALE
+}

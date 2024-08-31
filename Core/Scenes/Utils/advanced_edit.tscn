@@ -1,0 +1,269 @@
+[gd_scene load_steps=9 format=3 uid="uid://dxmqfbihim1b0"]
+
+[ext_resource type="Theme" uid="uid://dxvkgbhgl3ilx" path="res://Core/Scenes/database/theme.tres" id="1_g0fp6"]
+[ext_resource type="Script" path="res://Core/Scenes/Utils/TextEdit.gd" id="2_a5770"]
+[ext_resource type="Shortcut" uid="uid://dndl3hrmoaml5" path="res://Core/Inputs/Shortcuts/advanced_edit/setItalic.tres" id="2_n4xgd"]
+[ext_resource type="FontFile" uid="uid://cdw27th1yt5h1" path="res://Core/Assets/fonts/GeneralSans-Medium.otf" id="2_oyoj8"]
+[ext_resource type="Shortcut" uid="uid://dbse3u61y5xsn" path="res://Core/Inputs/Shortcuts/advanced_edit/setBold.tres" id="2_res5s"]
+[ext_resource type="Shortcut" uid="uid://dx7ikpsosb8va" path="res://Core/Inputs/Shortcuts/advanced_edit/setUnder.tres" id="4_7fq5a"]
+[ext_resource type="Shortcut" uid="uid://kq6u5au11clt" path="res://Core/Inputs/Shortcuts/advanced_edit/setStrike.tres" id="5_6opy1"]
+[ext_resource type="Shortcut" uid="uid://bruw22q2gv5t7" path="res://Core/Inputs/Shortcuts/advanced_edit/unBold.tres" id="6_nl4qg"]
+
+[node name="AdvancedEdit" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_g0fp6")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+clip_contents = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="MenuButton" type="MenuButton" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+text = "More..."
+alignment = 0
+item_count = 4
+popup/item_0/text = "Open preview"
+popup/item_0/id = 0
+popup/item_1/text = "Preview on right"
+popup/item_1/checkable = 1
+popup/item_1/id = 1
+popup/item_2/text = "Preview settings..."
+popup/item_2/id = 3
+popup/item_3/text = "Insert table..."
+popup/item_3/id = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+size_flags_stretch_ratio = 0.1
+
+[node name="setBold" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+shortcut = ExtResource("2_res5s")
+text = "Bold"
+
+[node name="setItalic" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+shortcut = ExtResource("2_n4xgd")
+text = "Italic"
+
+[node name="setUnder" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+shortcut = ExtResource("4_7fq5a")
+text = "Underline"
+
+[node name="setStrikethrough" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+shortcut = ExtResource("5_6opy1")
+text = "Strikethrough"
+
+[node name="VSeparator2" type="VSeparator" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="fontSize" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/fontSize"]
+layout_mode = 2
+text = "Font size:"
+
+[node name="setSize" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer/fontSize"]
+layout_mode = 2
+min_value = 1.0
+value = 1.0
+allow_greater = true
+suffix = "px"
+
+[node name="VSeparator3" type="VSeparator" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="fontColor" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/fontColor"]
+layout_mode = 2
+text = "Font color:"
+
+[node name="setFontColor" type="ColorPickerButton" parent="MarginContainer/VBoxContainer/HBoxContainer/fontColor"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+color = Color(1, 1, 1, 1)
+
+[node name="backColor" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/backColor"]
+layout_mode = 2
+text = "Background color:"
+
+[node name="setBackColor" type="ColorPickerButton" parent="MarginContainer/VBoxContainer/HBoxContainer/backColor"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+color = Color(1, 1, 1, 0)
+
+[node name="VSeparator" type="VSeparator" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="setFont" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Custom font"
+
+[node name="VSeparator5" type="VSeparator" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="setLink" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Link"
+
+[node name="setIMG" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Image"
+
+[node name="setHint" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Tooltip"
+
+[node name="VSeparator4" type="VSeparator" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="setLeft" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Left"
+
+[node name="setMiddle" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Middle"
+
+[node name="setRight" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Right"
+
+[node name="setFill" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Fill"
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+visibility_layer = 0
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+size_flags_stretch_ratio = 0.1
+
+[node name="unBold" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+shortcut = ExtResource("6_nl4qg")
+text = "Bold"
+
+[node name="unItalic" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+shortcut = ExtResource("2_n4xgd")
+text = "Italic"
+
+[node name="unUnder" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+shortcut = ExtResource("4_7fq5a")
+text = "Underline"
+
+[node name="unStrikethrough" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+shortcut = ExtResource("5_6opy1")
+text = "Strikethrough"
+
+[node name="VSeparator2" type="VSeparator" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+
+[node name="unFont" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+text = "Custom font"
+
+[node name="VSeparator5" type="VSeparator" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+
+[node name="unLink" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+text = "Link"
+
+[node name="unIMG" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+text = "Image"
+
+[node name="unHint" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+text = "Tooltip"
+
+[node name="VSeparator4" type="VSeparator" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+
+[node name="unLeft" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+text = "Left"
+
+[node name="unMiddle" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+text = "Middle"
+
+[node name="unRight" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+text = "Right"
+
+[node name="unFill" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+text = "Fill"
+
+[node name="TextEdit" type="TextEdit" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("2_oyoj8")
+theme_override_font_sizes/font_size = 16
+text = "test"
+script = ExtResource("2_a5770")
+
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/setBold" to="MarginContainer/VBoxContainer/TextEdit" method="_on_set_bold_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/setItalic" to="MarginContainer/VBoxContainer/TextEdit" method="_on_set_italic_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/setUnder" to="MarginContainer/VBoxContainer/TextEdit" method="_on_set_under_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/setStrikethrough" to="MarginContainer/VBoxContainer/TextEdit" method="_on_set_strikethrough_pressed"]
+[connection signal="value_changed" from="MarginContainer/VBoxContainer/HBoxContainer/fontSize/setSize" to="MarginContainer/VBoxContainer/TextEdit" method="_on_set_size_value_changed"]
+[connection signal="color_changed" from="MarginContainer/VBoxContainer/HBoxContainer/fontColor/setFontColor" to="MarginContainer/VBoxContainer/TextEdit" method="_on_set_font_color_color_changed"]
+[connection signal="popup_closed" from="MarginContainer/VBoxContainer/HBoxContainer/fontColor/setFontColor" to="MarginContainer/VBoxContainer/TextEdit" method="_on_set_font_color_popup_closed"]
+[connection signal="color_changed" from="MarginContainer/VBoxContainer/HBoxContainer/backColor/setBackColor" to="MarginContainer/VBoxContainer/TextEdit" method="_on_set_back_color_color_changed"]
+[connection signal="popup_closed" from="MarginContainer/VBoxContainer/HBoxContainer/backColor/setBackColor" to="MarginContainer/VBoxContainer/TextEdit" method="_on_set_back_color_popup_closed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/setFont" to="MarginContainer/VBoxContainer/TextEdit" method="_on_set_font_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/setLink" to="MarginContainer/VBoxContainer/TextEdit" method="_on_set_link_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/setIMG" to="MarginContainer/VBoxContainer/TextEdit" method="_on_set_img_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/setHint" to="MarginContainer/VBoxContainer/TextEdit" method="_on_set_hint_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/setLeft" to="MarginContainer/VBoxContainer/TextEdit" method="_on_set_left_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/setMiddle" to="MarginContainer/VBoxContainer/TextEdit" method="_on_set_middle_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/setRight" to="MarginContainer/VBoxContainer/TextEdit" method="_on_set_right_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/setFill" to="MarginContainer/VBoxContainer/TextEdit" method="_on_set_fill_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer3/unBold" to="MarginContainer/VBoxContainer/TextEdit" method="_on_un_bold_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer3/unItalic" to="MarginContainer/VBoxContainer/TextEdit" method="_on_un_italic_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer3/unUnder" to="MarginContainer/VBoxContainer/TextEdit" method="_on_un_under_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer3/unStrikethrough" to="MarginContainer/VBoxContainer/TextEdit" method="_on_un_strikethrough_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer3/unFont" to="MarginContainer/VBoxContainer/TextEdit" method="_on_un_font_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer3/unLink" to="MarginContainer/VBoxContainer/TextEdit" method="_on_un_link_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer3/unIMG" to="MarginContainer/VBoxContainer/TextEdit" method="_on_un_img_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer3/unHint" to="MarginContainer/VBoxContainer/TextEdit" method="_on_un_hint_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer3/unLeft" to="MarginContainer/VBoxContainer/TextEdit" method="_on_un_left_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer3/unMiddle" to="MarginContainer/VBoxContainer/TextEdit" method="_on_un_middle_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer3/unRight" to="MarginContainer/VBoxContainer/TextEdit" method="_on_un_right_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer3/unFill" to="MarginContainer/VBoxContainer/TextEdit" method="_on_un_fill_pressed"]

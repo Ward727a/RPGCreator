@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://dsfa7xspmjdmv"]
+
+[ext_resource type="Script" path="res://Core/gui/InfoDB/child/info_item_lineedit.gd" id="1_maf4b"]
+
+[node name="info_item_lineedit" type="HBoxContainer"]
+script = ExtResource("1_maf4b")
+
+[node name="label" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+text = "label:"
+
+[node name="content" type="LineEdit" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+text = "content"
