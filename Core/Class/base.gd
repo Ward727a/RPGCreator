@@ -12,20 +12,23 @@ var events: Dictionary = {} # Events assigned to the object
 
 var register: Register
 
+var need_register: bool = true # If the object need to be registered
+
 ## Initialize the object to register the class to the register (Use "super" to call it) - You need to call this to be able to use the register
 func _init(_custom_name: String = ""):
 
-    if custom_name == "":
-        if _custom_name != "":
-            custom_name = _custom_name
-        else:
-            return
-    
-    register = Register.get_instance()
+    if need_register:
+        if custom_name == "":
+            if _custom_name != "":
+                custom_name = _custom_name
+            else:
+                return
+        
+        register = Register.get_instance()
 
-    register.register_class(self)
+        register.register_class(self)
 
-    allowed_events.append_array(["pre_unregister", "post_unregister", "pre_register", "post_register"])
+        allowed_events.append_array(["pre_unregister", "post_unregister", "pre_register", "post_register"])
 
 #####################################
 # Custom logging functions          #

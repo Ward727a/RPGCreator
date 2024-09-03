@@ -6,28 +6,33 @@ var id: String = "" # Character's id
 
 var name: String = "" # Character's name
 
-var health: int = 100: # Character's health
-	set(new):
-		health = new
+var health: int = 100 # Character's health
 
-		if max_health < health:
-			max_health = health
+var min_health: int = 10:  # Character's minimum health (for leveling up, example: If this var = 10, the character will start with 10 health, and slowly increase to the max_health)
+	set(new):
+		min_health = new
+		if min_health > max_health:
+			max_health = min_health
 
 var max_health: int = 100: # Character's maximum health
 	set(new):
 		max_health = new
+		if min_health > max_health:
+			min_health = max_health
 
-		if health > max_health:
-			health = max_health
+var health_easing: EnumRegister.AnimalsEasingType = EnumRegister.AnimalsEasingType.EASE_OUT_SINE
 
 var strength: int = 10 # Character's strength
 var max_strength: int = 10 # Character's maximum strength
+var strength_easing: EnumRegister.AnimalsEasingType = EnumRegister.AnimalsEasingType.EASE_OUT_SINE
 
 var dexterity: int = 10 # Character's dexterity
 var max_dexterity: int = 10 # Character's maximum dexterity
+var dexterity_easing: EnumRegister.AnimalsEasingType = EnumRegister.AnimalsEasingType.EASE_OUT_SINE
 
 var constitution: int = 10 # Character's constitution
 var max_constitution: int = 10 # Character's maximum constitution
+var constitution_easing: EnumRegister.AnimalsEasingType = EnumRegister.AnimalsEasingType.EASE_OUT_SINE
 
 var attack: int = 0 # Character's attack
 var max_attack: int = 0 # Character's maximum attack

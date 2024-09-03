@@ -9,7 +9,7 @@ var list_node: Dictionary = {}
 
 const itemList_NodePath: String = "res://Core/Scenes/database/custom_list_item.tscn"
 
-signal item_clicked(name: String, metadata: Dictionary)
+signal item_clicked(node: Node, name: String, metadata: Dictionary)
 
 var db_index_name: String = "char_idx"
 var db_context: String = "box_entities"
@@ -117,6 +117,7 @@ func add_item(Content: Array, _metadata: Dictionary = {}):
     
     print("DataRegisted: ", DataRegister.get_data(db_context, db_char_list_key))
 
+    node.base_theme = bg_theme
     node.clicked_on_item.connect(_click_on_item)
 
     list_node[item_metadata['engine_index']] = node
@@ -171,5 +172,5 @@ func _on_data_registered(_context: String, _key: String, _value: Variant, _origi
         for key in datas_list:
             add_item(datas_list[key], {db_index_name: key})
 
-func _click_on_item(_name: String, _metadata: Dictionary):
-    item_clicked.emit(_name, _metadata)
+func _click_on_item(node: Node, _name: String, _metadata: Dictionary):
+    item_clicked.emit(node, _name, _metadata)

@@ -26,12 +26,15 @@ var pet_list: Array = [] # Character's pet list
 
 var intelligence: int = 10 # Character's intelligence
 var max_intelligence: int = 10 # Character's maximum intelligence
+var intelligence_easing: EnumRegister.AnimalsEasingType = EnumRegister.AnimalsEasingType.EASE_OUT_SINE
 
 var wisdom: int = 10 # Character's wisdom
 var max_wisdom: int = 10 # Character's maximum wisdom
+var wisdom_easing: EnumRegister.AnimalsEasingType = EnumRegister.AnimalsEasingType.EASE_OUT_SINE
 
 var charisma: int = 10 # Character's charisma
 var max_charisma: int = 10 # Character's maximum charisma
+var charisma_easing: EnumRegister.AnimalsEasingType = EnumRegister.AnimalsEasingType.EASE_OUT_SINE
 
 var cast_speed: int = 0 # Character's cast speed
 var max_cast_speed: int = 0 # Character's maximum cast speed
@@ -44,6 +47,7 @@ var max_spells: int = 0 # Character's maximum spells
 
 var luck: int = 0 # Character's luck
 var max_luck: int = 0 # Character's maximum luck
+var luck_easing: EnumRegister.AnimalsEasingType = EnumRegister.AnimalsEasingType.EASE_OUT_SINE
 
 var is_merchant: bool = false # Character's merchant status
 var is_job_master: bool = false # Character's job master status

@@ -4,10 +4,10 @@ var metadata: Dictionary = {}
 var content = []
 var types = []
 var item_name: String = ""
-
+var base_theme: StyleBoxFlat
 var node_item: HBoxContainer
 
-signal clicked_on_item(name: String, metadata: Dictionary)
+signal clicked_on_item(node: Node, name: String, metadata: Dictionary)
 
 func _ready():
     print("Hi")
@@ -57,4 +57,4 @@ func set_item_metadata(_metadata: Dictionary):
     metadata = _metadata
 
 func _click_on_panel():
-    clicked_on_item.emit(item_name, metadata)
+    clicked_on_item.emit(self, item_name, metadata)

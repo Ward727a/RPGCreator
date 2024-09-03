@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://bqk3n33rqfdbm"]
+[gd_scene load_steps=10 format=3 uid="uid://bqk3n33rqfdbm"]
 
 [ext_resource type="Script" path="res://Core/gui/InfoDB/info_entities.gd" id="1_igoy3"]
 [ext_resource type="Script" path="res://Core/gui/InfoDB/child/info_item_lineedit.gd" id="2_3liey"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://Core/gui/InfoDB/child/info_item_options.gd" id="4_1fyov"]
 [ext_resource type="Script" path="res://Core/gui/InfoDB/child/info_item_textedit.gd" id="5_qv877"]
 [ext_resource type="PackedScene" uid="uid://chcj7up8k8pa8" path="res://addons/easy_charts/examples/line_chart/Control.tscn" id="7_34k7w"]
+[ext_resource type="Script" path="res://Core/gui/InfoDB/child/info_item_check.gd" id="8_0hjda"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j5l4w"]
 bg_color = Color(0.498039, 0.498039, 0.498039, 1)
@@ -26,10 +27,12 @@ script = ExtResource("1_igoy3")
 [node name="TabContainer" type="TabContainer" parent="."]
 layout_mode = 2
 size_flags_vertical = 3
+current_tab = 4
 tab_focus_mode = 1
 
 [node name="DETAILS" type="MarginContainer" parent="TabContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
@@ -191,6 +194,7 @@ label_name = "PVMAX"
 content = 100
 
 [node name="chartHP" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/HPMP/HP" node_paths=PackedStringArray("min_value_node", "max_value_node") instance=ExtResource("7_34k7w")]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 min_value_node = NodePath("../HBoxContainer/infoPV")
@@ -220,6 +224,7 @@ label_name = "MPMAX"
 content = 100
 
 [node name="chartMP" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/HPMP/MP" node_paths=PackedStringArray("min_value_node", "max_value_node") instance=ExtResource("7_34k7w")]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 min_value_node = NodePath("../HBoxContainer/infoMP")
@@ -301,12 +306,14 @@ size_flags_horizontal = 3
 layout_mode = 2
 
 [node name="infoCON" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/CONINT/CON/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("3_d7kx8")
 label_name = "CON"
 
 [node name="infoCONMax" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/CONINT/CON/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("3_d7kx8")
@@ -314,6 +321,7 @@ label_name = "CONMAX"
 content = 100
 
 [node name="chartCON" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/CONINT/CON" node_paths=PackedStringArray("min_value_node", "max_value_node") instance=ExtResource("7_34k7w")]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 min_value_node = NodePath("../HBoxContainer/infoCON")
@@ -328,12 +336,14 @@ size_flags_horizontal = 3
 layout_mode = 2
 
 [node name="infoINT" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/CONINT/INT/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("3_d7kx8")
 label_name = "INT"
 
 [node name="infoINTMax" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/CONINT/INT/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("3_d7kx8")
@@ -341,6 +351,7 @@ label_name = "INTMAX"
 content = 100
 
 [node name="chartINT" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/CONINT/INT" node_paths=PackedStringArray("min_value_node", "max_value_node") instance=ExtResource("7_34k7w")]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 min_value_node = NodePath("../HBoxContainer/infoINT")
@@ -358,12 +369,14 @@ size_flags_horizontal = 3
 layout_mode = 2
 
 [node name="infoWIS" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/WISCHA/WIS/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("3_d7kx8")
 label_name = "WIS"
 
 [node name="infoWISMax" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/WISCHA/WIS/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("3_d7kx8")
@@ -371,6 +384,7 @@ label_name = "WISMAX"
 content = 100
 
 [node name="chartWIS" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/WISCHA/WIS" node_paths=PackedStringArray("min_value_node", "max_value_node") instance=ExtResource("7_34k7w")]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 min_value_node = NodePath("../HBoxContainer/infoWIS")
@@ -385,12 +399,14 @@ size_flags_horizontal = 3
 layout_mode = 2
 
 [node name="infoCHA" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/WISCHA/CHA/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("3_d7kx8")
 label_name = "CHA"
 
 [node name="infoCHAMax" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/WISCHA/CHA/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("3_d7kx8")
@@ -398,6 +414,7 @@ label_name = "CHAMAX"
 content = 100
 
 [node name="chartCHA" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/WISCHA/CHA" node_paths=PackedStringArray("min_value_node", "max_value_node") instance=ExtResource("7_34k7w")]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 easing = 14
@@ -416,12 +433,14 @@ size_flags_horizontal = 3
 layout_mode = 2
 
 [node name="infoLUCK" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/LUCK/LUCK/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("3_d7kx8")
 label_name = "LUCK"
 
 [node name="infoLUCKMax" type="HBoxContainer" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/LUCK/LUCK/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("3_d7kx8")
@@ -429,6 +448,7 @@ label_name = "LUCKMAX"
 content = 100
 
 [node name="chartLUCK" parent="TabContainer/STATS/ScrollContainer/HBoxContainer2/LUCK/LUCK" node_paths=PackedStringArray("min_value_node", "max_value_node") instance=ExtResource("7_34k7w")]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 min_value_node = NodePath("../HBoxContainer/infoLUCK")
@@ -455,9 +475,124 @@ theme_override_constants/margin_bottom = 4
 
 [node name="SETTINGS" type="MarginContainer" parent="TabContainer"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/SETTINGS"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/SETTINGS/VBoxContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/SETTINGS/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="TabContainer/SETTINGS/VBoxContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="isMerchant" type="HBoxContainer" parent="TabContainer/SETTINGS/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer3"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "HINT_IS_MERCHANT"
+script = ExtResource("8_0hjda")
+label_name = "IS_MERCHANT"
+
+[node name="isJobMaster" type="HBoxContainer" parent="TabContainer/SETTINGS/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer3"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "HINT_IS_JOB_MASTER"
+script = ExtResource("8_0hjda")
+label_name = "IS_JOB_MASTER"
+
+[node name="isSkillMaster" type="HBoxContainer" parent="TabContainer/SETTINGS/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer3"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "HINT_IS_SKILL_MASTER"
+script = ExtResource("8_0hjda")
+label_name = "IS_SKILL_MASTER"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="TabContainer/SETTINGS/VBoxContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="isPetMaster" type="HBoxContainer" parent="TabContainer/SETTINGS/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "HINT_IS_PET_MASTER"
+script = ExtResource("8_0hjda")
+label_name = "IS_PET_MASTER"
+
+[node name="isGuildMaster" type="HBoxContainer" parent="TabContainer/SETTINGS/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "HINT_IS_GUILD_MASTER"
+script = ExtResource("8_0hjda")
+label_name = "IS_GUILD_MASTER"
+
+[node name="isFactionMaster" type="HBoxContainer" parent="TabContainer/SETTINGS/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "HINT_IS_FACTION_MASTER"
+script = ExtResource("8_0hjda")
+label_name = "IS_FACTION_MASTER"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/SETTINGS/VBoxContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="isSpellMaster" type="HBoxContainer" parent="TabContainer/SETTINGS/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "HINT_IS_SPELL_MASTER"
+script = ExtResource("8_0hjda")
+label_name = "IS_SPELL_MASTER"
+
+[node name="empty" type="HBoxContainer" parent="TabContainer/SETTINGS/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="empty2" type="HBoxContainer" parent="TabContainer/SETTINGS/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="HSeparator" type="HSeparator" parent="TabContainer/SETTINGS/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="TabContainer/SETTINGS/VBoxContainer"]
+layout_mode = 2
+
+[node name="isKillable" type="HBoxContainer" parent="TabContainer/SETTINGS/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "HINT_IS_KILLABLE"
+script = ExtResource("8_0hjda")
+label_name = "IS_KILLABLE"
+content = true
+
+[node name="isInvincible" type="HBoxContainer" parent="TabContainer/SETTINGS/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "HINT_IS_INVINCIBLE"
+script = ExtResource("8_0hjda")
+label_name = "IS_INVINCIBLE"
+
+[node name="isLootable" type="HBoxContainer" parent="TabContainer/SETTINGS/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "HINT_IS_LOOTABLE"
+script = ExtResource("8_0hjda")
+label_name = "IS_LOOTABLE"

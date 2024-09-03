@@ -1,6 +1,5 @@
 extends Control
 
-var change_history: Dictionary = {} # History of changes made to the database
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -11,11 +10,8 @@ func _ready():
 	# %Button4.connect("pressed", _on_generate_id)
 	%ApplyDB.pressed.connect(_on_apply_changes)
 	%CancelDB.pressed.connect(_on_load_file)
-	%BoxEntities.change_made.connect(_on_change_made)
 
 	pass # Replace with function body.
-
-
 
 
 func _on_load_file():
@@ -56,17 +52,7 @@ func _on_apply_changes():
 	print("Apply changes")
 
 
-	# Check if there are changes to apply
-	if change_history.size() == 0:
-		print("No changes to apply")
-		return
-	
-	# Check what changes to apply
-	for key in change_history:
-
-		match (key):
-			"BoxEntities":
-				_save_box_entities()
+	_save_box_entities()
 
 	pass
 
@@ -77,11 +63,3 @@ func _save_box_entities():
 
 	var return_data = storage.store_all_data(characters, "Entities", "Characters")
 	print("Data saved: ", return_data)
-
-func _on_change_made(change_origin: String, change_type: EnumRegister.BoxEntitiesChange, change_data: Dictionary):
-	print("Change made")
-
-	if !change_history.has(change_origin):
-		change_history[change_origin] = []
-
-	change_history[change_origin].append({"change_type": change_type, "change_data": change_data})

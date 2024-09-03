@@ -19,10 +19,6 @@ config/icon="res://icon.svg"
 
 project/assembly_name="RPGCreator"
 
-[editor_plugins]
-
-enabled=PackedStringArray()
-
 [internationalization]
 
 locale/translations=PackedStringArray("res://Core/Assets/Translation/main.en.translation", "res://Core/Assets/Translation/main.fr.translation")

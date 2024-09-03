@@ -36,7 +36,9 @@ var diet: AnimalsDiet = AnimalsDiet.HERBIVORE # Animal's diet (0 = herbivore, 1 
 var gender: AnimalsGender = AnimalsGender.MALE # Animal's gender (0 = male, 1 = female)
 
 var mana: int = 100 # Character's mana
+var min_mana: int = 0 # Character's minimum mana
 var max_mana: int = 100 # Character's maximum mana
+var mana_easing: EnumRegister.AnimalsEasingType = EnumRegister.AnimalsEasingType.EASE_OUT_SINE
 
 func _on_mana_spent(mana_spent: int) -> void:
 	# Called when the entity spends mana.

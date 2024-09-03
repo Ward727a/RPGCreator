@@ -3,34 +3,20 @@ extends Control
 @onready var chart: Chart = $Panel/MarginContainer/VBoxContainer/Chart
 @onready var optionEasing: OptionButton = %easingOption
 
-@export var title: String = "Air Quality Monitoring"
+@export var title: String = ""
 @export var interactive: bool = true
 
-enum easing_type {
-    EASE_IN_CIRC,
-    EASE_IN_SINE,
-    EASE_IN_QUINT,
-    EASE_IN_CUBIC,
-    EASE_IN_QUAD,
-    EASE_IN_QUART,
-    EASE_IN_EXPO,
-    EASE_OUT_CIRC,
-    EASE_OUT_SINE,
-    EASE_OUT_QUINT,
-    EASE_OUT_CUBIC,
-    EASE_OUT_QUAD,
-    EASE_OUT_QUART,
-    EASE_OUT_EXPO,
-    NONE
-}
 
 @export_group("data")
-@export
-var x: Array = []
-@export
-# Generate some random values for the y axis (100 values)
-var y: Array = []
-@export var easing: easing_type = easing_type.EASE_OUT_SINE
+@export var x: Array = []
+@export var y: Array = []
+@export var easing: EnumRegister.AnimalsEasingType = EnumRegister.AnimalsEasingType.EASE_OUT_SINE:
+    set(new):
+        easing = new
+        if is_inside_tree():
+            if optionEasing.selected != easing:
+                optionEasing.select(easing)
+                _on_content_changed(null)
 @export var min_value_node: Node = null
 @export var max_value_node: Node = null
 
@@ -39,7 +25,7 @@ var y: Array = []
 @export var line_type: Function.Type = Function.Type.LINE
 @export var interpolation_type: Function.Interpolation = Function.Interpolation.LINEAR
 @export var line_width: float = 1.0
-@export var graph_unit_name: String = "Pressure"
+@export var graph_unit_name: String = ""
 
 @export_group("colors")
 @export var background_color: Color = Color.TRANSPARENT
@@ -81,35 +67,35 @@ var f1: Function
 # This function will return the easing function based on the selected easing type
 func get_easing() -> Callable:
     match easing:
-        easing_type.EASE_IN_CIRC:
+        EnumRegister.AnimalsEasingType.EASE_IN_CIRC:
             return Utils.Math.ease_in_circ
-        easing_type.EASE_IN_SINE:
+        EnumRegister.AnimalsEasingType.EASE_IN_SINE:
             return Utils.Math.ease_in_sine
-        easing_type.EASE_IN_QUINT:
+        EnumRegister.AnimalsEasingType.EASE_IN_QUINT:
             return Utils.Math.ease_in_quint
-        easing_type.EASE_IN_CUBIC:
+        EnumRegister.AnimalsEasingType.EASE_IN_CUBIC:
             return Utils.Math.ease_in_cubic
-        easing_type.EASE_IN_QUAD:
+        EnumRegister.AnimalsEasingType.EASE_IN_QUAD:
             return Utils.Math.ease_in_quad
-        easing_type.EASE_IN_QUART:
+        EnumRegister.AnimalsEasingType.EASE_IN_QUART:
             return Utils.Math.ease_in_quart
-        easing_type.EASE_IN_EXPO:
+        EnumRegister.AnimalsEasingType.EASE_IN_EXPO:
             return Utils.Math.ease_in_expo
-        easing_type.EASE_OUT_CIRC:
+        EnumRegister.AnimalsEasingType.EASE_OUT_CIRC:
             return Utils.Math.ease_out_circ
-        easing_type.EASE_OUT_SINE:
+        EnumRegister.AnimalsEasingType.EASE_OUT_SINE:
             return Utils.Math.ease_out_sine
-        easing_type.EASE_OUT_QUINT:
+        EnumRegister.AnimalsEasingType.EASE_OUT_QUINT:
             return Utils.Math.ease_out_quint
-        easing_type.EASE_OUT_CUBIC:
+        EnumRegister.AnimalsEasingType.EASE_OUT_CUBIC:
             return Utils.Math.ease_out_cubic
-        easing_type.EASE_OUT_QUAD:
+        EnumRegister.AnimalsEasingType.EASE_OUT_QUAD:
             return Utils.Math.ease_out_quad
-        easing_type.EASE_OUT_QUART:
+        EnumRegister.AnimalsEasingType.EASE_OUT_QUART:
             return Utils.Math.ease_out_quart
-        easing_type.EASE_OUT_EXPO:
+        EnumRegister.AnimalsEasingType.EASE_OUT_EXPO:
             return Utils.Math.ease_out_expo
-        easing_type.NONE:
+        EnumRegister.AnimalsEasingType.NONE:
             return Utils.Math.ease_none
         _:
             return Utils.Math.ease_none
@@ -120,29 +106,28 @@ func _ready():
         printerr("Please assign the min and max value nodes")
         return
     
-    var min_v : float = min_value_node.content -1
+    var min_v : float = min_value_node.content
     var max_v : float = max_value_node.content
 
+    if min_v == max_v:
+        min_v += 1
+
     # Let's create our @x values
-    # var x: PackedFloat32Array = ArrayOperations.multiply_float(range(-10, 11, 1), 0.5)
-    for a in range(0, 101):
+    for a in range(1, 101):
         x.append(a)
     
     var easing_func: Callable = get_easing()
     # And our y values. It can be an n-size array of arrays.
     # NOTE: `x.size() == y.size()` or `x.size() == y[n].size()`
-    # var y: Array = ArrayOperations.multiply_int(ArrayOperations.cos(x), 20)
-    for a in range(0, 101):
+    for a in range(1, 101):
         # Generate random value that will be exponentially increasing
         var x: float = float(a / 100.0)
 
-        
         # remove number after the .000 to simplify it
         var y_var =  int((float(int(easing_func.call(x)*1000)))/1000 * (max_v - min_v) + min_v)
         
         # clamp the value (can't be lower that min_v and higher than max_v)
-        y_var = clamp(y_var, min_v, max_v)
-
+        y_var = clampi(y_var, min_v, max_v)
 
         y.append(y_var)
     
@@ -229,12 +214,19 @@ func _process(delta: float):
     f1.remove_point(0)
     chart.queue_redraw() # This will force the Chart to be updated
 
+func redraw():
+    
+    chart.queue_redraw()
+
 func _on_content_changed(content):
 
-    var min_v : float = min_value_node.content -1
+    var min_v : float = min_value_node.content 
     var max_v : float = max_value_node.content
 
-    easing = Utils.cast_to_enum(optionEasing.selected,easing_type)
+    if min_v == max_v:
+        min_v += 1
+
+    easing = Utils.cast_to_enum(optionEasing.selected, EnumRegister.AnimalsEasingType)
 
     # Let's create our @x values
     # var x: PackedFloat32Array = ArrayOperations.multiply_float(range(-10, 11, 1), 0.5)

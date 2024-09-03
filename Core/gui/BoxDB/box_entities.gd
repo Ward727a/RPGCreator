@@ -1,6 +1,6 @@
 extends HBoxContainer
 
-signal change_made(change_origin: String, change_type: EnumRegister.BoxEntitiesChange, change_data: Dictionary)
+var last_clicked_node: Node = null
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -8,14 +8,57 @@ func _ready():
 	%CharList.item_clicked.connect(_on_char_list_clicked)
 	%CharList.origin = "BoxEntities"
 
+	await _load_characters()
+	
+	print("BoxEntities ready")
+
+
+func _load_characters():
+	var storage = JsonStorage.new()
+
+	var data = storage.get_all_data("Entities", "Characters")
+
+	print(data)
+
+	for key in data:
+		var character: Character = data[key]
+
+		CharacterRegister.add_character(character)
+
+		%CharList.add_item([character.name, character.surname], {"char_idx": character.id})
+
 func _on_new_character():
 	var character: Character = CharacterRegister.new_character()
 
 	%CharList.add_item([character.name, character.surname], {"char_idx": character.id})
 
-	change_made.emit("BoxEntities", EnumRegister.BoxEntitiesChange.ADD_CHARACTER, {"character": character})
+	var history = HistoryCharactersList.new(EnumRegister.HistoryAction.ADD, character)
 
-func _on_char_list_clicked(_name: String, _metadata: Dictionary):
+	HistoryRegister.add_to_history(history)
+
+
+func _on_char_list_clicked(_node: Node, _name: String, _metadata: Dictionary):
+
+	print(_node)
+
+	if last_clicked_node != _node:
+		
+		if last_clicked_node != null:
+			# Edit the theme of the last clicked node to set it back to the default
+			var old_theme: StyleBoxFlat = last_clicked_node.base_theme
+			last_clicked_node.get_node("Panel").add_theme_stylebox_override("panel", old_theme)
+
+		last_clicked_node = _node
+		# Edit the theme of the last clicked node to set it back to the default
+		var base_theme: StyleBoxFlat = last_clicked_node.base_theme.duplicate()
+
+		base_theme.border_width_bottom = 2
+		base_theme.border_width_top = 2
+		base_theme.border_width_left = 2
+		base_theme.border_width_right = 2
+		base_theme.border_color = Color(0.4, 0.4, 0.4, 1.0)
+
+		last_clicked_node.get_node("Panel").add_theme_stylebox_override("panel", base_theme)
 
 	var char_idx: String = _metadata['char_idx']
 

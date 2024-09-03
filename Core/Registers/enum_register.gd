@@ -10,6 +10,13 @@ class_name EnumRegister
 ## But some scripts require that I use the constant directly so you may have to edit this script to edit the
 ## engine enums without taking the risk of breaking it.
 
+##!       !!!IMPORTANT!!!        PLEASE READ - if you want to make a pull request:
+##!
+##! Please, when you add a new enum to the engine (via const), add 1 to the "Const numbers" below & add 1 to the "Dict numbers" below
+##! If you don't do this, and you do a pull request, it will be rejected until you fix this. (unless you have a good reason to not do it)
+##! This is to avoid having to check all the enums in the engine to see if they are all registered in this script.
+##!
+
 ## TODO: Maybe separate each enum constant in some categories (e.g. Animals.Enum, Effects.Enum, etc.), so it will be easier to find them (but maybe it's not necessary? tbh I don't know)
 
 static var enums: Dictionary = {}
@@ -18,6 +25,7 @@ static var registered_base: bool = false
 # First creating all constants - You can use this to set the type of a var (e.g. var my_var: AnimalsDiet)
 ## Animals
 const AnimalsDiet = preload("res://Core/Enums/animals/AnimalsDiet.gd").AnimalsDiet
+const AnimalsEasingType = preload("res://Core/Enums/animals/AnimalsEasingType.gd").AnimalsEasingType
 const AnimalsGender = preload("res://Core/Enums/animals/AnimalsGender.gd").AnimalsGender
 const AnimalsMovementType = preload("res://Core/Enums/animals/AnimalsMovementType.gd").AnimalsMovementType
 ## Effects
@@ -43,6 +51,11 @@ const ObjectiveType = preload("res://Core/Enums/quests/objective_type.gd").Objec
 ## GUI
 ### BoxEntities
 const BoxEntitiesChange = preload("res://Core/Enums/gui/entities/box_entities_change.gd").BoxEntitiesChange
+### History
+const HistoryAction = preload("res://Core/Enums/gui/history/history_action.gd").HistoryAction
+const HistoryLocation = preload("res://Core/Enums/gui/history/history_location.gd").HistoryLocation
+
+##### Const numbers: 22 ##### This number NEED to be the equal or less (Const<=Dict) than the "Dict numbers" below
 
 ## Register all the basics engine enums [b](!! If you don't know what you are doing, don't edit this function !!)[/b][br]
 ## This function NEEDS to be called at the beginning of the engine, otherwise you could have some issues.
@@ -60,9 +73,10 @@ static func register_base_enum() -> void:
     # If your scared to break the engine, you can just call the function "register_enum" for each enum you want to register
     # Check the function "register_enum" for more information
     var enums_array: Dictionary = {
-        # Start of the engine enums
+        # Start of the engine enums - The name of the key should be the same as the enum name
         ## Animals
         "AnimalsDiet": AnimalsDiet,
+        "AnimalsEasingType": AnimalsEasingType,
         "AnimalsGender": AnimalsGender,
         "AnimalsMovementType": AnimalsMovementType,
         ## Effects
@@ -84,10 +98,17 @@ static func register_base_enum() -> void:
         "QuestType": QuestType,
         ## Quests Objectives
         "ObjectiveType": ObjectiveType,
+        ## GUI - BoxEntities
+        "BoxEntitiesChange": BoxEntitiesChange,
+        ## History
+        "HistoryAction": HistoryAction,
+        "HistoryLocation": HistoryLocation,
         # End of the engine enums
 
         # Add your custom enums after this comment
     }
+
+    ##### Dict numbers: 22 ##### This number NEED to be equal or more (Dict>=Const)than the "Const numbers" above
 
     # Then registering them
     for enum_name in enums_array:

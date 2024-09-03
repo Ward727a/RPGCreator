@@ -5,6 +5,12 @@ class_name Utils
 ## You can give directly the enum as a parameter or the path to the enum
 static func cast_to_enum(value: int, _enum: Variant) -> Variant:
 
+    if value < 0:
+        return _enum.values()[0]
+    
+    if value >= len(_enum.values()):
+        return _enum.values()[len(_enum.values()) - 1]
+
     return _enum.values()[value]
 
 ## This function is used to create a signal [br]
