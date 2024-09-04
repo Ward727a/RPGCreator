@@ -7,3 +7,77 @@ OBJECT,Object,Objet
 HELP,Help,Aide
 DOCUMENTATION,Documentation,Documentation
 ABOUT,About,A propos
+CHARACTERS,Characters,Personnages
+EFFECTS,Effects,Effets
+QUESTS,Quests,Quêtes
+SEARCH,Search…,Rechercher…
+ADD_NEW_CHARACTER,Add new character,Ajouter un nouveau personnages
+DETAILS,Details,Détails
+STATS,Stats,Statistiques
+SKILLS,Skills,Compétences
+INVENTORY,Inventory,Inventaire
+SETTINGS,Settings,Paramètres
+NAME,Name,Prénom
+SURNAME,Surname,Nom
+AGE,Age,Age
+GENDER,Gender,Genre
+RACE,Race,Race
+LVL,Level,Niveau
+LVLMAX,Max level,Niveau max
+HISTORY,History,Histoire
+PV,HP,PV
+PVMAX,HP Max,PV Max
+MP,MP,PM
+MPMAX,MP Max,PM Max
+STR,Strength,Force
+STRMAX,Max strength,Force max
+DEX,Dexterity,Dextérité
+DEXMAX,Max dexterity,Dextérité max
+CON,Constitution,Constitution
+CONMAX,Max constitution,Constitution max
+INT,Inteligence,Intelligence
+INTMAX,Max Inteligence,Intelligence max
+WIS,Wisdom,Sagesse
+WISMAX,Max wisdom,Sagesse max
+CHA,Charisma,Charisme
+CHAMAX,Max charisma,Charisme max
+LUCK,Luck,Chance
+LUCKMAX,Max luck,Chance max
+EASE_IN_CIRC,Ease in circ,Ease in circ
+EASE_IN_SINE,Ease in sine,Ease in sine
+EASE_IN_QUINT,Ease in quint,Ease in quint
+EASE_IN_CUBIC,Ease in cubic,Ease in cubic
+EASE_IN_QUAD,Ease in quad,Ease in quad
+EASE_IN_QUART,Ease in quart,Ease in quart
+EASE_IN_EXPO,Ease in expo,Ease in expo
+EASE_OUT_CIRC,Ease out circ,Ease out circ
+EASE_OUT_SINE,Ease out sine,Ease out sine
+EASE_OUT_QUINT,Ease out quint,Ease out quint
+EASE_OUT_CUBIC,Ease out cubic,Ease out cubic
+EASE_OUT_QUAD,Ease out quad,Ease out quad
+EASE_OUT_QUART,Ease out quart,Ease out quart
+EASE_OUT_EXPO,Ease out expo,Ease out expo
+EASE_NONE,No easing,Pas d’adoucissement
+MAX_SKILL,Max skills,Nombre de compétences max
+HINT_MAX_SKILL,wip,wip
+ADD_NEW_SKILL,Add new skill,Ajouter une nouvelle compétence
+IS_MERCHANT,Is a merchant,Est un marchant
+HINT_IS_MERCHANT,wip,wip
+IS_JOB_MASTER,Is a job master,Est un maître de métier
+HINT_IS_JOB_MASTER,wip,wip
+IS_SKILL_MASTER,Is a skill master,Est un maître de compétence
+HINT_IS_SKILL_MASTER,wip,wip
+IS_PET_MASTER,Is a pet master,Est un maître d’animaux
+HINT_IS_PET_MASTER,wip,wip
+IS_GUILD_MASTER,Is a guild master,Est un maître de guilde
+HINT_IS_GUILD_MASTER,wip,wip
+IS_FACTION_MASTER,Is a faction master,Est un chef de faction
+HINT_IS_FACTION_MASTER,wip,wip
+IS_SPELL_MASTER,Is a spells master,Est un maître de sorts
+HINT_IS_SPELL_MASTER,wip,wip
+IS_KILLABLE,Is killable,Est tuable
+HINT_IS_KILLABLE,wip,wip
+IS_INVINCIBLE,Is invicible,Est invincible
+HINT_IS_INVINCIBLE,wip,wip
+IS_LOOTABLE,Is lootable,Peut-être fouiller
+HINT_IS_LOOTABLE,wip,wip

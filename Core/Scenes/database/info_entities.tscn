@@ -27,12 +27,10 @@ script = ExtResource("1_igoy3")
 [node name="TabContainer" type="TabContainer" parent="."]
 layout_mode = 2
 size_flags_vertical = 3
-current_tab = 4
 tab_focus_mode = 1
 
 [node name="DETAILS" type="MarginContainer" parent="TabContainer"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
@@ -464,6 +462,28 @@ theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/SKILLS"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/SKILLS/VBoxContainer"]
+layout_mode = 2
+
+[node name="infoMaxSkill" type="HBoxContainer" parent="TabContainer/SKILLS/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "HINT_MAX_SKILL"
+script = ExtResource("3_d7kx8")
+label_name = "MAX_SKILL"
+
+[node name="HSeparator" type="HSeparator" parent="TabContainer/SKILLS/VBoxContainer"]
+layout_mode = 2
+
+[node name="addNewSkill" type="Button" parent="TabContainer/SKILLS/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "ADD_NEW_SKILL"
+
 [node name="INVENTORY" type="MarginContainer" parent="TabContainer"]
 unique_name_in_owner = true
 visible = false
@@ -475,6 +495,7 @@ theme_override_constants/margin_bottom = 4
 
 [node name="SETTINGS" type="MarginContainer" parent="TabContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4

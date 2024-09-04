@@ -58,6 +58,12 @@ var node_luck: InfoItemSpinBox
 var node_luck_max: InfoItemSpinBox
 var chart_luck: Control
 
+## Skills
+var node_max_skills: InfoItemSpinBox
+var node_add_skill: Button
+
+## Inventory
+
 ## Settings
 var is_npc: InfoItemCheck
 var is_merchant: InfoItemCheck
@@ -131,6 +137,10 @@ func _ready():
 	node_luck_max = %infoLUCKMax
 	chart_luck = %chartLUCK
 
+	# Get the skills tab nodes
+	node_max_skills = %infoMaxSkill
+	node_add_skill = %addNewSkill
+
 	# Get the settings tab nodes
 	is_merchant = %isMerchant
 	is_jobMaster = %isJobMaster
@@ -153,7 +163,7 @@ func _ready():
 	node_name.set_max_length(20)
 	node_surname.set_max_length(20)
 
-	# Add the options
+	# Add the options to the infoItems that need it
 	add_options()
 
 	# Link the signals
@@ -196,6 +206,24 @@ func refresh_info():
 		return
 	
 	# Set the details tab
+	init_details()
+
+	# Set the stats tab
+	init_stats()
+
+	# Set the skills tab
+	init_skills()
+
+	# Set the inventory tab
+	init_inventory()
+
+	# Set the settings tab
+	init_settings()
+
+	pass
+
+# Init the details tab
+func init_details():
 	node_name.set_content(character.name)
 	node_surname.set_content(character.surname)
 	node_age.set_content(character.age)
@@ -205,7 +233,8 @@ func refresh_info():
 	node_gender.set_content(character.gender)
 	node_history.set_content(character.history_text)
 
-	# Set the stats tab
+# Init the stats tab
+func init_stats():
 	## PV
 	node_pv.set_content(character.min_health)
 	node_pv_max.set_content(character.max_health)
@@ -252,7 +281,16 @@ func refresh_info():
 	chart_luck.f1.name = tr("LUCK")
 	chart_luck.easing = character.luck_easing
 
-	# Set the settings tab
+# Init the skills tab
+func init_skills():
+	node_max_skills.set_content(character.max_skills)
+
+# Init the inventory tab
+func init_inventory():
+	pass
+
+# Init the settings tab
+func init_settings():
 	is_merchant.set_content(character.is_merchant)
 	is_jobMaster.set_content(character.is_job_master)
 	is_skillMaster.set_content(character.is_skill_master)
@@ -263,8 +301,6 @@ func refresh_info():
 	is_killable.set_content(character.is_killable)
 	is_lootable.set_content(character.is_lootable)
 	is_invincible.set_content(character.is_invicible)
-
-	pass
 
 # Links the signal of the entities to the info
 func link_signals():
@@ -284,7 +320,6 @@ func link_details_signal():
 	node_lvl_max.content_changed.connect(_on_node_lvl_max_content_changed)
 	node_gender.content_changed.connect(_on_node_gender_content_changed)
 	node_history.content_changed.connect(_on_node_history_content_changed)
-	pass
 
 # Link the stats tab signals
 func link_stats_signal():
@@ -317,11 +352,10 @@ func link_stats_signal():
 	node_luck.content_changed.connect(_on_node_luck_content_changed)
 	node_luck_max.content_changed.connect(_on_node_luck_max_content_changed)
 
-	pass
-
 # Link the skills tab signals
 func link_skills_signal():
-	pass
+	node_max_skills.content_changed.connect(_on_node_max_skills_content_changed)
+	node_add_skill.pressed.connect(_on_node_add_skill_pressed)
 
 # Link the inventory tab signals
 func link_inventory_signal():
@@ -341,11 +375,11 @@ func link_settings_signal():
 	is_lootable.content_changed.connect(_on_is_lootable_content_changed)
 	is_invincible.content_changed.connect(_on_is_invincible_content_changed)
 
-	pass
 
 ############################################
 # Signals for the details tab
 ############################################
+
 
 func _on_nodelvl_content_changed(content: int) -> void:
 	if character == null:
@@ -602,6 +636,22 @@ func _on_node_luck_max_content_changed(content: int) -> void:
 
 	character.max_luck = content
 
+
+############################################
+# Signals for the settings tab
+############################################
+
+
+func _on_node_max_skills_content_changed(content: int) -> void:
+	if character == null:
+		return
+
+	_add_to_history({"max_skills": character.max_skills})
+
+	character.max_skills = content
+
+func _on_node_add_skill_pressed() -> void:
+	pass
 
 ############################################
 # Signals for the settings tab

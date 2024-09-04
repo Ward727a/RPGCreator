@@ -13,7 +13,8 @@ config_version=5
 config/name="RPGCreator"
 run/main_scene="res://control.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
-config/icon="res://icon.svg"
+boot_splash/image="res://big_icon2.png"
+config/icon="res://Icon.png"
 
 [dotnet]
 
