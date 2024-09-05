@@ -30,9 +30,11 @@ So I decided to create my own :)
 
 ## 🗣 Discord Server
 If you want to follow the project you can join the official discord server right here:
-discord.gg/4yfq4NNzs4
+
+https://discord.gg/4yfq4NNzs4
 
 On this server you can ask question, propose feature, talk with the community, see some sneak-peek and check the changelog!
+
 Sometime I will be in voice channel with my screen shared so you can see me work and talk to me! :)
 
 # ❔ FAQ
