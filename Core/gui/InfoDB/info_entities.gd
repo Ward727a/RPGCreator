@@ -61,6 +61,7 @@ var chart_luck: Control
 ## Skills
 var node_max_skills: InfoItemSpinBox
 var node_add_skill: Button
+var skill_list: CustomList
 
 ## Inventory
 
@@ -140,6 +141,7 @@ func _ready():
 	# Get the skills tab nodes
 	node_max_skills = %infoMaxSkill
 	node_add_skill = %addNewSkill
+	skill_list = %skillList
 
 	# Get the settings tab nodes
 	is_merchant = %isMerchant
@@ -172,6 +174,9 @@ func _ready():
 	# Translate the box name
 	translate_box_name()
 
+	# Set list properties
+	set_list_prop()
+
 # Add the options to each infoItemOptions
 func add_options():
 	
@@ -190,6 +195,14 @@ func translate_box_name():
 	box_skills.set_name(tr("SKILLS"))
 	box_inventory.set_name(tr("INVENTORY"))
 	box_settings.set_name(tr("SETTINGS"))
+
+func set_list_prop():
+	skill_list.set_db_data("char_idx", "box_entities", "characters_list")
+
+	skill_list.origin = "BoxEntities"
+
+	skill_list.add_row("SKILL_NAME", List.ItemType.TEXT)
+	skill_list.add_row("SKILL_LVL", List.ItemType.TEXT)
 
 # Set the entities to show
 func set_entities(_character: Character):
@@ -284,6 +297,15 @@ func init_stats():
 # Init the skills tab
 func init_skills():
 	node_max_skills.set_content(character.max_skills)
+
+	# Clear the list
+	skill_list.clear_items()
+
+	# Add the skills to the list
+	var skills = character.skills
+
+	for skill in skills:
+		skill_list.add_item([skill.name, str(skill.level)], {"char_idx": character.id})
 
 # Init the inventory tab
 func init_inventory():
@@ -638,7 +660,7 @@ func _on_node_luck_max_content_changed(content: int) -> void:
 
 
 ############################################
-# Signals for the settings tab
+# Signals for the skills tab
 ############################################
 
 
@@ -651,7 +673,22 @@ func _on_node_max_skills_content_changed(content: int) -> void:
 	character.max_skills = content
 
 func _on_node_add_skill_pressed() -> void:
-	pass
+
+	if character == null:
+		return
+
+	# Check if the character has reached the maximum number of skills
+	if character.skills.size() >= character.max_skills:
+		return
+	
+	_add_to_history({"skills": character.skills})
+
+	# Add a new skill to the character
+	character.add_skill(tr("NEW_SKILL"), 1)
+
+	%skillList.add_item([tr("NEW_SKILL"), "1"], {"char_idx": character.id})
+
+
 
 ############################################
 # Signals for the settings tab

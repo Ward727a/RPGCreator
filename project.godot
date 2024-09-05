@@ -23,4 +23,5 @@ project/assembly_name="RPGCreator"
 [internationalization]
 
 locale/translations=PackedStringArray("res://Core/Assets/Translation/main.en.translation", "res://Core/Assets/Translation/main.fr.translation")
+locale/test="en"
 pseudolocalization/double_vowels=true

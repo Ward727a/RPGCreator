@@ -33,6 +33,9 @@ const EffectTypes = preload("res://Core/Enums/effects/effect_type.gd").EffectTyp
 const EffectOutcome = preload("res://Core/Enums/effects/effect_outcome.gd").EffectOutcome
 const EffectTime = preload("res://Core/Enums/effects/effect_time.gd").EffectTime
 const EffectTarget = preload("res://Core/Enums/effects/effect_target.gd").EffectTarget
+## Skills
+const SkillTypes = preload("res://Core/Enums/skills/skill_types.gd").SkillTypes
+const SkillTarget = preload("res://Core/Enums/skills/skill_target.gd").SkillTarget
 ## Objects
 const ObjectType = preload("res://Core/Enums/objects/object_type.gd").ObjectType
 ## Items
@@ -55,7 +58,7 @@ const BoxEntitiesChange = preload("res://Core/Enums/gui/entities/box_entities_ch
 const HistoryAction = preload("res://Core/Enums/gui/history/history_action.gd").HistoryAction
 const HistoryLocation = preload("res://Core/Enums/gui/history/history_location.gd").HistoryLocation
 
-##### Const numbers: 22 ##### This number NEED to be the equal or less (Const<=Dict) than the "Dict numbers" below
+##### Const numbers: 24 ##### This number NEED to be the equal or less (Const<=Dict) than the "Dict numbers" below
 
 ## Register all the basics engine enums [b](!! If you don't know what you are doing, don't edit this function !!)[/b][br]
 ## This function NEEDS to be called at the beginning of the engine, otherwise you could have some issues.
@@ -79,6 +82,9 @@ static func register_base_enum() -> void:
         "AnimalsEasingType": AnimalsEasingType,
         "AnimalsGender": AnimalsGender,
         "AnimalsMovementType": AnimalsMovementType,
+        ## Skills
+        "SkillTypes": SkillTypes,
+        "SkillTarget": SkillTarget,
         ## Effects
         "EffectTypes": EffectTypes,
         "EffectOutcome": EffectOutcome,
@@ -108,7 +114,7 @@ static func register_base_enum() -> void:
         # Add your custom enums after this comment
     }
 
-    ##### Dict numbers: 22 ##### This number NEED to be equal or more (Dict>=Const)than the "Const numbers" above
+    ##### Dict numbers: 24 ##### This number NEED to be equal or more (Dict>=Const)than the "Const numbers" above
 
     # Then registering them
     for enum_name in enums_array:

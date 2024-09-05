@@ -8,10 +8,13 @@ func _ready():
 	%CharList.item_clicked.connect(_on_char_list_clicked)
 	%CharList.origin = "BoxEntities"
 
+
+	await %CharList.add_row("CHAR_NAME", List.ItemType.TEXT)
+	await %CharList.add_row("CHAR_SURNAME", List.ItemType.TEXT)
+
 	await _load_characters()
 	
 	print("BoxEntities ready")
-
 
 func _load_characters():
 	var storage = JsonStorage.new()
@@ -39,7 +42,7 @@ func _on_new_character():
 
 func _on_char_list_clicked(_node: Node, _name: String, _metadata: Dictionary):
 
-	print(_node)
+	print("clicked")
 
 	if last_clicked_node != _node:
 		

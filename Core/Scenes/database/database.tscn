@@ -54,6 +54,7 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/focus = ExtResource("3_lgoj1")
 toggle_mode = true
+button_pressed = true
 button_group = ExtResource("2_p64cy")
 text = "CHARACTERS"
 

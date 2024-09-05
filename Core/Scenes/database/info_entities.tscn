@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://bqk3n33rqfdbm"]
+[gd_scene load_steps=11 format=3 uid="uid://bqk3n33rqfdbm"]
 
 [ext_resource type="Script" path="res://Core/gui/InfoDB/info_entities.gd" id="1_igoy3"]
 [ext_resource type="Script" path="res://Core/gui/InfoDB/child/info_item_lineedit.gd" id="2_3liey"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://Core/gui/InfoDB/child/info_item_textedit.gd" id="5_qv877"]
 [ext_resource type="PackedScene" uid="uid://chcj7up8k8pa8" path="res://addons/easy_charts/examples/line_chart/Control.tscn" id="7_34k7w"]
 [ext_resource type="Script" path="res://Core/gui/InfoDB/child/info_item_check.gd" id="8_0hjda"]
+[ext_resource type="PackedScene" uid="uid://grljyoauhhtn" path="res://Core/Scenes/database/custom_list.tscn" id="8_i3vk5"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j5l4w"]
 bg_color = Color(0.498039, 0.498039, 0.498039, 1)
@@ -27,10 +28,12 @@ script = ExtResource("1_igoy3")
 [node name="TabContainer" type="TabContainer" parent="."]
 layout_mode = 2
 size_flags_vertical = 3
+current_tab = 2
 tab_focus_mode = 1
 
 [node name="DETAILS" type="MarginContainer" parent="TabContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
@@ -455,7 +458,6 @@ graph_color = Color(0.776471, 0.486275, 0.156863, 1)
 
 [node name="SKILLS" type="MarginContainer" parent="TabContainer"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
@@ -483,6 +485,11 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 text = "ADD_NEW_SKILL"
+
+[node name="skillList" parent="TabContainer/SKILLS/VBoxContainer" instance=ExtResource("8_i3vk5")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
 
 [node name="INVENTORY" type="MarginContainer" parent="TabContainer"]
 unique_name_in_owner = true

@@ -11,11 +11,11 @@ const itemList_NodePath: String = "res://Core/Scenes/database/custom_list_item.t
 
 signal item_clicked(node: Node, name: String, metadata: Dictionary)
 
-var db_index_name: String = "char_idx"
-var db_context: String = "box_entities"
-var db_char_list_key: String = "characters_list"
+var db_index_name: String = "char_idx" # The name of the index in the database
+var db_context: String = "box_entities" # The context of the database
+var db_char_list_key: String = "characters_list" # The key to access the list of characters in the database
 
-var origin: String = "CustomList"
+var origin: String = "CustomList" # The origin of the data
 
 func connect_signal():
 
@@ -39,9 +39,6 @@ func _ready():
 
     if data.size() == 0:
         return
-
-    add_row("CHAR_NAME", List.ItemType.TEXT)
-    add_row("CHAR_SURNAME", List.ItemType.TEXT)
 
 # Add a row to the list
 func add_row(row_text: String, row_type: List.ItemType, min_size: Vector2 = Vector2(0,0)):
@@ -138,6 +135,13 @@ func remove_item(engine_index: String):
             list_node.erase(engine_index)
             return
 
+# Clear all items from the list
+func clear_items():
+    list_object.clear_items()
+    list_node.clear()
+
+    for i in list.get_children():
+        i.queue_free()
 
 ####################
 # SIGNALS
@@ -145,10 +149,16 @@ func remove_item(engine_index: String):
 
 func _on_data_registered(_context: String, _key: String, _value: Variant, _origin: String):
 
+
     if _origin == origin:
         return
 
-    print("Data registered: ", _context, _key)
+
+    if _context != db_context:
+        return
+    
+    if _key != db_char_list_key:
+        return
 
 
     if _context == db_context and _key == db_char_list_key:

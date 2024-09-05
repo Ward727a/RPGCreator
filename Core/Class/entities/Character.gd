@@ -64,3 +64,18 @@ var gold: int = 0 # Character's gold
 
 var history_text: String = "\ntest\n\r\t" # Character's history
 
+func is_ally(_character: Character) -> bool:
+    if _character == self:
+        return true
+    return false
+
+func is_enemy(_character: Character) -> bool:
+    if _character != self:
+        return true
+    return false
+
+func add_skill(_skill_name: String, _skill_lvl) -> void:
+    var skill = BaseSkill.new()
+    skill.name = _skill_name
+    skill.level = _skill_lvl
+    skills.append(skill)

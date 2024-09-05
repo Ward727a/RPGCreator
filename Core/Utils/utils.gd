@@ -25,7 +25,7 @@ static func cast_to_enum(value: int, _enum: Variant) -> Variant:
 ##     pass
 ## [/codeblock]
 ## Or else you will not be able to receive the signal
-static func make_static_signal(object, signal_name: String):
+static func make_static_signal(object, signal_name: String) -> Signal:
     if object.has_user_signal(signal_name): # Check if the signal already exists
         return Signal(object, signal_name) # If it exists, return the signal
     object.add_user_signal(signal_name) # If it doesn't exist, create the signal on the object

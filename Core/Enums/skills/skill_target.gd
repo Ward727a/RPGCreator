@@ -1,9 +1,9 @@
 
-enum EffectTarget {
+enum SkillTarget {
     SELF,
-    ALLIES,
     ALLY,
+    ALLIES,
     ENEMY,
     ENEMIES,
-    ALL
+    ALL,
 }
