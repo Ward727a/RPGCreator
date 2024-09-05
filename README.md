@@ -21,12 +21,19 @@ So I decided to create my own :)
 # Please note that this project is not finished at all! Many features here are either not yet implemented, or not finished!
 
 ## ✨WIP Features 
-- Database system for creating characters, items, effects, ...
+- Database system for creating characters, items, effects, ... >> High priority task - IN PROGRESS 🟨
 - Extensive plugins support
 - Advanced text editor (color, font type, font size, link, image, ...) something WISIWYG like >> DONE✅
 - Fully UI editable (Add, edit or remove UI, HUD, Menu, ...)
 - 2D Support at first, then 3D Support
 - And lots more (this list will raise in size once I finished the actual list)
+
+## 🗣 Discord Server
+If you want to follow the project you can join the official discord server right here:
+discord.gg/4yfq4NNzs4
+
+On this server you can ask question, propose feature, talk with the community, see some sneak-peek and check the changelog!
+Sometime I will be in voice channel with my screen shared so you can see me work and talk to me! :)
 
 # ❔ FAQ
 - Why publish this on github when this project is not finished?
