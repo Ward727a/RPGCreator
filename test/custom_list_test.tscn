@@ -1,0 +1,28 @@
+[gd_scene load_steps=4 format=3 uid="uid://deeb53weg3vr3"]
+
+[ext_resource type="Script" path="res://test/custom_list_test.gd" id="1_g0f0d"]
+[ext_resource type="PackedScene" uid="uid://grljyoauhhtn" path="res://Core/Scenes/database/custom_list.tscn" id="2_0n72a"]
+[ext_resource type="Script" path="res://Core/gui/CustomList/customListItemBase.gd" id="3_eh48w"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_g0f0d")
+
+[node name="CustomList" parent="." instance=ExtResource("2_0n72a")]
+unique_name_in_owner = true
+layout_mode = 1
+
+[node name="CustomListItemBase" type="VBoxContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3_eh48w")

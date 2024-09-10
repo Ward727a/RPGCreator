@@ -74,8 +74,8 @@ func is_enemy(_character: Character) -> bool:
         return true
     return false
 
-func add_skill(_skill_name: String, _skill_lvl) -> void:
-    var skill = BaseSkill.new()
-    skill.name = _skill_name
-    skill.level = _skill_lvl
+func add_skill(_skill_name: String) -> void:
+    var skill = SkillRegister.get_skill(_skill_name)
+    if skill == null:
+        return
     skills.append(skill)

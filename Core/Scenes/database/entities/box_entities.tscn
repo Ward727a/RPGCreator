@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://grljyoauhhtn" path="res://Core/Scenes/database/custom_list.tscn" id="1_1gsb4"]
 [ext_resource type="Script" path="res://Core/gui/BoxDB/box_entities.gd" id="1_u07jm"]
-[ext_resource type="PackedScene" uid="uid://bqk3n33rqfdbm" path="res://Core/Scenes/database/info_entities.tscn" id="2_fdx10"]
+[ext_resource type="PackedScene" uid="uid://bqk3n33rqfdbm" path="res://Core/Scenes/database/entities/info_entities.tscn" id="2_fdx10"]
 
 [node name="BoxEntities" type="HBoxContainer"]
 script = ExtResource("1_u07jm")

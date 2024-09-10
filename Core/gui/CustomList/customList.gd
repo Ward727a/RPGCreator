@@ -10,10 +10,12 @@ var list_node: Dictionary = {}
 const itemList_NodePath: String = "res://Core/Scenes/database/custom_list_item.tscn"
 
 signal item_clicked(node: Node, name: String, metadata: Dictionary)
+signal option_chosen(option: String, option_button: OptionButton)
 
-var db_index_name: String = "char_idx" # The name of the index in the database
-var db_context: String = "box_entities" # The context of the database
-var db_char_list_key: String = "characters_list" # The key to access the list of characters in the database
+
+@export var db_index_name: String = "char_idx" # The name of the index in the database
+@export var db_context: String = "box_entities" # The context of the database
+@export var db_char_list_key: String = "characters_list" # The key to access the list of characters in the database
 
 var origin: String = "CustomList" # The origin of the data
 
@@ -32,13 +34,52 @@ func _init():
 
 func _ready():
 
-    rows = %row_cat
-    list = %list_content
-
     var data: Dictionary = list_object.get_list_property()
 
+    if get_child_count() == 0:
+        print("The list node is missing.")
+        print("Creating a new list node.")
+        
+        _create_body()
+        return
+
+    rows = %row_cat
+    list = %list_content
+    
     if data.size() == 0:
         return
+
+
+func _create_body():
+    var margin = MarginContainer.new()
+    var vbox = VBoxContainer.new()
+    var row_box = HBoxContainer.new()
+    var scroll = ScrollContainer.new()
+    var list_box = VBoxContainer.new()
+
+    margin.add_child(vbox)
+    vbox.add_child(row_box)
+    vbox.add_child(scroll)
+    scroll.add_child(list_box)
+
+    margin.add_theme_constant_override("margin_left", 4)
+    margin.add_theme_constant_override("margin_top", 4)
+    margin.add_theme_constant_override("margin_right", 4)
+    margin.add_theme_constant_override("margin_bottom", 4)
+    
+
+    add_child(margin)
+    
+    margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+
+    scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+    list_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    list_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+    list = list_box
+    rows = row_box
+
 
 # Add a row to the list
 func add_row(row_text: String, row_type: List.ItemType, min_size: Vector2 = Vector2(0,0)):
@@ -61,7 +102,7 @@ func add_row(row_text: String, row_type: List.ItemType, min_size: Vector2 = Vect
 # It returns the index of the item in the list and the engine index
 # The index of the item SHOULD NOT be trusted, as it can change if an item is removed / added
 # If you need to do something with the item, use the "engine index" instead, this index can't change and is unique to the item
-func add_item(Content: Array, _metadata: Dictionary = {}):
+func add_item(Content: Array, _metadata: Dictionary = {}) -> Dictionary:
     var idx = list_object.add_item(Content, "", _metadata)
 
     var item_object = list_object.get_list_property()['items'][idx]
@@ -90,8 +131,8 @@ func add_item(Content: Array, _metadata: Dictionary = {}):
     list.add_child(node)
 
     node.set_item_name(item_name)
-    node.set_item_content(item_content, list_object.get_list_property()['rows_type'])
     node.set_item_metadata(item_metadata)
+    node.set_item_content(item_content, list_object.get_list_property()['rows_type'])
 
     if DataRegister.has_key(db_context, db_char_list_key):
         var datas_list = DataRegister.get_data(db_context, db_char_list_key)
@@ -116,10 +157,12 @@ func add_item(Content: Array, _metadata: Dictionary = {}):
 
     node.base_theme = bg_theme
     node.clicked_on_item.connect(_click_on_item)
+    node.option_chosen.connect(_on_option_chosen)
 
     list_node[item_metadata['engine_index']] = node
+    
 
-    return {"index": idx, "engine_index": item_metadata['engine_index']}
+    return {"index": idx, "engine_index": item_metadata['engine_index'], "node": node}
 
 
 # Remove an item from the list
@@ -142,6 +185,12 @@ func clear_items():
 
     for i in list.get_children():
         i.queue_free()
+    
+func clear_rows():
+    list_object.clear_rows()
+    for i in rows.get_children():
+        i.queue_free()
+    
 
 ####################
 # SIGNALS
@@ -184,3 +233,6 @@ func _on_data_registered(_context: String, _key: String, _value: Variant, _origi
 
 func _click_on_item(node: Node, _name: String, _metadata: Dictionary):
     item_clicked.emit(node, _name, _metadata)
+
+func _on_option_chosen(option: String, option_button: OptionButton):
+    option_chosen.emit(option, option_button)

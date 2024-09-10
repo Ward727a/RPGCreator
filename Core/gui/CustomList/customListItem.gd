@@ -8,6 +8,7 @@ var base_theme: StyleBoxFlat
 var node_item: HBoxContainer
 
 signal clicked_on_item(node: Node, name: String, metadata: Dictionary)
+signal option_chosen(option: String, option_button: OptionButton)
 
 func _ready():
     print("Hi")
@@ -51,6 +52,26 @@ func set_item_content(_content: Array, _type: Array):
                 checkbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
                 checkbox.size_flags_vertical = Control.SIZE_SHRINK_CENTER
                 node_item.add_child(checkbox)
+            List.ItemType.OPTION_BUTTON:
+                var option_button = OptionButton.new()
+                option_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+                option_button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+
+                # Get options metadata
+                var options = metadata["options"]
+                for option in options:
+
+                    if typeof(option) == TYPE_STRING:
+                        option_button.add_item(option)
+                    else:
+                        option_button.add_item(option["name"])
+                        # Set the metadata of the option
+                        option_button.set_item_metadata(option_button.item_count - 1, {"value": option['value']})
+                option_button.selected = content[i]
+
+                option_button.item_selected.connect(_on_option_chosen.bind(option_button))
+
+                node_item.add_child(option_button)
 
 
 func set_item_metadata(_metadata: Dictionary):
@@ -58,3 +79,6 @@ func set_item_metadata(_metadata: Dictionary):
 
 func _click_on_panel():
     clicked_on_item.emit(self, item_name, metadata)
+
+func _on_option_chosen(option: int, option_button: OptionButton):
+    option_chosen.emit(str(option), option_button)

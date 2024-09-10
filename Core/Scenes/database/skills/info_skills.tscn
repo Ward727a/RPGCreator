@@ -1,0 +1,130 @@
+[gd_scene load_steps=9 format=3 uid="uid://buoab2o2hrttm"]
+
+[ext_resource type="PackedScene" uid="uid://n5xa418dln6i" path="res://Core/Scenes/database/info_item_text.tscn" id="1_d5pqn"]
+[ext_resource type="Script" path="res://Core/gui/InfoDB/skills/info_skills.gd" id="1_tisth"]
+[ext_resource type="Script" path="res://Core/gui/InfoDB/child/info_item_lineedit.gd" id="2_vx3kh"]
+[ext_resource type="Script" path="res://Core/gui/InfoDB/child/info_item_textedit.gd" id="3_h5602"]
+[ext_resource type="Script" path="res://Core/gui/InfoDB/child/info_item_options.gd" id="4_pjtjx"]
+[ext_resource type="Script" path="res://Core/gui/InfoDB/child/info_item_spinbox.gd" id="5_vwtvh"]
+[ext_resource type="PackedScene" uid="uid://cbboequg3adx8" path="res://Core/Scenes/Utils/custom_list_v2.tscn" id="5_wlsgd"]
+[ext_resource type="Script" path="res://Core/gui/List/Skill/effect_list.gd" id="6_gr7v8"]
+
+[node name="infoSkills" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_tisth")
+
+[node name="TabContainer" type="TabContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DETAILS" type="MarginContainer" parent="TabContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/DETAILS"]
+layout_mode = 2
+
+[node name="infoID" parent="TabContainer/DETAILS/VBoxContainer" instance=ExtResource("1_d5pqn")]
+unique_name_in_owner = true
+layout_mode = 2
+label_name = "ID"
+content = "NaN"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/DETAILS/VBoxContainer"]
+layout_mode = 2
+
+[node name="infoName" type="HBoxContainer" parent="TabContainer/DETAILS/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("2_vx3kh")
+label_name = "SKILL_NAME"
+content = "NaN"
+
+[node name="infoDesc" type="VBoxContainer" parent="TabContainer/DETAILS/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("3_h5602")
+label_name = "SKILL_DESCRIPTION"
+
+[node name="SKILL" type="MarginContainer" parent="TabContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TabContainer/SKILL"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/SKILL/VBoxContainer"]
+layout_mode = 2
+
+[node name="infoType" type="HBoxContainer" parent="TabContainer/SKILL/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("4_pjtjx")
+label_name = "SKILL_TYPE"
+
+[node name="infoTarget" type="HBoxContainer" parent="TabContainer/SKILL/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("4_pjtjx")
+label_name = "SKILL_TARGET"
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="TabContainer/SKILL/VBoxContainer"]
+layout_mode = 2
+
+[node name="infoCooldown" type="HBoxContainer" parent="TabContainer/SKILL/VBoxContainer/HBoxContainer3"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("5_vwtvh")
+label_name = "SKILL_COOLDOWN"
+suffix = "MS"
+
+[node name="cooldown_time_type" type="OptionButton" parent="TabContainer/SKILL/VBoxContainer/HBoxContainer3"]
+unique_name_in_owner = true
+layout_mode = 2
+selected = 0
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="TabContainer/SKILL/VBoxContainer"]
+layout_mode = 2
+
+[node name="infoEffects" parent="TabContainer/SKILL/VBoxContainer/HBoxContainer2" instance=ExtResource("5_wlsgd")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+script = ExtResource("6_gr7v8")
+title = "SKILL_EFFECTS"
+
+[node name="MarginContainer" type="MarginContainer" parent="TabContainer/SKILL/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+
+[node name="infoConditions" parent="TabContainer/SKILL/VBoxContainer/HBoxContainer2" instance=ExtResource("5_wlsgd")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+script = ExtResource("6_gr7v8")
+title = "SKILL_CONDITIONS"
+
+[connection signal="content_changed" from="TabContainer/DETAILS/VBoxContainer/HBoxContainer/infoName" to="." method="_on_info_name_content_changed"]
+[connection signal="content_changed" from="TabContainer/DETAILS/VBoxContainer/infoDesc" to="." method="_on_info_desc_content_changed"]
+[connection signal="content_changed" from="TabContainer/SKILL/VBoxContainer/HBoxContainer/infoType" to="." method="_on_info_type_content_changed"]
+[connection signal="content_changed" from="TabContainer/SKILL/VBoxContainer/HBoxContainer/infoTarget" to="." method="_on_info_target_content_changed"]
+[connection signal="content_changed" from="TabContainer/SKILL/VBoxContainer/HBoxContainer3/infoCooldown" to="." method="_on_info_cooldown_content_changed"]
+[connection signal="item_selected" from="TabContainer/SKILL/VBoxContainer/HBoxContainer3/cooldown_time_type" to="." method="_on_cooldown_time_type_item_selected"]

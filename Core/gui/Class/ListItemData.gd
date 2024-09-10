@@ -4,7 +4,8 @@ enum ItemType {
     TEXT,
     IMAGE,
     BUTTON,
-    CHECKBOX
+    CHECKBOX,
+    OPTION_BUTTON
 }
 
 var name: String = ""
@@ -70,6 +71,14 @@ func set_content(_content: Array):
                     content.append((object == "true"))
                 elif typeof(object) == TYPE_INT:
                     content.append((object == 1))
+                else:
+                    push_error("Invalid content type")
+                    return
+            ItemType.OPTION_BUTTON:
+                if typeof(object) == TYPE_STRING:
+                    content.append(object.to_int())
+                elif typeof(object) == TYPE_INT:
+                    content.append(object)
                 else:
                     push_error("Invalid content type")
                     return

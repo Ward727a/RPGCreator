@@ -14,6 +14,11 @@ var content: int = 0:
 		content = new
 		reload_content()
 
+@export 
+var suffix: String = "":
+	set(new):
+		content_node.suffix = tr(new)
+
 signal content_changed(content: int)
 
 var label_node: Label
@@ -29,6 +34,8 @@ func _init():
 	content_node = SpinBox.new()
 	content_node.value = content
 	content_node.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# allow greater values
+	content_node.allow_greater = true
 
 	content_node.connect("value_changed", _on_content_changed)
 

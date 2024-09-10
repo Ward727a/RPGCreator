@@ -54,6 +54,7 @@ func _init():
 	content_node.bbcode_enabled = true
 	content_node.text = content
 	content_node.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content_node.size_flags_vertical = Control.SIZE_EXPAND_FILL
 
 	# We prepare the advanced edit window
 	window = ConfirmationDialog.new()

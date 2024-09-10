@@ -82,3 +82,29 @@ HINT_IS_INVINCIBLE,wip,wip
 IS_LOOTABLE,Is lootable,Peut-être fouiller
 HINT_IS_LOOTABLE,wip,wip
 NEW_SKILL,New skill,Nouvelle compétence
+ALL,All,Tous
+ACTIVE,Active,Actif
+PASSIVE,Passive,Passif
+REACTIVE,Reactive,Réactif
+SPECIAL,Special,Spécial
+SKILL_TYPE,Skill type,Type de compétence
+SKILL_TARGET,Skill target,Cible de la compétence
+SKILL_COOLDOWN,Skill cooldown,Temps de recharge
+SKILL_EFFECTS,Skill effects,Effets de compétence
+SKILL_CONDITIONS,Skill conditions,Conditions
+ADD,Add,Ajouter
+CREATE,Create,Nouveau
+SKILL,Skill,Compétence
+SKILL_NAME,Skill name,Nom de la compétence
+SKILL_DESCRIPTION,Skill description,Description de la compétence
+OPEN_ADVANCED_EDITOR,Open the advanced text editor,Ouvrir l’éditeur de texte avancé
+CHAR_NAME,Name,Prénom
+CHAR_SURNAME,Surname,Nom
+ALLY,Ally,Allié
+ALLIES,Allies,Alliés
+ENEMY,Enemy,Ennemi
+ENEMIES,Enemies,Ennemis
+SELF,Self,Soi
+MS,ms,ms
+SEC,sec,sec
+MIN,min,min

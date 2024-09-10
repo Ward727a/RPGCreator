@@ -3,10 +3,11 @@ class_name BaseSkill
 
 const SkillTypes = EnumRegister.SkillTypes
 const SkillTarget = EnumRegister.SkillTarget
+const SkillCooldownType = EnumRegister.SkillCooldownType
 
+var id: String = "" # Skill's id
 var name: String = "" # Skill's name
 var description: String = "" # Skill's description
-var level: int = 1 # Skill's level (For now, it's not used - It's different from the character's level!)
 
 var skill_type: SkillTypes = SkillTypes.ACTIVE # Skill's type
 var skill_target: SkillTarget = SkillTarget.SELF # Skill's target (self, ally, enemy, all)
@@ -15,6 +16,7 @@ var skill_cost: Dictionary = {} # Skill's cost (ex: { "hp": 10, "mp": 5})
 var skill_conditions: Array[BaseSkillCondition] = [] # Skill's conditions
 var skill_caster: Character = null # Skill's caster
 var skill_cooldown: int = 0 # Skill's cooldown
+var skill_cooldown_type: SkillCooldownType = SkillCooldownType.MS # Skill's cooldown type
 
 # Function to use the skill
 # It should return true if the skill was used successfully, and false if it wasn't

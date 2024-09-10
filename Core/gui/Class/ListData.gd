@@ -5,7 +5,9 @@ enum ItemType {
     TEXT,
     IMAGE,
     BUTTON,
-    CHECKBOX
+    CHECKBOX,
+    OPTION_BUTTON,
+    MAX
 }
 
 var rows: Array = []
@@ -39,8 +41,8 @@ func add_item(item_content: Array, item_name: String = "", _item_metadata: Dicti
 
     var listItem = ListItem.new(item_name, rows_type)
 
-    listItem.set_content(item_content)
     listItem.add_metadatas(_item_metadata)
+    listItem.set_content(item_content)
 
     items.append(listItem)
 

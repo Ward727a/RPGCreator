@@ -184,7 +184,7 @@ func add_options():
 	var gender_options = {}
 	for enum_name in CharacterGender:
 		var enum_key = CharacterGender[enum_name] # Get the key (value) of the enum (e.g. 0, 1,2,3,..,n)
-		gender_options[enum_key] = {"name": enum_name, "uid": enum_key}
+		gender_options[enum_key] = {"name": tr(enum_name), "uid": enum_key}
 	
 	node_gender.set_options(gender_options)
 
@@ -201,8 +201,7 @@ func set_list_prop():
 
 	skill_list.origin = "BoxEntities"
 
-	skill_list.add_row("SKILL_NAME", List.ItemType.TEXT)
-	skill_list.add_row("SKILL_LVL", List.ItemType.TEXT)
+	skill_list.add_row("SKILL_NAME", List.ItemType.OPTION_BUTTON)
 
 # Set the entities to show
 func set_entities(_character: Character):
@@ -305,7 +304,7 @@ func init_skills():
 	var skills = character.skills
 
 	for skill in skills:
-		skill_list.add_item([skill.name, str(skill.level)], {"char_idx": character.id})
+		skill_list.add_item([skill.id], {"char_idx": character.id, "options": SkillRegister.get_all_skills_name_by_ids()})
 
 # Init the inventory tab
 func init_inventory():
@@ -681,13 +680,16 @@ func _on_node_add_skill_pressed() -> void:
 	if character.skills.size() >= character.max_skills:
 		return
 	
+	# Check if the database has any skill
+	if SkillRegister.get_all_skills_ids().size() == 0:
+		return
+
 	_add_to_history({"skills": character.skills})
 
 	# Add a new skill to the character
-	character.add_skill(tr("NEW_SKILL"), 1)
+	character.add_skill(SkillRegister.get_all_skills_ids()[0])
 
-	%skillList.add_item([tr("NEW_SKILL"), "1"], {"char_idx": character.id})
-
+	%skillList.add_item([SkillRegister.get_all_skills_ids()[0]], {"char_idx": character.id, "options": SkillRegister.get_all_skills_name_by_ids()})
 
 
 ############################################

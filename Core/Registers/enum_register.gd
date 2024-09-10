@@ -36,6 +36,7 @@ const EffectTarget = preload("res://Core/Enums/effects/effect_target.gd").Effect
 ## Skills
 const SkillTypes = preload("res://Core/Enums/skills/skill_types.gd").SkillTypes
 const SkillTarget = preload("res://Core/Enums/skills/skill_target.gd").SkillTarget
+const SkillCooldownType = preload("res://Core/Enums/skills/skill_cooldown_type.gd").SkillCooldownType
 ## Objects
 const ObjectType = preload("res://Core/Enums/objects/object_type.gd").ObjectType
 ## Items

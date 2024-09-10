@@ -1,5 +1,10 @@
 extends Control
 
+const button_group_path = "res://Core/Scenes/database/ButtonGroup/LeftMenu.tres"
+
+func _init():
+
+	await _test_load_skill_from_db()
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -10,9 +15,27 @@ func _ready():
 	# %Button4.connect("pressed", _on_generate_id)
 	%ApplyDB.pressed.connect(_on_apply_changes)
 	%CancelDB.pressed.connect(_on_load_file)
+	
+
+	var button_group: ButtonGroup = %MenuEntities.button_group
+	button_group.pressed.connect(_on_menu_button_pressed)
 
 	pass # Replace with function body.
 
+
+func _test_load_skill_from_db():
+	var storage = JsonStorage.new()
+
+	var data = storage.get_all_data("Skills", "Skills")
+
+	print(data)
+
+	if data == null:
+		return
+
+	for key in data:
+		var skill: BaseSkill = data[key]
+		SkillRegister.add_skill(skill)
 
 func _on_load_file():
 	var storage = JsonStorage.new()
@@ -53,6 +76,7 @@ func _on_apply_changes():
 
 
 	_save_box_entities()
+	_save_box_skills()
 
 	pass
 
@@ -62,4 +86,21 @@ func _save_box_entities():
 	var storage = JsonStorage.new()
 
 	var return_data = storage.store_all_data(characters, "Entities", "Characters")
-	print("Data saved: ", return_data)
+	print("char_data saved: ", return_data)
+
+func _save_box_skills():
+	var skills = SkillRegister.skills_to_string()
+
+	var storage = JsonStorage.new()
+
+	var return_data = storage.store_all_data(skills, "Skills", "Skills")
+	print("skill_data saved: ", return_data)
+
+func _on_menu_button_pressed(button: Button):
+	match(button.text):
+		"CHARACTERS":
+			%BoxEntities.show()
+			%BoxSkills.hide()
+		"SKILLS":
+			%BoxEntities.hide()
+			%BoxSkills.show()

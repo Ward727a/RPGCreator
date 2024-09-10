@@ -71,6 +71,20 @@ func set_label(_label: String):
 func set_content(_content: int):
 	content = _content
 
+## Set the options inside the infoitem[br]
+## [br]
+## The given dictionnary need to have the following structure:[br]
+## {uid: {"name": "OptionName", "uid": 2301}, ...}[br]
+## uid being the "value" of, for example, an enum [br]
+## So if we have 'SELF = 0', we get: 
+## [codeblock]
+## {
+## 0: {
+## 	"name": "SELF", 
+##	"uid": 0
+## 	}
+## }
+## [/codeblock]
 func set_options(_options: Dictionary):
 
 	if _options.size() == 0:
@@ -80,4 +94,4 @@ func set_options(_options: Dictionary):
 
 func _on_content_changed(value: int) -> void:
 	content = value
-	emit_signal("content_changed", content)
+	emit_signal("content_changed", str(content))
