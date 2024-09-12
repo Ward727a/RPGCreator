@@ -121,21 +121,5 @@ layout_mode = 2
 layout_mode = 2
 text = "Test"
 
-[node name="ADD_NEW_OBJECT_WINDOW" type="ConfirmationDialog" parent="."]
-title = "Please choose..."
-initial_position = 1
-size = Vector2i(550, 300)
-min_size = Vector2i(550, 300)
-
-[node name="VBoxContainer" type="VBoxContainer" parent="ADD_NEW_OBJECT_WINDOW"]
-offset_left = 8.0
-offset_top = 8.0
-offset_right = 542.0
-offset_bottom = 251.0
-
-[node name="LineEdit" type="LineEdit" parent="ADD_NEW_OBJECT_WINDOW/VBoxContainer"]
-layout_mode = 2
-placeholder_text = "SEARCH"
-
-[node name="VBoxContainer" type="VBoxContainer" parent="ADD_NEW_OBJECT_WINDOW/VBoxContainer"]
-layout_mode = 2
+[connection signal="pressed" from="MarginContainer2/menu/add" to="." method="_on_add_pressed"]
+[connection signal="pressed" from="MarginContainer2/menu/create" to="." method="_on_create_pressed"]

@@ -20,7 +20,7 @@ func _ready():
 	var button_group: ButtonGroup = %MenuEntities.button_group
 	button_group.pressed.connect(_on_menu_button_pressed)
 
-	pass # Replace with function body.
+	_load_base_conditions()
 
 
 func _test_load_skill_from_db():
@@ -104,3 +104,33 @@ func _on_menu_button_pressed(button: Button):
 		"SKILLS":
 			%BoxEntities.hide()
 			%BoxSkills.show()
+
+func _load_base_conditions(): # ! Need to rework this so it's not hardcoded, the engine need to be able to generate IDs for the conditions, and the conditions need to be stored in the database.
+
+	var data = JsonStorage.new().get_all_data("Skills", "EngineConditions")
+
+	if data!=null:
+		for key in data:
+			var condition: BaseSkillCondition = data[key]
+			SkillConditionsRegister.add_condition(condition)
+	else:
+		print("No default conditions found.")
+		print("Creating default conditions...")
+		var MSC = ManaSkillCondition.new("862473214724818651169126206019312014213811999160139211194216352502359214523915714513")
+		var HSC = HealthSkillCondition.new("177112252037022597662098486601872396369109207182149210357923314210892603319848166")
+
+		SkillConditionsRegister.add_condition(MSC)
+		SkillConditionsRegister.add_condition(HSC)
+
+		JsonStorage.new().store_all_data(SkillConditionsRegister.conditions_to_string(), "Skills", "EngineConditions")
+		print("Default conditions created and saved.")
+
+func test_init_conditions():
+	
+	# Init the base engine conditions
+	var MSC = ManaSkillCondition.new()
+	var HSC = HealthSkillCondition.new()
+
+	# Add the conditions to the register
+	SkillConditionsRegister.add_condition(MSC)
+	SkillConditionsRegister.add_condition(HSC)

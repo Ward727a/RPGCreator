@@ -67,6 +67,29 @@ var data: Dictionary = {}
 ## This will determine if the list is working (all check are done and valid, if not, set to true).[br]
 var not_working: bool = false
 
+func reload():
+
+	# Clear the content
+	_clear_content()
+
+	# Check if the template is valid.
+	if !_check_template():
+		push_error("The template is invalid.")
+		not_working = true
+	
+	# Check if the rows are valid.
+	if !_check_rows():
+		push_error("The rows are invalid.")
+		not_working = true
+	
+	# hide the template
+	template.hide()
+
+	# Create the list.
+	_create_list()
+
+	# Create the row. (If any)
+	_create_row()
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -266,10 +289,16 @@ func remove_item(idx: String):
 		if data[i].id_list > id_list:
 			data[i].id_list -= 1
 
-func add_item(_data: Dictionary):
+## Add an item to the list.[br]
+## You need to provide the data of the item you want to add.[br]
+## The data need to be formated the same way the template is expecting it.[br]
+## [br]
+## For the base template (if you don't have a custom template), the data need to be a dictionary with the key "val".[br]
+## This will return the id of the item. Or an empty string if the item couldn't be added.
+func add_item(_data: Dictionary) -> String:
 
 	if not_working:
-		return
+		return ""
 
 	
 	var id = IdGenerator.new().generate_id()
@@ -304,6 +333,47 @@ func add_item(_data: Dictionary):
 
 	# Add the item to the list
 	data[id] = _item
+
+	# Return the id of the item.
+	return id
+
+func _get_item(idx: String) -> __TemplateItem:
+
+	if not_working:
+		return null
+
+	# Check if the item exists.
+	if !data.has(idx):
+		push_error("The item ",idx," doesn't exist.")
+		return null
+
+	return data[idx]
+
+func clear_items():
+
+	if not_working:
+		return
+
+	# Clear the items.
+	for i in data.keys():
+		list.remove_child(data[i].template_node)
+		print("Removing: ",i)
+		data.erase(i)
+	
+	# Checking if the data is empty.
+	if data.size() != 0:
+		push_error("The data is not empty after clearing the items.")
+		return
+
+
+func _clear_content():
+
+	if not_working:
+		return
+
+	# Clear the list.
+	list.queue_free()
+	scroll.queue_free()
 
 # Class of the row
 class Row:

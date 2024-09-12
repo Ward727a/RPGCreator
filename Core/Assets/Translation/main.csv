@@ -108,3 +108,9 @@ SELF,Self,Soi
 MS,ms,ms
 SEC,sec,sec
 MIN,min,min
+SKILL_CONDITION_MANA_NAME,Has enough MP,A assez de PM
+SKILL_CONDITION_MANA_DESCRIPTION,The character needs to have at least X amount of MP to use this skill,Le caractère à besoin d’avoir au moins X PM pour utiliser la compétence
+SKILL_CONDITION_HEALTH_NAME,Has enough HP,A assez de PV
+SKILL_CONDITION_HEALTH_DESCRIPTION,The character needs to have at least X amount of HP to use this skill,Le caractère à besoin d’avoir au moins X PV pour utiliser la compétence
+ADD_SKILL_EFFECT_WINDOW,Choose some effects to add…,Choisissez les effets à ajouter…
+ADD_SKILL_CONDITION_WINDOW,Choose some conditions to add…,Choisissez les conditions à ajouter…

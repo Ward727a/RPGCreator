@@ -6,6 +6,8 @@ const EffectOutcome = EnumRegister.EffectOutcome
 const EffectTime = EnumRegister.EffectTime
 const EffectTarget = EnumRegister.EffectTarget
 
+var id: String = "" # Effect's ID
+
 var name: String = "" # Effect's name
 var description: String = "" # Effect's description
 
