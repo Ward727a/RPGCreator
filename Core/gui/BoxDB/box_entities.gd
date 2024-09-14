@@ -23,6 +23,9 @@ func _load_characters():
 
 	print(data)
 
+	if data == null:
+		return
+
 	for key in data:
 		var character: Character = data[key]
 

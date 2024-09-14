@@ -20,7 +20,8 @@ func _ready():
 	var button_group: ButtonGroup = %MenuEntities.button_group
 	button_group.pressed.connect(_on_menu_button_pressed)
 
-	_load_base_conditions()
+	await _load_base_conditions()
+	await _load_base_effects()
 
 
 func _test_load_skill_from_db():
@@ -105,7 +106,9 @@ func _on_menu_button_pressed(button: Button):
 			%BoxEntities.hide()
 			%BoxSkills.show()
 
-func _load_base_conditions(): # ! Need to rework this so it's not hardcoded, the engine need to be able to generate IDs for the conditions, and the conditions need to be stored in the database.
+#! This function is still WIP, but for now it works.
+#? This function should check the folder "skill/conditions" for all the conditions
+func _load_base_conditions(): 
 
 	var data = JsonStorage.new().get_all_data("Skills", "EngineConditions")
 
@@ -116,14 +119,38 @@ func _load_base_conditions(): # ! Need to rework this so it's not hardcoded, the
 	else:
 		print("No default conditions found.")
 		print("Creating default conditions...")
-		var MSC = ManaSkillCondition.new("862473214724818651169126206019312014213811999160139211194216352502359214523915714513")
-		var HSC = HealthSkillCondition.new("177112252037022597662098486601872396369109207182149210357923314210892603319848166")
+		var MSC = ManaSkillCondition.new()
+		var HSC = HealthSkillCondition.new()
 
 		SkillConditionsRegister.add_condition(MSC)
 		SkillConditionsRegister.add_condition(HSC)
 
 		JsonStorage.new().store_all_data(SkillConditionsRegister.conditions_to_string(), "Skills", "EngineConditions")
 		print("Default conditions created and saved.")
+
+#! This function is still WIP, but for now it works.
+#? This function should check the folder "skill/effects" for all the effects
+func _load_base_effects():
+
+	var data = JsonStorage.new().get_all_data("Skills", "EngineEffects")
+
+	if data!=null:
+		for key in data:
+			var effect: BaseEffect = data[key]
+			EffectRegister.add_effect(effect)
+	else:
+		print("No default effects found.")
+		print("Creating default effects...")
+		var PSE = PoisonEffect.new()
+		var HEE = HealEffect.new()
+		var STE = StunEffect.new()
+
+		EffectRegister.add_effect(PSE)
+		EffectRegister.add_effect(HEE)
+		EffectRegister.add_effect(STE)
+
+		JsonStorage.new().store_all_data(EffectRegister.effects_to_string(), "Skills", "EngineEffects")
+		print("Default effects created and saved.")
 
 func test_init_conditions():
 	

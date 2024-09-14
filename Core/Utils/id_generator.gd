@@ -17,3 +17,10 @@ func generate_id() -> String:
     var id_string = str(crypted_id).replace(",", "").replace("[", "").replace("]", "").replace(" ", "")
 
     return id_string
+
+# This is a more simpler way to generate an ID, it is less secure but it is faster.
+func generate_small_id() -> String:
+    
+    var id = str(randi()%10000)
+
+    return id

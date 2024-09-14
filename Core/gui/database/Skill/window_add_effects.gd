@@ -5,6 +5,9 @@ extends ConfirmationDialog
 
 var effects: Dictionary = {}
 var effects_hash: int = 0
+var effects_checked: Dictionary = {}
+
+var nodes: Dictionary = {}
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -16,6 +19,9 @@ func _on_about_to_popup():
 	
 	# Get all the effects
 	var effects_data: Dictionary = EffectRegister.get_all_effects()
+	
+	print(var_to_str(effects_data))
+	
 	var effects_data_hash: int = effects_data.hash() # Get the hash of the effects data
 
 	# Check if the hash are the same - So we don't have to update the list every time
@@ -37,9 +43,29 @@ func _on_about_to_popup():
 	# var idx = list.add_item({"val": "Test", "idx": "test", "hint": "Test hint"}) # Uncomment this line to test the list
 
 	# print("IDX test_item: ", idx) # Uncomment this line to test the list
-
+	
+	reload_content()
 
 ## Used to reload the [b]VISUAL[/b] content (Not the data)
 func reload_content():
 
+	list.clear()
+
+	for i in effects.keys():
+		var idx_item: String = list.add_item({"val": effects[i].name, "idx": i, "hint": effects[i].description})
+
+		var _item: RefCounted = list.get_item(idx_item)
+
+		var node_item: Node = _item.template_node
+
+		print("effects_checked: ", effects_checked)
+		print("condition_i: ", i)
+
+		nodes[i] = node_item
+
+		node_item.toggled.connect(_on_effect_toggled.bind(_item.data))
+
+	print("Added: ", effects.keys().size(), " effects")
+
+func _on_effect_toggled(toggle: bool, _idx: String, data: Dictionary):
 	pass

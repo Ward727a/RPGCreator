@@ -288,11 +288,23 @@ initial_position = 1
 size = Vector2i(400, 250)
 script = ExtResource("14_6som4")
 
-[node name="list" type="VBoxContainer" parent="edit_condition"]
+[node name="ScrollContainer" type="ScrollContainer" parent="edit_condition"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 offset_left = 8.0
 offset_top = 8.0
-offset_right = 392.0
-offset_bottom = 201.0
+offset_right = -8.0
+offset_bottom = -49.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="list" type="VBoxContainer" parent="edit_condition/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [connection signal="content_changed" from="TabContainer/DETAILS/VBoxContainer/HBoxContainer/infoName" to="." method="_on_info_name_content_changed"]
 [connection signal="content_changed" from="TabContainer/DETAILS/VBoxContainer/infoDesc" to="." method="_on_info_desc_content_changed"]
@@ -304,6 +316,7 @@ offset_bottom = 201.0
 [connection signal="create_pressed" from="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoEffects" to="." method="_on_info_effects_create_pressed"]
 [connection signal="add_pressed" from="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoConditions" to="." method="_on_info_conditions_add_pressed"]
 [connection signal="create_pressed" from="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoConditions" to="." method="_on_info_conditions_create_pressed"]
+[connection signal="edit_condition" from="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoConditions" to="." method="_on_info_conditions_edit_condition"]
 [connection signal="edit" from="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoConditions/list_template" to="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoConditions" method="_on_list_template_edit"]
 [connection signal="canceled" from="add_effects" to="." method="_on_add_effects_canceled"]
 [connection signal="confirmed" from="add_effects" to="." method="_on_add_effects_confirmed"]
@@ -311,3 +324,5 @@ offset_bottom = 201.0
 [connection signal="canceled" from="add_conditions" to="." method="_on_add_conditions_canceled"]
 [connection signal="confirmed" from="add_conditions" to="." method="_on_add_conditions_confirmed"]
 [connection signal="toggled" from="add_conditions/list_template/Panel/MarginContainer/HBoxContainer/CheckBox" to="add_conditions/list_template" method="_on_check_box_toggled"]
+[connection signal="canceled" from="edit_condition" to="." method="_on_edit_condition_canceled"]
+[connection signal="confirmed" from="edit_condition" to="." method="_on_edit_condition_confirmed"]

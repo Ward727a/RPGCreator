@@ -27,6 +27,8 @@ func store_all_data(data: Variant, identifier: String, ref: String) -> Variant:
 
 func get_all_data(identifier: String, ref: String) -> Variant:
 	var file_path = get_file_path(identifier, ref)
+
+	print("File path: ", file_path)
 	
 	return load_from_file(file_path)
 
@@ -37,6 +39,7 @@ func load_from_file(file_path: String) -> Variant:
 		var content = file.get_as_text().replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").replace("\\f", "\f").replace("\\b", "\b")
 		file.close()
 
+		print("Content: ", content)
 
 		return str_to_var(content)
 	else:

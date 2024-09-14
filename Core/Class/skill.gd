@@ -79,3 +79,9 @@ func set_effects(_effects: Array[BaseEffect]) -> void:
 
 func set_conditions(_conditions: Array[BaseSkillCondition]) -> void:
     skill_conditions = _conditions
+
+func get_condition(_condition_id: String) -> BaseSkillCondition:
+    for condition in skill_conditions:
+        if condition.id == _condition_id:
+            return condition
+    return null

@@ -18,6 +18,10 @@ func set_data(_data: Dictionary): # This function will be called at third when t
 	label.get_parent().set_tooltip_text(tr(_data["hint"]))
 	condition_idx = _data["idx"]
 
+func set_checked(_checked: bool):
+	# print("Set checked: ", _checked)
+	get_node("Panel/MarginContainer/HBoxContainer/CheckBox").set_pressed_no_signal(_checked)
+
 func set_idx(_idx: String): # This function will be called at second when the list is created. The IDX is the unique id of the item.
 	idx = _idx
 

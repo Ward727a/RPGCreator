@@ -109,6 +109,8 @@ func get_all_metadata() -> Dictionary:
 # Event functions #
 ###################
 
+#? Why did I created this system? I don't remember... Need to check why and if it need to be removed or not
+
 ## Add an event to the events dictionary
 func add_event(key: String, value: Callable) -> void:
 

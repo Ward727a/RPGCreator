@@ -7,6 +7,8 @@ var conditions: Dictionary = {}
 var conditions_hash: int = 0
 var conditions_checked: Dictionary = {}
 
+var nodes: Dictionary = {}
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 
@@ -42,6 +44,20 @@ func _on_about_to_popup():
 	# Reload the content
 	reload_content()
 
+func set_checked(checked_conditions: Array[BaseSkillCondition]):
+	
+	conditions_checked.clear()
+
+	for i in checked_conditions:
+		conditions_checked[i.id] = i
+	
+	for i in nodes.keys():
+		var node_item: Node = nodes[i]
+
+		if conditions_checked.has(i):
+			node_item.set_checked(true)
+		else:
+			node_item.set_checked(false)
 
 ## Used to reload the [b]VISUAL[/b] content (Not the data)
 func reload_content():
@@ -54,6 +70,11 @@ func reload_content():
 		var _item: RefCounted = list.get_item(idx_item)
 
 		var node_item: Node = _item.template_node
+
+		print("conditions_checked: ", conditions_checked)
+		print("condition_i: ", i)
+
+		nodes[i] = node_item
 
 		node_item.toggled.connect(_on_condition_toggled.bind(_item.data))
 

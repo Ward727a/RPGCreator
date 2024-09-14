@@ -4,9 +4,9 @@ class_name ManaSkillCondition
 var export_mana_required: int = 0 # The amount of mana required to use the skill
 
 ## We will initialize the condition here[br]
-func _init(_default_idx: String = ""):
+func _init():
 
-    id = _default_idx
+    id = "mana_skill_condition" # Define the condition ID here, IT NEED to be unique!!
     name = "SKILL_CONDITION_MANA_NAME" # "Has enough MP"
     description = "SKILL_CONDITION_MANA_DESCRIPTION" # "The character needs to have at least X amount of MP to use this skill"
 

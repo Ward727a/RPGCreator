@@ -16,6 +16,9 @@ var infoConditions: CustomListV2Base
 var windowEffects: ConfirmationDialog
 var windowConditions: ConfirmationDialog
 
+var windowEditCondition: ConfirmationDialog
+var windowEditEffect: ConfirmationDialog
+
 var skill_loaded: BaseSkill = null
 
 var clicked_on: Node = null
@@ -36,6 +39,8 @@ func _ready():
 
 	windowEffects = %add_effects
 	windowConditions = %add_conditions
+
+	windowEditCondition = %edit_condition
 
 	init_nodes()
 
@@ -200,6 +205,7 @@ func _on_info_conditions_create_pressed():
 
 func _on_info_conditions_add_pressed():
 	windowConditions.popup_centered()
+	windowConditions.set_checked(skill_loaded.skill_conditions)
 
 func _on_info_effects_create_pressed():
 	print("Create effect")
@@ -264,10 +270,51 @@ func _on_add_conditions_confirmed():
 	reload_conditions()
 
 func _on_add_conditions_canceled():
-	print("Add conditions canceled")
+	# print("Add conditions canceled")
+	pass
 
 func _on_add_effects_confirmed():
 	print("Add effects confirmed")
 
 func _on_add_effects_canceled():
 	print("Add effects canceled")
+	pass
+
+
+func _on_info_conditions_edit_condition(condition_idx:String):
+	print("Edit condition: ", condition_idx)
+
+	var condition: BaseSkillCondition = skill_loaded.get_condition(condition_idx)
+
+	if condition == null:
+		push_error("Condition not found")
+		return
+	
+	await windowEditCondition.edit(condition)
+
+	windowEditCondition.popup_centered()
+
+func _on_edit_condition_canceled():
+	# print("Edit condition canceled")
+	pass
+
+func _on_edit_condition_confirmed():
+	
+	var condition: BaseSkillCondition = windowEditCondition.get_condition()
+
+	if condition == null:
+		push_error("Condition not found")
+		return
+
+	# Find the condition in the skill
+	for i in skill_loaded.skill_conditions:
+		if i.id == condition.id:
+			# Remove the condition
+			skill_loaded.skill_conditions.erase(i)
+			# Add the new condition
+			skill_loaded.skill_conditions.push_back(condition)
+			break
+	# print("Condition edited: ", var_to_str(skill_loaded.skill_conditions)) # Debug, uncomment to test
+	
+	# Reload the conditions list
+	reload_conditions()

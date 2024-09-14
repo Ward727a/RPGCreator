@@ -1,6 +1,17 @@
 extends Animals
 class_name Character
 
+signal moved(_direction: Vector2) # Signal that the character has moved
+signal equiped(_item: Object) # Signal that an item has been equiped
+signal unequiped(_item: Object) # Signal that an item has been unequiped
+signal used(_item: Object) # Signal that an item has been used
+signal casted(_spell: BaseSkill, _target: Character) # Signal that a spell has been cast
+signal damaged(_damage: int) # Signal that the character has been damaged
+signal healed(_heal: int) # Signal that the character has been healed
+signal died() # Signal that the character has died
+signal started_turn() # Signal that the character's turn has started
+signal ended_turn() # Signal that the character's turn has ended
+
 var surname: String = "" # Character's surname
 
 var religion: int = 0 # Character's religion
@@ -79,3 +90,9 @@ func add_skill(_skill_name: String) -> void:
     if skill == null:
         return
     skills.append(skill)
+
+func remove_skill(_skill_name: String) -> void:
+    var skill = SkillRegister.get_skill(_skill_name)
+    if skill == null:
+        return
+    skills.erase(skills.find(skill))

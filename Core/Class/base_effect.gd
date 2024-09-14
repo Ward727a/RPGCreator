@@ -22,4 +22,4 @@ var effect_target: EffectTarget = EffectTarget.SELF # Effect's target (self, all
 # This function should be overridden in the child classes
 # It should apply the effect to the target
 func apply_effect(_target: Character) -> void:
-    pass
+	pass
