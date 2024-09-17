@@ -67,7 +67,7 @@ Yes! I will take some time when the engine is ready to create a good wiki with a
 To being totally honest: I really want to support 3D and 2D, but to begin the engine will only support 2D!
 - What language will be used for plugins?
 
-I'm still thinking about that, maybe GDScript or LUA, maybe both, I don't know as I'm still on the "idea" part of the plugins system! There will be no JS Support as I don't like this language, but maybe one day? Who know.
+I'm still thinking about that, maybe ~~GDScript~~ (This expose the user to a lot of risk) or LUA, ~~maybe both,~~ I don't know as I'm still on the "idea" part of the plugins system! There will be a JS Support at some point, but not at the release.
 - Is there a starting assets pack? (Like characters textures, tilemaps, etc...)
 
 Maybe?
