@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://y13b3lbbj0m5"]
+[gd_scene load_steps=7 format=3 uid="uid://y13b3lbbj0m5"]
 
 [ext_resource type="Theme" uid="uid://dxvkgbhgl3ilx" path="res://Core/Scenes/database/theme.tres" id="1_2ixfr"]
 [ext_resource type="Script" path="res://Core/Scenes/database/database.gd" id="1_w0qjs"]
@@ -6,7 +6,6 @@
 [ext_resource type="StyleBox" uid="uid://dwaq4cefo31uo" path="res://Core/Scenes/database/ButtonGroup/buttonStyle-Focus.tres" id="3_lgoj1"]
 [ext_resource type="PackedScene" uid="uid://lk3g8g6myah2" path="res://Core/Scenes/database/entities/box_entities.tscn" id="5_7wih8"]
 [ext_resource type="PackedScene" uid="uid://cvtt8ib4u0y2i" path="res://Core/Scenes/database/skills/box_skills.tscn" id="6_50rxi"]
-[ext_resource type="PackedScene" uid="uid://dxw4xp81ajnhp" path="res://Core/Scenes/debug/debug_main.tscn" id="7_g7yuy"]
 
 [node name="Database" type="Control"]
 layout_mode = 3
@@ -141,6 +140,3 @@ text = "CANCEL"
 unique_name_in_owner = true
 layout_mode = 2
 text = "APPLY"
-
-[node name="DebugMain" parent="." instance=ExtResource("7_g7yuy")]
-visible = false

@@ -46,6 +46,21 @@ func _on_about_to_popup():
 	
 	reload_content()
 
+func set_checked(checked_effects: Array[BaseEffect]):
+	
+	effects_checked.clear()
+
+	for i in checked_effects:
+		effects_checked[i.id] = i
+	
+	for i in nodes.keys():
+		var node_item: Node = nodes[i]
+
+		if effects_checked.has(i):
+			node_item.set_checked(true)
+		else:
+			node_item.set_checked(false)
+
 ## Used to reload the [b]VISUAL[/b] content (Not the data)
 func reload_content():
 
@@ -68,4 +83,19 @@ func reload_content():
 	print("Added: ", effects.keys().size(), " effects")
 
 func _on_effect_toggled(toggle: bool, _idx: String, data: Dictionary):
-	pass
+	
+	var effect_idx: String = data["idx"]
+
+	# Check if the effect exists in the register
+	if !EffectRegister.has_effect(effect_idx):
+		print("Effect not found in the register")
+		return
+
+	var effect = EffectRegister.get_pure_effect(effect_idx)
+
+	if toggle:
+		effects_checked[effect_idx] = effect
+	else:
+		effects_checked.erase(effect_idx)
+	
+	print("Checked: ", effects_checked.size())

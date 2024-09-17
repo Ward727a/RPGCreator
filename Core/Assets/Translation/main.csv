@@ -115,3 +115,9 @@ SKILL_CONDITION_HEALTH_DESCRIPTION,The character needs to have at least X amount
 ADD_SKILL_EFFECT_WINDOW,Choose some effects to add…,Choisissez les effets à ajouter…
 ADD_SKILL_CONDITION_WINDOW,Choose some conditions to add…,Choisissez les conditions à ajouter…
 EDIT_SKILL_CONDITION,Editing the condition…,Édition de la condition...
+EFFECT_HEAL_NAME,Heal,Soin
+EFFECT_HEAL_DESCRIPTION,The character will heal X amount of HP,Le caractère vas se soigner de X montant de PV
+EFFECT_POISON_NAME,Poison,Poison
+EFFECT_POISON_DESCRIPTION,The character will take X amount of damage every turn/move,Le caractère vas prend X montant de dégât à chaque tour/mouvement
+EFFECT_STUN_NAME,Stun,Étourdir
+EFFECT_STUN_DESCRIPTION,The character will not be able to do anything for X turn/move,Le caractère ne vas rien pouvoir faire pendant X tour/mouvement

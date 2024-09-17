@@ -20,6 +20,10 @@ config/icon="res://Icon.png"
 
 project/assembly_name="RPGCreator"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/easy_charts/plugin.cfg")
+
 [internationalization]
 
 locale/translations=PackedStringArray("res://Core/Assets/Translation/main.en.translation", "res://Core/Assets/Translation/main.fr.translation")

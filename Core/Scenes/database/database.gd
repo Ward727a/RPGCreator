@@ -2,6 +2,8 @@ extends Control
 
 const button_group_path = "res://Core/Scenes/database/ButtonGroup/LeftMenu.tres"
 
+var _open_debug_input: InputEventKey = preload("res://Core/Inputs/Shortcuts/debug/open_debug.tres")
+
 func _init():
 
 	await _test_load_skill_from_db()
@@ -23,6 +25,13 @@ func _ready():
 	await _load_base_conditions()
 	await _load_base_effects()
 
+func _shortcut_input(event):
+	
+	if event.is_match(_open_debug_input, true) and event.is_pressed():
+		var debug_menu: ConfirmationDialog = $DebugMain
+		
+		if !debug_menu.get_opened():
+			debug_menu.popup_centered()
 
 func _test_load_skill_from_db():
 	var storage = JsonStorage.new()
@@ -44,6 +53,9 @@ func _on_load_file():
 	var data = storage.get_all_data("Entities", "Characters")
 
 	print(data)
+	
+	if data == null:
+		return
 
 	for key in data:
 		var chara: Character = data[key]

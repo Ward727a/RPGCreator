@@ -1,0 +1,35 @@
+[gd_scene load_steps=5 format=3 uid="uid://dxw4xp81ajnhp"]
+
+[ext_resource type="Script" path="res://Core/gui/debug/debug_main.gd" id="1_s8jkl"]
+[ext_resource type="Script" path="res://Core/gui/debug/system/open_user_data.gd" id="2_xfx0i"]
+[ext_resource type="Script" path="res://Core/gui/debug/system/check_user_folders.gd" id="3_cxmn7"]
+[ext_resource type="Script" path="res://Core/gui/debug/engine/test_load_effects.gd" id="4_cnqsn"]
+
+[node name="DebugMain" type="ConfirmationDialog"]
+title = "Debug menu"
+initial_position = 2
+size = Vector2i(650, 500)
+visible = true
+cancel_button_text = "Close"
+script = ExtResource("1_s8jkl")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 642.0
+offset_bottom = 451.0
+
+[node name="open_user_data" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Open user data"
+script = ExtResource("2_xfx0i")
+
+[node name="check_user_folders" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Check user folder"
+script = ExtResource("3_cxmn7")
+
+[node name="test_load_effects" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Test load effects"
+script = ExtResource("4_cnqsn")

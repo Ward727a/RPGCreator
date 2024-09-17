@@ -21,6 +21,10 @@ func set_data(_data: Dictionary): # This function will be called at third when t
 	label.get_parent().set_tooltip_text(_data["hint"])
 	condition_idx = _data["idx"]
 
+func set_checked(_checked: bool):
+	#print("Set checked: ", _checked) # Debug, uncomment to test
+	get_node("Panel/MarginContainer/HBoxContainer/CheckBox").set_pressed_no_signal(_checked)
+
 func _on_check_box_toggled(toggled_on:bool):
 	print("Checkbox toggled: ", toggled_on)
 	toggled.emit(toggled_on, idx)

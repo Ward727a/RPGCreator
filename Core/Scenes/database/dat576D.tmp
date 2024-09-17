@@ -143,4 +143,3 @@ layout_mode = 2
 text = "APPLY"
 
 [node name="DebugMain" parent="." instance=ExtResource("7_g7yuy")]
-visible = false

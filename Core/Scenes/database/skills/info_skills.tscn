@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://buoab2o2hrttm"]
+[gd_scene load_steps=18 format=3 uid="uid://buoab2o2hrttm"]
 
 [ext_resource type="PackedScene" uid="uid://n5xa418dln6i" path="res://Core/Scenes/database/info_item_text.tscn" id="1_d5pqn"]
 [ext_resource type="Script" path="res://Core/gui/InfoDB/skills/info_skills.gd" id="1_tisth"]
@@ -12,8 +12,10 @@
 [ext_resource type="Script" path="res://Core/gui/database/Skill/window_add_effects.gd" id="9_p377h"]
 [ext_resource type="Script" path="res://Core/gui/database/Skill/window_add_conditions/list_template.gd" id="10_0tc5m"]
 [ext_resource type="Script" path="res://Core/gui/database/Skill/window_add_effects/list_template.gd" id="10_3dx45"]
+[ext_resource type="Script" path="res://Core/gui/List/Skill/condition_list.gd" id="10_lcl3j"]
 [ext_resource type="Script" path="res://Core/gui/database/Skill/window_add_conditions.gd" id="10_ockrp"]
 [ext_resource type="Script" path="res://Core/gui/database/Skill/window_edit_condition.gd" id="14_6som4"]
+[ext_resource type="Script" path="res://Core/gui/database/Skill/window_edit_effect.gd" id="16_o37a5"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5jyk6"]
 bg_color = Color(0.6, 0.6, 0.6, 0.0823529)
@@ -120,12 +122,46 @@ layout_mode = 2
 [node name="HBoxContainer2" type="HBoxContainer" parent="TabContainer/SKILL/VBoxContainer"]
 layout_mode = 2
 
-[node name="infoEffects" parent="TabContainer/SKILL/VBoxContainer/HBoxContainer2" instance=ExtResource("5_wlsgd")]
+[node name="infoEffects" parent="TabContainer/SKILL/VBoxContainer/HBoxContainer2" node_paths=PackedStringArray("custom_item_template") instance=ExtResource("5_wlsgd")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 300)
 layout_mode = 2
 script = ExtResource("6_gr7v8")
+custom_item_template = NodePath("list_template")
 title = "SKILL_EFFECTS"
+
+[node name="list_template" type="HBoxContainer" parent="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoEffects"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+script = ExtResource("9_i1loj")
+
+[node name="Panel" type="Panel" parent="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoEffects/list_template"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_5jyk6")
+
+[node name="MarginContainer" type="MarginContainer" parent="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoEffects/list_template/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 5
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoEffects/list_template/Panel/MarginContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoEffects/list_template/Panel/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Test"
+
+[node name="edit_cond_button" type="Button" parent="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoEffects/list_template"]
+layout_mode = 2
+size_flags_vertical = 4
+text = "EDIT"
 
 [node name="MarginContainer" type="MarginContainer" parent="TabContainer/SKILL/VBoxContainer/HBoxContainer2"]
 layout_mode = 2
@@ -134,9 +170,8 @@ layout_mode = 2
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 300)
 layout_mode = 2
-script = ExtResource("6_gr7v8")
+script = ExtResource("10_lcl3j")
 custom_item_template = NodePath("list_template")
-title = "SKILL_CONDITIONS"
 
 [node name="list_template" type="HBoxContainer" parent="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoConditions"]
 custom_minimum_size = Vector2(0, 30)
@@ -306,6 +341,31 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
+[node name="edit_effect" type="ConfirmationDialog" parent="."]
+unique_name_in_owner = true
+title = "EDIT_SKILL_CONDITION"
+initial_position = 1
+size = Vector2i(400, 250)
+script = ExtResource("16_o37a5")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="edit_effect"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -49.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="list" type="VBoxContainer" parent="edit_effect/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
 [connection signal="content_changed" from="TabContainer/DETAILS/VBoxContainer/HBoxContainer/infoName" to="." method="_on_info_name_content_changed"]
 [connection signal="content_changed" from="TabContainer/DETAILS/VBoxContainer/infoDesc" to="." method="_on_info_desc_content_changed"]
 [connection signal="content_changed" from="TabContainer/SKILL/VBoxContainer/HBoxContainer/infoType" to="." method="_on_info_type_content_changed"]
@@ -314,6 +374,8 @@ size_flags_vertical = 3
 [connection signal="item_selected" from="TabContainer/SKILL/VBoxContainer/HBoxContainer3/cooldown_time_type" to="." method="_on_cooldown_time_type_item_selected"]
 [connection signal="add_pressed" from="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoEffects" to="." method="_on_info_effects_add_pressed"]
 [connection signal="create_pressed" from="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoEffects" to="." method="_on_info_effects_create_pressed"]
+[connection signal="edit_effect" from="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoEffects" to="." method="_on_info_effects_edit_effect"]
+[connection signal="edit" from="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoEffects/list_template" to="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoEffects" method="_on_list_template_edit"]
 [connection signal="add_pressed" from="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoConditions" to="." method="_on_info_conditions_add_pressed"]
 [connection signal="create_pressed" from="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoConditions" to="." method="_on_info_conditions_create_pressed"]
 [connection signal="edit_condition" from="TabContainer/SKILL/VBoxContainer/HBoxContainer2/infoConditions" to="." method="_on_info_conditions_edit_condition"]
@@ -326,3 +388,5 @@ size_flags_vertical = 3
 [connection signal="toggled" from="add_conditions/list_template/Panel/MarginContainer/HBoxContainer/CheckBox" to="add_conditions/list_template" method="_on_check_box_toggled"]
 [connection signal="canceled" from="edit_condition" to="." method="_on_edit_condition_canceled"]
 [connection signal="confirmed" from="edit_condition" to="." method="_on_edit_condition_confirmed"]
+[connection signal="canceled" from="edit_effect" to="." method="_on_edit_effect_canceled"]
+[connection signal="confirmed" from="edit_effect" to="." method="_on_edit_effect_confirmed"]

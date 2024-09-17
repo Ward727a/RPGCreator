@@ -2,36 +2,36 @@ extends ConfirmationDialog
 
 @onready var list: VBoxContainer = get_node("ScrollContainer/list")
 
-var edited_condition: BaseSkillCondition = null
+var edited_effect: BaseEffect = null
 
 var parameters: Dictionary = {} # The parameters of the condition that is being edited. (export_ & hint_)
-var condition_idx: String = "" # The index of the condition that is being edited.
+var effect_idx: String = "" # The index of the condition that is being edited.
 
 func _ready():
 	about_to_popup.connect(_on_about_to_popup)
 
-func get_condition() -> BaseSkillCondition:
+func get_effect() -> BaseEffect:
 
 	# Edit the condition with the new parameters
 	for i in parameters.keys():
 		var data: Dictionary = parameters[i]
 		var param_data: Variant = data["export"]
 
-		edited_condition.set(str("export_",i), param_data)
+		edited_effect.set(str("export_",i), param_data)
 
-	return edited_condition
+	return edited_effect
 
-func edit(_condition: BaseSkillCondition) -> bool:
+func edit(_effect: BaseEffect) -> bool:
 
 	# Clear the parameters
 	parameters = {}
 
-	condition_idx = _condition.id
-	edited_condition = _condition
-	print(var_to_str((_condition)))
+	effect_idx = _effect.id
+	edited_effect = _effect
+	print(var_to_str((_effect)))
 
 	# Get the list of parameters
-	for i in _condition.get_property_list():
+	for i in _effect.get_property_list():
 
 		var prop_name: String = i.name
 		var prop_name_sanitized: String = sanitaze_param_name(prop_name)
@@ -40,26 +40,26 @@ func edit(_condition: BaseSkillCondition) -> bool:
 			if not parameters.has(prop_name_sanitized):
 				parameters[prop_name_sanitized] = {}
 			
-			parameters[prop_name_sanitized]["export"] = _condition.get(prop_name)
+			parameters[prop_name_sanitized]["export"] = _effect.get(prop_name)
 			parameters[prop_name_sanitized]["type"] = i.type
 		
 		if prop_name.begins_with("hint_"):
 			if not parameters.has(prop_name_sanitized):
 				parameters[prop_name_sanitized] = {}
 			
-			parameters[prop_name_sanitized]["hint"] = _condition.get(prop_name)
+			parameters[prop_name_sanitized]["hint"] = _effect.get(prop_name)
 		
 		if prop_name.begins_with("name_"):
 			if not parameters.has(prop_name_sanitized):
 				parameters[prop_name_sanitized] = {}
 			
-			parameters[prop_name_sanitized]["name"] = _condition.get(prop_name)
+			parameters[prop_name_sanitized]["name"] = _effect.get(prop_name)
 		
 		if prop_name.begins_with("type_"):
 			if not parameters.has(prop_name_sanitized):
 				parameters[prop_name_sanitized] = {}
 			
-			parameters[prop_name_sanitized]["type"] = _condition.get(prop_name)
+			parameters[prop_name_sanitized]["type"] = _effect.get(prop_name)
 		
 	return true
 

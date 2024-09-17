@@ -15,21 +15,21 @@ var name_can_kill: String = "Can Kill Target"
 
 func _init():
 
-    id = "poison_effect" # Define the effect ID here, IT NEED to be unique than the other effects!!
-    name = "EFFECT_POISON_NAME" # "Poison" - Those lines will be automatically translated if you have a translation file
-    description = "EFFECT_POISON_DESCRIPTION" # "The target will be poisoned for X turns and will take Y damage each turn" - Those lines will be automatically translated if you have a translation file
+	id = "poison_effect" # Define the effect ID here, IT NEED to be unique than the other effects!!
+	name = "EFFECT_POISON_NAME" # "Poison" - Those lines will be automatically translated if you have a translation file
+	description = "EFFECT_POISON_DESCRIPTION" # "The target will be poisoned for X turns and will take Y damage each turn" - Those lines will be automatically translated if you have a translation file
 
 func apply_effect(_target: Character) -> void:
-    pass
+	pass
 
 func duplicate() -> PoisonEffect:
-    
-    var new_effect = PoisonEffect.new()
-    
-    new_effect.export_poison_damage = export_poison_damage
-    new_effect.export_poison_duration = export_poison_duration
-    new_effect.id = id
-    new_effect.name = name
-    new_effect.description = description
-    
-    return new_effect
+	
+	var new_effect = PoisonEffect.new()
+	
+	new_effect.export_poison_damage = export_poison_damage
+	new_effect.export_poison_duration = export_poison_duration
+	new_effect.id = id
+	new_effect.name = name
+	new_effect.description = description
+	
+	return new_effect

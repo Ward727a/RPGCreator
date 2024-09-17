@@ -41,6 +41,7 @@ func _ready():
 	windowConditions = %add_conditions
 
 	windowEditCondition = %edit_condition
+	windowEditEffect = %edit_effect
 
 	init_nodes()
 
@@ -76,6 +77,13 @@ func reload_conditions():
 	for i in skill_loaded.skill_conditions:
 		infoConditions.add_item({"val": i.name, "idx": i.id, "hint": i.description})
 
+func reload_effects():
+	
+	infoEffects.clear()
+	
+	for i in skill_loaded.skill_effects:
+		infoEffects.add_item({"val": i.name, "idx": i.id, "hint": i.description})
+
 # Load a skill
 func _on_load_skill(skill: BaseSkill):
 	
@@ -96,6 +104,7 @@ func _on_load_skill(skill: BaseSkill):
 
 	# Reload the conditions
 	reload_conditions()
+	reload_effects()
 
 	# infoEffects.load_items(skill.effects) ## TODO: Implement the "load_items" inside the CustomListV2Base then in the custom script
 	# infoConditions.load_items(skill.conditions) ## TODO: Implement the "load_items" inside the CustomListV2Base then in the custom script
@@ -212,6 +221,7 @@ func _on_info_effects_create_pressed():
 
 func _on_info_effects_add_pressed():
 	windowEffects.popup_centered()
+	windowEffects.set_checked(skill_loaded.skill_effects)
 
 ## When the user clicks on the "Add conditions" button[br]
 ## Get all the checked conditions[br]
@@ -274,7 +284,54 @@ func _on_add_conditions_canceled():
 	pass
 
 func _on_add_effects_confirmed():
-	print("Add effects confirmed")
+	print("Add effects confirmed") # Debug, uncomment to test
+	print("checked_effects: ", windowEffects.effects_checked) # Debug, uncomment to test
+
+	if skill_loaded == null:
+		return
+	
+	var skill_effect_has_id = {}
+
+	for i in skill_loaded.skill_effects:
+		skill_effect_has_id[i.id] = i
+
+	print("has_id: ", skill_effect_has_id) # Debug, uncomment to test
+	print("checked: ", windowEffects.effects_checked) # Debug, uncomment to test
+
+	# check if the key are the same, if it is, do nothing - If not, erase the conditions that aren't in the checked and add the new ones
+	if skill_effect_has_id == windowEffects.effects_checked:
+		print("Same effects") # Debug, uncomment to test
+		return
+	
+	print("Different effects") # Debug, uncomment to test
+
+	var new_effects: Array = []
+
+	for i in windowEffects.effects_checked.keys():
+		if !skill_effect_has_id.has(i):
+			new_effects.append(windowEffects.effects_checked[i])
+	
+	print("New effects: ", new_effects) # Debug, uncomment to test
+
+	# Create a list of the old effects that will be removed
+	var old_effects: Array = []
+
+	for i in skill_loaded.skill_effects:
+		if !windowEffects.effects_checked.has(i.id):
+			old_effects.append(i)
+	
+	# Remove the old effects
+	for i in old_effects:
+		skill_loaded.skill_effects.erase(i)
+	
+	# Add the new one
+	for i in new_effects:
+		skill_loaded.skill_effects.push_back(i.duplicate())
+	
+	print("Skill effects: ", var_to_str(skill_loaded.skill_effects)) # Debug, uncomment to test
+
+	# Reload the conditions list
+	reload_effects()
 
 func _on_add_effects_canceled():
 	print("Add effects canceled")
@@ -318,3 +375,43 @@ func _on_edit_condition_confirmed():
 	
 	# Reload the conditions list
 	reload_conditions()
+
+
+func _on_info_effects_edit_effect(effect_idx: String):
+	print("Edit effect: ", effect_idx)
+
+	var effect: BaseEffect = skill_loaded.get_effect(effect_idx)
+
+	if effect == null:
+		push_error("Effect not found")
+		return
+	
+	await windowEditEffect.edit(effect)
+
+	windowEditEffect.popup_centered()
+
+
+func _on_edit_effect_canceled():
+	pass # Replace with function body.
+
+
+func _on_edit_effect_confirmed():
+	
+	var effect: BaseEffect = windowEditEffect.get_effect()
+
+	if effect == null:
+		push_error("Effect not found")
+		return
+
+	# Find the condition in the skill
+	for i in skill_loaded.skill_effects:
+		if i.id == effect.id:
+			# Remove the condition
+			skill_loaded.skill_effects.erase(i)
+			# Add the new condition
+			skill_loaded.skill_effects.push_back(effect)
+			break
+	print("Effect edited: ", var_to_str(skill_loaded.skill_effects)) # Debug, uncomment to test
+	
+	# Reload the effects list
+	reload_effects()
