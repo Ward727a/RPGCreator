@@ -1,0 +1,34 @@
+[gd_scene load_steps=4 format=3 uid="uid://bbuayxywjl1v"]
+
+[ext_resource type="PackedScene" uid="uid://cbboequg3adx8" path="res://Core/Scenes/Utils/custom_list_v2.tscn" id="1_081pw"]
+[ext_resource type="Script" path="res://Core/gui/database/Items/box_items.gd" id="1_t7gnv"]
+[ext_resource type="Script" path="res://Core/gui/database/Items/tab_manager.gd" id="2_nbrqq"]
+
+[node name="BoxItems" type="HBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_t7gnv")
+
+[node name="HSplitContainer" type="HSplitContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HSplitContainer"]
+custom_minimum_size = Vector2(350, 0)
+layout_mode = 2
+
+[node name="itemList" parent="HSplitContainer/VBoxContainer" instance=ExtResource("1_081pw")]
+layout_mode = 2
+show_add_button = false
+show_title = false
+
+[node name="TabContainer" type="TabContainer" parent="HSplitContainer"]
+layout_mode = 2
+script = ExtResource("2_nbrqq")
+
+[connection signal="create_pressed" from="HSplitContainer/VBoxContainer/itemList" to="." method="_on_item_list_create_pressed"]

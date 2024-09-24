@@ -34,6 +34,8 @@ func _shortcut_input(event):
 			debug_menu.popup_centered()
 
 func _test_load_skill_from_db():
+	
+	print("Loading skills...")
 	var storage = JsonStorage.new()
 
 	var data = storage.get_all_data("Skills", "Skills")
@@ -43,9 +45,7 @@ func _test_load_skill_from_db():
 	if data == null:
 		return
 
-	for key in data:
-		var skill: BaseSkill = data[key]
-		SkillRegister.add_skill(skill)
+	SkillRegister.from_dictionary(data)
 
 func _on_load_file():
 	var storage = JsonStorage.new()
@@ -102,7 +102,7 @@ func _save_box_entities():
 	print("char_data saved: ", return_data)
 
 func _save_box_skills():
-	var skills = SkillRegister.skills_to_string()
+	var skills = SkillRegister.to_dictionary()
 
 	var storage = JsonStorage.new()
 
@@ -114,62 +114,52 @@ func _on_menu_button_pressed(button: Button):
 		"CHARACTERS":
 			%BoxEntities.show()
 			%BoxSkills.hide()
+			%BoxItems.hide()
 		"SKILLS":
 			%BoxEntities.hide()
 			%BoxSkills.show()
+			%BoxItems.hide()
+		"ITEM":
+			%BoxEntities.hide()
+			%BoxSkills.hide()
+			%BoxItems.show()
 
 #! This function is still WIP, but for now it works.
 #? This function should check the folder "skill/conditions" for all the conditions
 func _load_base_conditions(): 
 
-	var data = JsonStorage.new().get_all_data("Skills", "EngineConditions")
-
-	if data!=null:
-		for key in data:
-			var condition: BaseSkillCondition = data[key]
-			SkillConditionsRegister.add_condition(condition)
-	else:
-		print("No default conditions found.")
-		print("Creating default conditions...")
-		var MSC = ManaSkillCondition.new()
-		var HSC = HealthSkillCondition.new()
-
-		SkillConditionsRegister.add_condition(MSC)
-		SkillConditionsRegister.add_condition(HSC)
-
-		JsonStorage.new().store_all_data(SkillConditionsRegister.conditions_to_string(), "Skills", "EngineConditions")
-		print("Default conditions created and saved.")
+	EngineFolder.new().load_skill_conditions()
 
 #! This function is still WIP, but for now it works.
 #? This function should check the folder "skill/effects" for all the effects
 func _load_base_effects():
-
-	var data = JsonStorage.new().get_all_data("Skills", "EngineEffects")
-
-	if data!=null:
-		for key in data:
-			var effect: BaseEffect = data[key]
-			EffectRegister.add_effect(effect)
-	else:
-		print("No default effects found.")
-		print("Creating default effects...")
-		var PSE = PoisonEffect.new()
-		var HEE = HealEffect.new()
-		var STE = StunEffect.new()
-
-		EffectRegister.add_effect(PSE)
-		EffectRegister.add_effect(HEE)
-		EffectRegister.add_effect(STE)
-
-		JsonStorage.new().store_all_data(EffectRegister.effects_to_string(), "Skills", "EngineEffects")
-		print("Default effects created and saved.")
+	EngineFolder.new().load_skill_effects()
+	pass
+	#var data = JsonStorage.new().get_all_data("Skills", "EngineEffects")
+	#
+	#if data!=null:
+		#for key in data:
+			#var effect: BaseEffect = data[key]
+			#EffectRegister.add_effect(effect)
+	#else:
+		#print("No default effects found.")
+		#print("Creating default effects...")
+		#
+		#EffectRegister.add_effect(PSE)
+		#EffectRegister.add_effect(HEE)
+		#EffectRegister.add_effect(STE)
+		#
+		#JsonStorage.new().store_all_data(EffectRegister.effects_to_string(), "Skills", "EngineEffects")
+		#print("Default effects created and saved.")
 
 func test_init_conditions():
 	
+	EngineFolder.new().load_skill_conditions()
+	
 	# Init the base engine conditions
-	var MSC = ManaSkillCondition.new()
-	var HSC = HealthSkillCondition.new()
-
-	# Add the conditions to the register
-	SkillConditionsRegister.add_condition(MSC)
-	SkillConditionsRegister.add_condition(HSC)
+	#var MSC = ManaSkillCondition.new()
+	#var HSC = HealthSkillCondition.new()
+#
+	## Add the conditions to the register
+	#SkillConditionsRegister.add_condition(MSC)
+	#SkillConditionsRegister.add_condition(HSC)

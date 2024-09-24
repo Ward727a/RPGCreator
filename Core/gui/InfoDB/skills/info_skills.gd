@@ -24,6 +24,7 @@ var skill_loaded: BaseSkill = null
 var clicked_on: Node = null
 
 signal skill_renamed()
+signal skill_type_changed()
 
 # Get all the nodes from the scene
 func _ready():
@@ -165,6 +166,7 @@ func _on_info_target_content_changed(content:String):
 	skill_loaded.skill_target = Utils.cast_to_enum(content.to_int(), EnumRegister.SkillTarget)
 
 # when the skill type is changed (ex: Active, Passive, etc)
+# TODO reload the skills so they are properly sorted
 func _on_info_type_content_changed(content:String):
 	
 	if skill_loaded == null:
@@ -173,6 +175,7 @@ func _on_info_type_content_changed(content:String):
 	_add_to_history({"skill_type": skill_loaded.skill_type})
 
 	skill_loaded.skill_type = Utils.cast_to_enum(content.to_int(), EnumRegister.SkillTypes)
+	skill_type_changed.emit()
 
 # When the cooldown is changed
 func _on_info_cooldown_content_changed(content:int):

@@ -1,0 +1,57 @@
+[gd_scene load_steps=2 format=3 uid="uid://xqpbj4gaqgjf"]
+
+[ext_resource type="Script" path="res://Core/gui/database/Items/win_parameters/lua_param_content.gd" id="1_dkh8v"]
+
+[node name="win_parameters" type="ConfirmationDialog"]
+title = "ITEM_PARAMETERS"
+initial_position = 2
+size = Vector2i(550, 400)
+visible = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 542.0
+offset_bottom = 351.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="lua_param_body" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="lua_param_top" type="HBoxContainer" parent="VBoxContainer/lua_param_body"]
+layout_mode = 2
+
+[node name="title" type="Label" parent="VBoxContainer/lua_param_body/lua_param_top"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "LUA_PARAMETERS"
+
+[node name="edit_script" type="Button" parent="VBoxContainer/lua_param_body/lua_param_top"]
+layout_mode = 2
+text = "LUA_EDIT"
+
+[node name="add_param" type="Button" parent="VBoxContainer/lua_param_body/lua_param_top"]
+layout_mode = 2
+text = "ADD_ITEM_PARAMETER"
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/lua_param_body"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/lua_param_body/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="lua_param_content" type="VBoxContainer" parent="VBoxContainer/lua_param_body/MarginContainer/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_dkh8v")

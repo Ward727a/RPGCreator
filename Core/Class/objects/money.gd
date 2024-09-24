@@ -6,11 +6,11 @@ var value: int = 0 # Money value
 
 # Override the use function
 func use():
-    pass
+	pass
 
 func store():
-    pass
+	pass
 
 # Return the money value
 func get_value():
-    return value
+	return value

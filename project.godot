@@ -29,3 +29,7 @@ enabled=PackedStringArray("res://addons/easy_charts/plugin.cfg")
 locale/translations=PackedStringArray("res://Core/Assets/Translation/main.en.translation", "res://Core/Assets/Translation/main.fr.translation")
 locale/test="en"
 pseudolocalization/double_vowels=true
+
+[rendering]
+
+textures/lossless_compression/force_png=true

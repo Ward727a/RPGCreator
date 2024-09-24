@@ -60,3 +60,4 @@ layout_mode = 2
 [connection signal="item_clicked" from="HSplitContainer/left/skillList" to="HSplitContainer/right/Panel/MarginContainer/ScrollContainer/infoSkills" method="_on_skill_list_item_clicked"]
 [connection signal="pressed" from="HSplitContainer/left/addSkill" to="HSplitContainer/left/skillList" method="_on_add_skill_pressed"]
 [connection signal="skill_renamed" from="HSplitContainer/right/Panel/MarginContainer/ScrollContainer/infoSkills" to="HSplitContainer/left/skillList" method="_on_info_skills_skill_renamed"]
+[connection signal="skill_type_changed" from="HSplitContainer/right/Panel/MarginContainer/ScrollContainer/infoSkills" to="HSplitContainer/left/skillList" method="_on_info_skills_skill_type_changed"]

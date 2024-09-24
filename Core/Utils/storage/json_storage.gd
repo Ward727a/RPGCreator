@@ -20,7 +20,10 @@ func store_all_data(data: Variant, identifier: String, ref: String) -> Variant:
 		if data is String:
 			file.store_string(data.replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r").replace("\f", "\\f").replace("\b", "\\b"))
 		else:
-			file.store_string(str_to_var(data).replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r").replace("\f", "\\f").replace("\b", "\\b"))
+			file.store_string(var_to_str(data).replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r").replace("\f", "\\f").replace("\b", "\\b"))
+		
+		print("saving: ", data)
+		
 		file.close()
 	
 	return data
@@ -37,9 +40,9 @@ func load_from_file(file_path: String) -> Variant:
 
 	if FileAccess.file_exists(file_path) and file != null:
 		var content = file.get_as_text().replace("\\n", "\n").replace("\\t", "\t").replace("\\r", "\r").replace("\\f", "\f").replace("\\b", "\b")
+		
+		print("Content: ", file.get_as_text())
 		file.close()
-
-		print("Content: ", content)
 
 		return str_to_var(content)
 	else:
@@ -49,7 +52,6 @@ func get_possible_ref(identifier: String) -> Array:
 	var dir_path = get_directory(identifier)
 	
 	var dir = DirAccess.open(dir_path)
-	
 	
 	var refs = []
 	

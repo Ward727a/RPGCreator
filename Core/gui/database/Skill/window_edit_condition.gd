@@ -17,7 +17,7 @@ func get_condition() -> BaseSkillCondition:
 		var data: Dictionary = parameters[i]
 		var param_data: Variant = data["export"]
 
-		edited_condition.set(str("export_",i), param_data)
+		edited_condition.exported_value[i]['value'] = param_data
 
 	return edited_condition
 
@@ -30,41 +30,62 @@ func edit(_condition: BaseSkillCondition) -> bool:
 	edited_condition = _condition
 	print(var_to_str((_condition)))
 
-	# Get the list of parameters
-	for i in _condition.get_property_list():
+	for key in _condition.exported_value.keys():
 
-		var prop_name: String = i.name
-		var prop_name_sanitized: String = sanitaze_param_name(prop_name)
-
-		if prop_name.begins_with("export_"):
-			if not parameters.has(prop_name_sanitized):
-				parameters[prop_name_sanitized] = {}
-			
-			parameters[prop_name_sanitized]["export"] = _condition.get(prop_name)
-			parameters[prop_name_sanitized]["type"] = i.type
+		var prop_name: String = key
+		var i: Dictionary = _condition.exported_value[key]
 		
-		if prop_name.begins_with("hint_"):
-			if not parameters.has(prop_name_sanitized):
-				parameters[prop_name_sanitized] = {}
-			
-			parameters[prop_name_sanitized]["hint"] = _condition.get(prop_name)
-		
-		if prop_name.begins_with("name_"):
-			if not parameters.has(prop_name_sanitized):
-				parameters[prop_name_sanitized] = {}
-			
-			parameters[prop_name_sanitized]["name"] = _condition.get(prop_name)
-		
-		if prop_name.begins_with("type_"):
-			if not parameters.has(prop_name_sanitized):
-				parameters[prop_name_sanitized] = {}
-			
-			parameters[prop_name_sanitized]["type"] = _condition.get(prop_name)
-		
+		parameters[prop_name] = {}
+		parameters[prop_name]["export"] = i.value if i.has('value') else i.default
+		parameters[prop_name]["type"] = string_type_to_int(i.type)
+		parameters[prop_name]["name"] = tr(prop_name)
+		parameters[prop_name]["hint"] = i.hint
+	## Get the list of parameters
+	#for i in _condition.get_property_list():
+#
+		#var prop_name: String = i.name
+		#var prop_name_sanitized: String = sanitaze_param_name(prop_name)
+#
+		#if prop_name.begins_with("export_"):
+			#if not parameters.has(prop_name_sanitized):
+				#parameters[prop_name_sanitized] = {}
+			#
+			#parameters[prop_name_sanitized]["export"] = _condition.get(prop_name)
+			#parameters[prop_name_sanitized]["type"] = i.type
+		#
+		#if prop_name.begins_with("hint_"):
+			#if not parameters.has(prop_name_sanitized):
+				#parameters[prop_name_sanitized] = {}
+			#
+			#parameters[prop_name_sanitized]["hint"] = _condition.get(prop_name)
+		#
+		#if prop_name.begins_with("name_"):
+			#if not parameters.has(prop_name_sanitized):
+				#parameters[prop_name_sanitized] = {}
+			#
+			#parameters[prop_name_sanitized]["name"] = _condition.get(prop_name)
+		#
+		#if prop_name.begins_with("type_"):
+			#if not parameters.has(prop_name_sanitized):
+				#parameters[prop_name_sanitized] = {}
+			#
+			#parameters[prop_name_sanitized]["type"] = _condition.get(prop_name)
+		#
 	return true
 
-func sanitaze_param_name(_name: String) -> String:
-	return _name.replace("export_", "").replace("hint_", "").replace("name_", "").replace("type_", "")
+func string_type_to_int(type_name: String) -> int:
+	
+	match(type_name.to_snake_case().to_upper()):
+		"STRING":
+			return TYPE_STRING
+		"INT":
+			return TYPE_INT
+		"BOOL":
+			return TYPE_BOOL
+		"FLOAT":
+			return TYPE_FLOAT
+		_:
+			return TYPE_NIL
 
 func clear_children():
 	for i in list.get_children():

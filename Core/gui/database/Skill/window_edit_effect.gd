@@ -17,7 +17,7 @@ func get_effect() -> BaseEffect:
 		var data: Dictionary = parameters[i]
 		var param_data: Variant = data["export"]
 
-		edited_effect.set(str("export_",i), param_data)
+		edited_effect.exported_value[i]['value'] = param_data
 
 	return edited_effect
 
@@ -30,41 +30,32 @@ func edit(_effect: BaseEffect) -> bool:
 	edited_effect = _effect
 	print(var_to_str((_effect)))
 
-	# Get the list of parameters
-	for i in _effect.get_property_list():
+	for key in _effect.exported_value.keys():
 
-		var prop_name: String = i.name
-		var prop_name_sanitized: String = sanitaze_param_name(prop_name)
-
-		if prop_name.begins_with("export_"):
-			if not parameters.has(prop_name_sanitized):
-				parameters[prop_name_sanitized] = {}
-			
-			parameters[prop_name_sanitized]["export"] = _effect.get(prop_name)
-			parameters[prop_name_sanitized]["type"] = i.type
+		var prop_name: String = key
+		var i: Dictionary = _effect.exported_value[key]
 		
-		if prop_name.begins_with("hint_"):
-			if not parameters.has(prop_name_sanitized):
-				parameters[prop_name_sanitized] = {}
-			
-			parameters[prop_name_sanitized]["hint"] = _effect.get(prop_name)
-		
-		if prop_name.begins_with("name_"):
-			if not parameters.has(prop_name_sanitized):
-				parameters[prop_name_sanitized] = {}
-			
-			parameters[prop_name_sanitized]["name"] = _effect.get(prop_name)
-		
-		if prop_name.begins_with("type_"):
-			if not parameters.has(prop_name_sanitized):
-				parameters[prop_name_sanitized] = {}
-			
-			parameters[prop_name_sanitized]["type"] = _effect.get(prop_name)
+		parameters[prop_name] = {}
+		parameters[prop_name]["export"] = i.value if i.has('value') else i.default
+		parameters[prop_name]["type"] = string_type_to_int(i.type)
+		parameters[prop_name]["name"] = tr(prop_name)
+		parameters[prop_name]["hint"] = i.hint
 		
 	return true
 
-func sanitaze_param_name(_name: String) -> String:
-	return _name.replace("export_", "").replace("hint_", "").replace("name_", "").replace("type_", "")
+func string_type_to_int(type_name: String) -> int:
+	
+	match(type_name.to_snake_case().to_upper()):
+		"STRING":
+			return TYPE_STRING
+		"INT":
+			return TYPE_INT
+		"BOOL":
+			return TYPE_BOOL
+		"FLOAT":
+			return TYPE_FLOAT
+		_:
+			return TYPE_NIL
 
 func clear_children():
 	for i in list.get_children():

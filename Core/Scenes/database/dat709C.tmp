@@ -1,0 +1,146 @@
+[gd_scene load_steps=8 format=3 uid="uid://y13b3lbbj0m5"]
+
+[ext_resource type="Theme" uid="uid://dxvkgbhgl3ilx" path="res://Core/Scenes/database/theme.tres" id="1_2ixfr"]
+[ext_resource type="Script" path="res://Core/Scenes/database/database.gd" id="1_w0qjs"]
+[ext_resource type="ButtonGroup" uid="uid://yfyf2jwsp5fg" path="res://Core/Scenes/database/ButtonGroup/LeftMenu.tres" id="2_p64cy"]
+[ext_resource type="StyleBox" uid="uid://dwaq4cefo31uo" path="res://Core/Scenes/database/ButtonGroup/buttonStyle-Focus.tres" id="3_lgoj1"]
+[ext_resource type="PackedScene" uid="uid://lk3g8g6myah2" path="res://Core/Scenes/database/entities/box_entities.tscn" id="5_7wih8"]
+[ext_resource type="PackedScene" uid="uid://cvtt8ib4u0y2i" path="res://Core/Scenes/database/skills/box_skills.tscn" id="6_50rxi"]
+[ext_resource type="PackedScene" uid="uid://dxw4xp81ajnhp" path="res://Core/Scenes/debug/debug_main.tscn" id="7_g7yuy"]
+
+[node name="Database" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_2ixfr")
+script = ExtResource("1_w0qjs")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="page_menu" type="MarginContainer" parent="VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+size_flags_stretch_ratio = 0.3
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="scroll" type="ScrollContainer" parent="VBoxContainer/HBoxContainer/page_menu"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MenuContent" type="VBoxContainer" parent="VBoxContainer/HBoxContainer/page_menu/scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MenuEntities" type="Button" parent="VBoxContainer/HBoxContainer/page_menu/scroll/MenuContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/focus = ExtResource("3_lgoj1")
+toggle_mode = true
+button_group = ExtResource("2_p64cy")
+text = "CHARACTERS"
+
+[node name="MenuSkills" type="Button" parent="VBoxContainer/HBoxContainer/page_menu/scroll/MenuContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/focus = ExtResource("3_lgoj1")
+toggle_mode = true
+button_pressed = true
+button_group = ExtResource("2_p64cy")
+text = "SKILLS"
+
+[node name="MenuItem" type="Button" parent="VBoxContainer/HBoxContainer/page_menu/scroll/MenuContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/focus = ExtResource("3_lgoj1")
+toggle_mode = true
+button_group = ExtResource("2_p64cy")
+text = "ITEM"
+
+[node name="MenuEffects" type="Button" parent="VBoxContainer/HBoxContainer/page_menu/scroll/MenuContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/focus = ExtResource("3_lgoj1")
+toggle_mode = true
+button_group = ExtResource("2_p64cy")
+text = "EFFECTS"
+
+[node name="MenuQuests" type="Button" parent="VBoxContainer/HBoxContainer/page_menu/scroll/MenuContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/focus = ExtResource("3_lgoj1")
+toggle_mode = true
+button_group = ExtResource("2_p64cy")
+text = "QUESTS"
+
+[node name="VSeparator" type="VSeparator" parent="VBoxContainer/HBoxContainer"]
+clip_contents = true
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="page_content" type="MarginContainer" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="BoxEntities" parent="VBoxContainer/HBoxContainer/page_content" instance=ExtResource("5_7wih8")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="BoxSkills" parent="VBoxContainer/HBoxContainer/page_content" instance=ExtResource("6_50rxi")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="bottom_menu" type="HBoxContainer" parent="VBoxContainer/MarginContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="CancelDB" type="Button" parent="VBoxContainer/MarginContainer/bottom_menu"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "CANCEL"
+
+[node name="ApplyDB" type="Button" parent="VBoxContainer/MarginContainer/bottom_menu"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "APPLY"
+
+[node name="DebugMain" parent="." instance=ExtResource("7_g7yuy")]
+visible = false

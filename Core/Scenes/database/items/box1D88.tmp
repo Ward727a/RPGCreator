@@ -1,0 +1,96 @@
+[gd_scene load_steps=3 format=3 uid="uid://bbuayxywjl1v"]
+
+[ext_resource type="Script" path="res://Core/gui/database/Items/win_parameters/lua_param_content.gd" id="1_ll4uo"]
+
+[sub_resource type="GDScript" id="GDScript_qphr8"]
+script/source = "extends HBoxContainer
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	
+	%lua_param_content.add_lua_item('test', 'String', \"A really big text line, with \\r return, and a still has a looooooooooooots of O\")
+	
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	pass
+"
+
+[node name="BoxItems" type="HBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = SubResource("GDScript_qphr8")
+
+[node name="HSplitContainer" type="HSplitContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HSplitContainer"]
+custom_minimum_size = Vector2(350, 0)
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HSplitContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="LineEdit" type="LineEdit" parent="HSplitContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "SEARCH"
+
+[node name="item_parameters" type="Button" parent="HSplitContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "PARAMETERS"
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="HSplitContainer"]
+layout_mode = 2
+
+[node name="win_parameters" type="ConfirmationDialog" parent="."]
+title = "ITEM_PARAMETERS"
+initial_position = 2
+size = Vector2i(550, 400)
+visible = true
+
+[node name="ScrollContainer" type="ScrollContainer" parent="win_parameters"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 542.0
+offset_bottom = 351.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="win_parameters/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="lua_param_body" type="VBoxContainer" parent="win_parameters/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="lua_param_top" type="HBoxContainer" parent="win_parameters/ScrollContainer/VBoxContainer/lua_param_body"]
+layout_mode = 2
+
+[node name="title" type="Label" parent="win_parameters/ScrollContainer/VBoxContainer/lua_param_body/lua_param_top"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "LUA_PARAMETERS"
+
+[node name="edit_script" type="Button" parent="win_parameters/ScrollContainer/VBoxContainer/lua_param_body/lua_param_top"]
+layout_mode = 2
+text = "LUA_EDIT"
+
+[node name="add_param" type="Button" parent="win_parameters/ScrollContainer/VBoxContainer/lua_param_body/lua_param_top"]
+layout_mode = 2
+text = "ADD_ITEM_PARAMETER"
+
+[node name="lua_param_content" type="VBoxContainer" parent="win_parameters/ScrollContainer/VBoxContainer/lua_param_body"]
+unique_name_in_owner = true
+layout_mode = 2
+script = ExtResource("1_ll4uo")

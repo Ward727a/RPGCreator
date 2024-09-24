@@ -10,7 +10,7 @@ var cert = X509Certificate.new()
 
 func generate_id() -> String:
 	
-	var id = str("UniqueID",randi()%10000)
+	var id = str("UniqueID",randi()%10_000)
 
 	var crypted_id: PackedByteArray = crypto.encrypt(crypto_key, id.to_utf8_buffer())
 
@@ -18,9 +18,14 @@ func generate_id() -> String:
 
 	return id_string
 
+func generate_medium_id() -> String:
+	var id = str(randi()%1_000_000_000)
+	
+	return id
+
 # This is a more simpler way to generate an ID, it is less secure but it is faster.
 func generate_small_id() -> String:
 	
-	var id = str(randi()%10000)
+	var id = str(randi()%10_000)
 
 	return id

@@ -91,3 +91,59 @@ func get_effect(_effect_id: String) -> BaseEffect:
 		if effect.id == _effect_id:
 			return effect
 	return null
+
+func to_dictionary() -> Dictionary:
+	
+	var skill_cond_data: Array[Dictionary] = []
+	var skill_effect_data: Array[Dictionary] = []
+	
+	for condition: BaseSkillCondition in skill_conditions:
+		skill_cond_data.push_back(
+			condition.to_dictionary()
+		)
+	
+	for effect: BaseEffect in skill_effects:
+		skill_effect_data.push_back(
+			effect.to_dictionary()
+		)
+	
+	var data : Dictionary = {
+		"id": id,
+		"conditions": skill_cond_data,
+		"effects": skill_effect_data,
+		"name": name,
+		"description": description,
+		"type": skill_type,
+		"target": skill_target,
+		"cost": skill_cost,
+		"cooldown": skill_cooldown,
+		"cooldown_type": skill_cooldown_type
+	}
+	
+	return data
+
+static func from_dictionary(data: Dictionary) -> BaseSkill:
+	
+	var skill: BaseSkill = BaseSkill.new()
+	
+	var conds: Array = []
+	var effects: Array = []
+	
+	for cond in data['conditions']:
+		conds.push_back(BaseSkillCondition.from_dictionary(cond))
+	
+	for effect in data['effects']:
+		effects.push_back(BaseEffect.from_dictionary(effect))
+	
+	skill.id = data['id']
+	skill.name = data['name']
+	skill.description = data['description']
+	skill.skill_effects.append_array(effects)
+	skill.skill_conditions.append_array(conds)
+	skill.skill_type = data['type']
+	skill.skill_target = data['target']
+	skill.skill_cost = data['cost']
+	skill.skill_cooldown = data['cooldown']
+	skill.skill_cooldown_type = data['cooldown_type']
+	
+	return skill

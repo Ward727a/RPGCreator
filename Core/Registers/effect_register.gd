@@ -62,16 +62,11 @@ static func add_effect(effect: BaseEffect) -> String:
 	data[effect_id] = effect
 	return effect_id
 
-static func new_effect() -> BaseEffect:
+static func new_effect(lua_script: String) -> BaseEffect:
 	# Create a new effect
 
-	var id = IdGenerator.new().generate_id()
 
-	var effect = BaseEffect.new()
-
-	effect.id = id
-	effect.name = "New Effect"
-	effect.set_custom_name("Effect")
+	var effect = BaseEffect.new(lua_script)
 
 	add_effect(effect)
 

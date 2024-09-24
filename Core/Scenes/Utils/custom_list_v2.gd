@@ -4,7 +4,6 @@ class_name CustomListV2Base
 ## If you don't know what you are doing, please ask for help. [br]
 ## If you do something wrong, the list will just not appear as it will be cleaned up by the engine. [br]
 
-
 @onready var create_button: Button = get_node("MarginContainer2/menu/create")
 @onready var add_button: Button = get_node("MarginContainer2/menu/add")
 @onready var title_label: Label = get_node("TitleContainer/Title")

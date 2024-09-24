@@ -1,9 +1,69 @@
-[gd_scene load_steps=5 format=3 uid="uid://dxw4xp81ajnhp"]
+[gd_scene load_steps=8 format=3 uid="uid://dxw4xp81ajnhp"]
 
 [ext_resource type="Script" path="res://Core/gui/debug/debug_main.gd" id="1_s8jkl"]
 [ext_resource type="Script" path="res://Core/gui/debug/system/open_user_data.gd" id="2_xfx0i"]
 [ext_resource type="Script" path="res://Core/gui/debug/system/check_user_folders.gd" id="3_cxmn7"]
 [ext_resource type="Script" path="res://Core/gui/debug/engine/test_load_effects.gd" id="4_cnqsn"]
+
+[sub_resource type="GDScript" id="GDScript_erukk"]
+script/source = "extends Button
+
+
+func _pressed():
+	await EngineFolder.new().load_items_parameters()
+	
+	print(ItemParametersRegister.get_categories())
+	
+	print(ItemParametersRegister.get_parameters(\"Stats\"))
+	
+"
+
+[sub_resource type="GDScript" id="GDScript_n4jgo"]
+script/source = "extends Button
+
+
+func _pressed():
+	await EngineFolder.new().load_ui()
+	
+	print(UIRegister.get_ui_list())
+	
+	var list = UIRegister.get_ui_list()
+	
+	if list.size() != 0:
+		get_parent().get_parent().get_parent().add_child(UIRegister.get_ui(list[0]))
+"
+
+[sub_resource type="GDScript" id="GDScript_513ku"]
+script/source = "extends Button
+
+var is_press: bool = false
+
+func _pressed():
+	
+	if is_press:
+		callable_test.call()
+		return
+	
+	var loader: LuaLoader = LuaLoader.new('user://test_load_callable.lua')
+	
+	var api = loader.get_api()
+	
+	api.push_variant('test_fn', test_callable)
+	
+	loader.load_lua()
+	
+	is_press = true
+	
+	
+
+var callable_test: Callable
+
+func test_callable(callable):
+	
+	print(type_string(typeof(callable)))
+	
+	callable_test = callable
+"
 
 [node name="DebugMain" type="ConfirmationDialog"]
 title = "Debug menu"
@@ -33,3 +93,18 @@ script = ExtResource("3_cxmn7")
 layout_mode = 2
 text = "Test load effects"
 script = ExtResource("4_cnqsn")
+
+[node name="test_load_item_parameters" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Test Load Item Parameters"
+script = SubResource("GDScript_erukk")
+
+[node name="test_load_ui" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Test Load UI"
+script = SubResource("GDScript_n4jgo")
+
+[node name="test_load_lua_callable" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Test Load LUA Callable"
+script = SubResource("GDScript_513ku")

@@ -63,17 +63,11 @@ static func add_condition(condition: BaseSkillCondition) -> String:
 	data[condition_id] = condition
 	return condition_id
 
-static func new_condition() -> BaseSkillCondition:
+static func new_condition(lua_script: String) -> BaseSkillCondition:
 	# Create a new skill condition
 
-	var id = IdGenerator.new().generate_id()
-
-	var condition = BaseSkillCondition.new()
+	var condition = BaseSkillCondition.new(lua_script)
 	
-	condition.id = id
-	condition.name = "New Skill Condition"
-	condition.set_custom_name("SkillCondition")
-
 	add_condition(condition)
 
 	return condition

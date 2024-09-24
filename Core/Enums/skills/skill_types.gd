@@ -1,7 +1,7 @@
 
 enum SkillTypes {
-    ACTIVE,
-    PASSIVE,
-    REACTIVE,
-    SPECIAL,
+	ACTIVE,
+	PASSIVE,
+	REACTIVE,
+	SPECIAL,
 }

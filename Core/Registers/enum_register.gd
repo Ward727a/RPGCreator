@@ -65,61 +65,61 @@ const HistoryLocation = preload("res://Core/Enums/gui/history/history_location.g
 ## This function NEEDS to be called at the beginning of the engine, otherwise you could have some issues.
 static func register_base_enum() -> void:
 
-    if registered_base:
-        return
-    
-    registered_base = true
+	if registered_base:
+		return
+	
+	registered_base = true
 
-    # Creating an array with all the enums
-    # This is useful to avoid having to register each enum one by one
-    # You can add your custom enums here but don't touch the already existing ones (unless you know what you are doing)
-    #
-    # If your scared to break the engine, you can just call the function "register_enum" for each enum you want to register
-    # Check the function "register_enum" for more information
-    var enums_array: Dictionary = {
-        # Start of the engine enums - The name of the key should be the same as the enum name
-        ## Animals
-        "AnimalsDiet": AnimalsDiet,
-        "AnimalsEasingType": AnimalsEasingType,
-        "AnimalsGender": AnimalsGender,
-        "AnimalsMovementType": AnimalsMovementType,
-        ## Skills
-        "SkillTypes": SkillTypes,
-        "SkillTarget": SkillTarget,
-        ## Effects
-        "EffectTypes": EffectTypes,
-        "EffectOutcome": EffectOutcome,
-        "EffectTime": EffectTime,
-        "EffectTarget": EffectTarget,
-        "ObjectType": ObjectType,
-        ## Items
-        "ItemObtainability": ItemObtainability,
-        "ItemRarity": ItemRarity,
-        "ItemUsability": ItemUsability,
-        "ItemDurabilityType": ItemDurabilityType,
-        "ItemRepairability": ItemRepairability,
-        "ItemDropability": ItemDropability,
-        "ItemType": ItemType,
-        ## Quests
-        "QuestStatus": QuestStatus,
-        "QuestType": QuestType,
-        ## Quests Objectives
-        "ObjectiveType": ObjectiveType,
-        ## GUI - BoxEntities
-        "BoxEntitiesChange": BoxEntitiesChange,
-        ## History
-        "HistoryAction": HistoryAction,
-        "HistoryLocation": HistoryLocation,
-        # End of the engine enums
+	# Creating an array with all the enums
+	# This is useful to avoid having to register each enum one by one
+	# You can add your custom enums here but don't touch the already existing ones (unless you know what you are doing)
+	#
+	# If your scared to break the engine, you can just call the function "register_enum" for each enum you want to register
+	# Check the function "register_enum" for more information
+	var enums_array: Dictionary = {
+		# Start of the engine enums - The name of the key should be the same as the enum name
+		## Animals
+		"AnimalsDiet": AnimalsDiet,
+		"AnimalsEasingType": AnimalsEasingType,
+		"AnimalsGender": AnimalsGender,
+		"AnimalsMovementType": AnimalsMovementType,
+		## Skills
+		"SkillTypes": SkillTypes,
+		"SkillTarget": SkillTarget,
+		## Effects
+		"EffectTypes": EffectTypes,
+		"EffectOutcome": EffectOutcome,
+		"EffectTime": EffectTime,
+		"EffectTarget": EffectTarget,
+		"ObjectType": ObjectType,
+		## Items
+		"ItemObtainability": ItemObtainability,
+		"ItemRarity": ItemRarity,
+		"ItemUsability": ItemUsability,
+		"ItemDurabilityType": ItemDurabilityType,
+		"ItemRepairability": ItemRepairability,
+		"ItemDropability": ItemDropability,
+		"ItemType": ItemType,
+		## Quests
+		"QuestStatus": QuestStatus,
+		"QuestType": QuestType,
+		## Quests Objectives
+		"ObjectiveType": ObjectiveType,
+		## GUI - BoxEntities
+		"BoxEntitiesChange": BoxEntitiesChange,
+		## History
+		"HistoryAction": HistoryAction,
+		"HistoryLocation": HistoryLocation,
+		# End of the engine enums
 
-        # Add your custom enums after this comment
-    }
+		# Add your custom enums after this comment
+	}
 
-    ##### Dict numbers: 24 ##### This number NEED to be equal or more (Dict>=Const)than the "Const numbers" above
+	##### Dict numbers: 24 ##### This number NEED to be equal or more (Dict>=Const)than the "Const numbers" above
 
-    # Then registering them
-    for enum_name in enums_array:
-        register_enum(enum_name, enums_array[enum_name])
+	# Then registering them
+	for enum_name in enums_array:
+		register_enum(enum_name, enums_array[enum_name])
 
 
 ## Register an enum, this can be used to register any enum (engine or custom)
@@ -146,38 +146,38 @@ static func register_base_enum() -> void:
 ##     const diet = EnumRegister.get_enum("MyEnum") # Getting the AnimalsDiet enum
 ## [/codeblock]
 static func register_enum(enum_name: String, enum_constant: Variant, add_salt_if_already_exist: bool = false) -> String:
-    print("Registering enum: " + enum_name)
+	print("Registering enum: " + enum_name)
 
-    if enums.has(enum_name):
-        if add_salt_if_already_exist:
-            print("Enum already registered: " + enum_name + ", adding salt to the name")
+	if enums.has(enum_name):
+		if add_salt_if_already_exist:
+			print("Enum already registered: " + enum_name + ", adding salt to the name")
 
-            # Adding a salt to the name
-            # We create 2 random numbers to reduce the chance of having the same salt
-            var salt1 = randi()%1000
-            var salt2 = randi()%1000
+			# Adding a salt to the name
+			# We create 2 random numbers to reduce the chance of having the same salt
+			var salt1 = randi()%1000
+			var salt2 = randi()%1000
 
-            while enums.has(enum_name + "_S" + str(salt1 + salt2)):
-                salt1 = randi()%1000
-                salt2 = randi()%1000
+			while enums.has(enum_name + "_S" + str(salt1 + salt2)):
+				salt1 = randi()%1000
+				salt2 = randi()%1000
 
-            enum_name += str("_S", str(salt1 + salt2))
-        else:
-            print("Enum already registered: " + enum_name)
-            return ""
+			enum_name += str("_S", str(salt1 + salt2))
+		else:
+			print("Enum already registered: " + enum_name)
+			return ""
 
-    enums[enum_name] = enum_constant
-    return enum_name
+	enums[enum_name] = enum_constant
+	return enum_name
 
 ## Get an enum, this can be used to get any registered enum (engine or custom)
 ## [br]
 ## @param enum_name: the name of the enum
 static func get_enum(enum_name: String) -> Variant:
-    return enums[enum_name]
+	return enums[enum_name]
 
 ## Return all registered enums, it will returns ALL enums (including the engine ones) so be careful!
 static func get_all_enums() -> Dictionary:
-    return enums
+	return enums
 
 ## Unregister an enum, yes, like any other function in this, you can unregister the engine enums too.
 ## [br]
@@ -185,4 +185,4 @@ static func get_all_enums() -> Dictionary:
 ## [br]
 ## @return bool: true if the enum was unregistered, false otherwise
 static func unregister_enum(enum_name: String) -> bool:
-    return enums.erase(enum_name)
+	return enums.erase(enum_name)

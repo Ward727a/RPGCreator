@@ -303,3 +303,8 @@ func _on_add_skill_pressed():
 func _on_info_skills_skill_renamed():
 	# Emit the reload signal.
 	need_reload.emit()
+
+
+func _on_info_skills_skill_type_changed():
+	# Emit the reload signal.
+	need_reload.emit()
