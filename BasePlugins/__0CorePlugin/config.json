@@ -1,0 +1,11 @@
+{
+    "name": "CorePlugin",
+    "version": "1.0.0",
+    "author": "RPG Creator",
+    "main_script": "main.lua",
+    "permissions": ["INTERFACE_MANAGER", "GD:INTERFACE", "GD:MATERIAL", "GD:STYLE", "GD:TEXTURE", "LOGGER", "PLUGIN_MANAGER", "GENERATE_ID", "PROJECT_MANAGER", "EVENTS_MANAGER", "DATA_MANAGER", "ASSETS_MANAGER"],
+    "description": "VERY important plugin, this plugin manage all of the UI of the software. Do not remove, it WILL break the software!!",
+    "auto_start": false, 
+    "icon": "",
+    "need_plugin": []
+}

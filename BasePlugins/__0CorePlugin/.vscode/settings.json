@@ -1,0 +1,10 @@
+{
+    "iis.configDir": "",
+    "Lua.diagnostics.globals": [
+        "InterfaceManager"
+    ],
+    "Lua.diagnostics.disable": [
+        "undefined-global",
+        "lowercase-global"
+    ]
+}
