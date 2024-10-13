@@ -10,26 +10,36 @@ config_version=5
 
 [application]
 
-config/name="RPGCreator"
-run/main_scene="res://control.tscn"
+config/name="RPGCreatorV2"
+config/use_custom_user_dir=true
+config/custom_user_dir_name="RPGCreator"
 config/features=PackedStringArray("4.2", "Forward Plus")
-boot_splash/image="res://big_icon2.png"
-config/icon="res://Icon.png"
+run/max_fps=144
+boot_splash/show_image=false
+boot_splash/image="res://Assets/icon.png"
+boot_splash/fullsize=false
+boot_splash/use_filter=false
+config/icon="res://Assets/icon.png"
+
+[autoload]
+
+ImGuiRoot="*res://addons/imgui-godot/data/ImGuiRoot.tscn"
+SoundManager="*res://addons/sound_manager/module/SoundManager.tscn"
+
+[display]
+
+window/size/mode=2
+window/subwindows/embed_subwindows=false
+window/per_pixel_transparency/allowed=true
 
 [dotnet]
 
-project/assembly_name="RPGCreator"
+project/assembly_name="RPGCreatorV2"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/easy_charts/plugin.cfg")
+enabled=PackedStringArray("res://addons/gdUnit4/plugin.cfg", "res://addons/imgui-godot/plugin.cfg", "res://addons/sound_manager/plugin.cfg")
 
-[internationalization]
+[gdunit4]
 
-locale/translations=PackedStringArray("res://Core/Assets/Translation/main.en.translation", "res://Core/Assets/Translation/main.fr.translation")
-locale/test="en"
-pseudolocalization/double_vowels=true
-
-[rendering]
-
-textures/lossless_compression/force_png=true
+settings/test/test_lookup_folder="Tests"

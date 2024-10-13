@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ResSettingsData" load_steps=2 format=3 uid="uid://cdo0w5kts8mpo"]
+
+[ext_resource type="Script" path="res://Core/Settings/settings_data.gd" id="1_j2d5b"]
+
+[resource]
+script = ExtResource("1_j2d5b")
+assets_folder = "user://Assets/"
+data_folder = "user://data/"
+plugins_folder = "user://plugins/"
+base_plugin_folder = ["__0CorePlugin"]

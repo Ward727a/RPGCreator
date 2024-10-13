@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://vqnqvndpsftt"]
+
+[ext_resource type="Script" path="res://addons/sound_manager/module/internal_scripts/SoundManager.gd" id="1"]
+
+[node name="SoundManager" type="Node"]
+script = ExtResource("1")
+preload_resources = true

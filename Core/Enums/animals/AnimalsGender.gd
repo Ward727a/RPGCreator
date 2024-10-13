@@ -1,5 +1,0 @@
-
-enum AnimalsGender{
-    MALE,
-    FEMALE
-}

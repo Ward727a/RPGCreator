@@ -1,0 +1,84 @@
+[gd_scene load_steps=3 format=3 uid="uid://bpm8r3q36i3hf"]
+
+[ext_resource type="Script" path="res://Core/Main/data_manager.gd" id="1_hp413"]
+
+[sub_resource type="GDScript" id="GDScript_4m0eo"]
+resource_name = "testdatamanager01"
+script/source = "extends Control
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	
+	%testLoad.pressed.connect(_on_test_load)
+	%testSave.pressed.connect(_on_test_save)
+	
+	pass # Replace with function body.
+
+func _on_test_load():
+	
+	DataManager.get_singleton().load_data()
+	
+	var object = DataManager.get_singleton().GET('test/data_of_test', null)
+	
+	if object == null:
+		push_error(\"Test load failed object is null!!\")
+		return
+	
+	if object is Test_data_manager_01:
+		print_rich(\"[color=green]Test load success!!\")
+		
+		object.test()
+		
+		return
+	
+	push_error(\"Test load failed object not test_save_object!!\")
+	
+	pass
+
+func _on_test_save():
+	
+	var test_object = Test_data_manager_01.new()
+	
+	test_object.name = \"This is a object of test edited!\"
+	
+	var success = DataManager.get_singleton().SET('test/data_of_test', test_object)
+	
+	if success == null:
+		push_error(\"Test save failed on SET!!\")
+		return
+	
+	DataManager.get_singleton().save_data()
+	
+	print_rich(\"[color=green]Test save success!!\")
+	
+	pass
+"
+
+[node name="TestDataManager01" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_4m0eo")
+
+[node name="testSave" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+text = "save"
+
+[node name="testLoad" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.048
+anchor_bottom = 0.048
+offset_top = 5.0
+text = "load"
+
+[node name="DataManager" type="Node" parent="."]
+script = ExtResource("1_hp413")

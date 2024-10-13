@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=2 format=3 uid="uid://c8ypmss5mycfg"]
+
+[ext_resource type="Script" path="res://Core/Settings/software_info.gd" id="1_ldibn"]
+
+[resource]
+script = ExtResource("1_ldibn")
+name = "RPG Creator"
+version = "1.0.0"
+author = "Ward"
+copyright = "2024-Present"

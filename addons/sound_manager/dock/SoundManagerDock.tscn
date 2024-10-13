@@ -1,0 +1,490 @@
+[gd_scene load_steps=6 format=3 uid="uid://bxcvu43yv4xly"]
+
+[ext_resource type="Script" path="res://addons/sound_manager/dock/SoundManagerDock.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://dl0vqixpxa80t" path="res://addons/sound_manager/dock/assets/slider_grabber_highlighted.svg" id="2"]
+[ext_resource type="Texture2D" uid="uid://25dn21f8amun" path="res://addons/sound_manager/dock/assets/slider_grabber.svg" id="3"]
+[ext_resource type="Texture2D" uid="uid://b7c8ya4xhor0q" path="res://addons/sound_manager/dock/assets/restore.svg" id="4"]
+
+[sub_resource type="Theme" id="1"]
+HSlider/icons/grabber = ExtResource("3")
+HSlider/icons/grabber_disabled = null
+HSlider/icons/grabber_highlight = ExtResource("2")
+HSlider/icons/tick = null
+HSlider/styles/grabber_area = null
+HSlider/styles/grabber_area_highlight = null
+HSlider/styles/slider = null
+
+[node name="SoundManager" type="ScrollContainer"]
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 362.0
+offset_bottom = -6.0
+grow_vertical = 2
+size_flags_vertical = 3
+script = ExtResource("1")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="BGMPropertiesPanel" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="BGMPropertiesCheck" type="HBoxContainer" parent="VBoxContainer/BGMPropertiesPanel"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/BGMPropertiesPanel/BGMPropertiesCheck"]
+layout_mode = 2
+text = "BGM Properties"
+
+[node name="CheckBox" type="CheckBox" parent="VBoxContainer/BGMPropertiesPanel/BGMPropertiesCheck"]
+layout_mode = 2
+
+[node name="BGMVolume" type="HBoxContainer" parent="VBoxContainer/BGMPropertiesPanel"]
+visible = false
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/BGMPropertiesPanel/BGMVolume"]
+layout_mode = 2
+text = "Volume Db"
+
+[node name="Value" type="HSlider" parent="VBoxContainer/BGMPropertiesPanel/BGMVolume"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme = SubResource("1")
+min_value = -80.0
+max_value = 24.0
+step = 1.072
+value = 0.4
+ticks_on_borders = true
+
+[node name="LineEdit" type="LineEdit" parent="VBoxContainer/BGMPropertiesPanel/BGMVolume"]
+layout_mode = 2
+text = "0"
+
+[node name="ToolButton" type="Button" parent="VBoxContainer/BGMPropertiesPanel/BGMVolume"]
+layout_mode = 2
+icon = ExtResource("4")
+
+[node name="BGMPitch" type="HBoxContainer" parent="VBoxContainer/BGMPropertiesPanel"]
+visible = false
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/BGMPropertiesPanel/BGMPitch"]
+layout_mode = 2
+text = "Pitch Scale"
+
+[node name="Value" type="HSlider" parent="VBoxContainer/BGMPropertiesPanel/BGMPitch"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme = SubResource("1")
+min_value = 0.01
+max_value = 4.0
+step = 0.04
+value = 1.01
+ticks_on_borders = true
+
+[node name="LineEdit" type="LineEdit" parent="VBoxContainer/BGMPropertiesPanel/BGMPitch"]
+layout_mode = 2
+text = "1.01"
+
+[node name="ToolButton" type="Button" parent="VBoxContainer/BGMPropertiesPanel/BGMPitch"]
+layout_mode = 2
+icon = ExtResource("4")
+
+[node name="BGSPropertiesPanel" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="BGSPropertiesCheck" type="HBoxContainer" parent="VBoxContainer/BGSPropertiesPanel"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/BGSPropertiesPanel/BGSPropertiesCheck"]
+layout_mode = 2
+text = "BGS Properties"
+
+[node name="CheckBox" type="CheckBox" parent="VBoxContainer/BGSPropertiesPanel/BGSPropertiesCheck"]
+layout_mode = 2
+
+[node name="BGSVolume" type="HBoxContainer" parent="VBoxContainer/BGSPropertiesPanel"]
+visible = false
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/BGSPropertiesPanel/BGSVolume"]
+layout_mode = 2
+text = "Volume Db"
+
+[node name="Value" type="HSlider" parent="VBoxContainer/BGSPropertiesPanel/BGSVolume"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme = SubResource("1")
+min_value = -80.0
+max_value = 24.0
+step = 1.072
+value = 0.4
+ticks_on_borders = true
+
+[node name="LineEdit" type="LineEdit" parent="VBoxContainer/BGSPropertiesPanel/BGSVolume"]
+layout_mode = 2
+text = "0"
+
+[node name="ToolButton" type="Button" parent="VBoxContainer/BGSPropertiesPanel/BGSVolume"]
+layout_mode = 2
+icon = ExtResource("4")
+
+[node name="BGSPitch" type="HBoxContainer" parent="VBoxContainer/BGSPropertiesPanel"]
+visible = false
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/BGSPropertiesPanel/BGSPitch"]
+layout_mode = 2
+text = "Pitch Scale"
+
+[node name="Value" type="HSlider" parent="VBoxContainer/BGSPropertiesPanel/BGSPitch"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme = SubResource("1")
+min_value = 0.01
+max_value = 4.0
+step = 0.04
+value = 1.01
+ticks_on_borders = true
+
+[node name="LineEdit" type="LineEdit" parent="VBoxContainer/BGSPropertiesPanel/BGSPitch"]
+layout_mode = 2
+text = "1"
+
+[node name="ToolButton" type="Button" parent="VBoxContainer/BGSPropertiesPanel/BGSPitch"]
+layout_mode = 2
+icon = ExtResource("4")
+
+[node name="SEPropertiesPanel" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="SEPropertiesCheck" type="HBoxContainer" parent="VBoxContainer/SEPropertiesPanel"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/SEPropertiesPanel/SEPropertiesCheck"]
+layout_mode = 2
+text = "SFX Properties"
+
+[node name="CheckBox" type="CheckBox" parent="VBoxContainer/SEPropertiesPanel/SEPropertiesCheck"]
+layout_mode = 2
+
+[node name="SEVolume" type="HBoxContainer" parent="VBoxContainer/SEPropertiesPanel"]
+visible = false
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/SEPropertiesPanel/SEVolume"]
+layout_mode = 2
+text = "Volume Db"
+
+[node name="Value" type="HSlider" parent="VBoxContainer/SEPropertiesPanel/SEVolume"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme = SubResource("1")
+min_value = -80.0
+max_value = 24.0
+step = 1.072
+value = 0.4
+ticks_on_borders = true
+
+[node name="LineEdit" type="LineEdit" parent="VBoxContainer/SEPropertiesPanel/SEVolume"]
+layout_mode = 2
+text = "0"
+
+[node name="ToolButton" type="Button" parent="VBoxContainer/SEPropertiesPanel/SEVolume"]
+layout_mode = 2
+icon = ExtResource("4")
+
+[node name="SEPitch" type="HBoxContainer" parent="VBoxContainer/SEPropertiesPanel"]
+visible = false
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/SEPropertiesPanel/SEPitch"]
+layout_mode = 2
+text = "Pitch Scale"
+
+[node name="Value" type="HSlider" parent="VBoxContainer/SEPropertiesPanel/SEPitch"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme = SubResource("1")
+min_value = 0.01
+max_value = 4.0
+step = 0.04
+value = 1.01
+ticks_on_borders = true
+
+[node name="LineEdit" type="LineEdit" parent="VBoxContainer/SEPropertiesPanel/SEPitch"]
+layout_mode = 2
+text = "1"
+
+[node name="ToolButton" type="Button" parent="VBoxContainer/SEPropertiesPanel/SEPitch"]
+layout_mode = 2
+icon = ExtResource("4")
+
+[node name="MEPropertiesPanel" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="MEPropertiesCheck" type="HBoxContainer" parent="VBoxContainer/MEPropertiesPanel"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/MEPropertiesPanel/MEPropertiesCheck"]
+layout_mode = 2
+text = "MFX Properties"
+
+[node name="CheckBox" type="CheckBox" parent="VBoxContainer/MEPropertiesPanel/MEPropertiesCheck"]
+layout_mode = 2
+
+[node name="MEVolume" type="HBoxContainer" parent="VBoxContainer/MEPropertiesPanel"]
+visible = false
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/MEPropertiesPanel/MEVolume"]
+layout_mode = 2
+text = "Volume Db"
+
+[node name="Value" type="HSlider" parent="VBoxContainer/MEPropertiesPanel/MEVolume"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme = SubResource("1")
+min_value = -80.0
+max_value = 24.0
+step = 1.072
+value = 0.4
+ticks_on_borders = true
+
+[node name="LineEdit" type="LineEdit" parent="VBoxContainer/MEPropertiesPanel/MEVolume"]
+layout_mode = 2
+text = "0"
+
+[node name="ToolButton" type="Button" parent="VBoxContainer/MEPropertiesPanel/MEVolume"]
+layout_mode = 2
+icon = ExtResource("4")
+
+[node name="MEPitch" type="HBoxContainer" parent="VBoxContainer/MEPropertiesPanel"]
+visible = false
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/MEPropertiesPanel/MEPitch"]
+layout_mode = 2
+text = "Pitch Scale"
+
+[node name="Value" type="HSlider" parent="VBoxContainer/MEPropertiesPanel/MEPitch"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme = SubResource("1")
+min_value = 0.01
+max_value = 4.0
+step = 0.04
+value = 1.01
+ticks_on_borders = true
+
+[node name="LineEdit" type="LineEdit" parent="VBoxContainer/MEPropertiesPanel/MEPitch"]
+layout_mode = 2
+text = "1"
+
+[node name="ToolButton" type="Button" parent="VBoxContainer/MEPropertiesPanel/MEPitch"]
+layout_mode = 2
+icon = ExtResource("4")
+
+[node name="BGMBusPanel" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/BGMBusPanel"]
+layout_mode = 2
+text = "BGM BUS"
+
+[node name="NameField" type="OptionButton" parent="VBoxContainer/BGMBusPanel"]
+layout_mode = 2
+selected = 1
+item_count = 5
+popup/item_0/text = "Master"
+popup/item_1/text = "BGM"
+popup/item_1/id = 1
+popup/item_2/text = "BGS"
+popup/item_2/id = 2
+popup/item_3/text = "SFX"
+popup/item_3/id = 3
+popup/item_4/text = "MFX"
+popup/item_4/id = 4
+
+[node name="BGSBusPanel" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/BGSBusPanel"]
+layout_mode = 2
+text = "BGS BUS"
+
+[node name="NameField" type="OptionButton" parent="VBoxContainer/BGSBusPanel"]
+layout_mode = 2
+selected = 2
+item_count = 5
+popup/item_0/text = "Master"
+popup/item_1/text = "BGM"
+popup/item_1/id = 1
+popup/item_2/text = "BGS"
+popup/item_2/id = 2
+popup/item_3/text = "SFX"
+popup/item_3/id = 3
+popup/item_4/text = "MFX"
+popup/item_4/id = 4
+
+[node name="SEBusPanel" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/SEBusPanel"]
+layout_mode = 2
+text = "SFX BUS"
+
+[node name="NameField" type="OptionButton" parent="VBoxContainer/SEBusPanel"]
+layout_mode = 2
+selected = 3
+item_count = 5
+popup/item_0/text = "Master"
+popup/item_1/text = "BGM"
+popup/item_1/id = 1
+popup/item_2/text = "BGS"
+popup/item_2/id = 2
+popup/item_3/text = "SFX"
+popup/item_3/id = 3
+popup/item_4/text = "MFX"
+popup/item_4/id = 4
+
+[node name="MEBusPanel" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/MEBusPanel"]
+layout_mode = 2
+text = "MFX BUS"
+
+[node name="NameField" type="OptionButton" parent="VBoxContainer/MEBusPanel"]
+layout_mode = 2
+selected = 4
+item_count = 5
+popup/item_0/text = "Master"
+popup/item_1/text = "BGM"
+popup/item_1/id = 1
+popup/item_2/text = "BGS"
+popup/item_2/id = 2
+popup/item_3/text = "SFX"
+popup/item_3/id = 3
+popup/item_4/text = "MFX"
+popup/item_4/id = 4
+
+[node name="HSeparator2" type="HSeparator" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="AudioFilesLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Audio Files"
+
+[node name="ToggleFilesPanelButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+toggle_mode = true
+text = "Manage Audio Files"
+
+[node name="AudioFilesPanel" type="PanelContainer" parent="VBoxContainer"]
+visible = false
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/AudioFilesPanel"]
+layout_mode = 2
+
+[node name="Files" type="VBoxContainer" parent="VBoxContainer/AudioFilesPanel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 2
+
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="DictionaryLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+mouse_filter = 0
+text = "Audio Files Dictionary"
+
+[node name="DictionaryContainer" type="ScrollContainer" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DictionaryPanel" type="VBoxContainer" parent="VBoxContainer/DictionaryContainer"]
+layout_mode = 2
+
+[node name="HSeparator3" type="HSeparator" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 2
+
+[node name="AdvancedOptions" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 10
+
+[node name="AdvancedPanel" type="HBoxContainer" parent="VBoxContainer/AdvancedOptions"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="AdvancedLabel" type="Label" parent="VBoxContainer/AdvancedOptions/AdvancedPanel"]
+layout_mode = 2
+text = "Advanced Options"
+
+[node name="AdvancedButton" type="CheckBox" parent="VBoxContainer/AdvancedOptions/AdvancedPanel"]
+layout_mode = 2
+
+[node name="PreloadPanel" type="HBoxContainer" parent="VBoxContainer/AdvancedOptions"]
+visible = false
+layout_mode = 2
+
+[node name="PreloadLabel" type="Label" parent="VBoxContainer/AdvancedOptions/PreloadPanel"]
+layout_mode = 2
+text = "Preload resources"
+
+[node name="PreloadButton" type="CheckBox" parent="VBoxContainer/AdvancedOptions/PreloadPanel"]
+layout_mode = 2
+
+[node name="PreinstantiatePanel" type="HBoxContainer" parent="VBoxContainer/AdvancedOptions"]
+visible = false
+layout_mode = 2
+
+[node name="PreinstantiateLabel" type="Label" parent="VBoxContainer/AdvancedOptions/PreinstantiatePanel"]
+layout_mode = 2
+text = "Preinstantiate Nodes"
+
+[node name="PreinstantiateButton" type="CheckBox" parent="VBoxContainer/AdvancedOptions/PreinstantiatePanel"]
+layout_mode = 2
+
+[node name="DebugPanel" type="HBoxContainer" parent="VBoxContainer/AdvancedOptions"]
+visible = false
+layout_mode = 2
+
+[node name="DebugLabel" type="Label" parent="VBoxContainer/AdvancedOptions/DebugPanel"]
+layout_mode = 2
+text = "Debug Mode"
+
+[node name="DebugButton" type="CheckBox" parent="VBoxContainer/AdvancedOptions/DebugPanel"]
+layout_mode = 2
+button_pressed = true
