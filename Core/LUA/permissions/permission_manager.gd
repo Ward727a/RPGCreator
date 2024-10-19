@@ -125,8 +125,11 @@ func _create_table():
 	_to_table("GD:STYLE", LEVEL.LOW)
 	_to_table("GD:TEXTURE", LEVEL.LOW)
 	_to_table("GD:MATERIAL", LEVEL.LOW)
+	_to_table("GD:GLOBAL", LEVEL.LOW)
 	
 	_to_table("INTERFACE_MANAGER", LEVEL.LOW)
+	_to_table("HELPER", LEVEL.HIGH)
+	_to_table("HELPER:OPEN_LINK", LEVEL.HIGH)
 	
 	pass
 

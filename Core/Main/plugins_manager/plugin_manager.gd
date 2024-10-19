@@ -174,10 +174,6 @@ func _check_plugin_name(plugin_config: ResPlugin):
 	
 	return true
 
-func _init_main_script(plugin_config: ResPlugin):
-	
-	pass
-
 func HAS(plugin_name: String) -> bool:
 	return plugins.has(plugin_name)
 

@@ -3,8 +3,8 @@
     "version": "1.0.0",
     "author": "RPG Creator",
     "main_script": "main.lua",
-    "permissions": ["INTERFACE_MANAGER", "GD:INTERFACE", "GD:MATERIAL", "GD:STYLE", "GD:TEXTURE", "LOGGER", "PLUGIN_MANAGER", "GENERATE_ID", "PROJECT_MANAGER", "EVENTS_MANAGER", "DATA_MANAGER", "ASSETS_MANAGER"],
-    "description": "VERY important plugin, this plugin manage all of the UI of the software. Do not remove, it WILL break the software!!",
+    "permissions": ["INTERFACE_MANAGER", "HELPER:OPEN_LINK", "GD:INTERFACE", "GD:GLOBAL", "GD:MATERIAL", "GD:STYLE", "GD:TEXTURE", "LOGGER", "PLUGIN_MANAGER", "GENERATE_ID", "PROJECT_MANAGER", "EVENTS_MANAGER", "DATA_MANAGER", "ASSETS_MANAGER"],
+    "description": "VERY important plugin, this plugin manage all of the UI of the software. Do not remove, it WILL break the software!!\nPlease note that this plugin have near ALL permissions, so be sure to not allow any external modification to it.",
     "auto_start": false, 
     "icon": "",
     "need_plugin": []

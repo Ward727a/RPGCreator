@@ -186,11 +186,13 @@ func _give_permission():
 		GodotManager.get_singleton().link_plugin_texture(self)
 		GodotManager.get_singleton().link_plugin_style(self)
 		GodotManager.get_singleton().link_plugin_ui(self)
+		GodotManager.get_singleton().link_plugin_global(self)
 	
 	if InterfaceManager.is_valid():
 		InterfaceManager.get_singleton().link_plugin(self)
 	
 	Logger.link_plugin(self)
+	URLHelper.link_plugin(self)
 	
 	set_link("has_permission", has_allowed)
 	set_link("import_lua", import_lua)
@@ -200,7 +202,7 @@ func _give_permission():
 func _print(message):
 	print(message)
 
-func _on_toggle(state: bool):
+func _on_toggle(_state: bool):
 	
 	if !need_plugin.is_empty():
 		if PluginManager.is_valid():
@@ -302,35 +304,35 @@ func get_high_perm() -> Array[ResPermissionObject]:
 	
 	return _get_perm_from_level(2)
 
-func has_link(name: String):
+func has_link(_name: String):
 	
-	return linked_obj.has(name)
+	return linked_obj.has(_name)
 
-func remove_link(name: String) -> bool:
+func remove_link(_name: String) -> bool:
 	
-	if !has_link(name):
+	if !has_link(_name):
 		return true
 	
-	return linked_obj.erase(name)
+	return linked_obj.erase(_name)
 
-func set_link(name: String, obj: Variant):
+func set_link(_name: String, obj: Variant):
 	
-	linked_obj[name] = obj
+	linked_obj[_name] = obj
 
-func add_link(name: String, obj: Variant) -> bool:
+func add_link(_name: String, obj: Variant) -> bool:
 	
-	if has_link(name):
+	if has_link(_name):
 		return false
 	
-	set_link(name, obj)
+	set_link(_name, obj)
 	return true
 
-func get_link(name: String, default = null) -> Variant:
+func get_link(_name: String, default = null) -> Variant:
 	
-	if !has_link(name):
+	if !has_link(_name):
 		return default
 	
-	return linked_obj[name]
+	return linked_obj[_name]
 
 func import_lua(lua_script: String) -> bool:
 	
@@ -870,7 +872,7 @@ class dialog_auto_start extends ConfirmationDialog:
 		confirmed.connect(_on_accept.bind(plugin_obj))
 		canceled.connect(_on_refuse)
 	
-	func _process(delta):
+	func _process(_delta):
 		set_size(Vector2i(250, 200))
 		set_process(false)
 	

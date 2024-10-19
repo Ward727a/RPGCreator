@@ -12,6 +12,9 @@ static func is_valid() -> bool:
 func _init():
 	singleton = self
 
+func _process(delta: float) -> void:
+	GlobalEventManager.get_singleton().CALL("tick", [delta])
+
 var events = {}
 var logger: Logger = Logger.new("GlobalEventManager")
 
@@ -97,9 +100,45 @@ func CALL(path: String, args: Array = []):
 	var functions = GET(path)
 	
 	for fn: Callable in functions:
-		
 		var binded_fn = fn.bindv(args)
 		binded_fn.call()
+
+func REMOVE(path: String, callback: Callable) -> bool:
+	if typeof(path) != TYPE_STRING:
+		return false
+	
+	if path.is_empty():
+		return false
+	
+	var path_parts: PackedStringArray = path.split('/')
+	var last_part: String = path_parts[path_parts.size() - 1]
+	
+	var data = events
+	
+	for part in path_parts:
+		
+		if last_part == part:
+			
+			if data.has(part):
+				
+				if typeof(data[part]) != TYPE_ARRAY:
+					break
+				
+				data.erase(callback)
+			
+			break
+		
+		if data.has(part):
+			data = data[part]
+			continue
+		
+		break
+	
+	return false
+	
+
+func HAS(path: String = "") -> bool:
+	return (!GET(path).is_empty())
 
 func link_plugin(_plugin_obj: ResPlugin):
 	
@@ -149,5 +188,15 @@ class _lua_class:
 	func GET(path: String = "") -> Array:
 		return singleton.GET(path)
 	
-	func CALL(path: String, args: Array = []):
+	func CALL(path: String, args = []):
+		
+		print(var_to_str(args))
+		if typeof(args) == TYPE_DICTIONARY:
+			var arr = []
+			
+			for key in args:
+				arr.push_back(args[key])
+			
+			singleton.CALL(path, arr)
+			return
 		singleton.CALL(path, args)

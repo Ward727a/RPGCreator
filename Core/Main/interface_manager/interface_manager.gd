@@ -89,8 +89,6 @@ func _remove_from_data(_name: String) -> bool:
 	if !_has_in_data(_name):
 		return false
 	
-	var res: ResInterface = interface_data[_name]
-	
 	return interface_data.erase(_name)
 
 func _get_from_data(_name: String) -> ResInterface:

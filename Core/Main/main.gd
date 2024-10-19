@@ -66,6 +66,7 @@ func _ready():
 	PluginManager.get_singleton().plugin_ready.connect(_on_plugin_ready)
 	PluginManager.get_singleton().VERIFY_PLUGINS()
 
+@warning_ignore("int_as_enum_without_cast")
 func _add_child(child: Node, force_readable_name: bool = false, internal: InternalMode = 0):
 	get_parent().add_child.call_deferred(child, force_readable_name, internal)
 

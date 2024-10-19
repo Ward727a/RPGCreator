@@ -98,7 +98,7 @@ class _lua_class:
 		if log_obj.has(name):
 			return log_obj[name]
 		
-		var log = Logger.new(name)
+		@warning_ignore("shadowed_global_identifier") var log = Logger.new(name)
 		log_obj[name] = log
 		return log
 	

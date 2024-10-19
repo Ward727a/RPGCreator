@@ -11,6 +11,7 @@ static func generate_id(min_size: int = 10, max_size: int = 20) -> String:
 		max_size = min_size
 	
 	var id := PackedByteArray()
+	@warning_ignore("integer_division")
 	var size = randi_range(min_size, max_size)/2
 	
 	id.resize(size)

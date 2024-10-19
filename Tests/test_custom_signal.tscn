@@ -1,0 +1,25 @@
+[gd_scene load_steps=2 format=3 uid="uid://d2mnkdm4cw8rh"]
+
+[sub_resource type="GDScript" id="GDScript_bw6lg"]
+script/source = "extends Control
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	set_process(true)
+	process.connect(
+		func(delta):
+			print(\"Hi!\")
+			
+	)
+	pass # Replace with function body.
+"
+
+[node name="TestCustomSignal" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_bw6lg")

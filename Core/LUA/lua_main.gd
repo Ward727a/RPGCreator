@@ -1,7 +1,6 @@
 extends Node
 class_name LuaObject
 
-signal READY_TO_LINK()
 signal STARTED(success: bool)
 signal STOPPED(success: bool)
 signal PUSH_VARIANT(var_name: String, var_value: Variant)
@@ -23,11 +22,19 @@ func _init(plugin_name: String, script_path: String):
 	_script_name = _script_path.rsplit("/", true, 1)[1]
 	_script_name = _script_name.split(".")[0]
 	
-	logger = Logger.new(str("%s - %s" % [_plugin_name, _script_name]))
-	
+	logger = Logger.new(str("%s - %s - " % [_plugin_name, _script_name]))
 	_api = LuaAPI.new()
 	_api.bind_libraries(["table","string","base","math","utf8","coroutine"])
+	_api.push_variant("node_to_lua", node_to_lua)
+	_api.push_variant("node_from_lua", node_from_lua)
+	_api.push_variant("print", _print)
 	
+
+func _print(message, var_to_str: bool = false):
+	if var_to_str:
+		print(var_to_str(message))
+		return
+	print(message)
 
 func is_valid() -> bool:
 	
@@ -144,3 +151,11 @@ func pull_variant(var_name: String) -> Variant:
 	
 	PULL_VARIANT.emit(var_name, variant_value)
 	return variant_value
+
+func node_to_lua(node: Node) -> String:
+	return var_to_str(node)
+
+func node_from_lua(node: String) -> Node:
+	if str_to_var(node) is Node:
+		return str_to_var(node)
+	return null
