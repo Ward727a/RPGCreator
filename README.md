@@ -1,7 +1,14 @@
 # ⚔ RPGCreator 🏹
-## This project is still in devlopment, so it's not at all ready to be used, I created this repository mainly for me to be able to keep the code in a safeplace
+## This project is still in development, so it's not at all ready to be used, I created this repository mainly for me to be able to keep the code in a safeplace
 
 *A free, open-source, fully editable RPG Maker alternative made in Godot.*
+
+Join us:
+<a rel="me" href="https://mastodon.social/@RPGCreator">Mastodon</a>
+<a href="https://bsky.app/profile/rpgcreator.bsky.social">Bluesky</a>
+<a href="https://x.com/RPG_Creator_">Twitter - X</a>
+<a href="https://discord.gg/4yfq4NNzs4">Discord</a>
+<a href="https://rpgcreator.flarum.cloud/">Forum</a>
 
 ---
 ### Why?
