@@ -10,6 +10,8 @@ Join us:
 <a href="https://discord.gg/4yfq4NNzs4">Discord</a>
 <a href="https://rpgcreator.flarum.cloud/">Forum</a>
 
+Want to check what is working on without having to join us? No problem, go inside the "Discussions" tab! :)
+
 ---
 ### Why?
 
