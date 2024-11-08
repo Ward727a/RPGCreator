@@ -188,6 +188,9 @@ func _give_permission():
 		GodotManager.get_singleton().link_plugin_ui(self)
 		GodotManager.get_singleton().link_plugin_global(self)
 	
+	if ThemeManager.is_valid():
+		ThemeManager.get_singleton().link_plugin(self)
+	
 	if InterfaceManager.is_valid():
 		InterfaceManager.get_singleton().link_plugin(self)
 	
@@ -195,7 +198,10 @@ func _give_permission():
 	URLHelper.link_plugin(self)
 	
 	set_link("has_permission", has_allowed)
-	set_link("import_lua", import_lua)
+	set_link("import_lua", LuaCallableExtra.with_ref(import_lua))
+	set_link("software_version", Settings.get_singleton().SoftwareInfo.version)
+	
+	enable = true
 	
 	permission_given.emit()
 
@@ -334,18 +340,28 @@ func get_link(_name: String, default = null) -> Variant:
 	
 	return linked_obj[_name]
 
-func import_lua(lua_script: String) -> bool:
+func import_lua(from_lua: LuaAPI, lua_script: String, content_to_give: Dictionary = {}) -> bool:
+	
+	var from_origin: bool = false
 	
 	if lua_script.begins_with("./"):
 		lua_script = lua_script.split("./", true, 1)[1]
+		from_origin = true
 	
 	if lua_script.begins_with("/"):
 		lua_script = lua_script.split("/", true, 1)[1]
+		from_origin = true
 	
-	var script_path: String = str(main_folder, "/", lua_script)
+	var script_path: String = ""
 	
-	if imported_lua.has(script_path):
-		return true
+	if from_origin:
+		script_path = str(main_folder, "/", lua_script)
+	else:
+		script_path = str(from_lua.get_registry_value('folder_path'), "/", lua_script)
+	
+	if script_path.is_empty() or !script_path.ends_with(".lua"):
+		logger.error("Script path is empty!")
+		return false
 	
 	if !FileAccess.file_exists(script_path):
 		push_error("%s doesn't exist!" % script_path)
@@ -360,9 +376,36 @@ func import_lua(lua_script: String) -> bool:
 		api.push_variant(link_key, obj)
 	
 	if api.is_valid():
-		api.start()
+		
+		if content_to_give.size() != 0:
+			for key in content_to_give:
+				var value = content_to_give[key]
+				
+				if typeof(value) == TYPE_NIL:
+					logger.warn("Giving %s object, but it's null!")
+				
+				api.push_variant(key, value)
+		
+		var started = await api.start()
+		
+		if !started:
+			return false
 	
-	imported_lua[script_path] = api
+	if api.has_fn('_on_import'):
+		var import_dic = api.CALL('_on_import')
+		
+		if from_lua == null:
+			logger.error("Lua ref not valid!")
+			return false
+		
+		for key in import_dic:
+			var value = import_dic[key]
+			
+			if typeof(value) == TYPE_NIL:
+				logger.error("Can't import %s because his value is null!" % key)
+				continue
+			from_lua.push_variant(key, value)
+	
 	return true
 
 class dialog_low extends ConfirmationDialog:

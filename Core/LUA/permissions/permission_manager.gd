@@ -121,6 +121,19 @@ func _create_table():
 	_to_table("ASSETS_MANAGER:SET", LEVEL.MID)
 	_to_table("ASSETS_MANAGER:load_data", LEVEL.MID)
 	
+	#=======================================================#
+	#==================== Theme Manager ====================#
+	#=======================================================#
+	_to_table("THEME_MANAGER", LEVEL.LOW)
+	_to_table("THEME_MANAGER:add_theme", LEVEL.LOW)
+	_to_table("THEME_MANAGER:set_theme", LEVEL.LOW)
+	_to_table("THEME_MANAGER:get_theme", LEVEL.LOW)
+	_to_table("THEME_MANAGER:remove_theme", LEVEL.LOW)
+	_to_table("THEME_MANAGER:has_theme", LEVEL.LOW)
+	
+	#=======================================================#
+	#==================== Godot Manager ====================#
+	#=======================================================#
 	_to_table("GD:INTERFACE", LEVEL.LOW)
 	_to_table("GD:STYLE", LEVEL.LOW)
 	_to_table("GD:TEXTURE", LEVEL.LOW)

@@ -127,9 +127,10 @@ func create_summary(_report_dir :String) -> String:
 	return ""
 
 
-func html_encode(value :String) -> String:
-	for key in CHARACTERS_TO_ENCODE.keys() as Array[String]:
-		value =value.replace(key, CHARACTERS_TO_ENCODE[key])
+func html_encode(value: String) -> String:
+	for key: String in CHARACTERS_TO_ENCODE.keys():
+		@warning_ignore("unsafe_cast")
+		value = value.replace(key, CHARACTERS_TO_ENCODE[key] as String)
 	return value
 
 

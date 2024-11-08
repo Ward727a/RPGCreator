@@ -42,6 +42,10 @@ func is_valid() -> bool:
 
 func start() -> bool:
 	
+	
+	_api.set_registry_value("folder_path", _script_path.rsplit("/", true, 1)[0])
+	_api.set_registry_value("script_path", _script_path)
+	
 	if started:
 		logger.warning("Script already started, stop it if you want to start it again.")
 		return true

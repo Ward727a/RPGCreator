@@ -106,9 +106,10 @@ class CLIRunner:
 	func _ready() -> void:
 		_state = INIT
 		_report_dir = GdUnitFileAccess.current_dir() + "reports"
-		_executor = load("res://addons/gdUnit4/src/core/execution/GdUnitTestSuiteExecutor.gd").new()
+		_executor = GdUnitTestSuiteExecutor.new()
 		# stop checked first test failure to fail fast
-		_executor.fail_fast(true)
+		@warning_ignore("unsafe_cast")
+		(_executor as GdUnitTestSuiteExecutor).fail_fast(true)
 		if GdUnit4CSharpApiLoader.is_mono_supported():
 			prints("GdUnit4Net version '%s' loaded." % GdUnit4CSharpApiLoader.version())
 			_cs_executor = GdUnit4CSharpApiLoader.create_executor(self)
@@ -124,6 +125,7 @@ class CLIRunner:
 			prints("Finallize .. done")
 
 
+	@warning_ignore("unsafe_method_access")
 	func _process(_delta :float) -> void:
 		match _state:
 			INIT:
@@ -136,7 +138,8 @@ class CLIRunner:
 				else:
 					set_process(false)
 					# process next test suite
-					var test_suite := _test_suites_to_process.pop_front() as Node
+					var test_suite: Node = _test_suites_to_process.pop_front()
+
 					if _cs_executor != null and _cs_executor.IsExecutable(test_suite):
 						_cs_executor.Execute(test_suite)
 						await _cs_executor.ExecutionCompleted
@@ -186,6 +189,7 @@ class CLIRunner:
 			"Disabled fail fast!",
 			Color.DEEP_SKY_BLUE
 		)
+		@warning_ignore("unsafe_method_access")
 		_executor.fail_fast(false)
 
 
@@ -200,13 +204,13 @@ class CLIRunner:
 
 	func show_version() -> void:
 		_console.prints_color(
-			"Godot %s" % Engine.get_version_info().get("string"),
+			"Godot %s" % Engine.get_version_info().get("string") as String,
 			Color.DARK_SALMON
 		)
 		var config := ConfigFile.new()
 		config.load("addons/gdUnit4/plugin.cfg")
 		_console.prints_color(
-			"GdUnit4 %s" % config.get_value("plugin", "version"),
+			"GdUnit4 %s" % config.get_value("plugin", "version") as String,
 			Color.DARK_SALMON
 		)
 		quit(RETURN_SUCCESS)
@@ -304,7 +308,8 @@ class CLIRunner:
 			return
 		# build runner config by given commands
 		var commands :Array[CmdCommand] = []
-		commands.append_array(result.value())
+		@warning_ignore("unsafe_cast")
+		commands.append_array(result.value() as Array)
 		result = (
 			CmdCommandHandler.new(_cmd_options)
 				.register_cb("-help", Callable(self, "show_help"))
@@ -419,7 +424,9 @@ class CLIRunner:
 				# if no tests skipped test the complete suite is skipped
 				if skipped_tests.is_empty():
 					_console.prints_warning("Mark test suite '%s' as skipped!" % suite_to_skip)
+					@warning_ignore("unsafe_property_access")
 					test_suite.__is_skipped = true
+					@warning_ignore("unsafe_property_access")
 					test_suite.__skip_reason = skip_reason
 				else:
 					# skip tests

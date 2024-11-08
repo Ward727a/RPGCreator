@@ -5,6 +5,8 @@ function start()
 
     if has_permission("LOGGER") then
 
+        import_lua("./test_theme/main.lua")
+
         Logger.log("CorePlugin", "Importing notification system...")
         if import_lua("./notification_system/main.lua") then
             Logger.log("CorePlugin", "Notification system imported successfully")

@@ -22,6 +22,8 @@ func _init():
 	add_child(Settings.new())
 	
 	add_child(GodotManager.new())
+	
+	add_child(ThemeManager.new())
 	add_child(InterfaceManager.new())
 	
 	add_child(DataManager.new())

@@ -4,14 +4,14 @@ class_name GdUnitTestCaseAfterStage
 extends IGdUnitExecutionStage
 
 
-var _call_stage :bool
+var _call_stage: bool
 
 
 func _init(call_stage := true) -> void:
 	_call_stage = call_stage
 
 
-func _execute(context :GdUnitExecutionContext) -> void:
+func _execute(context: GdUnitExecutionContext) -> void:
 	var test_suite := context.test_suite
 
 	if _call_stage:
@@ -27,16 +27,15 @@ func _execute(context :GdUnitExecutionContext) -> void:
 	if context.is_skipped():
 		fire_test_skipped(context)
 	else:
-		fire_event(GdUnitEvent.new()\
-			.test_after(test_suite.get_script().resource_path,
+		fire_event(GdUnitEvent.new() \
+			.test_after(context.get_test_suite_path(),
 				context.get_test_suite_name(),
 				context.get_test_case_name(),
 				context.get_execution_statistics(),
 				reports))
 
 
-func fire_test_skipped(context :GdUnitExecutionContext) -> void:
-	var test_suite := context.test_suite
+func fire_test_skipped(context: GdUnitExecutionContext) -> void:
 	var test_case := context.test_case
 	var statistics := {
 		GdUnitEvent.ORPHAN_NODES: 0,
@@ -49,10 +48,10 @@ func fire_test_skipped(context :GdUnitExecutionContext) -> void:
 		GdUnitEvent.SKIPPED: true,
 		GdUnitEvent.SKIPPED_COUNT: 1,
 	}
-	var report := GdUnitReport.new()\
+	var report := GdUnitReport.new() \
 		.create(GdUnitReport.SKIPPED, test_case.line_number(), GdAssertMessages.test_skipped(test_case.skip_info()))
-	fire_event(GdUnitEvent.new()\
-		.test_after(test_suite.get_script().resource_path,
+	fire_event(GdUnitEvent.new() \
+		.test_after(context.get_test_suite_path(),
 			context.get_test_suite_name(),
 			context.get_test_case_name(),
 			statistics,
