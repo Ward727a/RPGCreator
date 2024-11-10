@@ -3,6 +3,8 @@ class_name Main
 
 static var singleton: Main
 
+static var logger: Logger = Logger.new("Main")
+
 var _in_crash_process: bool = false
 var _close_requested: bool = false
 
@@ -41,6 +43,12 @@ func _init():
 	child_exiting_tree.connect(_on_child_exiting_tree)
 
 func _on_quit():
+	
+	for plugin in PluginManager.get_singleton().LIST():
+		if plugin.enable:
+			logger.log("Stopping plugin %s" % plugin.name)
+			await plugin.lua_main.CALL('stop')
+	
 	notification(NOTIFICATION_WM_CLOSE_REQUEST)
 	_close_requested = true
 	get_tree().quit(0)
@@ -86,6 +94,9 @@ func _on_plugin_ready(plugin_name):
 		
 		if plugin.auto_start:
 			plugin.auto_started.emit()
+		
+		if DataManager.get_singleton().GET('editor/plugin/%s' % plugin_name, [{},{},{},false])[3]:
+			plugin.toggle.emit(true)
 	
 
 func _notification(what):

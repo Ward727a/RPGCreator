@@ -29,6 +29,16 @@ func _init(plugin_name: String, script_path: String):
 	_api.push_variant("node_from_lua", node_from_lua)
 	_api.push_variant("print", _print)
 	
+	add_advanced_string_utility()
+
+func add_advanced_string_utility():
+	
+	var string_lib = _api.pull_variant('string')
+	
+	string_lib['begins_with'] = LUA_StringUtility.begins_with
+	string_lib['replace'] = LUA_StringUtility.replace
+	
+	_api.push_variant('string', string_lib)
 
 func _print(message, var_to_str: bool = false):
 	if var_to_str:
@@ -90,6 +100,8 @@ func start() -> bool:
 
 func stop() -> bool:
 	
+	print("Stop plugin!")
+	
 	if !is_valid():
 		logger.warning("API is not valid, can't stop.")
 		return false
@@ -109,7 +121,7 @@ func stop() -> bool:
 	
 	STOPPED.emit(stop_return)
 	
-	_api.free()
+	started = false
 	
 	return stop_return
 

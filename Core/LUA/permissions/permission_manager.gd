@@ -140,6 +140,18 @@ func _create_table():
 	_to_table("GD:MATERIAL", LEVEL.LOW)
 	_to_table("GD:GLOBAL", LEVEL.LOW)
 	
+	#=======================================================#
+	#==================== File Utility =====================#
+	#=======================================================#
+	_to_table("FILE", LEVEL.HIGH)
+	_to_table("FILE:ALL_FILES", LEVEL.HIGH)
+	_to_table("FILE:READ", LEVEL.LOW)
+	_to_table("FILE:WRITE", LEVEL.LOW)
+	_to_table("FILE:READ_COMPRESS", LEVEL.LOW)
+	_to_table("FILE:WRITE_COMPRESS", LEVEL.LOW)
+	_to_table("FILE:READ_ENCRYPT", LEVEL.MID)
+	_to_table("FILE:WRITE_ENCRYPT", LEVEL.MID)
+	
 	_to_table("INTERFACE_MANAGER", LEVEL.LOW)
 	_to_table("HELPER", LEVEL.HIGH)
 	_to_table("HELPER:OPEN_LINK", LEVEL.HIGH)

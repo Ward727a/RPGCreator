@@ -26,6 +26,11 @@ var logger: Logger = Logger.new("Plugin - ???")
 @export var main_config: String = ""
 @export var main_folder: String = ""
 
+@export var permission_low_given: bool = false
+@export var permission_mid_given: bool = false
+@export var permission_high_given: bool = false
+@export var permission_already_auto_asked: bool = false
+
 @export var permissions_required: Array[ResPermissionObject] = []
 @export var linked_obj: Dictionary = {}
 
@@ -68,6 +73,35 @@ func ask_for_perms():
 			
 			_give_permission()
 			return
+	
+	if DataManager.get_singleton().HAS(str('editor/plugin/%s' % name)):
+		
+		var perms = DataManager.get_singleton().GET(str('editor/plugin/%s' % name), [{},{},{}])
+		
+		for low in get_low_perm():
+			if perms[0].has(low.path):
+				low.allowed = true
+			else:
+				low.allowed = false
+		
+		for mid in get_mid_perm():
+			if perms[1].has(mid.path):
+				mid.allowed = true
+			else:
+				mid.allowed = false
+		
+		for high in get_high_perm():
+			if perms[2].has(high.path):
+				high.allowed = true
+			else:
+				high.allowed = false
+		
+		_give_permission()
+		return
+	
+	DataManager.get_singleton().SET(str('editor/plugin/%s' % name), [{},{},{}, false])
+	
+	
 	_check_lows()
 
 func _check_lows():
@@ -163,6 +197,20 @@ func _ask_for_high(perm_high: Array):
 
 func _give_permission():
 	
+	if DataManager.get_singleton().HAS('editor/plugin/%s' % name):
+		var data = DataManager.get_singleton().GET('editor/plugin/%s' % name, [{},{},{}, false])
+		for low in get_low_perm():
+			if low.allowed:
+				data[0][low.path] = true
+		for mid in get_mid_perm():
+			if mid.allowed:
+				data[1][mid.path] = true
+		for high in get_high_perm():
+			if high.allowed:
+				data[2][high.path] = true
+		
+		DataManager.get_singleton().SET('editor/plugin/%s' % name, data)
+	
 	if has_allowed('GENERATE_ID'):
 		set_link("generate_id", IDGenerator.generate_id)
 	
@@ -197,11 +245,11 @@ func _give_permission():
 	Logger.link_plugin(self)
 	URLHelper.link_plugin(self)
 	
+	LUA_FileUtility.link_plugin(self)
+	
 	set_link("has_permission", has_allowed)
 	set_link("import_lua", LuaCallableExtra.with_ref(import_lua))
 	set_link("software_version", Settings.get_singleton().SoftwareInfo.version)
-	
-	enable = true
 	
 	permission_given.emit()
 
@@ -225,8 +273,16 @@ func _on_toggle(_state: bool):
 					logger.error("Thie plugin need plugin \"%s\", but \"%s\" is not started!" % [plugin, plugin])
 					return
 	
-	if toggle:
+	if _state:
+		if name != "CorePlugin":
+			var data = DataManager.get_singleton().GET('editor/plugin/%s' % name, [{},{},{}, false])
+			
+			data[3] = true
+			
+			DataManager.get_singleton().SET('editor/plugin/%s' % name, data)
 		if lua_main != null:
+			
+			enable = true
 			lua_main.start()
 		else:
 			lua_main = LuaObject.new(name, str(path, '/', main_script))
@@ -238,9 +294,17 @@ func _on_toggle(_state: bool):
 				lua_main.push_variant(link_key, obj)
 			
 			if lua_main.is_valid():
+				enable = true
 				lua_main.start()
 	else:
 		if lua_main != null:
+			if name != "CorePlugin":
+				var data = DataManager.get_singleton().GET('editor/plugin/%s' % name, [{},{},{}, false])
+				
+				data[3] = false
+				
+				DataManager.get_singleton().SET('editor/plugin/%s' % name, data)
+			enable = false
 			await lua_main.stop()
 			
 			for link_key in linked_obj:
@@ -381,9 +445,6 @@ func import_lua(from_lua: LuaAPI, lua_script: String, content_to_give: Dictionar
 			for key in content_to_give:
 				var value = content_to_give[key]
 				
-				if typeof(value) == TYPE_NIL:
-					logger.warn("Giving %s object, but it's null!")
-				
 				api.push_variant(key, value)
 		
 		var started = await api.start()
@@ -401,9 +462,6 @@ func import_lua(from_lua: LuaAPI, lua_script: String, content_to_give: Dictionar
 		for key in import_dic:
 			var value = import_dic[key]
 			
-			if typeof(value) == TYPE_NIL:
-				logger.error("Can't import %s because his value is null!" % key)
-				continue
 			from_lua.push_variant(key, value)
 	
 	return true
