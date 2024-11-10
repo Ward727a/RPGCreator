@@ -95,7 +95,7 @@ func can_write_compress() -> bool:
 
 func _convert_path(path: String) -> String:
 	if path.begins_with("//"):
-		return path.replace("//", str(plugin.path, "/"))
+		return ProjectSettings.globalize_path(path.replace("//", str(plugin.path, "/")))
 	return path
 
 func _is_allowed_path(path: String, can_write: bool = false) -> bool:
@@ -103,7 +103,7 @@ func _is_allowed_path(path: String, can_write: bool = false) -> bool:
 	
 	if limited:
 		
-		if path.begins_with(plugin.path):
+		if path.begins_with(plugin.path) or path.begins_with(ProjectSettings.globalize_path(plugin.path)):
 			
 			# We do the check here so the plugin can't know if the file exist 
 			# if it doesn't have the permission to access all files.
@@ -122,7 +122,7 @@ func _is_allowed_path(path: String, can_write: bool = false) -> bool:
 	logger.error('Path "%s" doesn\'t exist!' % path)
 	return false
 
-func open_file(path: String) -> FileAccess:
+func open_file(path: String):
 
 	if !can_read() and !can_write():
 		return null
@@ -131,6 +131,9 @@ func open_file(path: String) -> FileAccess:
 	
 	if !_is_allowed_path(path, can_write()):
 		return null
+	
+	if !FileAccess.file_exists(path) and can_write():
+		FileAccess.open(path, FileAccess.WRITE_READ)
 	
 	return FileAccess.open(path, file_permission)
 
@@ -228,6 +231,9 @@ func open_encrypt(path: String, key: Array) -> FileAccess:
 	if !_is_allowed_path(path, can_write_encrypt()):
 		return null
 	
+	if !FileAccess.file_exists(path) and can_write_encrypt():
+		FileAccess.open_encrypted(path, FileAccess.WRITE, key)
+	
 	return FileAccess.open_encrypted(path, file_encrypt_permission, key)
 
 func open_encrypt_with_pass(path: String, password: String) -> FileAccess:
@@ -240,6 +246,9 @@ func open_encrypt_with_pass(path: String, password: String) -> FileAccess:
 	if !_is_allowed_path(path, can_write_encrypt()):
 		return null
 	
+	if !FileAccess.file_exists(path) and can_write_encrypt():
+		FileAccess.open_encrypted_with_pass(path, FileAccess.WRITE, password)
+	
 	return FileAccess.open_encrypted_with_pass(path, file_encrypt_permission, password)
 
 func open_compressed(path: String, compression_mode: FileAccess.CompressionMode):
@@ -250,6 +259,11 @@ func open_compressed(path: String, compression_mode: FileAccess.CompressionMode)
 	path = _convert_path(path)
 	
 	if !_is_allowed_path(path, can_write_compress()):
+		return null
+	
+	if !FileAccess.file_exists(path) and can_write_encrypt():
+		if compression_mode == FileAccess.COMPRESSION_BROTLI:
+			FileAccess.open_compressed(path, FileAccess.WRITE, compression_mode)
 		return null
 	
 	return FileAccess.open_compressed(path, file_compress_permission, compression_mode)
