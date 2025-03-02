@@ -1,7 +1,7 @@
 # ⚔ RPGCreator 🏹
 ## This project is still in development, so it's not at all ready to be used, I created this repository mainly for me to be able to keep the code in a safeplace
 
-*A free, open-source, fully editable RPG Maker alternative made in Godot.*
+*A free, open-source, fully editable RPG Maker alternative made in Monogame.*
 
 Join us:
 <a rel="me" href="https://mastodon.social/@RPGCreator">Mastodon</a>
@@ -30,9 +30,9 @@ So I decided to create my own :)
 # Please note that this project is not finished at all! Many features here are either not yet implemented, or not finished!
 
 ## ✨WIP Features 
-- Database system for creating characters, items, effects, ... >> High priority task - IN PROGRESS 🟨
+- Database system for creating characters, items, effects, ... >>
 - Extensive plugins support
-- Advanced text editor (color, font type, font size, link, image, ...) something WISIWYG like >> DONE✅
+- Advanced text editor (color, font type, font size, link, image, ...) something like WISIWYG
 - Fully UI editable (Add, edit or remove UI, HUD, Menu, ...)
 - 2D Support at first, then 3D Support
 - And lots more (this list will raise in size once I finished the actual list)
@@ -62,9 +62,6 @@ I'm really not an expert with all the license thing, so yes? If you check the li
 - If I create a game on this engine, if I sold it, will I need to give a % ?
 
 0, nothing, don't care, it's your game, your work, your money, don't even think of this.
-- Why Godot?
-
-First it's a game engine, so I don't need to write the most "problematic" code parts, second because.. I want to, I like Godot, and I wanted to try make it with it, Godot is Free & Open-source, it respected the condition I setted to my-self, so I decided to use this.
 - Will this engine be available for \[OS]?
 
 Yes? Probably? I don't really know at the point of writing this, I will try to make it as avaible as possible!
@@ -76,7 +73,7 @@ Yes! I will take some time when the engine is ready to create a good wiki with a
 To being totally honest: I really want to support 3D and 2D, but to begin the engine will only support 2D!
 - What language will be used for plugins?
 
-I'm still thinking about that, maybe ~~GDScript~~ (This expose the user to a lot of risk) or LUA, ~~maybe both,~~ I don't know as I'm still on the "idea" part of the plugins system! There will be a JS Support at some point, but not at the release.
+LUA. There will be a JS Support at some point, but not at the release.
 - Is there a starting assets pack? (Like characters textures, tilemaps, etc...)
 
 Maybe?
