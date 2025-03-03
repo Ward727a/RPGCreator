@@ -1,7 +1,0 @@
-[gd_resource type="Resource" load_steps=2 format=3 uid="uid://bww8hu51rkumn"]
-
-[ext_resource type="Script" path="res://Core/Settings/update_log.gd" id="1_kk5lr"]
-
-[resource]
-script = ExtResource("1_kk5lr")
-logs = Array[Resource]([])
