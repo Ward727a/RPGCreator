@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,29 +11,6 @@ namespace RPGCreator.core.config
     // Manage all configuration related to logs
     class ConfigLog
     {
-        public struct LogSetting
-        {
-            public Color prefix_color;
-            public Color text_color;
-            public bool toggle;
-            public string prefix;
-
-            public LogSetting(Color _prefix_color, Color _text_color, bool _toggle, string _prefix)
-            {
-                prefix_color = _prefix_color;
-                text_color = _text_color;
-                toggle = _toggle;
-                prefix = _prefix;
-            }
-
-            public LogSetting(LogSetting setting)
-            {
-                prefix_color = setting.prefix_color;
-                text_color = setting.text_color;
-                toggle = setting.toggle;
-                prefix = setting.prefix;
-            }
-        }
 
         // Folder where logs will be stored
         public string folderName = "";
@@ -40,13 +18,12 @@ namespace RPGCreator.core.config
         // File name
         public string fileName = "";
 
-        // Config for each log type available
-        public LogSetting info = new(Color.SteelBlue, Color.LightSteelBlue, true, "[INFO] ");
-        public LogSetting normal = new(Color.Gray, Color.LightGray, true, "[NORMAL] ");
-        public LogSetting warning = new(Color.DarkOrange, Color.Orange, true, "[WARNING] ");
-        public LogSetting error = new(Color.DarkRed, Color.Red, true, "[ERROR] ");
-        public LogSetting success = new(Color.DarkOliveGreen, Color.ForestGreen, true, "[SUCCESS] ");
-        public LogSetting debug = new(Color.DarkMagenta, Color.Magenta, true, "[DEBUG] ");
+        public static Vector4 col_verbose = new(.25f, .25f, .25f, 1);
+        public static Vector4 col_debug = new(.59f, .68f, .89f, 1);
+        public static Vector4 col_info = new(.59f, .59f, .59f, 1);
+        public static Vector4 col_warn = new(1, .64f, 0, 1);
+        public static Vector4 col_err = new(.6f, 0, 0, 1);
+        public static Vector4 col_fatal = new(1, 0, 0, 1);
 
         public bool b_logging = true;
 

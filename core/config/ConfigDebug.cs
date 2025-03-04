@@ -10,6 +10,6 @@ namespace RPGCreator.core.config
     class ConfigDebug
     {
         // Enable/Disable ImGui
-        public bool b_ImGui = true;
+        public bool b_ImGui = false;
     }
 }

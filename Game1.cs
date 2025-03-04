@@ -3,6 +3,9 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using ImGuiNET.SampleProgram.XNA;
 using System;
+using Serilog;
+using RPGCreator.core.logs;
+using RPGCreator.core.debug;
 
 namespace RPGCreator;
 
@@ -27,12 +30,25 @@ public class Game1 : Game
     {
         _imGuiRenderer = new ImGuiRenderer(this);
         _imGuiRenderer.RebuildFontAtlas();
+
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Verbose()
+            .WriteTo.ImGuiLogger()
+            .CreateLogger();
+
         base.Initialize();
     }
 
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
+
+        Log.Logger.Fatal("Fatal");
+        Log.Logger.Error("Err");
+        Log.Logger.Debug("Debug");
+        Log.Logger.Verbose("Verbose");
+        Log.Logger.Information("Info");
+        Log.Logger.Warning("Warn");
 
         // TODO: use this.Content to load your game content here
     }
@@ -58,6 +74,8 @@ public class Game1 : Game
 
         ImGuiNET.ImGui.End();
 
+        ImDebug.Logger.RenderLogger();
+        
         _imGuiRenderer.AfterLayout();
 
         base.Draw(gameTime);
