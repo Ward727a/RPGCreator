@@ -18,7 +18,7 @@ namespace RPGCreator.core.Types.Resources
 
         public ResourcesImages(string path = "")
         {
-            Path = path;
+            Path = new(path);
             Type = ResourcesTypes.IMAGES;
 
             if (!File.Exists(path))

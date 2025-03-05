@@ -27,7 +27,7 @@ namespace RPGCreator.core.Types
 
         static Dictionary<string, int> CustomResourcesTypes = [];
 
-        public string Path;
+        public ResourcePath Path;
         public ResourcesTypes Type = ResourcesTypes.MAX;
         public int CustomType = -1;
 
