@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RPGCreator.core.Types
 {
-    class Resource
+    class Resource : BaseObject
     {
         public enum ResourcesTypes
         {
@@ -55,6 +55,21 @@ namespace RPGCreator.core.Types
             }
             Log.Logger.Error($"Custom type \"{idx}\" already exist.");
             return -1;
+        }
+
+        public override Resource Duplicate()
+        {
+            Resource BO = (Resource)base.Duplicate();
+
+            BO.Path = Path;
+            BO.Type = Type;
+            BO.CustomType = CustomType;
+            return BO;
+        }
+
+        public override string ToString()
+        {
+            return $"Resource(Path: '{Path.Path}', Type: '{Type}', CustomType: {CustomType})";
         }
     }
 }

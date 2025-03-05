@@ -6,18 +6,27 @@ using System;
 using Serilog;
 using RPGCreator.core.logs;
 using RPGCreator.core.debug;
+using RPGCreator.core.Types.Resources;
+using RPGCreator.thirdparty.ImageSharp;
+using SixLabors.ImageSharp;
 
 namespace RPGCreator;
 
 public class Game1 : Game
 {
+
+    ResourcesImages testImage;
+
     private GraphicsDeviceManager _graphics;
+    static private GraphicsDevice _graphicsDevice;
     private SpriteBatch _spriteBatch;
 
     private ImGuiRenderer _imGuiRenderer;
 
-    private Texture2D _xnaTexture;
-    private IntPtr _imGuiTexture;
+    static public GraphicsDevice GetGraphicDevice()
+    {
+        return _graphicsDevice;
+    }
 
     public Game1()
     {
@@ -42,6 +51,7 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
+        _graphicsDevice = GraphicsDevice;
 
         Log.Logger.Fatal("Fatal");
         Log.Logger.Error("Err");
@@ -49,6 +59,9 @@ public class Game1 : Game
         Log.Logger.Verbose("Verbose");
         Log.Logger.Information("Info");
         Log.Logger.Warning("Warn");
+
+        testImage = new("C:\\Users\\Malywan\\Pictures\\image1420.png");
+        Log.Logger.Debug($"Image: {testImage}");
 
         // TODO: use this.Content to load your game content here
     }
@@ -65,9 +78,14 @@ public class Game1 : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.CornflowerBlue);
+        GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.CornflowerBlue);
 
-        // TODO: Add your drawing code here
+        _spriteBatch.Begin();
+
+        _spriteBatch.Draw(testImage.GetTexture2D(), new Vector2(50, 50), Microsoft.Xna.Framework.Color.White);
+
+        _spriteBatch.End();
+
         _imGuiRenderer.BeforeLayout(gameTime);
 
         ImGuiNET.ImGui.Begin("test");

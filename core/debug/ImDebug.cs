@@ -33,7 +33,7 @@ namespace RPGCreator.core.debug
 
             public static void RenderLogger()
             {
-                ImGui.Begin("Logger");
+                ImGui.Begin("Logger", ImGuiWindowFlags.HorizontalScrollbar);
                 if (ImGui.GetWindowSize().X < MIN_X_SIZE) // Check if the size is at least the minimum size, or else radio button will go outside the box
                 {
                     ImGui.SetWindowSize(new Vector2(MIN_X_SIZE, ImGui.GetWindowSize().Y));

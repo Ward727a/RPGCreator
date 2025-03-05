@@ -41,6 +41,7 @@ namespace RPGCreator.core.Types
             _IsValid = File.Exists(_Path);
             return IsValid;
         }
-        
+
+        public static implicit operator ResourcePath(string path) => new(path);
     }
 }
