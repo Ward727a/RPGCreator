@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPGCreator.core.Types.Math.Transform
+namespace RPGCreator.core.types.Math.Transform
 {
     internal class Rotator
     {

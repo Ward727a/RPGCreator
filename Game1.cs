@@ -5,11 +5,15 @@ using ImGuiNET.SampleProgram.XNA;
 using Serilog;
 using RPGCreator.core.logs;
 using RPGCreator.core.debug;
-using RPGCreator.core.Types.Objects.Resources;
+using RPGCreator.core.types.objects.resources;
 using System.IO;
 using RPGCreatorLib.ContentPipeline.TXT;
 using RPGCreator.core;
 using MonoGame.Extended.Input;
+using RPGCreator.core.types.objects.ui;
+using System.Collections.Generic;
+using RPGCreator.core.types;
+using RPGCreator.core.types.objects.ui.buttons;
 
 namespace RPGCreator;
 
@@ -20,13 +24,15 @@ public class Game1 : Game
 
     static public Game1 Self;
 
-    static public MouseStateExtended MouseState { get; private set; }
+    private BaseButton testUI;
 
     private GraphicsDeviceManager _graphics;
     static private GraphicsDevice _graphicsDevice;
     private SpriteBatch _spriteBatch;
 
     private ImGuiRenderer _imGuiRenderer;
+
+    private List<GameObject> GameObjects;
 
     static public GraphicsDevice GetGraphicDevice()
     {
@@ -39,15 +45,13 @@ public class Game1 : Game
         Self = this;
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
-
-        MouseState = MouseExtended.GetState();
     }
 
     protected override void Initialize()
     {
         _imGuiRenderer = new ImGuiRenderer(this);
         _imGuiRenderer.RebuildFontAtlas();
-
+        MouseExtended.WindowHandle = Mouse.WindowHandle;
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Verbose()
             .WriteTo.ImGuiLogger()
@@ -61,29 +65,33 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _graphicsDevice = GraphicsDevice;
         BaseContent.LoadBaseContent(Content);
-        Log.Logger.Fatal("Fatal");
-        Log.Logger.Error("Err");
-        Log.Logger.Debug("Debug");
-        Log.Logger.Verbose("Verbose");
-        Log.Logger.Information("Info");
-        Log.Logger.Warning("Warn");
 
-        testImage = new("C:\\Users\\Malywan\\Pictures\\image1420.png");
-        Log.Logger.Debug($"Image: {testImage}");
+        //testImage = new("C:\\Users\\Ward\\Pictures\\image1420.png");
+        //Log.Logger.Debug($"Image: {testImage}");
 
-        Log.Logger.Debug($"Base Gitignore: {BaseContent.GetGitignore()}");
+        //Log.Logger.Debug($"Base Gitignore: {BaseContent.GetGitignore()}");
 
-        // TODO: use this.Content to load your game content here
+        testUI = new();
+        testUI.SetScale(new(200, 200));
+        testUI.SetPosition(new(250, 50));
+
+        testUI.OnPressed += (object sender, System.EventArgs e) =>
+        {
+            Log.Logger.Debug("Button pressed!");
+        };
+
+        Log.Logger.Information(testUI.ToString());
     }
 
     protected override void Update(GameTime gameTime)
     {
+        MouseExtended.Update();
+        KeyboardExtended.Update();
+
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
-        // TODO: Add your update logic here
-
-        base.Update(gameTime);
+        testUI._Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
@@ -92,7 +100,8 @@ public class Game1 : Game
 
         _spriteBatch.Begin();
 
-        _spriteBatch.Draw(testImage.GetTexture2D(), new Vector2(50, 50), Microsoft.Xna.Framework.Color.White);
+        //_spriteBatch.Draw(testImage.GetTexture2D(), new Vector2(50, 50), Microsoft.Xna.Framework.Color.White);
+        testUI._Draw(_spriteBatch);
 
         _spriteBatch.End();
 

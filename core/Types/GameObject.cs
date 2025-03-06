@@ -1,12 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
-using RPGCreator.core.Types.Math.Transform;
+using Microsoft.Xna.Framework.Graphics;
+using RPGCreator.core.types.Math.Transform;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPGCreator.core.Types
+namespace RPGCreator.core.types
 {
     /// <summary>
     /// Base class for all game object.<br/>
@@ -15,6 +16,8 @@ namespace RPGCreator.core.Types
     class GameObject  : BaseObject
     {
 
+        protected bool multithread = false;
+        protected bool thread_running = false;
         public string ObjectName = "";
 
         /// <summary>
@@ -199,42 +202,42 @@ namespace RPGCreator.core.Types
         public void SetPosition(Position position)
         {
             PreSetPositionArgs preArg = new(GetPosition(), position);
-            PreSetPosition(this, preArg);
+            PreSetPosition?.Invoke(this, preArg);
 
             _Position = position;
             
             PostSetPositionArgs postArg = new(preArg);
-            PostSetPosition(this, postArg);
+            PostSetPosition?.Invoke(this, postArg);
         }
 
         public void SetRotation(Rotator rotation)
         {
             PreSetRotationArgs preArg = new(GetRotation(), rotation);
-            PreSetRotation(this, preArg);
+            PreSetRotation?.Invoke(this, preArg);
 
             _Rotation = rotation;
             
             PostSetRotationArgs postArg = new(preArg);
-            PostSetRotation(this, postArg);
+            PostSetRotation?.Invoke(this, postArg);
         }
 
         public void SetScale(Scale scale)
         {
             PreSetScaleArgs preArg = new(GetScale(), scale);
-            PreSetScale(this, preArg);
+            PreSetScale?.Invoke(this, preArg);
 
             _Scale = scale;
 
             PostSetScaleArgs postArg = new(preArg);
-            PostSetScale(this, postArg);
+            PostSetScale?.Invoke(this, postArg);
         }
 
         public GameObject(params object[] args)
         {
-            PreInit(this, this);
+            PreInit?.Invoke(this, this);
             ObjectName = $"Object-{ID}";
             Init(args);
-            PostInit(this, this);
+            PostInit?.Invoke(this, this);
         }
 
         public override string ToString()
@@ -247,7 +250,7 @@ namespace RPGCreator.core.Types
         /// Throw an <see cref="NotImplementedException"/> if no overload is defined.
         /// </summary>
         /// <exception cref="NotImplementedException">Throwed if no overload is defined.</exception>
-        public virtual void Draw()
+        public virtual void Draw(SpriteBatch _sb)
         {
             throw new NotImplementedException("No overload defined.");
         }
@@ -255,11 +258,26 @@ namespace RPGCreator.core.Types
         /// <summary>
         /// Inner function that can't be overloaded. This allow the object to call the <see cref="PreDraw"/> event.
         /// </summary>
-        public void _Draw()
+        public void _Draw(SpriteBatch _sb)
         {
-            PreDraw(this, null);
-            Draw();
-            PostDraw(this, null);
+            if (multithread && !thread_running)
+            {
+                thread_running = true;
+                Parallel.Invoke(
+                    () =>
+                    {
+                        PreDraw?.Invoke(this, null);
+                        Draw(_sb);
+                        PostDraw?.Invoke(this, null);
+                        thread_running = false;
+                    });
+            }
+            else
+            {
+                PreDraw?.Invoke(this, null);
+                Draw(_sb);
+                PostDraw?.Invoke(this, null);
+            }
         }
 
 
@@ -280,9 +298,9 @@ namespace RPGCreator.core.Types
         /// <param name="gameTime">Time state of the game.</param>
         public void _Update(GameTime gameTime)
         {
-            PreUpdate(this, gameTime);
+            PreUpdate?.Invoke(this, gameTime);
             Update(gameTime);
-            PostUpdate(this, null);
+            PostUpdate?.Invoke(this, null);
         }
 
         /// <summary>
@@ -301,7 +319,7 @@ namespace RPGCreator.core.Types
         /// </summary>
         protected void CallPreInit()
         {
-            PreInit(this, this);
+            PreInit?.Invoke(this, this);
             ObjectName = $"Object-{ID}";
         }
 
@@ -310,7 +328,7 @@ namespace RPGCreator.core.Types
         /// </summary>
         protected void CallPostInit()
         {
-            PostInit(this, this);
+            PostInit?.Invoke(this, this);
         }
 
         /// <summary>
@@ -325,9 +343,9 @@ namespace RPGCreator.core.Types
 
         ~GameObject()
         {
-            PreDestroy(this, null);
+            PreDestroy?.Invoke(this, null);
             Destroy();
-            PostDestroy(this, null);
+            PostDestroy?.Invoke(this, null);
         }
     }
 }

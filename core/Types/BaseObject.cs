@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPGCreator.core.Types
+namespace RPGCreator.core.types
 {
     /// <summary>
     /// The base class for all other class found inside the engine.<br/>

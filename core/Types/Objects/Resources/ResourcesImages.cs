@@ -1,6 +1,6 @@
 ﻿using Autofac.Core;
 using Microsoft.Xna.Framework.Graphics;
-using RPGCreator.core.Types.Objects;
+using RPGCreator.core.types.objects;
 using Serilog;
 using SixLabors.ImageSharp;
 using System;
@@ -11,7 +11,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPGCreator.core.Types.Objects.Resources
+namespace RPGCreator.core.types.objects.resources
 {
     class ResourcesImages : Resource
     {

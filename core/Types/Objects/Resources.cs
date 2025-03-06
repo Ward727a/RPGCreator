@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPGCreator.core.Types.Objects
+namespace RPGCreator.core.types.objects
 {
     class Resource : BaseObject
     {

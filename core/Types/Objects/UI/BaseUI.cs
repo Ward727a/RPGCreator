@@ -1,17 +1,17 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended.Input;
+using Serilog;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace RPGCreator.core.Types.Objects.UI
+namespace RPGCreator.core.types.objects.ui
 {
+    /// <summary>
+    /// This is the base class for all UI Related class. This define some base properties and events.
+    /// </summary>
     class BaseUI : GameObject
     {
-        public Texture2D Texture { get; set; }
         protected bool b_MouseInside = false;
         protected MouseButton LastMousebuttonPressed = MouseButton.None;
         protected int LastPressTime = 0;
@@ -44,7 +44,7 @@ namespace RPGCreator.core.Types.Objects.UI
 
         public override BaseUI Init(params object[] args)
         {
-            return null;
+            return this;
         }
 
         public BaseUI()
@@ -56,17 +56,51 @@ namespace RPGCreator.core.Types.Objects.UI
 
         protected bool IsMouseInside()
         {
-            Point mousePosition = Game1.MouseState.Position;
+            Point mousePosition = MouseExtended.GetState().Position;
             if (mousePosition.X < GetPosition().X + GetScale().X &&
-                mousePosition.X > GetPosition().X && 
+                mousePosition.X > GetPosition().X &&
                 mousePosition.Y < GetPosition().Y + GetScale().Y &&
                 mousePosition.Y > GetPosition().Y)
             {
-                b_MouseInside = true;
-            } else
-            {
+                return true;
             }
-            return b_MouseInside;
+            else
+            {
+                return false;
+            }
+        }
+
+        public void CheckMouseClickEvent(GameTime gameTime, ButtonState State, MouseButton Type, EventHandler ePressed, EventHandler eReleased, EventHandler eClicked)
+        {
+            if (State == ButtonState.Pressed)
+            {
+                ePressed?.Invoke(this, null);
+                if (LastMousebuttonPressed != Type)
+                {
+                    LastMousebuttonPressed = Type;
+                    LastPressTime = gameTime.ElapsedGameTime.Milliseconds;
+                }
+                else
+                {
+                    LastMousebuttonPressed = Type;
+                    LastPressTime += gameTime.ElapsedGameTime.Milliseconds;
+                }
+            }
+            else
+            {
+                if (LastPressTime <= 200 && LastMousebuttonPressed == Type)
+                {
+                    eClicked?.Invoke(this, null);
+                    LastMousebuttonPressed = MouseButton.None;
+                    LastPressTime = 0;
+                }
+                else if (LastMousebuttonPressed == Type)
+                {
+                    LastMousebuttonPressed = MouseButton.None;
+                    LastPressTime = 0;
+                }
+                eReleased?.Invoke(this, null);
+            }
         }
 
         public override void Update(GameTime gameTime)
@@ -75,76 +109,44 @@ namespace RPGCreator.core.Types.Objects.UI
             {
                 if (b_MouseInside)
                 {
-                    OnMouseMove(this, null);
+                    if(MouseExtended.GetState().DeltaPosition != new Point(0, 0))
+                    {
+
+                        OnMouseMove?.Invoke(this, null);
+                    }
                 }
                 else
                 {
                     b_MouseInside = true;
-                    OnMouseEnter(this, null);
+                    OnMouseEnter?.Invoke(this, null);
                 }
+                CheckMouseClickEvent(gameTime, MouseExtended.GetState().LeftButton, MouseButton.Left, OnLeftMousePressed, OnLeftMouseReleased, OnLeftMouseClick);
+                CheckMouseClickEvent(gameTime, MouseExtended.GetState().RightButton, MouseButton.Right, OnRightMousePressed, OnRightMouseReleased, OnRightMouseClick);
+                CheckMouseClickEvent(gameTime, MouseExtended.GetState().MiddleButton, MouseButton.Middle, OnMiddleMousePressed, OnMiddleMouseReleased, OnMiddleMouseClick);
+            } else
+            {
+                if (b_MouseInside)
+                {
+                    Log.Logger.Verbose("Mouse out");
+                    b_MouseInside = false;
 
-                if(Game1.MouseState.LeftButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
-                {
-                    OnLeftMousePressed(this, null);
-                    LastMousebuttonPressed = MouseButton.Left;
-                    if (LastPressTime > 0)
+                    switch (LastMousebuttonPressed)
                     {
-                        LastPressTime = gameTime.ElapsedGameTime.Milliseconds;
+                        case MouseButton.Left:
+                            {
+                                OnLeftMouseReleased?.Invoke(this, null);
+                            }break;
+                        case MouseButton.Middle:
+                            {
+                                OnMiddleMouseReleased?.Invoke(this, null);
+                            }break;
+                        case MouseButton.Right:
+                            {
+                                OnRightMouseReleased?.Invoke(this, null);
+                            }break;
                     }
-                    else
-                    {
-                        LastPressTime += gameTime.ElapsedGameTime.Milliseconds;
-                    }
-                }
-                else
-                {
-                    if (LastPressTime <= 200 && LastMousebuttonPressed == MouseButton.Left)
-                    {
-                        OnLeftMouseClick(this, null);
-                    }
-                    OnLeftMouseReleased(this, null);
-                }
-                if (Game1.MouseState.RightButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
-                {
-                    OnRightMousePressed(this, null);
-                    LastMousebuttonPressed = MouseButton.Right;
-                    if (LastPressTime > 0)
-                    {
-                        LastPressTime = gameTime.ElapsedGameTime.Milliseconds;
-                    }
-                    else
-                    {
-                        LastPressTime += gameTime.ElapsedGameTime.Milliseconds;
-                    }
-                }
-                else
-                {
-                    if (LastPressTime <= 200 && LastMousebuttonPressed == MouseButton.Right)
-                    {
-                        OnRightMouseClick(this, null);
-                    }
-                    OnRightMouseReleased(this, null);
-                }
-                if(Game1.MouseState.MiddleButton == Microsoft.Xna.Framework.Input.ButtonState.Pressed)
-                {
-                    OnMiddleMousePressed(this, null);
-                    LastMousebuttonPressed = MouseButton.Middle;
-                    if (LastPressTime > 0)
-                    {
-                        LastPressTime = gameTime.ElapsedGameTime.Milliseconds;
-                    }
-                    else
-                    {
-                        LastPressTime += gameTime.ElapsedGameTime.Milliseconds;
-                    }
-                }
-                else
-                {
-                    if (LastPressTime <= 200 && LastMousebuttonPressed == MouseButton.Middle)
-                    {
-                        OnMiddleMouseClick(this, null);
-                    }
-                    OnMiddleMouseReleased(this, null);
+                    LastMousebuttonPressed = MouseButton.None;
+                    LastPressTime = 0;
                 }
             }
 

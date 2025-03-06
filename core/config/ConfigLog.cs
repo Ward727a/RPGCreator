@@ -1,4 +1,4 @@
-﻿using RPGCreator.core.Types;
+﻿using RPGCreator.core.types;
 using System;
 using System.Collections.Generic;
 using System.Linq;

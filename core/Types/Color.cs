@@ -6,7 +6,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPGCreator.core.Types
+namespace RPGCreator.core.types
 {
     class Color
     {
