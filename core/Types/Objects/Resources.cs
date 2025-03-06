@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPGCreator.core.Types
+namespace RPGCreator.core.Types.Objects
 {
     class Resource : BaseObject
     {
@@ -70,6 +70,13 @@ namespace RPGCreator.core.Types
         public override string ToString()
         {
             return $"Resource(Path: '{Path.Path}', Type: '{Type}', CustomType: {CustomType})";
+        }
+        /// <summary>
+        /// Return the path of the resource.
+        /// </summary>
+        public string GetPath()
+        {
+            return Path.Path;
         }
     }
 }

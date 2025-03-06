@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Autofac.Core;
+using Microsoft.Xna.Framework.Graphics;
+using RPGCreator.core.Types.Objects;
 using Serilog;
 using SixLabors.ImageSharp;
 using System;
@@ -9,7 +11,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPGCreator.core.Types.Resources
+namespace RPGCreator.core.Types.Objects.Resources
 {
     class ResourcesImages : Resource
     {
@@ -50,7 +52,11 @@ namespace RPGCreator.core.Types.Resources
 
         public Texture2D GetTexture2D()
         {
-            Texture ??= Texture2D.FromFile(Game1.GetGraphicDevice(), Path.Path);
+            if (!Path.IsValid)
+            {
+                return BaseContent.GetNullTexture();
+            }
+            Texture ??= Texture2D.FromFile(Game1.GetGraphicDevice(), GetPath());
             return Texture;
         }
     }

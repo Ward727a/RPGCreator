@@ -14,3 +14,8 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin BaseContent/.gitignore.txt
+/importer:
+/processor:
+/build:BaseContent/.gitignore.txt
+

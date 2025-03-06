@@ -2,15 +2,14 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using ImGuiNET.SampleProgram.XNA;
-using System;
 using Serilog;
 using RPGCreator.core.logs;
 using RPGCreator.core.debug;
-using RPGCreator.core.Types.Resources;
-using RPGCreator.thirdparty.ImageSharp;
-using SixLabors.ImageSharp;
+using RPGCreator.core.Types.Objects.Resources;
 
 namespace RPGCreator;
+
+//TODO: Create an importer/exporter for MGCB to import .txt file for BaseContent (ex: .gitignore.txt).
 
 public class Game1 : Game
 {

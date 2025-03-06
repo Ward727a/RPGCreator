@@ -1,0 +1,2 @@
+# This is a basic gitignore for an RPG Creator project.
+# Last update: 06/03/2025 
