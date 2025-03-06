@@ -11,11 +11,13 @@
 #-------------------------------- References --------------------------------#
 
 /reference:..\bin\Debug\net8.0\MonoGame.Extended.Content.Pipeline.dll
+/reference:..\..\..\MGCBExtension_RPGCreator\bin\Debug\net8.0\MGCBExtension_RPGCreator.dll
 
 #---------------------------------- Content ---------------------------------#
 
 #begin BaseContent/.gitignore.txt
-/importer:
-/processor:
+/importer:TXTImporter
+/processor:TXTProcessor
+/processorParam:Identifier=RPGCreator.core.io.ContentReader.TextReader, RPGCreator
 /build:BaseContent/.gitignore.txt
 

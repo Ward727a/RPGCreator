@@ -6,15 +6,21 @@ using Serilog;
 using RPGCreator.core.logs;
 using RPGCreator.core.debug;
 using RPGCreator.core.Types.Objects.Resources;
+using System.IO;
+using RPGCreatorLib.ContentPipeline.TXT;
+using RPGCreator.core;
+using MonoGame.Extended.Input;
 
 namespace RPGCreator;
-
-//TODO: Create an importer/exporter for MGCB to import .txt file for BaseContent (ex: .gitignore.txt).
 
 public class Game1 : Game
 {
 
     ResourcesImages testImage;
+
+    static public Game1 Self;
+
+    static public MouseStateExtended MouseState { get; private set; }
 
     private GraphicsDeviceManager _graphics;
     static private GraphicsDevice _graphicsDevice;
@@ -30,8 +36,11 @@ public class Game1 : Game
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
+        Self = this;
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
+
+        MouseState = MouseExtended.GetState();
     }
 
     protected override void Initialize()
@@ -51,7 +60,7 @@ public class Game1 : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _graphicsDevice = GraphicsDevice;
-
+        BaseContent.LoadBaseContent(Content);
         Log.Logger.Fatal("Fatal");
         Log.Logger.Error("Err");
         Log.Logger.Debug("Debug");
@@ -61,6 +70,8 @@ public class Game1 : Game
 
         testImage = new("C:\\Users\\Malywan\\Pictures\\image1420.png");
         Log.Logger.Debug($"Image: {testImage}");
+
+        Log.Logger.Debug($"Base Gitignore: {BaseContent.GetGitignore()}");
 
         // TODO: use this.Content to load your game content here
     }

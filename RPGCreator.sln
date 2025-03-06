@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35825.156 d17.13
+VisualStudioVersion = 17.13.35825.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RPGCreator", "RPGCreator.csproj", "{968022F8-AF74-4AFA-AFBE-2AC6DD7BC2D6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RPGCreatorLib", "..\..\RPGCreatorLib\RPGCreatorLib.csproj", "{1BE8DFDB-550C-4BBA-9B51-8A13E5309BDE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{968022F8-AF74-4AFA-AFBE-2AC6DD7BC2D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{968022F8-AF74-4AFA-AFBE-2AC6DD7BC2D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{968022F8-AF74-4AFA-AFBE-2AC6DD7BC2D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BE8DFDB-550C-4BBA-9B51-8A13E5309BDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BE8DFDB-550C-4BBA-9B51-8A13E5309BDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BE8DFDB-550C-4BBA-9B51-8A13E5309BDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BE8DFDB-550C-4BBA-9B51-8A13E5309BDE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,6 +6,13 @@ using System.Threading.Tasks;
 
 namespace RPGCreator.core.Types
 {
+    /// <summary>
+    /// The base class for all other class found inside the engine.<br/>
+    /// </summary>
+    /// <remarks>
+    /// Remark:<br/>
+    /// For game component (Like UI, Sprite, ...) you should use <see cref="GameObject"/>.
+    /// </remarks>
     class BaseObject
     {
         public Guid ID { get; }
