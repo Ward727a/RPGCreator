@@ -1,0 +1,3 @@
+[submodule "thirdparty/Squid"]
+	path = thirdparty/Squid
+	url = https://github.com/Roderik11/Squid.git
