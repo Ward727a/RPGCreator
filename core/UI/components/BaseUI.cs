@@ -2,10 +2,11 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended.Input;
+using RPGCreator.core.types;
 using Serilog;
 using System;
 
-namespace RPGCreator.core.types.objects.ui
+namespace RPGCreator.core.UI.components
 {
     /// <summary>
     /// This is the base class for all UI Related class. This define some base properties and events.

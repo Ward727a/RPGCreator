@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using MonoGame.Extended.Shapes;
+using RPGCreator.core.UI.components;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPGCreator.core.types.objects.ui.buttons
+namespace RPGCreator.core.UI.components.buttons
 {
     class BaseButton : BaseUI
     {
@@ -20,10 +21,10 @@ namespace RPGCreator.core.types.objects.ui.buttons
         private bool b_IsFocused = false;
         private bool b_IsDisabled = false;
 
-        public Texture2D? BaseTexture;
-        public Texture2D? PressedTexture = null;
-        public Texture2D? DisabledTexture = null;
-        public Texture2D? FocusTexture = null;
+        public Texture2D BaseTexture;
+        public Texture2D PressedTexture = null;
+        public Texture2D DisabledTexture = null;
+        public Texture2D FocusTexture = null;
 
         public event EventHandler OnPressed;
         public event EventHandler OnReleased;
@@ -43,7 +44,7 @@ namespace RPGCreator.core.types.objects.ui.buttons
             return this;
         }
 
-        protected virtual void BasePressed(object sender, System.EventArgs e)
+        protected virtual void BasePressed(object sender, EventArgs e)
         {
             if (b_IsDisabled || b_IsPressed) return; 
             OnPressed?.Invoke(this, null);
@@ -51,7 +52,7 @@ namespace RPGCreator.core.types.objects.ui.buttons
             b_IsPressed = true;
         }
 
-        protected virtual void BaseReleased(object sender, System.EventArgs e)
+        protected virtual void BaseReleased(object sender, EventArgs e)
         {
             if (b_IsDisabled || !b_IsPressed) return;
             OnReleased?.Invoke(this, null);
@@ -59,7 +60,7 @@ namespace RPGCreator.core.types.objects.ui.buttons
             b_IsPressed = false;
         }
 
-        protected virtual void BaseHover(object sender, System.EventArgs e)
+        protected virtual void BaseHover(object sender, EventArgs e)
         {
             if (b_IsDisabled) return;
             OnHover?.Invoke(this, null);
@@ -120,40 +121,40 @@ namespace RPGCreator.core.types.objects.ui.buttons
         {
             if(BaseTexture == null)
             {
-                _sb.DrawRectangle(new RectangleF(GetPosition().X, GetPosition().Y, GetScale().X, GetScale().Y), Microsoft.Xna.Framework.Color.Gray, thickness: 10f);
+                _sb.DrawRectangle(new RectangleF(GetPosition().X, GetPosition().Y, GetScale().X, GetScale().Y), Color.Gray, thickness: 10f);
                 return;
             }
 
-            _sb.Draw(BaseTexture, new Vector2(GetPosition().X, GetPosition().Y), Microsoft.Xna.Framework.Color.White);
+            _sb.Draw(BaseTexture, new Vector2(GetPosition().X, GetPosition().Y), Color.White);
         }
 
         public virtual void DrawPressedTexture(SpriteBatch _sb)
         {
             if(PressedTexture == null)
             {
-                _sb.DrawRectangle(new RectangleF(GetPosition().X, GetPosition().Y, GetScale().X, GetScale().Y), Microsoft.Xna.Framework.Color.DimGray, thickness: 10f);
+                _sb.DrawRectangle(new RectangleF(GetPosition().X, GetPosition().Y, GetScale().X, GetScale().Y), Color.DimGray, thickness: 10f);
                 return;
             }
 
-            _sb.Draw(PressedTexture, new Vector2(GetPosition().X, GetPosition().Y), Microsoft.Xna.Framework.Color.White);
+            _sb.Draw(PressedTexture, new Vector2(GetPosition().X, GetPosition().Y), Color.White);
         }
 
         public virtual void DrawDisabledTexture(SpriteBatch _sb)
         {
             if (DisabledTexture == null)
             {
-                _sb.DrawRectangle(new RectangleF(GetPosition().X, GetPosition().Y, GetScale().X, GetScale().Y), Microsoft.Xna.Framework.Color.DarkGray, thickness: 10f);
+                _sb.DrawRectangle(new RectangleF(GetPosition().X, GetPosition().Y, GetScale().X, GetScale().Y), Color.DarkGray, thickness: 10f);
                 return;
             }
 
-            _sb.Draw(DisabledTexture, new Vector2(GetPosition().X, GetPosition().Y), Microsoft.Xna.Framework.Color.White);
+            _sb.Draw(DisabledTexture, new Vector2(GetPosition().X, GetPosition().Y), Color.White);
         }
 
         public virtual void DrawFocusedTexture(SpriteBatch _sb)
         {
             if(FocusTexture != null)
             {
-                _sb.Draw(FocusTexture, new Vector2(GetPosition().X, GetPosition().Y), Microsoft.Xna.Framework.Color.White);
+                _sb.Draw(FocusTexture, new Vector2(GetPosition().X, GetPosition().Y), Color.White);
             }
         }
     }

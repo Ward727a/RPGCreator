@@ -13,7 +13,7 @@ using MonoGame.Extended.Input;
 using RPGCreator.core.types.objects.ui;
 using System.Collections.Generic;
 using RPGCreator.core.types;
-using RPGCreator.core.types.objects.ui.buttons;
+using RPGCreator.core.UI.components.buttons;
 
 namespace RPGCreator;
 
