@@ -16,6 +16,7 @@ using RPGCreator.core.types;
 using RPGCreator.core.UI.components.buttons;
 using RPGCreator.core.UI.containers;
 using RPGCreator.core.types.Math.Transform;
+using RPGCreator.core.helpers;
 
 namespace RPGCreator;
 
@@ -31,7 +32,7 @@ public class Game1 : Game
 
     private GraphicsDeviceManager _graphics;
     static private GraphicsDevice _graphicsDevice;
-    private SpriteBatch _spriteBatch;
+    private SpriteBatchExtended _spriteBatch;
 
     private ImGuiRenderer _imGuiRenderer;
 
@@ -65,7 +66,7 @@ public class Game1 : Game
 
     protected override void LoadContent()
     {
-        _spriteBatch = new SpriteBatch(GraphicsDevice);
+        _spriteBatch = new SpriteBatchExtended(GraphicsDevice);
         _graphicsDevice = GraphicsDevice;
         BaseContent.LoadBaseContent(Content);
 

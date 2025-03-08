@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended.Input;
+using RPGCreator.core.helpers;
 using RPGCreator.core.types.Math.Transform;
 using RPGCreator.core.UI.components;
 using Serilog;
@@ -33,7 +34,7 @@ namespace RPGCreator.core.UI.containers
             base.Update(gameTime);
         }
 
-        public override void DrawContents(SpriteBatch _sb)
+        public override void DrawContents(SpriteBatchExtended _sb)
         {
             _sb.Begin();
 

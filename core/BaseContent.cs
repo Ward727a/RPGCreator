@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended.BitmapFonts;
 using RPGCreatorLib.ContentPipeline.TXT;
 using Serilog;
 using System;
@@ -25,6 +26,7 @@ namespace RPGCreator.core
         static public void LoadBaseContent(ContentManager content)
         {
             Gitignore = content.Load<TXTAsset>("BaseContent/.gitignore").Content;
+            BasicFont = content.Load<BitmapFont>("Fonts/OpenSans-Regular");
         }
 
         #region NullTexture
@@ -58,5 +60,19 @@ namespace RPGCreator.core
             return Gitignore;
         }
         #endregion GitIgnore
+
+        #region BaseFont
+        static private BitmapFont BasicFont;
+
+        static public BitmapFont GetBasicFont()
+        {
+            if(BasicFont == null)
+            {
+                Log.Logger.Error("BasicFont is actually null. Maybe the LoadBaseContent wasn't called?");
+                return null;
+            }
+            return BasicFont;
+        }
+        #endregion BaseFont
     }
 }

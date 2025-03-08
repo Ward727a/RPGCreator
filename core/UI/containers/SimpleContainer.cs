@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended;
 using MonoGame.Extended.Graphics;
+using RPGCreator.core.helpers;
 using RPGCreator.core.types.Math.Transform;
 using RPGCreator.core.UI.components;
 using Serilog;
@@ -97,7 +98,7 @@ namespace RPGCreator.core.UI.containers
         }
 
 
-        public override void Draw(SpriteBatch _sb)
+        public override void Draw(SpriteBatchExtended _sb)
         {
             render.BeginDraw(Game1.GetGraphicDevice(), Color.Red);
 
@@ -113,7 +114,7 @@ namespace RPGCreator.core.UI.containers
             }
         }
 
-        public virtual void DrawContents(SpriteBatch _sb)
+        public virtual void DrawContents(SpriteBatchExtended _sb)
         {
             _sb.Begin();
 
@@ -125,7 +126,7 @@ namespace RPGCreator.core.UI.containers
             _sb.End();
         }
 
-        public virtual void FinalizeDrawContainer(SpriteBatch _sb)
+        public virtual void FinalizeDrawContainer(SpriteBatchExtended _sb)
         {
             Game1.GetGraphicDevice().SetRenderTarget(null);
             _sb.Begin();

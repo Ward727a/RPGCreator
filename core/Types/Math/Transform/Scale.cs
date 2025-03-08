@@ -60,6 +60,60 @@ namespace RPGCreator.core.types.Math.Transform
             return scale1;
         }
 
+        public static Scale operator +(Scale scale, Position pos)
+        {
+            if(scale.Is2D != pos.Is2D)
+            {
+                throw new InvalidOperationException("Cannot add 2D and 3D scale/position");
+            }
+
+            scale.X += pos.X;
+            scale.Y += pos.Y;
+            if(scale.Is2D)
+            {
+                scale.Z += pos.Z;
+            }
+            return scale;
+        }
+
+        public static Scale operator /(Scale scale1, Scale scale2)
+        {
+            if(!scale1.IsSameDimension(scale2))
+            {
+                throw new InvalidOperationException("Cannot divide 2D and 3D scale/position");
+            }
+
+            scale1.X /= scale2.X;
+            scale1.Y /= scale2.Y;
+            if(scale1.Is2D)
+            {
+                scale1.Z /= scale2.Z;
+            }
+            return scale1;
+        }
+
+        public static Scale operator /(Scale scale, int value)
+        {
+            scale.X /= value;
+            scale.Y /= value;
+            if(scale.Is2D)
+            {
+                scale.Z /= value;
+            }
+            return scale;
+        }
+
+        public static Scale operator /(Scale scale, float value)
+        {
+            scale.X /= value;
+            scale.Y /= value;
+            if (scale.Is2D)
+            {
+                scale.Z /= value;
+            }
+            return scale;
+        }
+
         public static Scale operator ++(Scale scale)
         {
             scale.X += 1;

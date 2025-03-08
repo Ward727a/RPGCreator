@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended.Input;
 using RPGCreator.core.controllers;
+using RPGCreator.core.helpers;
 using RPGCreator.core.types.Math.Transform;
 using RPGCreator.core.UI.components;
 using System;
@@ -229,7 +230,7 @@ namespace RPGCreator.core.types
         {
             if(parent != null)
             {
-                return parent.GetAbsolutePosition() + _Position;
+                return parent.GetRelativePosition() + _Position;
             }
             return _Position;
         }
@@ -307,12 +308,12 @@ namespace RPGCreator.core.types
         /// Throw an <see cref="NotImplementedException"/> if no overload is defined.
         /// </summary>
         /// <exception cref="NotImplementedException">Throwed if no overload is defined.</exception>
-        public virtual void Draw(SpriteBatch _sb)
+        public virtual void Draw(SpriteBatchExtended _sb)
         {
             throw new NotImplementedException("No overload defined.");
         }
 
-        public virtual void DrawAt(SpriteBatch _sb, Position at)
+        public virtual void DrawAt(SpriteBatchExtended _sb, Position at)
         {
             throw new NotImplementedException("No overload defined.");
         }
@@ -320,7 +321,7 @@ namespace RPGCreator.core.types
         /// <summary>
         /// Inner function that can't be overloaded. This allow the object to call the <see cref="PreDraw"/> event.
         /// </summary>
-        public void _Draw(SpriteBatch _sb)
+        public void _Draw(SpriteBatchExtended _sb)
         {
             if (!IsVisible) return;
             if (multithread)
@@ -344,7 +345,7 @@ namespace RPGCreator.core.types
             }
         }
 
-        public void _DrawAt(SpriteBatch _sb, Position at)
+        public void _DrawAt(SpriteBatchExtended _sb, Position at)
         {
             if (!IsVisible) return;
             if (multithread)
@@ -443,14 +444,7 @@ namespace RPGCreator.core.types
 
         public void CheckCursorPosition(GameTime gameTime)
         {
-            if (IsMouseInside())
-            {
-                if (!b_MouseInside)
-                {
-                    MouseController.InObject(this);
-                }
-            }
-            else
+            if (!IsMouseInside())
             {
                 if (b_MouseInside)
                 {
@@ -459,6 +453,13 @@ namespace RPGCreator.core.types
                         return;
                     }
                     MouseController.OutObject(this);
+                }
+            }
+            else
+            {
+                if (!b_MouseInside)
+                {
+                    MouseController.InObject(this);
                 }
             }
             if (IsMouseInside())

@@ -86,6 +86,22 @@ namespace RPGCreator.core.types.Math.Transform
             return pos1;
         }
 
+        public static Position operator +(Position pos, Scale scale)
+        {
+            if (pos.Is2D != scale.Is2D)
+            {
+                throw new InvalidOperationException("Cannot add 2D and 3D scale/position");
+            }
+
+            pos.X += scale.X;
+            pos.Y += scale.Y;
+            if(pos.Is2D)
+            {
+                pos.Z += scale.Z;
+            }
+            return pos;
+        }
+
         public static Position operator ++(Position pos)
         {
             pos.X += 1;
@@ -100,6 +116,20 @@ namespace RPGCreator.core.types.Math.Transform
         public override string ToString()
         {
             return $"Position{{X: {X}; Y: {Y}; Z: {Z}}}";
+        }
+
+        public readonly Vector2 ToVector2()
+        {
+            return new(X, Y);
+        }
+
+        public readonly Vector3 ToVector3()
+        {
+            if(Is2D)
+            {
+                return new(0, 0, 0);
+            }
+            return new(X, Y, (float)Z);
         }
 
     }

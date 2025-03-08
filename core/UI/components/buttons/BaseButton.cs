@@ -1,26 +1,41 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
+using MonoGame.Extended.BitmapFonts;
 using MonoGame.Extended.Shapes;
+using RPGCreator.core.helpers;
 using RPGCreator.core.types.Math.Transform;
 using RPGCreator.core.UI.components;
+using RPGCreator.core.UI.components.basics;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
+using Label = RPGCreator.core.UI.components.basics.Label;
 
 namespace RPGCreator.core.UI.components.buttons
 {
     class BaseButton : BaseUI
     {
 
-        public string Text = "Button";
+        public Label label = new("Button");
 
         private bool b_IsPressed = false;
         private bool b_IsFocused = false;
         private bool b_IsDisabled = false;
+
+        public ALIGNEMENT_H HorizontalTextAlign = ALIGNEMENT_H.CENTER;
+        public ALIGNEMENT_V VerticalTextAlign = ALIGNEMENT_V.MIDDLE;
+
+        public Color BaseTextColor = Color.Black;
+        public Color PressedTextColor = Color.White;
+        public Color DisabledTextColor = Color.Gray;
+        public Color FocusTextColor = Color.Black;
+
+        public BitmapFont TextFont = BaseContent.GetBasicFont();
 
         public Texture2D BaseTexture;
         public Texture2D PressedTexture = null;
@@ -41,6 +56,11 @@ namespace RPGCreator.core.UI.components.buttons
             OnLeftMouseReleased += BaseReleased;
             OnMouseEnter += BaseHover;
             OnMouseMove += BaseHover;
+
+            label.parent = this;
+            label.AlignH = HorizontalTextAlign;
+            label.AlignV = VerticalTextAlign;
+            label.Rescale(24);
 
             return this;
         }
@@ -69,7 +89,7 @@ namespace RPGCreator.core.UI.components.buttons
 
         public virtual void SetText(string text)
         {
-            Text = text;
+            label.SetContent(text);
             TextChanged(this, null);
         }
 
@@ -95,7 +115,7 @@ namespace RPGCreator.core.UI.components.buttons
             b_IsDisabled = true;
         }
 
-        public override void Draw(SpriteBatch _sb)
+        public override void Draw(SpriteBatchExtended _sb)
         {
             if(!b_IsDisabled)
             {
@@ -104,21 +124,25 @@ namespace RPGCreator.core.UI.components.buttons
                     if(!b_IsFocused)
                     {
                         DrawBaseTexture(_sb, GetRelativePosition());
+                        label.Draw(_sb, BaseTextColor);
                     } else
                     {
                         DrawFocusedTexture(_sb, GetRelativePosition());
+                        label.Draw(_sb, FocusTextColor);
                     }
                 } else
                 {
                     DrawPressedTexture(_sb, GetRelativePosition());
+                    label.Draw(_sb, PressedTextColor);
                 }
             } else
             {
                 DrawDisabledTexture(_sb, GetRelativePosition());
+                label.Draw(_sb, DisabledTextColor);
             }
         }
 
-        public override void DrawAt(SpriteBatch _sb, Position at)
+        public override void DrawAt(SpriteBatchExtended _sb, Position at)
         {
 
             if (!b_IsDisabled)
@@ -128,20 +152,49 @@ namespace RPGCreator.core.UI.components.buttons
                     if (!b_IsFocused)
                     {
                         DrawBaseTexture(_sb, at);
+
+                        /*
+                         * 
+                        _sb.DrawString(
+                        TextFont, 
+                        Text, 
+                        (
+                            GetPositionByAlign(
+                                HorizontalTextAlign, 
+                                VerticalTextAlign
+                            )
+                            + 
+                            new Scale(
+                                TextFont.MeasureString(Text).Width / 2 * -1, 
+                                TextFont.MeasureString(Text).Height / 2 * -1
+                            )
+                        ).ToVector2(),
+                        BaseTextColor, 
+                        0, 
+                        new Vector2(), 
+                        new Vector2(1, 1),
+                        SpriteEffects.None,
+                        0);
+                         */
+
+                        label.Draw(_sb, BaseTextColor);
                     }
                     else
                     {
                         DrawFocusedTexture(_sb, at);
+                        label.Draw(_sb, FocusTextColor);
                     }
                 }
                 else
                 {
                     DrawPressedTexture(_sb, at);
+                    label.Draw(_sb, PressedTextColor);
                 }
             }
             else
             {
                 DrawDisabledTexture(_sb, at);
+                label.Draw(_sb, DisabledTextColor);
             }
         }
 
