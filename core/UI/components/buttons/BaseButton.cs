@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using MonoGame.Extended.Shapes;
+using RPGCreator.core.types.Math.Transform;
 using RPGCreator.core.UI.components;
 using Serilog;
 using System;
@@ -102,59 +103,86 @@ namespace RPGCreator.core.UI.components.buttons
                 {
                     if(!b_IsFocused)
                     {
-                        DrawBaseTexture(_sb);
+                        DrawBaseTexture(_sb, GetRelativePosition());
                     } else
                     {
-                        DrawFocusedTexture(_sb);
+                        DrawFocusedTexture(_sb, GetRelativePosition());
                     }
                 } else
                 {
-                    DrawPressedTexture(_sb);
+                    DrawPressedTexture(_sb, GetRelativePosition());
                 }
             } else
             {
-                DrawDisabledTexture(_sb);
+                DrawDisabledTexture(_sb, GetRelativePosition());
             }
         }
 
-        public virtual void DrawBaseTexture(SpriteBatch _sb)
+        public override void DrawAt(SpriteBatch _sb, Position at)
+        {
+
+            if (!b_IsDisabled)
+            {
+                if (!b_IsPressed)
+                {
+                    if (!b_IsFocused)
+                    {
+                        DrawBaseTexture(_sb, at);
+                    }
+                    else
+                    {
+                        DrawFocusedTexture(_sb, at);
+                    }
+                }
+                else
+                {
+                    DrawPressedTexture(_sb, at);
+                }
+            }
+            else
+            {
+                DrawDisabledTexture(_sb, at);
+            }
+        }
+
+        public virtual void DrawBaseTexture(SpriteBatch _sb, Position at)
         {
             if(BaseTexture == null)
             {
-                _sb.DrawRectangle(new RectangleF(GetPosition().X, GetPosition().Y, GetScale().X, GetScale().Y), Color.Gray, thickness: 10f);
+                _sb.DrawRectangle(new RectangleF(at.X, at.Y, GetScale().X, GetScale().Y), Color.Gray, thickness: 10f);
                 return;
             }
 
-            _sb.Draw(BaseTexture, new Vector2(GetPosition().X, GetPosition().Y), Color.White);
+            _sb.Draw(BaseTexture, new Vector2(at.X, at.Y), Color.White);
         }
 
-        public virtual void DrawPressedTexture(SpriteBatch _sb)
+        public virtual void DrawPressedTexture(SpriteBatch _sb, Position at)
         {
             if(PressedTexture == null)
             {
-                _sb.DrawRectangle(new RectangleF(GetPosition().X, GetPosition().Y, GetScale().X, GetScale().Y), Color.DimGray, thickness: 10f);
+                _sb.DrawRectangle(new RectangleF(at.X, at.Y, GetScale().X, GetScale().Y), Color.DimGray, thickness: 10f);
                 return;
             }
 
-            _sb.Draw(PressedTexture, new Vector2(GetPosition().X, GetPosition().Y), Color.White);
+            _sb.Draw(PressedTexture, new Vector2(at.X, at.Y), Color.White);
         }
 
-        public virtual void DrawDisabledTexture(SpriteBatch _sb)
+        public virtual void DrawDisabledTexture(SpriteBatch _sb, Position at)
         {
             if (DisabledTexture == null)
             {
-                _sb.DrawRectangle(new RectangleF(GetPosition().X, GetPosition().Y, GetScale().X, GetScale().Y), Color.DarkGray, thickness: 10f);
+                _sb.DrawRectangle(new RectangleF(at.X, at.Y, GetScale().X, GetScale().Y), Color.DarkGray, thickness: 10f);
                 return;
             }
 
-            _sb.Draw(DisabledTexture, new Vector2(GetPosition().X, GetPosition().Y), Color.White);
+            _sb.Draw(DisabledTexture, new Vector2(at.X, at.Y), Color.White);
         }
 
-        public virtual void DrawFocusedTexture(SpriteBatch _sb)
+        public virtual void DrawFocusedTexture(SpriteBatch _sb, Position at)
         {
             if(FocusTexture != null)
             {
-                _sb.Draw(FocusTexture, new Vector2(GetPosition().X, GetPosition().Y), Color.White);
+                _sb.Draw(FocusTexture, new Vector2(at.X, at.Y), Color.White);
             }
         }
     }

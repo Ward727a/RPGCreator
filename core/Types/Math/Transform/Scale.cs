@@ -21,7 +21,7 @@ namespace RPGCreator.core.types.Math.Transform
             X = x; Y = y; Z = z;
         }
 
-        private bool IsSameDimension(Scale CompareTo)
+        private readonly bool IsSameDimension(Scale CompareTo)
         {
             return (Is2D == CompareTo.Is2D);
         }

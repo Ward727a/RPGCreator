@@ -10,10 +10,12 @@ using System.IO;
 using RPGCreatorLib.ContentPipeline.TXT;
 using RPGCreator.core;
 using MonoGame.Extended.Input;
-using RPGCreator.core.types.objects.ui;
+//using RPGCreator.core.types.objects.ui;
 using System.Collections.Generic;
 using RPGCreator.core.types;
 using RPGCreator.core.UI.components.buttons;
+using RPGCreator.core.UI.containers;
+using RPGCreator.core.types.Math.Transform;
 
 namespace RPGCreator;
 
@@ -25,6 +27,7 @@ public class Game1 : Game
     static public Game1 Self;
 
     private BaseButton testUI;
+    private ScrollContainer Container;
 
     private GraphicsDeviceManager _graphics;
     static private GraphicsDevice _graphicsDevice;
@@ -71,13 +74,24 @@ public class Game1 : Game
 
         //Log.Logger.Debug($"Base Gitignore: {BaseContent.GetGitignore()}");
 
+        Container = new(new Scale(100, 200));
+        Container.SetPosition(new Position(150, 150));
+        Container.allowYScroll = true;
+        Container.allowXScroll = true;
+
         testUI = new();
-        testUI.SetScale(new(200, 200));
-        testUI.SetPosition(new(250, 50));
+        testUI.SetScale(new(100, 50));
+        testUI.SetPosition(new(0, 0));
+        Container.AddChild(testUI);
+        testUI = new();
+        testUI.SetScale(new(100, 50));
+        testUI.SetPosition(new(0, 0));
+
+        Container.AddChild(testUI);
 
         testUI.OnPressed += (object sender, System.EventArgs e) =>
         {
-            Log.Logger.Debug("Button pressed!");
+            Container.SetPosition(new Position(0, 0));
         };
 
         Log.Logger.Information(testUI.ToString());
@@ -91,19 +105,20 @@ public class Game1 : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
-        testUI._Update(gameTime);
+        Container._Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.CornflowerBlue);
 
-        _spriteBatch.Begin();
 
-        //_spriteBatch.Draw(testImage.GetTexture2D(), new Vector2(50, 50), Microsoft.Xna.Framework.Color.White);
-        testUI._Draw(_spriteBatch);
+        _spriteBatch.Begin();
+        //testUI._Draw(_spriteBatch);
 
         _spriteBatch.End();
+
+        Container._Draw(_spriteBatch);
 
         _imGuiRenderer.BeforeLayout(gameTime);
 

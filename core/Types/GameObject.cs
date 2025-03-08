@@ -1,6 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended.Input;
+using RPGCreator.core.controllers;
 using RPGCreator.core.types.Math.Transform;
+using RPGCreator.core.UI.components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +19,42 @@ namespace RPGCreator.core.types
     /// </summary>
     class GameObject  : BaseObject
     {
+
+        public GameObject parent = null;
+
+        protected bool b_MouseInside = false;
+        public bool IsVisible = true;
+        protected MouseButton LastMousebuttonPressed = MouseButton.None;
+        protected int LastPressTime = 0;
+
+        #region MouseEvents
+        public event EventHandler OnMouseEnter;
+        public event EventHandler OnMouseMove;
+        public event EventHandler OnMouseLeave;
+
+        #region DragEvents
+        public event EventHandler OnDragStart;
+        public event EventHandler OnDragStop;
+        #endregion DragEvents
+
+        #region MouseClickEvents
+        public event EventHandler OnLeftMousePressed;
+        public event EventHandler OnLeftMouseClick;
+        public event EventHandler OnLeftMouseReleased;
+
+        public event EventHandler OnRightMousePressed;
+        public event EventHandler OnRightMouseClick;
+        public event EventHandler OnRightMouseReleased;
+
+        public event EventHandler OnMiddleMousePressed;
+        public event EventHandler OnMiddleMouseClick;
+        public event EventHandler OnMiddleMouseReleased;
+        //public event EventHandler OnLeftMouseDoubleClick;
+        //public event EventHandler OnRightMouseDoubleClick;
+        //public event EventHandler OnMiddleMouseDoubleClick;
+        #endregion MouseClickEvents
+        #endregion MouseEvents
+
 
         protected bool multithread = false;
         protected bool thread_running = false;
@@ -181,7 +221,24 @@ namespace RPGCreator.core.types
             return Game1.Self;
         }
 
-        public Position GetPosition()
+        /// <summary>
+        /// Get the position relative directly to the screen.
+        /// </summary>
+        /// <returns></returns>
+        public Position GetAbsolutePosition()
+        {
+            if(parent != null)
+            {
+                return parent.GetAbsolutePosition() + _Position;
+            }
+            return _Position;
+        }
+
+        /// <summary>
+        /// Get the position relative to the parent (the direct position).
+        /// </summary>
+        /// <returns></returns>
+        public Position GetRelativePosition()
         {
             return _Position;
         }
@@ -201,7 +258,7 @@ namespace RPGCreator.core.types
         /// <param name="position"></param>
         public void SetPosition(Position position)
         {
-            PreSetPositionArgs preArg = new(GetPosition(), position);
+            PreSetPositionArgs preArg = new(GetAbsolutePosition(), position);
             PreSetPosition?.Invoke(this, preArg);
 
             _Position = position;
@@ -232,11 +289,11 @@ namespace RPGCreator.core.types
             PostSetScale?.Invoke(this, postArg);
         }
 
-        public GameObject(params object[] args)
+        public GameObject()
         {
             PreInit?.Invoke(this, this);
             ObjectName = $"Object-{ID}";
-            Init(args);
+            Init(null);
             PostInit?.Invoke(this, this);
         }
 
@@ -255,13 +312,20 @@ namespace RPGCreator.core.types
             throw new NotImplementedException("No overload defined.");
         }
 
+        public virtual void DrawAt(SpriteBatch _sb, Position at)
+        {
+            throw new NotImplementedException("No overload defined.");
+        }
+
         /// <summary>
         /// Inner function that can't be overloaded. This allow the object to call the <see cref="PreDraw"/> event.
         /// </summary>
         public void _Draw(SpriteBatch _sb)
         {
-            if (multithread && !thread_running)
+            if (!IsVisible) return;
+            if (multithread)
             {
+                if (thread_running) return;
                 thread_running = true;
                 Parallel.Invoke(
                     () =>
@@ -280,6 +344,30 @@ namespace RPGCreator.core.types
             }
         }
 
+        public void _DrawAt(SpriteBatch _sb, Position at)
+        {
+            if (!IsVisible) return;
+            if (multithread)
+            {
+                if (thread_running) return;
+                thread_running = true;
+                Parallel.Invoke(
+                    () =>
+                    {
+                        PreDraw?.Invoke(this, null);
+                        DrawAt(_sb, at);
+                        PostDraw?.Invoke(this, null);
+                        thread_running = false;
+                    });
+            }
+            else
+            {
+                PreDraw?.Invoke(this, null);
+                DrawAt(_sb, at);
+                PostDraw?.Invoke(this, null);
+            }
+        }
+
 
         /// <summary>
         /// Called each game frame.<br/>
@@ -292,6 +380,137 @@ namespace RPGCreator.core.types
             throw new NotImplementedException("No overload defined.");
         }
 
+        protected bool IsMouseInside()
+        {
+            if (!IsVisible) return false;
+
+            Point mousePosition = MouseExtended.GetState().Position;
+
+            // Check if object has parent, and in this case, check if the mouse position is inside the parent or not.
+            // This allow us to not have false positive if this object is hidden inside the parent.
+            if (parent != null)
+            {
+                if (!((BaseUI)parent).IsMouseInside())
+                {
+                    return false;
+                }
+            }
+
+            if (mousePosition.X < GetAbsolutePosition().X + GetScale().X &&
+                mousePosition.X > GetAbsolutePosition().X &&
+                mousePosition.Y < GetAbsolutePosition().Y + GetScale().Y &&
+                mousePosition.Y > GetAbsolutePosition().Y)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public void CheckMouseClickEvent(GameTime gameTime, ButtonState State, MouseButton Type, EventHandler ePressed, EventHandler eReleased, EventHandler eClicked)
+        {
+            if (State == ButtonState.Pressed)
+            {
+                ePressed?.Invoke(this, null);
+                if (LastMousebuttonPressed != Type)
+                {
+                    LastMousebuttonPressed = Type;
+                    LastPressTime = gameTime.ElapsedGameTime.Milliseconds;
+                }
+                else
+                {
+                    LastMousebuttonPressed = Type;
+                    LastPressTime += gameTime.ElapsedGameTime.Milliseconds;
+                }
+            }
+            else
+            {
+                if (LastPressTime <= 200 && LastMousebuttonPressed == Type)
+                {
+                    eClicked?.Invoke(this, null);
+                    LastMousebuttonPressed = MouseButton.None;
+                    LastPressTime = 0;
+                }
+                else if (LastMousebuttonPressed == Type)
+                {
+                    LastMousebuttonPressed = MouseButton.None;
+                    LastPressTime = 0;
+                }
+                eReleased?.Invoke(this, null);
+            }
+        }
+
+        public void CheckCursorPosition(GameTime gameTime)
+        {
+            if (IsMouseInside())
+            {
+                if (!b_MouseInside)
+                {
+                    MouseController.InObject(this);
+                }
+            }
+            else
+            {
+                if (b_MouseInside)
+                {
+                    if (MouseController.LastObject() != this)
+                    {
+                        return;
+                    }
+                    MouseController.OutObject(this);
+                }
+            }
+            if (IsMouseInside())
+            {
+                if (b_MouseInside)
+                {
+                    if (MouseExtended.GetState().DeltaPosition != new Point(0, 0))
+                    {
+
+                        OnMouseMove?.Invoke(this, null);
+                    }
+                }
+                else
+                {
+                    //MouseController.InObject(this);
+                    b_MouseInside = true;
+                    OnMouseEnter?.Invoke(this, null);
+                }
+                CheckMouseClickEvent(gameTime, MouseExtended.GetState().LeftButton, MouseButton.Left, OnLeftMousePressed, OnLeftMouseReleased, OnLeftMouseClick);
+                CheckMouseClickEvent(gameTime, MouseExtended.GetState().RightButton, MouseButton.Right, OnRightMousePressed, OnRightMouseReleased, OnRightMouseClick);
+                CheckMouseClickEvent(gameTime, MouseExtended.GetState().MiddleButton, MouseButton.Middle, OnMiddleMousePressed, OnMiddleMouseReleased, OnMiddleMouseClick);
+            }
+            else
+            {
+                if (b_MouseInside)
+                {
+                    b_MouseInside = false;
+
+                    switch (LastMousebuttonPressed)
+                    {
+                        case MouseButton.Left:
+                            {
+                                OnLeftMouseReleased?.Invoke(this, null);
+                            }
+                            break;
+                        case MouseButton.Middle:
+                            {
+                                OnMiddleMouseReleased?.Invoke(this, null);
+                            }
+                            break;
+                        case MouseButton.Right:
+                            {
+                                OnRightMouseReleased?.Invoke(this, null);
+                            }
+                            break;
+                    }
+                    LastMousebuttonPressed = MouseButton.None;
+                    LastPressTime = 0;
+                }
+            }
+        }
+
         /// <summary>
         /// Inner function that can't be overloaded. This allow the object to call the <see cref="PreUpdate"/> event.
         /// </summary>
@@ -299,6 +518,7 @@ namespace RPGCreator.core.types
         public void _Update(GameTime gameTime)
         {
             PreUpdate?.Invoke(this, gameTime);
+            CheckCursorPosition(gameTime);
             Update(gameTime);
             PostUpdate?.Invoke(this, null);
         }
