@@ -16,6 +16,11 @@ namespace RPGCreator.core.types.Math.Transform
 
         public readonly bool Is2D => Z.HasValue;
 
+        public override string ToString()
+        {
+            return $"{X}, {Y}, {Z}";
+        }
+
         public void Rescale(float x, float y, float? z = null)
         {
             X = x; Y = y; Z = z;
@@ -29,7 +34,7 @@ namespace RPGCreator.core.types.Math.Transform
         public static bool operator <(Scale scale1, Scale scale2)
         {
 
-            if (scale1.IsSameDimension(scale2))
+            if (!scale1.IsSameDimension(scale2))
             {
                 throw new InvalidOperationException("Cannot compare 2D and 3D scales.");
             }
@@ -37,7 +42,7 @@ namespace RPGCreator.core.types.Math.Transform
         }
         public static bool operator >(Scale scale1, Scale scale2)
         {
-            if (scale1.IsSameDimension(scale2))
+            if (!scale1.IsSameDimension(scale2))
             {
                 throw new InvalidOperationException("Cannot compare 2D and 3D scales.");
             }
@@ -46,7 +51,7 @@ namespace RPGCreator.core.types.Math.Transform
 
         public static Scale operator +(Scale scale1, Scale scale2)
         {
-            if (scale1.IsSameDimension(scale2))
+            if (!scale1.IsSameDimension(scale2))
             {
                 throw new InvalidOperationException("Cannot add 2D and 3D scales.");
             }
@@ -56,6 +61,21 @@ namespace RPGCreator.core.types.Math.Transform
             if (scale1.Is2D)
             {
                 scale1.Z += scale2.Z;
+            }
+            return scale1;
+        }
+        public static Scale operator -(Scale scale1, Scale scale2)
+        {
+            if (scale1.IsSameDimension(scale2))
+            {
+                throw new InvalidOperationException("Cannot add 2D and 3D scales.");
+            }
+
+            scale1.X -= scale2.X;
+            scale1.Y -= scale2.Y;
+            if (scale1.Is2D)
+            {
+                scale1.Z -= scale2.Z;
             }
             return scale1;
         }

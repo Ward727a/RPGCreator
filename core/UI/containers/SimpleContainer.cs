@@ -21,6 +21,9 @@ namespace RPGCreator.core.UI.containers
         protected List<BaseUI> Childs = [];
         protected Dictionary<string, int> ChildsIndexes = [];
 
+        public event EventHandler<BaseUI> OnAddChildren;
+        public event EventHandler<BaseUI> OnRemoveChildren;
+
         public SimpleContainer(Scale scale)
         {
             CallPreInit();
@@ -51,6 +54,7 @@ namespace RPGCreator.core.UI.containers
             }
             ChildsIndexes.Add(child.ObjectName, Childs.Count);
             Childs.Add(child);
+            OnAddChildren(this, child);
             return true;
         }
 
@@ -63,6 +67,7 @@ namespace RPGCreator.core.UI.containers
             }
             Childs[index].parent = null;
             Childs.RemoveAt(index);
+            OnRemoveChildren(this, child);
 
             return true;
         }
@@ -75,6 +80,7 @@ namespace RPGCreator.core.UI.containers
                 return false;
             }
             Childs[index].parent = null;
+            OnRemoveChildren(this, Childs[index]);
             Childs.RemoveAt(index);
 
             return true;

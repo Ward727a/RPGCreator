@@ -5,7 +5,7 @@ using ImGuiNET.SampleProgram.XNA;
 using Serilog;
 using RPGCreator.core.logs;
 using RPGCreator.core.debug;
-using RPGCreator.core.types.objects.resources;
+//using RPGCreator.core.types..resources;
 using System.IO;
 using RPGCreatorLib.ContentPipeline.TXT;
 using RPGCreator.core;
@@ -17,6 +17,7 @@ using RPGCreator.core.UI.components.buttons;
 using RPGCreator.core.UI.containers;
 using RPGCreator.core.types.Math.Transform;
 using RPGCreator.core.helpers;
+using RPGCreator.core.types.objects.resources;
 
 namespace RPGCreator;
 
@@ -75,7 +76,7 @@ public class Game1 : Game
 
         //Log.Logger.Debug($"Base Gitignore: {BaseContent.GetGitignore()}");
 
-        Container = new(new Scale(100, 200));
+        Container = new(new Scale(100, 50));
         Container.SetPosition(new Position(150, 150));
         Container.allowYScroll = true;
         Container.allowXScroll = true;
