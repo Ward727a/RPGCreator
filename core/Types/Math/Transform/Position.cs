@@ -95,9 +95,24 @@ namespace RPGCreator.core.types.Math.Transform
 
             pos.X += scale.X;
             pos.Y += scale.Y;
-            if(pos.Is2D)
+            if (pos.Is2D)
             {
                 pos.Z += scale.Z;
+            }
+            return pos;
+        }
+        public static Position operator -(Position pos, Scale scale)
+        {
+            if (pos.Is2D != scale.Is2D)
+            {
+                throw new InvalidOperationException("Cannot remove 2D and 3D scale/position");
+            }
+
+            pos.X -= scale.X;
+            pos.Y -= scale.Y;
+            if (pos.Is2D)
+            {
+                pos.Z -= scale.Z;
             }
             return pos;
         }

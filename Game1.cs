@@ -18,6 +18,7 @@ using RPGCreator.core.UI.containers;
 using RPGCreator.core.types.Math.Transform;
 using RPGCreator.core.helpers;
 using RPGCreator.core.types.objects.resources;
+using System;
 
 namespace RPGCreator;
 
@@ -84,6 +85,10 @@ public class Game1 : Game
         testUI = new();
         testUI.SetScale(new(100, 50));
         testUI.SetPosition(new(0, 0));
+        testUI.OnPressed += (object sender, EventArgs e) =>
+        {
+            ((BaseButton)sender).SetScale(new Scale(((BaseButton)sender).GetScale().X + 5, ((BaseButton)sender).GetScale().Y + 5));
+        };
         Container.AddChild(testUI);
         testUI = new();
         testUI.SetScale(new(100, 50));
