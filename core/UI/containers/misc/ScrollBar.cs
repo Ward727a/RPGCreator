@@ -67,13 +67,16 @@ namespace RPGCreator.core.UI.containers.misc
                     positionY = BodyScale;
                 }
                 TotalScale = ((ScrollContainer)parent).ScrollBounds.Y;
-                ThumbPosition = (((ScrollContainer)parent).TotalScrollY * DisplayScale) / (TotalScale);
+                ThumbPosition = Math.Abs((((ScrollContainer)parent).TotalScrollY * DisplayScale) / (TotalScale));
                 DisplayScale = parent.GetScale().Y;
                 if (_sb.IsBegin)
                 {
                     _sb.FillRectangle(new Vector2(positionX, positionY), new SizeF(BodyScale, DisplayScale), Color.Purple);
                     float SizeRatio = (Math.Min(DisplayScale / TotalScale, 1));
-                    _sb.FillRectangle(new Vector2(positionX + (BodyScale - ThumbScale)/2, ((ThumbPosition * -1) + (BodyScale - ThumbScale) / 2)), new SizeF(ThumbScale, (DisplayScale * SizeRatio) - (BodyScale - ThumbScale)), Color.RosyBrown);
+                    float CombinedMargin = 2; // This determine the maximum X and Y for the margin (so if we have (MarginTop = 1 && MarginBottom = 1) then it should be equal to 2 (MT + MB) as we let only 1 pixel as margin by side
+                    float MarginBySide = 1; // This determine the amount for 1 side (TOP for example)
+                    // What's is happening below is made with a lots of tests and retry, I can't really precise what exactly happen
+                    _sb.FillRectangle(new Vector2(positionX + MarginBySide, ((ThumbPosition) + MarginBySide)), new SizeF(ThumbScale, (DisplayScale * SizeRatio) - CombinedMargin), Color.RosyBrown);
                 }
             } else
             {
@@ -87,13 +90,16 @@ namespace RPGCreator.core.UI.containers.misc
                 }
                 positionY = (parent.GetScale().Y) - BodyScale;
                 TotalScale = ((ScrollContainer)parent).ScrollBounds.X;
-                ThumbPosition = (((ScrollContainer)parent).TotalScrollX * DisplayScale) / (TotalScale);
+                ThumbPosition = Math.Abs((((ScrollContainer)parent).TotalScrollX * DisplayScale) / (TotalScale));
                 DisplayScale = parent.GetScale().X;
                 if(_sb.IsBegin)
                 {
                     _sb.FillRectangle(new Vector2(positionX, positionY), new SizeF(DisplayScale, BodyScale), Color.GreenYellow);
                     float SizeRatio = (Math.Min(DisplayScale / TotalScale, 1));
-                    _sb.FillRectangle(new Vector2(((ThumbPosition*-1) + (BodyScale - ThumbScale) / 2), positionY + (BodyScale - ThumbScale)/2), new SizeF((DisplayScale * SizeRatio) - (BodyScale - ThumbScale), ThumbScale), Color.Blue);
+                    float CombinedMargin = 2;
+                    float MarginBySide = 1;
+                    // What's is happening below is made with a lots of tests and retry, I can't really precise what exactly happen
+                    _sb.FillRectangle(new Vector2(((ThumbPosition) + MarginBySide), positionY + MarginBySide), new SizeF((DisplayScale * SizeRatio) - CombinedMargin, ThumbScale), Color.Blue);
                 }
             }
 
