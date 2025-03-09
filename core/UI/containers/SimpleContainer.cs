@@ -25,7 +25,7 @@ namespace RPGCreator.core.UI.containers
         }
 
         public ALIGN_ITEM AlignItem = ALIGN_ITEM.TOP_TO_BOTTOM;
-
+        
         protected RenderTarget2D render;
         protected List<BaseUI> Childs = [];
         protected Dictionary<string, int> ChildsIndexes = [];
@@ -59,7 +59,14 @@ namespace RPGCreator.core.UI.containers
             if (Childs.Count > 0)
             {
                 //child.SetPosition(new(child.GetRelativePosition().X, child.GetRelativePosition().Y + Childs.Last().GetScale().Y));
-                Log.Logger.Verbose($"New position: {new Position(child.GetRelativePosition().X, child.GetRelativePosition().Y + Childs.Last().GetScale().Y)}");
+                if(AlignItem == ALIGN_ITEM.TOP_TO_BOTTOM)
+                {
+                    child.SetPosition(new(child.GetRelativePosition().X, child.GetRelativePosition().Y + Childs.Last().GetScale().Y));
+                } else
+                {
+                    child.SetPosition(new(child.GetRelativePosition().X + Childs.Last().GetScale().X, child.GetRelativePosition().Y));
+                }
+                //Log.Logger.Verbose($"New position: {new Position(child.GetRelativePosition().X, child.GetRelativePosition().Y + Childs.Last().GetScale().Y)}");
             }
             ChildsIndexes.Add(child.ObjectName, Childs.Count);
             Childs.Add(child);

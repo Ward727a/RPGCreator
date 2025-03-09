@@ -4,6 +4,7 @@ using MonoGame.Extended.Input;
 using RPGCreator.core.helpers;
 using RPGCreator.core.types.Math.Transform;
 using RPGCreator.core.UI.components;
+using RPGCreator.core.UI.containers.misc;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,9 @@ namespace RPGCreator.core.UI.containers
         public bool allowXScroll = false;
         public bool allowYScroll = false;
 
-        protected Scale ScrollBounds = new();
+        public Scale ScrollBounds = new();
+
+        public ScrollBar Scrollbar = new();
 
         public int TotalScrollX = 0;
         public int TotalScrollY = 0;
@@ -36,7 +39,15 @@ namespace RPGCreator.core.UI.containers
 
             OnAddChildren += OnAddedChildren;
             OnRemoveChildren += OnRemovedChildren;
-
+            Scrollbar.parent = this;
+            if (AlignItem == ALIGN_ITEM.TOP_TO_BOTTOM)
+            {
+                Scrollbar.Direction = ScrollBar.SCROLLBAR_DIRECTION.VERTICAL;
+            }
+            else
+            {
+                Scrollbar.Direction = ScrollBar.SCROLLBAR_DIRECTION.HORIZONTAL;
+            }
             return this;
         }
 
@@ -112,7 +123,6 @@ namespace RPGCreator.core.UI.containers
         public override void DrawContents(SpriteBatchExtended _sb)
         {
             _sb.Begin();
-
             Scale OldScale = new();
             foreach (BaseUI child in Childs)
             {
@@ -129,6 +139,7 @@ namespace RPGCreator.core.UI.containers
                 child._Draw(_sb);
                 OldScale += child.GetScale();
             }
+            Scrollbar._Draw(_sb);
             _sb.End();
         }
 
