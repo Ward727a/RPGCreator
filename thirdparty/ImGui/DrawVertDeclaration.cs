@@ -1,6 +1,7 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using ImGuiNET;
+using Microsoft.Xna.Framework.Graphics;
 
-namespace ImGuiNET.SampleProgram.XNA
+namespace RPGCreator.thirdparty.ImGui
 {
     public static class DrawVertDeclaration
     {

@@ -20,7 +20,7 @@ namespace RPGCreator.thirdparty.ImageSharp
         /// </summary>
         /// <param name="imageIn">The Image to convert</param>
         /// <returns>An byte array containing the JPG format Image</returns>
-        public static byte[] ToArray(this SixLabors.ImageSharp.Image imageIn)
+        public static byte[] ToArray(this Image imageIn)
         {
             using (MemoryStream ms = new MemoryStream())
             {
@@ -35,7 +35,7 @@ namespace RPGCreator.thirdparty.ImageSharp
         /// <param name="imageIn">The Image to convert</param>
         /// <param name="fmt"></param>
         /// <returns>An byte array containing the JPG format Image</returns>
-        public static byte[] ToArray(this SixLabors.ImageSharp.Image imageIn, IImageFormat fmt)
+        public static byte[] ToArray(this Image imageIn, IImageFormat fmt)
         {
             using (MemoryStream ms = new MemoryStream())
             {

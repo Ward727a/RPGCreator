@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using ImGuiNET.SampleProgram.XNA;
 using Serilog;
 using RPGCreator.core.logs;
 using RPGCreator.core.debug;
@@ -21,6 +20,8 @@ using RPGCreator.core.types.objects.resources;
 using System;
 using MonoGameGum.GueDeriving;
 using RenderingLibrary;
+using RPGCreator.thirdparty.ImGui;
+using ImGuiNET;
 
 namespace RPGCreator;
 
@@ -53,11 +54,18 @@ public class Game1 : Game
         Self = this;
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
+        
     }
 
     protected override void Initialize()
     {
         MonoGameGum.GumService.Default.Initialize(this);
+
+        var rectangle = new ColoredRectangleRuntime();
+        rectangle.Width = 100;
+        rectangle.Height = 100;
+        rectangle.Color = Microsoft.Xna.Framework.Color.White;
+
         rectangle.AddToManagers(SystemManagers.Default, null);
         _imGuiRenderer = new ImGuiRenderer(this);
         _imGuiRenderer.RebuildFontAtlas();

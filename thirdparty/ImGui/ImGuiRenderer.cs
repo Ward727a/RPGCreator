@@ -4,8 +4,9 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using ImGuiNET;
 
-namespace ImGuiNET.SampleProgram.XNA
+namespace RPGCreator.thirdparty.ImGui
 {
     /// <summary>
     /// ImGui renderer for use with XNA-likes (FNA & MonoGame)
@@ -29,10 +30,10 @@ namespace ImGuiNET.SampleProgram.XNA
         private int _indexBufferSize;
 
         // Textures
-        private Dictionary<IntPtr, Texture2D> _loadedTextures;
+        private Dictionary<nint, Texture2D> _loadedTextures;
 
         private int _textureId;
-        private IntPtr? _fontTextureId;
+        private nint? _fontTextureId;
 
         // Input
         private int _scrollWheelValue;
@@ -42,13 +43,13 @@ namespace ImGuiNET.SampleProgram.XNA
 
         public ImGuiRenderer(Game game)
         {
-            var context = ImGui.CreateContext();
-            ImGui.SetCurrentContext(context);
+            var context = ImGuiNET.ImGui.CreateContext();
+            ImGuiNET.ImGui.SetCurrentContext(context);
 
             _game = game ?? throw new ArgumentNullException(nameof(game));
             _graphicsDevice = game.GraphicsDevice;
 
-            _loadedTextures = new Dictionary<IntPtr, Texture2D>();
+            _loadedTextures = new Dictionary<nint, Texture2D>();
 
             _rasterizerState = new RasterizerState()
             {
@@ -66,17 +67,17 @@ namespace ImGuiNET.SampleProgram.XNA
         #region ImGuiRenderer
 
         /// <summary>
-        /// Creates a texture and loads the font data from ImGui. Should be called when the <see cref="GraphicsDevice" /> is initialized but before any rendering is done
+        /// Creates a texture and loads the font data from ImGuiNET.ImGui. Should be called when the <see cref="GraphicsDevice" /> is initialized but before any rendering is done
         /// </summary>
         public virtual unsafe void RebuildFontAtlas()
         {
             // Get font texture from ImGui
-            var io = ImGui.GetIO();
+            var io = ImGuiNET.ImGui.GetIO();
             io.Fonts.GetTexDataAsRGBA32(out byte* pixelData, out int width, out int height, out int bytesPerPixel);
 
             // Copy the data to a managed array
             var pixels = new byte[width * height * bytesPerPixel];
-            unsafe { Marshal.Copy(new IntPtr(pixelData), pixels, 0, pixels.Length); }
+            unsafe { Marshal.Copy(new nint(pixelData), pixels, 0, pixels.Length); }
 
             // Create and register the texture as an XNA texture
             var tex2d = new Texture2D(_graphicsDevice, width, height, false, SurfaceFormat.Color);
@@ -94,11 +95,11 @@ namespace ImGuiNET.SampleProgram.XNA
         }
 
         /// <summary>
-        /// Creates a pointer to a texture, which can be passed through ImGui calls such as <see cref="ImGui.Image" />. That pointer is then used by ImGui to let us know what texture to draw
+        /// Creates a pointer to a texture, which can be passed through ImGui calls such as <see cref="ImGuiNET.ImGui.Image" />. That pointer is then used by ImGui to let us know what texture to draw
         /// </summary>
-        public virtual IntPtr BindTexture(Texture2D texture)
+        public virtual nint BindTexture(Texture2D texture)
         {
-            var id = new IntPtr(_textureId++);
+            var id = new nint(_textureId++);
 
             _loadedTextures.Add(id, texture);
 
@@ -108,7 +109,7 @@ namespace ImGuiNET.SampleProgram.XNA
         /// <summary>
         /// Removes a previously created texture pointer, releasing its reference and allowing it to be deallocated
         /// </summary>
-        public virtual void UnbindTexture(IntPtr textureId)
+        public virtual void UnbindTexture(nint textureId)
         {
             _loadedTextures.Remove(textureId);
         }
@@ -118,21 +119,21 @@ namespace ImGuiNET.SampleProgram.XNA
         /// </summary>
         public virtual void BeforeLayout(GameTime gameTime)
         {
-            ImGui.GetIO().DeltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            ImGuiNET.ImGui.GetIO().DeltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             UpdateInput();
 
-            ImGui.NewFrame();
+            ImGuiNET.ImGui.NewFrame();
         }
 
         /// <summary>
-        /// Asks ImGui for the generated geometry data and sends it to the graphics pipeline, should be called after the UI is drawn using ImGui.** calls
+        /// Asks ImGui for the generated geometry data and sends it to the graphics pipeline, should be called after the UI is drawn using ImGuiNET.ImGui.** calls
         /// </summary>
         public virtual void AfterLayout()
         {
-            ImGui.Render();
+            ImGuiNET.ImGui.Render();
 
-            unsafe { RenderDrawData(ImGui.GetDrawData()); }
+            unsafe { RenderDrawData(ImGuiNET.ImGui.GetDrawData()); }
         }
 
         #endregion ImGuiRenderer
@@ -144,7 +145,7 @@ namespace ImGuiNET.SampleProgram.XNA
         /// </summary>
         protected virtual void SetupInput()
         {
-            var io = ImGui.GetIO();
+            var io = ImGuiNET.ImGui.GetIO();
 
             // MonoGame-specific //////////////////////
             _game.Window.TextInput += (s, a) =>
@@ -160,7 +161,7 @@ namespace ImGuiNET.SampleProgram.XNA
             //{
             //    if (c == '\t') return;
 
-            //    ImGui.GetIO().AddInputCharacter(c);
+            //    ImGuiNET.ImGui.GetIO().AddInputCharacter(c);
             //};
             ///////////////////////////////////////////
         }
@@ -172,7 +173,7 @@ namespace ImGuiNET.SampleProgram.XNA
         {
             _effect = _effect ?? new BasicEffect(_graphicsDevice);
 
-            var io = ImGui.GetIO();
+            var io = ImGuiNET.ImGui.GetIO();
 
             _effect.World = Matrix.Identity;
             _effect.View = Matrix.Identity;
@@ -191,7 +192,7 @@ namespace ImGuiNET.SampleProgram.XNA
         {
             if (!_game.IsActive) return;
 
-            var io = ImGui.GetIO();
+            var io = ImGuiNET.ImGui.GetIO();
 
             var mouse = Mouse.GetState();
             var keyboard = Keyboard.GetState();
@@ -306,7 +307,7 @@ namespace ImGuiNET.SampleProgram.XNA
             _graphicsDevice.DepthStencilState = DepthStencilState.DepthRead;
 
             // Handle cases of screen coordinates != from framebuffer coordinates (e.g. retina displays)
-            drawData.ScaleClipRects(ImGui.GetIO().DisplayFramebufferScale);
+            drawData.ScaleClipRects(ImGuiNET.ImGui.GetIO().DisplayFramebufferScale);
 
             // Setup projection
             _graphicsDevice.Viewport = new Viewport(0, 0, _graphicsDevice.PresentationParameters.BackBufferWidth, _graphicsDevice.PresentationParameters.BackBufferHeight);
