@@ -19,6 +19,8 @@ using RPGCreator.core.types.Math.Transform;
 using RPGCreator.core.helpers;
 using RPGCreator.core.types.objects.resources;
 using System;
+using MonoGameGum.GueDeriving;
+using RenderingLibrary;
 
 namespace RPGCreator;
 
@@ -55,6 +57,8 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
+        MonoGameGum.GumService.Default.Initialize(this);
+        rectangle.AddToManagers(SystemManagers.Default, null);
         _imGuiRenderer = new ImGuiRenderer(this);
         _imGuiRenderer.RebuildFontAtlas();
         MouseExtended.WindowHandle = Mouse.WindowHandle;
@@ -106,6 +110,7 @@ public class Game1 : Game
 
     protected override void Update(GameTime gameTime)
     {
+        MonoGameGum.GumService.Default.Update(this, gameTime);
         MouseExtended.Update();
         KeyboardExtended.Update();
 
@@ -119,6 +124,7 @@ public class Game1 : Game
     {
         GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.CornflowerBlue);
 
+        MonoGameGum.GumService.Default.Draw();
 
         _spriteBatch.Begin();
         //testUI._Draw(_spriteBatch);
