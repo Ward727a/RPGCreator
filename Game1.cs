@@ -16,15 +16,21 @@ using MonoGameGum.GueDeriving;
 using RenderingLibrary;
 using RPGCreator.thirdparty.ImGui;
 using MonoGameGum.Forms.Controls;
+using Gum.Wireframe;
+using System;
+using RPGCreator.core.interfaces.launcher;
+using MonoGame.OpenGL;
+using System.Runtime.InteropServices;
 
 namespace RPGCreator;
 
-public class Game1 : Game
+public partial class Game1 : Game
 {
-
     ResourcesImages testImage;
 
     StackPanel Root;
+
+    Launcher launcher;
 
     static public Game1 Self;
 
@@ -47,35 +53,63 @@ public class Game1 : Game
         Self = this;
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
-        
     }
 
     protected override void Initialize()
     {
-        var gumProject = MonoGameGum.GumService.Default.Initialize(this);
+        MonoGameGum.GumService.Default.Initialize(this);
+
+
+        _graphics.PreferredBackBufferWidth = 940;
+        _graphics.PreferredBackBufferHeight = 520;
+        _graphics.ApplyChanges();
+        launcher = new(_graphics.GraphicsDevice);
+        SDL_Wrapper.SetWindowMinSize(Window.Handle, 920, 517);
+
 
         Root = new();
         Root.Visual.AddToManagers();
 
-        var button = new Button();
-
-        Root.AddChild(button);
-        button.Text = "Click me";
-
-        button.Visual.Width = 350;
-
-        button.Click += (_, _) =>
-            button.Text = $"Clicked at {System.DateTime.Now}";
-
         _imGuiRenderer = new ImGuiRenderer(this);
+        BaseContent.LoadBaseContent(Content);
+        // Adding different ImGui Font size.
+        ImGui_Helper.AddFont(13);
+        ImGui_Helper.AddFont(16);
+        ImGui_Helper.AddFont(18);
+        ImGui_Helper.AddFont(20);
+        ImGui_Helper.AddFont(24);
+        ImGui_Helper.AddFont(32);
         _imGuiRenderer.RebuildFontAtlas();
-        MouseExtended.WindowHandle = Mouse.WindowHandle;
+
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Verbose()
             .WriteTo.ImGuiLogger()
             .CreateLogger();
 
+        // This allows you to resize:
+        Window.AllowUserResizing = true;
+        // This event is raised whenever a resize occurs, allowing
+        // us to perform custom logic on a resize
+        Window.ClientSizeChanged += HandleClientSizeChanged;
+
         base.Initialize();
+    }
+    private void HandleClientSizeChanged(object sender, EventArgs e)
+    {
+
+        if (_graphics.GraphicsDevice.Viewport.Width < 920 || _graphics.GraphicsDevice.Viewport.Height < 517)
+        {
+            _graphics.PreferredBackBufferWidth = 920;
+            _graphics.PreferredBackBufferHeight = 517;
+            _graphics.ApplyChanges();
+        }
+
+        GraphicalUiElement.CanvasWidth = _graphics.GraphicsDevice.Viewport.Width;
+        GraphicalUiElement.CanvasHeight = _graphics.GraphicsDevice.Viewport.Height;
+
+        // Resize root
+        Root.Visual.UpdateLayout();
+        launcher.HandleClientSizeChanged();
     }
 
     protected override void LoadContent()
@@ -94,21 +128,19 @@ public class Game1 : Game
 
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
+
+        launcher.Update();
     }
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.CornflowerBlue);
-
+        GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.FromNonPremultiplied(new (0.05f, 0.05f, 0.06f, 1)));
 
         MonoGameGum.GumService.Default.Draw();
 
-
         _imGuiRenderer.BeforeLayout(gameTime);
 
-        ImGuiNET.ImGui.Begin("test");
-
-        ImGuiNET.ImGui.End();
+        launcher.Draw();
 
         ImDebug.Logger.RenderLogger();
         

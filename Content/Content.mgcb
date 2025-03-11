@@ -38,3 +38,6 @@
 /processor:BitmapFontProcessor
 /build:Fonts/OpenSans-Regular.fnt
 
+#begin Fonts/Roboto-Regular.ttf
+/copy:Fonts/Roboto-Regular.ttf
+

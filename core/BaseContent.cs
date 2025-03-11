@@ -4,6 +4,7 @@ using MonoGame.Extended.BitmapFonts;
 using RPGCreatorLib.ContentPipeline.TXT;
 using Serilog;
 using System;
+using System.IO;
 using System.Reflection.Metadata;
 
 /*
@@ -18,6 +19,12 @@ namespace RPGCreator.core
     /// </summary>
     class BaseContent
     {
+
+        static private void _ErrorMessage(string target, string actually_is)
+        {
+            Log.Logger.Error($"{target} is actually {actually_is}. Maybe the LoadBaseContent wasn't called?");
+        }
+
         /// <summary>
         /// This allow the class to load content from the MGCB Pipeline.<br/>
         /// This should be called in the main process (Game.cs).
@@ -27,6 +34,7 @@ namespace RPGCreator.core
         {
             Gitignore = content.Load<TXTAsset>("BaseContent/.gitignore").Content;
             BasicFont = content.Load<BitmapFont>("Fonts/OpenSans-Regular");
+            ImGuiFont = Path.Combine(content.RootDirectory, "Fonts/Roboto-Regular.ttf");
         }
 
         #region NullTexture
@@ -53,7 +61,7 @@ namespace RPGCreator.core
         {
             if(Gitignore == string.Empty)
             {
-                Log.Logger.Error("Gitignore is actually empty. Maybe the LoadBaseContent wasn't called?");
+                _ErrorMessage("Gitignore", "empty");
                 return "#Base Gitignore couldn't be found when generating it, please report it.";
             }
 
@@ -68,11 +76,25 @@ namespace RPGCreator.core
         {
             if(BasicFont == null)
             {
-                Log.Logger.Error("BasicFont is actually null. Maybe the LoadBaseContent wasn't called?");
+                _ErrorMessage("BasicFont", "null");
                 return null;
             }
             return BasicFont;
         }
         #endregion BaseFont
+
+        #region ImGuiFont
+        static private string ImGuiFont;
+
+        static public string GetImGuiFont()
+        {
+            if(ImGuiFont == string.Empty || !File.Exists(ImGuiFont))
+            {
+                _ErrorMessage("ImGuiFont", "empty");
+                return "";
+            }
+            return ImGuiFont;
+        }
+        #endregion ImGuiFont
     }
 }
