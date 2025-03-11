@@ -12,5 +12,6 @@ namespace RPGCreator.core.config
         public static ConfigLog log = new();
         public static ConfigDebug debug = new();
         public static ConfigProject currentProject = new();
+        public static ConfigPlugins plugins = new();
     }
 }

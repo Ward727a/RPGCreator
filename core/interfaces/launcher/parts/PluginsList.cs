@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework.Graphics;
+using RPGCreator.core.config;
 using RPGCreator.core.helpers;
 using System;
 using System.Collections.Generic;
@@ -12,9 +13,11 @@ namespace RPGCreator.core.interfaces.launcher.parts
 {
     class PluginsList : InterfacesMain
     {
+        PluginsItem pi;
         public PluginsList(GraphicsDevice graphicsDevice, float AboutSizeY) : base(graphicsDevice)
         {
             Title = "Launcher-PluginsPart";
+            pi = new(graphics);
             MinSize = new(250, -1);
             MaxSize = new(400, -1);
             SetSize((graphicsDevice.Viewport.Width / 450) * 100, graphicsDevice.Viewport.Height - AboutSizeY);
@@ -29,16 +32,13 @@ namespace RPGCreator.core.interfaces.launcher.parts
             ImGui.SetWindowSize(Size);
 
             ImGui.PushFont(ImGui_Helper.GetFont(16));
-            ImGui_Helper.AlignNextText("Plugins installed", ImGui_Helper.ALIGNEMENT.CENTER);
-            ImGui.Text("Plugins installed");
+            ImGui_Helper.AlignNextText($"Plugins ({Config.plugins.LoadedPlugins.Count} | {Config.plugins.InstalledPlugins.Count})", ImGui_Helper.ALIGNEMENT.CENTER);
+            ImGui.Text($"Plugins ({Config.plugins.LoadedPlugins.Count} | {Config.plugins.InstalledPlugins.Count})");
             ImGui.PopFont();
 
             ImGui.Separator();
 
-            ImGui.Text("Try");
-            ImGui.SameLine();
-            ImGui.TextColored(new(.8f, .2f, .2f, 1), "Test of colored text");
-
+            pi.Draw();
             ImGui.End();
         }
 
