@@ -17,7 +17,7 @@ namespace RPGCreator.core.interfaces.launcher.parts
         public PluginsList(GraphicsDevice graphicsDevice, float AboutSizeY) : base(graphicsDevice)
         {
             Title = "Launcher-PluginsPart";
-            pi = new(graphics);
+            pi = new(graphics, new plugins.BasePlugin("Test of plugin"));
             MinSize = new(250, -1);
             MaxSize = new(400, -1);
             SetSize((graphicsDevice.Viewport.Width / 450) * 100, graphicsDevice.Viewport.Height - AboutSizeY);
@@ -27,7 +27,7 @@ namespace RPGCreator.core.interfaces.launcher.parts
         protected override void OnDraw()
         {
 
-            ImGui.Begin(Title, ref opened, ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar);
+            ImGui.Begin(Title, ref opened, ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoBringToFrontOnFocus);
             ImGui.SetWindowPos(Position);
             ImGui.SetWindowSize(Size);
 

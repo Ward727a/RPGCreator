@@ -21,6 +21,10 @@ using System;
 using RPGCreator.core.interfaces.launcher;
 using MonoGame.OpenGL;
 using System.Runtime.InteropServices;
+using ImGuiNET;
+using RPGCreator.core.config;
+using RPGCreator.core.interfaces.debug;
+using RPGCreator.core.io.datas;
 
 namespace RPGCreator;
 
@@ -31,6 +35,8 @@ public partial class Game1 : Game
     StackPanel Root;
 
     Launcher launcher;
+
+    Debug DebugMainMenu;
 
     static public Game1 Self;
 
@@ -59,11 +65,11 @@ public partial class Game1 : Game
     {
         MonoGameGum.GumService.Default.Initialize(this);
 
-
         _graphics.PreferredBackBufferWidth = 940;
         _graphics.PreferredBackBufferHeight = 520;
         _graphics.ApplyChanges();
         launcher = new(_graphics.GraphicsDevice);
+        DebugMainMenu = new(_graphics.GraphicsDevice);
         SDL_Wrapper.SetWindowMinSize(Window.Handle, 920, 517);
 
 
@@ -71,7 +77,10 @@ public partial class Game1 : Game
         Root.Visual.AddToManagers();
 
         _imGuiRenderer = new ImGuiRenderer(this);
-        BaseContent.LoadBaseContent(Content);
+
+        BaseContent.Folders.LoadFolders(); // Loading / Creating the needed folders.
+
+        BaseContent.LoadBaseContent(Content); // Loading basic content.
         // Adding different ImGui Font size.
         ImGui_Helper.AddFont(13);
         ImGui_Helper.AddFont(16);
@@ -126,8 +135,9 @@ public partial class Game1 : Game
         MouseExtended.Update();
         KeyboardExtended.Update();
 
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-            Exit();
+
+        if (KeyboardExtended.GetState().IsAltDown() && KeyboardExtended.GetState().IsControlDown() && KeyboardExtended.GetState().WasKeyPressed(Keys.D))
+            Config.debug.b_Menu = !Config.debug.b_Menu;
 
         launcher.Update();
     }
@@ -142,8 +152,8 @@ public partial class Game1 : Game
 
         launcher.Draw();
 
-        ImDebug.Logger.RenderLogger();
-        
+        DebugMainMenu.Draw();
+
         _imGuiRenderer.AfterLayout();
 
         base.Draw(gameTime);

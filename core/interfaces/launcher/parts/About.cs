@@ -13,7 +13,7 @@ namespace RPGCreator.core.interfaces.launcher.parts
         public About(GraphicsDevice graphicsDevice) : base(graphicsDevice)
         {
             Title = "Launcher-AboutPart";
-            SetSize(graphicsDevice.Viewport.Width, 60);
+            SetSize(graphicsDevice.Viewport.Width, 30);
             Position.X = 0;
             Position.Y = (graphicsDevice.Viewport.Height - Size.Y);
         }
@@ -26,7 +26,7 @@ namespace RPGCreator.core.interfaces.launcher.parts
 
         protected override void OnDraw()
         {
-            ImGui.Begin(Title, ref opened, ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar);
+            ImGui.Begin(Title, ref opened, ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoBringToFrontOnFocus);
             ImGui.SetWindowPos(Position);
             ImGui.SetWindowSize(Size);
             ImGui.End();

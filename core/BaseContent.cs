@@ -5,6 +5,7 @@ using RPGCreatorLib.ContentPipeline.TXT;
 using Serilog;
 using System;
 using System.IO;
+using System.Reflection;
 using System.Reflection.Metadata;
 
 /*
@@ -96,5 +97,125 @@ namespace RPGCreator.core
             return ImGuiFont;
         }
         #endregion ImGuiFont
+
+        #region Folders
+
+        static public class Folders
+        {
+            static public void LoadFolders()
+            {
+                GetAppdata();
+                // Inside %AppData%/RPG Creator
+                GetData();
+                GetConfig();
+                GetPlugins();
+
+                // Inside %AppData%/RPG Creator/data
+                GetProjects();
+
+                GetSoftware();
+            }
+
+            static private string _appdata = "";
+                static private string _data = "";
+                    static private string _projects = "";
+                static private string _config = "";
+                static private string _plugins = "";
+
+            static private string _software = "";
+
+            static public string GetData()
+            {
+                if(_data == string.Empty)
+                {
+                    _data = Path.Combine(GetAppdata(), "data");
+
+                    if(!Directory.Exists(_data))
+                    {
+                        Directory.CreateDirectory(_data);
+                    }
+                }
+
+                return _data;
+            }
+
+            static public string GetProjects()
+            {
+                if(_projects == string.Empty)
+                {
+                    _projects = Path.Combine(GetData(), "projects");
+
+                    if(!Directory.Exists(_projects))
+                    {
+                        Directory.CreateDirectory(_projects);
+                    }
+                }
+
+                return _projects;
+            }
+
+            static public string GetConfig()
+            {
+
+                if(_config == string.Empty)
+                {
+                    _config = Path.Combine(GetAppdata(), "config");
+
+                    if(!Directory.Exists(_config))
+                    {
+                        Directory.CreateDirectory(_config);
+                    }
+                }
+
+                return _config;
+            }
+
+            static public string GetPlugins()
+            {
+                if(_plugins == string.Empty)
+                {
+                    _plugins = Path.Combine(GetAppdata(), "plugins");
+
+                    if(!Directory.Exists(_plugins))
+                    {
+                        Directory.CreateDirectory(_plugins);
+                    }
+                }
+
+                return _plugins;
+            }
+
+            static public string GetAppdata()
+            {
+                if (_appdata == string.Empty)
+                {
+                    string userAppdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+
+                    _appdata = Path.Combine(userAppdata, "RPG Creator");
+
+                    if(!Directory.Exists(_appdata))
+                    {
+                        Directory.CreateDirectory(_appdata);
+                    }
+                }
+                return _appdata;
+            }
+
+            static public string GetSoftware()
+            {
+                if(_software == string.Empty)
+                {
+                    _software = Assembly.GetEntryAssembly().Location;
+
+                    if(!Directory.Exists(_software))
+                    {
+                        Log.Logger.Fatal("Software folder couldn't be found? This is an internal error, please report it!");
+                    }
+                }
+
+                return _software;
+            }
+        }
+        #endregion Folders
     }
 }

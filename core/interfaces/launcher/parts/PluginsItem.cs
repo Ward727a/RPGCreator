@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended.Input;
 using RPGCreator.core.helpers;
+using RPGCreator.core.plugins;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +14,14 @@ namespace RPGCreator.core.interfaces.launcher.parts
 {
     class PluginsItem : InterfacesMain
     {
+        public BasePlugin plugin;
+
         private bool ChangedCursor = false;
-        public bool outdated = true;
         public bool IsCollapsed = false;
-        public PluginsItem(GraphicsDevice graphicsDevice) : base(graphicsDevice)
+        public PluginsItem(GraphicsDevice graphicsDevice, BasePlugin forPlugin) : base(graphicsDevice)
         {
             Title = "PluginsPart-Test";
+            plugin = forPlugin;
         }
 
         protected override void OnDraw()
@@ -26,14 +29,14 @@ namespace RPGCreator.core.interfaces.launcher.parts
             ImGui.BeginChild(Title, new(0, 0), ImGuiChildFlags.Borders | ImGuiChildFlags.AutoResizeY);
             ImGui.BeginGroup();
 
-            if (outdated)
-                ImGui.TextColored(new(1, 0.4f, .4f, 1), "Test plugin");
+            if (plugin.IsOutdated())
+                ImGui.TextColored(new(1, 0.4f, .4f, 1), plugin.Name);
             else
-                ImGui.Text("Test plugin");
+                ImGui.Text(plugin.Name);
 
             ImGui.SameLine();
-            ImGui_Helper.AlignNextText("V1.0.0", ImGui_Helper.ALIGNEMENT.RIGHT);
-            ImGui.Text("V1.0.0");
+            ImGui_Helper.AlignNextText($"V{plugin.PluginVersion}", ImGui_Helper.ALIGNEMENT.RIGHT);
+            ImGui.Text($"V{plugin.PluginVersion}");
             ImGui.EndGroup();
 
             if(ImGui.IsItemClicked())
@@ -46,7 +49,7 @@ namespace RPGCreator.core.interfaces.launcher.parts
                 ImGui.BeginTooltip();
                 ImGui.Text("Plugin state:");
                 ImGui.SameLine();
-                if (outdated)
+                if (plugin.IsOutdated())
                     ImGui.TextColored(new(1, .4f, .4f, 1), "Outdated");
                 else
                     ImGui.TextColored(new(1, 0.6f, 0.6f, 1), "Disabled");
@@ -56,25 +59,29 @@ namespace RPGCreator.core.interfaces.launcher.parts
                 else
                     ImGui.Text("Click to collapse this plugin information.");
 
-                if(outdated)
+                if(plugin.IsOutdated())
                 {
                     ImGui.SeparatorText("Error");
                     ImGui.Text("This plugin is outdated and can't be used.");
                 }
 
                 ImGui.EndTooltip();
-                MouseExtended.SetCursor(Microsoft.Xna.Framework.Input.MouseCursor.Hand);
+                MouseExtended.SetCursor(MouseCursor.Hand);
                 ChangedCursor = true;
             } else if(ChangedCursor)
             {
-                MouseExtended.SetCursor(Microsoft.Xna.Framework.Input.MouseCursor.Arrow);
+                MouseExtended.SetCursor(MouseCursor.Arrow);
                 ChangedCursor = false;
             }
 
             if (!IsCollapsed)
             {
                 ImGui.Separator();
-                ImGui.Text("Context");
+
+                if(plugin.Description.Length > 120)
+                    ImGui.TextWrapped(plugin.Description.Remove(120));
+                else
+                    ImGui.TextWrapped(plugin.Description);
             }
             ImGui.EndChild();
         }
