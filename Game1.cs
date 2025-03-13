@@ -126,6 +126,8 @@ public partial class Game1 : Game
         _spriteBatch = new SpriteBatchExtended(GraphicsDevice);
         _graphicsDevice = GraphicsDevice;
         BaseContent.LoadBaseContent(Content);
+
+        ConfigFile.plugins.GetDoc();
     }
 
     protected override void Update(GameTime gameTime)

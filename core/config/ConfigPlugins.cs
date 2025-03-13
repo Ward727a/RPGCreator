@@ -9,6 +9,6 @@ namespace RPGCreator.core.config
     class ConfigPlugins
     {
         public List<string> LoadedPlugins = [];
-        public List<string> InstalledPlugins = [""];
+        public List<string> InstalledPlugins = [];
     }
 }

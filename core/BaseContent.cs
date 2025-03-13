@@ -20,7 +20,7 @@ namespace RPGCreator.core
     /// </summary>
     class BaseContent
     {
-
+        static protected string _contentFolder = "";
         static private void _ErrorMessage(string target, string actually_is)
         {
             Log.Logger.Error($"{target} is actually {actually_is}. Maybe the LoadBaseContent wasn't called?");
@@ -36,6 +36,7 @@ namespace RPGCreator.core
             Gitignore = content.Load<TXTAsset>("BaseContent/.gitignore").Content;
             BasicFont = content.Load<BitmapFont>("Fonts/OpenSans-Regular");
             ImGuiFont = Path.Combine(content.RootDirectory, "Fonts/Roboto-Regular.ttf");
+            _contentFolder = content.RootDirectory;
         }
 
         #region NullTexture
@@ -123,6 +124,43 @@ namespace RPGCreator.core
                 static private string _plugins = "";
 
             static private string _software = "";
+
+            static private string _internals = "";
+                static private string _XSD = "";
+                    static private string _XSD_Configs = "";
+
+            static public string GetContent()
+            {
+                return _contentFolder;
+            }
+
+            static public string GetInternals()
+            {
+                if(_internals == string.Empty)
+                {
+                    _internals = Path.Combine(GetContent(), "Internals");
+                }
+                return _internals;
+            }
+
+            static public string GetXSD()
+            {
+                if(_XSD == string.Empty)
+                {
+                    _XSD = Path.Combine(GetInternals(), "XSD");
+                }
+
+                return _XSD;
+            }
+
+            static public string GetXSDConfig()
+            {
+                if(_XSD_Configs == string.Empty)
+                {
+                    _XSD_Configs = Path.Combine(GetXSD(), "Configs");
+                }
+                return _XSD_Configs;
+            }
 
             static public string GetData()
             {

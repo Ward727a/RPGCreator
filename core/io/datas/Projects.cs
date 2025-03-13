@@ -29,6 +29,7 @@ namespace RPGCreator.core.io.datas
             writer.WriteStartDocument();
 
             writer.WriteStartElement("projects-list");
+            writer.WriteAttributeString("version", GlobalData.EditorVersion.ToString());
 
             writer.WriteEndElement();
             writer.WriteEndDocument();
@@ -55,23 +56,23 @@ namespace RPGCreator.core.io.datas
             }
             return _root;
         }
-        static private IEnumerable<XElement> GetProjectsList()
+        static private IEnumerable<XElement> GetXProjectsList()
         {
             return GetRoot().Descendants("project");
         }
         static private XElement GetXProject(string projectName)
         {
-            return GetProjectsList().Where(x => (string)x.Element("name") == projectName).First();
+            return GetXProjectsList().Where(x => (string)x.Element("name") == projectName).FirstOrDefault();
         }
 
         static public int GetProjectCount()
         {
-            return GetProjectsList().Count();
+            return GetXProjectsList().Count();
         }
 
         static public bool HasProject(string projectName)
         {
-            return GetProjectsList().Select(x => x.Element("name")?.Value ==  projectName).Any();
+            return GetXProjectsList().Select(x => x.Element("name")?.Value ==  projectName).Any();
         }
 
         static public bool RemoveProject(string projectName)
