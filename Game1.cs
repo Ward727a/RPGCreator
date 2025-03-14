@@ -64,6 +64,10 @@ public partial class Game1 : Game
     protected override void Initialize()
     {
         MonoGameGum.GumService.Default.Initialize(this);
+        BaseContent.Folders.LoadFolders(); // Loading / Creating the needed folders.
+        BaseContent.LoadBaseContent(Content);
+
+        ConfigFile.plugins.GetDoc();
 
         _graphics.PreferredBackBufferWidth = 940;
         _graphics.PreferredBackBufferHeight = 520;
@@ -78,9 +82,7 @@ public partial class Game1 : Game
 
         _imGuiRenderer = new ImGuiRenderer(this);
 
-        BaseContent.Folders.LoadFolders(); // Loading / Creating the needed folders.
 
-        BaseContent.LoadBaseContent(Content); // Loading basic content.
         // Adding different ImGui Font size.
         ImGui_Helper.AddFont(13);
         ImGui_Helper.AddFont(16);
@@ -125,9 +127,6 @@ public partial class Game1 : Game
     {
         _spriteBatch = new SpriteBatchExtended(GraphicsDevice);
         _graphicsDevice = GraphicsDevice;
-        BaseContent.LoadBaseContent(Content);
-
-        ConfigFile.plugins.GetDoc();
     }
 
     protected override void Update(GameTime gameTime)

@@ -18,10 +18,10 @@ namespace RPGCreator.core.interfaces.launcher.parts
 
         private bool ChangedCursor = false;
         public bool IsCollapsed = false;
-        public PluginsItem(GraphicsDevice graphicsDevice, BasePlugin forPlugin) : base(graphicsDevice)
+        public PluginsItem(GraphicsDevice graphicsDevice, string plugin_unique) : base(graphicsDevice)
         {
-            Title = "PluginsPart-Test";
-            plugin = forPlugin;
+            Title = $"PluginsPart-{plugin_unique}";
+            plugin = new(plugin_unique);
         }
 
         protected override void OnDraw()

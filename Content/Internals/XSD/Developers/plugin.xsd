@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+This file determine the schema that each plugin config file need to respect.
+All parameters are required unless otherwise stated. See at the bottom of the file for an example.
+-->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <!-- Root of the file -->
+  <xs:element name="plugin">
+    <xs:complexType>
+      <xs:sequence maxOccurs="1">
+        <!-- Unique name of the plugin, this can be anything but it NEED to be unique!! -->
+        <xs:element name="unique" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <!-- Name of the plugin -->
+        <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <!-- Version of the plugin -->
+        <xs:element name="version" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <!-- Description of the plugin (Not obligatory) -->
+        <xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        <!-- Authors of the plugin -->
+        <xs:element name="authors" minOccurs="1" maxOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="author" type="xs:string" maxOccurs="unbounded" minOccurs="1"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <!-- Supported engine version -->
+        <xs:element name="supported-versions" maxOccurs="1" minOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="version" type="xs:string" maxOccurs="unbounded" minOccurs="1"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <!-- Dependencies of the plugin (Not obligatory) -->
+        <!-- Each entry need to be the "unique" of these plugins -->
+        <xs:element name="dependencies" maxOccurs="1" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="plugin" type="xs:string" maxOccurs="unbounded" minOccurs="1"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <!-- Languages supported by this plugin (Not obligatory - If not set the english language will be used by default) -->
+        <xs:element name="languages" maxOccurs="1" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="lang" minOccurs="1" maxOccurs="unbounded">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="fr-FR"/>
+                    <xs:enumeration value="en-EN"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
+<!--
+Example of valid XML file: (Made for the engine version 1.0.0)
+
+<plugin>
+  <unique>fr.ward.my-awesome-plugin</unique>
+  <name>My Awesome Plugin!</name>
+  <version>1.2.3</version>
+  <description>This plugin is awesome!</description>
+  <authors>
+    <author>Me!</author>
+    <author>And just me in fact :)</author>
+  </authors>
+  <supported-versions>
+    <version>1.0.0</version>
+  </supported-versions>
+  <dependencies>
+    <plugin>fr.ward.my-awesome-api</plugin>
+  </dependencies>
+  <languages>
+    <lang>fr-FR</lang>
+    <lang>en-EN</lang>
+  </languages>
+</plugin>
+
+-->

@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
-
-
   <xs:element name="Plugins">
     <xs:complexType>
       <xs:sequence>
         <xs:element name="Plugin" maxOccurs="unbounded" minOccurs="0">
           <xs:complexType>
             <xs:sequence>
+              <!-- Define the unique name of the plugin -->
+              <xs:element name="Unique" type="xs:string" minOccurs="1" maxOccurs="1"/>
+              <!-- Define the name of the plugin -->
               <xs:element name="Name" type="xs:string" minOccurs="1"/>
+              <!-- Define the description of the plugin (Not obligatory) -->
               <xs:element name="Description" type="xs:string" minOccurs="0"/>
+              <!-- Define the version of the plugin -->
               <xs:element name="Version" type="xs:string" minOccurs="1"/>
-              <xs:element name="Enabled" type="xs:boolean" default="false"/>
+              <!-- Define if the plugin is enabled or not (Reserved by the engine) -->
+              <xs:element name="Enabled" type="xs:boolean" default="false" minOccurs="1"/>
+              <!-- Define the authors of the plugin -->
               <xs:element name="Authors" minOccurs="1" maxOccurs="1">
                 <xs:complexType>
                   <xs:sequence>
@@ -19,6 +24,7 @@
                   </xs:sequence>
                 </xs:complexType>
               </xs:element>
+              <!-- Define what engine version the plugin support -->
               <xs:element name="EditorVersions" minOccurs="1" maxOccurs="1">
                 <xs:complexType>
                   <xs:sequence>
@@ -26,14 +32,44 @@
                   </xs:sequence>
                 </xs:complexType>
               </xs:element>
+              <!-- Define what plugin(s) this plugin need to be enabled -->
+              <xs:element name="Dependencies" maxOccurs="1" minOccurs="0">
+
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Plugin" type="xs:string" maxOccurs="unbounded" minOccurs="1"/>
+                  </xs:sequence>
+                </xs:complexType>
+                
+              </xs:element>
+              <!-- Define what languages is supported by the plugin -->
+              <xs:element name="Languages" maxOccurs="1" minOccurs="0">
+
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Lang" maxOccurs="unbounded" minOccurs="1">
+                      <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                          <xs:enumeration value="fr-FR"/>
+                          <xs:enumeration value="en-EN"/>
+                        </xs:restriction>
+                      </xs:simpleType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+                
+              </xs:element>
+              <!-- Define where the config file for this plugin can be found at. Reserved by the engine)
+              As config file need to be at the root of the plugin folder, it can be used to find the folder of the plugin too -->
+              <xs:element name="Config" type="xs:string" maxOccurs="1" minOccurs="1"/>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
       </xs:sequence>
 
+      <!-- Define the version of the editor the file was created in (Reserved by the engine) -->
       <xs:attribute name="version" type="xs:string" use="required"/>
     </xs:complexType>
     
   </xs:element>
-  
 </xs:schema>

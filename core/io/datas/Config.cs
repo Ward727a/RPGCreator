@@ -12,7 +12,7 @@ using System.Xml.Schema;
 namespace RPGCreator.core.io.datas
 {
     /// <summary>
-    /// A class that manage all the config file of the editor.
+    /// A class that manage all the config (.xml) file of the editor.
     /// </summary>
     static public class ConfigFile
     {
@@ -38,7 +38,7 @@ namespace RPGCreator.core.io.datas
 
                 writer.WriteStartDocument();
 
-                writer.WriteStartElement("editor");
+                writer.WriteStartElement("Editor");
                 writer.WriteAttributeString("version", GlobalData.EditorVersion.ToString());
 
                 writer.WriteEndElement();
@@ -108,6 +108,7 @@ namespace RPGCreator.core.io.datas
             private bool CheckXSDSchema()
             {
                 XmlDocument xmlDoc = new();
+                
                 xmlDoc.Load(_xml);
 
                 XmlSchemaSet schemaSet = new();
@@ -171,20 +172,28 @@ namespace RPGCreator.core.io.datas
 
             private XElement GetXPlugin(string name)
             {
-                return GetXPluginsItems().Where(x => (string)x.Element("Name").Value == name).FirstOrDefault();
+                return GetXPluginsItems().Where(x => (string)x.Element("Unique").Value == name).FirstOrDefault();
             }
 
             private IEnumerable<XElement> GetXPluginsEnabledItems()
             {
                 return GetXPluginsItems().Where(x => {
-                    return IsEnabled(x.Element("Name").Value);
+                    if(IsEnabled(x.Element("Unique").Value))
+                    {
+                        if(IsOutdated(x.Element("Unique").Value))
+                        {
+                            return false;
+                        }
+                        return true;
+                    }
+                    return false;
                     });
             }
 
             private IEnumerable<XElement> GetXPluginsDisabledItems()
             {
                 return GetXPluginsItems().Where(x => {
-                    return !IsEnabled(x.Element("Name").Value);
+                    return !IsEnabled(x.Element("Unique").Value);
                 });
             }
 
@@ -221,35 +230,44 @@ namespace RPGCreator.core.io.datas
                 return GetXPluginsDisabledItems().Count();
             }
 
+            public string[] GetPluginsUnique()
+            {
+                return GetXPluginsItems().Select(x => x.Element("Unique").Value).ToArray();
+            }
+
+            public string GetPluginName(string unique)
+            {
+                return GetXPlugin(unique).Element("Name").Value;
+            }
+
             public string[] GetPluginsName()
             {
                 return GetXPluginsItems().Select(x => x.Element("Name").Value).ToArray();
             }
 
-            public string[] GetEnabledName()
+            public bool IsEnabled(string unique)
             {
-                return GetXPluginsEnabledItems().Select(x => x.Element("Name").Value).ToArray();
-            }
-
-            public bool IsEnabled(string name)
-            {
-                if(bool.TryParse(GetXPlugin(name).Element("Enabled").Value, out bool result))
+                if(!HasXElement(GetXPlugin(unique), "Enabled"))
+                {
+                    return false;
+                }
+                if(bool.TryParse(GetXPlugin(unique).Element("Enabled").Value, out bool result))
                 {
                     return result;
                 }
 
-                NotValidFieldValue(name, "Enabled", GetXPlugin(name).Element("Enabled").Value, "bool (true or false)");
+                NotValidFieldValue(unique, "Enabled", GetXPlugin(unique).Element("Enabled").Value, "bool (true or false)");
                 return false;
             }
 
-            public bool IsOutdated(string name)
+            public bool IsOutdated(string unique)
             {
-                return GetEditorVersion(name).Contains(GlobalData.EditorVersion.ToString());
+                return !GetEditorVersion(unique).Contains(GlobalData.EditorVersion.ToString());
             }
 
-            public string[] GetEditorVersion(string name)
+            public string[] GetEditorVersion(string unique)
             {
-                XElement pluginVersion = GetXPlugin(name).Element("EditorVersions");
+                XElement pluginVersion = GetXPlugin(unique).Element("EditorVersions");
                 if(pluginVersion.HasElements)
                 {
                     return pluginVersion.Elements().Select(x => x.Value).ToArray();
@@ -260,35 +278,96 @@ namespace RPGCreator.core.io.datas
                     return [pluginVersion.Value];
                 }
 
-                NotValidField(name, "EditorVersion", "Not parent of \"<Version>\" elements");
+                NotValidField(unique, "EditorVersion", "Not parent of \"<Version>\" elements");
                 return [];
             }
 
-            public string GetPluginVersion(string name)
+            public string GetPluginVersion(string unique)
             {
-                return GetXPlugin(name).Element("version").Value;
+                return GetXPlugin(unique).Element("Version").Value;
             }
 
-            public string[] GetPluginAuthors(string name)
+            public string[] GetPluginAuthors(string unique)
             {
-                XElement pluginAuthors = GetXPlugin(name).Element("Authors");
+                XElement pluginAuthors = GetXPlugin(unique).Element("Authors");
                 if (pluginAuthors.HasElements)
                 {
                     return pluginAuthors.Elements().Select(x => x.Value).ToArray();
                 }
 
-                NotValidField(name, "Authors", "Not parent of \"<Author>\" elements");
+                NotValidField(unique, "Authors", "Not parent of \"<Author>\" elements");
                 return [];
             }
 
-            public string GetPluginDescription(string name)
+            public string GetPluginDescription(string unique)
             {
-                XElement plugin = GetXPlugin(name);
+                XElement plugin = GetXPlugin(unique);
                 if(HasXElement(plugin, "Description"))
                 {
                     return plugin.Element("Description").Value;
                 }
-                return $"No description provided by {name} plugin.";
+                return $"No description provided by {unique} plugin.";
+            }
+
+            public string[] GetPluginDependencies(string unique)
+            {
+                XElement plugin = GetXPlugin(unique);
+                if(HasXElement(plugin, "Dependencies") && plugin.Element("Dependencies").HasElements)
+                {
+                    XElement DependenciesElem = plugin.Element("Dependencies");
+
+                    if(HasXElement(DependenciesElem, "Plugin"))
+                    {
+                        return DependenciesElem.Elements("Plugin").Select(x => x.Value).ToArray();
+                    }
+                }
+                return [];
+            }
+
+            public bool HasPluginDependencies(string unique)
+            {
+                return GetPluginDependencies(unique).Length > 0;
+            }
+
+            public string[] GetSupportedLanguages(string unique)
+            {
+                XElement plugin = GetXPlugin(unique);
+                if(HasXElement(plugin, "Languages") && plugin.Element("Languages").HasElements)
+                {
+                    XElement LanguagesElem = plugin.Element("Languages");
+
+                    if(HasXElement(LanguagesElem, "Lang"))
+                    {
+                        return LanguagesElem.Elements("Lang").Select(x => x.Value).ToArray();
+                    }
+                }
+                return [];
+            }
+
+            public bool HasSupportForLang(string unique, string lang)
+            {
+                return GetSupportedLanguages(unique).Contains(lang);
+            }
+
+            public string GetConfigFilePath(string unique)
+            {
+                XElement plugin = GetXPlugin(unique);
+                if(HasXElement(plugin, "Config"))
+                {
+                    return plugin.Element("Config").Value;
+                }
+                NotValidField(unique, "Config", "Expected to find it, but no Config element could be found.");
+                return "";
+            }
+
+            public string GetPluginRoot(string unique)
+            {
+                string configPath = GetConfigFilePath(unique);
+                if (string.IsNullOrEmpty(configPath))
+                {
+                    return "";
+                }
+                return configPath.Replace(Path.GetFileName(configPath), "");
             }
         }
     }

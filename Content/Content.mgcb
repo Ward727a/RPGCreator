@@ -44,3 +44,6 @@
 #begin Internals/XSD/Configs/plugins.xsd
 /copy:Internals/XSD/Configs/plugins.xsd
 
+#begin Internals/XSD/Developers/plugin.xsd
+/copy:Internals/XSD/Developers/plugin.xsd
+
