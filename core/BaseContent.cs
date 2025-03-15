@@ -128,6 +128,7 @@ namespace RPGCreator.core
             static private string _internals = "";
                 static private string _XSD = "";
                     static private string _XSD_Configs = "";
+                    static private string _XSD_Dev = "";
 
             static public string GetContent()
             {
@@ -160,6 +161,15 @@ namespace RPGCreator.core
                     _XSD_Configs = Path.Combine(GetXSD(), "Configs");
                 }
                 return _XSD_Configs;
+            }
+
+            static public string GetXSDDev()
+            {
+                if(_XSD_Dev == string.Empty)
+                {
+                    _XSD_Dev = Path.Combine(GetXSD(), "Developers");
+                }
+                return _XSD_Dev;
             }
 
             static public string GetData()
@@ -243,7 +253,7 @@ namespace RPGCreator.core
             {
                 if(_software == string.Empty)
                 {
-                    _software = Assembly.GetEntryAssembly().Location;
+                    _software = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
                     if(!Directory.Exists(_software))
                     {

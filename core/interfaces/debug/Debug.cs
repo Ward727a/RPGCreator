@@ -20,6 +20,7 @@ namespace RPGCreator.core.interfaces.debug
 
         protected override void OnDraw()
         {
+            if (Config.debug.b_BlockDebug) return;
             if (!Config.debug.b_Menu)
             {
                 if (Config.debug.b_Logger)

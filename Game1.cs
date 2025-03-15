@@ -25,17 +25,28 @@ using ImGuiNET;
 using RPGCreator.core.config;
 using RPGCreator.core.interfaces.debug;
 using RPGCreator.core.io.datas;
+using RPGCreator.core.interfaces.splashScreen;
 
 namespace RPGCreator;
 
 public partial class Game1 : Game
 {
+    enum GAME_STATE
+    {
+        LOADING,
+        LAUNCHER,
+        IN_PROJECT
+    }
+
+    GAME_STATE GameState = GAME_STATE.LOADING;
+
+    SplashScreen Splash;
+
     ResourcesImages testImage;
 
     StackPanel Root;
 
     Launcher launcher;
-
     Debug DebugMainMenu;
 
     static public Game1 Self;
@@ -72,6 +83,7 @@ public partial class Game1 : Game
         _graphics.PreferredBackBufferWidth = 940;
         _graphics.PreferredBackBufferHeight = 520;
         _graphics.ApplyChanges();
+        Splash = new(_graphics.GraphicsDevice);
         launcher = new(_graphics.GraphicsDevice);
         DebugMainMenu = new(_graphics.GraphicsDevice);
         SDL_Wrapper.SetWindowMinSize(Window.Handle, 920, 517);
@@ -120,6 +132,7 @@ public partial class Game1 : Game
 
         // Resize root
         Root.Visual.UpdateLayout();
+        Splash.HandleClientSizeChanged();
         launcher.HandleClientSizeChanged();
     }
 
@@ -150,10 +163,22 @@ public partial class Game1 : Game
         MonoGameGum.GumService.Default.Draw();
 
         _imGuiRenderer.BeforeLayout(gameTime);
+        switch (GameState)
+        {
+            case GAME_STATE.LOADING:
+                {
+                    Window.Title = "RPG Creator - Loading...";
+                    Splash.Draw();
+                } break;
+            case GAME_STATE.LAUNCHER:
+                {
+                    launcher.Draw();
 
-        launcher.Draw();
+                    DebugMainMenu.Draw();
+                } break;
+        }
 
-        DebugMainMenu.Draw();
+
 
         _imGuiRenderer.AfterLayout();
 

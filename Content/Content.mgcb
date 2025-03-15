@@ -11,7 +11,7 @@
 #-------------------------------- References --------------------------------#
 
 /reference:..\bin\Debug\net8.0\MonoGame.Extended.Content.Pipeline.dll
-/reference:..\..\..\MGCBExtension_RPGCreator\bin\Debug\net8.0\MGCBExtension_RPGCreator.dll
+/reference:..\..\MGCBExtension_RPGCreator\bin\Debug\net8.0\MGCBExtension_RPGCreator.dll
 
 #---------------------------------- Content ---------------------------------#
 

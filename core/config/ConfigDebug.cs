@@ -9,6 +9,10 @@ namespace RPGCreator.core.config
     // Manage all configuration related to debuging
     class ConfigDebug
     {
+
+        // Block the debug menu
+        public bool b_BlockDebug = false;
+
         // Enable/Disable ImGui
         public bool b_ImGui = true;
 
