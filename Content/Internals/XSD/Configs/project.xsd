@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="project">
+		<xs:complexType>
+			<xs:all maxOccurs="1">
+				<xs:element name="unique" type="xs:string"/>
+				<xs:element name="name" type="xs:string"/>
+				<xs:element name="version" type="xs:string"/>
+				<xs:element name="description" type="xs:string"/>
+				<xs:element name="icon" type="xs:string"/>
+				<xs:element name="folder" type="xs:string"/>
+				<xs:element name="authors">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="author" type="xs:string" maxOccurs="unbounded"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="plugins_used">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="plugin" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:sequence maxOccurs="1">
+										<xs:element name="unique" type="xs:string"/>
+										<xs:element name="version" type="xs:string"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="use_source_control" type="xs:boolean" default="false"/>
+				<xs:element name="source_control"> <!-- This still need to be worked on, nothing here is used for now -->
+					<xs:complexType>
+						<xs:sequence maxOccurs="1">
+							<xs:element name="type" type="xs:int" default="0"/> <!-- 0: GitHub | 1: Gitlab -->
+							<xs:element name="repo" type="xs:string"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="is_favorite" type="xs:string"/>
+				<xs:element name="is_archived" type="xs:string"/>
+			</xs:all>
+			<xs:attribute name="version" type="xs:string"/> <!-- Editor version -->
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

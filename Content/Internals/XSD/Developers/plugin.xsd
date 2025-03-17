@@ -9,7 +9,7 @@ All parameters are required unless otherwise stated. See at the bottom of the fi
   <!-- Root of the file -->
   <xs:element name="plugin">
     <xs:complexType>
-      <xs:sequence maxOccurs="1">
+      <xs:all maxOccurs="1">
         <!-- Unique name of the plugin, this can be anything but it NEED to be unique!! -->
         <xs:element name="unique" type="xs:string" minOccurs="1" maxOccurs="1"/>
         <!-- Name of the plugin -->
@@ -58,7 +58,7 @@ All parameters are required unless otherwise stated. See at the bottom of the fi
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-      </xs:sequence>
+      </xs:all>
     </xs:complexType>
   </xs:element>
 </xs:schema>

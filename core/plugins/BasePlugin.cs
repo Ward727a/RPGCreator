@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace RPGCreator.core.plugins
 {
@@ -14,6 +15,7 @@ namespace RPGCreator.core.plugins
     /// </summary>
     class BasePlugin
     {
+
 
         public BasePlugin(string unique)
         {

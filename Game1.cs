@@ -84,8 +84,13 @@ public partial class Game1 : Game
         _graphics.PreferredBackBufferHeight = 520;
         _graphics.ApplyChanges();
         Splash = new(_graphics.GraphicsDevice);
-        launcher = new(_graphics.GraphicsDevice);
-        DebugMainMenu = new(_graphics.GraphicsDevice);
+        Splash.LoadingDone += (_, _) =>
+        {
+            GameState = GAME_STATE.LAUNCHER;
+            Splash = null;
+            launcher = new(_graphics.GraphicsDevice);
+            DebugMainMenu = new(_graphics.GraphicsDevice);
+        };
         SDL_Wrapper.SetWindowMinSize(Window.Handle, 920, 517);
 
 
@@ -153,7 +158,7 @@ public partial class Game1 : Game
         if (KeyboardExtended.GetState().IsAltDown() && KeyboardExtended.GetState().IsControlDown() && KeyboardExtended.GetState().WasKeyPressed(Keys.D))
             Config.debug.b_Menu = !Config.debug.b_Menu;
 
-        launcher.Update();
+        //launcher.Update();
     }
 
     protected override void Draw(GameTime gameTime)
@@ -177,8 +182,6 @@ public partial class Game1 : Game
                     DebugMainMenu.Draw();
                 } break;
         }
-
-
 
         _imGuiRenderer.AfterLayout();
 

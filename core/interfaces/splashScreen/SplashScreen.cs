@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 using System.Xml.Schema;
 using System.Xml;
 using MonoGame.Extended.Input;
+using RPGCreator.core.io.datas;
+using System.Xml.Linq;
 
 namespace RPGCreator.core.interfaces.splashScreen
 {
@@ -22,15 +24,10 @@ namespace RPGCreator.core.interfaces.splashScreen
         enum LOADING_STATE
         {
             STARTING,
-            STARTING_,
             LOADING_BASE,
-            LOADING_BASE_,
             LOADING_FOLDERS,
-            LOADING_FOLDERS_,
             CHECKING_PLUGINS,
-            CHECKING_PLUGINS_,
             CHECKING_PROJECTS,
-            CHECKING_PROJECTS_,
             DONE,
             DONE_,
             ERROR
@@ -46,9 +43,10 @@ namespace RPGCreator.core.interfaces.splashScreen
         float auto_scroll_area = 4;
 
         // For CHECKING_PLUGINS state:
-        int total_plugins_found = 0;
-        int total_plugins_success = 0;
         List<string> plugin_unique_used = [];
+
+        // For CHECKING_PROJECTS state:
+        List<string> project_unique_used = [];
 
         public SplashScreen(GraphicsDevice graphicsDevice) : base(graphicsDevice)
         {
@@ -73,11 +71,8 @@ namespace RPGCreator.core.interfaces.splashScreen
                         str_state = "Starting loading...";
                         loading_log.Add($"Loading started at {DateTime.Now}, please wait.");
                         loading_percentage = 0;
-                        state = LOADING_STATE.STARTING_;
+                        state = LOADING_STATE.LOADING_BASE;
                     } break;
-                case LOADING_STATE.STARTING_:
-                    state = LOADING_STATE.LOADING_BASE;
-                    break;
                 case LOADING_STATE.LOADING_BASE:
                     {
                         str_state = "Checking base content...";
@@ -95,7 +90,7 @@ namespace RPGCreator.core.interfaces.splashScreen
                         {
                             loading_log.Add("ImGui font loaded...");
                         }
-                        loading_percentage = 16;
+                        loading_percentage = 20;
                         state = LOADING_STATE.LOADING_FOLDERS;
                     } break;
                 case LOADING_STATE.LOADING_FOLDERS:
@@ -113,7 +108,7 @@ namespace RPGCreator.core.interfaces.splashScreen
                         _CheckFolder(BaseContent.Folders.GetXSDDev());
                         loading_log.Add("-- Checking for folders in the folder of the software --");
                         _CheckFolder(BaseContent.Folders.GetSoftware());
-                        loading_percentage = 32;
+                        loading_percentage = 40;
                         state = LOADING_STATE.CHECKING_PLUGINS;
                     } break;
                 case LOADING_STATE.CHECKING_PLUGINS:
@@ -125,7 +120,7 @@ namespace RPGCreator.core.interfaces.splashScreen
                         string plugin_xsd = Path.Combine(BaseContent.Folders.GetXSDDev(), "plugin.xsd");
                         if(!File.Exists(plugin_xsd))
                         {
-                            loading_log.Add("[ERROR] plugin schema file doesn't exist!");
+                            loading_log.Add("[ERROR] Plugin schema file doesn't exist!");
                             state = LOADING_STATE.ERROR;
                             break;
                         }
@@ -146,8 +141,103 @@ namespace RPGCreator.core.interfaces.splashScreen
                             else
                                 break;
                         }
-                        loading_percentage = 48;
+                        loading_percentage = 50;
+
+                        // Check if we still have old plugins in the data.
+
+                        str_state = "Checking for uninstalled plugins...";
+
+                        loading_log.Add("======================================");
+                        loading_log.Add("Checking for uninstalled plugins...");
+
+                        foreach(string unique in ConfigFile.plugins.GetPluginsUnique())
+                        {
+                            if(!plugin_unique_used.Contains(unique))
+                            {
+                                loading_log.Add($"Plugin \"{unique}\" can't be found anymore, removing it's data...");
+                                ConfigFile.plugins.RemovePlugin(unique);
+                                loading_log.Add($"[SUCCESS] Plugin \"{unique}\" has been removed.");
+                            }
+                        }
+                        loading_percentage = 60;
+
                         state = LOADING_STATE.CHECKING_PROJECTS;
+                    } break;
+                case LOADING_STATE.CHECKING_PROJECTS:
+                    {
+                        str_state = "Checking for projects...";
+                        // First we need to check if the Configs/project.xsd exist.
+                        loading_log.Add("======================================");
+                        loading_log.Add("Checking for schema file...");
+                        string project_xsd = Path.Combine(BaseContent.Folders.GetXSDConfig(), "project.xsd");
+                        if (!File.Exists(project_xsd))
+                        {
+                            loading_log.Add("[ERROR] Project schema file doesn't exist!");
+                            state = LOADING_STATE.ERROR;
+                            break;
+                        }
+
+                        XmlSchemaSet schemaSet = new();
+                        schemaSet.Add(null, project_xsd);
+
+                        XmlReaderSettings readerSettings = new();
+                        readerSettings.Schemas.Add(schemaSet);
+                        readerSettings.ValidationType = ValidationType.Schema;
+
+                        foreach (ConfigFile.Projects.PROJECT_DATA data in ConfigFile.projects.GetProjects(out bool error))
+                        {
+                            if (error) // If this is on true, then the file has a BIG problem, we need to stop right now before risking to create more problems. No risk wanted
+                            {
+                                loading_log.Add("[ERROR] There was an internal error when trying to get projects from the data file.");
+                                loading_log.Add("[ERROR] If even after restarting you still get this error, make a backup and try to delete the \"projects.xml\" in your \"appdata/RPG Creator/data/projects\" folder!");
+                                state = LOADING_STATE.ERROR;
+                                break;
+                            }
+
+                            if(!File.Exists(data.path))
+                            {
+                                loading_log.Add($"[ERROR] The project at \"{data.path}\" couldn't be found. It will be removed from the data.");
+                                ConfigFile.projects.RemoveProject(data.unique);
+                                loading_log.Add($"[SUCCESS] The project at \"{data.path}\" was removed from the data file.");
+                                continue;
+                            }
+
+                            if(project_unique_used.Contains(data.unique))
+                            {
+                                loading_log.Add($"[ERROR] The project at \"{data.path}\" use the same unique as another project.");
+                                loading_log.Add($"[ERROR] This shouldn't happen, but don't worry, the editor will fix it!");
+
+                                ConfigFile.projects.RemoveProject(data.unique);
+
+                                string newUnique = Guid.NewGuid().ToString();
+
+                                ConfigFile.projects.AddProject(newUnique, data.path);
+
+                                loading_log.Add($"[SUCCESS] The project unique has been succesfully modified from {data.unique} to {newUnique}");
+                                loading_log.Add($"Project \"{newUnique}\" at \"{data.path}\" as been checked.");
+                                project_unique_used.Add(newUnique);
+                                continue;
+                            }
+                            project_unique_used.Add(data.unique);
+                            loading_log.Add($"Project \"{data.unique}\" at \"{data.path}\" as been checked.");
+                        }
+
+                        loading_log.Add("[SUCCESS] All projects has been checked with success.");
+                        state = LOADING_STATE.DONE;
+                        loading_percentage = 80;
+
+                    } break;
+                case LOADING_STATE.DONE:
+                    {
+                        str_state = "Loading done, starting the editor...";
+                        loading_percentage = 100;
+                        loading_log.Add("======================================");
+                        loading_log.Add($"Loading finished at {DateTime.Now}.");
+                        loading_log.Add("======================================");
+                        loading_log.Add("All good, have fun making games! =)");
+                        loading_log.Add("-- If the editor doesn't start soon, please report it! --");
+                        state = LOADING_STATE.DONE_;
+                        LoadingDone(this, null);
                     } break;
             }
             // ======================== Loading bar ========================
@@ -180,9 +270,13 @@ namespace RPGCreator.core.interfaces.splashScreen
                     i++;
                     continue;
                 }
+                if(s.StartsWith("[SUCCESS]"))
+                {
+                    ImGui.TextColored(new(0, 1, 0, 1), $">> {s}");
+                    continue;
+                }
                 ImGui.TextWrapped($">> {s}");
             }
-            ImGui.Text($"{ImGui.GetScrollY()}");
             if(ImGui.GetScrollY() >= ImGui.GetScrollMaxY() - auto_scroll_area)
             {
                 ImGui.SetScrollHereY();
@@ -197,7 +291,7 @@ namespace RPGCreator.core.interfaces.splashScreen
         {
             if (Directory.Exists(path))
             {
-                loading_log.Add($"Folder {path} loaded.");
+                loading_log.Add($"[SUCCESS] Folder {path} loaded.");
             } else
             {
                 loading_log.Add($"[ERROR] Folder {path} couldn't be loaded!!");
@@ -234,18 +328,41 @@ namespace RPGCreator.core.interfaces.splashScreen
                 }
             }
 
-            if(!_CheckConfig(valid_path, schema_reader))
+            if(!_CheckConfig(valid_path, schema_reader, out string unique, out Version version))
             {
                 state = LOADING_STATE.ERROR;
                 return false;
             }
 
+            // Check if the plugin is already in the data
+            if(!ConfigFile.plugins.HasPlugin(unique))
+            {
+                ConfigFile.plugins.AddPlugin(XDocument.Load(valid_path), valid_path);
+                loading_log.Add($"[SUCCESS] New plugin \"{unique}\" v{version} added.");
+            } else
+            {
+                string current_version = ConfigFile.plugins.GetPluginVersion(unique);
+                if (Version.Parse(current_version) == version)
+                {
+                    loading_log.Add($"[SUCCESS] Plugin \"{unique}\" v{version} already added, passing to the next one.");
+                }
+                else
+                {
+                    bool enabled_status = ConfigFile.plugins.IsEnabled(unique);
+                    ConfigFile.plugins.RemovePlugin(unique);
+                    ConfigFile.plugins.AddPlugin(XDocument.Load(valid_path), valid_path, enabled_status);
+                    loading_log.Add($"[SUCCESS] Plugin \"{unique}\" has been updated from {current_version} to {version}.");
+                }
+            }
+
             return true;
         }
 
-        private bool _CheckConfig(string config_path, XmlReaderSettings schema_reader)
+        private bool _CheckConfig(string config_path, XmlReaderSettings schema_reader, out string unique, out Version version)
         {
             XmlDocument xmlDoc = new();
+            unique = "";
+            version = new(0, 0, 0, 0);
 
             try
             {
@@ -282,6 +399,7 @@ namespace RPGCreator.core.interfaces.splashScreen
                         string value = reader.ReadElementContentAsString();
                         if (!plugin_unique_used.Contains(value))
                         {
+                            unique = value;
                             plugin_unique_used.Add(value);
                         }
                         else
@@ -291,8 +409,14 @@ namespace RPGCreator.core.interfaces.splashScreen
                             error++;
                         }
                     }
+                    if (reader.Name == "version" && reader.Depth == 1)
+                    {
+                        string value = reader.ReadElementContentAsString();
+                        version = Version.Parse(value);
+                    }
                 }
             }
+
             if (error != 0)
             {
                 return false;

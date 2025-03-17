@@ -5,6 +5,12 @@
     <None Update="Content\Internals\XSD\Configs\plugins.xsd">
       <SubType>Designer</SubType>
     </None>
+    <None Update="Content\Internals\XSD\Configs\project.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Update="Content\Internals\XSD\Configs\projects.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Update="Content\Internals\XSD\Developers\plugin.xsd">
       <SubType>Designer</SubType>
     </None>
