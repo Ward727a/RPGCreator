@@ -11,6 +11,50 @@ namespace RPGCreator.core.interfaces
 {
     internal abstract class InterfacesMain
     {
+
+        public Dictionary<string, object> metadata = new Dictionary<string, object>();
+
+        static private bool _ShowingOverlay = false;
+        static private string _OverlayTitle = "";
+
+        static private ImGuiWindowFlags _BaseFlags = ImGuiWindowFlags.None;
+
+        protected static void SetOverlay(InterfacesMain overlayObject)
+        {
+            _ShowingOverlay = true;
+            _OverlayTitle = overlayObject.Title;
+            _BaseFlags |= ImGuiWindowFlags.NoInputs;
+            _BaseFlags |= ImGuiWindowFlags.NoBringToFrontOnFocus;
+        }
+
+        protected static void RemoveOverlay()
+        {
+            _ShowingOverlay = false;
+            _OverlayTitle = null;
+            _BaseFlags = ImGuiWindowFlags.None;
+        }
+
+        protected static bool HasOverlay()
+        {
+            return _ShowingOverlay;
+        }
+
+        protected static string OverlayParent()
+        {
+            return _OverlayTitle;
+        }
+
+        protected ImGuiWindowFlags GetBaseFlags()
+        {
+            if(_ShowingOverlay && _OverlayTitle != Title)
+            {
+                return _BaseFlags;
+            } else
+            {
+                return ImGuiWindowFlags.None;
+            }
+        }
+
         public Vector2 Size = new();
 
         public void SetSize(float x = -1, float y = -1)

@@ -90,6 +90,7 @@ public partial class Game1 : Game
             Splash = null;
             launcher = new(_graphics.GraphicsDevice);
             DebugMainMenu = new(_graphics.GraphicsDevice);
+            Config.debug.b_BlockDebug = false;
         };
         SDL_Wrapper.SetWindowMinSize(Window.Handle, 920, 517);
 
@@ -137,8 +138,8 @@ public partial class Game1 : Game
 
         // Resize root
         Root.Visual.UpdateLayout();
-        Splash.HandleClientSizeChanged();
-        launcher.HandleClientSizeChanged();
+        Splash?.HandleClientSizeChanged();
+        launcher?.HandleClientSizeChanged();
     }
 
     protected override void LoadContent()
@@ -157,8 +158,6 @@ public partial class Game1 : Game
 
         if (KeyboardExtended.GetState().IsAltDown() && KeyboardExtended.GetState().IsControlDown() && KeyboardExtended.GetState().WasKeyPressed(Keys.D))
             Config.debug.b_Menu = !Config.debug.b_Menu;
-
-        //launcher.Update();
     }
 
     protected override void Draw(GameTime gameTime)

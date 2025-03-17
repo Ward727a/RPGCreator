@@ -21,7 +21,7 @@ namespace RPGCreator.core.interfaces.launcher.parts
             Title = "Launcher-PluginsPart";
             MinSize = new(250, -1);
             MaxSize = new(400, -1);
-            SetSize((graphicsDevice.Viewport.Width / 450) * 100, graphicsDevice.Viewport.Height - AboutSizeY);
+            SetSize((graphicsDevice.Viewport.Width / MaxSize.X) * 100, graphicsDevice.Viewport.Height - AboutSizeY);
             Position = new(graphicsDevice.Viewport.Width - Size.X, 0);
 
             EnabledPlugins = ConfigFile.plugins.GetEnabledPluginsCount();
@@ -36,7 +36,7 @@ namespace RPGCreator.core.interfaces.launcher.parts
         protected override void OnDraw()
         {
 
-            ImGui.Begin(Title, ref opened, ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoBringToFrontOnFocus);
+            ImGui.Begin(Title, ref opened, GetBaseFlags() | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoBringToFrontOnFocus);
             ImGui.SetWindowPos(Position);
             ImGui.SetWindowSize(Size);
 
@@ -61,7 +61,7 @@ namespace RPGCreator.core.interfaces.launcher.parts
 
         public void UpdateSize(float AboutSizeY)
         {
-            SetSize((graphics.Viewport.Width / 450) * 100);
+            SetSize((graphics.Viewport.Width / MaxSize.X) * 100);
             Position.X = graphics.Viewport.Width - Size.X;
             SetSize(y: graphics.Viewport.Height - AboutSizeY);
         }

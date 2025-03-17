@@ -26,7 +26,7 @@ namespace RPGCreator.core.interfaces.launcher.parts
 
         protected override void OnDraw()
         {
-            ImGui.Begin(Title, ref opened, ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoBringToFrontOnFocus);
+            ImGui.Begin(Title, ref opened, GetBaseFlags() | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoBringToFrontOnFocus);
             ImGui.SetWindowPos(Position);
             ImGui.SetWindowSize(Size);
             ImGui.End();

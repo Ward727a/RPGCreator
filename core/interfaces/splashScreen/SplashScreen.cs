@@ -61,7 +61,7 @@ namespace RPGCreator.core.interfaces.splashScreen
             ImGui.SetNextWindowFocus();
             ImGui.SetNextFrameWantCaptureKeyboard(true);
             ImGui.SetNextFrameWantCaptureMouse(true);
-            ImGui.Begin(Title, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar);
+            ImGui.Begin(Title, GetBaseFlags() | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar);
             ImGui.SetWindowSize(Size);
             ImGui.SetWindowPos(Position);
             switch(state)
@@ -430,7 +430,7 @@ namespace RPGCreator.core.interfaces.splashScreen
             throw new NotImplementedException();
         }
 
-        public void HandleClientSizeChanged()
+        protected override void OnClientSizeChanged()
         {
             Size = new(graphics.Viewport.Width, graphics.Viewport.Height);
         }

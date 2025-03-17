@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.core.config;
 using RPGCreator.core.helpers;
+using RPGCreator.core.interfaces.modals;
 using RPGCreator.core.io.datas;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace RPGCreator.core.interfaces.launcher.parts
 {
     class ProjectManager : InterfacesMain
     {
+        protected ProjectCreator creator;
         protected int _project_number = 0;
         protected bool _is_project_loaded = false;
         protected string _project_search_input = "";
@@ -27,6 +29,7 @@ namespace RPGCreator.core.interfaces.launcher.parts
             Title = "Launcher-ProjectsManager";
             SetSize((graphicsDevice.Viewport.Width - PluginSizeX), graphicsDevice.Viewport.Height - AboutSizeY);
             Position = new(0, 0);
+            creator = new(graphicsDevice);
             LoadProject();
         }
 
@@ -48,7 +51,7 @@ namespace RPGCreator.core.interfaces.launcher.parts
 
         protected override void OnDraw()
         {
-            ImGui.Begin(Title, ref opened, ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoBringToFrontOnFocus);
+            ImGui.Begin(Title, ref opened, GetBaseFlags() | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoBringToFrontOnFocus);
             ImGui.SetWindowPos(Position);
             ImGui.SetWindowSize(Size);
 
@@ -93,7 +96,10 @@ namespace RPGCreator.core.interfaces.launcher.parts
                     ImGui.Text("You don't have any project (for now).");
 
                     ImGui_Helper.AlignNextText("Create a new project", ImGui_Helper.ALIGNEMENT.CENTER);
-                    ImGui.Button("Create a new project");
+                    if(ImGui.Button("Create a new project"))
+                    {
+                        creator.Show();
+                    }
                 } else
                 {
                     ImGui.Text("This part is still WIP.");
@@ -103,6 +109,8 @@ namespace RPGCreator.core.interfaces.launcher.parts
                 ImGui.EndChild();
 
             ImGui.End();
+
+            creator.Draw();
         }
 
         protected override void OnUpdate()
