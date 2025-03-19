@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.core.helpers;
+using RPGCreator.core.helpers.ImGuiPlus;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,8 @@ namespace RPGCreator.core.interfaces.modals
         private float left_margin = 150;
         private float top_margin = 100;
 
+        private FileSelector SelectorPath;
+
         public ProjectCreator(GraphicsDevice graphicsDevice) : base(graphicsDevice)
         {
             MinSize = new(250, 250);
@@ -27,7 +30,21 @@ namespace RPGCreator.core.interfaces.modals
             float sizeX = (vWidth - left_margin * 2);
             float sizeY = (vHeight - top_margin * 2);
             SetSize((sizeX), (sizeY));
-            Position = new(top_margin, left_margin);
+            Position = new(left_margin, top_margin);
+
+            FileSelector.FILE_SELECTOR_PARAMETERS param = new();
+            param.StartFolder = "E:\\_dev\\RPGCreator\\Content\\BaseContent\\Licenses";
+            SelectorPath = new(this, "Select the project location...", "Project location...", param);
+
+            SelectorPath.OnOpen += (_, _) =>
+            {
+                Lock();
+            };
+
+            SelectorPath.OnConfirmed += (_, _) =>
+            {
+                Unlock();
+            };
 
             Hide();
         }
@@ -35,6 +52,12 @@ namespace RPGCreator.core.interfaces.modals
         public override void Show()
         {
             base.Show();
+            float vWidth = graphics.Viewport.Width;
+            float vHeight = graphics.Viewport.Height;
+            float sizeX = (vWidth - left_margin * 2);
+            float sizeY = (vHeight - top_margin * 2);
+            SetSize((sizeX), (sizeY));
+            Position = new(left_margin, top_margin);
 
             SetOverlay(this);
         }
@@ -48,7 +71,7 @@ namespace RPGCreator.core.interfaces.modals
 
         protected override void OnDraw()
         {
-            ImGui.Begin(Title, GetBaseFlags() | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoCollapse);
+            ImGui.Begin(Title, GetBaseFlags() | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoCollapse | _SelfFlags);
 
             if(ImGui.GetWindowSize() != Size)
                 ImGui.SetWindowSize(Size);
@@ -57,10 +80,7 @@ namespace RPGCreator.core.interfaces.modals
 
             ImGui.InputTextWithHint("Project name", "Type here your project name...", ref project_name, 255);
 
-            ImGui_Helper.FILE_SELECTOR_PARAMETERS param = new();
-            param.StartFolder = "E:\\_dev\\RPGCreator\\Content\\BaseContent\\Licenses";
-
-            ImGui_Helper.FileSelector(this, "Select a path for your project...", "Select a folder...", out ImGui_Helper.FILE_SELECTOR_RETURN response, param);
+            SelectorPath.Draw();
 
             ImGui.End();
         }

@@ -219,7 +219,7 @@ namespace RPGCreator.core.types
 
         public Game GetGame()
         {
-            return Game1.Self;
+            return null;
         }
 
         /// <summary>

@@ -25,9 +25,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Gum.MonoGame" Version="2025.3.9.1" />
+    <PackageReference Include="Gum.MonoGame" Version="2025.3.17.1" />
     <PackageReference Include="ImGui.NET" Version="1.91.6.1" />
-    <PackageReference Include="IronSoftware.System.Drawing" Version="2025.3.5" />
+    <PackageReference Include="IronSoftware.System.Drawing" Version="2025.3.6" />
     <PackageReference Include="MonoGame.Extended" Version="4.0.4" />
     <PackageReference Include="MonoGame.Extended.Content.Pipeline" Version="4.0.4" />
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.2.1105" />

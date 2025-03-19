@@ -49,6 +49,8 @@ public partial class Game1 : Game
     Launcher launcher;
     Debug DebugMainMenu;
 
+    public event EventHandler Drawing;
+
     static public Game1 Self;
 
     private GraphicsDeviceManager _graphics;
@@ -74,6 +76,8 @@ public partial class Game1 : Game
 
     protected override void Initialize()
     {
+
+
         MonoGameGum.GumService.Default.Initialize(this);
         BaseContent.Folders.LoadFolders(); // Loading / Creating the needed folders.
         BaseContent.LoadBaseContent(Content);
@@ -146,6 +150,7 @@ public partial class Game1 : Game
     {
         _spriteBatch = new SpriteBatchExtended(GraphicsDevice);
         _graphicsDevice = GraphicsDevice;
+
     }
 
     protected override void Update(GameTime gameTime)
@@ -162,6 +167,7 @@ public partial class Game1 : Game
 
     protected override void Draw(GameTime gameTime)
     {
+        Drawing?.Invoke(this, null);
         GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.FromNonPremultiplied(new (0.05f, 0.05f, 0.06f, 1)));
 
         MonoGameGum.GumService.Default.Draw();

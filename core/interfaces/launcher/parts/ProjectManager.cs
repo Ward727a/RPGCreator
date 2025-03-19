@@ -81,7 +81,7 @@ namespace RPGCreator.core.interfaces.launcher.parts
             // ------------------------------------------------------------
             ImGui.Separator();
 
-            ImGui.BeginChild("ProjectsList", new Vector2(), ImGuiChildFlags.None, ImGuiWindowFlags.AlwaysVerticalScrollbar);
+            ImGui.BeginChild("ProjectsList", new Vector2(), ImGuiChildFlags.None, GetBaseFlags() | ImGuiWindowFlags.AlwaysVerticalScrollbar);
 
             if (!_is_project_loaded)
             {

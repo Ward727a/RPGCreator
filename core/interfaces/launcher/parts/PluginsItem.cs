@@ -26,7 +26,7 @@ namespace RPGCreator.core.interfaces.launcher.parts
 
         protected override void OnDraw()
         {
-            ImGui.BeginChild(Title, new(0, 0), ImGuiChildFlags.Borders | ImGuiChildFlags.AutoResizeY);
+            ImGui.BeginChild(Title, new(0, 0), ImGuiChildFlags.Borders | ImGuiChildFlags.AutoResizeY, GetBaseFlags());
             ImGui.BeginGroup();
 
             if (plugin.IsOutdated())
