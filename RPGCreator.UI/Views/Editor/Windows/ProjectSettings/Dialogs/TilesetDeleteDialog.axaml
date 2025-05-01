@@ -1,0 +1,50 @@
+ <!-- RPG Creator - Open-source RPG Engine.-->
+ <!-- (c) 2025 Ward-->
+ <!-- -->
+ <!-- This file is part of RPG Creator and is distributed under the MIT License. -->
+ <!-- You are free to use, modify, and distribute this file under the terms of the MIT License. -->
+ <!-- See LICENSE for details. -->
+ <!-- -->
+ <!-- === -->
+ <!-- -->
+ <!-- Ce fichier fait partie de RPG Creator et est distribué sous licence MIT. -->
+ <!-- Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence MIT. -->
+ <!-- Voir LICENSE pour plus de détails. -->
+ <!--  -->
+ <!-- === -->
+ <!--  -->
+ <!-- Contact:  -->
+ <!-- => Mail: Ward727a@gmail.com -->
+ <!--    Please use this object: "RPG Creator [YourObject]" -->
+ <!-- => Discord: ward727 -->
+ <!--  -->
+ <!-- For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response. -->
+ <!-- -->
+<Window xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:RPGCreator.UI.ViewModels._Editor.Windows._ProjectSettings.Dialogs;assembly=RPGCreator.UI"
+			 xmlns:u="https://irihi.tech/ursa"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+			 Width="400"
+			 Height="300"
+		     ShowInTaskbar="False"
+		     WindowStartupLocation="CenterOwner"
+             x:DataType="vm:TilesetDeleteDialogViewModel"
+             x:Class="RPGCreator.UI.Views.Editor._ProjectSettings.Dialog.TilesetDeleteDialog">
+	<StackPanel Spacing="10" VerticalAlignment="Center">
+		
+		<TextBlock Text="PLEASE READ - WIP Area" HorizontalAlignment="Center" TextWrapping="Wrap"/>
+		<TextBlock Text="You are about to delete this tileset. If this tileset is hardlinked, the linked file will be also delete." HorizontalAlignment="Center" TextWrapping="Wrap"/>
+		<TextBlock Text="If this tileset isn't hardlinked, the linked file will not be deleted." HorizontalAlignment="Center" TextWrapping="Wrap"/>
+
+		<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5">
+			
+			<Button Content="Cancel"/>
+			<Button Content="Confirm and delete this tileset" Classes="Danger"/>
+			
+		</StackPanel>
+		
+	</StackPanel>
+</Window>

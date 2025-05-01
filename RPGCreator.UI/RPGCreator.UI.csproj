@@ -1,0 +1,76 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <Version>1.0.0</Version>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.2.6" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.6" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.6" />
+    <PackageReference Include="AvaloniaInside.MonoGame" Version="1.0.1" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+
+    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.6" />
+    <PackageReference Include="Irihi.Ursa" Version="1.10.0" />
+    <PackageReference Include="Irihi.Ursa.Themes.Semi" Version="1.10.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
+    <PackageReference Include="Semi.Avalonia" Version="11.2.1.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Lang\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Editor\Windows\ProjectSettings\Test.axaml.cs">
+      <DependentUpon>Test.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\LauncherView.axaml.cs">
+      <DependentUpon>LauncherView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\LauncherWindow.axaml.cs">
+      <DependentUpon>LauncherWindow.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
+    <Folder Include="Styles\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RPGCreator.Core\RPGCreator.Core.csproj" />
+    <ProjectReference Include="..\RPGCreator.RTP\RPGCreator.RTP.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Lang\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+	<ItemGroup>
+	  <Compile Update="Resources.Designer.cs">
+		<DesignTime>True</DesignTime>
+		<AutoGen>True</AutoGen>
+		<DependentUpon>Resources.resx</DependentUpon>
+	  </Compile>
+	  <Compile Update="Views\Launcher\Windows\ProjectCreator\ProjectCreatorWindow.axaml.cs">
+	    <DependentUpon>ProjectCreatorWindow.axaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Views\Modals\ErrorDialog.axaml.cs">
+	    <DependentUpon>ErrorDialog.axaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+</Project>

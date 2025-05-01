@@ -1,0 +1,3 @@
+[submodule "thirdparty/Gum"]
+	path = thirdparty/Gum
+	url = https://github.com/Ward727a/Gum.git
