@@ -1,0 +1,116 @@
+ <!-- RPG Creator - Open-source RPG Engine.-->
+ <!-- (c) 2025 Ward-->
+ <!-- -->
+ <!-- This file is part of RPG Creator and is distributed under the MIT License. -->
+ <!-- You are free to use, modify, and distribute this file under the terms of the MIT License. -->
+ <!-- See LICENSE for details. -->
+ <!-- -->
+ <!-- === -->
+ <!-- -->
+ <!-- Ce fichier fait partie de RPG Creator et est distribué sous licence MIT. -->
+ <!-- Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence MIT. -->
+ <!-- Voir LICENSE pour plus de détails. -->
+ <!--  -->
+ <!-- === -->
+ <!--  -->
+ <!-- Contact:  -->
+ <!-- => Mail: Ward727a@gmail.com -->
+ <!--    Please use this object: "RPG Creator [YourObject]" -->
+ <!-- => Discord: ward727 -->
+ <!--  -->
+ <!-- For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response. -->
+ <!-- -->
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:converters="clr-namespace:RPGCreator.UI.OLD.Converters;assembly=RPGCreator.UI"
+        xmlns:vm="clr-namespace:RPGCreator.UI.OLD.ViewModels._Editor.Windows._ProjectSettings.Dialogs;assembly=RPGCreator.UI"
+		xmlns:u="https://irihi.tech/ursa"
+        mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="235"
+		Width="700"
+		Height="235"
+		ShowInTaskbar="False"
+		WindowStartupLocation="CenterOwner"
+		x:DataType="vm:TilesetImportDialogViewModel"
+        x:Class="RPGCreator.UI.OLD.Views.Editor._ProjectSettings.Dialog.TilesetImportDialog"
+        Title="TilesetImportDialog">
+
+	<Design.DataContext>
+		<vm:TilesetImportDialogViewModel/>
+	</Design.DataContext>
+
+	<Window.Resources>
+		<converters:PathToBitmapConverter x:Key="PathToBitmapConverter"/>
+	</Window.Resources>
+
+	<StackPanel Margin="4" VerticalAlignment="Center">
+
+		<Grid ColumnDefinitions="auto, 4, *">
+
+			<Panel Width="192" Height="192">
+				<u:Skeleton
+					VerticalAlignment="Center"
+					CornerRadius="2"
+					Width="192"
+					Height="192"
+					IsLoading="{Binding !HasPath, Mode=TwoWay}">
+					
+					<Image x:Name="tileset_preview" RenderOptions.BitmapInterpolationMode="None" Source="{Binding Path, Converter={StaticResource PathToBitmapConverter}}"/>
+					
+				</u:Skeleton>
+			</Panel>
+
+			<StackPanel Grid.Column="2" Spacing="4">
+
+				<StackPanel>
+					<Label Content="Name" Target="name_input"/>
+					<TextBox x:Name="name_input" Text="{Binding Name, Mode=TwoWay}"/>
+				</StackPanel>
+				
+				<StackPanel>
+					<Label Content="Path" Target="path_input"/>
+					<u:PathPicker x:Name="path_input" AllowMultiple="False" FileFilter="[Image,*.jpg,*.png]" Title="Load tileset" SelectedPathsText="{Binding Path, Mode=TwoWay}"/>
+				</StackPanel>
+
+				<StackPanel>
+					<StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+						<Label Content="Dimension" Target="dim_input"/>
+						<u:Badge Header="?" Classes="Inverted" VerticalAlignment="Center">
+							<ToolTip.Tip>
+								<StackPanel Spacing="4">
+									<TextBlock Text="The dimension define the tile size (e.g. 16x16, 24x24, 32x32, 64x64, ...)."/>
+									<TextBlock Text="As each tile need to be a square, you just need to define one (1) of the side size."/>
+								</StackPanel>
+							</ToolTip.Tip>
+						</u:Badge>
+					</StackPanel>
+					<u:NumericIntUpDown x:Name="dim_input" Minimum="1" Watermark="(Min: 1)" Value="{Binding Dimension, Mode=TwoWay}"/>
+				</StackPanel>
+				
+				<StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+					<CheckBox Content="Hardlink" IsChecked="{Binding Hardlink, Mode=TwoWay}"/>
+					<u:Badge Header="?" Classes="Inverted" VerticalAlignment="Center">
+						<ToolTip.Tip>
+							<StackPanel Spacing="4">
+								<TextBlock Text="A hardlinked tileset will duplicate the file inside the project folder. This allow you to edit it."/>
+								<TextBlock Text="A softlink will just create a link between the original file. You will not be able to edit it."/>
+								<TextBlock Text="Checked = Hardlink"/>
+								<TextBlock Text="Not checked = Softlink"/>
+							</StackPanel>
+						</ToolTip.Tip>
+					</u:Badge>
+				</StackPanel>
+				
+			</StackPanel>
+			
+		</Grid>
+
+		<Grid ColumnDefinitions="auto, 4, *, 4, auto, 4, auto">
+			<u:Badge Header="!" Classes="Danger" IsVisible="{Binding HasError}"/>
+			<TextBlock Grid.Column="2" Text="{Binding Error}" Classes="Danger" VerticalAlignment="Center"/>
+			<Button Grid.Column="4" Content="Cancel" Command="{Binding CancelCommand}"/>
+			<Button Grid.Column="6" Content="Import" Command="{Binding ConfirmCommand}"/>
+		</Grid>
+	</StackPanel>
+</Window>

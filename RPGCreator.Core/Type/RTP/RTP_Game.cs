@@ -23,6 +23,7 @@
 // 
 #endregion
 using Microsoft.Xna.Framework;
+using RPGCreator.Core.Type.Project;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,5 +35,12 @@ namespace RPGCreator.Core.Type.RTP
     public abstract class RTP_Game : Game
     {
         public RTP_GameEvents _events = new();
+        protected BaseProject? Project => EngineCore.Instance.Data.EditedProject;
+        protected bool HasProject => Project != null;
+
+        protected virtual void _Init() { }
+        protected virtual void _LoadContent() { }
+        protected virtual void _Update(GameTime gameTime) { }
+        protected virtual void _Draw(GameTime gameTime) { }
     }
 }

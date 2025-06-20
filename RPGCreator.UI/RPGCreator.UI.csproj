@@ -13,6 +13,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <AvaloniaResource Remove="Assets\avalonia-logo.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\avalonia-logo.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.2.6" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.6" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.6" />
@@ -33,20 +43,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Update="Views\Editor\Windows\ProjectSettings\Test.axaml.cs">
-      <DependentUpon>Test.axaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\LauncherView.axaml.cs">
-      <DependentUpon>LauncherView.axaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\LauncherWindow.axaml.cs">
-      <DependentUpon>LauncherWindow.axaml</DependentUpon>
-    </Compile>
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Interfaces\" />
-    <Folder Include="Styles\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -65,12 +65,6 @@
 		<DesignTime>True</DesignTime>
 		<AutoGen>True</AutoGen>
 		<DependentUpon>Resources.resx</DependentUpon>
-	  </Compile>
-	  <Compile Update="Views\Launcher\Windows\ProjectCreator\ProjectCreatorWindow.axaml.cs">
-	    <DependentUpon>ProjectCreatorWindow.axaml</DependentUpon>
-	  </Compile>
-	  <Compile Update="Views\Modals\ErrorDialog.axaml.cs">
-	    <DependentUpon>ErrorDialog.axaml</DependentUpon>
 	  </Compile>
 	</ItemGroup>
 </Project>

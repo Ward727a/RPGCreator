@@ -93,12 +93,12 @@ namespace RPGCreator.Core.Managers.ProjectsManager
             //EngineCore.Instance.Events.OnEngineUnloadProject(new());
         }
 
-        public void CreateProject(string project_name, string project_path)
+        public BaseProject? CreateProject(string project_name, string project_path)
         {
             ProjectsConf conf = EngineCore.Instance.Configs.GetConfig<ProjectsConf>("ProjectsConf");
             if (conf.Projects.Any(x => x.Name == project_name))
             {
-                return;
+                return null;
             }
 
             BaseProject project = new BaseProject(project_name)
@@ -109,6 +109,7 @@ namespace RPGCreator.Core.Managers.ProjectsManager
             conf.Projects.Add(project);
             conf.SaveProject(project, true);
             conf.Save();
+            return project;
         }
 
         public ObservableCollection<BaseProject> GetProjectsList()

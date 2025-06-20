@@ -35,6 +35,9 @@ using System.Threading.Tasks;
 
 namespace RPGCreator.Core.Type.Map
 {
+    /// <summary>
+    /// Base class for all drawable on a map (map included).
+    /// </summary>
     public abstract partial class BaseDrawable : ObservableObject
     {
 

@@ -1,0 +1,321 @@
+﻿#region LICENSE
+//
+// RPG Creator - Open-source RPG Engine.
+// (c) 2025 Ward
+// 
+// This file is part of RPG Creator and is distributed under the MIT License.
+// You are free to use, modify, and distribute this file under the terms of the MIT License.
+// See LICENSE for details.
+// 
+// ---
+// 
+// Ce fichier fait partie de RPG Creator et est distribué sous licence MIT.
+// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence MIT.
+// Voir LICENSE pour plus de détails.
+// 
+// Contact:
+// => Mail: Ward727a@gmail.com
+//    Please use this object: "RPG Creator [YourObject]"
+// => Discord: ward727
+// 
+// For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
+// 
+// 
+#endregion
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Media;
+using Avalonia.VisualTree;
+using Microsoft.Xna.Framework;
+using RPGCreator.Core;
+using RPGCreator.MonoGame;
+using RPGCreator.UI.Content.Editor.Tabs;
+using RPGCreator.UI.Content.Editor.TilesetSelectorComponents;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace RPGCreator.UI.Content.Editor
+{
+    public class EditorWindowControl : UserControl
+    {
+        private Window _Host => (Window)this.GetVisualRoot()!;
+
+        private EditorGame? game = (EditorGame)EngineCore.Instance.Data.RTPGame;
+        private AvaloniaInside.MonoGame.MonoGameControl MonoGameScreen;
+
+        private TilesetSelector tilesetSelector;
+
+        public EditorWindowControl()
+        {
+
+            if(game == null)
+            {
+                throw new InvalidOperationException("EditorGame is not initialized. Make sure to initialize the game before using this control.");
+            }
+
+            // Initialize the control here if needed
+            // For example, you can set up bindings, styles, etc.
+
+            var MainGrid = new Grid
+            {
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+                RowDefinitions = new RowDefinitions("Auto, *, 1, Auto")
+            };
+
+            #region MenuBar
+            var menuBar = new Menu
+            {
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
+            };
+            MainGrid.Children.Add(menuBar);
+            Grid.SetRow(menuBar, 0);
+
+            var fileMenuItem = new MenuItem
+            {
+                Header = "File"
+            };
+            menuBar.Items.Add(fileMenuItem);
+
+            var newFileMenuItem = new MenuItem
+            {
+                Header = "New"
+            };
+            fileMenuItem.Items.Add(newFileMenuItem);
+            var openFileMenuItem = new MenuItem
+            {
+                Header = "Open..."
+            };
+            fileMenuItem.Items.Add(openFileMenuItem);
+            var saveFileMenuItem = new MenuItem
+            {
+                Header = "Save"
+            };
+            fileMenuItem.Items.Add(saveFileMenuItem);
+            var closeFileMenuItem = new MenuItem
+            {
+                Header = "Close"
+            };
+            fileMenuItem.Items.Add(closeFileMenuItem);
+            var exportFileMenuItem = new MenuItem
+            {
+                Header = "Export"
+            };
+            fileMenuItem.Items.Add(exportFileMenuItem);
+
+            var editMenuItem = new MenuItem
+            {
+                Header = "Edit"
+            };
+            var undoEditMenuItem = new MenuItem
+            {
+                Header = "Undo"
+            };
+            menuBar.Items.Add(editMenuItem);
+            var redoEditMenuItem = new MenuItem
+            {
+                Header = "Redo"
+            };
+            editMenuItem.Items.Add(undoEditMenuItem);
+            var projectSettingsMenuItem = new MenuItem
+            {
+                Header = "Project Settings"
+            };
+            editMenuItem.Items.Add(projectSettingsMenuItem);
+            var preferencesMenuItem = new MenuItem
+            {
+                Header = "Preferences"
+            };
+            editMenuItem.Items.Add(preferencesMenuItem);
+
+            var assetsMenuItem = new MenuItem
+            {
+                Header = "Assets"
+            };
+            menuBar.Items.Add(assetsMenuItem);
+            var addAssetMenuItem = new MenuItem
+            {
+                Header = "Add..."
+            };
+            assetsMenuItem.Items.Add(addAssetMenuItem);
+            var manageAssetsMenuItem = new MenuItem
+            {
+                Header = "Manage Assets"
+            };
+            assetsMenuItem.Items.Add(manageAssetsMenuItem);
+            var importAssetsMenuItem = new MenuItem
+            {
+                Header = "Import Assets"
+            };
+            assetsMenuItem.Items.Add(importAssetsMenuItem);
+            var exportAssetsMenuItem = new MenuItem
+            {
+                Header = "Export Assets"
+            };
+            assetsMenuItem.Items.Add(exportAssetsMenuItem);
+            var helpMenuItem = new MenuItem
+            {
+                Header = "Help"
+            };
+            menuBar.Items.Add(helpMenuItem);
+            var aboutMenuItem = new MenuItem
+            {
+                Header = "About"
+            };
+            helpMenuItem.Items.Add(aboutMenuItem);
+            var documentationMenuItem = new MenuItem
+            {
+                Header = "Documentation"
+            };
+            helpMenuItem.Items.Add(documentationMenuItem);
+            var reportIssueMenuItem = new MenuItem
+            {
+                Header = "Report Issue"
+            };
+            helpMenuItem.Items.Add(reportIssueMenuItem);
+            #endregion
+
+            var ContentGrid = new Grid
+            {
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+                ColumnDefinitions = new ColumnDefinitions("Auto, *, Auto"),
+            };
+            MainGrid.Children.Add(ContentGrid);
+            Grid.SetRow(ContentGrid, 1);
+
+            #region LeftBar
+            var LeftPanel = new Grid
+            {
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+                Width = 300,
+                RowDefinitions = new RowDefinitions("*, 1, *"),
+            };
+            ContentGrid.Children.Add(LeftPanel);
+            Grid.SetColumn(LeftPanel, 0);
+
+            var tabControl = new TabControl
+            {
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+                Margin = App.style.Margin,
+            };
+            LeftPanel.Children.Add(tabControl);
+
+            tabControl.Items.Add(MapLevelTab.CreateTab(_Host));
+            tabControl.Items.Add(MapEditor.CreateTab(_Host));
+
+            var separatorLeftPanel0 = new Separator
+            {
+                Margin = App.style.Margin,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                BorderBrush = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Gray),
+            };
+            LeftPanel.Children.Add(separatorLeftPanel0);
+            Grid.SetRow(separatorLeftPanel0, 1);
+
+            tilesetSelector = new TilesetSelector();
+            LeftPanel.Children.Add(tilesetSelector);
+            Grid.SetRow(tilesetSelector, 2);
+
+            #endregion
+
+            var RightPanel = new StackPanel
+            {
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+                Width = 300,
+            };
+            ContentGrid.Children.Add(RightPanel);
+            Grid.SetColumn(RightPanel, 2);
+
+            var BottomPanel = new Grid
+            {
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Bottom,
+                Height = 200,
+                RowDefinitions = new RowDefinitions("*"),
+            };
+            MainGrid.Children.Add(BottomPanel);
+            Grid.SetRow(BottomPanel, 3);
+
+            var subBottomBorder = new Border
+            {
+                Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromArgb(60, 0, 0, 0)),
+                Margin = new Thickness(4),
+                Padding = new Thickness(4),
+                BorderThickness = new Thickness(1),
+                BorderBrush = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Gray),
+                CornerRadius = new CornerRadius(2),
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            };
+            BottomPanel.Children.Add(subBottomBorder);
+
+            var SubBottomPanel = new StackPanel
+            {
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+                Orientation = Avalonia.Layout.Orientation.Vertical,
+            };
+            subBottomBorder.Child = SubBottomPanel;
+
+            var CenterGrid = new Grid
+            {
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+                RowDefinitions = new("auto, *")
+            };
+            ContentGrid.Children.Add(CenterGrid);
+            Grid.SetColumn(CenterGrid, 1);
+
+            var toolbar = new StackPanel
+            {
+                Orientation = Avalonia.Layout.Orientation.Horizontal,
+                Height = 24
+            };
+            CenterGrid.Children.Add(toolbar);
+
+            MonoGameScreen = new AvaloniaInside.MonoGame.MonoGameControl
+            {
+                // This margin is a weird workaround to center the game screen.. IDK why it doesn't center properly otherwise. (12 because of the toolbar height being 24px)
+                // This is maybe due to some old artifacts from the first implementation of the RTP inside the engine, but couldn't find where or why. I'm not even sure if this is really that.
+                Margin = new Thickness(0, -12, 0, 12), 
+                Game = game,
+            };
+            CenterGrid.Children.Add(MonoGameScreen);
+            Grid.SetRow(MonoGameScreen, 1);
+
+            MonoGameScreen.PointerEntered += (s, e) =>
+            {
+                game.CanUseMouse = true;
+            };
+
+            MonoGameScreen.PointerExited += (s, e) =>
+            {
+                game.CanUseMouse = false;
+            };
+
+            game._events.RTPDraw += (s, e) =>
+            {
+                // Update the game "window" position and size based on the MonoGameScreen's position and size.
+                var position = (MonoGameScreen.TransformToVisual(_Host)?.Transform(new Avalonia.Point(0, 0))).GetValueOrDefault();
+
+                game.GraphicsDevice.PresentationParameters.BackBufferWidth = (int)MonoGameScreen.Bounds.Width;
+                game.GraphicsDevice.PresentationParameters.BackBufferHeight = (int)MonoGameScreen.Bounds.Height;
+                game._graphics.ApplyChanges();
+
+                game.Window.Position = new Microsoft.Xna.Framework.Point((int)(_Host.Position.X + 8 + 300), (int)(position.Y + _Host.Position.Y + 1 + menuBar.Bounds.Height + 12));
+            };
+
+            this.Content = MainGrid;
+        }
+    }
+}

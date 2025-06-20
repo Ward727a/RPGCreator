@@ -1,0 +1,49 @@
+﻿#region LICENSE
+//
+// RPG Creator - Open-source RPG Engine.
+// (c) 2025 Ward
+// 
+// This file is part of RPG Creator and is distributed under the MIT License.
+// You are free to use, modify, and distribute this file under the terms of the MIT License.
+// See LICENSE for details.
+// 
+// ---
+// 
+// Ce fichier fait partie de RPG Creator et est distribué sous licence MIT.
+// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence MIT.
+// Voir LICENSE pour plus de détails.
+// 
+// Contact:
+// => Mail: Ward727a@gmail.com
+//    Please use this object: "RPG Creator [YourObject]"
+// => Discord: ward727
+// 
+// For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
+// 
+// 
+#endregion
+using Avalonia;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace RPGCreator.UI.Styles
+{
+    internal class DefaultStyle : BaseStyle
+    {
+        public override string StyleName => "Default style";
+
+        public override Thickness Margin => new Thickness(4);
+
+        public override int TitleFontSize => 32;
+
+        public override int SubtitleFontSize => 24;
+
+        public override int TextFontSize => 18;
+        public override int MediumTextFontSize => 14; // Default to TextFontSize, can be overridden if needed
+
+        public override int SmallTextFontSize => 12;
+    }
+}

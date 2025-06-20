@@ -116,5 +116,11 @@ namespace RPGCreator.Core.Type.Project
             CreatedMap?.Invoke(this, e);
         }
 
+        public event EventHandler? MapsListChanged;
+        public virtual void OnMapsListChanged()
+        {
+            MapsListChanged?.Invoke(this, EventArgs.Empty);
+        }
+
     }
 }

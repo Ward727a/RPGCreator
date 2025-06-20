@@ -22,19 +22,40 @@
 // 
 // 
 #endregion
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Xna.Framework;
 using RPGCreator.Core.Rendering.Batching;
+using RPGCreator.Core.Type.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Color = Avalonia.Media.Color;
 
 namespace RPGCreator.Core.Type.Map
 {
-    public partial class MapLayer : BaseDrawable
+
+    public class UIV_MapLayer : UIVisual
     {
+        public readonly Color UnknownColor = Color.FromArgb(255, 0, 0, 255); // 255, 0, 0, 255
+        public readonly Color DefaultColor = Color.FromArgb(240, 248, 255, 255); // 240, 248, 255, 255
+        public readonly Color CollisionColor = Color.FromArgb(255, 165, 0, 255); // 255, 165, 0, 255
+        public readonly Color EntityColor = Color.FromArgb(255, 192, 203, 255); // 255, 192, 203, 255
+    }
+
+    public partial class MapLayer : BaseDrawable, IHasUIVisual<UIV_MapLayer>
+    {
+        
+        // This should be the same as the one found inside the Tile type (ETileType)
+        public enum ELayerType
+        {
+            UNKNOWN,
+            DEFAULT,
+            COLLISION,
+            ENTITY
+        }
 
         event EventHandler<Tile>? TileAdded;
         event EventHandler<Tile>? TileRemoved;
@@ -43,11 +64,16 @@ namespace RPGCreator.Core.Type.Map
         [ObservableProperty]
         private bool _IsSelected = false;
 
+        [ObservableProperty]
+        private ELayerType _LayerType = ELayerType.DEFAULT;
         public string Name { get; set; } = string.Empty;
         public int ZIndex { get; set; } = 0;
         public bool Visible { get; set; } = true;
         public List<Tile> Tiles { get; set; } = [];
         public List<Tile> SelectedTiles { get; set; } = [];
+        private UIV_MapLayer _visual = new();
+        public UIV_MapLayer Visual => _visual;
+
         public MapLayer(string name, int zIndex, bool visible)
         {
             Name = name;
@@ -70,6 +96,10 @@ namespace RPGCreator.Core.Type.Map
 
         public virtual void AddTile(Tile tile)
         {
+
+            if ((int)tile.Type != (int)LayerType)
+                return;
+
             ArgumentNullException.ThrowIfNull(tile);
             Tiles.Add(tile);
             tile.Parent = this;

@@ -1,0 +1,71 @@
+ <!-- RPG Creator - Open-source RPG Engine.-->
+ <!-- (c) 2025 Ward-->
+ <!-- -->
+ <!-- This file is part of RPG Creator and is distributed under the MIT License. -->
+ <!-- You are free to use, modify, and distribute this file under the terms of the MIT License. -->
+ <!-- See LICENSE for details. -->
+ <!-- -->
+ <!-- === -->
+ <!-- -->
+ <!-- Ce fichier fait partie de RPG Creator et est distribué sous licence MIT. -->
+ <!-- Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence MIT. -->
+ <!-- Voir LICENSE pour plus de détails. -->
+ <!--  -->
+ <!-- === -->
+ <!--  -->
+ <!-- Contact:  -->
+ <!-- => Mail: Ward727a@gmail.com -->
+ <!--    Please use this object: "RPG Creator [YourObject]" -->
+ <!-- => Discord: ward727 -->
+ <!--  -->
+ <!-- For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response. -->
+ <!-- -->
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="RPGCreator.UI.OLD.Views.Editor.Windows.ProjectSettings"
+		xmlns:vm="clr-namespace:RPGCreator.UI.OLD.ViewModels._Editor.Windows"
+        Title="ProjectSettings"
+		     WindowStartupLocation="CenterOwner"
+		xmlns:u="https://irihi.tech/ursa"
+		x:DataType="vm:ProjectSettingsViewModel"
+		MinWidth="800"
+		MinHeight="450">
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="auto" MinWidth="200" />
+			<ColumnDefinition Width="3"/>
+			<ColumnDefinition Width="*" MinWidth="400" />
+		</Grid.ColumnDefinitions>
+
+		<u:NavMenu Margin="4">
+			<u:NavMenuItem Header="Information" Tapped="NavInformation_Tapped"/>
+			<u:NavMenuItem Header="Test" Tapped="NavTest_Tapped"/>
+			<u:NavMenuItem Header="Assets">
+				<u:NavMenuItem Header="Using"/>
+				<u:NavMenuItem Header="Tilesets" Tapped="NavAssetTilesets_Tapped"/>
+			</u:NavMenuItem>
+		</u:NavMenu>
+
+		<GridSplitter Grid.Column="1"/>
+
+		<Grid Grid.Column="2" Margin="4">
+
+			<Grid.RowDefinitions>
+				<RowDefinition Height="*"/>
+				<RowDefinition Height="auto"/>
+			</Grid.RowDefinitions>
+			
+			<Panel>
+				<ScrollViewer x:Name="Scroller" Margin="4" u:ScrollTo.Direction="Top"/>
+			</Panel>
+
+			<StackPanel Orientation="Horizontal" Margin="4" HorizontalAlignment="Right" Grid.Row="1">
+				<Button Content="Save" Click="Save_Click"/>
+			</StackPanel>
+			
+		</Grid>
+	</Grid>
+</Window>

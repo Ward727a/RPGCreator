@@ -30,7 +30,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPGCreator.UI.Converters
+namespace RPGCreator.UI.OLD.Converters
 {
     public class NullOrEmptyToVisibilityConverter : IValueConverter
     {

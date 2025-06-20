@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RPGCreator.UI.Lang {
+namespace RPGCreator.UI.OLD.Lang {
     using System;
     
     

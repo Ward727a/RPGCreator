@@ -1,0 +1,90 @@
+ <!-- RPG Creator - Open-source RPG Engine.-->
+ <!-- (c) 2025 Ward-->
+ <!-- -->
+ <!-- This file is part of RPG Creator and is distributed under the MIT License. -->
+ <!-- You are free to use, modify, and distribute this file under the terms of the MIT License. -->
+ <!-- See LICENSE for details. -->
+ <!-- -->
+ <!-- === -->
+ <!-- -->
+ <!-- Ce fichier fait partie de RPG Creator et est distribué sous licence MIT. -->
+ <!-- Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence MIT. -->
+ <!-- Voir LICENSE pour plus de détails. -->
+ <!--  -->
+ <!-- === -->
+ <!--  -->
+ <!-- Contact:  -->
+ <!-- => Mail: Ward727a@gmail.com -->
+ <!--    Please use this object: "RPG Creator [YourObject]" -->
+ <!-- => Discord: ward727 -->
+ <!--  -->
+ <!-- For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response. -->
+ <!-- -->
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:lang="clr-namespace:RPGCreator.UI.OLD.Lang"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:RPGCreator.UI.OLD.ViewModels"
+			 xmlns:template="clr-namespace:RPGCreator.Template.Launcher"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="RPGCreator.UI.OLD.Views.LauncherView"
+             x:DataType="vm:LauncherViewModel"
+			 x:Name="Test">
+  <Design.DataContext>
+    <!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+    <vm:LauncherViewModel />
+  </Design.DataContext>
+
+	<Grid HorizontalAlignment="Stretch" ColumnDefinitions="*, auto">
+		<StackPanel x:Name="ProjectManager" Grid.Column="0" Margin="2">
+
+			
+			<Grid VerticalAlignment="Center" ColumnDefinitions="auto,2,auto,0,*,2,auto,2,auto">
+				<Button x:Name="NewProject" Command="{Binding OpenProjectCreator}" VerticalAlignment="Center" Grid.Column="0" Content="{x:Static lang:Resources.Launcher_NewProject}"/>
+				<TextBox x:Name="SearchProject" Watermark="{x:Static lang:Resources.Launcher_InputSearchProject}" Grid.Column="4"/>
+				<Button x:Name="OpenFolder" VerticalAlignment="Center" Grid.Column="6" HorizontalContentAlignment="Center" Content="{x:Static lang:Resources.Launcher_OpenFolder}" />
+				<Button x:Name="Settings" VerticalAlignment="Center" Grid.Column="8" HorizontalContentAlignment="Center" Content="{x:Static lang:Resources.Launcher_Settings}" />
+			</Grid>
+			
+			
+			<Separator/>
+
+			<!--Show project list-->
+			<ItemsControl ItemsSource="{Binding ItemsList}" x:Name="ItemParent">
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<StackPanel Margin="3" Spacing="5" Background="{Binding #ItemParent.((vm:LauncherViewModel)DataContext).BackgroundItemColor}">
+							<Grid Margin="3" RowDefinitions="auto, 5, auto" ColumnDefinitions="auto, *, auto">
+								<TextBlock Grid.Column="0" Text="{Binding Name}"/>
+								<Separator Grid.Column="1" HorizontalAlignment="Stretch"/>
+								<TextBlock Grid.Column="2" Text="{Binding Version, StringFormat='v{0}'}"/>
+								<Grid Grid.Row="2" Grid.ColumnSpan="5" ColumnDefinitions="auto, *, auto, 2, auto, *, auto">
+									<Button Grid.Column="0" Command="{Binding #ItemParent.((vm:LauncherViewModel)DataContext).EditProjectCommand}" CommandParameter="{Binding Name}">Edit project</Button>
+									<Separator Grid.Column="1"/>
+									<Button Grid.Column="2">Favorite</Button>
+									<Button Grid.Column="4">Archive</Button>
+									<Separator Grid.Column="5"/>
+									<Button Grid.Column="6">
+										Delete
+									</Button>
+								</Grid>
+							</Grid>
+						</StackPanel>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+
+			<!--If no project was found-->
+			<StackPanel IsVisible="{Binding !ItemsList.Count}">
+				<TextBlock HorizontalAlignment="Center" Text="{x:Static lang:Resources.Launcher_NoProjectFound}" Height="24" VerticalAlignment="Center"/>
+				<Button HorizontalAlignment="Center" Content="{x:Static lang:Resources.Launcher_NewProjectIfNone}" Command="{Binding OpenProjectCreator}"/>
+			</StackPanel>
+			
+		</StackPanel>
+		<StackPanel x:Name="PluginManager" Grid.Column="2" Margin="2" MinWidth="250">
+		</StackPanel>
+	</Grid>
+
+</UserControl>

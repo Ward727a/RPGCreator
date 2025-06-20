@@ -27,6 +27,7 @@ using RPGCreator.Core.Type.Assets;
 using RPGCreator.Core.Type.Map;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -43,13 +44,12 @@ namespace RPGCreator.Core.Type.Project
     /// - Items <br/>
     /// - And more... <br/>
     /// </summary>
-    public partial class ProjectGameData : ObservableObject
+    public partial class ProjectGameData
     {
 
         private BaseProject Project;
 
-        [ObservableProperty]
-        private List<BaseMap> maps = [];
+        public ObservableCollection<BaseMap> Maps = [];
 
         public ProjectGameData(BaseProject project)
         {

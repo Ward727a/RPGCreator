@@ -22,6 +22,7 @@
 // 
 // 
 #endregion
+using Avalonia.Media;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.Core.Type.Map;
 using SixLabors.ImageSharp;
@@ -40,8 +41,8 @@ namespace RPGCreator.Core.Type.Assets
 
         public override bool ShouldBeCached => true;
 
-        int tile_width;
-        int tile_height;
+        public int tile_width;
+        public int tile_height;
 
         public Tileset() : base()
         {
@@ -107,5 +108,6 @@ namespace RPGCreator.Core.Type.Assets
             // Assuming you have a method to create a texture from a rectangle
             return new Tile(this, tile_rect);
         }
+
     }
 }

@@ -71,8 +71,8 @@ namespace RPGCreator.Core.Types
 
         public void CreateTexture()
         {
-            EditorGame t = App.Services.GetRequiredService<EditorService>().GameEditor;
-            texture = Texture2D.FromFile(App.Services.GetRequiredService<EditorService>().GameEditor!.GraphicsDevice, Path);
+            //EditorGame t = App.Services.GetRequiredService<EditorService>().GameEditor;
+            //texture = Texture2D.FromFile(App.Services.GetRequiredService<EditorService>().GameEditor!.GraphicsDevice, Path);
         }
 
 
@@ -113,11 +113,11 @@ namespace RPGCreator.Core.Types
 
         partial void OnPathChanged(string value)
         {
-            if (!string.IsNullOrEmpty(Path) && File.Exists(Path) && App.Services.GetRequiredService<EditorService>().HasGame && App.Services.GetRequiredService<EditorService>().GameEditor!.GraphicsDevice != null)
-            {
-                texture = Texture2D.FromFile(App.Services.GetRequiredService<EditorService>().GameEditor!.GraphicsDevice, Path);
-            }
-            if (!HasXML) return;
+            //if (!string.IsNullOrEmpty(Path) && File.Exists(Path) && App.Services.GetRequiredService<EditorService>().HasGame && App.Services.GetRequiredService<EditorService>().GameEditor!.GraphicsDevice != null)
+            //{
+            //    texture = Texture2D.FromFile(App.Services.GetRequiredService<EditorService>().GameEditor!.GraphicsDevice, Path);
+            //}
+            //if (!HasXML) return;
             XML.Element("Path").SetValue(value);
         }
 

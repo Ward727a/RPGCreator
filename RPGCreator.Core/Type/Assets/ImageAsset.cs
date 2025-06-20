@@ -22,6 +22,7 @@
 // 
 // 
 #endregion
+using Avalonia.Media.Imaging;
 using Microsoft.Xna.Framework.Graphics;
 using SixLabors.ImageSharp;
 using System;
@@ -40,6 +41,7 @@ namespace RPGCreator.Core.Type.Assets
         internal Image _Image;
         protected string _ImagePathCached;
         protected Texture2D _TextureCache;
+        protected Bitmap? _BitmapCache;
         public string ImagePath { get; set; }
         public int Width;
         public int Height;
@@ -122,5 +124,16 @@ namespace RPGCreator.Core.Type.Assets
                 throw new Exception("Failed to convert Image to Texture2D.", e);
             }
         }
+        
+        public virtual Bitmap GetBitmap()
+        {
+            if(_BitmapCache != null)
+            {
+                return _BitmapCache;
+            }
+            _BitmapCache = new Bitmap(ImagePath);
+            return _BitmapCache;
+        }
+
     }
 }

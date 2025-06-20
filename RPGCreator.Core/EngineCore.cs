@@ -56,10 +56,13 @@ namespace RPGCreator.Core
         public EngineManagers Managers { get; private set; }
         public EngineModules Modules { get; private set; }
 
-        public static BaseAssetsPack TESTPACK;
+        // TODO: Remove?
+        //public static BaseAssetsPack TESTPACK;
 
         public static bool ManagersReady = false;
         public static bool ModulesReady = false;
+
+        private int _openedWindowsCount = 0; // Count of opened windows, used to know if the engine is ready to be closed or not.
 
         private EngineCore() 
         {
@@ -80,8 +83,6 @@ namespace RPGCreator.Core
 
             Managers.Projects.CreateProject("test project new config", "C:\\Users\\Ward\\Desktop\\Test");
 
-            TESTPACK = new BaseAssetsPack("test");
-
         }
 
         private void SubscribeBaseEvents()
@@ -100,6 +101,41 @@ namespace RPGCreator.Core
             Events.RTPCreated += (sender, args) =>
             {
                 Data.RTPGame = args.RTP;
+            };
+
+            Events.UIEditorOpened += (sender, args) =>
+            {
+                _openedWindowsCount++;
+            };
+
+            Events.UIEditorClosed += (sender, args) =>
+            {
+                _openedWindowsCount--;
+                if (_openedWindowsCount <= 0)
+                {
+                    // If no windows are opened, then we can close the engine.
+                    Events.OnEngineStopping(new());
+                }
+            };
+
+            Events.UILauncherOpened += (sender, args) =>
+            {
+                _openedWindowsCount++;
+            };
+
+            Events.UILauncherClosed += (sender, args) =>
+            {
+                _openedWindowsCount--;
+                if (_openedWindowsCount <= 0)
+                {
+                    // If no windows are opened, then we can close the engine.
+                    Events.OnEngineStopping(new());
+                }
+            };
+
+            Events.EngineStopping += (sender, args) =>
+            {
+                // This event is called when the engine is stopping, we can do some cleanup here.
             };
         }
 

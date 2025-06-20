@@ -28,7 +28,7 @@ using System;
 using System.Globalization;
 using System.IO;
 
-namespace RPGCreator.UI.Converters;
+namespace RPGCreator.UI.OLD.Converters;
 
 public class PathToBitmapConverter : IValueConverter
 {

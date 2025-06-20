@@ -51,7 +51,7 @@ namespace RPGCreator.Core.Helpers
 
         public FolderManager()
         {
-            ConfigurationService_old service = App.Services.GetService<ConfigurationService_old>();
+            //ConfigurationService_old service = App.Services.GetService<ConfigurationService_old>();
         }
 
         protected bool CheckFolders()

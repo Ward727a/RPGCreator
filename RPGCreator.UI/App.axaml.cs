@@ -34,8 +34,8 @@ using RPGCreator.Core.Events.EventArgs;
 using RPGCreator.Core.Helpers;
 using RPGCreator.Core.Services;
 using RPGCreator.Modals;
-using RPGCreator.UI.ViewModels;
-using RPGCreator.UI.Views;
+using RPGCreator.UI.Content.Launcher;
+using RPGCreator.UI.Styles;
 using System;
 using System.Collections.Generic;
 
@@ -44,33 +44,9 @@ namespace RPGCreator.UI;
 public partial class App : Application
 {
 
-    // Structure
+    // TODO: Move this style static variable to a more appropriate place, like a StylesManager or similar.
+    public static readonly BaseStyle style = new DefaultStyle();
 
-    /// <summary>
-    /// Allow to add service to the ServicesProvider.
-    /// </summary>
-    /// 
-    private readonly Dictionary<Type, Type[]> SingletonByInterfaceTable = new()
-    {
-    };
-
-    private readonly Type[] SingletonsTable =
-    [
-        typeof(ErrorDialog),
-        typeof(LauncherWindow),
-        typeof(LauncherView),
-        typeof(EditorService)
-
-    ];
-
-    private readonly Type[] TransientsTable = 
-    [
-
-    ];
-
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-    public static IServiceProvider Services { get; private set; }
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
     public override void Initialize()
     {
@@ -90,26 +66,13 @@ public partial class App : Application
             return;
         }
 
-        LoadServices();
-
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = Services.GetRequiredService<LauncherWindow>();
-            if (desktop.MainWindow != null)
-            {
-                //FolderManager folderManager = Services.GetRequiredService<FolderManager>();
-                //ConfigurationService s = Services.GetRequiredService<ConfigurationService>();
-                desktop.MainWindow.DataContext = new LauncherViewModel(desktop.MainWindow);
-            }
+            desktop.MainWindow = new LauncherWindow();
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
         {
-            singleViewPlatform.MainView = Services.GetService<LauncherView>();
-            if(singleViewPlatform.MainView != null)
-            {
-                //FolderManager folderManager = Services.GetRequiredService<FolderManager>();
-                singleViewPlatform.MainView.DataContext = new LauncherViewModel((Window)singleViewPlatform.MainView);
-            };
+            singleViewPlatform.MainView ??= new LauncherWindowControl();;
         }
 
         EngineCore.Instance.Events.OnUIReady(new());
@@ -127,6 +90,10 @@ public partial class App : Application
         EngineTimer.Start();
 
         base.OnFrameworkInitializationCompleted();
+        this.AttachDevTools(new()
+        {
+            StartupScreenIndex = 1,
+        });
     }
 
     private void Events_CoreReady(object? sender, CoreReadyArgs e)
@@ -134,29 +101,4 @@ public partial class App : Application
         OnFrameworkInitializationCompleted();
     }
 
-    private void LoadServices()
-    {
-        ServiceCollection services = new();
-
-        foreach (KeyValuePair<Type, Type[]> pair in SingletonByInterfaceTable)
-        {
-            foreach (Type type in pair.Value)
-            {
-                services.AddSingleton(pair.Key, type);
-            }
-        }
-
-        foreach (Type singleton in SingletonsTable)
-        {
-            services.AddSingleton(singleton);
-        }
-
-        foreach (Type transient in TransientsTable)
-        {
-            services.AddTransient(transient);
-        }
-
-        Services = services.BuildServiceProvider();
-        
-    }
 }

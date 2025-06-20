@@ -24,6 +24,7 @@
 #endregion
 using Avalonia.Controls;
 using Microsoft.Xna.Framework;
+using RPGCreator.Core.Type.Map;
 using RPGCreator.Core.Type.Project;
 using RPGCreator.Core.Type.RTP;
 
@@ -32,6 +33,9 @@ namespace RPGCreator.Core
     public class EngineData
     {
 
+        public event EventHandler? EditedMapChanged;
+        private BaseMap? _editedMap;
+
         internal EngineData()
         { }
 
@@ -39,6 +43,17 @@ namespace RPGCreator.Core
         public static Version AppVersion => new(0, 1, 0);
 
         public BaseProject? EditedProject { get; internal set; }
-        public RTP_Game? RTPGame { get; internal set; }
+        public BaseMap? EditedMap { get => _editedMap; 
+            set
+            {
+                if (_editedMap != value)
+                {
+                    _editedMap = value;
+                    EditedMapChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+        public Tile? SelectedTile { get; internal set; }
+        public Game? RTPGame { get; internal set; }
     }
 }

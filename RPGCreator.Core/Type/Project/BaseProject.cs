@@ -22,17 +22,21 @@
 // 
 // 
 #endregion
+using CommunityToolkit.Mvvm.ComponentModel;
+using RPGCreator.Core.Configs.Helpers;
 using RPGCreator.Core.Type.Assets;
 using RPGCreator.Core.Type.Assets.BaseAssetsPack;
+using RPGCreator.Core.Type.Map;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace RPGCreator.Core.Type.Project
 {
-    public class BaseProject
+    public partial class BaseProject : ObservableObject
     {
 
         public string? Name { get; set; } = "";
@@ -46,17 +50,30 @@ namespace RPGCreator.Core.Type.Project
         public List<string> Authors { get; set; } = [];
         public List<string> AssetsPackPath = [];
 
-        public List<object>? Maps;
+        [ObservableProperty]
+        private BaseMap? _EditMap = null;
+
+        public bool EditingMap => EditMap != null;
 
         public ProjectGameData GameData;
 
-        ProjectEvent Event;
+        public ProjectEvent Event;
+
+        #region PropertyEvent
+
+
+        #endregion
+
 
         public BaseProject(string name)
         {
             Name = name;
             Event = new ProjectEvent();
             GameData = new ProjectGameData(this);
+            GameData.Maps.CollectionChanged += (_, _) =>
+            {
+                Event.OnMapsListChanged();
+            };
         }
 
         public void Load()
@@ -67,11 +84,20 @@ namespace RPGCreator.Core.Type.Project
             {
                 EngineCore.Instance.Managers.AssetsPack.LoadAssetsPack(packPath);
             }
+
+            EngineCore.Instance.Data.EditedProject = this;
         }
 
         public void Unload()
         {
             EngineCore.Instance.Managers.AssetsPack.ClearAssetsPacks();
+            EngineCore.Instance.Data.EditedProject = null;
+        }
+
+        public void SaveConfig()
+        {
+            ProjectsConf conf = EngineCore.Instance.Configs.GetConfig<ProjectsConf>("ProjectsConf");
+            conf.SaveProject(this, false);
         }
 
         private string[] FormatString(string unformatedString)

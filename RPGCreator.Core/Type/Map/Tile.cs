@@ -22,6 +22,7 @@
 // 
 // 
 #endregion
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
@@ -37,8 +38,21 @@ using System.Threading.Tasks;
 
 namespace RPGCreator.Core.Type.Map
 {
-    public class Tile(Tileset tileset, Rectangle uv) : BaseInteractable
+    public partial class Tile(Tileset tileset, Rectangle uv) : BaseInteractable
     {
+
+        // This should be the same as the one found inside the MapLayer type (ELayerType)
+        public enum ETileType
+        {
+            UNKNOWN,
+            DEFAULT,
+            COLLISION,
+            ENTITY
+        }
+
+        [ObservableProperty]
+        private ETileType _Type = ETileType.DEFAULT;
+
         public Tileset Tileset { get; private set; } = tileset;
         public Rectangle UV { get; private set; } = uv;
         

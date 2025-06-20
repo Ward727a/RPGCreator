@@ -1,0 +1,156 @@
+ <!-- RPG Creator - Open-source RPG Engine.-->
+ <!-- (c) 2025 Ward-->
+ <!-- -->
+ <!-- This file is part of RPG Creator and is distributed under the MIT License. -->
+ <!-- You are free to use, modify, and distribute this file under the terms of the MIT License. -->
+ <!-- See LICENSE for details. -->
+ <!-- -->
+ <!-- === -->
+ <!-- -->
+ <!-- Ce fichier fait partie de RPG Creator et est distribué sous licence MIT. -->
+ <!-- Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence MIT. -->
+ <!-- Voir LICENSE pour plus de détails. -->
+ <!--  -->
+ <!-- === -->
+ <!--  -->
+ <!-- Contact:  -->
+ <!-- => Mail: Ward727a@gmail.com -->
+ <!--    Please use this object: "RPG Creator [YourObject]" -->
+ <!-- => Discord: ward727 -->
+ <!--  -->
+ <!-- For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response. -->
+ <!-- -->
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mg="clr-namespace:AvaloniaInside.MonoGame;assembly=AvaloniaInside.MonoGame"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="clr-namespace:RPGCreator.UI.OLD.ViewModels._Editor"
+             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="650"
+			 xmlns:converters="clr-namespace:RPGCreator.UI.OLD.Converters;assembly=RPGCreator.UI"
+			 xmlns:u="https://irihi.tech/ursa"
+             x:DataType="vm:EditorViewModel"
+			 xmlns:tabs="clr-namespace:RPGCreator.UI.OLD.Views.Editor.Tabs"
+             x:Class="RPGCreator.UI.OLD.Views.Editor.EditorView">
+	<UserControl.DataContext>
+		<vm:EditorViewModel/>
+	</UserControl.DataContext>
+	<UserControl.Resources>
+		<converters:PathToBitmapConverter x:Key="PathToBitmapConverter"/>
+	</UserControl.Resources>
+	<Grid RowDefinitions="auto, *">
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="auto" MinWidth="300"/>
+			<ColumnDefinition Width="4"/>
+			<ColumnDefinition Width="*" MinWidth="600"/>
+		</Grid.ColumnDefinitions>
+
+		<Border BorderThickness="0, 0, 0, 1.5" BorderBrush="DimGray" MinHeight="30" Grid.Row="0" Grid.ColumnSpan="4">
+			<StackPanel Orientation="Horizontal" Margin="4">
+
+				<Menu>
+					<MenuItem Header="_File">
+						<MenuItem Header="_Import file..." Command="{Binding ImportFileCommand}"/>
+					</MenuItem>
+					<MenuItem Header="_Project">
+						<MenuItem Header="_Settings" Click="OpenSettings_Click"/>
+						<!--<Separator/> Test to add a separator in a menu.
+						<MenuItem Header="_Test"/>-->
+					</MenuItem>
+				</Menu>
+			
+			</StackPanel>
+		</Border>
+		<TabControl Grid.Row="1">
+			<TabItem Header="Level Editor">
+				<tabs:LevelEditorTab DataContext="{Binding}"/>
+			</TabItem>
+			<TabItem Header="Test">
+				<StackPanel Margin="5">
+					<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5">
+						<u:NumericIntUpDown x:Name="XPos" Watermark="X position" Value="{Binding PositionX, Mode=TwoWay}"/>
+						<u:NumericIntUpDown x:Name="YPos" Watermark="Y Position" Value="{Binding PositionY, Mode=TwoWay}"/>
+					</StackPanel>
+					<TextBox Text="{Binding ButtonContent, Mode=TwoWay}" Watermark="Button content (default 'hi')"/>
+					<Button Content="Add Button" Command="{Binding AddButtonCommand}"/>
+					<Button Content="[Test] Save map" Command="{Binding SaveMapCommand}"/>
+					<Button Content="[Test] Load map" Command="{Binding LoadMapCommand}"/>
+				</StackPanel>
+			</TabItem>
+			<TabItem Header="Test2">
+				<StackPanel Margin="5">
+					<ListBox ItemsSource="{Binding AvalTilesets, Mode=TwoWay}" SelectedIndex="{Binding SelectedTilesetIndex, Mode=TwoWay}" SelectionMode="Single">
+						<ListBox.ItemTemplate>
+							<DataTemplate>
+									<StackPanel>
+										<TextBlock Text="{Binding Name}"/>
+										<ScrollViewer x:Name="TilesetScrollViewer" Width="256" Height="256" ClipToBounds="True" PointerPressed="Canvas_PointerPressed_1" HorizontalScrollBarVisibility="Auto">
+											<Panel>
+												<Image Source="{Binding ImagePath, Converter={StaticResource PathToBitmapConverter}}"/>
+											</Panel>
+										</ScrollViewer>
+									</StackPanel>
+							</DataTemplate>
+						</ListBox.ItemTemplate>
+					</ListBox>
+				</StackPanel>
+			</TabItem>
+			<TabItem Header="Test3">
+				<StackPanel Margin="5">
+					<TextBlock x:Name="TestText"/>
+					<ScrollViewer x:Name="TilesetScrollViewer" Width="256" Height="256" ClipToBounds="True" PointerPressed="Canvas_PointerPressed_1" HorizontalScrollBarVisibility="Auto">
+						<Panel ClipToBounds="True">
+							<Grid>
+								<Image x:Name="TilesetImage" Source="{Binding Selected_tileset.ImagePath, Mode=OneWay, Converter={StaticResource PathToBitmapConverter}}" HorizontalAlignment="Left" VerticalAlignment="Top" RenderOptions.BitmapInterpolationMode="None"/>
+								<Canvas x:Name="TilesetCanvas" HorizontalAlignment="Left" VerticalAlignment="Top">
+										<Rectangle x:Name="SelectionRectangle"
+												Width="{Binding SelectionSquareSize}" Height="{Binding SelectionSquareSize}"
+												Stroke="Red" StrokeThickness="2"
+												IsVisible="False" SizeChanged="Rectangle_SizeChanged"/>
+								</Canvas>
+							</Grid>
+						</Panel>
+					</ScrollViewer>
+					<Button Content="+" Command="{Binding ZoomInCommand}" IsEnabled="False"/>
+					<Button Content="-" Command="{Binding ZoomOutCommand}" IsEnabled="False"/>
+				</StackPanel>
+			</TabItem>
+		</TabControl>
+		
+		<GridSplitter Grid.Row="1" Grid.Column="1" Background="DimGray" ResizeDirection="Columns"/>
+		
+		<Grid Grid.Row="1" Grid.Column="2" VerticalAlignment="Stretch">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="*" MinHeight="400"/>
+				<RowDefinition Height="4"/>
+				<RowDefinition Height="auto" MinHeight="200"/>
+			</Grid.RowDefinitions>
+
+			<!--<Rectangle Fill="Aqua"/>-->
+			<mg:MonoGameControl Game="{Binding EditorGame}" x:Name="GameControl" PointerEntered="MonoGameControl_PointerEntered_1" PointerExited="MonoGameControl_PointerExited_2">
+
+			</mg:MonoGameControl>
+			<StackPanel Orientation="Horizontal">
+				<ListBox ItemsSource="{Binding LayersName}" SelectedIndex="{Binding SelectedLayerIndex, Mode=TwoWay}">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding}"/>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+				<TextBox Text="{Binding NewLayerName, Mode=TwoWay}"/>
+				<Button Content="Add Layer" Command="{Binding AddLayerCommand}"/>
+			</StackPanel>
+
+
+			<GridSplitter Grid.Row="1" ResizeDirection="Rows" Background="DimGray"/>
+			<TabControl Grid.Row="2">
+				<TabItem Header="World">
+					<Panel HorizontalAlignment="Left">
+						<Button>Hi</Button>
+					</Panel>
+				</TabItem>
+			</TabControl>
+		</Grid>
+	</Grid>
+</UserControl>
