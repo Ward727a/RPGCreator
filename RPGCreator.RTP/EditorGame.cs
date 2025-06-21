@@ -91,7 +91,7 @@ namespace RPGCreator.MonoGame
             {
                 if (Mouse.GetState().LeftButton == ButtonState.Pressed)
                 {
-                    Console.WriteLine("Left mouse button pressed inside preview.");
+                    //Console.WriteLine("Left mouse button pressed inside preview.");
                 }
             }
 

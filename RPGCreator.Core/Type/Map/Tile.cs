@@ -50,6 +50,8 @@ namespace RPGCreator.Core.Type.Map
             ENTITY
         }
 
+        public Ulid ID { get; private set; } = Ulid.NewUlid();
+
         [ObservableProperty]
         private ETileType _Type = ETileType.DEFAULT;
 
@@ -81,6 +83,17 @@ namespace RPGCreator.Core.Type.Map
         public virtual void Selected()
         {
             // TODO
+        }
+
+        internal Tile Clone()
+        {
+            return new Tile(Tileset, UV)
+            {
+                Type = Type,
+                Position = Position,
+                SelectedTile = SelectedTile,
+                TaskSelectedID = TaskSelectedID
+            };
         }
     }
 }

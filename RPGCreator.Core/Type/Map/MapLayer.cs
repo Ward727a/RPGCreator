@@ -33,6 +33,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Color = Avalonia.Media.Color;
+using Point = RPGCreator.Core.Type.Internal.Point;
 
 namespace RPGCreator.Core.Type.Map
 {
@@ -69,12 +70,13 @@ namespace RPGCreator.Core.Type.Map
         public string Name { get; set; } = string.Empty;
         public int ZIndex { get; set; } = 0;
         public bool Visible { get; set; } = true;
-        public List<Tile> Tiles { get; set; } = [];
+        public Dictionary<Point, Tile> Tiles { get; set; } = [];
+        //public Dictionary<Point, Ulid> TileIndexMapping { get; set; } = new(); // Maps the tile position to its index in the Tiles list for quick access
         public List<Tile> SelectedTiles { get; set; } = [];
         private UIV_MapLayer _visual = new();
         public UIV_MapLayer Visual => _visual;
 
-        public MapLayer(string name, int zIndex, bool visible)
+        public MapLayer(string name, int zIndex = 0, bool visible = true)
         {
             Name = name;
             ZIndex = zIndex;
@@ -88,7 +90,7 @@ namespace RPGCreator.Core.Type.Map
             // Draw the layer here
             // This is where you would implement the logic to draw the layer using the provided SpriteBatchExtend instance.
             // For example, you might loop through the tiles in the layer and draw them using sb.Draw() method.
-            foreach (var tile in Tiles)
+            foreach (var tile in Tiles.Values)
             {
                 tile.Draw(sb);
             }
@@ -101,14 +103,32 @@ namespace RPGCreator.Core.Type.Map
                 return;
 
             ArgumentNullException.ThrowIfNull(tile);
-            Tiles.Add(tile);
+            Tiles.Add(tile.Position, tile);
             tile.Parent = this;
             TileAdded?.Invoke(this, tile);
+        }
+        public virtual void AddTileAt(Tile tile, Point at)
+        {
+            if((int)tile.Type != (int)LayerType)
+                return;
+
+            if(TryGetTileAt(at, out Tile? samePositionTile))
+            {
+                if (samePositionTile == null)
+                    throw new InvalidOperationException("Tile at the specified position is placed, but null, this should not happen.");
+                RemoveTile(samePositionTile);
+            }
+
+            ArgumentNullException.ThrowIfNull(tile);
+            Tile? CopyTile = tile.Clone() as Tile;
+            CopyTile.Position = at.ToMG().ToVector2();
+            Tiles.Add(at, CopyTile);
+            CopyTile.Parent = this;
         }
         public virtual void RemoveTile(Tile tile)
         {
             ArgumentNullException.ThrowIfNull(tile);
-            Tiles.Remove(tile);
+            Tiles.Remove(tile.Position);
             tile.Parent = null;
             TileRemoved?.Invoke(this, tile);
         }
@@ -118,10 +138,10 @@ namespace RPGCreator.Core.Type.Map
             // Updating the layer here
 
             // Tiles update logic to check for mouse events, etc.
-            Tiles.ForEach(tile =>
+            foreach (var tile in Tiles.Values)
             {
                 tile.Update(gameTime);
-            });
+            }
         }
 
         public void SelectTile(Tile tile)
@@ -142,15 +162,25 @@ namespace RPGCreator.Core.Type.Map
 
         public Tile? GetTileAt(int x, int y)
         {
-            var tile = Tiles.FirstOrDefault(t => t.Position.X <= x && t.Position.X + t.UV.Width >= x &&
-                                             t.Position.Y <= y && t.Position.Y + t.UV.Height >= y);
-            return tile;
+            var at = new Point(x, y);
+            if (Tiles.TryGetValue(at, out Tile value))
+            {
+                return value;
+            }
+            return null;
         }
 
         public bool TryGetTileAt(int x, int y, out Tile? tile)
         {
-            tile = Tiles.FirstOrDefault(t => t.Position.X <= x && t.Position.X + t.UV.Width >= x &&
-                                             t.Position.Y <= y && t.Position.Y + t.UV.Height >= y);
+            var at = new Point(x, y);
+            tile = null;
+            Tiles.TryGetValue(at, out tile);
+            return tile != null;
+        }
+        public bool TryGetTileAt(Point at, out Tile? tile)
+        {
+            tile = null;
+            Tiles.TryGetValue(at, out tile);
             return tile != null;
         }
     }

@@ -49,11 +49,14 @@ namespace RPGCreator.UI.Content.Editor
         private AvaloniaInside.MonoGame.MonoGameControl MonoGameScreen;
 
         private TilesetSelector tilesetSelector;
+        private Avalonia.Point _LastTilePlacePos;
+
+        private bool _placingTile = false; // Flag to indicate if a tile is being placed
 
         public EditorWindowControl()
         {
 
-            if(game == null)
+            if (game == null)
             {
                 throw new InvalidOperationException("EditorGame is not initialized. Make sure to initialize the game before using this control.");
             }
@@ -287,7 +290,7 @@ namespace RPGCreator.UI.Content.Editor
             {
                 // This margin is a weird workaround to center the game screen.. IDK why it doesn't center properly otherwise. (12 because of the toolbar height being 24px)
                 // This is maybe due to some old artifacts from the first implementation of the RTP inside the engine, but couldn't find where or why. I'm not even sure if this is really that.
-                Margin = new Thickness(0, -12, 0, 12), 
+                Margin = new Thickness(0, -12, 0, 12),
                 Game = game,
             };
             CenterGrid.Children.Add(MonoGameScreen);
@@ -303,6 +306,10 @@ namespace RPGCreator.UI.Content.Editor
                 game.CanUseMouse = false;
             };
 
+            MonoGameScreen.PointerPressed += MonoGameScreen_PointerPressed;
+            MonoGameScreen.PointerReleased += MonoGameScreen_PointerReleased;
+            MonoGameScreen.PointerMoved += MonoGameScreen_PointerMoved;
+
             game._events.RTPDraw += (s, e) =>
             {
                 // Update the game "window" position and size based on the MonoGameScreen's position and size.
@@ -316,6 +323,52 @@ namespace RPGCreator.UI.Content.Editor
             };
 
             this.Content = MainGrid;
+        }
+
+        private void MonoGameScreen_PointerPressed(object? sender, PointerPressedEventArgs e)
+        {
+            if (e.GetCurrentPoint(MonoGameScreen).Properties.IsLeftButtonPressed)
+            {
+                var position = e.GetPosition(MonoGameScreen);
+                // Adjust the position to account for the MonoGameScreen's margin (12px)
+                EngineCore.Instance.Managers.Brush.ClickAt(new Core.Type.Internal.Point(position.WithY(position.Y - 12)));
+                _LastTilePlacePos = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position.WithY(position.Y - 12));
+                _placingTile = true; // Set the flag to indicate that a tile is being placed
+            }
+        }
+
+        private void MonoGameScreen_PointerReleased(object? sender, PointerReleasedEventArgs e)
+        {
+            if (e.GetCurrentPoint(MonoGameScreen).Properties.IsLeftButtonPressed && _placingTile)
+            {
+                _placingTile = false; // Reset the flag when the tile placement is done
+                _LastTilePlacePos = new(-1, -1); // Reset the last tile position
+            }
+        }
+
+        private void MonoGameScreen_PointerMoved(object? sender, PointerEventArgs e)
+        {
+            if (_placingTile && e.GetCurrentPoint(MonoGameScreen).Properties.IsLeftButtonPressed)
+            {
+                var position = e.GetPosition(MonoGameScreen);
+
+                // Check if the mouse position has at least moved one tile from the last position
+                var normalizedCurrentPosition = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position.WithY(position.Y - 12));
+
+                if(_LastTilePlacePos != normalizedCurrentPosition)
+                {
+                    // If the position has changed, update the last position
+                    _LastTilePlacePos = normalizedCurrentPosition;
+                }
+                else
+                {
+                    // If the position hasn't changed, do not place a tile again
+                    return;
+                }
+
+                // Adjust the position to account for the MonoGameScreen's margin (12px)
+                EngineCore.Instance.Managers.Brush.ClickAt(new Core.Type.Internal.Point(position.WithY(position.Y - 12)));
+            }
         }
     }
 }

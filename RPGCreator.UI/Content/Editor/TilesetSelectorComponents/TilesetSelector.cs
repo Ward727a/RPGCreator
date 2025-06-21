@@ -220,7 +220,6 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                 InnerTilesetCanvas.Children.Add(tilesetImage);
             }
         }
-
         protected void OnSelectTile(object? sender, PointerPressedEventArgs e)
         {
 
@@ -276,8 +275,11 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                 Canvas.SetTop(TileBorder, tileRectangle.Y);
                 InnerTilesetCanvas.Children.Add(TileBorder);
             }
-        }
 
+            var tile = SelectedTileset.GetTile(tileCol, tileRow);
+
+            EngineCore.Instance.Data.SelectedTile = tile;
+        }
         protected void OnMovingRoot(object? sender, PointerEventArgs e)
         {
             // This event handler is triggered when the root tileset canvas is moved (Right-click and drag)
@@ -346,7 +348,6 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                 return;
             }
         }
-
         protected void OnResetRootTilesetPos(object? sender, RoutedEventArgs e)
         {
             // This event handler is triggered when the reset button is clicked

@@ -68,6 +68,10 @@ namespace RPGCreator.Core.Type.Assets
 
             XElement data = AssetData;
 
+            if(tile_width > 0 && tile_height > 0)
+            {
+                return; // Already initialized
+            }
             int dim_width = int.Parse(data.Element("tile_width")?.Value ?? "0");
             int dim_height = int.Parse(data.Element("tile_height")?.Value ?? "0");
 
@@ -109,5 +113,28 @@ namespace RPGCreator.Core.Type.Assets
             return new Tile(this, tile_rect);
         }
 
+        public Tile GetTile(int tile_col, int tile_row)
+        {
+            var width = Math.Max(Width, GetBitmap().Size.Width);
+            var height = Math.Max(Height, GetBitmap().Size.Height);
+
+            if(tile_col < 0 || tile_row < 0)
+            {
+                throw new ArgumentOutOfRangeException("Tile coordinates cannot be negative.");
+            }
+
+            if (tile_col * tile_width >= width)
+            {
+                throw new ArgumentOutOfRangeException(nameof(tile_col), "Tile coordinates are out of bounds.");
+            }
+            if (tile_row * tile_height >= height)
+            {
+                throw new ArgumentOutOfRangeException(nameof(tile_row), "Tile coordinates are out of bounds.");
+            }
+
+            Microsoft.Xna.Framework.Rectangle tile_rect = new(tile_col * tile_width, tile_row * tile_height, tile_width, tile_height);
+
+            return new Tile(this, tile_rect);
+        }
     }
 }

@@ -22,39 +22,33 @@
 // 
 // 
 #endregion
-using RPGCreator.Core.Managers.AssetsManager;
-using RPGCreator.Core.Managers.AssetsPackManager;
-using RPGCreator.Core.Managers.ProjectsManager;
-using RPGCreator.Core.Managers.RTP.BrushManagers;
+using RPGCreator.Core.Type.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPGCreator.Core
+namespace RPGCreator.Core.Managers.RTP.BrushManagers
 {
-    public class EngineManagers
+    public class BrushManagerEvent
     {
-        public AssetsPackManager AssetsPack { get; private set; }
-        public AssetsManager Assets { get; private set; }
-        public ProjectsManager Projects { get; private set; }
-        public BrushManager Brush { get; private set; }
-
-        internal EngineManagers()
+        internal BrushManagerEvent()
         {
-            Projects = new ProjectsManager();
-            AssetsPack = new AssetsPackManager();
-            Assets = new AssetsManager();
-            Brush = new BrushManager();
-
-            EngineCore.Instance.Events.OnCoreManagersReady(new());
         }
 
-        internal void Init()
+        public event EventHandler<ClickedAtEventArgs>? ClickedAt;
+        internal void OnClickedAt(ClickedAtEventArgs args)
         {
-            Assets.Init();
+            ClickedAt?.Invoke(this, args);
         }
-
+        internal void OnClickedAt(int x, int y)
+        {
+            ClickedAt?.Invoke(this, new ClickedAtEventArgs(x, y));
+        }
+        internal void OnClickedAt(Point at)
+        {
+            ClickedAt?.Invoke(this, new ClickedAtEventArgs(at));
+        }
     }
 }

@@ -63,7 +63,16 @@ namespace RPGCreator.Core.Type.Assets
 
             XElement data = AssetData;
 
-            string file_path = data.Element("file_path")?.Value ?? "UNKNOWN";
+            string file_path;
+
+            if(data == null)
+            {
+                file_path = ImagePath;
+            } else
+            {
+                file_path = data.Element("file_path")?.Value ?? "UNKNOWN";
+            }
+
 
             if (string.IsNullOrEmpty(file_path) || file_path == "UNKNOWN")
             {
@@ -99,7 +108,8 @@ namespace RPGCreator.Core.Type.Assets
 
             if (_Image == null)
             {
-                throw new InvalidOperationException("Image is not loaded.");
+                FromBase();
+                //throw new InvalidOperationException("Image is not loaded.");
             }
 
             if(_TextureCache != null && _ImagePathCached == ImagePath)

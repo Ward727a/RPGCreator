@@ -30,11 +30,42 @@ using RPGCreator.Core.Type.RTP;
 
 namespace RPGCreator.Core
 {
+
+    public class SelectedTileChangedEventArgs : EventArgs
+    {
+        public Tile? OldTile { get; }
+        public Tile? NewTile { get; }
+        public SelectedTileChangedEventArgs(Tile? oldTile, Tile? newTile)
+        {
+            OldTile = oldTile;
+            NewTile = newTile;
+        }
+    }
+
+    public class  SelectedLayerChangedEventArgs : EventArgs
+    {
+        
+        public MapLayer? OldLayer { get; }
+        public MapLayer? NewLayer { get; }
+        public SelectedLayerChangedEventArgs(MapLayer? oldLayer, MapLayer? newLayer)
+        {
+            OldLayer = oldLayer;
+            NewLayer = newLayer;
+        }
+
+    }
+
     public class EngineData
     {
 
+
         public event EventHandler? EditedMapChanged;
+        public event EventHandler<SelectedLayerChangedEventArgs>? SelectedLayerChanged;
+        public event EventHandler<SelectedTileChangedEventArgs>? SelectedTileChanged;
+
         private BaseMap? _editedMap;
+        private MapLayer? _selectedLayer;
+        private Tile? _selectedTile;
 
         internal EngineData()
         { }
@@ -43,6 +74,17 @@ namespace RPGCreator.Core
         public static Version AppVersion => new(0, 1, 0);
 
         public BaseProject? EditedProject { get; internal set; }
+        public MapLayer? SelectedLayer { get => _selectedLayer; 
+            set
+            {
+                if (_selectedLayer != value)
+                {
+                    var oldLayer = _selectedLayer;
+                    _selectedLayer = value;
+                    SelectedLayerChanged?.Invoke(this, new SelectedLayerChangedEventArgs(oldLayer, _selectedLayer));
+                }
+            }
+        }
         public BaseMap? EditedMap { get => _editedMap; 
             set
             {
@@ -53,7 +95,17 @@ namespace RPGCreator.Core
                 }
             }
         }
-        public Tile? SelectedTile { get; internal set; }
+        public Tile? SelectedTile { get => _selectedTile; 
+            set
+            {
+                if (_selectedTile != value)
+                {
+                    var oldTile = _selectedTile;
+                    _selectedTile = value;
+                    SelectedTileChanged?.Invoke(this, new SelectedTileChangedEventArgs(oldTile, _selectedTile));
+                }
+            }
+        }
         public Game? RTPGame { get; internal set; }
     }
 }

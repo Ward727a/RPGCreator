@@ -23,8 +23,10 @@
 // 
 #endregion
 using Avalonia.Controls;
+using Avalonia.VisualTree;
 using RPGCreator.Core;
 using RPGCreator.UI.Common;
+using RPGCreator.UI.Content.Editor.LayersListComponents;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -99,69 +101,8 @@ namespace RPGCreator.UI.Content.Editor.Tabs
             });
 
             #region LayersSection
-            
-            LayersBody = new StackPanel
-            {
-                Orientation = Avalonia.Layout.Orientation.Vertical,
-                Margin = App.style.Margin
-            };
 
-            var selectedLayerText = new TextBlock
-            {
-                Text = "Selected Layer: None",
-                Margin = App.style.Margin,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                TextAlignment = Avalonia.Media.TextAlignment.Center
-            };
-
-            LayersBody.Children.Add(selectedLayerText);
-
-            AddLayerButton = new Button
-            {
-                Content = "Add Layer",
-                Margin = App.style.Margin,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center
-            };
-
-            LayersBody.Children.Add(AddLayerButton);
-
-            AddLayerButton.Click += (s, e) =>
-            {
-                // Logic to add a new layer
-                var newLayerName = $"Layer {LayersList.Items.Count + 1}";
-                LayersList.Items.Add(newLayerName);
-                LayersList.SelectedItem = newLayerName;
-                selectedLayerText.Text = $"Selected Layer: {newLayerName}";
-            };
-
-            var separator = new Separator
-            {
-                Margin = App.style.Margin
-            };
-
-            LayersBody.Children.Add(separator);
-
-            LayersList = new ListBox
-            {
-                Margin = App.style.Margin,
-                SelectionMode = SelectionMode.Single,
-            };
-            LayersList.Items.Add("Test1");
-            LayersList.Items.Add("Test2");
-            LayersList.Items.Add("Test3");
-            LayersList.SelectionChanged += (s, e) =>
-            {
-                if (LayersList.SelectedItem != null)
-                {
-                    selectedLayerText.Text = $"Selected Layer: {LayersList.SelectedItem}";
-                }
-            };
-
-            LayersBody.Children.Add(LayersList);
-
-            LayersBox = new ClosableBox(LayersBody, "Layers");
-
-            BodyContent.Children.Add(LayersBox);
+            BodyContent.Children.Add(new LayersListComponent());
 
             #endregion
 
@@ -230,7 +171,6 @@ namespace RPGCreator.UI.Content.Editor.Tabs
         private void Data_EditedMapChanged(object? sender, EventArgs e)
         {
             RefreshMapProperties();
-            RefreshLayersList();
         }
 
         public void RefreshMapProperties()
@@ -242,17 +182,6 @@ namespace RPGCreator.UI.Content.Editor.Tabs
             MapDescriptionText.Text = $"Map Description: {EngineCore.Instance.Data.EditedMap.Description}";
             MapEntitiesNumberText.Text = $"Entities: 0 (not working yet)";
             MapLayersNumberText.Text = $"Layers: {EngineCore.Instance.Data.EditedMap.Layers.Count}";
-        }
-
-        public void RefreshLayersList()
-        {
-            if (EngineCore.Instance.Data.EditedMap == null)
-                return;
-            LayersList.Items.Clear();
-            foreach (var layer in EngineCore.Instance.Data.EditedMap.Layers)
-            {
-                LayersList.Items.Add(layer.Name);
-            }
         }
 
         public static TabItem CreateTab(Window host)
@@ -268,5 +197,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
             return tab;
         }
+
+        
     }
 }

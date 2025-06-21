@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using MonoGame.Extended;
+using RPGCreator.Core;
+using RPGCreator.Core.Managers.RTP.BrushManagers;
 using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Type.Map;
 using System;
@@ -16,19 +18,59 @@ namespace RPGCreator.RTP.Editor.Components
         public BaseMap? Map;
         private SpriteBatchExtend _sb;
 
-        public MapEditing(SpriteBatchExtend spriteBatchExtend)
+        private MapEditing()
+        {
+
+            RegisterEvents();
+        }
+
+        public MapEditing(SpriteBatchExtend spriteBatchExtend) : this()
         {
             _sb = spriteBatchExtend;
             // Initialize components related to map editing
             // This could include setting up layers, properties, and other map-related functionalities
         }
 
-        public MapEditing(BaseMap map, SpriteBatchExtend spriteBatchExtend)
+        public MapEditing(BaseMap map, SpriteBatchExtend spriteBatchExtend) : this()
         {
             _sb = spriteBatchExtend;
             Map = map;
             // Initialize components related to the provided map
             // This could include setting up layers, properties, and other map-related functionalities
+        }
+
+        protected void RegisterEvents()
+        {
+            EngineCore.Instance.Managers.Brush.Event.ClickedAt += Brush_ClickedAt;
+        }
+
+        private void Brush_ClickedAt(object? sender, ClickedAtEventArgs e)
+        {
+            if(Map == null)
+            {
+                return;
+            }
+
+            var layer = EngineCore.Instance.Data.SelectedLayer;
+
+            if(layer == null)
+            {
+                return;
+            }
+
+            var tile = EngineCore.Instance.Data.SelectedTile;
+
+            if(tile == null)
+            {
+                return; // No tile selected, nothing to add
+            }
+
+            if(!InBorder(e.At))
+            {
+                return; // Clicked outside the map border, do not add tile
+            }
+
+            layer.AddTileAt(tile, e.At);
         }
 
         public void Draw()
@@ -69,6 +111,25 @@ namespace RPGCreator.RTP.Editor.Components
             {
                 layer.Draw(_sb);
             }
+        }
+
+        protected bool InBorder(Point at)
+        {
+            if(!HasMap())
+            {
+                return false;
+            }
+
+            int cellSize = Map.GridParameter.CellWidth;
+            int horizontalCells = Map.Size.Width;
+            int verticalCells = Map.Size.Height;
+
+            // Check if the point is within the bounds of the map
+            if (at.X < 0 || at.Y < 0 || at.X >= horizontalCells * cellSize || at.Y >= verticalCells * cellSize)
+            {
+                return false;
+            }
+            return true;
         }
 
         protected void DrawGrid()

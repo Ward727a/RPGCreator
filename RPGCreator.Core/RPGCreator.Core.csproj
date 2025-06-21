@@ -20,4 +20,8 @@
     <Folder Include="Type\Map\Interactable\BaseEventsArgs\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\RPGCreator.UI\RPGCreatorAval.sln.licenseheader" Link="RPGCreatorAval.sln.licenseheader" />
+  </ItemGroup>
+
 </Project>
