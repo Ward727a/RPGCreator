@@ -31,8 +31,11 @@ using Avalonia.VisualTree;
 using Microsoft.Xna.Framework;
 using RPGCreator.Core;
 using RPGCreator.MonoGame;
+using RPGCreator.UI.Content.AssetsManage;
 using RPGCreator.UI.Content.Editor.Tabs;
 using RPGCreator.UI.Content.Editor.TilesetSelectorComponents;
+using RPGCreator.UI.Content.Editor.Toolbar;
+using RPGCreator.UI.Content.Preferences;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -135,6 +138,7 @@ namespace RPGCreator.UI.Content.Editor
             {
                 Header = "Preferences"
             };
+            preferencesMenuItem.Click += PreferencesMenuItem_Click;
             editMenuItem.Items.Add(preferencesMenuItem);
 
             var assetsMenuItem = new MenuItem
@@ -151,6 +155,7 @@ namespace RPGCreator.UI.Content.Editor
             {
                 Header = "Manage Assets"
             };
+            manageAssetsMenuItem.Click += ManageAssetsMenuItem_Click;
             assetsMenuItem.Items.Add(manageAssetsMenuItem);
             var importAssetsMenuItem = new MenuItem
             {
@@ -279,22 +284,27 @@ namespace RPGCreator.UI.Content.Editor
             ContentGrid.Children.Add(CenterGrid);
             Grid.SetColumn(CenterGrid, 1);
 
-            var toolbar = new StackPanel
-            {
-                Orientation = Avalonia.Layout.Orientation.Horizontal,
-                Height = 24
-            };
+            var toolbar = new ToolbarControl();
             CenterGrid.Children.Add(toolbar);
+
+            // This is used to contain the MonoGame screen inside it's bounds.
+            // If we don't do this, the MonoGame screen will not be able to resize properly and some dirty tricks would be needed.
+            // AKA: Adding a margin to the MonoGame screen, then removing it "down" property to each position when needed, etc...
+            // This is a cleaner way to do it.
+            var monogameGrid = new Grid
+            {
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+                Margin = App.style.Margin,
+            };
+            CenterGrid.Children.Add(monogameGrid);
+            Grid.SetRow(monogameGrid, 1);
 
             MonoGameScreen = new AvaloniaInside.MonoGame.MonoGameControl
             {
-                // This margin is a weird workaround to center the game screen.. IDK why it doesn't center properly otherwise. (12 because of the toolbar height being 24px)
-                // This is maybe due to some old artifacts from the first implementation of the RTP inside the engine, but couldn't find where or why. I'm not even sure if this is really that.
-                Margin = new Thickness(0, -12, 0, 12),
                 Game = game,
             };
-            CenterGrid.Children.Add(MonoGameScreen);
-            Grid.SetRow(MonoGameScreen, 1);
+            monogameGrid.Children.Add(MonoGameScreen);
 
             MonoGameScreen.PointerEntered += (s, e) =>
             {
@@ -319,10 +329,39 @@ namespace RPGCreator.UI.Content.Editor
                 game.GraphicsDevice.PresentationParameters.BackBufferHeight = (int)MonoGameScreen.Bounds.Height;
                 game._graphics.ApplyChanges();
 
-                game.Window.Position = new Microsoft.Xna.Framework.Point((int)(_Host.Position.X + 8 + 300), (int)(position.Y + _Host.Position.Y + 1 + menuBar.Bounds.Height + 12));
+                game.Window.Position = new Microsoft.Xna.Framework.Point((int)(_Host.Position.X + 8 + 300), (int)(position.Y + _Host.Position.Y + 1 + menuBar.Bounds.Height));
             };
 
             this.Content = MainGrid;
+        }
+
+        private void ManageAssetsMenuItem_Click(object? sender, RoutedEventArgs e)
+        {
+            // Open the assets management window
+            var assetsManageWindow = new AssetsManageWindow();
+            assetsManageWindow.ShowDialog(_Host).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                {
+                    // Handle any errors that occurred while showing the assets management window
+                    Console.WriteLine("Error showing assets management window: " + t.Exception?.Message);
+                }
+            });
+        }
+
+        private void PreferencesMenuItem_Click(object? sender, RoutedEventArgs e)
+        {
+            // Open the preferences window
+            var preferencesWindow = new PreferencesWindow();
+
+            preferencesWindow.ShowDialog(_Host).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                {
+                    // Handle any errors that occurred while showing the preferences window
+                    Console.WriteLine("Error showing preferences window: " + t.Exception?.Message);
+                }
+            });
         }
 
         private void MonoGameScreen_PointerPressed(object? sender, PointerPressedEventArgs e)
@@ -331,8 +370,8 @@ namespace RPGCreator.UI.Content.Editor
             {
                 var position = e.GetPosition(MonoGameScreen);
                 // Adjust the position to account for the MonoGameScreen's margin (12px)
-                EngineCore.Instance.Managers.Brush.ClickAt(new Core.Type.Internal.Point(position.WithY(position.Y - 12)));
-                _LastTilePlacePos = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position.WithY(position.Y - 12));
+                EngineCore.Instance.Managers.Brush.ClickAt(new Core.Type.Internal.Point(position));
+                _LastTilePlacePos = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position);
                 _placingTile = true; // Set the flag to indicate that a tile is being placed
             }
         }
@@ -353,7 +392,7 @@ namespace RPGCreator.UI.Content.Editor
                 var position = e.GetPosition(MonoGameScreen);
 
                 // Check if the mouse position has at least moved one tile from the last position
-                var normalizedCurrentPosition = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position.WithY(position.Y - 12));
+                var normalizedCurrentPosition = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position);
 
                 if(_LastTilePlacePos != normalizedCurrentPosition)
                 {
@@ -367,7 +406,7 @@ namespace RPGCreator.UI.Content.Editor
                 }
 
                 // Adjust the position to account for the MonoGameScreen's margin (12px)
-                EngineCore.Instance.Managers.Brush.ClickAt(new Core.Type.Internal.Point(position.WithY(position.Y - 12)));
+                EngineCore.Instance.Managers.Brush.ClickAt(new Core.Type.Internal.Point(position));
             }
         }
     }

@@ -22,8 +22,14 @@
 // 
 // 
 #endregion
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.VisualTree;
+using RPGCreator.Core;
 using RPGCreator.Core.Type.Map;
+using RPGCreator.UI.Common;
+using RPGCreator.UI.Common.Windows;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,9 +46,12 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
     public class LayerItem : UserControl
     {
 
+        public event Action? LayerRemoved;
+
         #region Components
 
         public StackPanel Body { get; private set; }
+        public NumericUpDown ZIndexSelector { get; private set; }
         public TextBlock LayerNameText { get; private set; }
 
         #endregion
@@ -61,7 +70,22 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                 Orientation = Avalonia.Layout.Orientation.Horizontal,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                Background = Avalonia.Media.Brushes.Transparent,
             };
+
+            ZIndexSelector = new NumericUpDown
+            {
+                Value = Layer.ZIndex,
+                Minimum = -1000,
+                Maximum = 1000,
+                Width = 60,
+                Margin = new Avalonia.Thickness(5, 0, 5, 0),
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                FontSize = App.style.SmallTextFontSize,
+            };
+            ZIndexSelector.ValueChanged += ZIndexSelector_ValueChanged;
+            ToolTip.SetTip(ZIndexSelector, "Z-Index of the layer. This determines the rendering order of the layer.\nLayers with a higher Z-Index are rendered on top of layers with a lower Z-Index.");
+            Body.Children.Add(ZIndexSelector);
 
             LayerNameText = new TextBlock
             {
@@ -72,7 +96,62 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
 
             Body.Children.Add(LayerNameText);
 
+            Body.PointerPressed += Body_PointerPressed;
+
             Content = Body;
         }
+
+        private void Body_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+        {
+            if(e.GetCurrentPoint(Body).Properties.IsRightButtonPressed)
+            {
+                e.Handled = true;
+
+                GlobalStaticUIData.CurrentContext?.Close();
+                GlobalStaticUIData.CurrentContext = new ContextMenu();
+                var removeLayerItem = new MenuItem { Header = "Remove Layer" };
+                removeLayerItem.Click += (s, e) => OnRemoveLayer();
+                GlobalStaticUIData.CurrentContext.Items.Add(removeLayerItem);
+                GlobalStaticUIData.CurrentContext.Open(Body);
+            }
+        }
+
+        private void OnRemoveLayer()
+        {
+
+            var confirmation = new ConfirmDialog("Remove Layer", "Are you sure you want to remove this layer? This action cannot be undone.", "Remove", "Cancel");
+            confirmation.Confirmed += () =>
+            {
+                if (Layer != null && Layer is MapLayer mapLayer)
+                {
+                    // Remove the layer from the engine data
+                    EngineCore.Instance.Data.EditedMap?.Layers.Remove(mapLayer);
+                    LayerRemoved?.Invoke();
+                }
+            };
+
+            confirmation.ShowDialog((Window)this.GetVisualRoot()!).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                {
+                    // Handle any errors that occurred while showing the confirmation dialog
+                    Console.WriteLine("Error showing confirmation dialog: " + t.Exception?.Message);
+                }
+            });
+
+        }
+
+
+        #region EventsHandlers
+
+        private void ZIndexSelector_ValueChanged(object? sender, NumericUpDownValueChangedEventArgs e)
+        {
+            if (Layer != null && e.NewValue.HasValue)
+            {
+                Layer.ZIndex = (int)e.NewValue.Value;
+            }
+        }
+
+        #endregion
     }
 }

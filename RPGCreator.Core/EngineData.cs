@@ -24,6 +24,7 @@
 #endregion
 using Avalonia.Controls;
 using Microsoft.Xna.Framework;
+using RPGCreator.Core.Managers.RTP.BrushManagers.Brushs;
 using RPGCreator.Core.Type.Map;
 using RPGCreator.Core.Type.Project;
 using RPGCreator.Core.Type.RTP;
@@ -57,7 +58,56 @@ namespace RPGCreator.Core
 
     public class EngineData
     {
+        public class SEditorSettings()
+        {
 
+            public event Action? IsDrawingChanged;
+            private bool _isDrawing = false;
+            public bool IsDrawing { get => _isDrawing; set
+                {
+                    if (_isDrawing != value)
+                    {
+                        _isDrawing = value;
+                        IsDrawingChanged?.Invoke();
+                    }
+                }
+            }
+
+            public event Action? ShowCollisionChanged;
+            private bool _showCollisionLayer = true;
+            public bool ShowCollisionLayer { get => _showCollisionLayer; set
+                {
+                    if (_showCollisionLayer != value)
+                    {
+                        _showCollisionLayer = value;
+                        ShowCollisionChanged?.Invoke();
+                    }
+                }
+            }
+            public event Action? ShowEntityChanged;
+            private bool _showEntityLayer = true;
+            public bool ShowEntityLayer { get => _showEntityLayer; set
+                {
+                    if (_showEntityLayer != value)
+                    {
+                        _showEntityLayer = value;
+                        ShowEntityChanged?.Invoke();
+                    }
+                }
+            }
+
+            public event Action? BrushTypeChanged;
+            private IBrush? _brushType = null;
+            public IBrush? BrushType { get => _brushType; set
+                {
+                    if (_brushType != value)
+                    {
+                        _brushType = value;
+                        BrushTypeChanged?.Invoke();
+                    }
+                }
+            }
+        }
 
         public event EventHandler? EditedMapChanged;
         public event EventHandler<SelectedLayerChangedEventArgs>? SelectedLayerChanged;
@@ -66,6 +116,7 @@ namespace RPGCreator.Core
         private BaseMap? _editedMap;
         private MapLayer? _selectedLayer;
         private Tile? _selectedTile;
+        public SEditorSettings EditorSettings { get; } = new SEditorSettings();
 
         internal EngineData()
         { }

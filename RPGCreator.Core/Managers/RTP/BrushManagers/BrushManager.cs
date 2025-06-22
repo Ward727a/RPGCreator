@@ -44,15 +44,30 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
 
         public void ClickAt(Point at)
         {
+
+            if(!EngineCore.Instance.Data.EditorSettings.IsDrawing)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Drawing is not enabled. Please enable drawing in the toolbar before clicking.");
+                Console.ResetColor();
+                return;
+            }
+
             if (EngineCore.Instance.Data.EditedProject == null)
             {
-                throw new InvalidOperationException("No project is currently loaded.");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("No project is currently loaded. Please load a project before clicking.");
+                Console.ResetColor();
+                return;
             }
 
             // Convert the point to a valid position in the tile width and height
             if (EngineCore.Instance.Data.SelectedTile == null)
             {
-                throw new InvalidOperationException("No map is currently loaded.");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("No tile is currently selected. Please select a tile before clicking.");
+                Console.ResetColor();
+                return;
             }
             var tileWidth = EngineCore.Instance.Data.SelectedTile.Tileset.tile_width;
             var tileHeight = EngineCore.Instance.Data.SelectedTile.Tileset.tile_height;
@@ -65,15 +80,24 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
             // Handle the click at the specified point
             // This is where you would implement the logic for what happens when a brush is clicked at a specific point
             Console.WriteLine($"Brush clicked at: {at}");
-
-            Event.OnClickedAt(at);
+            if(EngineCore.Instance.Data.EditorSettings.BrushType == null)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("No brush type is currently selected. Please select a brush type before clicking.");
+                Console.ResetColor();
+                return;
+            }
+            Event.OnClickedAt(at, EngineCore.Instance.Data.EditorSettings.BrushType);
         }
 
         public Point NormalizedPositionToTile(Point position)
         {
             if (EngineCore.Instance.Data.SelectedTile == null)
             {
-                throw new InvalidOperationException("No tile is currently selected.");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("No tile is currently selected. Please select a tile before clicking.");
+                Console.ResetColor();
+                return new Point(-1, -1);
             }
             var tileWidth = EngineCore.Instance.Data.SelectedTile.Tileset.tile_width;
             var tileHeight = EngineCore.Instance.Data.SelectedTile.Tileset.tile_height;

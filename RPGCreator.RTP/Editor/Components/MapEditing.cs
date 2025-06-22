@@ -51,26 +51,7 @@ namespace RPGCreator.RTP.Editor.Components
                 return;
             }
 
-            var layer = EngineCore.Instance.Data.SelectedLayer;
-
-            if(layer == null)
-            {
-                return;
-            }
-
-            var tile = EngineCore.Instance.Data.SelectedTile;
-
-            if(tile == null)
-            {
-                return; // No tile selected, nothing to add
-            }
-
-            if(!InBorder(e.At))
-            {
-                return; // Clicked outside the map border, do not add tile
-            }
-
-            layer.AddTileAt(tile, e.At);
+            e.brush.Draw(_sb, e.At, Map);
         }
 
         public void Draw()

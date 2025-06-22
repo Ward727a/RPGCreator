@@ -22,42 +22,40 @@
 // 
 // 
 #endregion
-using RPGCreator.Core.Managers.RTP.BrushManagers.Brushs;
+using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Type.Internal;
+using RPGCreator.Core.Type.Map;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPGCreator.Core.Managers.RTP.BrushManagers
+namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
 {
-    public class BrushManagerEvent
+    public interface IBrush
     {
-        internal BrushManagerEvent()
-        {
-        }
 
-        public event EventHandler<ClickedAtEventArgs>? ClickedAt;
-        internal void OnClickedAt(ClickedAtEventArgs args)
+
+        void Draw(SpriteBatchExtend sb, Point at, Type.Map.BaseMap map);
+
+        protected static bool InBorder(Point at, BaseMap Map)
         {
-            ClickedAt?.Invoke(this, args);
-        }
-        internal void OnClickedAt(int x, int y)
-        {
-            ClickedAt?.Invoke(this, new ClickedAtEventArgs(x, y));
-        }
-        internal void OnClickedAt(Point at)
-        {
-            ClickedAt?.Invoke(this, new ClickedAtEventArgs(at));
-        }
-        internal void OnClickedAt(int x, int y, IBrush brush)
-        {
-            ClickedAt?.Invoke(this, new ClickedAtEventArgs(x, y, brush));
-        }
-        internal void OnClickedAt(Point at, IBrush brush)
-        {
-            ClickedAt?.Invoke(this, new ClickedAtEventArgs(at, brush));
+            if (Map == null)
+            {
+                return false;
+            }
+
+            int cellSize = Map.GridParameter.CellWidth;
+            int horizontalCells = Map.Size.Width;
+            int verticalCells = Map.Size.Height;
+
+            // Check if the point is within the bounds of the map
+            if (at.X < 0 || at.Y < 0 || at.X >= horizontalCells * cellSize || at.Y >= verticalCells * cellSize)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

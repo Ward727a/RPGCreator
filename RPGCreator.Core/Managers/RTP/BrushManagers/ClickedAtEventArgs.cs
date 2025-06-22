@@ -22,6 +22,7 @@
 // 
 // 
 #endregion
+using RPGCreator.Core.Managers.RTP.BrushManagers.Brushs;
 using RPGCreator.Core.Type.Internal;
 
 namespace RPGCreator.Core.Managers.RTP.BrushManagers
@@ -29,13 +30,24 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
     public class ClickedAtEventArgs : EventArgs
     {
         public Point At { get; }
+        public IBrush brush { get; private set; }
         public ClickedAtEventArgs(int x, int y)
         {
             At = new Point(x, y);
+            this.brush = new SimpleBrush(); // Default brush if none is specified
         }
         public ClickedAtEventArgs(Point at)
         {
             At = at;
+            this.brush = new SimpleBrush(); // Default brush if none is specified
+        }
+        public ClickedAtEventArgs(int x, int y, IBrush brush) : this(x, y)
+        {
+            this.brush = brush;
+        }
+        public ClickedAtEventArgs(Point at, IBrush brush) : this(at)
+        {
+            this.brush = brush;
         }
     }
 }

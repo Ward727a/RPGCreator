@@ -415,8 +415,6 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
             }
 
-            // TODO: Continuer a bosser sur ce systeme. Voir pour le link au EngineCore et les events.
-
             public LevelItem()
             {
                 Orientation = Avalonia.Layout.Orientation.Horizontal;
@@ -541,7 +539,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
             var textMapTest = new MapItem();
             _MapList.Children.Add(textMapTest);
-            // On right click on the MapLevelPanel and not on item inside MapLevelPanel, show a context menu
+
             cont.PointerPressed += (s, e) =>
             {
                 if (e.GetCurrentPoint(cont).Properties.IsRightButtonPressed)
@@ -553,10 +551,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
                     e.Handled = true;
 
-                    if (GlobalStaticUIData.CurrentContext != null)
-                    {
-                        GlobalStaticUIData.CurrentContext.Close();
-                    }
+                    GlobalStaticUIData.CurrentContext?.Close();
                     GlobalStaticUIData.CurrentContext = new ContextMenu();
                     var addMapItem = new MenuItem { Header = "Add Map" };
                     addMapItem.Click += (s, e) => OnCreateNewMap();
@@ -605,8 +600,6 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
             addButton.Click += (s, e) =>
             {
-                // Here you would typically add the map to your data structure
-                // For now, we just close the popup
 
                 var map = new MapItem(mapNameInput.Text ?? "New Map");
                 _MapList.Children.Add(map);
@@ -617,8 +610,6 @@ namespace RPGCreator.UI.Content.Editor.Tabs
             {
                 if (e.Key == Avalonia.Input.Key.Enter)
                 {
-                    // Here you would typically add the map to your data structure
-                    // For now, we just close the popup
 
                     var map = new MapItem(mapNameInput.Text ?? "New Map");
                     _MapList.Children.Add(map);

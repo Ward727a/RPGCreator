@@ -108,15 +108,18 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
             RegisterEvents();
         }
 
-
         protected void RefreshComponents()
         {
             LayersList.Items.Clear();
             if (EngineCore.Instance.Data.EditedMap == null) return;
-            foreach (var layer in EngineCore.Instance.Data.EditedMap.Layers)
+            foreach (var layer in EngineCore.Instance.Data.EditedMap.Layers.OrderBy(l=>l.ZIndex))
             {
                 LayerItem layerItem = new LayerItem(layer);
                 LayersList.Items.Add(layerItem);
+                layerItem.LayerRemoved += () =>
+                {
+                    RefreshComponents();
+                };
             }
             if (LayersList.Items.Count > 0)
             {
@@ -183,9 +186,20 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                     var newLayerName = layerNameTextBox.Text;
                     MapLayer layer = new Core.Type.Map.MapLayer(newLayerName);
 
+                    layer.ZIndex = EngineCore.Instance.Data.EditedMap.Layers.Count - 1; // Set ZIndex to the last index
+                    layer.ZIndexChanged += (value) =>
+                    {
+                        RefreshComponents();
+                    };
+
                     EngineCore.Instance.Data.EditedMap?.Layers.Add(layer);
 
                     LayerItem newLayerItem = new LayerItem(layer);
+
+                    newLayerItem.LayerRemoved += () =>
+                    {
+                        RefreshComponents();
+                    };
 
                     LayersList.Items.Add(newLayerItem);
                     LayersList.SelectedItem = newLayerItem;
@@ -228,11 +242,11 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
 
         private void OnLayerSelected(object? sender, SelectionChangedEventArgs e)
         {
-            var layerItem = LayersList.SelectedItem as LayerItem;
-            if (layerItem == null) return;
+            if (LayersList.SelectedItem is not LayerItem layerItem) return;
             SelectedLayerText.Text = $"Selected Layer: {layerItem.Layer.Name}";
             EngineCore.Instance.Data.SelectedLayer = layerItem.Layer;
         }
+
         #endregion
     }
 }

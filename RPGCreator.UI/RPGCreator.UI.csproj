@@ -46,6 +46,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Content\AssetsManage\Components\" />
+    <Folder Include="Content\Preferences\Components\General\" />
     <Folder Include="Interfaces\" />
   </ItemGroup>
 

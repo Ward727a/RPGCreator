@@ -61,6 +61,7 @@ namespace RPGCreator.Core.Type.Map
         event EventHandler<Tile>? TileAdded;
         event EventHandler<Tile>? TileRemoved;
         event EventHandler<Tile>? TileSelected;
+        public event Action<int>? ZIndexChanged;
 
         [ObservableProperty]
         private bool _IsSelected = false;
@@ -68,7 +69,9 @@ namespace RPGCreator.Core.Type.Map
         [ObservableProperty]
         private ELayerType _LayerType = ELayerType.DEFAULT;
         public string Name { get; set; } = string.Empty;
-        public int ZIndex { get; set; } = 0;
+
+        private int _ZIndex = 0;
+        public int ZIndex { get => _ZIndex; set { _ZIndex = value; ZIndexChanged?.Invoke(value); } }
         public bool Visible { get; set; } = true;
         public Dictionary<Point, Tile> Tiles { get; set; } = [];
         //public Dictionary<Point, Ulid> TileIndexMapping { get; set; } = new(); // Maps the tile position to its index in the Tiles list for quick access
@@ -131,6 +134,23 @@ namespace RPGCreator.Core.Type.Map
             Tiles.Remove(tile.Position);
             tile.Parent = null;
             TileRemoved?.Invoke(this, tile);
+        }
+
+        public virtual void RemoveTileAt(int x, int y)
+        {
+            var at = new Point(x, y);
+            if (Tiles.TryGetValue(at, out Tile? tile))
+            {
+                RemoveTile(tile);
+            }
+        }
+
+        public void RemoveTileAt(Point at)
+        {
+            if (Tiles.TryGetValue(at, out Tile? tile))
+            {
+                RemoveTile(tile);
+            }
         }
 
         protected override void _Update(GameTime gameTime)
