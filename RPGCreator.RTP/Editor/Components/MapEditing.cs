@@ -2,6 +2,7 @@
 using MonoGame.Extended;
 using RPGCreator.Core;
 using RPGCreator.Core.Managers.RTP.BrushManagers;
+using RPGCreator.Core.Managers.RTP.BrushManagers.Brushs;
 using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Type.Map;
 using System;
@@ -17,6 +18,9 @@ namespace RPGCreator.RTP.Editor.Components
         public bool ShowGridInFront { get; set; } = false;
         public BaseMap? Map;
         private SpriteBatchExtend _sb;
+
+        public Point _LastPreviewAt;
+        public IBrushPreviewFeature? _LastPreviewBrush;
 
         private MapEditing()
         {
@@ -42,6 +46,19 @@ namespace RPGCreator.RTP.Editor.Components
         protected void RegisterEvents()
         {
             EngineCore.Instance.Managers.Brush.Event.ClickedAt += Brush_ClickedAt;
+            EngineCore.Instance.Managers.Brush.Event.PreviewAt += Brush_PreviewAt;
+            EngineCore.Instance.Managers.Brush.Event.ClearPreview += Brush_ClearPreview;
+        }
+
+        private void Brush_ClearPreview()
+        {
+            if (Map == null)
+            {
+                return;
+            }
+            Map.PreviewLayer.Tiles.Clear(); // Clear the preview layer tiles
+            _LastPreviewAt = new(-1,-1); // Reset the last preview position
+            _LastPreviewBrush = null; // Reset the last preview brush
         }
 
         private void Brush_ClickedAt(object? sender, ClickedAtEventArgs e)
@@ -52,6 +69,35 @@ namespace RPGCreator.RTP.Editor.Components
             }
 
             e.brush.Draw(_sb, e.At, Map);
+        }
+
+        private void Brush_PreviewAt(object? sender, PreviewAtEventArgs e)
+        {
+
+            if(_LastPreviewAt == e.At && _LastPreviewBrush == e.Brush)
+            {
+                return; // No need to update the preview if the position and brush are the same
+            }
+
+            if (Map == null)
+            {
+                return;
+            }
+
+            if (Map.PreviewLayer.Tiles.Count > 0)
+            {
+                Map.PreviewLayer.Tiles.Clear(); // Clear previous preview tiles
+            }
+
+            if (
+                e.Brush == null)
+            {
+                return;
+            }
+
+            e.Brush.ShowPreview(_sb, e.At, Map);
+            _LastPreviewAt = e.At;
+            _LastPreviewBrush = e.Brush;
         }
 
         public void Draw()
@@ -92,6 +138,10 @@ namespace RPGCreator.RTP.Editor.Components
             {
                 layer.Draw(_sb);
             }
+
+            _sb.SetOpacity(0.5f); // Set opacity for the preview layer
+            Map.PreviewLayer.Draw(_sb);
+            _sb.ResetOpacity(); // Reset opacity after drawing the preview layer
         }
 
         protected bool InBorder(Point at)

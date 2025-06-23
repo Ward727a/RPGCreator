@@ -32,10 +32,39 @@ using System.Threading.Tasks;
 
 namespace RPGCreator.Core.Managers.RTP.BrushManagers
 {
-    public class BrushManagerEvent
+    public partial class BrushManagerEvent
     {
+
         internal BrushManagerEvent()
         {
+        }
+
+        public event Action? ClearPreview;
+        internal void OnClearPreview()
+        {
+            ClearPreview?.Invoke();
+        }
+
+        public event EventHandler<PreviewAtEventArgs>? PreviewAt;
+        internal void OnPreviewAt(PreviewAtEventArgs args)
+        {
+            PreviewAt?.Invoke(this, args);
+        }
+        internal void OnPreviewAt(int x, int y)
+        {
+            PreviewAt?.Invoke(this, new PreviewAtEventArgs(x, y));
+        }
+        internal void OnPreviewAt(Point at)
+        {
+            PreviewAt?.Invoke(this, new PreviewAtEventArgs(at));
+        }
+        internal void OnPreviewAt(int x, int y, IBrushPreviewFeature brush)
+        {
+            PreviewAt?.Invoke(this, new PreviewAtEventArgs(x, y, brush));
+        }
+        internal void OnPreviewAt(Point at, IBrushPreviewFeature brush)
+        {
+            PreviewAt?.Invoke(this, new PreviewAtEventArgs(at, brush));
         }
 
         public event EventHandler<ClickedAtEventArgs>? ClickedAt;

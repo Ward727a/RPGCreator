@@ -53,6 +53,7 @@ namespace RPGCreator.UI.Content.Editor
 
         private TilesetSelector tilesetSelector;
         private Avalonia.Point _LastTilePlacePos;
+        private Avalonia.Point _LastTilePreviewPos;
 
         private bool _placingTile = false; // Flag to indicate if a tile is being placed
 
@@ -319,6 +320,7 @@ namespace RPGCreator.UI.Content.Editor
             MonoGameScreen.PointerPressed += MonoGameScreen_PointerPressed;
             MonoGameScreen.PointerReleased += MonoGameScreen_PointerReleased;
             MonoGameScreen.PointerMoved += MonoGameScreen_PointerMoved;
+            MonoGameScreen.PointerExited += MonoGameScreen_PointerExited;
 
             game._events.RTPDraw += (s, e) =>
             {
@@ -333,6 +335,11 @@ namespace RPGCreator.UI.Content.Editor
             };
 
             this.Content = MainGrid;
+        }
+
+        private void MonoGameScreen_PointerExited(object? sender, PointerEventArgs e)
+        {
+            EngineCore.Instance.Managers.Brush.ClearPreview(); // Clear the preview when the mouse exits the MonoGame screen
         }
 
         private void ManageAssetsMenuItem_Click(object? sender, RoutedEventArgs e)
@@ -408,6 +415,27 @@ namespace RPGCreator.UI.Content.Editor
                 // Adjust the position to account for the MonoGameScreen's margin (12px)
                 EngineCore.Instance.Managers.Brush.ClickAt(new Core.Type.Internal.Point(position));
             }
+
+            {
+                var position = e.GetPosition(MonoGameScreen);
+
+                // Check if the mouse position has at least moved one tile from the last position
+                var normalizedCurrentPosition = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position);
+
+                if (_LastTilePreviewPos != normalizedCurrentPosition)
+                {
+                    // If the position has changed, update the last position
+                    _LastTilePreviewPos = normalizedCurrentPosition;
+                }
+                else
+                {
+                    // If the position hasn't changed, do not place a tile again
+                    return;
+                }
+
+                EngineCore.Instance.Managers.Brush.PreviewAt(new Core.Type.Internal.Point(position));
+            }
+
         }
     }
 }

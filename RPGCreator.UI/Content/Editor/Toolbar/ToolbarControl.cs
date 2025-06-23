@@ -65,6 +65,9 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
 
         public StackPanel BrushSizePanel { get; private set; }
         public NumericUpDown BrushSizeSelector { get; private set; }
+
+        public StackPanel BrushPreviewPanel { get; private set; } // Panel to show brush preview if needed
+        public CheckBox BrushPreviewCheckBox { get; private set; } // CheckBox to toggle brush preview visibility
         #endregion
 
 
@@ -190,6 +193,37 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
 
             DrawOptionContent.Children.Add(BrushSizePanel);
 
+            BrushPreviewPanel = new StackPanel
+            {
+                Orientation = Avalonia.Layout.Orientation.Horizontal,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                Margin = new Avalonia.Thickness(0, 0, 0, 4),
+            };
+            BrushPreviewCheckBox = new CheckBox
+            {
+                Content = "Enable Brush Preview",
+                IsChecked = true, // Default to enabled
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                Margin = new Avalonia.Thickness(0, 0, 0, 4),
+            };
+            BrushPreviewCheckBox.IsCheckedChanged += (s, e) =>
+            {
+                // Handle brush preview toggle
+                if (EngineCore.Instance.Data.EditorSettings.BrushType is IBrushPreviewFeature brush)
+                {
+                    brush.IsPreviewEnabled = BrushPreviewCheckBox.IsChecked == true;
+                    Console.WriteLine($"Brush preview enabled: {brush.IsPreviewEnabled}");
+                }
+                else
+                {
+                    Console.WriteLine("Current brush does not support preview.");
+                }
+            };
+            BrushPreviewPanel.Children.Add(BrushPreviewCheckBox);
+            ToolTip.SetTip(BrushPreviewCheckBox, "Enable or disable brush preview while drawing on the map.");
+            DrawOptionContent.Children.Add(BrushPreviewPanel);
+
             #endregion
 
             // Add toolbar buttons or controls here
@@ -228,6 +262,18 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
             {
                 // Otherwise, hide the brush size panel
                 BrushSizePanel.IsVisible = false;
+            }
+
+            if (EngineCore.Instance.Data.EditorSettings.BrushType is IBrushPreviewFeature brushPreviewFeature)
+            {
+                // If the current brush supports preview, enable the brush preview checkbox
+                BrushPreviewPanel.IsVisible = true;
+                BrushPreviewCheckBox.IsChecked = brushPreviewFeature.IsPreviewEnabled; // Set the current preview state
+            }
+            else
+            {
+                // Otherwise, hide the brush preview panel
+                BrushPreviewPanel.IsVisible = false;
             }
         }
 

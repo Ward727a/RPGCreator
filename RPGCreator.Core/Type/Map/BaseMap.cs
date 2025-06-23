@@ -58,6 +58,9 @@ namespace RPGCreator.Core.Type.Map
         public ObservableCollection<BaseMap> Levels = [];
         [ObservableProperty]
         private ObservableCollection<MapLayer> _Layers = [];
+
+        public readonly MapLayer PreviewLayer = new MapLayer("Preview Layer", 99999, true);
+
         [ObservableProperty]
         private Size _Size = new(10, 20);
         [ObservableProperty]

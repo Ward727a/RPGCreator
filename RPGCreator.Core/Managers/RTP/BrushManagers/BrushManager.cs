@@ -22,6 +22,7 @@
 // 
 // 
 #endregion
+using RPGCreator.Core.Managers.RTP.BrushManagers.Brushs;
 using RPGCreator.Core.Type.Internal;
 using System;
 using System.Collections.Generic;
@@ -88,6 +89,69 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
                 return;
             }
             Event.OnClickedAt(at, EngineCore.Instance.Data.EditorSettings.BrushType);
+        }
+
+        public void PreviewAt(Point at)
+        {
+            if (!EngineCore.Instance.Data.EditorSettings.IsDrawing)
+            {
+                //Console.ForegroundColor = ConsoleColor.Red;
+                //Console.WriteLine("Drawing is not enabled. Please enable drawing in the toolbar before clicking.");
+                //Console.ResetColor();
+                return;
+            }
+
+            if (EngineCore.Instance.Data.EditedProject == null)
+            {
+                //Console.ForegroundColor = ConsoleColor.Red;
+                //Console.WriteLine("No project is currently loaded. Please load a project before clicking.");
+                //Console.ResetColor();
+                return;
+            }
+
+            // Convert the point to a valid position in the tile width and height
+            if (EngineCore.Instance.Data.SelectedTile == null)
+            {
+                //Console.ForegroundColor = ConsoleColor.Red;
+                //Console.WriteLine("No tile is currently selected. Please select a tile before clicking.");
+                //Console.ResetColor();
+                return;
+            }
+            var tileWidth = EngineCore.Instance.Data.SelectedTile.Tileset.tile_width;
+            var tileHeight = EngineCore.Instance.Data.SelectedTile.Tileset.tile_height;
+
+            int tileX = (at.X / tileWidth) * tileWidth;
+            int tileY = (at.Y / tileHeight) * tileHeight;
+
+            at = new Point(tileX, tileY);
+
+            // Handle the click at the specified point
+            // This is where you would implement the logic for what happens when a brush is clicked at a specific point
+            //Console.WriteLine($"Brush previewed at: {at}");
+            if (EngineCore.Instance.Data.EditorSettings.BrushType == null)
+            {
+                //Console.ForegroundColor = ConsoleColor.Red;
+                //Console.WriteLine("No brush type is currently selected. Please select a brush type before clicking.");
+                //Console.ResetColor();
+                return;
+            }
+
+            if(EngineCore.Instance.Data.EditorSettings.BrushType is IBrushPreviewFeature previewBrush)
+            {
+                Event.OnPreviewAt(at, previewBrush);
+                return;
+            }
+
+            //Console.ForegroundColor = ConsoleColor.Red;
+            //Console.WriteLine("The selected brush type does not support previewing. Please select a brush type that supports previewing.");
+            //Console.ResetColor();
+
+        }
+
+        public void ClearPreview()
+        {
+            //Console.WriteLine("Clearing brush preview.");
+            Event.OnClearPreview();
         }
 
         public Point NormalizedPositionToTile(Point position)

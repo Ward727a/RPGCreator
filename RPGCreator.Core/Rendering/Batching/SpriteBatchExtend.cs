@@ -35,6 +35,7 @@ namespace RPGCreator.Core.Rendering.Batching
     public class SpriteBatchExtend : SpriteBatch
     {
         public bool IsBegin { get; private set; } = false;
+        public float Opacity { get; private set; } = 1f;
 
         public struct SpriteBatchState
         {
@@ -128,6 +129,25 @@ namespace RPGCreator.Core.Rendering.Batching
                 SpriteBatchState spriteBatchState = _states.Pop();
                 Begin(spriteBatchState.SortMode, spriteBatchState.BlendState, spriteBatchState.SamplerState, spriteBatchState.DepthStencilState, spriteBatchState.RasterizerState, spriteBatchState.Effect, spriteBatchState.TransformMatrix);
             }
+        }
+
+        public void SetOpacity(float opacity)
+        {
+            if (opacity < 0f || opacity > 1f)
+                throw new ArgumentOutOfRangeException(nameof(opacity), "Opacity must be between 0 and 1.");
+            Opacity = opacity;
+        }
+
+        public void ResetOpacity()
+        {
+            Opacity = 1f;
+        }
+
+        public new void Draw(Texture2D texture, Vector2 position, Rectangle? sourceRectangle, Color color)
+        {
+            // Apply opacity to the color
+            color *= Opacity;
+            base.Draw(texture, position, sourceRectangle, color);
         }
     }
 }
