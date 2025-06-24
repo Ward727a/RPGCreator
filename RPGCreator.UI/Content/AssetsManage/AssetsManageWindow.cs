@@ -23,6 +23,7 @@
 // 
 #endregion
 using Avalonia.Controls;
+using RPGCreator.UI.Content.AssetsManage.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,7 +47,7 @@ namespace RPGCreator.UI.Content.AssetsManage
 
         private Dictionary<string, UserControl> _AssetsMenuOptions = new()
         {
-            ["Tilesets"] = new UserControl(), // Replace with actual assets panel
+            ["Tilesets"] = new TilesetsManageControl(), // Replace with actual assets panel
             ["---0"] = null, // Separator
             ["Characters"] = new UserControl(), // Replace with actual assets panel
             ["Enemies"] = new UserControl(), // Replace with actual assets panel

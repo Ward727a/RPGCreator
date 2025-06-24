@@ -61,6 +61,18 @@ namespace RPGCreator.Core
         public class SEditorSettings()
         {
 
+            public event Action? IsPlacingChanged;
+            private bool _isPlacing = false;
+            public bool IsPlacing { get => _isPlacing; set
+                {
+                    if (_isPlacing != value)
+                    {
+                        _isPlacing = value;
+                        IsPlacingChanged?.Invoke();
+                    }
+                }
+            }
+
             public event Action? IsDrawingChanged;
             private bool _isDrawing = false;
             public bool IsDrawing { get => _isDrawing; set

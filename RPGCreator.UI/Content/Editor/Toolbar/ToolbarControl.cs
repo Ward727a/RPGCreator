@@ -70,6 +70,16 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
         public CheckBox BrushPreviewCheckBox { get; private set; } // CheckBox to toggle brush preview visibility
         #endregion
 
+        #region Place Mode
+
+        public ToggleButton PlaceButton { get; private set; }
+        //public Button PlaceOptionButton { get; private set; }
+        //public Flyout PlaceOptionFlyout { get; private set; }
+        //public StackPanel PlaceOptionContent { get; private set; }
+        //public ComboBox PlaceSelector { get; private set; }
+
+        #endregion
+
 
         #endregion
 
@@ -226,8 +236,51 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
 
             #endregion
 
-            // Add toolbar buttons or controls here
-            // Example: Body.Children.Add(new Button { Content = "New" });
+            #region Place Mode
+
+            PlaceButton = new ToggleButton // Tool that allows placing entities on the map (like characters, doors, chests, etc.)
+            {
+                Content = "Place",
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                CornerRadius = new(2),
+                Margin = new Avalonia.Thickness(0, 0, 4, 0)
+            };
+            PlaceButton.IsCheckedChanged += PlaceButton_IsCheckedChanged;
+            Body.Children.Add(PlaceButton);
+
+            #endregion
+        }
+
+        public void UseTool() { } // Placeholder, this method can be used to force the user to use a specific tool if needed
+
+        private void PlaceButton_IsCheckedChanged(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            // This method handles the toggle state change of the Place button
+            if(sender is ToggleButton button)
+            {
+                if (button.IsChecked == true)
+                {
+                    // Logic to enable place mode
+                    Console.WriteLine("Place mode enabled.");
+                    EngineCore.Instance.Data.EditorSettings.IsPlacing = true; // Set the placing mode in editor settings
+                    if (LastChecked != null && LastChecked != button)
+                    {
+                        LastChecked.IsChecked = false; // Uncheck the last checked button
+                    }
+                    LastChecked = button; // Update the last checked button
+                }
+                else
+                {
+                    // Logic to disable place mode
+                    EngineCore.Instance.Data.EditorSettings.IsPlacing = false; // Set the placing mode in editor settings
+                    Console.WriteLine("Place mode disabled.");
+                    if (LastChecked == button)
+                    {
+                        LastChecked = null; // Reset last checked if the current button is unchecked
+                    }
+                }
+            }
         }
 
         #region BrushesFeatures

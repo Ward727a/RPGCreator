@@ -195,6 +195,7 @@ namespace RPGCreator.UI.Content.Editor
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
                 ColumnDefinitions = new ColumnDefinitions("Auto, *, Auto"),
+                RowDefinitions = new RowDefinitions("*, Auto"),
             };
             MainGrid.Children.Add(ContentGrid);
             Grid.SetRow(ContentGrid, 1);
@@ -209,6 +210,7 @@ namespace RPGCreator.UI.Content.Editor
             };
             ContentGrid.Children.Add(LeftPanel);
             Grid.SetColumn(LeftPanel, 0);
+            Grid.SetRowSpan(LeftPanel, 2);
 
             var tabControl = new TabControl
             {
@@ -252,8 +254,10 @@ namespace RPGCreator.UI.Content.Editor
                 Height = 200,
                 RowDefinitions = new RowDefinitions("*"),
             };
-            MainGrid.Children.Add(BottomPanel);
-            Grid.SetRow(BottomPanel, 3);
+            ContentGrid.Children.Add(BottomPanel);
+            Grid.SetColumn(BottomPanel, 1);
+            Grid.SetColumnSpan(BottomPanel, 2);
+            Grid.SetRow(BottomPanel, 1);
 
             var subBottomBorder = new Border
             {
