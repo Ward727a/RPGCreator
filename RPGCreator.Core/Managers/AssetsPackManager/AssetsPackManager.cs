@@ -183,6 +183,11 @@ namespace RPGCreator.Core.Managers.AssetsPackManager
             }
         }
 
+        public List<string> GetAssetsPacksNames()
+        {
+            return AssetsPacks.Keys.ToList();
+        }
+
         public void RemoveAssetsPack(string name)
         {
 

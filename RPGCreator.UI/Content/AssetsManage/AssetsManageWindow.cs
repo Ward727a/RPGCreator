@@ -132,9 +132,6 @@ namespace RPGCreator.UI.Content.AssetsManage
         {
             if (_AssetsMenuOptions.TryGetValue(key, out var panel))
             {
-                // Here you would typically switch the content of the main area to the selected panel.
-                // For example, you might have a ContentControl in the Body grid to display the selected panel.
-                // This is a placeholder for the actual implementation.
                 Console.WriteLine($"Showing assets panel: {key}");
                 if (AssetsPanel != null)
                 {
@@ -142,12 +139,28 @@ namespace RPGCreator.UI.Content.AssetsManage
                 }
                 AssetsPanel = panel;
                 Body.Children.Add(AssetsPanel);
-                Grid.SetColumn(AssetsPanel, 1); // Assuming the second column is for the main content
+                Grid.SetColumn(AssetsPanel, 1);
             }
             else
             {
                 Console.WriteLine($"Assets panel not found: {key}");
             }
+        }
+
+        public void OpenCustom(UserControl control)
+        {
+            if(control == null)
+            {
+                throw new ArgumentNullException(nameof(control), "Control cannot be null");
+            }
+
+            if(AssetsPanel != null)
+            {
+                Body.Children.Remove(AssetsPanel);
+            }
+            AssetsPanel = control;
+            Body.Children.Add(AssetsPanel);
+            Grid.SetColumn(AssetsPanel, 1);
         }
     }
 }

@@ -26,9 +26,11 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.VisualTree;
 using RPGCreator.Core;
 using RPGCreator.Core.Type.Assets;
 using RPGCreator.UI.Common;
+using RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,6 +40,190 @@ using System.Threading.Tasks;
 namespace RPGCreator.UI.Content.AssetsManage.Components
 {
 
+    public class NewTilesetDialogOnCreatedEventArgs : EventArgs
+    {
+        public string Name { get; }
+        public int TileWidth { get; }
+        public int TileHeight { get; }
+        public string AssetPack { get; }
+        public int TilesetType { get; }
+        public NewTilesetDialogOnCreatedEventArgs(string name, int tileWidth, int tileHeight, string assetPack, int tilesetType)
+        {
+            Name = name;
+            TileWidth = tileWidth;
+            TileHeight = tileHeight;
+            AssetPack = assetPack;
+            TilesetType = tilesetType;
+        }
+    }
+
+    public class NewTilesetDialog : Window
+    {
+        public event Action<NewTilesetDialogOnCreatedEventArgs>? OnCreated;
+        public Grid Body { get; private set; }
+        public NewTilesetDialog()
+        {
+            Title = "New Tileset";
+            Width = 400;
+            Height = 300;
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            CreateComponents();
+            Content = Body;
+        }
+
+        private void CreateComponents()
+        {
+            Body = new Grid
+            {
+                Margin = new Avalonia.Thickness(10),
+                RowDefinitions = new RowDefinitions("Auto, Auto, Auto, Auto, Auto, *"),
+                ColumnDefinitions = new ColumnDefinitions("Auto, *")
+            };
+
+            var nameLabel = new TextBlock
+            {
+                Text = "Name:",
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Avalonia.Thickness(5)
+            };
+            Body.Children.Add(nameLabel);
+            Grid.SetRow(nameLabel, 0);
+            Grid.SetColumn(nameLabel, 0);
+            var nameTextBox = new TextBox
+            {
+                Margin = new Avalonia.Thickness(5),
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Center,
+                UseFloatingWatermark = true,
+                Watermark = "Enter tileset name..."
+            };
+            Body.Children.Add(nameTextBox);
+            Grid.SetRow(nameTextBox, 0);
+            Grid.SetColumn(nameTextBox, 1);
+
+            var tileWidthLabel = new TextBlock
+            {
+                Text = "Tile Width:",
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Avalonia.Thickness(5)
+            };
+            Body.Children.Add(tileWidthLabel);
+            Grid.SetRow(tileWidthLabel, 1);
+            Grid.SetColumn(tileWidthLabel, 0);
+
+            var tileWidthTextBox = new TextBox
+            {
+                Margin = new Avalonia.Thickness(5),
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Center,
+                UseFloatingWatermark = true,
+                Watermark = "Enter tile width..."
+            };
+            Body.Children.Add(tileWidthTextBox);
+            Grid.SetRow(tileWidthTextBox, 1);
+            Grid.SetColumn(tileWidthTextBox, 1);
+
+            var tileHeightLabel = new TextBlock
+            {
+                Text = "Tile Height:",
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Avalonia.Thickness(5)
+            };
+            Body.Children.Add(tileHeightLabel);
+            Grid.SetRow(tileHeightLabel, 2);
+            Grid.SetColumn(tileHeightLabel, 0);
+
+            var tileHeightTextBox = new TextBox
+            {
+                Margin = new Avalonia.Thickness(5),
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Center,
+                UseFloatingWatermark = true,
+                Watermark = "Enter tile height..."
+            };
+            Body.Children.Add(tileHeightTextBox);
+            Grid.SetRow(tileHeightTextBox, 2);
+            Grid.SetColumn(tileHeightTextBox, 1);
+
+            var tilesetTypeSelectorLabel = new TextBlock
+            {
+                Text = "Tileset Type:",
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Avalonia.Thickness(5)
+            };
+            Body.Children.Add(tilesetTypeSelectorLabel);
+            Grid.SetRow(tilesetTypeSelectorLabel, 3);
+            Grid.SetColumn(tilesetTypeSelectorLabel, 0);
+
+            var tilesetTypeSelector = new ComboBox
+            {
+                Margin = new Avalonia.Thickness(5),
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            tilesetTypeSelector.Items.Add("Tileset");
+            tilesetTypeSelector.Items.Add("Autotile");
+
+            tilesetTypeSelector.SelectedIndex = 0; // Default to Tileset
+
+            Body.Children.Add(tilesetTypeSelector);
+            Grid.SetRow(tilesetTypeSelector, 3);
+            Grid.SetColumn(tilesetTypeSelector, 1);
+
+            var assetPackLabel = new TextBlock
+            {
+                Text = "Asset Pack:",
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Avalonia.Thickness(5)
+            };
+            Body.Children.Add(assetPackLabel);
+            Grid.SetRow(assetPackLabel, 4);
+            Grid.SetColumn(assetPackLabel, 0);
+
+            var assetPackSelector = new ComboBox
+            {
+                Margin = new Avalonia.Thickness(5),
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+
+            EngineCore.Instance.Managers.AssetsPack.GetAssetsPacksNames().ForEach(name =>
+            {
+                assetPackSelector.Items.Add(name);
+            });
+
+            assetPackSelector.SelectedIndex = 0; // Default to the first asset pack
+
+            Body.Children.Add(assetPackSelector);
+            Grid.SetRow(assetPackSelector, 4);
+            Grid.SetColumn(assetPackSelector, 1);
+
+            var createButton = new Button
+            {
+                Content = "Create",
+                Margin = new Avalonia.Thickness(5),
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            createButton.Click += (sender, e) =>
+            {
+                // Here you would handle the creation of the new tileset.
+                // For now, we just close the dialog.
+                OnCreated?.Invoke(new NewTilesetDialogOnCreatedEventArgs(
+                    nameTextBox.Text ?? "",
+                    int.TryParse(tileWidthTextBox.Text, out var tileWidth) ? tileWidth : 32, // Default to 32 if parsing fails
+                    int.TryParse(tileHeightTextBox.Text, out var tileHeight) ? tileHeight : 32, // Default to 32 if parsing fails
+                    assetPackSelector.SelectedItem?.ToString() ?? "",
+                    tilesetTypeSelector.SelectedIndex));
+                Console.WriteLine($"Creating new tileset: {nameTextBox.Text}, Width: {tileWidthTextBox.Text}, Height: {tileHeightTextBox.Text}, Type: {tilesetTypeSelector.SelectedItem}");
+                Close();
+            };
+            Body.Children.Add(createButton);
+            Grid.SetRow(createButton, 5);
+            Grid.SetColumn(createButton, 1);
+        }
+
+    }
     public class TilesetsManageControlFilters
     {
 
@@ -617,28 +803,37 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
         private void RegisterFooterEvents()
         {
 
-            // TODO: Voir pour implementer la création de nouveaux tilesets.
-            // Si j'ai le temps, faut que j'vois aussi pour le système d'autotiling (Création du nouveaux types, etc...)
-            // Pour l'autotiling, je pourrait voir pour créé un type contenant une liste de tilesets utilisés pour l'autotiling,
-            // Puis à chaque placement d'une tile, il vérifie si l'autotile le contient, et si oui, il place la tile correspondante.
-            // OU
-            // Voir pour implémenter un nouveau système dans le TilesetSelector qui permet de choisir un autotile,
-            // l'utilisateur pourrait assigner des tiles "basique" sur une image généré depuis les datas de l'autotile, puis les placer,
-            // Comme ça y'aura pas besoin de check chaque autotiles à chaque placement de tile,
-            // Mais qu'un seul, celui que l'utilisateur a choisi.
-            // A réfléchir, mais je pense que c'est la meilleure solution.
-            //
-            //
-            // Pour l'instant je vais bossé sur la création de nouveaux tilesets,
-            // Puis je créé le type d'autotile qui contiendra une liste de tilesets,
-            // Et je créé un système de base de création d'autotile,
-            // Je modifierai le TilesetSelector pour qu'il puisse afficher les autotiles et en séléctionner les tiles,
-            // Et enfin je verrai pour implémenter le système de placement d'autotile.
 
             Footer_New.Click += (sender, e) =>
             {
                 // This should open a dialog and ask what type of tileset they want to create.
                 // The choice could be either a basic tileset (from an image) or an autotile (from already existing tilesets).
+
+                var newTilesetDialog = new NewTilesetDialog();
+                newTilesetDialog.OnCreated += (args) =>
+                {
+                    if(args.TilesetType == 0) // Tileset
+                    {
+                        var tileset = new Tileset(args.Name, args.TileWidth, args.TileHeight, string.Empty)
+                        {
+                        };
+                        // Here you would typically save the tileset to the project or assets manager.
+                        EngineCore.Instance.Managers.Assets.AddAsset(args.AssetPack, tileset);
+
+                        Console.WriteLine($"New Tileset Created: {args.Name}, Width: {args.TileWidth}, Height: {args.TileHeight}, Asset Pack: {args.AssetPack}");
+
+                        ((AssetsManageWindow)this.GetVisualRoot()!).OpenCustom(new TilesetEditorWindowControl(tileset));
+                    }
+                    else if(args.TilesetType == 1) // Autotile
+                    {
+                        // Create a new Autotile (this will be implemented later)
+                        // For now, we just create a basic tileset.
+                    }
+                };
+
+                newTilesetDialog.ShowDialog((Window)this.GetVisualRoot()!);
+
+
                 Console.WriteLine("New button clicked.");
             };
 

@@ -46,6 +46,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Content\AssetsManage\AssetsEditors\AutotileEditor\" />
     <Folder Include="Content\Preferences\Components\General\" />
     <Folder Include="Interfaces\" />
   </ItemGroup>
