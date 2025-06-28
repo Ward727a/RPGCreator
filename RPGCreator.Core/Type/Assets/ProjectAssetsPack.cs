@@ -39,9 +39,8 @@ namespace RPGCreator.Core.Type.Assets
         public ProjectAssetsPack()
         { }
 
-        public ProjectAssetsPack(XDocument pack_config_document)
+        public ProjectAssetsPack(string config_path, XDocument pack_config_document) : base(config_path)
         {
-
         }
 
         public void AddAsset(BaseAsset asset)

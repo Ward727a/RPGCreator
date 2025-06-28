@@ -36,7 +36,6 @@ namespace RPGCreator.Core
 {
     public class EngineManagers
     {
-        public AssetsPackManager AssetsPack { get; private set; }
         public AssetsManager Assets { get; private set; }
         public ProjectsManager Projects { get; private set; }
         public BrushManager Brush { get; private set; }
@@ -44,7 +43,6 @@ namespace RPGCreator.Core
         internal EngineManagers()
         {
             Projects = new ProjectsManager();
-            AssetsPack = new AssetsPackManager();
             Assets = new AssetsManager();
             Brush = new BrushManager();
 

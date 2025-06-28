@@ -128,7 +128,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
         public event EventHandler<AssetsManagerUpdatedAssetArgs?>? UpdatedAsset;
         public virtual void OnUpdatedAsset(AssetsManagerUpdatedAssetArgs? args = null)
         {
-            UpdatedAsset?.Invoke(this, args ?? new(BaseAsset.TYPE.UNKNOWN));
+            UpdatedAsset?.Invoke(this, args ?? new(BaseAsset.TYPE.UNKNOWN, null));
         }
         public virtual void OnUpdatedAsset(AssetsManagerUpdatingAssetArgs preArgs)
         {

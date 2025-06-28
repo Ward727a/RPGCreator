@@ -25,7 +25,9 @@
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Xna.Framework;
+using RPGCreator.Core.Managers.AssetsManager.EventsArgs;
 using RPGCreator.Core.Rendering.Batching;
+using RPGCreator.Core.Type.Assets;
 using RPGCreator.Core.Type.Internal;
 using System;
 using System.Collections.Generic;
@@ -84,6 +86,41 @@ namespace RPGCreator.Core.Type.Map
             Name = name;
             ZIndex = zIndex;
             Visible = visible;
+
+            EngineCore.Instance.Managers.Assets.Event.UpdatedAsset += Assets_Event_UpdatedAsset;
+        }
+
+        private void Assets_Event_UpdatedAsset(object? sender, AssetsManagerUpdatedAssetArgs? e)
+        {
+            // We need to check if the updated asset is a Tileset and if it is used in this layer
+            // If it is, we need to update the tiles in this layer that use that Tileset
+            // If the tile are not present anymore in the Tileset, we need to remove them from the layer
+            if (e?.Type == BaseAsset.TYPE.TILESETS)
+            {
+
+                if(e.asset is not Tileset tileset)
+                    return;
+
+                foreach (var tile in Tiles.Values)
+                {
+                    if (tile.Tileset.Unique == tileset.Unique)
+                    {
+
+                        // Check if the tile position is still valid in the updated Tileset
+                        if (tile.UV.X > tileset.GetBitmap().Size.Width || tile.UV.Y > tileset.GetBitmap().Size.Height ||
+                            tile.UV.X + tile.UV.Width > tileset.GetBitmap().Size.Width ||
+                            tile.UV.Y + tile.UV.Height > tileset.GetBitmap().Size.Height || tile.UV.Width != tileset.tile_width || tile.UV.Height != tileset.tile_height)
+                        {
+                            // If the tile position is not valid anymore, we need to remove it from the layer
+                            RemoveTile(tile);
+                            continue; // Skip to the next tile
+                        }
+
+                        // If the tile's Tileset is the one that was updated, we need to update the tile
+                        tile.UpdateTileset(tileset);
+                    }
+                }
+            }
         }
 
         protected override void _Draw(SpriteBatchExtend sb)

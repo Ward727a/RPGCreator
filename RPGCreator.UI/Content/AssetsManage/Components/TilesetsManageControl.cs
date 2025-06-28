@@ -187,7 +187,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                 VerticalAlignment = VerticalAlignment.Center,
             };
 
-            EngineCore.Instance.Managers.AssetsPack.GetAssetsPacksNames().ForEach(name =>
+            EngineCore.Instance.Managers.Assets.GetAssetsPackNames().ForEach(name =>
             {
                 assetPackSelector.Items.Add(name);
             });
@@ -290,6 +290,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
     public interface ITilesetViewItem
     {
+        public Tileset Tileset { get; }
         public void Select();
         public void Deselect();
     }
@@ -506,6 +507,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
         #region Events
 
         public event Action? OnSelectedTilesetChanged;
+        public event Action? OnNeedRefresh;
 
         #endregion
 
@@ -557,6 +559,12 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
         public Button Footer_New { get; private set; }
         public Button Footer_Edit { get; private set; }
         public Button Footer_Delete { get; private set; }
+
+        #endregion
+
+        #region View Components
+
+        public StackPanel ViewPanel;
 
         #endregion
 
@@ -689,7 +697,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
             switch (Filters.ShowType)
             {
                 case 0: // ListView
-                    CreateListViewComponents(tilesets);
+                    CreateListViewComponents();
                     break;
 
                 case 1: // GridView
@@ -698,7 +706,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
             }
         }
 
-        private void CreateListViewComponents(List<Tileset> tilesets)
+        private void CreateListViewComponents()
         {
             var viewGrid = new Grid();
 
@@ -712,14 +720,22 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
             Body.Children.Add(viewScroller);
             Grid.SetRow(viewScroller, 1);
 
-            var viewPanel = new StackPanel
+            ViewPanel = new StackPanel
             {
                 Orientation = Avalonia.Layout.Orientation.Vertical,
                 Margin = new Avalonia.Thickness(10),
             };
 
-            viewGrid.Children.Add(viewPanel);
+            viewGrid.Children.Add(ViewPanel);
 
+            OnNeedRefresh += TilesetsManageControl_OnNeedRefresh;
+            TilesetsManageControl_OnNeedRefresh();
+        }
+
+        private void TilesetsManageControl_OnNeedRefresh()
+        {
+            var tilesets = EngineCore.Instance.Data.EditedProject?.GetAssetsType<Tileset>(BaseAsset.TYPE.TILESETS) ?? new List<Tileset>();
+            ViewPanel.Children.Clear();
             foreach (var tileset in tilesets)
             {
                 var item = new TilesetViewListItem(tileset);
@@ -734,7 +750,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                         SelectedTilesetViewItem = null;
                     }
                 };
-                viewPanel.Children.Add(item);
+                ViewPanel.Children.Add(item);
             }
         }
 
@@ -817,12 +833,16 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                         var tileset = new Tileset(args.Name, args.TileWidth, args.TileHeight, string.Empty)
                         {
                         };
-                        // Here you would typically save the tileset to the project or assets manager.
-                        EngineCore.Instance.Managers.Assets.AddAsset(args.AssetPack, tileset);
+                        var editor_control = new TilesetEditorWindowControl(tileset);
+                        var host_ = ((AssetsManageWindow)this.GetVisualRoot()!);
+                        editor_control.TilesetSaved += () =>
+                        {
+                            host_.ShowAssetsPanel("Tilesets");
 
-                        Console.WriteLine($"New Tileset Created: {args.Name}, Width: {args.TileWidth}, Height: {args.TileHeight}, Asset Pack: {args.AssetPack}");
+                            TilesetsManageControl_OnNeedRefresh();
+                        };
 
-                        ((AssetsManageWindow)this.GetVisualRoot()!).OpenCustom(new TilesetEditorWindowControl(tileset));
+                        host_.OpenCustom(editor_control);
                     }
                     else if(args.TilesetType == 1) // Autotile
                     {
@@ -830,6 +850,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                         // For now, we just create a basic tileset.
                     }
                 };
+                
 
                 newTilesetDialog.ShowDialog((Window)this.GetVisualRoot()!);
 
@@ -839,6 +860,22 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
             Footer_Edit.Click += (sender, e) =>
             {
+
+                if (SelectedTilesetViewItem == null)
+                {
+                    Console.WriteLine("No tileset selected to edit.");
+                    return;
+                }
+                TilesetEditorWindowControl editor_control = new TilesetEditorWindowControl(SelectedTilesetViewItem?.Tileset);
+
+                var host_ = ((AssetsManageWindow)this.GetVisualRoot()!);
+                editor_control.TilesetSaved += () =>
+                {
+                    host_.ShowAssetsPanel("Tilesets");
+                    TilesetsManageControl_OnNeedRefresh();
+                };
+                host_.OpenCustom(editor_control);
+
                 Console.WriteLine("Edit Tileset button clicked.");
             };
 

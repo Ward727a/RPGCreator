@@ -31,20 +31,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace RPGCreator.Core.Managers.AssetsManager
 {
     public class AssetsManager
     {
-        private Dictionary<string, BaseAssetsPack> _loadedPacks = new();
-        private Dictionary<Guid, BaseAsset> _cachedAssets = [];
+        private Dictionary<Ulid, BaseAsset> _cachedAssets = [];
+
+        readonly Dictionary<Ulid, BaseAssetsPack> AssetsPacks = [];
+        readonly Dictionary<string, Ulid> AssetsPacksMapping = [];
 
         public AssetsManagerEvent Event;
 
         public AssetsManager()
         {
             Event = new();
-
         }
 
         internal void Init()
@@ -55,8 +57,8 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 {
                     foreach (string packPath in e.LoadedProject.AssetsPackPath)
                     {
-                        BaseAssetsPack pack = new(packPath);
-                        RegisterPack(pack);
+                        
+                        LoadPack(packPath);
                     }
 
                 }
@@ -64,19 +66,56 @@ namespace RPGCreator.Core.Managers.AssetsManager
 
             EngineCore.Instance.Managers.Projects.Events.UnloadedProject += (object? sender, ProjectsManagerUnloadedProjectArgs e) =>
             {
-                var copyPacks = _loadedPacks.ToArray();
+                var copyPacks = AssetsPacks.ToArray();
                 foreach (var pack in copyPacks)
                 {
                     UnregisterPack(pack.Key);
                 }
             };
         }
+
+        public bool CreateAssetsPack(string packName, BaseAssetsPack.PACK_TYPE type)
+        {
+            if (string.IsNullOrEmpty(packName))
+            {
+                throw new ArgumentException("Pack name cannot be null or empty.", nameof(packName));
+            }
+            if (AssetsPacksMapping.ContainsKey(packName)) // Need to check how to allow same name for different packs.
+            {
+                throw new InvalidOperationException($"Assets pack with name {packName} already exists.");
+            }
+
+            BaseAssetsPack pack = new()
+            {
+                Name = packName,
+                Type = type
+            };
+            pack.CreateXMLDocument();
+            RegisterPack(pack);
+
+            return true;
+        }
+
+        public bool HasAssetsPack(string pack_name)
+        {
+            if (string.IsNullOrEmpty(pack_name))
+            {
+                throw new ArgumentException("Pack name cannot be null or empty.", nameof(pack_name));
+            }
+            return AssetsPacksMapping.ContainsKey(pack_name);
+        }
+
+        public List<string> GetAssetsPackNames()
+        {
+            return AssetsPacksMapping.Keys.ToList();
+        }
+
         /// <summary>
         /// This should not be used in other part than Core.<br/>
         /// Use the AssetsPackManager for this!
         /// </summary>
         /// <param name="pack"></param>
-        public virtual void RegisterPack(BaseAssetsPack pack)
+        public virtual void RegisterPack(BaseAssetsPack pack, bool shouldSaveConfig = true)
         {
             Event.OnUpdatingAsset();
             var args = new AssetsManagerAddingPackArgs(pack);
@@ -87,27 +126,49 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 return;
             }
 
-            _loadedPacks[pack.Name] = pack;
+            AssetsPacks[pack.Id] = pack;
+            AssetsPacksMapping[pack.Name] = pack.Id;
             foreach (var type in Enum.GetValues(typeof(BaseAsset.TYPE)))
             {
                 if (pack.HasAssetOfType((BaseAsset.TYPE)type))
                 {
-                    Event.OnUpdatedAsset(new AssetsManagerUpdatedAssetArgs((BaseAsset.TYPE)type));
+                    Event.OnUpdatedAsset(new AssetsManagerUpdatedAssetArgs((BaseAsset.TYPE)type, null));
                 }
             }
+
+            if(shouldSaveConfig)
+                EngineCore.Instance.Data.EditedProject?.SaveConfig();
+
             Event.OnAddedPack(args.ToAddedArgs());
         }
 
-        /// <summary>
-        /// This should not be used in other part than Core.<br/>
-        /// Use the AssetsPackManager for this!
-        /// </summary>
-        /// <param name="pack"></param>
-        public virtual void UnregisterPack(string packName)
+        public void LoadPack(string packPath)
         {
 
+            if(string.IsNullOrEmpty(packPath))
+            {
+                throw new ArgumentException("Pack path cannot be null or empty.", nameof(packPath));
+            }
+
+            if(!File.Exists(packPath))
+            {
+                throw new FileNotFoundException($"Assets pack file not found at path: {packPath}");
+            }
+
+            BaseAssetsPack pack = new(packPath);
+
+            if(pack.ErrorOnLoad)
+            {
+                throw new InvalidOperationException($"Failed to load assets pack from path: {packPath}.");
+            }
+
+            RegisterPack(pack, false);
+        }
+
+        public void UnregisterPack(Ulid packId, string pack_name = "")
+        {
             Event.OnUpdatingAsset();
-            var PreArgs = new AssetsManagerRemovingPackArgs(packName);
+            var PreArgs = new AssetsManagerRemovingPackArgs(packId);
             Event.OnRemovingPack(PreArgs);
 
             if (PreArgs.Cancel)
@@ -115,19 +176,28 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 return;
             }
 
-
-            if (_loadedPacks.ContainsKey(PreArgs.PackName))
+            if (AssetsPacks.TryGetValue(PreArgs.PackID, out BaseAssetsPack? pack))
             {
                 var PostArgs = PreArgs.ToPost(true);
 
                 foreach (var type in Enum.GetValues(typeof(BaseAsset.TYPE)))
                 {
-                    if (_loadedPacks[PreArgs.PackName].HasAssetOfType((BaseAsset.TYPE)type))
+                    if (pack.HasAssetOfType((BaseAsset.TYPE)type))
                     {
-                        Event.OnUpdatedAsset(new AssetsManagerUpdatedAssetArgs((BaseAsset.TYPE)type));
+                        Event.OnUpdatedAsset(new AssetsManagerUpdatedAssetArgs((BaseAsset.TYPE)type, null));
                     }
                 }
-                _loadedPacks.Remove(PreArgs.PackName);
+
+                pack.Save();
+
+                if(string.IsNullOrEmpty(pack_name))
+                {
+                    pack_name = pack.Name;
+                }
+
+                AssetsPacks.Remove(PreArgs.PackID);
+                AssetsPacksMapping.Remove(pack_name);
+
                 Event.OnRemovedPack(PostArgs);
             }
             else
@@ -138,14 +208,65 @@ namespace RPGCreator.Core.Managers.AssetsManager
             Event.OnUpdatedAsset();
         }
 
-        public virtual BaseAssetsPack[] GetAssetsPacks()
+        /// <summary>
+        /// This should not be used in other part than Core.<br/>
+        /// Use the AssetsPackManager for this!
+        /// </summary>
+        /// <param name="pack"></param>
+        public virtual void UnregisterPack(string packName)
         {
-            return [.. _loadedPacks.Values];
+
+            if(string.IsNullOrEmpty(packName))
+            {
+                throw new ArgumentException("Pack name cannot be null or empty.", nameof(packName));
+            }
+
+            if(AssetsPacksMapping.TryGetValue(packName, out Ulid packId))
+            {
+                UnregisterPack(packId, packName);
+            }
+            else
+            {
+                throw new KeyNotFoundException($"No assets pack found with name: {packName}");
+            }
+
         }
 
-        public virtual BaseAsset? GetCachedAsset(Guid guid)
+        public void ClearAssetsPacks()
         {
-            if (_cachedAssets.TryGetValue(guid, out BaseAsset? asset))
+            var copyPacks = AssetsPacks.ToArray();
+            foreach (var pack in copyPacks)
+            {
+                UnregisterPack(pack.Key);
+            }
+        }
+
+        public virtual BaseAssetsPack[] GetAssetsPacks()
+        {
+            return [.. AssetsPacks.Values];
+        }
+
+        public bool TryGetAssetsPack(Ulid packId, out BaseAssetsPack? pack)
+        {
+            return AssetsPacks.TryGetValue(packId, out pack);
+        }
+
+        public bool TryGetAssetsPack(string packName, out BaseAssetsPack? pack)
+        {
+            if (AssetsPacksMapping.TryGetValue(packName, out Ulid packId))
+            {
+                return AssetsPacks.TryGetValue(packId, out pack);
+            }
+            else
+            {
+                pack = null;
+                return false;
+            }
+        }
+
+        public virtual BaseAsset? GetCachedAsset(Ulid ulid)
+        {
+            if (_cachedAssets.TryGetValue(ulid, out BaseAsset? asset))
             {
                 return asset;
             }
@@ -154,9 +275,9 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 return null;
             }
         }
-        public virtual bool TryGetCachedAsset(Guid guid, out BaseAsset? asset)
+        public virtual bool TryGetCachedAsset(Ulid ulid, out BaseAsset? asset)
         {
-            return _cachedAssets.TryGetValue(guid, out asset);
+            return _cachedAssets.TryGetValue(ulid, out asset);
         }
 
         public virtual void AddCachedAsset(BaseAsset asset)
@@ -199,7 +320,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             string packName = parts[0];
             string assetPath = parts[1];
 
-            if (EngineCore.Instance.Managers.AssetsPack.TryGetAssetsPack(packName, out BaseAssetsPack? pack))
+            if (TryGetAssetsPack(packName, out BaseAssetsPack? pack))
             {
 
                 BaseAsset asset = pack!.GetAsset(assetPath);
@@ -222,29 +343,18 @@ namespace RPGCreator.Core.Managers.AssetsManager
             }
         }
 
-        public virtual void AddAsset(string packname, BaseAsset asset)
+        public virtual void AddAsset<T>(string packname, T asset) where T : BaseAsset
         {
             AssetsManagerUpdatingAssetArgs preUpdateArgs = new(asset.Type);
             Event.OnUpdatingAsset(preUpdateArgs);
+
+            if(TryGetAssetsPack(packname, out BaseAssetsPack? pack))
+            {
+                pack.AddAsset(asset);
+            }
+
             AssetsManagerAddingAssetArgs PreArgs = new(packname, asset);
             Event.OnAddingAsset(PreArgs);
-
-            if (EngineCore.Instance.Managers.AssetsPack.TryGetAssetsPack(packname, out BaseAssetsPack? pack))
-            {
-                if (pack == null)
-                {
-                    Event.OnAddedAsset(PreArgs.ToPost(false).SetError(true));
-                    return;
-                }
-                pack.AddAsset(asset);
-                Event.OnUpdatedAsset(preUpdateArgs.ToPost());
-                Event.OnAddedAsset(PreArgs.ToPost(true));
-            }
-            else
-            {
-                Event.OnAddedAsset(PreArgs.ToPost(false).SetError(true));
-                Event.OnUpdatedAsset(preUpdateArgs.ToPost().SetError(true));
-            }
         }
 
         public virtual void MoveAsset(string oldPath, string newPath)
@@ -261,7 +371,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             }
             string packName = parts[0];
             string assetPath = parts[1];
-            if (EngineCore.Instance.Managers.AssetsPack.TryGetAssetsPack(packName, out BaseAssetsPack? pack))
+            if (TryGetAssetsPack(packName, out BaseAssetsPack? pack))
             {
                 AssetsManagerUpdatingAssetArgs PreUpdateArgs = new(pack.GetAsset(assetPath)?.Type ?? BaseAsset.TYPE.UNKNOWN);
                 Event.OnUpdatingAsset(PreUpdateArgs);
@@ -289,7 +399,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             }
             string packName = parts[0];
             string assetPath = parts[1];
-            if (EngineCore.Instance.Managers.AssetsPack.TryGetAssetsPack(packName, out BaseAssetsPack? pack))
+            if (TryGetAssetsPack(packName, out BaseAssetsPack? pack))
             {
 
                 AssetsManagerUpdatingAssetArgs PreUpdateArgs = new(pack.GetAsset(assetPath)?.Type ?? BaseAsset.TYPE.UNKNOWN);
@@ -329,8 +439,8 @@ namespace RPGCreator.Core.Managers.AssetsManager
             string newPackName = newParts[0];
             string newAssetPath = newParts[1];
 
-            if (EngineCore.Instance.Managers.AssetsPack.TryGetAssetsPack(currentPackName, out BaseAssetsPack? currentPack) &&
-                EngineCore.Instance.Managers.AssetsPack.TryGetAssetsPack(newPackName, out BaseAssetsPack? newPack))
+            if (TryGetAssetsPack(currentPackName, out BaseAssetsPack? currentPack) &&
+                TryGetAssetsPack(newPackName, out BaseAssetsPack? newPack))
             {
                 BaseAsset? asset = currentPack!.GetAsset(currentAssetPath);
                 if (asset != null)

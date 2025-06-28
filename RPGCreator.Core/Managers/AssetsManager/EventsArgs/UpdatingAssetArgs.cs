@@ -44,7 +44,7 @@ namespace RPGCreator.Core.Managers.AssetsManager.EventsArgs
 
         public AssetsManagerUpdatedAssetArgs ToPost()
         {
-            return new AssetsManagerUpdatedAssetArgs(Type);
+            return new AssetsManagerUpdatedAssetArgs(Type, null);
         }
     }
 }

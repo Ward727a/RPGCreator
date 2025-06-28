@@ -89,7 +89,7 @@ namespace RPGCreator.Core.Type.Assets
             TILESETS,
         }
 
-        public Guid Unique { get; protected set; }
+        public Ulid Unique { get; protected set; }
 
         public string PackName;
         public string PackPath;
@@ -101,13 +101,13 @@ namespace RPGCreator.Core.Type.Assets
 
         public BaseAsset()
         {
-            Unique = Guid.NewGuid();
+            Unique = Ulid.NewUlid();
             Name = "UNKNOWN";
             Type = TYPE.UNKNOWN;
         }
         public BaseAsset(string Name)
         {
-            Unique = Guid.NewGuid();
+            Unique = Ulid.NewUlid();
             this.Name = Name;
         }
 
@@ -121,6 +121,7 @@ namespace RPGCreator.Core.Type.Assets
         static public T CreateFromFile<T>(XElement asset_elem, TYPE type) where T : BaseAsset, new()
         {
             //string type = asset_elem.Element("type")?.Value ?? "UNKNOWN";
+            Ulid unique = Ulid.Parse(asset_elem.Element("unique")?.Value ?? Guid.NewGuid().ToString());
             string name = asset_elem.Element("name")?.Value ?? "UNKNOWN";
 
             //if (string.IsNullOrEmpty(type) || type == "UNKNOWN")
@@ -135,7 +136,7 @@ namespace RPGCreator.Core.Type.Assets
 
             T asset = new()
             {
-                Unique = Guid.NewGuid(),
+                Unique = unique,
                 Name = name,
                 AssetData = asset_elem,
                 Type = type,
@@ -155,5 +156,8 @@ namespace RPGCreator.Core.Type.Assets
             // Need file path, dimension, image size, hardlink or softlink, etc...
             return asset;
         }
+
+        public virtual void Save()
+        { }
     }
 }

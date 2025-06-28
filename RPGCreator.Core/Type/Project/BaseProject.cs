@@ -78,11 +78,18 @@ namespace RPGCreator.Core.Type.Project
 
         public void Load()
         {
-            EngineCore.Instance.Managers.AssetsPack.ClearAssetsPacks();
+            EngineCore.Instance.Managers.Assets.ClearAssetsPacks();
+
+            //TODO: Need to switch to AssetsManager for this!
+
+            //foreach (string packPath in AssetsPackPath)
+            //{
+            //    EngineCore.Instance.Managers.AssetsPack.LoadAssetsPack(packPath);
+            //}
 
             foreach (string packPath in AssetsPackPath)
             {
-                EngineCore.Instance.Managers.AssetsPack.LoadAssetsPack(packPath);
+                EngineCore.Instance.Managers.Assets.LoadPack(packPath);
             }
 
             EngineCore.Instance.Data.EditedProject = this;
@@ -90,7 +97,7 @@ namespace RPGCreator.Core.Type.Project
 
         public void Unload()
         {
-            EngineCore.Instance.Managers.AssetsPack.ClearAssetsPacks();
+            EngineCore.Instance.Managers.Assets.ClearAssetsPacks();
             EngineCore.Instance.Data.EditedProject = null;
         }
 
@@ -115,7 +122,7 @@ namespace RPGCreator.Core.Type.Project
             string AssetPack = pathParts[0];
             string AssetPath = pathParts[1];
 
-            if(!EngineCore.Instance.Managers.AssetsPack.HasAssetsPack(AssetPack))
+            if(!EngineCore.Instance.Managers.Assets.HasAssetsPack(AssetPack))
             {
                 return null;
             }

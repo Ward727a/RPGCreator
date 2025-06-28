@@ -36,10 +36,12 @@ namespace RPGCreator.Core.Managers.AssetsManager.EventsArgs
     {
 
         public readonly BaseAsset.TYPE Type;
+        public readonly BaseAsset? asset;
 
-        public AssetsManagerUpdatedAssetArgs(BaseAsset.TYPE type)
+        public AssetsManagerUpdatedAssetArgs(BaseAsset.TYPE type, BaseAsset? asset)
         {
             Type = type;
+            this.asset = asset;
         }
 
     }

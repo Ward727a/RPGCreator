@@ -23,6 +23,7 @@
 // 
 #endregion
 using RPGCreator.Core.Events.EventArgs;
+using RPGCreator.Core.Managers.AssetsManager.EventsArgs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -150,6 +151,9 @@ namespace RPGCreator.Core.Events
         /// </summary>
         /// <param name="e"></param>
         internal virtual void OnCoreError(CoreErrorArgs e) => CoreError?.Invoke(this, e);
+
+        public event EventHandler<AssetsManagerUpdatedAssetArgs>? AssetsManagerUpdatedAsset;
+        internal void OnAssetsManagerUpdatedAsset(AssetsManagerUpdatedAssetArgs e) => AssetsManagerUpdatedAsset?.Invoke(this, e);
 
         #endregion
 

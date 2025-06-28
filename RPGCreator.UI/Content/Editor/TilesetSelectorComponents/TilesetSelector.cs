@@ -27,6 +27,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using RPGCreator.Core;
+using RPGCreator.Core.Managers.AssetsManager.EventsArgs;
 using RPGCreator.Core.Type.Assets;
 using System;
 using System.Collections.Generic;
@@ -63,6 +64,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                 return null;
             }
         }
+        private Tileset CurrentTemp;
 
         public TilesetSelector()
         {
@@ -159,30 +161,40 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 
             RootTilesetCanvas.Children.Add(InnerTilesetCanvas);
 
+            EngineCore.Instance.Managers.Assets.Event.AddedAsset += OnAssetAdded;
+            EngineCore.Instance.Managers.Assets.Event.UpdatedAsset += (sender, e) =>
+            {
+                if (e.Type == BaseAsset.TYPE.TILESETS)
+                {
+                    // If the updated asset is a tileset, we refresh the component
+                    RefreshComponent();
+                }
+            };
+
             RefreshComponent();
         }
 
         public void RefreshComponent()
         {
+            var current_selected = SelectBox.SelectedIndex;
             SelectBox.Items.Clear();
-
 
 #if DEBUG
             // VERY IMPORTANT: This code is only for testing purposes, it should not be used in production.
             // We check if the assets pack "TestPack" exists, if not we create it.
-            if (!EngineCore.Instance.Managers.AssetsPack.HasAssetsPack("TestPack"))
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("Creating TestPack assets pack for testing purposes.");
-                Console.ResetColor();
-                EngineCore.Instance.Managers.AssetsPack.NewAssetsPack("TestPack", Core.Type.Assets.BaseAssetsPack.BaseAssetsPack.PACK_TYPE.PROJECT);
+            //if (!EngineCore.Instance.Managers.AssetsPack.HasAssetsPack("TestPack"))
+            //{
+            //    Console.ForegroundColor = ConsoleColor.Yellow;
+            //    Console.WriteLine("Creating TestPack assets pack for testing purposes.");
+            //    Console.ResetColor();
+            //    EngineCore.Instance.Managers.AssetsPack.NewAssetsPack("TestPack", Core.Type.Assets.BaseAssetsPack.BaseAssetsPack.PACK_TYPE.PROJECT);
 
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("Adding TestTileset to TestPack assets pack for testing purposes.");
-                Console.ResetColor();
+            //    Console.ForegroundColor = ConsoleColor.Yellow;
+            //    Console.WriteLine("Adding TestTileset to TestPack assets pack for testing purposes.");
+            //    Console.ResetColor();
 
-                EngineCore.Instance.Managers.Assets.AddAsset("TestPack", new Tileset("TestTileset", 32, 32, "C:/Users/Ward/Pictures/basic_tileset_and_assets_standard/water_and_island_tiles_v2.png"));
-            }
+            //    EngineCore.Instance.Managers.Assets.AddAsset("TestPack", new Tileset("TestTileset", 32, 32, "C:/Users/Ward/Pictures/basic_tileset_and_assets_standard/water_and_island_tiles_v2.png"));
+            //}
 #endif
 
 
@@ -193,8 +205,21 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 
             project.GetAssetsType<Tileset>(Core.Type.Assets.BaseAsset.TYPE.TILESETS).ForEach(tileset =>
             {
-                SelectBox.Items.Add(new TilesetItem(tileset));
+                var item = new TilesetItem(tileset);
+                if (item.Error)
+                    return;
+                SelectBox.Items.Add(item);
             });
+
+            // Check if we can still select the previous selected tileset, else select the first one
+            if (current_selected >= 0 && current_selected < SelectBox.Items.Count)
+            {
+                SelectBox.SelectedIndex = current_selected;
+            }
+            else if (SelectBox.Items.Count > 0)
+            {
+                SelectBox.SelectedIndex = 0; // Select the first item if the previous index is out of range
+            }
         }
 
         #region EventsHandlers
@@ -218,26 +243,39 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                 };
                 InnerTilesetCanvas.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromArgb(20, 255, 255, 255));
                 InnerTilesetCanvas.Children.Add(tilesetImage);
+
+                if (TileBorder != null)
+                {
+                    CurrentTemp = item.Tileset;
+                    InnerTilesetCanvas.Children.Remove(TileBorder);
+                    TileBorder = null; // Clear the border when a new tileset is selected
+                    EngineCore.Instance.Data.SelectedTile = null; // Clear the selected tile
+                }
             }
         }
+
+        private void Tileset_ImageChanged(object? sender, EventArgs e)
+        {
+            var old = SelectBox.SelectedIndex;
+            SelectBox.SelectedIndex = 0;
+            SelectBox.SelectedIndex = old;
+        }
+
         protected void OnSelectTile(object? sender, PointerPressedEventArgs e)
         {
 
             if (!e.GetCurrentPoint(SelectBoxButton).Properties.IsLeftButtonPressed)
                 return;
 
-            // Handle the event when the select button is clicked
-            // This could involve opening a dialog to select a tileset or performing some action
             Console.WriteLine("Select button clicked.");
-            // You can add more logic here to handle the select button click
 
-            // Here we convert the location of the click to a tile position (tileCol, tileRow)
             if (SelectedTileset == null)
             {
                 Console.WriteLine("No tileset selected.");
                 return;
             }
 
+            // Here we convert the location of the click to a tile position (tileCol, tileRow)
             var position = e.GetPosition(InnerTilesetCanvas);
             int tileWidth = SelectedTileset.tile_width;
             int tileHeight = SelectedTileset.tile_height;
@@ -245,12 +283,21 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
             int tileCol = (int)(position.X / tileWidth);
             int tileRow = (int)(position.Y / tileHeight);
 
+
+            var tile = SelectedTileset.GetTile(tileCol, tileRow);
+
+            if(tile == null)
+            {
+                Console.WriteLine($"No tile found at column: {tileCol}, row: {tileRow}");
+                return;
+            }
+
             // Now we can use the tileCol and tileRow to draw a square around the clicked tile
             Console.WriteLine($"Tile clicked at column: {tileCol}, row: {tileRow}");
 
             var tileRectangle = new Avalonia.Rect(tileCol * tileWidth, tileRow * tileHeight, tileWidth, tileHeight);
 
-            if (TileBorder != null)
+            if (TileBorder != null) // If the tileborder already exists, we just move it
             {
                 Canvas.SetLeft(TileBorder, tileRectangle.X);
                 Canvas.SetTop(TileBorder, tileRectangle.Y);
@@ -275,8 +322,6 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                 Canvas.SetTop(TileBorder, tileRectangle.Y);
                 InnerTilesetCanvas.Children.Add(TileBorder);
             }
-
-            var tile = SelectedTileset.GetTile(tileCol, tileRow);
 
             EngineCore.Instance.Data.SelectedTile = tile;
         }
@@ -357,6 +402,12 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
             HasMovedRoot = false;
             IsMovingRoot = false;
             Console.WriteLine("Root tileset canvas position reset.");
+        }
+
+        private void OnAssetAdded(object? sender, AssetsManagerAddedAssetArgs e)
+        {
+            if(e.Asset.Type == BaseAsset.TYPE.TILESETS)
+                RefreshComponent();
         }
 
         #endregion

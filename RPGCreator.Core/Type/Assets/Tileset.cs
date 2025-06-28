@@ -113,7 +113,7 @@ namespace RPGCreator.Core.Type.Assets
             return new Tile(this, tile_rect);
         }
 
-        public Tile GetTile(int tile_col, int tile_row)
+        public Tile? GetTile(int tile_col, int tile_row)
         {
             var width = Math.Max(Width, GetBitmap().Size.Width);
             var height = Math.Max(Height, GetBitmap().Size.Height);
@@ -125,16 +125,30 @@ namespace RPGCreator.Core.Type.Assets
 
             if (tile_col * tile_width >= width)
             {
-                throw new ArgumentOutOfRangeException(nameof(tile_col), "Tile coordinates are out of bounds.");
+                return null; // Tile is out of bounds
             }
             if (tile_row * tile_height >= height)
             {
-                throw new ArgumentOutOfRangeException(nameof(tile_row), "Tile coordinates are out of bounds.");
+                return null; // Tile is out of bounds
             }
 
             Microsoft.Xna.Framework.Rectangle tile_rect = new(tile_col * tile_width, tile_row * tile_height, tile_width, tile_height);
 
             return new Tile(this, tile_rect);
+        }
+
+        public override void Save()
+        {
+            XElement xml_data = new XElement("asset",
+                new XElement("unique", Unique.ToString()),
+                new XElement("type", "TILESETS"),
+                new XElement("name", Name),
+                new XElement("file_path", ImagePath),
+                new XElement("tile_width", tile_width),
+                new XElement("tile_height", tile_height)
+            );
+
+            AssetData = xml_data;
         }
     }
 }

@@ -22,6 +22,7 @@
 // 
 // 
 #endregion
+using Microsoft.Xna.Framework;
 using RPGCreator.Core.Managers.AssetsPackManager.EventsArgs;
 using RPGCreator.Core.Type.Assets;
 using RPGCreator.Core.Type.Assets.BaseAssetsPack;
@@ -34,12 +35,14 @@ using System.Xml.Linq;
 
 namespace RPGCreator.Core.Managers.AssetsPackManager
 {
+    [Obsolete("AssetsPackManager is deprecated. Use AssetsManager instead.")]
     public class AssetsPackManager
     {
 
         readonly Dictionary<string, BaseAssetsPack> AssetsPacks = [];
         readonly AssetsPackManagerEvent Event = new();
 
+        [Obsolete("Need to switch to AssetsManager for this!")]
         public void NewAssetsPack(string name, BaseAssetsPack.PACK_TYPE type)
         {
 
@@ -51,15 +54,21 @@ namespace RPGCreator.Core.Managers.AssetsPackManager
                 return;
             }
 
+            BaseAssetsPack? created_pack;
+
             switch (type)
             {
                 case BaseAssetsPack.PACK_TYPE.PACK:
-                    AssetsPacks.Add(name, new ExternAssetsPack() { Name = name});
+                    created_pack = new ExternAssetsPack() { Name = name };
+                    created_pack.CreateXMLDocument();
+                    AssetsPacks.Add(name, created_pack);
                     EngineCore.Instance.Managers.Assets.RegisterPack(AssetsPacks[name]);
                     Event.OnAddedPack(PreArgs.ToPost());
                     break;
                 case BaseAssetsPack.PACK_TYPE.PROJECT:
-                    AssetsPacks.Add(name, new ProjectAssetsPack() { Name = name });
+                    created_pack = new ProjectAssetsPack() { Name = name };
+                    created_pack.CreateXMLDocument();
+                    AssetsPacks.Add(name, created_pack);
                     EngineCore.Instance.Managers.Assets.RegisterPack(AssetsPacks[name]);
                     Event.OnAddedPack(PreArgs.ToPost());
                     break;
@@ -69,6 +78,7 @@ namespace RPGCreator.Core.Managers.AssetsPackManager
             }
         }
 
+        [Obsolete("Need to switch to AssetsManager for this!")]
         public void LoadAssetsPack(string path)
         {
             if (File.Exists(path))
@@ -77,7 +87,9 @@ namespace RPGCreator.Core.Managers.AssetsPackManager
                 {
                     XDocument doc = XDocument.Load(path);
 
-                    string packName = doc.Root?.Attribute("name")?.Value ?? Path.GetFileNameWithoutExtension(path);
+                    var metaElement = doc.Root?.Element("meta");
+
+                    string packName = metaElement?.Element("name")?.Value ?? Path.GetFileNameWithoutExtension(path);
 
                     if(HasAssetsPack(packName))
                     {
@@ -85,20 +97,28 @@ namespace RPGCreator.Core.Managers.AssetsPackManager
                         return;
                     }
 
-                    BaseAssetsPack.PACK_TYPE packType = doc.Root?.Attribute("type")?.Value switch
+                    BaseAssetsPack.PACK_TYPE packType = metaElement?.Element("type")?.Value switch
                     {
-                        "pack" => BaseAssetsPack.PACK_TYPE.PACK,
-                        "project" => BaseAssetsPack.PACK_TYPE.PROJECT,
+                        "PACK" => BaseAssetsPack.PACK_TYPE.PACK,
+                        "PROJECT" => BaseAssetsPack.PACK_TYPE.PROJECT,
                         _ => BaseAssetsPack.PACK_TYPE.UNKNOWN
                     };
 
-                    switch(packType)
+                    BaseAssetsPack? pack = null;
+
+                    switch (packType)
                     {
                         case BaseAssetsPack.PACK_TYPE.PACK:
+                            pack = new ExternAssetsPack(doc);
                             AssetsPacks.Add(packName, new ExternAssetsPack(doc));
+                            pack.LoadAssets();
+                            EngineCore.Instance.Managers.Assets.RegisterPack(pack);
                             break;
                         case BaseAssetsPack.PACK_TYPE.PROJECT:
-                            AssetsPacks.Add(packName, new ProjectAssetsPack(doc));
+                            pack = new ProjectAssetsPack(path, doc);
+                            AssetsPacks.Add(packName, new ProjectAssetsPack(path, doc));
+                            pack.LoadAssets();
+                            EngineCore.Instance.Managers.Assets.RegisterPack(pack);
                             break;
                         default:
                             //Event.OnLoadedPack(new AssetsPackManagerLoadingPackArgs(name, path).SetError(true, $"Pack type {packType} is not supported."));
@@ -113,18 +133,21 @@ namespace RPGCreator.Core.Managers.AssetsPackManager
             }
         }
 
+        [Obsolete("Need to switch to AssetsManager for this!")]
         public void ClearAssetsPacks()
         {
             foreach (var pack in AssetsPacks)
             {
-                RemoveAssetsPack(pack.Key);
+                //RemoveAssetsPack(pack.Key);
             }
             AssetsPacks.Clear();
         }
+        [Obsolete("Need to switch to AssetsManager for this!")]
         public bool TryGetAssetsPack(string name, out BaseAssetsPack? pack)
         {
             return AssetsPacks.TryGetValue(name, out pack);
         }
+        [Obsolete("Need to switch to AssetsManager for this!")]
         public bool TryGetAssetsPack<T>(string name, out T? pack) where T : BaseAssetsPack
         {
             if (AssetsPacks.TryGetValue(name, out BaseAssetsPack? _pack))
@@ -147,11 +170,13 @@ namespace RPGCreator.Core.Managers.AssetsPackManager
             }
         }
 
+        [Obsolete("Need to switch to AssetsManager for this!")]
         public bool HasAssetsPack(string name)
         {
             return AssetsPacks.ContainsKey(name);
         }
 
+        [Obsolete("Need to switch to AssetsManager for this!")]
         public BaseAssetsPack GetAssetsPack(string name)
         {
             if (AssetsPacks.ContainsKey(name))
@@ -165,6 +190,7 @@ namespace RPGCreator.Core.Managers.AssetsPackManager
             }
         }
 
+        [Obsolete("Need to switch to AssetsManager for this!")]
         public T GetAssetsPack<T>(string name) where T : BaseAssetsPack
         {
             if (AssetsPacks.ContainsKey(name))
@@ -183,11 +209,13 @@ namespace RPGCreator.Core.Managers.AssetsPackManager
             }
         }
 
+        [Obsolete("Need to switch to AssetsManager for this!")]
         public List<string> GetAssetsPacksNames()
         {
             return AssetsPacks.Keys.ToList();
         }
 
+        [Obsolete("Need to switch to AssetsManager for this!")]
         public void RemoveAssetsPack(string name)
         {
 

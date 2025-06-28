@@ -37,12 +37,28 @@ namespace RPGCreator.Core.Type.Assets
     public class ImageAsset : BaseAsset
     {
 
+        public event EventHandler? ImageChanged;
 
-        internal Image _Image;
+        internal Image? _Image;
         protected string _ImagePathCached;
-        protected Texture2D _TextureCache;
+        protected Texture2D? _TextureCache;
         protected Bitmap? _BitmapCache;
-        public string ImagePath { get; set; }
+        private string _ImagePath;
+        public string ImagePath { 
+            get => _ImagePath; 
+            set
+            {
+                if (_ImagePath != value)
+                {
+                    _ImagePath = value;
+                    _ImagePathCached = string.Empty; // Reset cache when path changes
+                    _TextureCache = null; // Reset texture cache
+                    _BitmapCache = null; // Reset bitmap cache
+                    _Image = null; // Reset image
+                    ImageChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
         public int Width;
         public int Height;
 
@@ -120,14 +136,12 @@ namespace RPGCreator.Core.Type.Assets
             try
             {
                 // Convert ImageSharp image to Texture2D
-                using (var ms = new MemoryStream())
-                {
-                    _Image.SaveAsPng(ms);
-                    ms.Seek(0, SeekOrigin.Begin);
-                    _TextureCache = Texture2D.FromStream(device, ms);
-                    _ImagePathCached = ImagePath;
-                    return _TextureCache;
-                }
+                using var ms = new MemoryStream();
+                _Image.SaveAsPng(ms);
+                ms.Seek(0, SeekOrigin.Begin);
+                _TextureCache = Texture2D.FromStream(device, ms);
+                _ImagePathCached = ImagePath;
+                return _TextureCache;
             }
             catch (Exception e)
             {

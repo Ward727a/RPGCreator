@@ -36,6 +36,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 {
     public class TilesetItem : UserControl
     {
+        public bool Error { get; private set; } = false;
         public StackPanel Body { get; private set; }
         public TextBlock NameTextBlock { get; private set; }
         public Image TilesetImage { get; private set; }
@@ -64,7 +65,8 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 
             if(!File.Exists(tileset.ImagePath))
             {
-                throw new FileNotFoundException($"Tileset image file not found at {tileset.ImagePath}.");
+                Error = true;
+                return; // If the file doesn't exist, we can skip loading the image.
             }
 
             TilesetImage = new Image
@@ -73,6 +75,10 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                 Width = 32,
                 Height = 32,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+            };
+            tileset.ImageChanged += (sender, e) =>
+            {
+                TilesetImage.Source = tileset.GetBitmap();
             };
 
             Tileset = tileset;

@@ -61,6 +61,11 @@ namespace RPGCreator.Core.Type.Map
         public bool SelectedTile { get; set; } = false;
         private int TaskSelectedID = -1;
 
+        public void UpdateTileset(Tileset tileset)
+        {
+            Tileset = tileset;
+        }
+
         protected override void _Draw(SpriteBatchExtend sb)
         {
             sb.Draw(Tileset.GetTexture(sb.GraphicsDevice), Position, UV, Color.White);

@@ -36,11 +36,11 @@ namespace RPGCreator.Core.Managers.AssetsManager.EventsArgs
 
         public readonly bool Success = false;
 
-        public readonly string PackName = string.Empty;
+        public readonly Ulid PackID;
 
-        public AssetsManagerRemovedPackArgs(string packName, bool success)
+        public AssetsManagerRemovedPackArgs(Ulid packID, bool success)
         {
-            PackName = packName;
+            PackID = packID;
             Success = success;
         }
     }

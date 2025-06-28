@@ -140,7 +140,7 @@ namespace RPGCreator.UI.OLD.ViewModels._Editor
 
             EngineCore.Instance.Scheduler.WaitSecond(2, () =>
             {
-                EngineCore.Instance.Managers.AssetsPack.NewAssetsPack("Default", BaseAssetsPack.PACK_TYPE.PACK);
+                EngineCore.Instance.Managers.Assets.CreateAssetsPack("Default", BaseAssetsPack.PACK_TYPE.PACK);
                 EngineCore.Instance.Managers.Assets.AddAsset("Default", new Tileset("Default Tileset", 16, 16, "C:\\Users\\Ward\\AppData\\Roaming\\RPG Creator\\Assets\\Tilesets\\spr_tileset_sunnysideworld_16px.png"));
             });
 

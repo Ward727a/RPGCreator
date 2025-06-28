@@ -34,16 +34,16 @@ namespace RPGCreator.Core.Managers.AssetsManager.EventsArgs
 {
     public class AssetsManagerRemovingPackArgs : BasePreEventArgs
     {
-        public string PackName;
+        public Ulid PackID;
 
-        public AssetsManagerRemovingPackArgs(string packName)
+        public AssetsManagerRemovingPackArgs(Ulid packId)
         {
-            PackName = packName;
+            PackID = packId;
         }
 
         public AssetsManagerRemovedPackArgs ToPost(bool success = false)
         {
-            return new AssetsManagerRemovedPackArgs(PackName, success);
+            return new AssetsManagerRemovedPackArgs(PackID, success);
         }
 
     }

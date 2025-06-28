@@ -128,7 +128,7 @@ namespace RPGCreator.UI.Content.AssetsManage
             }
         }
 
-        protected void ShowAssetsPanel(string key)
+        public void ShowAssetsPanel(string key)
         {
             if (_AssetsMenuOptions.TryGetValue(key, out var panel))
             {
