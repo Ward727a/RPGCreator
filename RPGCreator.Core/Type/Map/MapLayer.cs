@@ -88,6 +88,28 @@ namespace RPGCreator.Core.Type.Map
             Visible = visible;
 
             EngineCore.Instance.Managers.Assets.Event.UpdatedAsset += Assets_Event_UpdatedAsset;
+            EngineCore.Instance.Managers.Assets.Event.RemovedAsset += Assets_Event_RemovedAsset;
+        }
+
+        private void Assets_Event_RemovedAsset(object? sender, AssetsManagerRemovedAssetArgs e)
+        {
+            if (e != null)
+            {
+                if (e.Type == BaseAsset.TYPE.TILESETS)
+                {
+                    // We need to check if the removed asset is a Tileset and if it is used in this layer
+                    // If it is, we need to remove the tiles that use that Tileset
+                    if (e.removedAsset is not Tileset tileset)
+                        return;
+                    foreach (var tile in Tiles.Values.ToList())
+                    {
+                        if (tile.Tileset.Unique == tileset.Unique)
+                        {
+                            RemoveTile(tile);
+                        }
+                    }
+                }
+            }
         }
 
         private void Assets_Event_UpdatedAsset(object? sender, AssetsManagerUpdatedAssetArgs? e)

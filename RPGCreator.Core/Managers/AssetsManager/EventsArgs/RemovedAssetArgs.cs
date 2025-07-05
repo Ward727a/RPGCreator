@@ -34,11 +34,17 @@ namespace RPGCreator.Core.Managers.AssetsManager.EventsArgs
 {
     public class AssetsManagerRemovedAssetArgs : BasePostEventArgs<AssetsManagerRemovedAssetArgs>
     {
-        public readonly string Path;
+        public readonly BaseAsset.TYPE Type;
+        public readonly BaseAsset removedAsset;
         public readonly bool Success;
-        public AssetsManagerRemovedAssetArgs(string path, bool success)
+
+        public AssetsManagerRemovedAssetArgs()
         {
-            Path = path;
+        }
+        public AssetsManagerRemovedAssetArgs(BaseAsset asset, bool success)
+        {
+            Type = asset.Type;
+            removedAsset = asset;
             Success = success;
         }
     }

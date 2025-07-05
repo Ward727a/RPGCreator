@@ -84,6 +84,7 @@ namespace RPGCreator.Core.Configs
         {
             Events = new EngineConfigEvents();
             // Load the default config file that should be inside the folder where the .exe is
+            var t = AppDomain.CurrentDomain.BaseDirectory;
             LoadOrCreateConfig(
                 Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App.conf.xml"),
                 APP_CONF_TEMPLATE,
@@ -148,6 +149,21 @@ namespace RPGCreator.Core.Configs
             {
                 var PreArgsCreate = new CreatingConfigArgs(configPath, template);
                 Events.OnCreatingConfig(PreArgsCreate);
+                
+                string directory = Path.GetDirectoryName(configPath) ?? "";
+                if(!Directory.Exists(directory))
+                {
+                    try
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
+                    catch (Exception ex)
+                    {
+                        Events.OnCreatedConfig(PreArgsCreate.ToPost().SetError(true, ex.Message));
+                        return false;
+                    }
+                }
+                
                 configPath = PreArgsCreate.ConfigPath;
                 template = PreArgsCreate.ConfigContent;
                 try

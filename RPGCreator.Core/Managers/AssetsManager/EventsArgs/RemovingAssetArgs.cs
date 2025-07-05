@@ -44,8 +44,6 @@ namespace RPGCreator.Core.Managers.AssetsManager.EventsArgs
         public AssetsManagerRemovedAssetArgs ToPost(bool success)
         {
             return new AssetsManagerRemovedAssetArgs(
-                Path,
-                success
             );
         }
     }

@@ -50,6 +50,9 @@ namespace RPGCreator.Core.Type.Map
             ENTITY
         }
 
+        public Autotiling? Autotiling { get; set; } = tileset.GetTileAt(new(uv.Top, uv.Left));
+        public bool IsAutotiling => Autotiling != null;
+
         public Ulid ID { get; private set; } = Ulid.NewUlid();
 
         [ObservableProperty]
@@ -97,7 +100,8 @@ namespace RPGCreator.Core.Type.Map
                 Type = Type,
                 Position = Position,
                 SelectedTile = SelectedTile,
-                TaskSelectedID = TaskSelectedID
+                TaskSelectedID = TaskSelectedID,
+                Autotiling = Autotiling
             };
         }
     }

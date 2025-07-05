@@ -385,6 +385,21 @@ namespace RPGCreator.Core.Managers.AssetsManager
             }
         }
 
+        public void RemoveAsset(BaseAsset asset)
+        {
+            if (asset == null)
+            {
+                throw new ArgumentNullException(nameof(asset), "Asset cannot be null.");
+            }
+
+            if(!TryGetAssetsPack(asset.PackName, out BaseAssetsPack? pack))
+            {
+                throw new InvalidOperationException($"No assets pack found with name: {asset.PackName}");
+            }
+
+            pack.RemoveAsset(asset);
+        }
+
         public virtual void RemoveAsset(string fullPath)
         {
             AssetsManagerRemovingAssetArgs PreArgs = new(fullPath);

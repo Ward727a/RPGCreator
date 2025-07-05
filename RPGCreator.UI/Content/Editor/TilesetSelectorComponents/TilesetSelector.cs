@@ -170,6 +170,14 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                     RefreshComponent();
                 }
             };
+            EngineCore.Instance.Managers.Assets.Event.RemovedAsset += (sender, e) =>
+            {
+                if (e.Type == BaseAsset.TYPE.TILESETS)
+                {
+                    // If the removed asset is a tileset, we refresh the component
+                    RefreshComponent();
+                }
+            };
 
             RefreshComponent();
         }
@@ -182,19 +190,19 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 #if DEBUG
             // VERY IMPORTANT: This code is only for testing purposes, it should not be used in production.
             // We check if the assets pack "TestPack" exists, if not we create it.
-            //if (!EngineCore.Instance.Managers.AssetsPack.HasAssetsPack("TestPack"))
-            //{
-            //    Console.ForegroundColor = ConsoleColor.Yellow;
-            //    Console.WriteLine("Creating TestPack assets pack for testing purposes.");
-            //    Console.ResetColor();
-            //    EngineCore.Instance.Managers.AssetsPack.NewAssetsPack("TestPack", Core.Type.Assets.BaseAssetsPack.BaseAssetsPack.PACK_TYPE.PROJECT);
+            if (!EngineCore.Instance.Managers.Assets.HasAssetsPack("TestPack"))
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Creating TestPack assets pack for testing purposes.");
+                Console.ResetColor();
+                EngineCore.Instance.Managers.Assets.CreateAssetsPack("TestPack", Core.Type.Assets.BaseAssetsPack.BaseAssetsPack.PACK_TYPE.PROJECT);
 
-            //    Console.ForegroundColor = ConsoleColor.Yellow;
-            //    Console.WriteLine("Adding TestTileset to TestPack assets pack for testing purposes.");
-            //    Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Adding TestTileset to TestPack assets pack for testing purposes.");
+                Console.ResetColor();
 
-            //    EngineCore.Instance.Managers.Assets.AddAsset("TestPack", new Tileset("TestTileset", 32, 32, "C:/Users/Ward/Pictures/basic_tileset_and_assets_standard/water_and_island_tiles_v2.png"));
-            //}
+                // EngineCore.Instance.Managers.Assets.AddAsset("TestPack", new Tileset("TestTileset", 32, 32, "/home/ward/Images/RPGCreatorAssets/basic_tileset_and_assets_standard/water_and_island_tiles_v2.png"));
+            }
 #endif
 
 

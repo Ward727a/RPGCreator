@@ -133,48 +133,44 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
 
         public void LoadAssets()
         {
-            XElement? root = ConfigDocument.Root;
-            XElement assets = root.Element("assets") ?? throw new Exception($"Config file at path {ConfigPath} is not valid.");
-            if (assets.HasElements)
+            var root = ConfigDocument.Root;
+            
+            if (root == null) return;
+            
+            var assets = root.Element("assets") ?? throw new Exception($"Config file at path {ConfigPath} is not valid.");
+            
+            if (!assets.HasElements) return;
+            
+            foreach (var assetElem in assets.Elements())
             {
-
-                foreach (XElement asset_elem in assets.Elements())
+                if (assetElem.Name == "asset")
                 {
-                    if (asset_elem.Name == "asset")
-                    {
-                        AddAssetFromFile(asset_elem);
-                    }
+                    AddAssetFromFile(assetElem);
                 }
-
             }
         }
 
-        protected virtual void AddAssetFromFile(XElement asset_elem)
+        protected virtual void AddAssetFromFile(XElement assetElem)
         {
-            string asset_type = asset_elem.Element("type")?.Value ?? "UNKNOWN";
+            var assetType = assetElem.Element("type")?.Value ?? "UNKNOWN";
 
-            if (string.IsNullOrEmpty(asset_type) || asset_type == "UNKNOWN")
+            if (string.IsNullOrEmpty(assetType) || assetType == "UNKNOWN")
             {
                 throw new Exception($"Asset type is null or empty.");
             }
 
-            BaseAsset.TYPE asset_type_enum = (BaseAsset.TYPE)Enum.Parse(typeof(BaseAsset.TYPE), asset_type);
+            var assetTypeEnum = (BaseAsset.TYPE)Enum.Parse(typeof(BaseAsset.TYPE), assetType);
 
-            if (asset_type_enum == BaseAsset.TYPE.UNKNOWN)
+            if (assetTypeEnum == BaseAsset.TYPE.UNKNOWN)
             {
                 throw new Exception($"Asset type is unknown.");
             }
 
-            BaseAsset asset;
-
-            switch (asset_type_enum)
+            BaseAsset asset = assetTypeEnum switch
             {
-                case BaseAsset.TYPE.TILESETS:
-                    asset = BaseAsset.CreateFromFile<Tileset>(asset_elem, asset_type_enum);
-                    break;
-                default:
-                    throw new Exception($"Asset type {asset_type} is not supported.");
-            }
+                BaseAsset.TYPE.TILESETS => BaseAsset.CreateFromFile<Tileset>(assetElem, assetTypeEnum),
+                _ => throw new Exception($"Asset type {assetType} is not supported.")
+            };
 
             string asset_path = asset.PackPath;
             asset.PackName = Name;
@@ -220,10 +216,8 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
             if(preArgs.Cancel)
                 return null;
 
-            if(Assets.ContainsKey(path))
+            if(Assets.TryGetValue(path, out BaseAsset? asset))
             {
-                BaseAsset asset = Assets[path];
-
                 Events.OnAssetGot(preArgs.ToPost(asset));
                 return asset;
             }
@@ -235,12 +229,7 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
 
         public bool HasAssetOfType(BaseAsset.TYPE type)
         {
-            foreach (var asset in Assets.Values)
-            {
-                if (asset.Type == type)
-                    return true;
-            }
-            return false;
+            return Assets.Values.Any(asset => asset.Type == type);
         }
 
         public void UpdateAsset<T>(T asset) where T : BaseAsset
@@ -264,50 +253,52 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
         public bool MoveAsset(string oldPath, string newPath)
         {
 
-            var PreArgs = new BaseAssetsPackMovingArgs(oldPath, newPath);
-            Events.OnAssetMoving(PreArgs);
-            if (PreArgs.Cancel)
+            var preArgs = new BaseAssetsPackMovingArgs(oldPath, newPath);
+            Events.OnAssetMoving(preArgs);
+            if (preArgs.Cancel)
                 return false;
             if (!Assets.TryGetValue(oldPath, out BaseAsset? asset))
             {
-                Events.OnAssetMoved(PreArgs.ToPost(asset).SetError(true, $"Asset at path {oldPath} doesn't exist."));
+                Events.OnAssetMoved(preArgs.ToPost(asset).SetError(true, $"Asset at path {oldPath} doesn't exist."));
                 return false;
             }
             Assets.Remove(oldPath);
             asset.PackPath = newPath;
             Assets.Add(newPath, asset);
-            Events.OnAssetMoved(PreArgs.ToPost(asset));
+            Events.OnAssetMoved(preArgs.ToPost(asset));
             return true;
         }
 
         public bool RemoveAsset(string path)
         {
-            var PreArgs = new BaseAssetsPackRemovingArgs(path);
-            Events.OnAssetRemoving(PreArgs);
-            if (PreArgs.Cancel)
+            var preArgs = new BaseAssetsPackRemovingArgs(path);
+            Events.OnAssetRemoving(preArgs);
+            if (preArgs.Cancel)
                 return false;
             if (!Assets.Remove(path, out BaseAsset? asset))
             {
-                Events.OnAssetRemoved(PreArgs.ToPost().SetError(true, $"Asset at path {path} doesn't exist."));
+                Events.OnAssetRemoved(preArgs.ToPost().SetError(true, $"Asset at path {path} doesn't exist."));
                 return false;
             }
-            Events.OnAssetRemoved(PreArgs.ToPost(asset));
+            Events.OnAssetRemoved(preArgs.ToPost(asset));
             return true;
         }
 
         public bool RemoveAsset(BaseAsset asset)
         {
-            var PreArgs = new BaseAssetsPackRemovingArgs(asset.PackPath);
+            var preArgs = new BaseAssetsPackRemovingArgs(asset.PackPath);
 
-            Events.OnAssetRemoving(PreArgs);
-            if (PreArgs.Cancel)
+            Events.OnAssetRemoving(preArgs);
+            if (preArgs.Cancel)
                 return false;
             if (!Assets.Remove(asset.PackPath, out BaseAsset? _))
             {
-                Events.OnAssetRemoved(PreArgs.ToPost().SetError(true, $"Asset at path {asset.PackPath} doesn't exist."));
+                Events.OnAssetRemoved(preArgs.ToPost().SetError(true, $"Asset at path {asset.PackPath} doesn't exist."));
                 return false;
             }
-            Events.OnAssetRemoved(PreArgs.ToPost(asset));
+            Save();
+            EngineCore.Instance.Managers.Assets.Event.OnRemovedAsset(new(asset, true));
+            Events.OnAssetRemoved(preArgs.ToPost(asset));
             return true;
         }
 
@@ -378,29 +369,29 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
 
         public BaseAsset? AddAsset(string path)
         {
-            var PreArgs = new BaseAssetsPackAddingArgs(path);
-            Events.OnAssetAdding(PreArgs);
+            var preArgs = new BaseAssetsPackAddingArgs(path);
+            Events.OnAssetAdding(preArgs);
 
-            if(PreArgs.Cancel)
+            if(preArgs.Cancel)
                 return null;
 
-            string asset_name;
+            string assetName;
 
             if (path.Contains('/'))
             {
-                string[] path_split = path.Split("/");
-                asset_name = path_split[^1];
+                var pathSplit = path.Split("/");
+                assetName = pathSplit[^1];
             }
             else
-                asset_name = path;
+                assetName = path;
 
-            if (!Assets.TryAdd(path, new BaseAsset(asset_name) { PackPath = path, PackName = Name }))
+            if (!Assets.TryAdd(path, new BaseAsset(assetName) { PackPath = path, PackName = Name }))
             {
-                Events.OnAssetAdded(PreArgs.ToPost().SetError(true, $"Asset at path {path} already exist."));
+                Events.OnAssetAdded(preArgs.ToPost().SetError(true, $"Asset at path {path} already exist."));
                 return null;
             }
 
-            Events.OnAssetAdded(PreArgs.ToPost(Assets[path]));
+            Events.OnAssetAdded(preArgs.ToPost(Assets[path]));
 
             return Assets[path];
         }
@@ -481,15 +472,21 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
             // Save the document to the config path
             if (!string.IsNullOrEmpty(ConfigPath))
             {
-                ConfigDocument.Save(ConfigPath);
+                
+                string configDir = Path.GetDirectoryName(ConfigPath) ?? throw new InvalidOperationException("Config path directory cannot be null.");
+                if (!Directory.Exists(configDir))
+                {
+                    Directory.CreateDirectory(configDir);
+                }
             }
             else
             {
                 // Or else, create a default path
                 ConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RPG Creator", "AssetsPacks", $"{Id}.xml");
                 Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath) ?? throw new InvalidOperationException("Config path directory cannot be null."));
-                ConfigDocument.Save(ConfigPath);
             }
+
+            ConfigDocument.Save(ConfigPath);
         }
 
         public void Save()
@@ -509,16 +506,28 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
                     throw new InvalidOperationException("Assets element in configuration document is null.");
                 }
 
-                foreach(var asset in Assets.Values)
+                var assetsList = assetsElement.Elements("asset").ToList();
+
+                foreach (var asset in Assets.Values)
                 {
                     XElement? existingAsset = assetsElement.Elements("asset").FirstOrDefault(a => a.Element("unique")?.Value == asset.Unique.ToString());
                     if (existingAsset != null)
                     {
+                        assetsList.Remove(existingAsset);
                         existingAsset.ReplaceWith(asset.AssetData);
                     }
                     else
                     {
                         assetsElement.Add(asset.AssetData);
+                    }
+                }
+
+                // Remove any assets that are not in the current Assets dictionary
+                foreach (var asset in assetsList)
+                {
+                    if (!Assets.Values.Any(a => a.Unique.ToString() == asset.Element("unique")?.Value))
+                    {
+                        asset.Remove();
                     }
                 }
 

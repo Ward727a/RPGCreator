@@ -87,6 +87,8 @@ namespace RPGCreator.Core.Type.Assets
             IMAGE,
             [AssetCategory(AssetCategoryType.Image)]
             TILESETS,
+            [AssetCategory(AssetCategoryType.Image)]
+            AUTOTILES,
         }
 
         public Ulid Unique { get; protected set; }

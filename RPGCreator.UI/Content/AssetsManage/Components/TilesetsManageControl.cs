@@ -30,6 +30,7 @@ using Avalonia.VisualTree;
 using RPGCreator.Core;
 using RPGCreator.Core.Type.Assets;
 using RPGCreator.UI.Common;
+using RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor;
 using System;
 using System.Collections.Generic;
@@ -846,8 +847,11 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                     }
                     else if(args.TilesetType == 1) // Autotile
                     {
-                        // Create a new Autotile (this will be implemented later)
-                        // For now, we just create a basic tileset.
+                        var autotile = new Autotiles(args.Name);
+                        var editor_control = new AutotileEditorWindowControl(autotile);
+                        var host_ = ((AssetsManageWindow)this.GetVisualRoot()!);
+
+                        host_.OpenCustom(editor_control);
                     }
                 };
                 
@@ -881,6 +885,15 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
             Footer_Delete.Click += (sender, e) =>
             {
+                if (SelectedTilesetViewItem == null)
+                {
+                    Console.WriteLine("No tileset selected to delete.");
+                    return;
+                }
+                // Here you would implement the logic to delete the selected tileset.
+                var tileset = SelectedTilesetViewItem.Tileset;
+                EngineCore.Instance.Managers.Assets.RemoveAsset(tileset);
+                TilesetsManageControl_OnNeedRefresh();
                 Console.WriteLine("Delete Tileset button clicked.");
             };
 

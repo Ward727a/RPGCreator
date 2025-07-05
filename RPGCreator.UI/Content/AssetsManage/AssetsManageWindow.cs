@@ -73,7 +73,7 @@ namespace RPGCreator.UI.Content.AssetsManage
 
         public AssetsManageWindow()
         {
-            Width = 1200;
+            Width = 1400;
             Height = 800;
             Title = "Assets Management";
             WindowStartupLocation = WindowStartupLocation.CenterScreen;

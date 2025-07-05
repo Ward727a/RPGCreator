@@ -38,8 +38,9 @@ namespace RPGCreator.Core.Type.Assets
 {
     public class Tileset : ImageAsset
     {
-
         public override bool ShouldBeCached => true;
+        public Dictionary<RPGCreator.Core.Type.Internal.Point, Autotiling> Autotiles = [];
+        public List<AutotilesGroup> Groups = new List<AutotilesGroup>();
 
         public int tile_width;
         public int tile_height;
@@ -68,7 +69,7 @@ namespace RPGCreator.Core.Type.Assets
 
             XElement data = AssetData;
 
-            if(tile_width > 0 && tile_height > 0)
+            if (tile_width > 0 && tile_height > 0)
             {
                 return; // Already initialized
             }
@@ -90,7 +91,7 @@ namespace RPGCreator.Core.Type.Assets
             {
                 throw new ArgumentOutOfRangeException(nameof(tile_x), "Tile coordinates cannot be negative.");
             }
-            if(tile_y < 0)
+            if (tile_y < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(tile_y), "Tile coordinates cannot be negative.");
             }
@@ -109,7 +110,6 @@ namespace RPGCreator.Core.Type.Assets
 
             Microsoft.Xna.Framework.Rectangle tile_rect = new(tile_x * tile_width, tile_y * tile_height, tile_width, tile_height);
 
-            // Assuming you have a method to create a texture from a rectangle
             return new Tile(this, tile_rect);
         }
 
@@ -118,7 +118,7 @@ namespace RPGCreator.Core.Type.Assets
             var width = Math.Max(Width, GetBitmap().Size.Width);
             var height = Math.Max(Height, GetBitmap().Size.Height);
 
-            if(tile_col < 0 || tile_row < 0)
+            if (tile_col < 0 || tile_row < 0)
             {
                 throw new ArgumentOutOfRangeException("Tile coordinates cannot be negative.");
             }
@@ -149,6 +149,49 @@ namespace RPGCreator.Core.Type.Assets
             );
 
             AssetData = xml_data;
+        }
+
+        public Autotiling? GetTile(Ulid ID)
+        {
+            var group = Groups.FirstOrDefault(g => g.HasTile(ID));
+            return group?.GetTileById(ID);
+        }
+
+        public Autotiling? GetTileAt(RPGCreator.Core.Type.Internal.Point at)
+        {
+            if(Autotiles.Count != 0 && Autotiles.TryGetValue(at, out var autotile))
+            {
+                return autotile;
+            }
+            return Groups.FirstOrDefault(g => g.HasTileAt(at))?.GetTileByPosition(at);
+        }
+        public bool HasTileAt(RPGCreator.Core.Type.Internal.Point at)
+        {
+            if (Autotiles.Count != 0 && Autotiles.ContainsKey(at))
+            {
+                return true;
+            }
+            return Groups.FirstOrDefault(g => g.HasTileAt(at)) != null;
+        }
+
+        public void CombineTilesGroup()
+        {
+            ClearCombinedTiles();
+            foreach (var autotilesGroup in Groups)
+            {
+                foreach (var tile in autotilesGroup.Tilings)
+                {
+                    if (tile.TilesetID == Unique)
+                    {
+                        Autotiles[tile.TilePosition] = tile;
+                    }
+                }
+            }
+        }
+
+        private void ClearCombinedTiles()
+        {
+            Autotiles.Clear();
         }
     }
 }

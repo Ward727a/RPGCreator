@@ -31,7 +31,7 @@
 
 	<Application.Resources>
 		<SolidColorBrush x:Key="Warning">Yellow</SolidColorBrush>
-		<SolidColorBrush x:Key="Error">Error</SolidColorBrush>
+		<SolidColorBrush x:Key="Error">Red</SolidColorBrush>
 	</Application.Resources>
 	<Application.Styles>
 		<semi:SemiTheme Locale="zh-CN" />
