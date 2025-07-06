@@ -40,52 +40,58 @@ namespace RPGCreator.UI.Common.Windows
 
         public bool AutoClose { get; set; } = true;
 
+        protected StackPanel PanelContent;
+        protected readonly Button ConfirmButton;
+        protected Button CancelButton;
+
         public ConfirmDialog(
             string title = "Confirm",
             string message = "Are you sure?",
             string confirmButtonText = "Yes",
             string cancelButtonText = "No")
         {
-            Title = title;
-            Content = new StackPanel
+
+            PanelContent = new StackPanel()
             {
                 Margin = App.style.Margin
             };
+            
+            Title = title;
+            Content = PanelContent;
             SizeToContent = SizeToContent.WidthAndHeight;
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
 
-            var panel = Content as StackPanel;
             var messageBlock = new TextBlock
             {
                 Text = message
             };
-            panel?.Children.Add(messageBlock);
+            PanelContent?.Children.Add(messageBlock);
             var buttonsPanel = new StackPanel
             {
                 Orientation = Orientation.Horizontal,
                 HorizontalAlignment = HorizontalAlignment.Center
             };
-            panel?.Children.Add(buttonsPanel);
-            var yesButton = new Button
+            PanelContent?.Children.Add(buttonsPanel);
+            ConfirmButton = new Button
             {
                 Content = confirmButtonText,
                 Margin = new Thickness(5)
             };
-            buttonsPanel.Children.Add(yesButton);
-            yesButton.Click += (s, e) => OnConfirm();
-            var noButton = new Button
+            buttonsPanel.Children.Add(ConfirmButton);
+            ConfirmButton.Click += (s, e) => OnConfirm();
+            CancelButton = new Button
             {
                 Content = cancelButtonText,
                 Margin = new Thickness(5),
                 BorderBrush = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Red),
                 Foreground = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Red)
             };
-            buttonsPanel.Children.Add(noButton);
-            noButton.Click += (s, e) => OnCancel();
+            buttonsPanel.Children.Add(CancelButton);
+            CancelButton.Click += (s, e) => OnCancel();
 
         }
 
-        protected void OnConfirm()
+        protected virtual void OnConfirm()
         {
             Confirmed?.Invoke();
             if (AutoClose)
@@ -93,7 +99,7 @@ namespace RPGCreator.UI.Common.Windows
                 Close();
             }
         }
-        protected void OnCancel()
+        protected virtual void OnCancel()
         {
             Cancelled?.Invoke();
             if (AutoClose)

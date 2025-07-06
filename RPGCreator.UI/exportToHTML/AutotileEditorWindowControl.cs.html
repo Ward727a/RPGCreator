@@ -1,0 +1,834 @@
+<html>
+<head>
+<title>AutotileEditorWindowControl.cs</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #6c95eb;}
+.s1 { color: #d0d0d0;}
+.s2 { color: #85c46c; font-style: italic;}
+.s3 { color: #bdbdbd;}
+.s4 { color: #c9a26d;}
+.s5 { color: #ed94c0;}
+</style>
+</head>
+<body bgcolor="#262626">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+AutotileEditorWindowControl.cs</font>
+</center></td></tr></table>
+<pre><span class="s0">#region </span><span class="s1">LICENSE</span>
+<span class="s2">//</span>
+<span class="s2">// RPG Creator - Open-source RPG Engine.</span>
+<span class="s2">// (c) 2025 Ward</span>
+<span class="s2">// </span>
+<span class="s2">// This file is part of RPG Creator and is distributed under the MIT License.</span>
+<span class="s2">// You are free to use, modify, and distribute this file under the terms of the MIT License.</span>
+<span class="s2">// See LICENSE for details.</span>
+<span class="s2">// </span>
+<span class="s2">// ---</span>
+<span class="s2">// </span>
+<span class="s2">// Ce fichier fait partie de RPG Creator et est distribué sous licence MIT.</span>
+<span class="s2">// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence MIT.</span>
+<span class="s2">// Voir LICENSE pour plus de détails.</span>
+<span class="s2">// </span>
+<span class="s2">// Contact:</span>
+<span class="s2">// =&gt; Mail: Ward727a@gmail.com</span>
+<span class="s2">//    Please use this object: &quot;RPG Creator [YourObject]&quot;</span>
+<span class="s2">// =&gt; Discord: ward727</span>
+<span class="s2">// </span>
+<span class="s2">// For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.</span>
+<span class="s2">// </span>
+<span class="s2">// </span>
+<span class="s0">#endregion</span>
+<span class="s0">using </span><span class="s1">Avalonia</span><span class="s3">.</span><span class="s1">Controls</span><span class="s3">;</span>
+<span class="s0">using </span><span class="s1">Avalonia</span><span class="s3">.</span><span class="s1">Media</span><span class="s3">;</span>
+<span class="s0">using </span><span class="s1">Avalonia</span><span class="s3">.</span><span class="s1">Media</span><span class="s3">.</span><span class="s1">Imaging</span><span class="s3">;</span>
+<span class="s0">using </span><span class="s1">RPGCreator</span><span class="s3">.</span><span class="s1">Core</span><span class="s3">;</span>
+<span class="s0">using </span><span class="s1">RPGCreator</span><span class="s3">.</span><span class="s1">Core</span><span class="s3">.</span><span class="s1">Type</span><span class="s3">.</span><span class="s1">Assets</span><span class="s3">;</span>
+<span class="s0">using </span><span class="s1">RPGCreator</span><span class="s3">.</span><span class="s1">UI</span><span class="s3">.</span><span class="s1">Common</span><span class="s3">;</span>
+<span class="s0">using </span><span class="s1">System</span><span class="s3">;</span>
+<span class="s0">using </span><span class="s1">System</span><span class="s3">.</span><span class="s1">Collections</span><span class="s3">.</span><span class="s1">Generic</span><span class="s3">;</span>
+<span class="s0">using </span><span class="s1">System</span><span class="s3">.</span><span class="s1">Linq</span><span class="s3">;</span>
+<span class="s0">using </span><span class="s1">System</span><span class="s3">.</span><span class="s1">Text</span><span class="s3">;</span>
+<span class="s0">using </span><span class="s1">System</span><span class="s3">.</span><span class="s1">Threading</span><span class="s3">.</span><span class="s1">Tasks</span><span class="s3">;</span>
+<span class="s0">using </span><span class="s1">Avalonia</span><span class="s3">;</span>
+<span class="s0">using </span><span class="s1">Avalonia</span><span class="s3">.</span><span class="s1">Layout</span><span class="s3">;</span>
+<span class="s0">using </span><span class="s1">Point </span><span class="s3">= </span><span class="s1">RPGCreator</span><span class="s3">.</span><span class="s1">Core</span><span class="s3">.</span><span class="s1">Type</span><span class="s3">.</span><span class="s1">Internal</span><span class="s3">.</span><span class="s1">Point</span><span class="s3">;</span>
+
+<span class="s0">namespace </span><span class="s1">RPGCreator</span><span class="s3">.</span><span class="s1">UI</span><span class="s3">.</span><span class="s1">Content</span><span class="s3">.</span><span class="s1">AssetsManage</span><span class="s3">.</span><span class="s1">AssetsEditors</span><span class="s3">.</span><span class="s1">AutotileEditor</span>
+<span class="s3">{</span>
+    <span class="s0">public class </span><span class="s1">AutotileEditorWindowControl : UserControl</span>
+    <span class="s3">{</span>
+        <span class="s0">private </span><span class="s1">Autotiling BasedOn</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">Autotiling SelectedAutotiling</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">Tileset? SelectedTileset</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">AutotilesGroup? SelectedGroup </span><span class="s3">{ </span><span class="s1">get</span><span class="s3">; </span><span class="s0">private </span><span class="s1">set</span><span class="s3">; }</span>
+        <span class="s0">public </span><span class="s1">Autotiles Autotile</span><span class="s3">;</span>
+
+        <span class="s2">// For now, the tools are not used, but they can be implemented later if needed.</span>
+        <span class="s2">//public enum EAutotileTools</span>
+        <span class="s2">//{</span>
+        <span class="s2">//    SELECT,</span>
+        <span class="s2">//    ADD_RULE,</span>
+        <span class="s2">//    REMOVE_RULE</span>
+        <span class="s2">//}</span>
+
+        <span class="s2">//public EAutotileTools SelectedTool =&gt; AutotileTools.SelectedIndex switch</span>
+        <span class="s2">//{</span>
+        <span class="s2">//    0 =&gt; EAutotileTools.SELECT,</span>
+        <span class="s2">//    1 =&gt; EAutotileTools.ADD_RULE,</span>
+        <span class="s2">//    2 =&gt; EAutotileTools.REMOVE_RULE,</span>
+        <span class="s2">//    _ =&gt; EAutotileTools.SELECT,</span>
+        <span class="s2">//};</span>
+
+        <span class="s0">#region </span><span class="s1">Components</span>
+        <span class="s0">public </span><span class="s1">Grid Body</span><span class="s3">;</span>
+
+        <span class="s0">#region </span><span class="s1">Left Bar</span>
+
+        <span class="s0">public </span><span class="s1">StackPanel LeftBar</span><span class="s3">;</span>
+
+        <span class="s0">#region </span><span class="s1">Preview</span>
+        <span class="s0">public </span><span class="s1">ClosableBox LeftPreviewBox</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">StackPanel LeftPreview</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">Image TestPreview</span><span class="s3">;</span>
+
+        <span class="s0">public </span><span class="s1">ComboBox AutotileTagPreview</span><span class="s3">;</span>
+        <span class="s0">#endregion</span>
+
+        <span class="s0">#region </span><span class="s1">Properties</span>
+
+        <span class="s0">public </span><span class="s1">ClosableBox PropertiesBox</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">Grid PropertiesGrid</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">ScrollViewer PropertiesScroller</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">StackPanel PropertiesPanel</span><span class="s3">;</span>
+
+        <span class="s0">public </span><span class="s1">TextBlock PropertiesIsBase</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">TextBlock PropertiesHasBase</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">ListBox PropertiesTagsList</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">ListBox PropertiesRulesList</span><span class="s3">;</span>
+
+        <span class="s0">#endregion</span>
+
+        <span class="s0">#endregion</span>
+
+        <span class="s0">#region </span><span class="s1">Main Body</span>
+
+        <span class="s0">public </span><span class="s1">Grid MainBody</span><span class="s3">;</span>
+
+        <span class="s0">#region </span><span class="s1">Top Bar</span>
+
+        <span class="s0">public </span><span class="s1">StackPanel TopBar</span><span class="s3">;</span>
+
+        <span class="s0">public </span><span class="s1">Button AddAutotileButton</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">ComboBox AutotileComboBox</span><span class="s3">;</span>
+
+        <span class="s0">public </span><span class="s1">ComboBox AutotileTools</span><span class="s3">;</span>
+
+        <span class="s0">#endregion</span>
+
+        <span class="s0">#region </span><span class="s1">Body Content</span>
+
+        <span class="s0">public </span><span class="s1">Grid BodyContentGrid</span><span class="s3">;</span>
+
+        <span class="s0">#region </span><span class="s1">Center</span>
+
+        <span class="s0">public </span><span class="s1">Grid CenterGrid</span><span class="s3">;</span>
+
+        <span class="s0">public </span><span class="s1">Canvas CenterMainCanvas</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">Canvas CenterSubCanvas</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">Image CenterTilesetImage</span><span class="s3">;</span>
+
+        <span class="s0">public </span><span class="s1">Border? BaseTileCase</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">List</span><span class="s3">&lt;</span><span class="s1">Border</span><span class="s3">&gt; </span><span class="s1">BasedOnTilesCases </span><span class="s3">= [];</span>
+        <span class="s0">public </span><span class="s1">Border? SelectedTileCase</span><span class="s3">;</span>
+        
+        <span class="s0">#region </span><span class="s1">Bottom Part</span>
+        
+        <span class="s0">public </span><span class="s1">StackPanel CenterBottomPanel</span><span class="s3">;</span>
+        
+        <span class="s0">public </span><span class="s1">StackPanel BasePropertiesPanel</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">TextBlock BasePropertiesText</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">CheckBox BasePropertiesChecker</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">TextBlock BasedOnPropertiesText</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">ComboBox BasedOnPropertiesCombo</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">StackPanel TagsPanel</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">StackPanel TagsPanelTop</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">TextBlock TagsText</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">Button AddTagButton</span><span class="s3">;</span>
+        
+        <span class="s0">#endregion</span>
+        
+        <span class="s0">#endregion</span>
+
+        <span class="s0">#region </span><span class="s1">TilesetSelectorRight</span>
+
+        <span class="s0">public </span><span class="s1">ScrollViewer TilesetSelectorScroller</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">Grid TilesetSelectorGrid</span><span class="s3">;</span>
+        <span class="s0">public </span><span class="s1">StackPanel TilesetSelectorPanel</span><span class="s3">;</span>
+
+        <span class="s0">#endregion</span>
+
+        <span class="s0">#endregion</span>
+
+        <span class="s0">#endregion</span>
+
+        <span class="s0">#endregion</span>
+
+        <span class="s0">public </span><span class="s1">AutotileEditorWindowControl</span><span class="s3">(</span><span class="s1">Autotiles autotiles</span><span class="s3">)</span>
+        <span class="s3">{</span>
+            <span class="s1">Autotile </span><span class="s3">= </span><span class="s1">autotiles</span><span class="s3">;</span>
+            <span class="s1">CreateComponents</span><span class="s3">();</span>
+
+            <span class="s0">this</span><span class="s3">.</span><span class="s1">Content </span><span class="s3">= </span><span class="s1">Body</span><span class="s3">;</span>
+        <span class="s3">}</span>
+
+        <span class="s0">public void </span><span class="s1">CreateComponents</span><span class="s3">()</span>
+        <span class="s3">{</span>
+            <span class="s1">Body </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Grid</span>
+            <span class="s3">{</span>
+                <span class="s1">ColumnDefinitions </span><span class="s3">= </span><span class="s0">new </span><span class="s1">ColumnDefinitions</span><span class="s3">(</span><span class="s4">&quot;250, *&quot;</span><span class="s3">),</span>
+            <span class="s3">};</span>
+
+            <span class="s1">CreateLeftBar</span><span class="s3">();</span>
+            <span class="s1">CreateMainBody</span><span class="s3">();</span>
+
+            <span class="s1">RegisterEvents</span><span class="s3">();</span>
+        <span class="s3">}</span>
+
+        <span class="s0">private void </span><span class="s1">CreateLeftBar</span><span class="s3">()</span>
+        <span class="s3">{</span>
+            <span class="s1">LeftBar </span><span class="s3">= </span><span class="s0">new </span><span class="s1">StackPanel</span>
+            <span class="s3">{</span>
+                <span class="s1">Orientation </span><span class="s3">= </span><span class="s1">Orientation</span><span class="s3">.</span><span class="s1">Vertical</span><span class="s3">,</span>
+                <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">10</span><span class="s3">),</span>
+            <span class="s3">};</span>
+            <span class="s1">Body</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">LeftBar</span><span class="s3">);</span>
+            <span class="s1">Grid</span><span class="s3">.</span><span class="s1">SetColumn</span><span class="s3">(</span><span class="s1">LeftBar</span><span class="s3">, </span><span class="s5">0</span><span class="s3">);</span>
+
+            <span class="s1">CreatePreview</span><span class="s3">();</span>
+            <span class="s1">CreateProperties</span><span class="s3">();</span>
+        <span class="s3">}</span>
+
+        <span class="s0">private void </span><span class="s1">CreatePreview</span><span class="s3">()</span>
+        <span class="s3">{</span>
+            <span class="s1">LeftPreview </span><span class="s3">= </span><span class="s0">new </span><span class="s1">StackPanel</span>
+            <span class="s3">{</span>
+                <span class="s1">Orientation </span><span class="s3">= </span><span class="s1">Orientation</span><span class="s3">.</span><span class="s1">Vertical</span><span class="s3">,</span>
+                <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">10</span><span class="s3">),</span>
+            <span class="s3">};</span>
+
+            <span class="s1">LeftPreviewBox </span><span class="s3">= </span><span class="s0">new </span><span class="s1">ClosableBox</span><span class="s3">(</span><span class="s1">LeftPreview</span><span class="s3">, </span><span class="s4">&quot;Preview&quot;</span><span class="s3">);</span>
+
+            <span class="s1">LeftBar</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">LeftPreviewBox</span><span class="s3">);</span>
+
+            <span class="s1">TestPreview </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Image</span>
+            <span class="s3">{</span>
+                <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">5</span><span class="s3">),</span>
+                <span class="s1">Width </span><span class="s3">= </span><span class="s5">200</span><span class="s3">,</span>
+                <span class="s1">Height </span><span class="s3">= </span><span class="s5">200</span><span class="s3">,</span>
+            <span class="s3">};</span>
+            <span class="s2">// Remove AA from test preview</span>
+            <span class="s1">RenderOptions</span><span class="s3">.</span><span class="s1">SetBitmapInterpolationMode</span><span class="s3">(</span><span class="s1">TestPreview</span><span class="s3">, </span><span class="s1">BitmapInterpolationMode</span><span class="s3">.</span><span class="s1">None</span><span class="s3">);</span>
+            <span class="s1">LeftPreview</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">TestPreview</span><span class="s3">);</span>
+
+            <span class="s1">AutotileTagPreview </span><span class="s3">= </span><span class="s0">new </span><span class="s1">ComboBox</span>
+            <span class="s3">{</span>
+                <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Top</span><span class="s3">,</span>
+                <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">5</span><span class="s3">),</span>
+            <span class="s3">};</span>
+            <span class="s1">LeftPreview</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">AutotileTagPreview</span><span class="s3">);</span>
+            <span class="s1">AutotileTagPreview</span><span class="s3">.</span><span class="s1">Items</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s4">&quot;Water&quot;</span><span class="s3">);</span>
+            <span class="s1">AutotileTagPreview</span><span class="s3">.</span><span class="s1">Items</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s4">&quot;Grass&quot;</span><span class="s3">);</span>
+            <span class="s1">AutotileTagPreview</span><span class="s3">.</span><span class="s1">Items</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s4">&quot;Road&quot;</span><span class="s3">);</span>
+            <span class="s1">AutotileTagPreview</span><span class="s3">.</span><span class="s1">SelectedIndex </span><span class="s3">= </span><span class="s5">0</span><span class="s3">;</span>
+
+            <span class="s1">LeftPreview</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s0">new </span><span class="s1">Separator</span><span class="s3">());</span>
+        <span class="s3">}</span>
+
+        <span class="s0">private void </span><span class="s1">CreateProperties</span><span class="s3">()</span>
+        <span class="s3">{</span>
+            <span class="s1">PropertiesGrid </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Grid</span>
+            <span class="s3">{</span>
+                <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">10</span><span class="s3">),</span>
+                <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+            <span class="s3">};</span>
+
+            <span class="s1">PropertiesBox </span><span class="s3">= </span><span class="s0">new </span><span class="s1">ClosableBox</span><span class="s3">(</span><span class="s1">PropertiesGrid</span><span class="s3">, </span><span class="s4">&quot;Properties&quot;</span><span class="s3">);</span>
+            <span class="s1">LeftBar</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">PropertiesBox</span><span class="s3">);</span>
+            <span class="s1">PropertiesScroller </span><span class="s3">= </span><span class="s0">new </span><span class="s1">ScrollViewer</span>
+            <span class="s3">{</span>
+                <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+            <span class="s3">};</span>
+            <span class="s1">PropertiesGrid</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">PropertiesScroller</span><span class="s3">);</span>
+            <span class="s1">PropertiesPanel </span><span class="s3">= </span><span class="s0">new </span><span class="s1">StackPanel</span>
+            <span class="s3">{</span>
+                <span class="s1">Orientation </span><span class="s3">= </span><span class="s1">Orientation</span><span class="s3">.</span><span class="s1">Vertical</span><span class="s3">,</span>
+                <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+            <span class="s3">};</span>
+            <span class="s1">PropertiesScroller</span><span class="s3">.</span><span class="s1">Content </span><span class="s3">= </span><span class="s1">PropertiesPanel</span><span class="s3">;</span>
+
+            <span class="s1">PropertiesIsBase </span><span class="s3">= </span><span class="s0">new </span><span class="s1">TextBlock</span>
+            <span class="s3">{</span>
+                <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Top</span><span class="s3">,</span>
+                <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">5</span><span class="s3">),</span>
+                <span class="s1">Text </span><span class="s3">= </span><span class="s4">&quot;Is Base: (Placeholder)&quot;</span><span class="s3">,</span>
+            <span class="s3">};</span>
+
+            <span class="s1">PropertiesPanel</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">PropertiesIsBase</span><span class="s3">);</span>
+
+            <span class="s1">PropertiesHasBase </span><span class="s3">= </span><span class="s0">new </span><span class="s1">TextBlock</span>
+            <span class="s3">{</span>
+                <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Top</span><span class="s3">,</span>
+                <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">5</span><span class="s3">),</span>
+                <span class="s1">Text </span><span class="s3">= </span><span class="s4">&quot;Has Base: (Placeholder)&quot;</span><span class="s3">,</span>
+            <span class="s3">};</span>
+
+            <span class="s1">PropertiesPanel</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">PropertiesHasBase</span><span class="s3">);</span>
+
+            <span class="s1">PropertiesPanel</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s0">new </span><span class="s1">TextSeparator </span><span class="s3">{ </span><span class="s1">Text </span><span class="s3">= </span><span class="s4">&quot;Tags&quot;</span><span class="s3">});</span>
+            <span class="s1">PropertiesTagsList </span><span class="s3">= </span><span class="s0">new </span><span class="s1">ListBox</span>
+            <span class="s3">{</span>
+                <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">5</span><span class="s3">),</span>
+                <span class="s1">Height </span><span class="s3">= </span><span class="s5">100</span><span class="s3">,</span>
+            <span class="s3">};</span>
+            <span class="s1">PropertiesPanel</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">PropertiesTagsList</span><span class="s3">);</span>
+
+            <span class="s1">PropertiesPanel</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s0">new </span><span class="s1">TextSeparator </span><span class="s3">{ </span><span class="s1">Text </span><span class="s3">= </span><span class="s4">&quot;Rules&quot; </span><span class="s3">});</span>
+            <span class="s1">PropertiesRulesList </span><span class="s3">= </span><span class="s0">new </span><span class="s1">ListBox</span>
+            <span class="s3">{</span>
+                <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">5</span><span class="s3">),</span>
+                <span class="s1">Height </span><span class="s3">= </span><span class="s5">100</span><span class="s3">,</span>
+            <span class="s3">};</span>
+            <span class="s1">PropertiesPanel</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">PropertiesRulesList</span><span class="s3">);</span>
+
+        <span class="s3">}</span>
+
+        <span class="s0">private void </span><span class="s1">CreateMainBody</span><span class="s3">()</span>
+        <span class="s3">{</span>
+            <span class="s1">MainBody </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Grid</span>
+            <span class="s3">{</span>
+                <span class="s1">RowDefinitions </span><span class="s3">= </span><span class="s0">new </span><span class="s1">RowDefinitions</span><span class="s3">(</span><span class="s4">&quot;Auto, *&quot;</span><span class="s3">),</span>
+                <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">10</span><span class="s3">),</span>
+            <span class="s3">};</span>
+            <span class="s1">Body</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">MainBody</span><span class="s3">);</span>
+            <span class="s1">Grid</span><span class="s3">.</span><span class="s1">SetColumn</span><span class="s3">(</span><span class="s1">MainBody</span><span class="s3">, </span><span class="s5">1</span><span class="s3">);</span>
+
+            <span class="s2">// TOP BAR</span>
+            <span class="s3">{</span>
+                <span class="s1">TopBar </span><span class="s3">= </span><span class="s0">new </span><span class="s1">StackPanel</span>
+                <span class="s3">{</span>
+                    <span class="s1">Orientation </span><span class="s3">= </span><span class="s1">Orientation</span><span class="s3">.</span><span class="s1">Horizontal</span><span class="s3">,</span>
+                    <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                    <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Top</span><span class="s3">,</span>
+                <span class="s3">};</span>
+                <span class="s1">MainBody</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">TopBar</span><span class="s3">);</span>
+
+                <span class="s1">AddAutotileButton </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Button</span>
+                <span class="s3">{</span>
+                    <span class="s1">Content </span><span class="s3">= </span><span class="s4">&quot;Add Group&quot;</span><span class="s3">,</span>
+                    <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Left</span><span class="s3">,</span>
+                    <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Center</span><span class="s3">,</span>
+                <span class="s3">};</span>
+                <span class="s1">TopBar</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">AddAutotileButton</span><span class="s3">);</span>
+
+                <span class="s1">AutotileComboBox </span><span class="s3">= </span><span class="s0">new </span><span class="s1">ComboBox</span>
+                <span class="s3">{</span>
+                    <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Left</span><span class="s3">,</span>
+                    <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Center</span><span class="s3">,</span>
+                    <span class="s1">Width </span><span class="s3">= </span><span class="s5">200</span><span class="s3">,</span>
+                <span class="s3">};</span>
+                <span class="s1">TopBar</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">AutotileComboBox</span><span class="s3">);</span>
+                <span class="s1">RefreshAutotileCombo</span><span class="s3">();</span>
+                <span class="s1">AutotileComboBox</span><span class="s3">.</span><span class="s1">SelectedIndex </span><span class="s3">= </span><span class="s5">0</span><span class="s3">;</span>
+
+                <span class="s2">//AutotileTools = new ComboBox</span>
+                <span class="s2">//{</span>
+                <span class="s2">//    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,</span>
+                <span class="s2">//    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,</span>
+                <span class="s2">//    Width = 200,</span>
+                <span class="s2">//};</span>
+                <span class="s2">//TopBar.Children.Add(AutotileTools);</span>
+                <span class="s2">//AutotileTools.Items.Add(&quot;Select&quot;);</span>
+                <span class="s2">//AutotileTools.Items.Add(&quot;Add Rule&quot;);</span>
+                <span class="s2">//AutotileTools.Items.Add(&quot;Remove Rule&quot;);</span>
+                <span class="s2">//AutotileTools.SelectedIndex = 0;</span>
+                <span class="s2">//AutotileTools.SelectionChanged += AutotileTools_SelectionChanged;</span>
+
+            <span class="s3">}</span>
+
+            <span class="s2">// BodyContent</span>
+            <span class="s3">{</span>
+                <span class="s1">BodyContentGrid </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Grid</span>
+                <span class="s3">{</span>
+                    <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">10</span><span class="s3">),</span>
+                    <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                    <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                    <span class="s1">ColumnDefinitions </span><span class="s3">= </span><span class="s0">new </span><span class="s1">ColumnDefinitions</span><span class="s3">(</span><span class="s4">&quot;*, Auto&quot;</span><span class="s3">),</span>
+                <span class="s3">};</span>
+                <span class="s1">MainBody</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">BodyContentGrid</span><span class="s3">);</span>
+                <span class="s1">Grid</span><span class="s3">.</span><span class="s1">SetRow</span><span class="s3">(</span><span class="s1">BodyContentGrid</span><span class="s3">, </span><span class="s5">1</span><span class="s3">);</span>
+
+                <span class="s2">// Center</span>
+                <span class="s3">{</span>
+                    <span class="s1">CenterGrid </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Grid</span>
+                    <span class="s3">{</span>
+                        <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                        <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                        <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">10</span><span class="s3">),</span>
+                        <span class="s1">RowDefinitions </span><span class="s3">= </span><span class="s0">new </span><span class="s1">RowDefinitions</span><span class="s3">(</span><span class="s4">&quot;*, Auto&quot;</span><span class="s3">)</span>
+                    <span class="s3">};</span>
+                    <span class="s1">BodyContentGrid</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">CenterGrid</span><span class="s3">);</span>
+                    <span class="s1">Grid</span><span class="s3">.</span><span class="s1">SetColumn</span><span class="s3">(</span><span class="s1">CenterGrid</span><span class="s3">, </span><span class="s5">0</span><span class="s3">);</span>
+
+                    <span class="s1">CenterMainCanvas </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Canvas</span>
+                    <span class="s3">{</span>
+                        <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                        <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                    <span class="s3">};</span>
+                    <span class="s1">CenterGrid</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">CenterMainCanvas</span><span class="s3">);</span>
+
+                    <span class="s1">CenterSubCanvas </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Canvas</span>
+                    <span class="s3">{</span>
+                        <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                        <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                    <span class="s3">};</span>
+                    <span class="s1">CenterMainCanvas</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">CenterSubCanvas</span><span class="s3">);</span>
+
+                    <span class="s1">CenterSubCanvas</span><span class="s3">.</span><span class="s1">PointerPressed </span><span class="s3">+= </span><span class="s1">CenterSubCanvas_PointerPressed</span><span class="s3">;</span>
+
+                    <span class="s1">CenterTilesetImage </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Image</span>
+                    <span class="s3">{</span>
+                        <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                        <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                    <span class="s3">};</span>
+                    <span class="s1">CenterSubCanvas</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">CenterTilesetImage</span><span class="s3">);</span>
+                    
+                    <span class="s2">// Center - bottom part (For autotile properties modification)</span>
+                    <span class="s0">#region </span><span class="s1">CenterBottomPart</span>
+                    <span class="s1">CenterBottomPanel </span><span class="s3">= </span><span class="s0">new </span><span class="s1">StackPanel</span><span class="s3">()</span>
+                    <span class="s3">{</span>
+                        <span class="s1">Orientation </span><span class="s3">= </span><span class="s1">Orientation</span><span class="s3">.</span><span class="s1">Horizontal</span><span class="s3">,</span>
+                        <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                        <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Bottom</span><span class="s3">,</span>
+                        <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">10</span><span class="s3">),</span>
+                        <span class="s1">Spacing </span><span class="s3">= </span><span class="s5">5</span>
+                    <span class="s3">};</span>
+                    <span class="s1">CenterGrid</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">CenterBottomPanel</span><span class="s3">);</span>
+                    <span class="s1">Grid</span><span class="s3">.</span><span class="s1">SetRow</span><span class="s3">(</span><span class="s1">CenterBottomPanel</span><span class="s3">, </span><span class="s5">1</span><span class="s3">);</span>
+                    
+                    <span class="s1">BasePropertiesPanel </span><span class="s3">= </span><span class="s0">new </span><span class="s1">StackPanel</span><span class="s3">()</span>
+                    <span class="s3">{</span>
+                        <span class="s1">Orientation </span><span class="s3">= </span><span class="s1">Orientation</span><span class="s3">.</span><span class="s1">Vertical</span><span class="s3">,</span>
+                        <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                        <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                        <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">10</span><span class="s3">),</span>
+                    <span class="s3">};</span>
+                    <span class="s1">CenterBottomPanel</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">BasePropertiesPanel</span><span class="s3">);</span>
+                    
+                    <span class="s1">BasePropertiesText </span><span class="s3">= </span><span class="s0">new </span><span class="s1">TextBlock</span><span class="s3">()</span>
+                    <span class="s3">{</span>
+                        <span class="s1">Text </span><span class="s3">= </span><span class="s4">&quot;Base Properties&quot;</span><span class="s3">,</span>
+                        <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Left</span><span class="s3">,</span>
+                        <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Top</span><span class="s3">,</span>
+                        <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">5</span><span class="s3">),</span>
+                    <span class="s3">};</span>
+                    <span class="s1">BasePropertiesPanel</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">BasePropertiesText</span><span class="s3">);</span>
+                    <span class="s1">BasePropertiesChecker </span><span class="s3">= </span><span class="s0">new </span><span class="s1">CheckBox</span><span class="s3">()</span>
+                    <span class="s3">{</span>
+                        <span class="s1">Content </span><span class="s3">= </span><span class="s4">&quot;Is Base&quot;</span><span class="s3">,</span>
+                        <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Left</span><span class="s3">,</span>
+                        <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Top</span><span class="s3">,</span>
+                        <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">5</span><span class="s3">),</span>
+                    <span class="s3">};</span>
+
+                    <span class="s1">BasePropertiesPanel</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">BasePropertiesChecker</span><span class="s3">);</span>
+                    
+                    <span class="s1">BasedOnPropertiesText </span><span class="s3">= </span><span class="s0">new </span><span class="s1">TextBlock</span><span class="s3">()</span>
+                    <span class="s3">{</span>
+                        <span class="s1">Text </span><span class="s3">= </span><span class="s4">&quot;Based On&quot;</span><span class="s3">,</span>
+                        <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Left</span><span class="s3">,</span>
+                        <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Top</span><span class="s3">,</span>
+                        <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">5</span><span class="s3">),</span>
+                    <span class="s3">};</span>
+                    
+                    <span class="s1">BasePropertiesPanel</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">BasedOnPropertiesText</span><span class="s3">);</span>
+                    
+                    <span class="s1">BasedOnPropertiesCombo </span><span class="s3">= </span><span class="s0">new </span><span class="s1">ComboBox</span><span class="s3">()</span>
+                    <span class="s3">{</span>
+                        <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                        <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Top</span><span class="s3">,</span>
+                        <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">5</span><span class="s3">),</span>
+                    <span class="s3">};</span>
+                    <span class="s1">BasePropertiesPanel</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">BasedOnPropertiesCombo</span><span class="s3">);</span>
+                    <span class="s1">BasedOnPropertiesCombo</span><span class="s3">.</span><span class="s1">Items</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s4">&quot;None&quot;</span><span class="s3">);</span>
+                    <span class="s1">BasedOnPropertiesCombo</span><span class="s3">.</span><span class="s1">Items</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s4">&quot;Autotile 1&quot;</span><span class="s3">);</span>
+                    <span class="s1">BasedOnPropertiesCombo</span><span class="s3">.</span><span class="s1">Items</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s4">&quot;Autotile 2&quot;</span><span class="s3">);</span>
+                    <span class="s1">BasedOnPropertiesCombo</span><span class="s3">.</span><span class="s1">SelectedIndex </span><span class="s3">= </span><span class="s5">0</span><span class="s3">;</span>
+
+                    <span class="s1">var separatorBaseToTags </span><span class="s3">= </span><span class="s0">new </span><span class="s1">VSeparator</span><span class="s3">();</span>
+                    
+                    <span class="s1">CenterBottomPanel</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">separatorBaseToTags</span><span class="s3">);</span>
+                    
+                    <span class="s1">TagsPanel </span><span class="s3">= </span><span class="s0">new </span><span class="s1">StackPanel</span><span class="s3">()</span>
+                    <span class="s3">{</span>
+                        <span class="s1">Orientation </span><span class="s3">= </span><span class="s1">Orientation</span><span class="s3">.</span><span class="s1">Vertical</span><span class="s3">,</span>
+                        <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                        <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                        <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">10</span><span class="s3">),</span>
+                    <span class="s3">};</span>
+                    <span class="s1">CenterBottomPanel</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">TagsPanel</span><span class="s3">);</span>
+                    
+                    <span class="s1">TagsPanelTop </span><span class="s3">= </span><span class="s0">new </span><span class="s1">StackPanel</span><span class="s3">()</span>
+                    <span class="s3">{</span>
+                        <span class="s1">Orientation </span><span class="s3">= </span><span class="s1">Orientation</span><span class="s3">.</span><span class="s1">Horizontal</span><span class="s3">,</span>
+                        <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                        <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Top</span><span class="s3">,</span>
+                        <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">5</span><span class="s3">),</span>
+                    <span class="s3">};</span>
+                    <span class="s1">TagsPanel</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">TagsPanelTop</span><span class="s3">);</span>
+                    
+                    <span class="s1">TagsText </span><span class="s3">= </span><span class="s0">new </span><span class="s1">TextBlock</span><span class="s3">()</span>
+                    <span class="s3">{</span>
+                        <span class="s1">Text </span><span class="s3">= </span><span class="s4">&quot;Tags&quot;</span><span class="s3">,</span>
+                        <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Left</span><span class="s3">,</span>
+                        <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Top</span><span class="s3">,</span>
+                        <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">5</span><span class="s3">),</span>
+                    <span class="s3">};</span>
+                    <span class="s1">TagsPanelTop</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">TagsText</span><span class="s3">);</span>
+                    
+                    <span class="s1">AddTagButton </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Button</span><span class="s3">()</span>
+                    <span class="s3">{</span>
+                        <span class="s1">Content </span><span class="s3">= </span><span class="s4">&quot;Add Tag&quot;</span><span class="s3">,</span>
+                        <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Right</span><span class="s3">,</span>
+                        <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Top</span><span class="s3">,</span>
+                        <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">5</span><span class="s3">),</span>
+                    <span class="s3">};</span>
+                    <span class="s1">TagsPanelTop</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">AddTagButton</span><span class="s3">);</span>
+                    <span class="s0">#endregion</span>
+                <span class="s3">}</span>
+
+                <span class="s2">// TilesetSelectorRight</span>
+                <span class="s3">{</span>
+                    <span class="s1">TilesetSelectorScroller </span><span class="s3">= </span><span class="s0">new </span><span class="s1">ScrollViewer</span>
+                    <span class="s3">{</span>
+                        <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                        <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                    <span class="s3">};</span>
+
+                    <span class="s1">BodyContentGrid</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">TilesetSelectorScroller</span><span class="s3">);</span>
+                    <span class="s1">Grid</span><span class="s3">.</span><span class="s1">SetColumn</span><span class="s3">(</span><span class="s1">TilesetSelectorScroller</span><span class="s3">, </span><span class="s5">1</span><span class="s3">);</span>
+
+                    <span class="s1">TilesetSelectorGrid </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Grid</span>
+                    <span class="s3">{</span>
+                        <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                        <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                        <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">10</span><span class="s3">),</span>
+                    <span class="s3">};</span>
+                    <span class="s1">TilesetSelectorScroller</span><span class="s3">.</span><span class="s1">Content </span><span class="s3">= </span><span class="s1">TilesetSelectorGrid</span><span class="s3">;</span>
+
+                    <span class="s1">TilesetSelectorPanel </span><span class="s3">= </span><span class="s0">new </span><span class="s1">StackPanel</span>
+                    <span class="s3">{</span>
+                        <span class="s1">Width </span><span class="s3">= </span><span class="s5">200</span><span class="s3">,</span>
+                        <span class="s1">Orientation </span><span class="s3">= </span><span class="s1">Orientation</span><span class="s3">.</span><span class="s1">Vertical</span><span class="s3">,</span>
+                        <span class="s1">HorizontalAlignment </span><span class="s3">= </span><span class="s1">HorizontalAlignment</span><span class="s3">.</span><span class="s1">Right</span><span class="s3">,</span>
+                        <span class="s1">VerticalAlignment </span><span class="s3">= </span><span class="s1">VerticalAlignment</span><span class="s3">.</span><span class="s1">Stretch</span><span class="s3">,</span>
+                        <span class="s1">Margin </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Thickness</span><span class="s3">(</span><span class="s5">10</span><span class="s3">),</span>
+                    <span class="s3">};</span>
+                    <span class="s1">TilesetSelectorGrid</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">TilesetSelectorPanel</span><span class="s3">);</span>
+
+                    <span class="s1">RefreshTilesetSelectorList</span><span class="s3">();</span>
+                <span class="s3">}</span>
+
+            <span class="s3">}</span>
+
+        <span class="s3">}</span>
+
+        <span class="s2">//private void AutotileTools_SelectionChanged(object? sender, SelectionChangedEventArgs e)</span>
+        <span class="s2">//{</span>
+
+        <span class="s2">//}</span>
+
+
+        <span class="s2">/* 
+         *  
+         * Je dois voir pour commencer à bosser sur comment faire en sorte que l'utilisteur puisse modifier les propriétés d'un autotile. 
+         * Cela inclut : 
+         * - Sélectionner un autotile dans la liste (Fait) 
+         * - Afficher les propriétés de l'autotile sélectionné (Fait) 
+         * - Définir si l'autotile est une base, ou basé sur une base. Il faut que ça soit l'un ou l'autre, pas les deux en même temps. (Fait) 
+         * - Ajouter des règles à l'autotile sélectionné | Si c'est une base alors aucune règle ne peut être ajoutée, si c'est basé sur une base ainsi, on peut ajouter des règles, si c'est aucun des deux on ne peut rien faire. 
+         * - Ajouter des tags à l'autotile sélectionné | Via un outil peut-être ? Genre outil &quot;Edit tag&quot; qui permet de sélectionner un tag, puis de cliquer sur un tile pour ajouter / retirer le tag. 
+         * 
+         * Afin de faire ça, il faudrait voir pour l'interface, là rendre plus &quot;user friendly&quot; et intuitive. Ou en tout cas, essayé de faire le minimum déjà. 
+         */</span>
+
+
+        <span class="s0">private void </span><span class="s1">CenterSubCanvas_PointerPressed</span><span class="s3">(</span><span class="s0">object</span><span class="s1">? sender</span><span class="s3">, </span><span class="s1">Avalonia</span><span class="s3">.</span><span class="s1">Input</span><span class="s3">.</span><span class="s1">PointerPressedEventArgs e</span><span class="s3">)</span>
+        <span class="s3">{</span>
+            <span class="s0">if </span><span class="s3">(</span><span class="s1">SelectedTileset </span><span class="s3">!= </span><span class="s0">null </span><span class="s3">&amp;&amp; </span><span class="s1">SelectedGroup </span><span class="s3">!= </span><span class="s0">null</span><span class="s3">)</span>
+            <span class="s3">{</span>
+                <span class="s1">Console</span><span class="s3">.</span><span class="s1">WriteLine</span><span class="s3">(</span><span class="s4">$&quot;Tileset clicked: </span><span class="s3">{</span><span class="s1">SelectedTileset</span><span class="s3">.</span><span class="s1">Name</span><span class="s3">}</span><span class="s4">&quot;</span><span class="s3">);</span>
+                <span class="s2">// Print location of the left click</span>
+                <span class="s1">var position </span><span class="s3">= </span><span class="s1">e</span><span class="s3">.</span><span class="s1">GetPosition</span><span class="s3">(</span><span class="s1">CenterSubCanvas</span><span class="s3">);</span>
+                <span class="s1">Console</span><span class="s3">.</span><span class="s1">WriteLine</span><span class="s3">(</span><span class="s4">$&quot;Click at position: </span><span class="s3">{</span><span class="s1">position</span><span class="s3">.</span><span class="s1">X</span><span class="s3">}</span><span class="s4">, </span><span class="s3">{</span><span class="s1">position</span><span class="s3">.</span><span class="s1">Y</span><span class="s3">}</span><span class="s4">&quot;</span><span class="s3">);</span>
+                <span class="s2">// Here you can add logic to handle the left click on the tileset</span>
+                <span class="s2">// For example, you might want to select a tile or perform some action</span>
+                <span class="s1">var tileWidth </span><span class="s3">= </span><span class="s1">SelectedTileset</span><span class="s3">.</span><span class="s1">tile_width</span><span class="s3">;</span>
+                <span class="s1">var tileHeight </span><span class="s3">= </span><span class="s1">SelectedTileset</span><span class="s3">.</span><span class="s1">tile_height</span><span class="s3">;</span>
+                <span class="s1">var tileX </span><span class="s3">= (</span><span class="s0">int</span><span class="s3">)(</span><span class="s1">position</span><span class="s3">.</span><span class="s1">X </span><span class="s3">/ </span><span class="s1">tileWidth</span><span class="s3">);</span>
+                <span class="s1">var tileY </span><span class="s3">= (</span><span class="s0">int</span><span class="s3">)(</span><span class="s1">position</span><span class="s3">.</span><span class="s1">Y </span><span class="s3">/ </span><span class="s1">tileHeight</span><span class="s3">);</span>
+                <span class="s0">if </span><span class="s3">(</span><span class="s1">e</span><span class="s3">.</span><span class="s1">GetCurrentPoint</span><span class="s3">(</span><span class="s1">CenterSubCanvas</span><span class="s3">).</span><span class="s1">Properties</span><span class="s3">.</span><span class="s1">IsLeftButtonPressed</span><span class="s3">)</span>
+                <span class="s3">{</span>
+                    <span class="s1">Console</span><span class="s3">.</span><span class="s1">WriteLine</span><span class="s3">(</span><span class="s4">$&quot;Tile left clicked at grid position: </span><span class="s3">{</span><span class="s1">tileX</span><span class="s3">}</span><span class="s4">, </span><span class="s3">{</span><span class="s1">tileY</span><span class="s3">}</span><span class="s4">&quot;</span><span class="s3">);</span>
+
+                    <span class="s1">TestPreview</span><span class="s3">.</span><span class="s1">Source </span><span class="s3">= </span><span class="s0">new </span><span class="s1">CroppedBitmap</span><span class="s3">(</span><span class="s1">SelectedTileset</span><span class="s3">.</span><span class="s1">GetBitmap</span><span class="s3">(), </span><span class="s0">new </span><span class="s1">PixelRect</span><span class="s3">(</span><span class="s1">tileX </span><span class="s3">* </span><span class="s1">tileWidth</span><span class="s3">, </span><span class="s1">tileY </span><span class="s3">* </span><span class="s1">tileHeight</span><span class="s3">, </span><span class="s1">tileWidth</span><span class="s3">, </span><span class="s1">tileHeight</span><span class="s3">));</span>
+                    <span class="s0">if </span><span class="s3">(</span><span class="s1">!SelectedGroup</span><span class="s3">.</span><span class="s1">HasTileAt</span><span class="s3">(</span><span class="s0">new </span><span class="s1">Core</span><span class="s3">.</span><span class="s1">Type</span><span class="s3">.</span><span class="s1">Internal</span><span class="s3">.</span><span class="s1">Point</span><span class="s3">(</span><span class="s1">tileX</span><span class="s3">, </span><span class="s1">tileY</span><span class="s3">)))</span>
+                    <span class="s3">{ </span>
+                        <span class="s1">SelectedAutotiling </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Autotiling</span>
+                        <span class="s3">{</span>
+                            <span class="s1">TilePosition </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Core</span><span class="s3">.</span><span class="s1">Type</span><span class="s3">.</span><span class="s1">Internal</span><span class="s3">.</span><span class="s1">Point</span><span class="s3">(</span><span class="s1">tileX</span><span class="s3">, </span><span class="s1">tileY</span><span class="s3">),</span>
+                            <span class="s1">TilesetID </span><span class="s3">= </span><span class="s1">SelectedTileset</span><span class="s3">.</span><span class="s1">Unique</span>
+                        <span class="s3">};</span>
+                        <span class="s1">SelectedGroup</span><span class="s3">.</span><span class="s1">AddTile</span><span class="s3">(</span><span class="s1">SelectedAutotiling</span><span class="s3">);</span>
+                        <span class="s1">Console</span><span class="s3">.</span><span class="s1">WriteLine</span><span class="s3">(</span><span class="s4">$&quot;New autotile created at: </span><span class="s3">{</span><span class="s1">tileX</span><span class="s3">}</span><span class="s4">, </span><span class="s3">{</span><span class="s1">tileY</span><span class="s3">}</span><span class="s4">&quot;</span><span class="s3">);</span>
+                    <span class="s3">}</span>
+                    <span class="s0">else</span>
+                    <span class="s3">{</span>
+                        <span class="s1">SelectedAutotiling </span><span class="s3">= </span><span class="s1">SelectedGroup</span><span class="s3">.</span><span class="s1">GetTileByPosition</span><span class="s3">(</span><span class="s0">new </span><span class="s1">Core</span><span class="s3">.</span><span class="s1">Type</span><span class="s3">.</span><span class="s1">Internal</span><span class="s3">.</span><span class="s1">Point</span><span class="s3">(</span><span class="s1">tileX</span><span class="s3">, </span><span class="s1">tileY</span><span class="s3">))</span><span class="s1">!</span><span class="s3">;</span>
+                        <span class="s1">Console</span><span class="s3">.</span><span class="s1">WriteLine</span><span class="s3">(</span><span class="s4">$&quot;Autotile already exists at: </span><span class="s3">{</span><span class="s1">tileX</span><span class="s3">}</span><span class="s4">, </span><span class="s3">{</span><span class="s1">tileY</span><span class="s3">}</span><span class="s4">&quot;</span><span class="s3">);</span>
+                    <span class="s3">}</span>
+
+                    <span class="s1">RefreshProperties</span><span class="s3">();</span>
+                <span class="s3">}</span>
+                <span class="s0">else if </span><span class="s3">(</span><span class="s1">e</span><span class="s3">.</span><span class="s1">GetCurrentPoint</span><span class="s3">(</span><span class="s1">CenterSubCanvas</span><span class="s3">).</span><span class="s1">Properties</span><span class="s3">.</span><span class="s1">IsRightButtonPressed</span><span class="s3">)</span>
+                <span class="s3">{</span>
+                    <span class="s1">Console</span><span class="s3">.</span><span class="s1">WriteLine</span><span class="s3">(</span><span class="s4">$&quot;Tile right clicked at grid position: </span><span class="s3">{</span><span class="s1">tileX</span><span class="s3">}</span><span class="s4">, </span><span class="s3">{</span><span class="s1">tileY</span><span class="s3">}</span><span class="s4">&quot;</span><span class="s3">);</span>
+                    <span class="s0">if </span><span class="s3">(</span><span class="s1">SelectedGroup</span><span class="s3">.</span><span class="s1">HasTileAt</span><span class="s3">(</span><span class="s0">new </span><span class="s1">Point</span><span class="s3">(</span><span class="s1">tileX</span><span class="s3">, </span><span class="s1">tileY</span><span class="s3">)))</span>
+                    <span class="s3">{</span>
+                        <span class="s1">SelectedGroup</span><span class="s3">.</span><span class="s1">RemoveTile</span><span class="s3">(</span><span class="s1">SelectedGroup</span><span class="s3">.</span><span class="s1">GetTileByPosition</span><span class="s3">(</span><span class="s0">new </span><span class="s1">Point</span><span class="s3">(</span><span class="s1">tileX</span><span class="s3">, </span><span class="s1">tileY</span><span class="s3">)));</span>
+                    <span class="s3">}</span>
+                    <span class="s1">RefreshProperties</span><span class="s3">();</span>
+                <span class="s3">}</span>
+            <span class="s3">}</span>
+        <span class="s3">}</span>
+
+        <span class="s0">private void </span><span class="s1">RefreshAutotileCombo</span><span class="s3">()</span>
+        <span class="s3">{</span>
+            <span class="s1">AutotileComboBox</span><span class="s3">.</span><span class="s1">Items</span><span class="s3">.</span><span class="s1">Clear</span><span class="s3">();</span>
+            <span class="s1">Autotile</span><span class="s3">.</span><span class="s1">Autotilings</span><span class="s3">.</span><span class="s1">ForEach</span><span class="s3">(</span><span class="s1">autotile =&gt;</span>
+            <span class="s3">{</span>
+                <span class="s1">AutotileComboBox</span><span class="s3">.</span><span class="s1">Items</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">autotile</span><span class="s3">.</span><span class="s1">Name</span><span class="s3">);</span>
+            <span class="s3">});</span>
+        <span class="s3">}</span>
+
+        <span class="s0">private void </span><span class="s1">RefreshTilesetSelectorList</span><span class="s3">()</span>
+        <span class="s3">{</span>
+            <span class="s1">EngineCore</span><span class="s3">.</span><span class="s1">Instance</span><span class="s3">.</span><span class="s1">Data</span><span class="s3">.</span><span class="s1">EditedProject?</span><span class="s3">.</span><span class="s1">GetAssetsType</span><span class="s3">&lt;</span><span class="s1">Tileset</span><span class="s3">&gt;(</span><span class="s1">BaseAsset</span><span class="s3">.</span><span class="s1">TYPE</span><span class="s3">.</span><span class="s1">TILESETS</span><span class="s3">)</span>
+                <span class="s3">.</span><span class="s1">ForEach</span><span class="s3">(</span><span class="s1">tileset =&gt;</span>
+                <span class="s3">{</span>
+                    <span class="s1">var item </span><span class="s3">= </span><span class="s0">new </span><span class="s1">AutotileTilesetItem</span><span class="s3">(</span><span class="s1">tileset</span><span class="s3">);</span>
+                    <span class="s1">item</span><span class="s3">.</span><span class="s1">TilesetSelected </span><span class="s3">+= () </span><span class="s1">=&gt;</span>
+                    <span class="s3">{</span>
+                        <span class="s1">Console</span><span class="s3">.</span><span class="s1">WriteLine</span><span class="s3">(</span><span class="s4">$&quot;Tileset selected: </span><span class="s3">{</span><span class="s1">tileset</span><span class="s3">.</span><span class="s1">Name</span><span class="s3">}</span><span class="s4">&quot;</span><span class="s3">);</span>
+                        <span class="s1">CenterTilesetImage</span><span class="s3">.</span><span class="s1">Source </span><span class="s3">= </span><span class="s1">tileset</span><span class="s3">.</span><span class="s1">GetBitmap</span><span class="s3">();</span>
+                        <span class="s1">SelectedTileset </span><span class="s3">= </span><span class="s1">tileset</span><span class="s3">;</span>
+                    <span class="s3">};</span>
+                    <span class="s1">TilesetSelectorPanel</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">item</span><span class="s3">);</span>
+                <span class="s3">});</span>
+        <span class="s3">}</span>
+
+        <span class="s0">private void </span><span class="s1">RefreshProperties</span><span class="s3">(</span><span class="s0">bool </span><span class="s1">refreshIsBase </span><span class="s3">= </span><span class="s0">true</span><span class="s3">, </span><span class="s0">bool </span><span class="s1">refreshBasedOn </span><span class="s3">= </span><span class="s0">true</span><span class="s3">)</span>
+        <span class="s3">{</span>
+            <span class="s1">PropertiesHasBase</span><span class="s3">.</span><span class="s1">Text </span><span class="s3">= </span><span class="s4">$&quot;Has Base: </span><span class="s3">{</span><span class="s1">SelectedAutotiling</span><span class="s3">.</span><span class="s1">BasedOn </span><span class="s3">!= </span><span class="s0">null</span><span class="s3">}</span><span class="s4">&quot;</span><span class="s3">;</span>
+            <span class="s1">PropertiesIsBase</span><span class="s3">.</span><span class="s1">Text </span><span class="s3">= </span><span class="s4">$&quot;Is Base: </span><span class="s3">{</span><span class="s1">SelectedAutotiling</span><span class="s3">.</span><span class="s1">IsBase</span><span class="s3">}</span><span class="s4">&quot;</span><span class="s3">;</span>
+            
+            <span class="s1">PropertiesTagsList</span><span class="s3">.</span><span class="s1">Items</span><span class="s3">.</span><span class="s1">Clear</span><span class="s3">();</span>
+            <span class="s1">SelectedAutotiling</span><span class="s3">.</span><span class="s1">Tags</span><span class="s3">.</span><span class="s1">ForEach</span><span class="s3">(</span><span class="s1">tag =&gt;</span>
+            <span class="s3">{</span>
+                <span class="s1">PropertiesTagsList</span><span class="s3">.</span><span class="s1">Items</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">tag</span><span class="s3">);</span>
+            <span class="s3">});</span>
+            
+            <span class="s1">PropertiesRulesList</span><span class="s3">.</span><span class="s1">Items</span><span class="s3">.</span><span class="s1">Clear</span><span class="s3">();</span>
+            <span class="s0">foreach </span><span class="s3">(</span><span class="s1">var rule </span><span class="s0">in </span><span class="s1">SelectedAutotiling</span><span class="s3">.</span><span class="s1">Rules</span><span class="s3">)</span>
+            <span class="s3">{</span>
+                <span class="s1">PropertiesRulesList</span><span class="s3">.</span><span class="s1">Items</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s4">$&quot;Pos: </span><span class="s3">{</span><span class="s1">rule</span><span class="s3">.</span><span class="s1">Key</span><span class="s3">} </span><span class="s4">| Rule: </span><span class="s3">{</span><span class="s1">rule</span><span class="s3">.</span><span class="s1">Value</span><span class="s3">.</span><span class="s1">AwaitedTag</span><span class="s3">} </span><span class="s4">| Type: </span><span class="s3">{(</span><span class="s1">rule</span><span class="s3">.</span><span class="s1">Value</span><span class="s3">.</span><span class="s1">Type </span><span class="s3">== </span><span class="s1">ERuleType</span><span class="s3">.</span><span class="s1">WHITELIST?</span><span class="s4">'W'</span><span class="s1">:</span><span class="s4">'B'</span><span class="s3">)}</span><span class="s4">&quot;</span><span class="s3">);</span>
+            <span class="s3">}</span>
+
+            <span class="s0">if</span><span class="s3">(</span><span class="s1">refreshIsBase</span><span class="s3">)</span>
+            <span class="s3">{</span>
+                <span class="s1">BasePropertiesChecker</span><span class="s3">.</span><span class="s1">IsCheckedChanged </span><span class="s3">-= </span><span class="s1">OnBaseChecked</span><span class="s3">;</span>
+                
+                <span class="s1">BasePropertiesChecker</span><span class="s3">.</span><span class="s1">IsChecked </span><span class="s3">= </span><span class="s1">SelectedAutotiling</span><span class="s3">.</span><span class="s1">IsBase</span><span class="s3">;</span>
+
+                <span class="s1">BasePropertiesChecker</span><span class="s3">.</span><span class="s1">IsCheckedChanged </span><span class="s3">+= </span><span class="s1">OnBaseChecked</span><span class="s3">;</span>
+            <span class="s3">}</span>
+
+            <span class="s0">if </span><span class="s3">(</span><span class="s1">SelectedGroup</span><span class="s3">.</span><span class="s1">HasBaseTile</span><span class="s3">() &amp;&amp; </span><span class="s1">!SelectedAutotiling</span><span class="s3">.</span><span class="s1">IsBase</span><span class="s3">)</span>
+            <span class="s3">{</span>
+                <span class="s1">var basePosition </span><span class="s3">= </span><span class="s1">SelectedGroup</span><span class="s3">.</span><span class="s1">BaseTile</span><span class="s3">.</span><span class="s1">TilePosition</span><span class="s3">;</span>
+
+                <span class="s1">DrawBaseCase</span><span class="s3">(</span><span class="s1">basePosition</span><span class="s3">);</span>
+            <span class="s3">}</span>
+            <span class="s0">else</span>
+            <span class="s3">{</span>
+                <span class="s1">RemoveBaseCase</span><span class="s3">();</span>
+            <span class="s3">}</span>
+            
+            <span class="s1">ClearBasedOnTilesCases</span><span class="s3">();</span>
+            <span class="s2">// Get all autotiles based on the base autotile</span>
+            <span class="s0">foreach </span><span class="s3">(</span><span class="s1">var tiling </span><span class="s0">in </span><span class="s1">SelectedGroup</span><span class="s3">.</span><span class="s1">Tilings</span><span class="s3">)</span>
+            <span class="s3">{</span>
+                <span class="s0">if</span><span class="s3">(</span><span class="s1">tiling </span><span class="s3">!= </span><span class="s1">SelectedGroup</span><span class="s3">.</span><span class="s1">BaseTile </span><span class="s3">&amp;&amp; </span><span class="s1">tiling </span><span class="s3">!= </span><span class="s1">SelectedAutotiling</span><span class="s3">)</span>
+                    <span class="s1">AddBasedOnTileCase</span><span class="s3">(</span><span class="s1">tiling</span><span class="s3">.</span><span class="s1">TilePosition</span><span class="s3">);</span>
+            <span class="s3">}</span>
+            
+            <span class="s2">// Get the position of the selected autotile</span>
+            <span class="s1">DrawSelectedTileCase</span><span class="s3">(</span><span class="s1">SelectedAutotiling</span><span class="s3">.</span><span class="s1">TilePosition</span><span class="s3">);</span>
+        <span class="s3">}</span>
+
+        <span class="s0">public void </span><span class="s1">RegisterEvents</span><span class="s3">()</span>
+        <span class="s3">{</span>
+            <span class="s1">AddAutotileButton</span><span class="s3">.</span><span class="s1">Click </span><span class="s3">+= (</span><span class="s1">s</span><span class="s3">, </span><span class="s1">e</span><span class="s3">) </span><span class="s1">=&gt;</span>
+            <span class="s3">{</span>
+                <span class="s1">Autotile</span><span class="s3">.</span><span class="s1">Autotilings</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s0">new </span><span class="s1">AutotilesGroup</span><span class="s3">(</span><span class="s4">$&quot;New Group - </span><span class="s3">{</span><span class="s1">AutotileComboBox</span><span class="s3">.</span><span class="s1">Items</span><span class="s3">.</span><span class="s1">Count</span><span class="s3">}</span><span class="s4">&quot;</span><span class="s3">, </span><span class="s1">SelectedTileset</span><span class="s3">));</span>
+                <span class="s1">RefreshAutotileCombo</span><span class="s3">();</span>
+                <span class="s1">AutotileComboBox</span><span class="s3">.</span><span class="s1">SelectedIndex </span><span class="s3">= </span><span class="s1">AutotileComboBox</span><span class="s3">.</span><span class="s1">Items</span><span class="s3">.</span><span class="s1">Count </span><span class="s3">- </span><span class="s5">1</span><span class="s3">;</span>
+            <span class="s3">};</span>
+            <span class="s1">AutotileComboBox</span><span class="s3">.</span><span class="s1">SelectionChanged </span><span class="s3">+= (</span><span class="s1">s</span><span class="s3">, </span><span class="s1">e</span><span class="s3">) </span><span class="s1">=&gt;</span>
+            <span class="s3">{</span>
+                <span class="s0">if </span><span class="s3">(</span><span class="s1">AutotileComboBox</span><span class="s3">.</span><span class="s1">SelectedIndex </span><span class="s3">&gt;= </span><span class="s5">0 </span><span class="s3">&amp;&amp; </span><span class="s1">AutotileComboBox</span><span class="s3">.</span><span class="s1">SelectedIndex </span><span class="s3">&lt; </span><span class="s1">Autotile</span><span class="s3">.</span><span class="s1">Autotilings</span><span class="s3">.</span><span class="s1">Count</span><span class="s3">)</span>
+                <span class="s3">{</span>
+                    <span class="s2">// Load the selected group</span>
+                    <span class="s1">SelectedGroup </span><span class="s3">= </span><span class="s1">Autotile</span><span class="s3">.</span><span class="s1">Autotilings</span><span class="s3">[</span><span class="s1">AutotileComboBox</span><span class="s3">.</span><span class="s1">SelectedIndex</span><span class="s3">];</span>
+                <span class="s3">}</span>
+            <span class="s3">};</span>
+            
+        <span class="s3">}</span>
+
+        <span class="s0">private void </span><span class="s1">BasedOnPropertiesComboOnSelectionChanged</span><span class="s3">(</span><span class="s0">object</span><span class="s1">? sender</span><span class="s3">, </span><span class="s1">SelectionChangedEventArgs e</span><span class="s3">)</span>
+        <span class="s3">{</span>
+            <span class="s0">if </span><span class="s3">(</span><span class="s1">SelectedAutotiling </span><span class="s3">!= </span><span class="s0">null</span><span class="s3">)</span>
+            <span class="s3">{</span>
+                <span class="s0">if </span><span class="s3">(</span><span class="s1">BasedOnPropertiesCombo</span><span class="s3">.</span><span class="s1">SelectedIndex </span><span class="s3">== </span><span class="s5">0</span><span class="s3">)</span>
+                <span class="s3">{</span>
+                    <span class="s1">SelectedAutotiling</span><span class="s3">.</span><span class="s1">BasedOn </span><span class="s3">= </span><span class="s0">null</span><span class="s3">;</span>
+                <span class="s3">}</span>
+                <span class="s0">else</span>
+                <span class="s3">{</span>
+                    <span class="s2">// Get the selected autotile based on the index</span>
+                    <span class="s1">var selectedIndex </span><span class="s3">= </span><span class="s1">BasedOnPropertiesCombo</span><span class="s3">.</span><span class="s1">SelectedIndex </span><span class="s3">- </span><span class="s5">1</span><span class="s3">; </span><span class="s2">// -1 because of &quot;None&quot; option</span>
+                    <span class="s1">var selectedAutotile </span><span class="s3">= </span><span class="s1">SelectedTileset</span><span class="s3">.</span><span class="s1">Autotiles</span><span class="s3">.</span><span class="s1">Values</span><span class="s3">.</span><span class="s1">Where</span><span class="s3">(</span><span class="s1">a =&gt; a</span><span class="s3">.</span><span class="s1">IsBase</span><span class="s3">).</span><span class="s1">ElementAtOrDefault</span><span class="s3">(</span><span class="s1">selectedIndex</span><span class="s3">);</span>
+                    <span class="s0">if </span><span class="s3">(</span><span class="s1">selectedAutotile </span><span class="s3">!= </span><span class="s0">null</span><span class="s3">)</span>
+                    <span class="s3">{</span>
+                        <span class="s1">BasedOn </span><span class="s3">= </span><span class="s1">selectedAutotile</span><span class="s3">;</span>
+                        <span class="s1">SelectedAutotiling</span><span class="s3">.</span><span class="s1">BasedOn </span><span class="s3">= </span><span class="s1">selectedAutotile</span><span class="s3">;</span>
+                        <span class="s1">SelectedAutotiling</span><span class="s3">.</span><span class="s1">IsBase </span><span class="s3">= </span><span class="s0">false</span><span class="s3">;</span>
+                    <span class="s3">}</span>
+                <span class="s3">}</span>
+                <span class="s1">RefreshProperties</span><span class="s3">(</span><span class="s1">refreshBasedOn: </span><span class="s0">false</span><span class="s3">);</span>
+            <span class="s3">}</span>
+        <span class="s3">}</span>
+
+        <span class="s0">private void </span><span class="s1">OnBaseChecked</span><span class="s3">(</span><span class="s0">object</span><span class="s1">? sender</span><span class="s3">, </span><span class="s1">Avalonia</span><span class="s3">.</span><span class="s1">Interactivity</span><span class="s3">.</span><span class="s1">RoutedEventArgs e</span><span class="s3">)</span>
+        <span class="s3">{</span>
+            <span class="s0">if </span><span class="s3">(</span><span class="s1">SelectedAutotiling </span><span class="s3">== </span><span class="s0">null</span><span class="s3">)</span>
+                <span class="s0">return</span><span class="s3">;</span>
+            <span class="s0">if </span><span class="s3">(</span><span class="s1">SelectedAutotiling</span><span class="s3">.</span><span class="s1">IsBase </span><span class="s3">|| </span><span class="s1">SelectedGroup</span><span class="s3">.</span><span class="s1">HasBaseTile</span><span class="s3">())</span>
+                <span class="s0">return</span><span class="s3">;</span>
+            
+            <span class="s1">SelectedAutotiling</span><span class="s3">.</span><span class="s1">IsBase </span><span class="s3">= </span><span class="s1">BasePropertiesChecker</span><span class="s3">.</span><span class="s1">IsChecked ?? </span><span class="s0">false</span><span class="s3">;</span>
+            <span class="s1">SelectedGroup</span><span class="s3">.</span><span class="s1">SetBase</span><span class="s3">(</span><span class="s1">SelectedAutotiling</span><span class="s3">);</span>
+            <span class="s1">RefreshProperties</span><span class="s3">();</span>
+        <span class="s3">}</span>
+
+        <span class="s0">private void </span><span class="s1">RemoveBaseCase</span><span class="s3">()</span>
+        <span class="s3">{</span>
+            <span class="s0">if </span><span class="s3">(</span><span class="s1">BaseTileCase </span><span class="s3">== </span><span class="s0">null</span><span class="s3">)</span>
+                <span class="s0">return</span><span class="s3">;</span>
+            
+            <span class="s1">CenterSubCanvas</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Remove</span><span class="s3">(</span><span class="s1">BaseTileCase</span><span class="s3">);</span>
+            <span class="s1">BaseTileCase </span><span class="s3">= </span><span class="s0">null</span><span class="s3">;</span>
+        <span class="s3">}</span>
+        <span class="s0">private void </span><span class="s1">DrawBaseCase</span><span class="s3">(</span><span class="s1">Core</span><span class="s3">.</span><span class="s1">Type</span><span class="s3">.</span><span class="s1">Internal</span><span class="s3">.</span><span class="s1">Point? at</span><span class="s3">)</span>
+        <span class="s3">{</span>
+            <span class="s0">if </span><span class="s3">(</span><span class="s1">BaseTileCase </span><span class="s3">== </span><span class="s0">null</span><span class="s3">)</span>
+            <span class="s3">{</span>
+                <span class="s1">BaseTileCase </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Border</span><span class="s3">()</span>
+                <span class="s3">{</span>
+                    <span class="s2">// Draw a red background, with 30% opacity</span>
+                    <span class="s1">Background </span><span class="s3">= </span><span class="s0">new </span><span class="s1">SolidColorBrush</span><span class="s3">(</span><span class="s1">Color</span><span class="s3">.</span><span class="s1">FromArgb</span><span class="s3">(</span><span class="s5">76</span><span class="s3">, </span><span class="s5">255</span><span class="s3">, </span><span class="s5">0</span><span class="s3">, </span><span class="s5">0</span><span class="s3">)),</span>
+                <span class="s3">};</span>
+                <span class="s1">CenterSubCanvas</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">BaseTileCase</span><span class="s3">);</span>
+            <span class="s3">}</span>
+            <span class="s1">BaseTileCase</span><span class="s3">.</span><span class="s1">Width </span><span class="s3">= </span><span class="s1">SelectedTileset</span><span class="s3">.</span><span class="s1">tile_width</span><span class="s3">;</span>
+            <span class="s1">BaseTileCase</span><span class="s3">.</span><span class="s1">Height </span><span class="s3">= </span><span class="s1">SelectedTileset</span><span class="s3">.</span><span class="s1">tile_height</span><span class="s3">;</span>
+            
+            <span class="s1">Canvas</span><span class="s3">.</span><span class="s1">SetLeft</span><span class="s3">(</span><span class="s1">BaseTileCase</span><span class="s3">, </span><span class="s1">at</span><span class="s3">.</span><span class="s1">Value</span><span class="s3">.</span><span class="s1">X </span><span class="s3">* </span><span class="s1">SelectedTileset</span><span class="s3">.</span><span class="s1">tile_width</span><span class="s3">);</span>
+            <span class="s1">Canvas</span><span class="s3">.</span><span class="s1">SetTop</span><span class="s3">(</span><span class="s1">BaseTileCase</span><span class="s3">, </span><span class="s1">at</span><span class="s3">.</span><span class="s1">Value</span><span class="s3">.</span><span class="s1">Y </span><span class="s3">* </span><span class="s1">SelectedTileset</span><span class="s3">.</span><span class="s1">tile_height</span><span class="s3">);</span>
+        <span class="s3">}</span>
+        
+        <span class="s0">private void </span><span class="s1">ClearBasedOnTilesCases</span><span class="s3">()</span>
+        <span class="s3">{</span>
+            <span class="s0">foreach </span><span class="s3">(</span><span class="s1">var border </span><span class="s0">in </span><span class="s1">BasedOnTilesCases</span><span class="s3">)</span>
+            <span class="s3">{</span>
+                <span class="s1">CenterSubCanvas</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Remove</span><span class="s3">(</span><span class="s1">border</span><span class="s3">);</span>
+            <span class="s3">}</span>
+            <span class="s1">BasedOnTilesCases</span><span class="s3">.</span><span class="s1">Clear</span><span class="s3">();</span>
+        <span class="s3">}</span>
+
+        <span class="s0">private void </span><span class="s1">AddBasedOnTileCase</span><span class="s3">(</span><span class="s1">Core</span><span class="s3">.</span><span class="s1">Type</span><span class="s3">.</span><span class="s1">Internal</span><span class="s3">.</span><span class="s1">Point? at</span><span class="s3">)</span>
+        <span class="s3">{</span>
+            <span class="s1">var border </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Border</span><span class="s3">()</span>
+            <span class="s3">{</span>
+                <span class="s2">// Draw a green background, with 30% opacity</span>
+                <span class="s1">Background </span><span class="s3">= </span><span class="s0">new </span><span class="s1">SolidColorBrush</span><span class="s3">(</span><span class="s1">Color</span><span class="s3">.</span><span class="s1">FromArgb</span><span class="s3">(</span><span class="s5">76</span><span class="s3">, </span><span class="s5">0</span><span class="s3">, </span><span class="s5">255</span><span class="s3">, </span><span class="s5">0</span><span class="s3">)),</span>
+            <span class="s3">};</span>
+            <span class="s1">CenterSubCanvas</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">border</span><span class="s3">);</span>
+            <span class="s1">BasedOnTilesCases</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">border</span><span class="s3">);</span>
+
+            <span class="s1">border</span><span class="s3">.</span><span class="s1">Width </span><span class="s3">= </span><span class="s1">SelectedTileset</span><span class="s3">.</span><span class="s1">tile_width</span><span class="s3">;</span>
+            <span class="s1">border</span><span class="s3">.</span><span class="s1">Height </span><span class="s3">= </span><span class="s1">SelectedTileset</span><span class="s3">.</span><span class="s1">tile_height</span><span class="s3">;</span>
+
+            <span class="s1">Canvas</span><span class="s3">.</span><span class="s1">SetLeft</span><span class="s3">(</span><span class="s1">border</span><span class="s3">, </span><span class="s1">at</span><span class="s3">.</span><span class="s1">Value</span><span class="s3">.</span><span class="s1">X </span><span class="s3">* </span><span class="s1">SelectedTileset</span><span class="s3">.</span><span class="s1">tile_width</span><span class="s3">);</span>
+            <span class="s1">Canvas</span><span class="s3">.</span><span class="s1">SetTop</span><span class="s3">(</span><span class="s1">border</span><span class="s3">, </span><span class="s1">at</span><span class="s3">.</span><span class="s1">Value</span><span class="s3">.</span><span class="s1">Y </span><span class="s3">* </span><span class="s1">SelectedTileset</span><span class="s3">.</span><span class="s1">tile_height</span><span class="s3">);</span>
+        <span class="s3">}</span>
+
+        <span class="s0">private void </span><span class="s1">DrawSelectedTileCase</span><span class="s3">(</span><span class="s1">Core</span><span class="s3">.</span><span class="s1">Type</span><span class="s3">.</span><span class="s1">Internal</span><span class="s3">.</span><span class="s1">Point? at</span><span class="s3">)</span>
+        <span class="s3">{</span>
+            <span class="s0">if </span><span class="s3">(</span><span class="s1">SelectedTileCase </span><span class="s3">== </span><span class="s0">null</span><span class="s3">)</span>
+            <span class="s3">{</span>
+                <span class="s1">SelectedTileCase </span><span class="s3">= </span><span class="s0">new </span><span class="s1">Border</span><span class="s3">()</span>
+                <span class="s3">{</span>
+                    <span class="s2">// Draw a cyan background, with 30% opacity</span>
+                    <span class="s1">Background </span><span class="s3">= </span><span class="s0">new </span><span class="s1">SolidColorBrush</span><span class="s3">(</span><span class="s1">Color</span><span class="s3">.</span><span class="s1">FromArgb</span><span class="s3">(</span><span class="s5">76</span><span class="s3">, </span><span class="s5">0</span><span class="s3">, </span><span class="s5">255</span><span class="s3">, </span><span class="s5">255</span><span class="s3">)),</span>
+                <span class="s3">};</span>
+                <span class="s1">CenterSubCanvas</span><span class="s3">.</span><span class="s1">Children</span><span class="s3">.</span><span class="s1">Add</span><span class="s3">(</span><span class="s1">SelectedTileCase</span><span class="s3">);</span>
+            <span class="s3">}</span>
+
+            <span class="s1">SelectedTileCase</span><span class="s3">.</span><span class="s1">Width </span><span class="s3">= </span><span class="s1">SelectedTileset</span><span class="s3">.</span><span class="s1">tile_width</span><span class="s3">;</span>
+            <span class="s1">SelectedTileCase</span><span class="s3">.</span><span class="s1">Height </span><span class="s3">= </span><span class="s1">SelectedTileset</span><span class="s3">.</span><span class="s1">tile_height</span><span class="s3">;</span>
+
+            <span class="s1">Canvas</span><span class="s3">.</span><span class="s1">SetLeft</span><span class="s3">(</span><span class="s1">SelectedTileCase</span><span class="s3">, </span><span class="s1">at</span><span class="s3">.</span><span class="s1">Value</span><span class="s3">.</span><span class="s1">X </span><span class="s3">* </span><span class="s1">SelectedTileset</span><span class="s3">.</span><span class="s1">tile_width</span><span class="s3">);</span>
+            <span class="s1">Canvas</span><span class="s3">.</span><span class="s1">SetTop</span><span class="s3">(</span><span class="s1">SelectedTileCase</span><span class="s3">, </span><span class="s1">at</span><span class="s3">.</span><span class="s1">Value</span><span class="s3">.</span><span class="s1">Y </span><span class="s3">* </span><span class="s1">SelectedTileset</span><span class="s3">.</span><span class="s1">tile_height</span><span class="s3">);</span>
+        <span class="s3">}</span>
+    <span class="s3">}</span>
+<span class="s3">}</span>
+</pre>
+</body>
+</html>
