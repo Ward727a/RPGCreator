@@ -49,21 +49,23 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
         public AutotilesGroup? SelectedGroup { get; private set; }
         public Autotiles Autotile;
 
-        // For now, the tools are not used, but they can be implemented later if needed.
-        //public enum EAutotileTools
-        //{
-        //    SELECT,
-        //    ADD_RULE,
-        //    REMOVE_RULE
-        //}
+         // For now, the tools are not used, but they can be implemented later if needed.
+        public enum EAutotileTools
+        {
+            SELECT,
+            ADD_TAG,
+            REMOVE_TAG
+        }
 
-        //public EAutotileTools SelectedTool => AutotileTools.SelectedIndex switch
-        //{
-        //    0 => EAutotileTools.SELECT,
-        //    1 => EAutotileTools.ADD_RULE,
-        //    2 => EAutotileTools.REMOVE_RULE,
-        //    _ => EAutotileTools.SELECT,
-        //};
+        public EAutotileTools SelectedTool => AutotileTools.SelectedIndex switch
+        {
+            0 => EAutotileTools.SELECT,
+            1 => EAutotileTools.ADD_TAG,
+            2 => EAutotileTools.REMOVE_TAG,
+            _ => EAutotileTools.SELECT,
+        };
+
+        public string SelectedTag => AutotileTagsSelector.SelectedItem as string ?? string.Empty;
 
         #region Components
         public Grid Body;
@@ -106,6 +108,9 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
         public ComboBox AutotileComboBox;
 
         public ComboBox AutotileTools;
+        public ComboBox AutotileTagsSelector;
+        public Button AutotileTagsAdd;
+        public Button AutotileTagsRemove;
 
         #endregion
 
@@ -129,15 +134,13 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
         
         public StackPanel CenterBottomPanel;
         
-        public StackPanel BasePropertiesPanel;
-        public TextBlock BasePropertiesText;
-        public CheckBox BasePropertiesChecker;
-        public TextBlock BasedOnPropertiesText;
-        public ComboBox BasedOnPropertiesCombo;
         public StackPanel TagsPanel;
         public StackPanel TagsPanelTop;
-        public TextBlock TagsText;
-        public Button AddTagButton;
+        public TextSeparator TagsText;
+        public ListBox TagsList;
+
+        public Button OpenRuleEditorButton;
+        
         
         #endregion
         
@@ -217,20 +220,6 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
             // Remove AA from test preview
             RenderOptions.SetBitmapInterpolationMode(TestPreview, BitmapInterpolationMode.None);
             LeftPreview.Children.Add(TestPreview);
-
-            AutotileTagPreview = new ComboBox
-            {
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Top,
-                Margin = new Thickness(5),
-            };
-            LeftPreview.Children.Add(AutotileTagPreview);
-            AutotileTagPreview.Items.Add("Water");
-            AutotileTagPreview.Items.Add("Grass");
-            AutotileTagPreview.Items.Add("Road");
-            AutotileTagPreview.SelectedIndex = 0;
-
-            LeftPreview.Children.Add(new Separator());
         }
 
         private void CreateProperties()
@@ -317,18 +306,56 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                 RefreshAutotileCombo();
                 AutotileComboBox.SelectedIndex = 0;
 
-                //AutotileTools = new ComboBox
-                //{
-                //    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-                //    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                //    Width = 200,
-                //};
-                //TopBar.Children.Add(AutotileTools);
-                //AutotileTools.Items.Add("Select");
-                //AutotileTools.Items.Add("Add Rule");
-                //AutotileTools.Items.Add("Remove Rule");
-                //AutotileTools.SelectedIndex = 0;
-                //AutotileTools.SelectionChanged += AutotileTools_SelectionChanged;
+                AutotileTools = new ComboBox
+                {
+                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                    Width = 200,
+                };
+                TopBar.Children.Add(AutotileTools);
+                AutotileTools.Items.Add("Select");
+                AutotileTools.Items.Add("Add Tag");
+                AutotileTools.Items.Add("Remove Tag");
+                AutotileTools.SelectedIndex = 0;
+                AutotileTools.SelectionChanged += AutotileTools_SelectionChanged;
+                
+                // Add a separator
+                TopBar.Children.Add(new VSeparator
+                {
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(5, 0, 5, 0),
+                });
+                
+                // Add a selector for tags
+                AutotileTagsSelector = new ComboBox()
+                {
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Width = 200,
+                    IsVisible = false,
+                };
+                TopBar.Children.Add(AutotileTagsSelector);
+                AutotileTagsSelector.Items.Add("Tag 1");
+                AutotileTagsSelector.Items.Add("Tag 2");
+                AutotileTagsSelector.Items.Add("Tag 3");
+                AutotileTagsSelector.SelectedIndex = 0;
+                #if DEBUG // For debugging purposes, we log the selected tag
+                AutotileTagsSelector.SelectionChanged += AutotileTagsSelector_SelectionChanged;
+                #endif
+                AutotileTagsAdd = new Button()
+                {
+                    Content = "New tag",
+                    IsVisible = false
+                };
+                TopBar.Children.Add(AutotileTagsAdd);
+                
+                AutotileTagsRemove = new Button()
+                {
+                    Content = "Remove tag",
+                    IsVisible = false
+                };
+                TopBar.Children.Add(AutotileTagsRemove);
 
             }
 
@@ -392,59 +419,6 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                     CenterGrid.Children.Add(CenterBottomPanel);
                     Grid.SetRow(CenterBottomPanel, 1);
                     
-                    BasePropertiesPanel = new StackPanel()
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Stretch,
-                        VerticalAlignment = VerticalAlignment.Stretch,
-                        Margin = new Thickness(10),
-                    };
-                    CenterBottomPanel.Children.Add(BasePropertiesPanel);
-                    
-                    BasePropertiesText = new TextBlock()
-                    {
-                        Text = "Base Properties",
-                        HorizontalAlignment = HorizontalAlignment.Left,
-                        VerticalAlignment = VerticalAlignment.Top,
-                        Margin = new Thickness(5),
-                    };
-                    BasePropertiesPanel.Children.Add(BasePropertiesText);
-                    BasePropertiesChecker = new CheckBox()
-                    {
-                        Content = "Is Base",
-                        HorizontalAlignment = HorizontalAlignment.Left,
-                        VerticalAlignment = VerticalAlignment.Top,
-                        Margin = new Thickness(5),
-                    };
-
-                    BasePropertiesPanel.Children.Add(BasePropertiesChecker);
-                    
-                    BasedOnPropertiesText = new TextBlock()
-                    {
-                        Text = "Based On",
-                        HorizontalAlignment = HorizontalAlignment.Left,
-                        VerticalAlignment = VerticalAlignment.Top,
-                        Margin = new Thickness(5),
-                    };
-                    
-                    BasePropertiesPanel.Children.Add(BasedOnPropertiesText);
-                    
-                    BasedOnPropertiesCombo = new ComboBox()
-                    {
-                        HorizontalAlignment = HorizontalAlignment.Stretch,
-                        VerticalAlignment = VerticalAlignment.Top,
-                        Margin = new Thickness(5),
-                    };
-                    BasePropertiesPanel.Children.Add(BasedOnPropertiesCombo);
-                    BasedOnPropertiesCombo.Items.Add("None");
-                    BasedOnPropertiesCombo.Items.Add("Autotile 1");
-                    BasedOnPropertiesCombo.Items.Add("Autotile 2");
-                    BasedOnPropertiesCombo.SelectedIndex = 0;
-
-                    var separatorBaseToTags = new VSeparator();
-                    
-                    CenterBottomPanel.Children.Add(separatorBaseToTags);
-                    
                     TagsPanel = new StackPanel()
                     {
                         Orientation = Orientation.Vertical,
@@ -463,23 +437,33 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                     };
                     TagsPanel.Children.Add(TagsPanelTop);
                     
-                    TagsText = new TextBlock()
+                    TagsText = new TextSeparator()
                     {
-                        Text = "Tags",
-                        HorizontalAlignment = HorizontalAlignment.Left,
+                        Text = "Tile tags",
+                        HorizontalAlignment = HorizontalAlignment.Center,
                         VerticalAlignment = VerticalAlignment.Top,
                         Margin = new Thickness(5),
                     };
                     TagsPanelTop.Children.Add(TagsText);
                     
-                    AddTagButton = new Button()
+                    TagsList = new ListBox()
                     {
-                        Content = "Add Tag",
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
+                        VerticalAlignment = VerticalAlignment.Stretch,
+                        Margin = new Thickness(5),
+                        Height = 100,
+                    };
+                    TagsPanel.Children.Add(TagsList);
+                    
+                    OpenRuleEditorButton = new Button()
+                    {
+                        Content = "Open Rule Editor...",
                         HorizontalAlignment = HorizontalAlignment.Right,
-                        VerticalAlignment = VerticalAlignment.Top,
+                        VerticalAlignment = VerticalAlignment.Center,
                         Margin = new Thickness(5),
                     };
-                    TagsPanelTop.Children.Add(AddTagButton);
+                    CenterBottomPanel.Children.Add(OpenRuleEditorButton);
+                    
                     #endregion
                 }
 
@@ -519,24 +503,38 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 
         }
 
-        //private void AutotileTools_SelectionChanged(object? sender, SelectionChangedEventArgs e)
-        //{
+        #if DEBUG
+        private void AutotileTagsSelector_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+        {
+            
+            Console.WriteLine($"Selected tag: {SelectedTag}");
+            
+        }
+        #endif
 
-        //}
-
-
-        /*
-         * 
-         * Je dois voir pour commencer à bosser sur comment faire en sorte que l'utilisteur puisse modifier les propriétés d'un autotile.
-         * Cela inclut :
-         * - Sélectionner un autotile dans la liste (Fait)
-         * - Afficher les propriétés de l'autotile sélectionné (Fait)
-         * - Définir si l'autotile est une base, ou basé sur une base. Il faut que ça soit l'un ou l'autre, pas les deux en même temps. (Fait)
-         * - Ajouter des tags à l'autotile sélectionné | Via un outil peut-être ? Genre outil "Edit tag" qui permet de sélectionner un tag, puis de cliquer sur un tile pour ajouter / retirer le tag.
-         * - Ajouter des règles à l'autotile sélectionné | Si c'est une base alors aucune règle ne peut être ajoutée, si c'est basé sur une base ainsi, on peut ajouter des règles, si c'est aucun des deux on ne peut rien faire.
-         *
-         * Afin de faire ça, il faudrait voir pour l'interface, là rendre plus "user friendly" et intuitive. Ou en tout cas, essayé de faire le minimum déjà.
-         */
+        private void AutotileTools_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+        {
+            switch (AutotileTools.SelectedIndex)
+            {
+                case 0:
+                {
+                    // Hide the tag selector
+                    AutotileTagsSelector.IsVisible = false;
+                    AutotileTagsAdd.IsVisible = false;
+                    AutotileTagsRemove.IsVisible = false;
+                }
+                break;
+                case 1:
+                case 2:
+                {
+                    // Show the tag selector
+                    AutotileTagsSelector.IsVisible = true;
+                    AutotileTagsAdd.IsVisible = true;
+                    AutotileTagsRemove.IsVisible = true;
+                }
+                break;
+            }
+        }
 
         private void CenterSubCanvas_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
         {
@@ -553,47 +551,133 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
             var tileHeight = SelectedTileset.tile_height;
             var tileX = (int)(position.X / tileWidth);
             var tileY = (int)(position.Y / tileHeight);
-            
-            if (e.GetCurrentPoint(CenterSubCanvas).Properties.IsLeftButtonPressed)
-            {
-                Console.WriteLine($"Tile left clicked at grid position: {tileX}, {tileY}");
 
-                TestPreview.Source = new CroppedBitmap(SelectedTileset.GetBitmap(), new PixelRect(tileX * tileWidth, tileY * tileHeight, tileWidth, tileHeight));
-                if (!SelectedGroup.HasTileAt(new Core.Type.Internal.Point(tileX, tileY)))
-                { 
-                    SelectedAutotiling = new Autotiling
+            switch (SelectedTool)
+            {
+                case EAutotileTools.SELECT:
+                {
+                    if (e.GetCurrentPoint(CenterSubCanvas).Properties.IsLeftButtonPressed)
                     {
-                        TilePosition = new Core.Type.Internal.Point(tileX, tileY),
-                        TilesetID = SelectedTileset.Unique
-                    };
-                    SelectedGroup.AddTile(SelectedAutotiling);
-                    Console.WriteLine($"New autotile created at: {tileX}, {tileY}");
-                }
-                else
-                {
-                    SelectedAutotiling = SelectedGroup.GetTileByPosition(new Core.Type.Internal.Point(tileX, tileY))!;
-                    Console.WriteLine($"Autotile already exists at: {tileX}, {tileY}");
-                }
+                        // Add or select tile in group
+                        Console.WriteLine($"Tile left clicked at grid position: {tileX}, {tileY}");
 
-                RefreshProperties();
-            }
-            else if (e.GetCurrentPoint(CenterSubCanvas).Properties.IsRightButtonPressed)
-            {
-                Console.WriteLine($"Tile right clicked at grid position: {tileX}, {tileY}");
-                if (SelectedGroup.HasTileAt(new Point(tileX, tileY)))
-                {
-                    SelectedGroup.RemoveTile(SelectedGroup.GetTileByPosition(new Point(tileX, tileY)));
+                        TestPreview.Source = new CroppedBitmap(SelectedTileset.GetBitmap(), new PixelRect(tileX * tileWidth, tileY * tileHeight, tileWidth, tileHeight));
+                        if (!SelectedGroup.HasTileAt(new Core.Type.Internal.Point(tileX, tileY)))
+                        { 
+                            SelectedAutotiling = new Autotiling
+                            {
+                                TilePosition = new Core.Type.Internal.Point(tileX, tileY),
+                                TilesetID = SelectedTileset.Unique
+                            };
+                            SelectedGroup.AddTile(SelectedAutotiling);
+                            Console.WriteLine($"New autotile created at: {tileX}, {tileY}");
+                        }
+                        else
+                        {
+                            SelectedAutotiling = SelectedGroup.GetTileByPosition(new Core.Type.Internal.Point(tileX, tileY))!;
+                            Console.WriteLine($"Autotile already exists at: {tileX}, {tileY}");
+                        }
+
+                        RefreshProperties();
+                    }
+                    else if (e.GetCurrentPoint(CenterSubCanvas).Properties.IsRightButtonPressed)
+                    {
+                        // Remove tile from group
+                        Console.WriteLine($"Tile right clicked at grid position: {tileX}, {tileY}");
+                        if (SelectedGroup.HasTileAt(new Point(tileX, tileY)))
+                        {
+                            SelectedGroup.RemoveTile(SelectedGroup.GetTileByPosition(new Point(tileX, tileY)));
+                        }
+                        RefreshProperties();
+                    } 
+                    else if (e.GetCurrentPoint(CenterSubCanvas).Properties.IsMiddleButtonPressed)
+                    {
+                        // Set base tile
+                        Console.WriteLine($"Tile middle clicked at grid position: {tileX}, {tileY}");
+                        if (!SelectedGroup.HasTileAt(new Point(tileX, tileY)))
+                            return;
+                        
+                        var tiling = SelectedGroup.GetTileByPosition(new Point(tileX, tileY));
+
+                        if (tiling == null)
+                            return;
+                        
+                        SelectedGroup.SetBase(tiling);
+                        RefreshProperties();
+                    }
                 }
-                RefreshProperties();
+                break;
+                case EAutotileTools.ADD_TAG:
+                {
+                    // Add tag to autotile
+                    if (e.GetCurrentPoint(CenterSubCanvas).Properties.IsLeftButtonPressed)
+                    {
+                        if (SelectedGroup != null)
+                        {
+                            var tiling = SelectedGroup.GetTileByPosition(new Core.Type.Internal.Point(tileX, tileY));
+
+                            if (tiling == null)
+                                return;
+
+                            if (SelectedGroup.Tags.Contains(SelectedTag))
+                                return;
+
+                            if (tiling.Tags.Contains(SelectedTag))
+                                return;
+                            
+                            tiling.Tags.Add(SelectedTag);
+
+                            if (!SelectedGroup.PresentTags.TryGetValue(SelectedTag, out List<Ulid>? value))
+                                SelectedGroup.PresentTags.Add(SelectedTag, [tiling.ID]);
+                            else
+                                value.Add(tiling.ID);
+                            
+                            if(tiling == SelectedAutotiling)
+                                RefreshProperties();
+                        }
+                    }
+                }
+                break;
+                case EAutotileTools.REMOVE_TAG:
+                {
+                    // Remove tag from autotile
+                    if (!e.GetCurrentPoint(CenterSubCanvas).Properties.IsLeftButtonPressed) return;
+
+                    if (SelectedGroup == null)
+                        return;
+                    
+                    var tiling = SelectedGroup.GetTileByPosition(new Core.Type.Internal.Point(tileX, tileY));
+
+                    if (tiling == null)
+                        return;
+
+                    if (!tiling.Tags.Contains(SelectedTag))
+                        return;
+
+                    tiling.Tags.Remove(SelectedTag);
+
+                    if (!SelectedGroup.PresentTags.ContainsKey(SelectedTag)) return;
+                    
+                    SelectedGroup.PresentTags[SelectedTag].Remove(tiling.ID);
+                    
+                    if (SelectedGroup.PresentTags[SelectedTag].Count == 0)
+                        SelectedGroup.PresentTags.Remove(SelectedTag);
+                    
+                    if(tiling == SelectedAutotiling)
+                        RefreshProperties();
+                }
+                break;
             }
         }
 
         private void RefreshAutotileCombo()
         {
             AutotileComboBox.Items.Clear();
-            Autotile.Autotilings.ForEach(autotile =>
+            if (SelectedTileset == null)
+                return;
+            SelectedTileset.Groups.ForEach(group =>
             {
-                AutotileComboBox.Items.Add(autotile.Name);
+                AutotileComboBox.Items.Add(group.Name);
             });
         }
 
@@ -613,7 +697,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                 });
         }
 
-        private void RefreshProperties(bool refreshIsBase = true, bool refreshBasedOn = true)
+        private void RefreshProperties()
         {
             if (SelectedAutotiling == null || SelectedGroup == null)
                 return;
@@ -623,15 +707,12 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
             {
                 GroupTagsTagsList.Items.Add(tag);
             });
-
-            if(refreshIsBase)
+            
+            TagsList.Items.Clear();
+            SelectedAutotiling.Tags.ForEach(tag =>
             {
-                BasePropertiesChecker.IsCheckedChanged -= OnBaseChecked;
-                
-                BasePropertiesChecker.IsChecked = SelectedAutotiling.IsBase;
-
-                BasePropertiesChecker.IsCheckedChanged += OnBaseChecked;
-            }
+                TagsList.Items.Add(tag);
+            });
 
             if (SelectedGroup.HasBaseTile() && !SelectedAutotiling.IsBase)
             {
@@ -660,16 +741,16 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
         {
             AddAutotileButton.Click += (s, e) =>
             {
-                Autotile.Autotilings.Add(new AutotilesGroup($"New Group - {AutotileComboBox.Items.Count}", SelectedTileset));
+                SelectedTileset.Groups.Add(new AutotilesGroup($"New Group - {AutotileComboBox.Items.Count}", SelectedTileset));
                 RefreshAutotileCombo();
                 AutotileComboBox.SelectedIndex = AutotileComboBox.Items.Count - 1;
             };
             AutotileComboBox.SelectionChanged += (s, e) =>
             {
-                if (AutotileComboBox.SelectedIndex >= 0 && AutotileComboBox.SelectedIndex < Autotile.Autotilings.Count)
+                if (AutotileComboBox.SelectedIndex >= 0 && AutotileComboBox.SelectedIndex < SelectedTileset.Groups.Count)
                 {
                     // Load the selected group
-                    SelectedGroup = Autotile.Autotilings[AutotileComboBox.SelectedIndex];
+                    SelectedGroup = SelectedTileset.Groups[AutotileComboBox.SelectedIndex];
                     RefreshProperties();
                 }
             };
@@ -690,21 +771,74 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                 };
                 dialog.ShowDialog((Window)this.GetVisualRoot()!);
             };
-            
-        }
 
-        private void OnBaseChecked(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
-        {
-            if (SelectedAutotiling == null)
-                return;
-            if (SelectedAutotiling.IsBase || SelectedGroup.HasBaseTile())
-                return;
-            
-            SelectedAutotiling.IsBase = BasePropertiesChecker.IsChecked ?? false;
-            SelectedGroup.SetBase(SelectedAutotiling);
-            RefreshProperties();
-        }
+            AutotileTagsRemove.Click += (s, e) =>
+            {
+                if (SelectedGroup == null)
+                    return;
 
+                if (string.IsNullOrWhiteSpace(SelectedTag))
+                    return;
+
+                if (SelectedGroup.PresentTags.TryGetValue(SelectedTag, out var list))
+                {
+                    foreach (var ulid in list)
+                    {
+                        SelectedGroup.GetTileById(ulid)?.Tags.Remove(SelectedTag);
+                    }
+                    SelectedGroup.PresentTags.Remove(SelectedTag);
+                }
+
+                if (AutotileTagsSelector.Items.Contains(SelectedTag))
+                {
+                    var shouldMoveSelection = (string)AutotileTagsSelector.SelectedItem! == SelectedTag;
+                        
+                    AutotileTagsSelector.Items.Remove(SelectedTag);
+
+                    if (shouldMoveSelection)
+                    {
+                        AutotileTagsSelector.SelectedIndex = 0;
+                    }
+                }
+                
+                RefreshProperties();
+            };
+            
+            AutotileTagsAdd.Click += (s, e) =>
+            {
+                if (SelectedGroup == null)
+                    return;
+
+                // Open a dialog to add a new tag
+                var dialog = new TextInputDialog("New Tag", "Enter the name of the new tag:", allowEmpty: false);
+                dialog.Confirmed += (tag) =>
+                {
+                    if (SelectedGroup.Tags.Contains(tag))
+                        return;
+                    
+                    AutotileTagsSelector.Items.Add(tag);
+                    AutotileTagsSelector.SelectedItem = tag;
+                    RefreshProperties();
+                };
+                
+                dialog.ShowDialog((Window)this.GetVisualRoot()!);
+            };
+
+            OpenRuleEditorButton.Click += (s, e) =>
+            {
+                Console.WriteLine("Opening Rule Editor...");
+                if (SelectedGroup == null)
+                {
+                    Console.WriteLine("No group selected.");
+                    return;
+                }
+                var ruleEditor = new AutotileEditorRuleEditorWindow(SelectedTileset);
+                
+                ruleEditor.ShowDialog((Window)this.GetVisualRoot()!);
+            };
+
+        }
+        
         private void RemoveBaseCase()
         {
             if (BaseTileCase == null)

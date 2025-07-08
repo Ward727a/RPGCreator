@@ -64,6 +64,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                 return null;
             }
         }
+
         private Tileset CurrentTemp;
 
         public TilesetSelector()

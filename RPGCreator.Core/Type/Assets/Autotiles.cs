@@ -125,6 +125,7 @@ namespace RPGCreator.Core.Type.Assets
         public string Name;
         public List<Autotiling> Tilings = [];
         public List<string> Tags = []; // Group tags, those are applied to all autotilings in the group (like a "global" tag).
+        public Dictionary<string, List<Ulid>> PresentTags = []; // Tags that are present in the group, used to quickly get the list of tags, so we don't have to iterate through all autotilings to get the tags.
         public Autotiling? BaseTile;
         public Tileset Tileset; // For a later version, we might want to have a group of tileset, but for now, we only have one tileset per group (for simplicity).
         public AutotilesGroup(string name, Tileset tileset, Autotiling? baseTile = null)

@@ -57,8 +57,10 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
             // For example, you might create a TextBlock to display the Tileset name
             var backPanel = new StackPanel()
             {
+                Width = 180,
                 Orientation = Orientation.Horizontal,
-                Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.LightGray),
+                // Light gray with 20% opacity
+                Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromArgb(20, 211, 211, 211)),
                 Spacing = 5,
                 Margin = new Avalonia.Thickness(5),
             };
@@ -77,7 +79,9 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
             var textBlock = new TextBlock
             {
                 Text = Tileset.Name,
-                Margin = new Avalonia.Thickness(5)
+                Margin = new Avalonia.Thickness(5),
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Left
             };
             backPanel.Children.Add(textBlock);
         }
