@@ -55,6 +55,7 @@ namespace RPGCreator.Core
         public EngineEvents Events { get; private set; }
         public EngineManagers Managers { get; private set; }
         public EngineModules Modules { get; private set; }
+        public EngineSerializer Serializer { get; private set; }
 
         // TODO: Remove?
         //public static BaseAssetsPack TESTPACK;
@@ -78,6 +79,7 @@ namespace RPGCreator.Core
             Events = new EngineEvents();
             Managers = new EngineManagers();
             Modules = new EngineModules();
+            Serializer = new EngineSerializer();
 
             Managers.Init();
 

@@ -1,22 +1,28 @@
 using System;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Media.Imaging;
+using RPGCreator.Core;
 using RPGCreator.Core.Type.Assets;
+using RPGCreator.Core.Type.Map;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor.RuleEditor;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor;
 
-//TODO: Add rules management (add, edit, delete)
-//TODO: Add preview of the autotilings with the rules applied
-//TODO: Remove select rectangle when the group is changed
+//TODO: The rule system still needs to be worked on, this is just a basic buggy implementation to get started.
 
 public class AutotileEditorRuleEditorWindowControl : UserControl
 {
     private Tileset _tileset;
-    private GroupItemControl _selectedGroupItem;
+    private GroupItemControl? _selectedGroupItem;
+    private Autotiling? _selectedAutotiling;
+    private Autotile_rule? _selectedRule;
 
     // All the "null!" are just to suppress the nullability warnings, as these fields will be initialized in the CreateComponents method.
     private Grid _mainGrid = null!;
@@ -42,12 +48,23 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
 
     private Canvas _previewMainCanvas = null!;
     private Canvas _previewSubCanvas = null!;
+    private MapLayer _previewFakeLayer = null!; // This will be used ONLY for the rule system, not to display the autotilings
+    
+    private StackPanel _ruleEditorPanel = null!;
+    private ComboBox _ruleTypeComboBox = null!;
+    private TextBox _ruleNameTextBox = null!;
+    private Grid _ruleGrid = null!;
+    private ComboBox _ruleSideComboBox = null!;
+    private TextBox _ruleTagsTextBox = null!;
+    private TextBox _ruleDescriptionTextBox = null!;
+    private Button _ruleConfirmButton = null!;
 
     public AutotileEditorRuleEditorWindowControl(Tileset tileset)
     {
         _tileset = tileset ?? throw new ArgumentNullException(nameof(tileset), "Tileset cannot be null");
 
         CreateComponents();
+        RegisterEvents();
 
         this.Content = _mainGrid;
 
@@ -79,6 +96,7 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
         Grid.SetColumn(_previewGrid, 1);
 
         CreatePreviewContent();
+        CreateRuleEditorContent();
     }
 
     private void CreateLeftContent()
@@ -179,8 +197,6 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
     {
         _previewMainCanvas = new Canvas()
         {
-            Height = 256,
-            Width = 256,
             ClipToBounds = true,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
@@ -196,8 +212,86 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
             Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Transparent),
         };
         _previewMainCanvas.Children.Add(_previewSubCanvas);
+        _previewFakeLayer = new MapLayer("fake_layer");
     }
 
+    private void CreateRuleEditorContent()
+    {
+        _ruleEditorPanel = new StackPanel()
+        {
+            
+            IsVisible = false, // Initially hidden, can be shown when a rule is selected
+            
+        };
+        _previewGrid.Children.Add(_ruleEditorPanel);
+        
+        _ruleTypeComboBox = new ComboBox()
+        {
+            Margin = new Thickness(5),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        _ruleEditorPanel.Children.Add(_ruleTypeComboBox);
+        _ruleTypeComboBox.Items.Add("Whitelist"); // In this context, Whitelist means the rule allows the tiles to be used if they match the rule
+        _ruleTypeComboBox.Items.Add("Blacklist"); // In this context, Blacklist means the rule prevents the tiles from being used if they match the rule
+        _ruleTypeComboBox.SelectedIndex = 0; // Default to Whitelist
+        
+        _ruleNameTextBox = new TextBox()
+        {
+            Margin = new Thickness(5),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            Watermark = "Enter rule name",
+        };
+        _ruleEditorPanel.Children.Add(_ruleNameTextBox);
+        
+        _ruleGrid = new Grid()
+        {
+            ColumnDefinitions = new ColumnDefinitions("Auto, *"),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+        };
+        _ruleEditorPanel.Children.Add(_ruleGrid);
+        
+        _ruleSideComboBox = new ComboBox()
+        {
+            Margin = new Thickness(5),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        _ruleGrid.Children.Add(_ruleSideComboBox);
+        Enum.GetNames(typeof(ERulePos)).ToList().ForEach(x => _ruleSideComboBox.Items.Add(x));
+        _ruleSideComboBox.SelectedIndex = 0; // Default to Left
+        
+        _ruleTagsTextBox = new TextBox()
+        {
+            Margin = new Thickness(5),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            Watermark = "Enter tag(s) (comma \",\" separated if multiple)",
+        };
+        _ruleGrid.Children.Add(_ruleTagsTextBox);
+        Grid.SetColumn(_ruleTagsTextBox, 1);
+        
+        _ruleDescriptionTextBox = new TextBox()
+        {
+            Margin = new Thickness(5),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            TextWrapping = TextWrapping.Wrap,
+            Watermark = "Enter rule description",
+        };
+        _ruleEditorPanel.Children.Add(_ruleDescriptionTextBox);
+        
+        _ruleConfirmButton = new Button()
+        {
+            Content = "Confirm",
+            Margin = new Thickness(5),
+            HorizontalAlignment = HorizontalAlignment.Right,
+        };
+        _ruleEditorPanel.Children.Add(_ruleConfirmButton);
+    }
+    
     private void RefreshGroupSelector()
     {
         _groupSelector.Items.Clear();
@@ -212,7 +306,12 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
     {
         if (_groupSelector.SelectedItem is GroupItemControl selectedGroup)
         {
+            if (_selectedGroupItem != null)
+            {
+                _selectedGroupItem.Group.UncombineGroupTags();
+            }
             _selectedGroupItem = selectedGroup;
+            _selectedGroupItem.Group.CombineGroupTags();
             Console.WriteLine($"Selected group: {selectedGroup.Group.Name}");
             
             // Add shadow on the tile that are not concerned by the group
@@ -249,12 +348,12 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
             }
             
             _leftBarRuleListBox.Items.Clear();
-            
-            
         }
     }
     private void OnSelectTileset(object? sender, PointerPressedEventArgs e)
     {
+        if (_selectedGroupItem == null)
+            return;
         // This event handler is triggered when a tileset is selected (Left-click)
         if (e.GetCurrentPoint(_tileSelectSubCanvas).Properties.IsLeftButtonPressed)
         {
@@ -288,6 +387,21 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
             
             Canvas.SetLeft(_tileSelectRect, tileCol * tileWidth);
             Canvas.SetTop(_tileSelectRect, tileRow * tileHeight);
+
+            _selectedAutotiling = _selectedGroupItem.Group.GetTileByPosition(new(tileCol, tileRow));
+            
+            if (_selectedAutotiling == null)
+            {
+                Console.WriteLine("Selected autotiling is null, this should not happen.");
+                return;
+            }
+            
+            // Populate the left bar rule list box with the rules of the selected autotiling
+            _leftBarRuleListBox.Items.Clear();
+            foreach (var rule in _selectedAutotiling.Rules)
+            {
+                _leftBarRuleListBox.Items.Add(rule.Name);
+            }
         }
     }
     private void OnMovingRoot(object? sender, PointerEventArgs e)
@@ -363,4 +477,329 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
     public bool IsMovingRoot { get; set; }
 
     public Point NewInnerPosition { get; set; }
+
+    
+    private void OnClickOnPreview(object? sender, PointerPressedEventArgs e)
+    {
+
+        if (_selectedAutotiling == null)
+            return;
+
+        if (_selectedGroupItem == null)
+            return;
+        
+        // This event handler is triggered when the user clicks on the preview canvas
+        if (e.GetCurrentPoint(_previewMainCanvas).Properties.IsLeftButtonPressed)
+        {
+            var clickPosition = e.GetPosition(_previewMainCanvas);
+            
+            int tileWidth = _tileset.tile_width;
+            int tileHeight = _tileset.tile_height;
+            int tileCol = (int)(clickPosition.X / tileWidth);
+            int tileRow = (int)(clickPosition.Y / tileHeight);
+            int tileX = tileCol * tileWidth;
+            int tileY = tileRow * tileHeight;
+            
+            Console.WriteLine($"Preview clicked at position: col:{tileCol} row:{tileRow}");
+
+            // Check if the clicked position is within the bounds of the preview canvas
+            if (tileX < 0 || tileY < 0 || tileX >= _previewMainCanvas.Width || tileY >= _previewMainCanvas.Height)
+            {
+                Console.WriteLine("Clicked position is out of bounds of the preview canvas.");
+                return;
+            }
+            
+            // Create a new rectangle to represent the clicked tile (ONLY FOR TESTING PURPOSES)
+            var clickedTileRect = new Rectangle
+            {
+                Width = tileWidth,
+                Height = tileHeight,
+                Stroke = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Red),
+                StrokeThickness = 2,
+                Fill = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Transparent)
+            };
+            EngineCore.Instance.Scheduler.WaitSecond(3f, ()=>
+            {
+                // Remove the rectangle after 3 seconds
+                _previewSubCanvas.Children.Remove(clickedTileRect);
+            });
+            Canvas.SetLeft(clickedTileRect, tileX);
+            Canvas.SetTop(clickedTileRect, tileY);
+            _previewSubCanvas.Children.Add(clickedTileRect);
+
+            if (!_selectedGroupItem.Group.HasBaseTile())
+                return;
+            
+            var correspondingTile = _selectedGroupItem.Group.GetTileByRule(_previewFakeLayer, new (tileX, tileY), out _);
+            
+            if (correspondingTile == null)
+            {
+                Console.WriteLine("Base tile is null, this should not happen.");
+                return;
+            }
+
+            var cropped = new CroppedBitmap(_tileset.GetBitmap(), new PixelRect(
+                correspondingTile.TilePosition.X * tileWidth,
+                correspondingTile.TilePosition.Y * tileHeight,
+                tileWidth,
+                tileHeight));
+            
+            // Place the base tile at the clicked position in the preview
+            var baseTileRect = new Image()
+            {
+                Width = tileWidth,
+                Height = tileHeight,
+                Source = cropped,
+                Opacity = 0.5 // Semi-transparent to indicate it's a base tile
+            };
+            Canvas.SetLeft(baseTileRect, tileX);
+            Canvas.SetTop(baseTileRect, tileY);
+            // _previewSubCanvas.Children.Add(baseTileRect);
+            if (_previewFakeLayer.TryGetTileAt(new Core.Type.Internal.Point(tileX, tileY), out var tile))
+            {
+                // Remove the existing tile at the clicked position
+                _previewFakeLayer.RemoveTile(tile);
+            }
+            _previewFakeLayer.AddTileAt(
+                new Tile(
+                    _tileset, 
+                    new Microsoft.Xna.Framework.Rectangle(
+                        correspondingTile.TilePosition.X * tileWidth, 
+                        correspondingTile.TilePosition.Y * tileHeight, 
+                        tileWidth, 
+                        tileHeight)
+                    )
+                {
+                    Autotiling = correspondingTile
+                }, 
+                new Point(tileX, tileY)
+                );
+            RefreshPreview();
+            Console.WriteLine($"Base tile placed at position: col:{tileCol} row:{tileRow}");
+        }
+    }
+    
+    private void RefreshPreview()
+    {
+        _previewSubCanvas.Children.Clear();
+        
+        if (_selectedAutotiling == null)
+        {
+            Console.WriteLine("No autotiling selected, cannot refresh preview.");
+            return;
+        }
+        
+        // Iterate through the fake layer tiles, and check if their autotiling still matches their rules
+        var tileCopies = _previewFakeLayer.Tiles.Values.ToList();
+        foreach (var tile in tileCopies)
+        {
+            if (tile.Autotiling == null)
+                continue;
+
+            // Check if the autotiling matches the rules
+            var matchingTiles = _selectedGroupItem.Group.GetTileByRule(_previewFakeLayer, tile.Position, out _);
+            if (matchingTiles == null)
+            {
+                // If the autotiling does not match the rules, we remove the tile from the preview
+                _previewFakeLayer.RemoveTile(tile);
+                continue;
+            }
+            
+            // If their is a matching autotiling, check if the this is the autotiling of the tile
+            if (tile.Autotiling != matchingTiles)
+            {
+                // If the autotiling does not match the tile, we remove the tile from the preview and place the matching autotiling
+                _previewFakeLayer.RemoveTile(tile);
+            }
+            var newTile = new Tile(
+                _tileset, 
+                new Microsoft.Xna.Framework.Rectangle(
+                    matchingTiles.TilePosition.X * _tileset.tile_width, 
+                    matchingTiles.TilePosition.Y * _tileset.tile_height, 
+                    _tileset.tile_width, 
+                    _tileset.tile_height))
+            {
+                Autotiling = matchingTiles
+            };
+            _previewFakeLayer.AddTileAt(newTile, tile.Position);
+            // Add the new tile to the preview
+            var cropped = new CroppedBitmap(_tileset.GetBitmap(), new PixelRect(
+                matchingTiles.TilePosition.X * _tileset.tile_width,
+                matchingTiles.TilePosition.Y * _tileset.tile_height,
+                _tileset.tile_width,
+                _tileset.tile_height));
+            var previewTileImage = new Image()
+            {
+                Source = cropped,
+                Width = _tileset.tile_width,
+                Height = _tileset.tile_height,
+                Opacity = 0.5 // Semi-transparent to indicate it's a base tile
+            };
+            Canvas.SetLeft(previewTileImage, tile.Position.X);
+            Canvas.SetTop(previewTileImage, tile.Position.Y);
+            Console.WriteLine("Adding tile to preview at position: " + tile.Position);
+            _previewSubCanvas.Children.Add(previewTileImage);
+        }
+        
+        
+    }
+
+    private void RegisterEvents()
+    {
+        RegisterLeftBarEvents();
+        RegisterRuleEditEvents();
+        RegisterPreviewEvents();
+    }
+
+    private void RegisterPreviewEvents()
+    {
+        _previewMainCanvas.PointerPressed += OnClickOnPreview;
+    }
+
+    private void RegisterLeftBarEvents()
+    {
+        _addButton.Click += AddButtonOnClick;
+        _editButton.Click += EditButtonOnClick;
+        _deleteButton.Click += DeleteButtonOnClick;
+    }
+
+    private void AddButtonOnClick(object? sender, RoutedEventArgs e)
+    {
+        if (_selectedAutotiling == null)
+            return;
+        _selectedRule = null;
+        _previewMainCanvas.IsVisible = false;
+        _ruleEditorPanel.IsVisible = true;
+        _ruleTypeComboBox.SelectedIndex = 0; // Default to Whitelist
+        _ruleNameTextBox.Text = string.Empty;
+        _ruleTagsTextBox.Text = string.Empty;
+        _ruleDescriptionTextBox.Text = string.Empty;
+        _ruleSideComboBox.SelectedIndex = 0; // Default to TOP_LEFT
+    }
+    private void EditButtonOnClick(object? sender, RoutedEventArgs e)
+    {
+        if (_leftBarRuleListBox.SelectedItem == null)
+            return;
+
+        // Get the selected rule from the list box
+        var selectedRuleName = _leftBarRuleListBox.SelectedItem.ToString();
+        if (string.IsNullOrWhiteSpace(selectedRuleName))
+            return;
+
+        _selectedRule = _selectedAutotiling.Rules.FirstOrDefault(r => r.Name == selectedRuleName);
+        if (_selectedRule == null)
+            return;
+
+        // Populate the rule editor with the selected rule's data
+        _ruleTypeComboBox.SelectedIndex = _selectedRule.Type == ERuleType.WHITELIST ? 0 : 1;
+        _ruleNameTextBox.Text = _selectedRule.Name;
+        _ruleTagsTextBox.Text = string.Join(", ", _selectedRule.Tags);
+        _ruleDescriptionTextBox.Text = _selectedRule.Description;
+        _ruleSideComboBox.SelectedIndex = (int)_selectedRule.Side;
+
+        // Show the rule editor panel
+        _previewMainCanvas.IsVisible = false;
+        _ruleEditorPanel.IsVisible = true;
+    }
+    private void DeleteButtonOnClick(object? sender, RoutedEventArgs e)
+    {
+        if (_leftBarRuleListBox.SelectedItem == null)
+            return;
+
+        // Get the selected rule from the list box
+        var selectedRuleName = _leftBarRuleListBox.SelectedItem.ToString();
+        if (string.IsNullOrWhiteSpace(selectedRuleName))
+            return;
+
+        // Find the rule in the selected autotiling
+        var ruleToDelete = _selectedAutotiling.Rules.FirstOrDefault(r => r.Name == selectedRuleName);
+        if (ruleToDelete == null)
+            return;
+
+        // Remove the rule from the autotiling
+        _selectedAutotiling.Rules.Remove(ruleToDelete);
+
+        // Remove the rule from the list box
+        _leftBarRuleListBox.Items.Remove(selectedRuleName);
+
+        if (_selectedRule == null)
+            return;
+
+        if (_selectedRule.Name != selectedRuleName) return;
+        
+        // If the deleted rule was the selected rule, clear the selection
+        _selectedRule = null;
+        _leftBarRuleListBox.SelectedItem = null;
+        _leftBarRuleListBox.SelectedIndex = -1;
+        _ruleEditorPanel.IsVisible = false;
+        _previewMainCanvas.IsVisible = true;
+    }
+
+    private void RegisterRuleEditEvents()
+    {
+        _ruleConfirmButton.Click += RuleConfirmButtonOnClick;
+    }
+
+    private void RuleConfirmButtonOnClick(object? sender, RoutedEventArgs e)
+    {
+
+        var Tags = _ruleTagsTextBox.Text;
+        var Name = _ruleNameTextBox.Text;
+        var Description = _ruleDescriptionTextBox.Text;
+        
+        if (string.IsNullOrWhiteSpace(Name))
+        {
+            // Show an error message or handle the case where the name is empty
+            Console.WriteLine("Rule name cannot be empty.");
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(Tags))
+        {
+            // Show an error message or handle the case where the tags are empty
+            Console.WriteLine("Rule tags cannot be empty.");
+            return;
+        }
+        
+        if (_selectedRule == null)
+        {
+            // If no rule is selected, we create a new one
+            _selectedRule = new Autotile_rule
+            {
+                Name = Name,
+                Tags = Tags.Split(',').Select(t => t.Trim()).ToList(),
+                Description = Description?? string.Empty,
+                Type = _ruleTypeComboBox.SelectedIndex == 0 ? ERuleType.WHITELIST : ERuleType.BLACKLIST,
+                Side = (ERulePos)_ruleSideComboBox.SelectedIndex
+            };
+            // Add to selected tiling
+            _selectedAutotiling.AddRule(_selectedRule);
+            // Add to the list box
+            _leftBarRuleListBox.Items.Add(_selectedRule.Name);
+        }
+        else
+        {
+            // If a rule is selected, we update it
+            // We get the old name first to compare it with the new name, and check if we need to update the list box
+            var oldName = _selectedRule.Name;
+            _selectedRule.Name = Name;
+            
+            if(!string.IsNullOrWhiteSpace(oldName) && oldName != Name)
+            {
+                // If the name has changed, we update the list box
+                var index = _leftBarRuleListBox.Items.IndexOf(oldName);
+                if (index >= 0)
+                {
+                    _leftBarRuleListBox.Items[index] = Name;
+                }
+            }
+            _selectedRule.Tags = Tags.Split(',').Select(t => t.Trim()).ToList();
+            _selectedRule.Description = Description;
+            _selectedRule.Type = _ruleTypeComboBox.SelectedIndex == 0 ? ERuleType.WHITELIST : ERuleType.BLACKLIST;
+            _selectedRule.Side = (ERulePos)_ruleSideComboBox.SelectedIndex;
+        }
+        
+        // Clear the rule editor panel
+        _ruleEditorPanel.IsVisible = false;
+        _previewMainCanvas.IsVisible = true;
+    }
 }

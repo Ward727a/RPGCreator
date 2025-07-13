@@ -81,7 +81,7 @@ namespace RPGCreator.Core.Scheduler
                 if (task.IsCompleted())
                 {
                     task.Execute();
-                    _tasks.RemoveAt(i);
+                    RemoveTask(i);
                 }
             }
         }

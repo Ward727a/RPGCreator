@@ -31,6 +31,7 @@ using RPGCreator.UI.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia;
@@ -272,7 +273,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
         {
             MainBody = new Grid
             {
-                RowDefinitions = new RowDefinitions("Auto, *"),
+                RowDefinitions = new RowDefinitions("Auto, *, Auto"),
                 Margin = new Thickness(10),
             };
             Body.Children.Add(MainBody);
@@ -499,6 +500,36 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                     RefreshTilesetSelectorList();
                 }
 
+            }
+            
+            // Bottom bar
+            {
+                var BottomBar = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    VerticalAlignment = VerticalAlignment.Bottom,
+                    Margin = new Thickness(10),
+                };
+                MainBody.Children.Add(BottomBar);
+                Grid.SetRow(BottomBar, 2);
+                
+                var saveButton = new Button
+                {
+                    Content = "Save",
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(5),
+                };
+                BottomBar.Children.Add(saveButton);
+                saveButton.Click += (s, e) =>
+                {
+                    if (SelectedTileset == null || SelectedGroup == null)
+                        return;
+                    
+                    // Save the autotiles
+                    EngineSerializer.Instance.Serialize(SelectedGroup, out var data);
+                };
             }
 
         }
