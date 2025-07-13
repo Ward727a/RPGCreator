@@ -44,6 +44,9 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 {
     public class AutotileEditorWindowControl : UserControl
     {
+
+        private string TestSavedData;
+        
         private Autotiling BasedOn;
         public Autotiling? SelectedAutotiling;
         public Tileset? SelectedTileset;
@@ -528,7 +531,50 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                         return;
                     
                     // Save the autotiles
-                    EngineSerializer.Instance.Serialize(SelectedGroup, out var data);
+                    EngineSerializer.Instance.Serialize(SelectedGroup, out TestSavedData);
+                };
+                
+                var testLoadButton = new Button
+                {
+                    Content = "Test Load",
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(5),
+                };
+                BottomBar.Children.Add(testLoadButton);
+                testLoadButton.Click += (s, e) =>
+                {
+                    if (SelectedTileset == null)
+                        return;
+                    
+                    // Deserialize the saved data
+                    if (string.IsNullOrWhiteSpace(TestSavedData))
+                    {
+                        Console.WriteLine("No data to load.");
+                        return;
+                    }
+                    EngineSerializer.Instance.Deserialize(TestSavedData, out var group, out var type);
+                    //
+                    // if (type != typeof(AutotilesGroup))
+                    // {
+                    //     Console.WriteLine($"Invalid type: {type}");
+                    //     return;
+                    // }
+
+                    if (group is AutotilesGroup groupTile)
+                    {
+                        SelectedTileset.Groups.Remove(SelectedTileset.Groups.Find(g => g.ID == groupTile.ID));
+                        SelectedTileset.Groups.Add(groupTile);
+                        // Add the loaded group to the tileset
+
+                        SelectedGroup = null;
+
+                        RefreshAutotileCombo();
+                        // Select the loaded group
+                        AutotileComboBox.SelectedItem = null;
+                        AutotileComboBox.SelectedIndex = -1;
+                        ClearProperties();
+                    }
                 };
             }
 
@@ -728,6 +774,14 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                 });
         }
 
+        private void ClearProperties()
+        {
+            GroupTagsTagsList.Items.Clear();
+            TagsList.Items.Clear();
+            RemoveBaseCase();
+            ClearBasedOnTilesCases();
+        }
+        
         private void RefreshProperties()
         {
             if (SelectedAutotiling == null || SelectedGroup == null)

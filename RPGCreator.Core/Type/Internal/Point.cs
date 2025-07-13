@@ -108,5 +108,38 @@ namespace RPGCreator.Core.Type.Internal
         {
             return new Point((int)vector.X, (int)vector.Y);
         }
+
+        public static Point Parse(string value)
+        {
+            Point point = new Point(0, 0);
+
+            if (value.Contains(','))
+            {
+                var splitted = value.Split(',');
+                if (splitted.Length != 2)
+                {
+                    throw new FormatException("Invalid Point format. Expected format: 'X Y'");
+                }
+                var xString = splitted[0].Trim();
+                var yString = splitted[1].Trim();
+                
+                // Replace the "X: " and "Y: " prefixes if they exist
+                if (xString.StartsWith("X: "))
+                {
+                    xString = xString.Substring(3);
+                }
+                if (yString.StartsWith("Y: "))
+                {
+                    yString = yString.Substring(3);
+                }
+                if (!int.TryParse(xString, out int x) || !int.TryParse(yString, out int y))
+                {
+                    throw new FormatException("Invalid Point format. Expected format: 'X Y'");
+                }
+                point = new Point(x, y);
+            }
+
+            return point;
+        }
     }
 }

@@ -64,15 +64,21 @@ public class EngineSerializer
             // For simplicity, this example assumes the data is already in the correct format
             // You would need to implement XML parsing logic here
             Console.WriteLine("Deserialization completed successfully.");
+            
+            var info = new DeserializationInfo(data);
+            obj = info.GetObject();
+            if (obj == null)
+            {
+                Console.WriteLine("Deserialization failed: Object is null.");
+                return;
+            }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Deserialization failed: {ex.Message}");
-            return;
         }
 
-        obj = info; // Replace with actual deserialized object
-        type = info.ObjectType; // Replace with actual type of the deserialized object
+        
     }
 
     public string GetData(SerializationInfo info)
@@ -89,6 +95,7 @@ public class EngineSerializer
                 Console.WriteLine($"Failed to get value for {entryName}");
                 continue;
             }
+            // TODO: Change how the array are serialized, so that we can have a better way to handle them
             sb.AppendLine($"  <Value V=\"{entryName}\" Type=\"{entryType.AssemblyQualifiedName}\">");
             if (entryType == typeof(List<SerializationInfo.SerializationListEntry>))
             {
@@ -103,7 +110,9 @@ public class EngineSerializer
                         }
                         else
                         {
+                            sb.AppendLine($"    <Item Type=\"{entryList.Value.GetType().AssemblyQualifiedName}\">");
                             sb.AppendLine($"    {entryList.Value}");
+                            sb.AppendLine("    </Item>");
                         }
                     }
                 }
@@ -134,10 +143,31 @@ public interface IDeserializable
 public sealed class DeserializationInfo
 {
     public string Data { get; private set; }
-    public XDocument XmlData { get; private set; } = new("<NULL/>");
+    public XDocument XmlData { get; private set; }
     public System.Type? ObjectType { get; private set; }
     public string? AssemblyName { get; private set; }
     public string? QualifiedName { get; private set; }
+    
+    private XElement? _currentElement;
+
+    public DeserializationInfo(XElement xmlElement)
+    {
+        if(xmlElement == null)
+            throw new ArgumentException("XML element cannot be null.", nameof(xmlElement));
+        Data = xmlElement.ToString();
+        if (string.IsNullOrEmpty(Data) || Data == "<NULL/>")
+        {
+            throw new ArgumentException("Data cannot be null or empty.", nameof(Data));
+        }
+        XmlData = new XDocument(xmlElement);
+        AssemblyName = xmlElement.Attribute("Assembly")?.Value;
+        QualifiedName = xmlElement.Attribute("QualifiedName")?.Value;
+        ObjectType = System.Type.GetType(QualifiedName ?? string.Empty);
+        if (ObjectType == null)
+        {
+            throw new InvalidOperationException($"Type '{QualifiedName}' could not be found.");
+        }
+    }
     
     public DeserializationInfo(string data)
     {
@@ -181,36 +211,168 @@ public sealed class DeserializationInfo
             return null;
         }
 
-        if (!ObjectType.IsSubclassOf(typeof(ISerializable))) return null;
+        if (!ObjectType.GetInterfaces().Contains(typeof(ISerializable))) return null;
         
         var obj = (ISerializable)Activator.CreateInstance(ObjectType)!;
-        var info = obj.GetObjectData();
-        if (info == null)
-        {
-            Console.WriteLine("Failed to get object data.");
-            return null;
-        }
-            
+        
+        // Create a new SerializationInfo object and populate it with the data from the XML
+        var newInfo = new SerializationInfo(ObjectType);
         foreach (var entry in XmlData.Root.Elements("Value"))
         {
+            _currentElement = entry;
             var entryName = entry.Attribute("V")?.Value;
             if (entryName == null)
             {
                 Console.WriteLine("Entry name is null.");
                 continue;
             }
-                
-            if (!info.TryGetValue(entryName, out var value, out var type))
+            var entryValue = entry.Value.Trim();
+            
+            // Create an object based on the type specified in the XML
+            var entryTypeName = entry.Attribute("Type")?.Value;
+            if (entryTypeName == null)
             {
-                Console.WriteLine($"Failed to get value for {entryName}");
+                Console.WriteLine("Entry type name is null.");
                 continue;
             }
-            
-            info.AddValue(entryName, value);
-        }
-            
-        return obj;
+            var entryType = System.Type.GetType(entryTypeName);
+            if (entryType == null)
+            {
+                Console.WriteLine($"Type '{entryTypeName}' could not be found.");
+                continue;
+            }
 
+            if(entryName == "Tags")
+                Console.WriteLine($"Deserializing entry '{entryName}' with type '{entryType.FullName}' and value '{entryValue}'");
+            
+            object? value = ConvertStringToType(entryType, entryValue);
+            if (value == null)
+            {
+                Console.WriteLine($"Value for entry '{entryName}' is null.");
+                continue;
+            }
+            newInfo.AddValue(entryName, value);
+        }
+        if(obj is IDeserializable deserializable)
+            deserializable.SetObjectData(newInfo);
+        else
+            throw new InvalidCastException($"Object of type {ObjectType.FullName} does not implement IDeserializable.");
+        return obj;
+    }
+
+    private object ConvertStringToType(System.Type type, string valueString)
+    {
+        if (type == typeof(string))
+            return valueString;
+        
+        var parseMethod = type.GetMethod("Parse", new[] { typeof(string) });
+        if (parseMethod != null && parseMethod.IsStatic)
+            return parseMethod.Invoke(null, new object?[]{valueString});
+
+        if (type.IsEnum)
+            return Enum.Parse(type, valueString);
+
+        if (type.GetInterfaces().Contains(typeof(IList)))
+        {
+
+            object? list = null;
+            if (type.GetGenericArguments()[0] == typeof(SerializationInfo.SerializationListEntry))
+            {
+                // If the type is a list of SerializationListEntry, we need to handle it specially
+                // We need to check if the next child of the current xml element is a <Object> element
+                if (_currentElement?.Elements("Object").Any() == true)
+                {
+                    System.Type awaitedType = null;
+                    // We then need to iterate through each <Object> element and create a new SerializationListEntry
+                    foreach (var objElement in _currentElement.Elements("Object"))
+                    {
+                        var entry = new DeserializationInfo(objElement);
+                        var entryValue = entry.GetObject();
+                        
+                        if (entryValue == null || entry.ObjectType == null)
+                        {
+                            return new List<object>();
+                        }
+
+                        if(awaitedType == null)
+                        {
+                            awaitedType = entry.ObjectType;
+                            
+                            list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(awaitedType))!;
+                        }
+
+                        if(list != null)
+                        {
+                            if (list.GetType().GetInterfaces().Contains(typeof(IList)))
+                            {
+                                // If the list is of type IList, we can add the entry value directly
+                                ((IList)list).Add(entryValue);
+                            }
+                        }
+                    }
+                } else if (_currentElement?.Elements("Item").Any() == true)
+                {
+                    System.Type? awaitedType = null;
+                    foreach (var itemElement in _currentElement?.Elements("Item"))
+                    {
+                        string typeString = itemElement.Attribute("Type")?.Value ?? "System.Object";
+                        System.Type itemType = System.Type.GetType(typeString) ?? typeof(object);
+
+                        if (awaitedType != null)
+                        {
+                            if (awaitedType != itemType)
+                            {
+                                Console.WriteLine($"Type '{typeString}' does not match expected type '{awaitedType.FullName}'.");
+                                continue;
+                            }
+                        }
+                        
+                        if (list == null)
+                        {
+                            list = Activator.CreateInstance(typeof(List<>).MakeGenericType(itemType));
+                            awaitedType = itemType;
+                        }
+                        if (list is IList itemList)
+                        {
+                            // If the list is of type IList, we can add the item value directly
+                            var itemValue = ConvertStringToType(itemType, itemElement.Value.Trim());
+                            if (itemValue != null)
+                            {
+                                itemList.Add(itemValue);
+                            }
+                        }
+                    }
+                }
+
+                return list;
+
+            }
+        }
+        
+        if (type.GetInterfaces().Contains(typeof(IDictionary)))
+        {
+            var dictType = typeof(Dictionary<,>).MakeGenericType(type.GetGenericArguments());
+            var dict = (IDictionary)Activator.CreateInstance(dictType)!;
+            foreach (var item in valueString.Split(','))
+            {
+                var keyValue = item.Split(':');
+                if (keyValue.Length != 2)
+                    continue; // Invalid key-value pair
+                var key = ConvertStringToType(type.GetGenericArguments()[0], keyValue[0].Trim());
+                var value = ConvertStringToType(type.GetGenericArguments()[1], keyValue[1].Trim());
+                dict.Add(key, value);
+            }
+            return dict;
+        }
+        
+        try
+        {
+            return Convert.ChangeType(valueString, type);
+        }
+        catch (InvalidCastException)
+        {
+            throw new InvalidOperationException($"Cannot convert '{valueString}' to type '{type.FullName}'.");
+        }
     }
 
     private bool IsXMLValid()
@@ -394,6 +556,8 @@ public sealed class SerializationInfo
     {
         if (TryGetValue(name, out var o, out var type))
         {
+
+            
             if(type == typeof(T) || type.IsSubclassOf(typeof(T)))
             {
                 value = (T?)o;
@@ -412,7 +576,7 @@ public sealed class SerializationInfo
     {
         if (TryGetValue(name, out var o, out var type))
         {
-            if (type is SerializationListEntry)
+            if (type.GetInterfaces().Contains(typeof(IList)))
             {
                 // Create a new list of the specified type
                 value = (T?)Activator.CreateInstance(typeof(T), new object[] { });
@@ -421,49 +585,38 @@ public sealed class SerializationInfo
                     Console.WriteLine($"Failed to create list of type {typeof(T).FullName}");
                     return false;
                 }
+                
                 // Populate the list with the deserialized entries
                 foreach (var entry in (IList)o)
                 {
-                    if (entry is SerializationListEntry listEntry)
+                    if (entry is not SerializationListEntry listEntry) continue;
+                    
+                    if (listEntry.Value is SerializationInfo info)
                     {
-                        if (listEntry.Value is SerializationInfo info)
+                        var item = Activator.CreateInstance(info.ObjectType);
+                            
+                        if (item is IDeserializable deserializableItem)
                         {
-                            // First we need to create the base object from the SerializationInfo
-                            var item = Activator.CreateInstance(info.ObjectType);
-                            
-                            // Check if the item has the IDeserializable interface
-                            if (item is IDeserializable deserializableItem)
-                            {
-                                // If it does, we can set the object data
-                                deserializableItem.SetObjectData(info);
-                            }
-                            else
-                            {
-                                Console.WriteLine($"Item of type {info.ObjectType.FullName} does not implement IDeserializable.");
-                            }
-                            
-                            if (item != null)
-                            {
-                                value.Add((T)item);
-                            }
+                            // If it does, we can set the object data
+                            deserializableItem.SetObjectData(info);
                         }
                         else
                         {
-                            value.Add((T)listEntry.Value!);
+                            Console.WriteLine($"Item of type {info.ObjectType.FullName} does not implement IDeserializable.");
+                            continue;
                         }
+                        
+                        value.Add((T)item);
+                    }
+                    else
+                    {
+                        value.Add((T)listEntry.Value!);
                     }
                 }
-            }
-            if(type == typeof(T) || type.IsSubclassOf(typeof(T)))
-            {
                 value = (T?)o;
-                
-                
+            
+            
                 return true;
-            }
-            else
-            {
-                Console.WriteLine($"Type mismatch: expected {typeof(T).FullName}, got {type.FullName}");
             }
         }
         value = default;
@@ -480,9 +633,33 @@ public sealed class SerializationInfo
         return false;
     }
     
+    public bool TryGetList<T>(string name, out T? value, T? defaultValue) where T : IList
+    {
+        if (TryGetList(name, out value))
+        {
+            return true;
+        }
+        value = defaultValue;
+        return false;
+    }
+    
     public bool TryGetValue<T>(string name, out T? value, T? defaultValue, string errorMessage)
     {
         if (TryGetValue(name, out value))
+        {
+            return true;
+        }
+        else
+        {
+            Console.WriteLine(errorMessage);
+            value = defaultValue;
+            return false;
+        }
+    }
+    
+    public bool TryGetList<T>(string name, out T? value, T? defaultValue, string errorMessage) where T : IList
+    {
+        if (TryGetList(name, out value))
         {
             return true;
         }

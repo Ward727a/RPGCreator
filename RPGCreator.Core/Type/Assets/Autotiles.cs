@@ -67,7 +67,6 @@ namespace RPGCreator.Core.Type.Assets
 
         public SerializationInfo GetObjectData()
         {
-            
             SerializationInfo info = new SerializationInfo(typeof(Autotile_rule));
             info.AddValue("ID", ID);
             info.AddValue("Name", Name);
@@ -76,22 +75,23 @@ namespace RPGCreator.Core.Type.Assets
             info.AddValue("Side", Side);
             info.AddValue("Tags", Tags);
             return info;
-            
         }
 
         public void SetObjectData(SerializationInfo info)
         {
             info.TryGetValue("ID", out Ulid ID);
-            info.TryGetValue("Name", out string name);
-            info.TryGetValue("Description", out string description);
-            info.TryGetValue("Type", out ERuleType type);
-            info.TryGetValue("Side", out ERulePos side);
-            info.TryGetValue("Tags", out List<string> tags);
+            info.TryGetValue("Name", out Name);
+            info.TryGetValue("Description", out Description);
+            info.TryGetValue("Type", out Type);
+            info.TryGetValue("Side", out Side);
+            info.TryGetList("Tags", out Tags);
+            
+            this.ID = ID;
         }
     }
 
     [Serializable]
-    public class Autotiling : ISerializable, IDeserializable
+    public class Autotiling() : ISerializable, IDeserializable
     {
         public RPGCreator.Core.Type.Internal.Point TilePosition = new RPGCreator.Core.Type.Internal.Point(0, 0);
         public AutotilesGroup? Group;
@@ -102,7 +102,7 @@ namespace RPGCreator.Core.Type.Assets
         public List<string> Tags = [];
         public List<Autotile_rule> Rules = new();
 
-        public Autotiling(bool isBase = false, Autotiling? basedOn = null)
+        public Autotiling(bool isBase = false, Autotiling? basedOn = null) : this()
         {
             IsBase = isBase;
             BasedOn = basedOn;
@@ -276,12 +276,16 @@ namespace RPGCreator.Core.Type.Assets
 
         public void SetObjectData(SerializationInfo info)
         {
+            
+            if(info.ObjectType != typeof(Autotiling))
+                throw new ArgumentException("Invalid serialization info type. Expected Autotiling.", nameof(info));
+            
             info.TryGetValue("ID", out ID, Ulid.Empty, "Field 'ID' not found in the serialization info.");
             info.TryGetValue("TilePosition", out TilePosition, new RPGCreator.Core.Type.Internal.Point(0, 0), "Field 'TilePosition' not found in the serialization info.");
             info.TryGetValue("IsBase", out IsBase, false, "Field 'IsBase' not found in the serialization info.");
             info.TryGetValue("BasedOnID", out BasedOn, null, "Field 'BasedOnID' not found in the serialization info.");
-            info.TryGetValue("Tags", out Tags, new List<string>(), "Field 'Tags' not found in the serialization info.");
-            info.TryGetValue("Rules", out Rules, new List<Autotile_rule>(), "Field 'Rules' not found in the serialization info.");
+            info.TryGetList("Tags", out Tags, new List<string>(), "Field 'Tags' not found in the serialization info.");
+            info.TryGetList("Rules", out Rules, new List<Autotile_rule>(), "Field 'Rules' not found in the serialization info.");
         }
 
         public SerializationInfo GetObjectData()
@@ -313,7 +317,7 @@ namespace RPGCreator.Core.Type.Assets
     }
 
     [Serializable]
-    public class AutotilesGroup : ISerializable, IDeserializable
+    public class AutotilesGroup() : ISerializable, IDeserializable
     {
         public Ulid ID = Ulid.NewUlid();
         public string Name;
@@ -322,7 +326,7 @@ namespace RPGCreator.Core.Type.Assets
         public Dictionary<string, List<Ulid>> PresentTags = []; // Tags that are present in the group, used to quickly get the list of tags, so we don't have to iterate through all autotilings to get the tags.
         public Autotiling? BaseTile;
         public Tileset Tileset; // For a later version, we might want to have a group of tileset, but for now, we only have one tileset per group (for simplicity).
-        public AutotilesGroup(string name, Tileset tileset, Autotiling? baseTile = null)
+        public AutotilesGroup(string name, Tileset tileset, Autotiling? baseTile = null) : this()
         {
             Name = name;
             Tileset = tileset ?? throw new ArgumentNullException(nameof(tileset), "Tileset cannot be null");
@@ -512,7 +516,23 @@ namespace RPGCreator.Core.Type.Assets
 
         public void SetObjectData(SerializationInfo info)
         {
-            throw new NotImplementedException();
+            if(info.ObjectType != typeof(AutotilesGroup))
+                throw new ArgumentException("Invalid serialization info type. Expected AutotilesGroup.", nameof(info));
+            
+            info.TryGetValue("ID", out ID, Ulid.Empty, "Field 'ID' not found in the serialization info.");
+            info.TryGetValue("Name", out Name, string.Empty, "Field 'Name' not found in the serialization info.");
+            info.TryGetValue("TilesetID", out Ulid tilesetId, Ulid.Empty, "Field 'TilesetID' not found in the serialization info.");
+            info.TryGetValue("BaseTileID", out Ulid baseTileId, Ulid.Empty, "Field 'BaseTileID' not found in the serialization info.");
+            info.TryGetList("Tags", out Tags, new List<string>(), "Field 'Tags' not found in the serialization info.");
+            info.TryGetList("Tilings", out Tilings, new List<Autotiling>(), "Field 'Tilings' not found in the serialization info.");
+            
+            foreach (var autotiling in Tilings)
+            {
+                autotiling.Group = this; // Set the group for each autotiling
+            }
+            
+            Tileset = EngineCore.Instance.Data.EditedProject.GetAssetsType<Tileset>(BaseAsset.TYPE.TILESETS).Find(t => t.Unique == tilesetId) ?? throw new InvalidOperationException($"Tileset with ID {tilesetId} not found.");
+            BaseTile = GetTileById(baseTileId);
         }
     }
 
@@ -544,16 +564,25 @@ namespace RPGCreator.Core.Type.Assets
         public SerializationInfo GetObjectData()
         {
             SerializationInfo info = new SerializationInfo(typeof(Autotiles));
-            info.AddValue("Unique", Unique.ToString());
+            info.AddValue("Unique", Unique);
             info.AddValue("Name", Name);
-            info.AddValue("Type", Type.ToString());
+            info.AddValue("Type", Type);
             info.AddValue("Autotilings", Autotilings);
             return info;
         }
 
         public void SetObjectData(SerializationInfo info)
         {
-            throw new NotImplementedException();
+            if(info.ObjectType != typeof(Autotiles))
+                throw new ArgumentException("Invalid serialization info type. Expected Autotiles.", nameof(info));
+
+            info.TryGetValue("Unique", out var unique, Ulid.Empty, "Field 'Unique' not found in the serialization info.");
+            info.TryGetValue("Name", out var name, string.Empty, "Field 'Name' not found in the serialization info.");
+            info.TryGetValue("Type", out TYPE type, TYPE.UNKNOWN, "Field 'Type' not found in the serialization info.");
+            Unique = unique;
+            Name = name;
+            Type = type;
+            info.TryGetList("Autotilings", out Autotilings, new List<AutotilesGroup>(), "Field 'Autotilings' not found in the serialization info.");
         }
     }
 }
