@@ -33,12 +33,12 @@ using System.Xml.Linq;
 
 namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
 {
-    public class BaseAssetsPack
+    public class BaseAssetsPack : ISerializable, IDeserializable
     {
 
         public bool ErrorOnLoad { get; private set; } = false;
 
-        public readonly Dictionary<string, BaseAsset> Assets = [];
+        public Dictionary<string, BaseAsset> Assets = [];
         public readonly BaseAssetsPackEvents Events = new();
 
         public string ConfigPath;
@@ -52,7 +52,7 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
         }
 
         public string Name;
-        public string Description;
+        public string? Description;
         public PACK_TYPE Type;
         public Ulid Id = Ulid.NewUlid();
 
@@ -537,6 +537,28 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
             {
                 throw new InvalidOperationException("Configuration document is null and couldn't be created.");
             }
+        }
+
+        public SerializationInfo GetObjectData()
+        {
+            SerializationInfo info = new SerializationInfo(typeof(BaseAssetsPack));
+            info.AddValue("ConfigPath", ConfigPath);
+            info.AddValue("Name", Name);
+            info.AddValue("Description", Description ?? "");
+            info.AddValue("Type", Type);
+            info.AddValue("Id", Id);
+            info.AddValue("Assets", Assets);
+            return info;
+        }
+
+        public void SetObjectData(SerializationInfo info)
+        {
+            info.TryGetValue("ConfigPath", out ConfigPath, "", "Field 'ConfigPath' not found in serialization info.");
+            info.TryGetValue("Name", out Name, "", "Field 'Name' not found in serialization info.");
+            info.TryGetValue("Description", out Description, "");
+            info.TryGetValue("Type", out Type, PACK_TYPE.UNKNOWN, "Field 'Type' not found in serialization info.");
+            info.TryGetValue("Id", out Id, Ulid.NewUlid(), "Field 'Id' not found in serialization info.");
+            info.TryGetDictionary("Assets", out Assets);
         }
     }
 }

@@ -4,6 +4,20 @@ using System.Xml.Linq;
 
 namespace RPGCreator.Core;
 
+/*
+ *
+ * RPG Creator Engine Serializer
+ * ============================
+ * This class is responsible for serializing and deserializing objects
+ * Author: RPG Creator Team (Ward).
+ *
+ * DevNote:
+ * I still need to clean up the code, and make it more readable.
+ * I would want to add more features to it, like the support for custom save formats (like JSON, YAML, etc.) with easy extensibility.
+ * But for now, I need to focus on cleaning all of this. [Ward727, 14/07/2025]
+ * 
+ */
+
 public class EngineSerializer
 {
     public static EngineSerializer Instance = null!;
@@ -16,7 +30,6 @@ public class EngineSerializer
 
     public void Serialize<T>(T obj, out string data, bool save = true) where T: class, ISerializable
     {
-
         data = "<NULL/>";
 
         var info = obj.GetObjectData();
@@ -96,9 +109,10 @@ public class EngineSerializer
                 continue;
             }
             // TODO: Change how the array are serialized, so that we can have a better way to handle them
-            sb.AppendLine($"  <Value V=\"{entryName}\" Type=\"{entryType.AssemblyQualifiedName}\">");
             if (entryType == typeof(List<SerializationInfo.SerializationListEntry>))
             {
+                sb.AppendLine($"  <List N=\"{entryName}\" Type=\"{entryType.GetGenericArguments()[0].AssemblyQualifiedName}\">");
+                
                 foreach (var o in (IList)entryValue)
                 {
                     if (o is SerializationInfo.SerializationListEntry entryList)
@@ -116,12 +130,36 @@ public class EngineSerializer
                         }
                     }
                 }
+                sb.AppendLine("  </List>");
+            }
+            else if(entryType.GetInterface("IDictionary") != null)
+            {
+                sb.AppendLine($"  <Dictionary N=\"{entryName}\" KeyType=\"{entryType.GetGenericArguments()[0].AssemblyQualifiedName}\" ValueType=\"{typeof(SerializationInfo.SerializationListEntry).AssemblyQualifiedName}\">");
+                foreach (DictionaryEntry entry in (IDictionary)entryValue)
+                {
+                    SerializationInfo.SerializationListEntry value = (SerializationInfo.SerializationListEntry)entry.Value;
+                    sb.AppendLine($"    <Item Type=\"{value.Type}\" Key=\"{entry.Key}\">");
+                    if (entry.Value is SerializationInfo.SerializationListEntry entryList)
+                    {
+                        if (entryList.Value is SerializationInfo _info)
+                        {
+                            sb.AppendLine(GetData(_info));
+                        }
+                        else
+                        {
+                            sb.AppendLine($"      {entryList.Value}");
+                        }
+                    }
+                    sb.AppendLine("    </Item>");
+                }
+                sb.AppendLine("  </Dictionary>");
             }
             else
             {
+                sb.AppendLine($"  <Value V=\"{entryName}\" Type=\"{entryType.AssemblyQualifiedName}\">");
                 sb.AppendLine($"    {entryValue}");
+                sb.AppendLine("  </Value>");
             }
-            sb.AppendLine("  </Value>");
         }
         sb.AppendLine("</Object>");
         data = sb.ToString();
@@ -253,6 +291,83 @@ public sealed class DeserializationInfo
             }
             newInfo.AddValue(entryName, value);
         }
+        
+        // Then we need to check if the XML contains a <Dictionary> element
+        foreach (var entry in XmlData.Root.Elements("Dictionary"))
+        {
+            _currentElement = entry;
+            var entryName = entry.Attribute("N")?.Value;
+            if (entryName == null)
+            {
+                Console.WriteLine("Dictionary entry name is null.");
+                continue;
+            }
+            var keyTypeName = entry.Attribute("KeyType")?.Value;
+            var valueTypeName = entry.Attribute("ValueType")?.Value;
+            if (keyTypeName == null || valueTypeName == null)
+            {
+                Console.WriteLine("Dictionary key or value type name is null.");
+                continue;
+            }
+            var keyType = System.Type.GetType(keyTypeName);
+            var valueType = System.Type.GetType(valueTypeName);
+            if (keyType == null || valueType == null)
+            {
+                Console.WriteLine($"Key or value type '{keyTypeName}' or '{valueTypeName}' could not be found.");
+                continue;
+            }
+
+            var dict = new Dictionary<object, object>();
+            foreach (var item in entry.Elements("Item"))
+            {
+                var key = item.Attribute("Key")?.Value;
+                var typeString = item.Attribute("Type")?.Value;
+                if (typeString == null)
+                {
+                    Console.WriteLine("Dictionary item type is null.");
+                    continue;
+                }
+                var itemType = System.Type.GetType(typeString);
+                if (key == null)
+                {
+                    Console.WriteLine("Dictionary item key is null.");
+                    continue;
+                }
+
+                object? convertedValue = null;
+                // If the item has a "Object" element, we need to deserialize it
+                if (item.Element("Object") != null)
+                {
+                    var objectElement = item.Element("Object");
+                    if (objectElement == null)
+                    {
+                        Console.WriteLine("Dictionary item object element is null.");
+                        continue;
+                    }
+                    var entryInfo = new DeserializationInfo(objectElement);
+                    convertedValue = entryInfo.GetObject();
+                }
+                else
+                {
+                    var itemValue = item.Value.Trim();
+                    convertedValue = ConvertStringToType(itemType, itemValue);
+                }
+                
+                // Convert the key and value to the appropriate types
+                var convertedKey = ConvertStringToType(keyType, key);
+                
+                if (convertedKey == null || convertedValue == null)
+                {
+                    Console.WriteLine($"Converted key or value for dictionary entry '{entryName}' is null.");
+                    continue;
+                }
+                
+                dict[convertedKey] = convertedValue;
+            }
+            
+            newInfo.AddValue(entryName, dict);
+        }
+        
         if(obj is IDeserializable deserializable)
             deserializable.SetObjectData(newInfo);
         else
@@ -437,7 +552,7 @@ public sealed class SerializationInfo
         {
             if (entry.Value is ISerializable serializableItem)
             {
-                dict[entry.Key.ToString()!] = new(serializableItem.GetObjectData(), typeof(SerializationEntry));
+                dict[entry.Key.ToString()!] = new(serializableItem.GetObjectData(), serializableItem.GetType());
             }
             else
             {
@@ -556,22 +671,68 @@ public sealed class SerializationInfo
     {
         if (TryGetValue(name, out var o, out var type))
         {
-
-            
             if(type == typeof(T) || type.IsSubclassOf(typeof(T)))
             {
                 value = (T?)o;
                 
                 return true;
             }
-            else
+            Console.WriteLine($"Type mismatch: expected {typeof(T).FullName}, got {type.FullName}");
+        }
+        value = default;
+        return false;
+    }
+    
+    public bool TryGetDictionary<T>(string name, out T? value) where T : IDictionary
+    {
+        if (TryGetValue(name, out var o, out var type))
+        {
+            if (type.GetInterfaces().Contains(typeof(IDictionary)))
             {
-                Console.WriteLine($"Type mismatch: expected {typeof(T).FullName}, got {type.FullName}");
+                // Create a new dictionary of the specified type
+                value = (T?)Activator.CreateInstance(typeof(T), new object[] { });
+                if (value == null)
+                {
+                    Console.WriteLine($"Failed to create dictionary of type {typeof(T).FullName}");
+                    return false;
+                }
+                
+                // Populate the dictionary with the deserialized entries
+                foreach (DictionaryEntry entry in (IDictionary)o)
+                {
+                    if (entry.Value is SerializationListEntry listEntry)
+                    {
+                        if (listEntry.Value is SerializationInfo info)
+                        {
+                            var item = Activator.CreateInstance(info.ObjectType);
+                            
+                            if (item is IDeserializable deserializableItem)
+                            {
+                                // If it does, we can set the object data
+                                deserializableItem.SetObjectData(info);
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Item of type {info.ObjectType.FullName} does not implement IDeserializable.");
+                                continue;
+                            }
+                            
+                            value.Add(entry.Key, item);
+                        }
+                        else
+                        {
+                            value.Add(entry.Key, listEntry.Value!);
+                        }
+                    }
+                }
+            
+                return true;
             }
         }
         value = default;
         return false;
     }
+    
     public bool TryGetList<T>(string name, out T? value) where T : IList
     {
         if (TryGetValue(name, out var o, out var type))

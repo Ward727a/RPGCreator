@@ -531,7 +531,15 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                         return;
                     
                     // Save the autotiles
-                    EngineSerializer.Instance.Serialize(SelectedGroup, out TestSavedData);
+                    
+                    // For test only, we will try to serialize the AssetsPack from the selected tileset
+                    var pack = EngineCore.Instance.Managers.Assets.GetAssetsPacks()[0];
+                    if (pack == null)
+                    {
+                        Console.WriteLine("No assets pack found.");
+                        return;
+                    }
+                    EngineSerializer.Instance.Serialize(pack, out TestSavedData);
                 };
                 
                 var testLoadButton = new Button
@@ -561,20 +569,20 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                     //     return;
                     // }
 
-                    if (group is AutotilesGroup groupTile)
-                    {
-                        SelectedTileset.Groups.Remove(SelectedTileset.Groups.Find(g => g.ID == groupTile.ID));
-                        SelectedTileset.Groups.Add(groupTile);
-                        // Add the loaded group to the tileset
-
-                        SelectedGroup = null;
-
-                        RefreshAutotileCombo();
-                        // Select the loaded group
-                        AutotileComboBox.SelectedItem = null;
-                        AutotileComboBox.SelectedIndex = -1;
-                        ClearProperties();
-                    }
+                    // if (group is AutotilesGroup groupTile)
+                    // {
+                    //     SelectedTileset.Groups.Remove(SelectedTileset.Groups.Find(g => g.ID == groupTile.ID));
+                    //     SelectedTileset.Groups.Add(groupTile);
+                    //     // Add the loaded group to the tileset
+                    //
+                    //     SelectedGroup = null;
+                    //
+                    //     RefreshAutotileCombo();
+                    //     // Select the loaded group
+                    //     AutotileComboBox.SelectedItem = null;
+                    //     AutotileComboBox.SelectedIndex = -1;
+                    //     ClearProperties();
+                    // }
                 };
             }
 

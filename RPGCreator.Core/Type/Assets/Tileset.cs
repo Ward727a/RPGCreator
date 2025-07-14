@@ -36,7 +36,7 @@ using System.Xml.Linq;
 
 namespace RPGCreator.Core.Type.Assets
 {
-    public class Tileset : ImageAsset
+    public class Tileset : ImageAsset, ISerializable, IDeserializable
     {
         public override bool ShouldBeCached => true;
         public Dictionary<RPGCreator.Core.Type.Internal.Point, Autotiling> Autotiles = [];
@@ -192,6 +192,37 @@ namespace RPGCreator.Core.Type.Assets
         private void ClearCombinedTiles()
         {
             Autotiles.Clear();
+        }
+
+        public SerializationInfo GetObjectData()
+        {
+            SerializationInfo info = new SerializationInfo(typeof(Tileset));
+            info.AddValue("unique", Unique);
+            info.AddValue("type", Type);
+            info.AddValue("name", Name);
+            info.AddValue("file_path", ImagePath);
+            info.AddValue("tile_width", tile_width);
+            info.AddValue("tile_height", tile_height);
+            return info;
+        }
+
+        public void SetObjectData(SerializationInfo info)
+        {
+            if (info == null)
+            {
+                throw new ArgumentNullException(nameof(info), "SerializationInfo cannot be null.");
+            }
+
+            info.TryGetValue("unique", out Ulid unique, Ulid.Empty, "Unique identifier not found or invalid.");
+            info.TryGetValue("type", out Type, TYPE.TILESETS, "Type not found or invalid (Set to Tileset by default).");
+            info.TryGetValue("name", out string name, "Unnamed Tileset", "Name not found or invalid (Set to 'Unnamed Tileset' by default).");
+            info.TryGetValue("file_path", out string imagePath, string.Empty, "File path not found or invalid (Set to empty string by default).");
+            info.TryGetValue("tile_width", out tile_width, 32, "Tile width not found or invalid (Set to 32 by default).");
+            info.TryGetValue("tile_height", out tile_height, 32, "Tile height not found or invalid (Set to 32 by default).");
+            
+            Unique = unique;
+            Name = name;
+            ImagePath = imagePath;
         }
     }
 }
