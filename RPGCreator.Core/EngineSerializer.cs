@@ -1,5 +1,6 @@
 
 using System.Collections;
+using System.Text;
 using System.Xml.Linq;
 
 namespace RPGCreator.Core;
@@ -12,9 +13,11 @@ namespace RPGCreator.Core;
  * Author: RPG Creator Team (Ward).
  *
  * DevNote:
- * I still need to clean up the code, and make it more readable.
- * I would want to add more features to it, like the support for custom save formats (like JSON, YAML, etc.) with easy extensibility.
+ * I still need to clean up the code, and make it more readable. (Done in someway, but it probably needs more work [Ward727, 15/07/2025])
+ * I would want to add more features to it, like the support for custom save formats (like JSON, YAML, etc.) with easy extensibility. (LATER ON, FIRST VERSION IS XML ONLY)
  * But for now, I need to focus on cleaning all of this. [Ward727, 14/07/2025]
+ * ============================
+ * I added a version to the object data, but for now it's hardcoded, I still need to think about how to handle versioning in the future. [Ward727, 15/07/2025]
  * 
  */
 
@@ -22,12 +25,19 @@ public class EngineSerializer
 {
     public static EngineSerializer Instance = null!;
 
-    public EngineSerializer()
+    internal EngineSerializer()
     {
         Console.WriteLine("EngineSerializer started at " + DateTime.Now + ".");
         Instance = this;
     }
 
+    /// <summary>
+    /// Serializes an object whose type implements <see cref="ISerializable"/>.
+    /// </summary>
+    /// <param name="obj">Object that need to be serialized</param>
+    /// <param name="data">The serialized data of the object</param>
+    /// <param name="save">[DEBUG] True if the output data should be saved in a file or not</param>
+    /// <typeparam name="T">A class that implements <see cref="ISerializable"/>.</typeparam>
     public void Serialize<T>(T obj, out string data, bool save = true) where T: class, ISerializable
     {
         data = "<NULL/>";
@@ -60,6 +70,13 @@ public class EngineSerializer
         }
     }
     
+    
+    /// <summary>
+    /// Deserializes a data string into an object and its type.
+    /// </summary>
+    /// <param name="data">The data string got from <see cref="Serialize{T}"/></param>
+    /// <param name="obj">The object remade from the data string</param>
+    /// <param name="type">The type of the object</param>
     public void Deserialize(string data, out object? obj, out System.Type? type)
     {
         obj = null;
@@ -94,13 +111,18 @@ public class EngineSerializer
         
     }
 
-    public string GetData(SerializationInfo info)
+    /// <summary>
+    /// Get the data from the serialization info and convert it to a string.
+    /// </summary>
+    /// <param name="info">The serialization info from a class that implements <see cref="ISerializable"/></param>
+    /// <returns></returns>
+    private string GetData(SerializationInfo info)
     {
         string data = "<NULL/>";
         
         // Write the serialization info to a string
         var sb = new System.Text.StringBuilder();
-        sb.AppendLine($"<Object Type=\"{info.ObjectType.FullName}\" Assembly=\"{info.AssemblyName}\" QualifiedName=\"{info.QualifiedName}\">");
+        sb.AppendLine($"<Object Type=\"{info.ObjectType.FullName}\" Assembly=\"{info.AssemblyName}\" QualifiedName=\"{info.QualifiedName}\" SerializerVersion=\"1.0\">");
         foreach (var entryName in info.GetNames())
         {
             if(info.TryGetValue(entryName, out var entryValue, out var entryType) == false)
@@ -108,58 +130,13 @@ public class EngineSerializer
                 Console.WriteLine($"Failed to get value for {entryName}");
                 continue;
             }
-            // TODO: Change how the array are serialized, so that we can have a better way to handle them
-            if (entryType == typeof(List<SerializationInfo.SerializationListEntry>))
-            {
-                sb.AppendLine($"  <List N=\"{entryName}\" Type=\"{entryType.GetGenericArguments()[0].AssemblyQualifiedName}\">");
-                
-                foreach (var o in (IList)entryValue)
-                {
-                    if (o is SerializationInfo.SerializationListEntry entryList)
-                    {
-                        if (entryList.Value is SerializationInfo _info)
-                        {
-                            sb.AppendLine(
-                                GetData(_info));
-                        }
-                        else
-                        {
-                            sb.AppendLine($"    <Item Type=\"{entryList.Value.GetType().AssemblyQualifiedName}\">");
-                            sb.AppendLine($"    {entryList.Value}");
-                            sb.AppendLine("    </Item>");
-                        }
-                    }
-                }
-                sb.AppendLine("  </List>");
-            }
-            else if(entryType.GetInterface("IDictionary") != null)
-            {
-                sb.AppendLine($"  <Dictionary N=\"{entryName}\" KeyType=\"{entryType.GetGenericArguments()[0].AssemblyQualifiedName}\" ValueType=\"{typeof(SerializationInfo.SerializationListEntry).AssemblyQualifiedName}\">");
-                foreach (DictionaryEntry entry in (IDictionary)entryValue)
-                {
-                    SerializationInfo.SerializationListEntry value = (SerializationInfo.SerializationListEntry)entry.Value;
-                    sb.AppendLine($"    <Item Type=\"{value.Type}\" Key=\"{entry.Key}\">");
-                    if (entry.Value is SerializationInfo.SerializationListEntry entryList)
-                    {
-                        if (entryList.Value is SerializationInfo _info)
-                        {
-                            sb.AppendLine(GetData(_info));
-                        }
-                        else
-                        {
-                            sb.AppendLine($"      {entryList.Value}");
-                        }
-                    }
-                    sb.AppendLine("    </Item>");
-                }
-                sb.AppendLine("  </Dictionary>");
-            }
-            else
-            {
-                sb.AppendLine($"  <Value V=\"{entryName}\" Type=\"{entryType.AssemblyQualifiedName}\">");
-                sb.AppendLine($"    {entryValue}");
-                sb.AppendLine("  </Value>");
-            }
+            
+            if (TryGetListEntry(entryType, entryName, entryValue, sb) || TryGetDictionaryEntry(entryType, entryName, entryValue, sb))
+                continue;
+            
+            sb.AppendLine($"  <Value V=\"{entryName}\" Type=\"{entryType.AssemblyQualifiedName}\">");
+            sb.AppendLine($"    {entryValue}");
+            sb.AppendLine("  </Value>");
         }
         sb.AppendLine("</Object>");
         data = sb.ToString();
@@ -167,17 +144,95 @@ public class EngineSerializer
 
         return data;
     }
+
+    /// <summary>
+    /// Try to get a list entry from the serialization info and append it to the StringBuilder.
+    /// </summary>
+    /// <param name="entryType">The type of the entry, should be a List[SerializationInfo.SerializationListEntry]</param>
+    /// <param name="entryName">The name of the entry</param>
+    /// <param name="entryValue">The value of the entry, should be a List of SerializationInfo.SerializationListEntry</param>
+    /// <param name="sb">The StringBuilder to append the data to</param>
+    /// <returns>True if the entry was a list, false otherwise</returns>
+    protected bool TryGetListEntry(System.Type? entryType, string entryName, object? entryValue, StringBuilder sb)
+    {
+        if (entryType != typeof(List<SerializationInfo.SerializationListEntry>)) return false;
+        
+        sb.AppendLine($"  <List N=\"{entryName}\" Type=\"{entryType.GetGenericArguments()[0].AssemblyQualifiedName}\">");
+                
+        foreach (var o in (IList)entryValue)
+        {
+            if (o is not SerializationInfo.SerializationListEntry entryList) continue;
+            
+            if (entryList.Value is SerializationInfo _info)
+            {
+                sb.AppendLine(
+                    GetData(_info));
+            }
+            else
+            {
+                sb.AppendLine($"    <Item Type=\"{entryList.Value.GetType().AssemblyQualifiedName}\">");
+                sb.AppendLine($"    {entryList.Value}");
+                sb.AppendLine("    </Item>");
+            }
+        }
+        sb.AppendLine("  </List>");
+        return true;
+
+    }
+    
+    /// <summary>
+    /// Try to get a dictionary entry from the serialization info and append it to the StringBuilder.
+    /// </summary>
+    /// <param name="entryType">The type of the entry, should be a Dictionary[KeyType, SerializationInfo.SerializationListEntry]</param>
+    /// <param name="entryName">The name of the entry</param>
+    /// <param name="entryValue">The value of the entry, should be a Dictionary of SerializationInfo.SerializationListEntry</param>
+    /// <param name="sb">The StringBuilder to append the data to</param>
+    /// <returns>True if the entry was a dictionary, false otherwise</returns>
+    protected bool TryGetDictionaryEntry(System.Type? entryType, string entryName, object? entryValue, StringBuilder sb)
+    {
+        if (entryType.GetInterface("IDictionary") == null) return false;
+        
+        sb.AppendLine($"  <Dictionary N=\"{entryName}\" KeyType=\"{entryType.GetGenericArguments()[0].AssemblyQualifiedName}\" ValueType=\"{typeof(SerializationInfo.SerializationListEntry).AssemblyQualifiedName}\">");
+        foreach (DictionaryEntry entry in (IDictionary)entryValue)
+        {
+            SerializationInfo.SerializationListEntry value = (SerializationInfo.SerializationListEntry)entry.Value;
+            sb.AppendLine($"    <Item Type=\"{value.Type}\" Key=\"{entry.Key}\">");
+            if (entry.Value is SerializationInfo.SerializationListEntry entryList)
+            {
+                if (entryList.Value is SerializationInfo _info)
+                {
+                    sb.AppendLine(GetData(_info));
+                }
+                else
+                {
+                    sb.AppendLine($"      {entryList.Value}");
+                }
+            }
+            sb.AppendLine("    </Item>");
+        }
+        sb.AppendLine("  </Dictionary>");
+        return true;
+    }
 }
 
+/// <summary>
+/// This interface should be implemented by classes that need to be serialized.
+/// </summary>
 public interface ISerializable
 {
     public SerializationInfo GetObjectData();
 }
+/// <summary>
+/// This interface should be implemented by classes that need to be deserialized.
+/// </summary>
 public interface IDeserializable
 {
     public void SetObjectData(SerializationInfo info);
 }
 
+/// <summary>
+/// This class is used to hold the deserialization information of an object.
+/// </summary>
 public sealed class DeserializationInfo
 {
     public string Data { get; private set; }
@@ -222,7 +277,7 @@ public sealed class DeserializationInfo
         {
             throw new InvalidOperationException("Failed to parse XML data.", ex);
         }
-        // ObjectType = 
+        
         AssemblyName = XmlData.Root.Attribute("Assembly")?.Value;
         QualifiedName = XmlData.Root.Attribute("QualifiedName")?.Value;
         
@@ -292,7 +347,6 @@ public sealed class DeserializationInfo
             newInfo.AddValue(entryName, value);
         }
         
-        // Then we need to check if the XML contains a <Dictionary> element
         foreach (var entry in XmlData.Root.Elements("Dictionary"))
         {
             _currentElement = entry;
@@ -375,6 +429,13 @@ public sealed class DeserializationInfo
         return obj;
     }
 
+    /// <summary>
+    /// Helper method to convert a string value to the appropriate type.
+    /// </summary>
+    /// <param name="type">The type to convert to</param>
+    /// <param name="valueString">The string value to convert</param>
+    /// <returns>The converted value as an object</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the conversion fails</exception>
     private object ConvertStringToType(System.Type type, string valueString)
     {
         if (type == typeof(string))
@@ -499,6 +560,10 @@ public sealed class DeserializationInfo
                XmlData.Root.Attribute("QualifiedName") != null;
     }
 }
+
+/// <summary>
+/// This class is used to hold the serialization information of an object.
+/// </summary>
 public sealed class SerializationInfo
 {
     public System.Type ObjectType { get; private set; }
@@ -519,6 +584,10 @@ public sealed class SerializationInfo
     
     private Dictionary<string, SerializationEntry> _values = [];
 
+    /// <summary>
+    /// This constructor initializes the SerializationInfo with the type of the object to be serialized.
+    /// </summary>
+    /// <param name="objectType">The type of the object to be serialized.</param>
     public SerializationInfo(System.Type objectType)
     {
         ObjectType = objectType;
@@ -654,7 +723,6 @@ public sealed class SerializationInfo
     
     public bool TryGetValue(string name, out object? value, out System.Type? type)
     {
-        // Implementation for retrieving a value from the serialization info
         if (_values.TryGetValue(name, out SerializationEntry entry))
         {
             value = entry.Value;
@@ -708,7 +776,6 @@ public sealed class SerializationInfo
                             
                             if (item is IDeserializable deserializableItem)
                             {
-                                // If it does, we can set the object data
                                 deserializableItem.SetObjectData(info);
                             }
                             else
@@ -758,7 +825,6 @@ public sealed class SerializationInfo
                             
                         if (item is IDeserializable deserializableItem)
                         {
-                            // If it does, we can set the object data
                             deserializableItem.SetObjectData(info);
                         }
                         else
@@ -810,12 +876,9 @@ public sealed class SerializationInfo
         {
             return true;
         }
-        else
-        {
-            Console.WriteLine(errorMessage);
-            value = defaultValue;
-            return false;
-        }
+        Console.WriteLine(errorMessage);
+        value = defaultValue;
+        return false;
     }
     
     public bool TryGetList<T>(string name, out T? value, T? defaultValue, string errorMessage) where T : IList
@@ -824,17 +887,13 @@ public sealed class SerializationInfo
         {
             return true;
         }
-        else
-        {
-            Console.WriteLine(errorMessage);
-            value = defaultValue;
-            return false;
-        }
+        Console.WriteLine(errorMessage);
+        value = defaultValue;
+        return false;
     }
     
     public List<string> GetNames()
     {
-        // Implementation for getting all values' names
         return _values.Keys.ToList();
     }
 
