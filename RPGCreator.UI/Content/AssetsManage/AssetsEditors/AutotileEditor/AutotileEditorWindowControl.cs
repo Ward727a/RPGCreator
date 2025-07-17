@@ -30,10 +30,6 @@ using RPGCreator.Core.Type.Assets;
 using RPGCreator.UI.Common;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Layout;
 using Avalonia.VisualTree;
@@ -832,7 +828,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 
         public void RegisterEvents()
         {
-            AddAutotileButton.Click += (s, e) =>
+            AddAutotileButton.Click += (_, _) =>
             {
                 SelectedTileset.Groups.Add(new AutotilesGroup($"New Group - {AutotileComboBox.Items.Count}", SelectedTileset));
                 RefreshAutotileCombo();
@@ -848,7 +844,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                 }
             };
             
-            GroupTagsAddButn.Click += (s, e) =>
+            GroupTagsAddButn.Click += (_, _) =>
             {
                 if (SelectedGroup == null)
                     return;

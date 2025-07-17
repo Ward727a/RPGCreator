@@ -36,9 +36,9 @@ using System.Threading.Tasks;
 
 namespace RPGCreator.Core.Type.Project
 {
-    public partial class BaseProject : ObservableObject
+    public partial class BaseProject : ObservableObject, ISerializable, IDeserializable
     {
-
+        public Ulid Id { get; set; } = Ulid.NewUlid();
         public string? Name { get; set; } = "";
         public string? Description { get; set; } = "";
         public string? Path  { get; set; } = "";
@@ -46,6 +46,7 @@ namespace RPGCreator.Core.Type.Project
         public Version? EditorVersion  { get; set; } = new Version(0, 0, 0, 0);
         public bool IsArchived  { get; set; }
         public bool IsFavorite  { get; set; }
+        public bool IsForcedLock { get; set; } = false; // If true, the project cannot be opened in the editor, due to bug or other issues.
         public string? Copyright { get; set; } = "";
         public List<string> Authors { get; set; } = [];
         public List<string> AssetsPackPath = [];
@@ -101,7 +102,7 @@ namespace RPGCreator.Core.Type.Project
             EngineCore.Instance.Data.EditedProject = null;
         }
 
-        public void SaveConfig()
+        public void Save()
         {
             ProjectsConf conf = EngineCore.Instance.Configs.GetConfig<ProjectsConf>("ProjectsConf");
             conf.SaveProject(this, false);
@@ -168,5 +169,59 @@ namespace RPGCreator.Core.Type.Project
             return assets_found;
         }
 
+        public SerializationInfo GetObjectData()
+        {
+            SerializationInfo info = new SerializationInfo(typeof(BaseProject));
+            info.AddValue("id", Id);
+            info.AddValue("name", Name);
+            info.AddValue("description", Description);
+            info.AddValue("path", Path);
+            info.AddValue("version", Version);
+            info.AddValue("editorVersion", EditorVersion);
+            info.AddValue("isArchived", IsArchived);
+            info.AddValue("isFavorite", IsFavorite);
+            info.AddValue("isForcedLock", IsForcedLock);
+            info.AddValue("copyright", Copyright);
+            info.AddValue("authors", Authors);
+            info.AddValue("assetsPackPath", AssetsPackPath);
+            info.AddValue("gameData", GameData);
+            
+            return info;
+        }
+
+        public void SetObjectData(SerializationInfo info)
+        {
+            if (info == null)
+            {
+                throw new ArgumentNullException(nameof(info), "SerializationInfo cannot be null.");
+            }
+
+            info.TryGetValue("id", out Ulid id, Ulid.NewUlid(), "ID not found or invalid (Set to new Ulid by default).");
+            info.TryGetValue("name", out string name, "Unnamed Project", "Name not found or invalid (Set to 'Unnamed Project' by default).");
+            info.TryGetValue("description", out string description, "", "Description not found or invalid (Set to empty string by default).");
+            info.TryGetValue("path", out string path, "", "Path not found or invalid (Set to empty string by default).");
+            info.TryGetValue("version", out Version version, new Version(0, 0, 0, 0), "Version not found or invalid (Set to (0, 0, 0, 0) by default).");
+            info.TryGetValue("editorVersion", out Version editorVersion, new Version(0, 0, 0, 0), "Editor version not found or invalid (Set to (0, 0, 0, 0) by default).");
+            info.TryGetValue("isArchived", out bool isArchived, false, "Is archived not found or invalid (Set to false by default).");
+            info.TryGetValue("isFavorite", out bool isFavorite, false, "Is favorite not found or invalid (Set to false by default).");
+            info.TryGetValue("isForcedLock", out bool isForcedLock, false, "Is forced lock not found or invalid (Set to false by default).");
+            info.TryGetValue("copyright", out string copyright, "", "Copyright not found or invalid (Set to empty string by default).");
+            info.TryGetList("authors", out List<string> authors, [], "Authors not found or invalid (Set to empty list by default).");
+            info.TryGetList("assetsPackPath", out List<string> assetsPackPath, [], "Assets pack path not found or invalid (Set to empty list by default).");
+            info.TryGetValue("gameData", out ProjectGameData gameData, new ProjectGameData(this), "Game data not found or invalid (Set to null by default).");
+
+            Name = name;
+            Description = description;
+            Path = path;
+            Version = version;
+            EditorVersion = editorVersion;
+            IsArchived = isArchived;
+            IsFavorite = isFavorite;
+            IsForcedLock = isForcedLock;
+            Copyright = copyright;
+            Authors = authors;
+            AssetsPackPath = assetsPackPath;
+            GameData = gameData;
+        }
     }
 }

@@ -41,6 +41,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.UI.Common.Windows;
 
 namespace RPGCreator.UI.Content.Editor
 {
@@ -105,6 +106,24 @@ namespace RPGCreator.UI.Content.Editor
                 Header = "Save"
             };
             fileMenuItem.Items.Add(saveFileMenuItem);
+            saveFileMenuItem.Click += (_, _) =>
+            {
+                var loadingModal = new LoadDialog("Saving...", "Saving the current project, please wait...");
+                loadingModal.ShowDialog(_Host).ContinueWith(t =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        // Handle any errors that occurred while saving
+                        Console.WriteLine("Error saving project: " + t.Exception?.Message);
+                    }
+                    else
+                    {
+                        // Successfully saved the project
+                        Console.WriteLine("Project saved successfully.");
+                    }
+                });
+                EngineCore.Instance.Data.EditedProject.Save();
+            };
             var closeFileMenuItem = new MenuItem
             {
                 Header = "Close"

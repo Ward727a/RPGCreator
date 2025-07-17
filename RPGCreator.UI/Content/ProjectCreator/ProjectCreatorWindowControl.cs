@@ -175,7 +175,7 @@ namespace RPGCreator.UI.Content.ProjectCreator
             }
             project.Description = _ProjectDescription;
 
-            project.SaveConfig();
+            project.Save();
 
             ProjectCreated?.Invoke(this, EventArgs.Empty);
         }

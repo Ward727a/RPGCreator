@@ -137,7 +137,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             }
 
             if(shouldSaveConfig)
-                EngineCore.Instance.Data.EditedProject?.SaveConfig();
+                EngineCore.Instance.Data.EditedProject?.Save();
 
             Event.OnAddedPack(args.ToAddedArgs());
         }
