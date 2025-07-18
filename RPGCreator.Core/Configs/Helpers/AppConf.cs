@@ -34,64 +34,92 @@ namespace RPGCreator.Core.Configs.Helpers
 {
     public class AppConf : ConfHelper
     {
-        public struct SAppConfPath
+        public override string ConfigName { get; set; } = "AppConf";
+        
+        public struct SAppConfPath()
         {
-            public string BaseFolder { get; set; }
-            public string AppDataFolder { get; set; }
-            public string AssetsFolder { get; set; }
-            public string StyleFolder { get; set; }
-            public string LogsFolder { get; set; }
-            public string ProjectsFolder { get; set; }
+            public string BaseFolder = AppDomain.CurrentDomain.BaseDirectory;
+            public string AppDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), EngineData.AppName);
+            public string AssetsFolder = $"%APPDATA%/Assets";
+            public string StyleFolder = $"%APPDATA%/Style";
+            public string LogsFolder = $"%APPDATA%/Logs";
+            public string ProjectsFolder = $"%APPDATA%/Projects";
         }
 
-        private XElement _root;
-
-        public SAppConfPath ConfigPath = new();
-
+        public SAppConfPath Paths = new();
 
         public override void LoadConfig()
         {
-
-            if(Doc.Root == null)
+            base.LoadConfig();
+            if (!Directory.Exists(Paths.BaseFolder))
             {
-                throw new Exception("Root is null");
+                Directory.CreateDirectory(Paths.BaseFolder);
             }
-            _root = Doc.Root;
-            LoadFolders();
+            if(!Directory.Exists(Paths.AppDataFolder))
+            {
+                Directory.CreateDirectory(Paths.AppDataFolder);
+            }
+            if (!Directory.Exists(Paths.AssetsFolder))
+            {
+                Directory.CreateDirectory(Paths.AssetsFolder);
+            }
+            if (!Directory.Exists(Paths.StyleFolder))
+            {
+                Directory.CreateDirectory(Paths.StyleFolder);
+            }
+            if (!Directory.Exists(Paths.LogsFolder))
+            {
+                Directory.CreateDirectory(Paths.LogsFolder);
+            }
+            if (!Directory.Exists(Paths.ProjectsFolder))
+            {
+                Directory.CreateDirectory(Paths.ProjectsFolder);
+            }
         }
 
-        protected virtual void LoadFolders()
+        private string FormatPath(string unformattedPath)
         {
-            if (_root.Element("ConfigPath") == null)
-                return;
-
-            XElement confPathElem = _root.Element("ConfigPath")!;
-
-            // Base folder is inside the folder where the .exe is located
-            ConfigPath.BaseFolder = confPathElem.Element("Base")?.Value ?? AppDomain.CurrentDomain.BaseDirectory;
-
-            if (string.IsNullOrEmpty(ConfigPath.BaseFolder))
-                throw new Exception("BaseFolder is null or empty");
-
-            ConfigPath.AppDataFolder = confPathElem.Element("Appdata")?.Value ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), EngineData.AppName);
-
-            ConfigPath.ProjectsFolder = FormatPath(confPathElem.Element("Projects")?.Value ?? string.Empty);
-            ConfigPath.StyleFolder = FormatPath(confPathElem.Element("Style")?.Value ?? string.Empty);
-            ConfigPath.AssetsFolder = FormatPath(confPathElem.Element("Assets")?.Value ?? string.Empty);
-            ConfigPath.LogsFolder = FormatPath(confPathElem.Element("Logs")?.Value ?? string.Empty);
-
+            return unformattedPath.Replace("%BASE_FOLDER%", Paths.BaseFolder).Replace("%APPDATA%", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), EngineData.AppName));
         }
-
-        protected string FormatPath(string unformatted_path)
-        {
-            return unformatted_path.Replace("%BASE_FOLDER%", ConfigPath.BaseFolder).Replace("%APPDATA%", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), EngineData.AppName));
-        }
-
-        public override void Save()
-        {
-            throw new NotImplementedException();
-        }
-
         
+        private string UnformatPath(string formattedPath)
+        {
+            return formattedPath.Replace(Paths.BaseFolder, "%BASE_FOLDER%").Replace(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), EngineData.AppName), "%APPDATA%");
+        }
+
+        public override SerializationInfo GetObjectData()
+        {
+            SerializationInfo info = new SerializationInfo(typeof(AppConf));
+            info.AddValue("base_folder", UnformatPath(Paths.BaseFolder));
+            info.AddValue("appdata_folder", UnformatPath(Paths.AppDataFolder));
+            info.AddValue("assets_folder", UnformatPath(Paths.AssetsFolder));
+            info.AddValue("style_folder", UnformatPath(Paths.StyleFolder));
+            info.AddValue("logs_folder", UnformatPath(Paths.LogsFolder));
+            info.AddValue("projects_folder", UnformatPath(Paths.ProjectsFolder));
+            return info;
+        }
+
+        public override void SetObjectData(SerializationInfo info)
+        {
+            if (info == null)
+            {
+                throw new ArgumentNullException(nameof(info), "SerializationInfo cannot be null.");
+            }
+
+            info.TryGetValue("base_folder", out Paths.BaseFolder!, AppDomain.CurrentDomain.BaseDirectory, "Base folder not found or invalid (Set to current domain base directory by default).");
+            info.TryGetValue("appdata_folder", out Paths.AppDataFolder!, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), EngineData.AppName), "App data folder not found or invalid (Set to ApplicationData path by default).");
+            info.TryGetValue("assets_folder", out Paths.AssetsFolder!, string.Empty, "Assets folder not found or invalid (Set to empty string by default).");
+            info.TryGetValue("style_folder", out Paths.StyleFolder!, string.Empty, "Style folder not found or invalid (Set to empty string by default).");
+            info.TryGetValue("logs_folder", out Paths.LogsFolder!, string.Empty, "Logs folder not found or invalid (Set to empty string by default).");
+            info.TryGetValue("projects_folder", out Paths.ProjectsFolder!, string.Empty, "Projects folder not found or invalid (Set to empty string by default).");
+            
+            Paths.BaseFolder = FormatPath(Paths.BaseFolder);
+            Paths.AppDataFolder = FormatPath(Paths.AppDataFolder);
+            Paths.AssetsFolder = FormatPath(Paths.AssetsFolder);
+            Paths.StyleFolder = FormatPath(Paths.StyleFolder);
+            Paths.LogsFolder = FormatPath(Paths.LogsFolder);
+            Paths.ProjectsFolder = FormatPath(Paths.ProjectsFolder);
+            
+        }
     }
 }

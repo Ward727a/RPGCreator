@@ -26,6 +26,7 @@ using RPGCreator.Core.Configs.Helpers;
 using RPGCreator.Core.Managers.ProjectsManager.Events;
 using RPGCreator.Core.Type.Project;
 using System.Collections.ObjectModel;
+using RPGCreator.Core.Type.Internal;
 
 namespace RPGCreator.Core.Managers.ProjectsManager
 {
@@ -39,22 +40,20 @@ namespace RPGCreator.Core.Managers.ProjectsManager
             Events = new ProjectsManagerEvent();
         }
 
-        public void LoadProject(string project_name)
+        public void LoadProject(Ulid projectId)
         {
             if (EngineCore.Instance.Data.EditedProject != null)
             {
                 UnloadProject();
             }
 
-            var PreArgs = new ProjectsManagerLoadingProjectArgs(project_name);
+            var PreArgs = new ProjectsManagerLoadingProjectArgs(projectId);
 
             Events.OnLoadingProject(PreArgs);
 
             ProjectsConf projectsConf = EngineCore.Instance.Configs.GetConfig<ProjectsConf>("ProjectsConf");
 
-            BaseProject project = projectsConf.Projects.FirstOrDefault(x => x.Name == project_name);
-
-            if (project == null)
+            if (!projectsConf.TryGetProject(projectId, out var project))
             {
                 Events.OnLoadedProject(PreArgs.ToPost(null).SetError(true, "Project not found"));
                 return;
@@ -95,26 +94,28 @@ namespace RPGCreator.Core.Managers.ProjectsManager
 
         public BaseProject? CreateProject(string project_name, string project_path)
         {
-            ProjectsConf conf = EngineCore.Instance.Configs.GetConfig<ProjectsConf>("ProjectsConf");
-            if (conf.Projects.Any(x => x.Name == project_name))
+            if (string.IsNullOrWhiteSpace(project_name))
             {
-                return null;
+                throw new ArgumentException("Project name cannot be null or empty.", nameof(project_name));
+            }
+            if (string.IsNullOrWhiteSpace(project_path))
+            {
+                throw new ArgumentException("Project path cannot be null or empty.", nameof(project_path));
             }
 
-            BaseProject project = new BaseProject(project_name)
+            var newProject = new BaseProject(project_name)
             {
-                Path = project_path,
+                Path = project_path
             };
+            
+            ProjectsConf.Instance.SaveProject(newProject);
 
-            conf.Projects.Add(project);
-            conf.SaveProject(project, true);
-            conf.Save();
-            return project;
+            return newProject;
         }
 
-        public ObservableCollection<BaseProject> GetProjectsList()
+        public List<BaseProjectLink> GetProjectsList()
         {
-            return EngineCore.Instance.Configs.GetConfig<ProjectsConf>("ProjectsConf").Projects;
+            return ProjectsConf.Instance.ProjectLinks;
         }
 
     }

@@ -29,50 +29,96 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using RPGCreator.Core.Type.Internal;
 using static RPGCreator.Core.Configs.EngineConfigs;
+
+/*
+ *
+ * ProjectsConf
+ * ============
+ * This class is used to manage the projects configuration.
+ *
+ * DevNote:
+ * Right now I'm trying to rework the old system that was used to save projects to use the project link system.
+ * It will allow to have a better management, without having to load all the projects at once, and also to not have to save all the projects in 2 different places.
+ * [Ward, 17/07/2025]
+ * 
+ */
 
 namespace RPGCreator.Core.Configs.Helpers
 {
     public class ProjectsConf : ConfHelper
     {
+        public override string ConfigName { get; set; } = "ProjectsConf";
+        public static ProjectsConf Instance { get; private set; }
 
-        public struct SProjectData
+        public List<BaseProjectLink> ProjectLinks { get; private set; } = [];
+
+        public ProjectsConf() : base()
         {
-            public string name;
-            public XElement element;
+            Instance = this;
         }
-
-        public ObservableCollection<BaseProject> Projects { get; private set; } = [];
-
+        
         public void AddProject(BaseProject project)
         {
-            Projects.Add(project);
+            if (project == null)
+            {
+                throw new ArgumentNullException(nameof(project), "Project cannot be null.");
+            }
+
+            var link = BaseProjectLink.CreateLinkFromProject(project);
+            
+            ProjectLinks.Add(link);
+        }
+        
+        public bool TryGetProject(Ulid projectId, out BaseProject? project)
+        {
+            project = null;
+            var link = ProjectLinks.FirstOrDefault(l => l.ProjectID == projectId);
+            if (link != null && link.TryGetProject(out project))
+            {
+                return true;
+            }
+            #if DEBUG
+            throw new KeyNotFoundException($"Project with ID {projectId} not found.");
+            #endif
+            return false;
         }
 
         public void SaveProject(BaseProject project, bool force = false)
         {
-            EngineSerializer.Instance.Serialize(project, out string data, false);
+            EngineSerializer.Instance.Serialize(project, out string projectData, false);
+
+            var link = ProjectLinks.Find(link => link.ProjectID == project.Id);
+            if(link == null)
+            {
+                AddProject(project);
+                link = ProjectLinks.Last();
+            }
             
             if(ConfigPath == null)
             {
                 throw new InvalidOperationException("ConfigPath is not set. Cannot save project.");
             }
             
-            if(!File.Exists(ConfigPath))
-                throw new FileNotFoundException($"Config file not found at {ConfigPath}.");
-
-            if (Root.Elements("project").Any())
+            EngineSerializer.Instance.Serialize(this, out string configData, false);
+            
+            // Save the configuration data to the config file
+            File.WriteAllText(ConfigPath, configData);
+            
+            // Then save the project data to the project config file
+            string projectConfigPath = link.ProjectConfigPath;
+            
+            if (string.IsNullOrEmpty(projectConfigPath))
             {
-                foreach (var xElement in Root.Elements("project"))
-                {
-                    // We do this due to the old system that was used to save projects.
-                    xElement.RemoveAll();
-                }
+                throw new InvalidOperationException("Project config path is not set. Cannot save project.");
             }
+            if (!Directory.Exists(Path.GetDirectoryName(projectConfigPath)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(projectConfigPath)!);
+            }
+            File.WriteAllText(projectConfigPath, projectData);
             
-            XElement ProjectXmlData = XElement.Parse(data);
-            
-            Root.Add(ProjectXmlData);
             Console.WriteLine($"Saved project '{project.Name}' to config at {ConfigPath}.");
             
             // OLD CODE - For Reference Only
@@ -233,103 +279,23 @@ namespace RPGCreator.Core.Configs.Helpers
 //             }
         }
 
-        public override void LoadConfig()
+        public override SerializationInfo GetObjectData()
         {
-
-            if (!Root.HasElements)
-                return;
-            Projects.Clear();
-
-            foreach(XElement project_target in Root.Elements("project"))
-            {
-                if(project_target.Element("do-not-load") != null)
-                {
-                    continue;
-                }
-
-                string? project_config_path = project_target.Element("path")?.Value ?? null;
-                string? project_config_name = project_target.Element("name")?.Value ?? null;
-
-                if (string.IsNullOrEmpty(project_config_path) || !File.Exists(project_config_path))
-                {
-                    project_target.Add(new XElement("do-not-load", "Reason: Project config path is not valid!"));
-                    continue;
-                }
-
-                if(string.IsNullOrEmpty(project_config_name))
-                {
-                    project_target.Add(new XElement("do-not-load", "Reason: Project config name is not valid!"));
-                    continue;
-                }
-
-                XDocument projectDoc;
-                XElement projectElement;
-
-                try
-                {
-                    projectDoc = XDocument.Load(project_config_path);
-                    projectElement = projectDoc.Root;
-                }
-                catch (Exception ex)
-                {
-                    project_target.Add(new XElement("do-not-load", $"Reason: {ex.Message}"));
-                    continue;
-                }
-
-                if (projectElement == null)
-                {
-                    project_target.Add(new XElement("do-not-load", "Reason: Project config path is not valid!"));
-                    continue;
-                }
-
-                if(projectElement.Element("name") == null)
-                {
-                    project_target.Add(new XElement("do-not-load", "Reason: Project config name is not valid!"));
-                    continue;
-                }
-
-                string? project_name = projectElement.Element("name")?.Value ?? null;
-
-                if(string.IsNullOrEmpty(project_name))
-                {
-                    project_target.Add(new XElement("do-not-load", "Reason: Project config name is not valid!"));
-                    continue;
-                }
-
-                if(project_name != project_config_name)
-                {
-                    project_target.Add(new XElement("do-not-load", $"Reason: Project config name from {project_config_path} is not the same as the one in {ConfigPath}!"));
-                    continue;
-                }
-
-                BaseProject project = new(project_name)
-                {
-                    Name = project_name ?? string.Empty,
-                    Path = projectElement.Element("path")?.Value ?? string.Empty,
-                    Description = projectElement.Element("description")?.Value ?? string.Empty,
-                    Version = Version.Parse(projectElement.Element("version")?.Value ?? "0.0.0.0"),
-                    EditorVersion = Version.Parse(projectElement.Element("editorVersion")?.Value ?? "0.0.0.0"),
-                    IsArchived = bool.Parse(projectElement.Element("isArchived")?.Value ?? "false"),
-                    IsFavorite = bool.Parse(projectElement.Element("isFavorite")?.Value ?? "false"),
-                    Copyright = projectElement.Element("copyright")?.Value ?? "",
-                    Authors = projectElement.Element("authors")?.Elements("author").Select(x => x.Value).ToList() ?? [],
-                };
-
-                project.AssetsPackPath = projectElement.Element("packs")?.Elements("pack").Select(x => x.Value).ToList() ?? [];
-
-                Projects.Add(project);
-            }
-
-            return;
+            SerializationInfo info = new SerializationInfo(typeof(ProjectsConf));
+            info.AddValue("projectLinks", ProjectLinks);
+            return info;
         }
 
-        public override void Save()
+        public override void SetObjectData(SerializationInfo info)
         {
-            foreach(BaseProject project in Projects)
+            if (info == null)
             {
-                SaveProject(project);
+                throw new ArgumentNullException(nameof(info), "SerializationInfo cannot be null.");
             }
-            Doc.Save(ConfigPath);
+
+            info.TryGetList("projectLinks", out List<BaseProjectLink> projectLinks, [], "Project links not found or invalid (Set to empty list by default).");
+
+            ProjectLinks = projectLinks;
         }
     }
 }

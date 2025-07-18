@@ -44,7 +44,7 @@ namespace RPGCreator.Core.Type.Project
     /// - Items <br/>
     /// - And more... <br/>
     /// </summary>
-    public partial class ProjectGameData
+    public partial class ProjectGameData : ISerializable, IDeserializable
     {
 
         private BaseProject Project;
@@ -56,5 +56,24 @@ namespace RPGCreator.Core.Type.Project
             Project = project;
         }
 
+        public SerializationInfo GetObjectData()
+        {
+            SerializationInfo info = new SerializationInfo(typeof(ProjectGameData));
+            info.AddValue("Maps", Maps);
+            // Add other properties as needed
+            return info;
+        }
+
+        public void SetObjectData(SerializationInfo info)
+        {
+            if (info == null) throw new ArgumentNullException(nameof(info));
+
+            info.TryGetList("Maps", out Maps, [], "Could not load Maps from project game data.");
+            // Set other properties as needed
+            if (Maps == null)
+            {
+                Maps = new ObservableCollection<BaseMap>();
+            }
+        }
     }
 }

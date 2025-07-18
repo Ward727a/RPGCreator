@@ -32,17 +32,11 @@ using System.Threading.Tasks;
 
 namespace RPGCreator.Core.Managers.ProjectsManager.Events
 {
-    public class ProjectsManagerLoadedProjectArgs : BasePostEventArgs<ProjectsManagerLoadedProjectArgs>
+    public class ProjectsManagerLoadedProjectArgs(Ulid loadedProjectId, BaseProject? loadedProject)
+        : BasePostEventArgs<ProjectsManagerLoadedProjectArgs>
     {
 
-        public readonly string LoadedProjectName;
-        public readonly BaseProject? LoadedProject;
-
-        public ProjectsManagerLoadedProjectArgs(string loadedProjectName, BaseProject? loadedProject)
-        {
-            LoadedProjectName = loadedProjectName;
-            LoadedProject = loadedProject;
-        }
-
+        public readonly Ulid LoadedProjectId = loadedProjectId;
+        public readonly BaseProject? LoadedProject = loadedProject;
     }
 }

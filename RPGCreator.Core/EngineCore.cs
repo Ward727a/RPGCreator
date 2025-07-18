@@ -74,12 +74,12 @@ namespace RPGCreator.Core
             Instance = this;
 
             Scheduler = new EngineScheduler();
+            Serializer = new EngineSerializer();
             Configs = new EngineConfigs();
             Data = new EngineData();
             Events = new EngineEvents();
             Managers = new EngineManagers();
             Modules = new EngineModules();
-            Serializer = new EngineSerializer();
 
             Managers.Init();
 

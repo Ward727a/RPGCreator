@@ -271,16 +271,22 @@ namespace RPGCreator.UI.Content.Launcher
             _ProjectStackPanel.Children.Clear();
 
             // Add a list of projects to the projectStackPanel
-            var projects = EngineCore.Instance.Managers.Projects.GetProjectsList();
+            var projectLinks = EngineCore.Instance.Managers.Projects.GetProjectsList();
 
-            foreach (var project in projects)
+            foreach (var projectLink in projectLinks)
             {
-                var projectItem = new LauncherProjectItem(project);
-                _ProjectStackPanel.Children.Add(projectItem);
-                projectItem.ProjectSelected += OnSelectProject;
-                Console.WriteLine($"Found project: {project.Name} at path {project.Path}");
+                if (projectLink.TryGetProject(out var project))
+                {
+                    var projectItem = new LauncherProjectItem(project);
+                    _ProjectStackPanel.Children.Add(projectItem);
+                    projectItem.ProjectSelected += OnSelectProject;
+                    Console.WriteLine($"Found project: {project.Name} at path {project.Path}");
+                }
+                else
+                {
+                    Console.WriteLine($"Project link with ID {projectLink.ProjectID} could not be resolved to a project.");
+                }
             }
-
         }
 
         #region EventHandler

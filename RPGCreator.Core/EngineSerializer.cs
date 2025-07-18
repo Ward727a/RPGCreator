@@ -14,10 +14,14 @@ namespace RPGCreator.Core;
  *
  * DevNote:
  * I still need to clean up the code, and make it more readable. (Done in someway, but it probably needs more work [Ward727, 15/07/2025])
- * I would want to add more features to it, like the support for custom save formats (like JSON, YAML, etc.) with easy extensibility. (LATER ON, FIRST VERSION IS XML ONLY)
+ * I would want to add more features to it, like the support for custom output formats (like JSON, YAML, etc.) with easy extensibility. (LATER ON, FIRST VERSION IS XML ONLY)
  * But for now, I need to focus on cleaning all of this. [Ward727, 14/07/2025]
  * ============================
  * I added a version to the object data, but for now it's hardcoded, I still need to think about how to handle versioning in the future. [Ward727, 15/07/2025]
+ * ============================
+ * I want to add a way to reduce types in the string data, for this I could use a mapping dictionary that maps types to strings, and then add a <TypeMapping> element at the top of the XML data.
+ * For this, I could see to automatically generate the mapping dictionary inside the SerializationInfo class (ex: AddValue => Check if the type is already in the mapping dictionary, if not, add it).
+ * [Ward727, 18/07/2025]
  * 
  */
 
@@ -90,18 +94,15 @@ public class EngineSerializer
 
         try
         {
-            // Here you would parse the XML and populate the SerializationInfo object
-            // For simplicity, this example assumes the data is already in the correct format
-            // You would need to implement XML parsing logic here
-            Console.WriteLine("Deserialization completed successfully.");
-            
             var info = new DeserializationInfo(data);
             obj = info.GetObject();
+            type = info.ObjectType;
             if (obj == null)
             {
                 Console.WriteLine("Deserialization failed: Object is null.");
                 return;
             }
+            Console.WriteLine("Deserialization completed successfully.");
         }
         catch (Exception ex)
         {
@@ -110,7 +111,7 @@ public class EngineSerializer
 
         
     }
-
+    
     /// <summary>
     /// Get the data from the serialization info and convert it to a string.
     /// </summary>
@@ -133,6 +134,12 @@ public class EngineSerializer
             
             if (TryGetListEntry(entryType, entryName, entryValue, sb) || TryGetDictionaryEntry(entryType, entryName, entryValue, sb))
                 continue;
+
+            if(entryValue is SerializationInfo serializationInfo)
+            {
+                sb.AppendLine(GetData(serializationInfo));
+                continue;
+            }
             
             sb.AppendLine($"  <Value V=\"{entryName}\" Type=\"{entryType.AssemblyQualifiedName}\">");
             sb.AppendLine($"    {entryValue}");
@@ -448,7 +455,7 @@ public sealed class DeserializationInfo
         if (type.IsEnum)
             return Enum.Parse(type, valueString);
 
-        if (type.GetInterfaces().Contains(typeof(IList)))
+        if (typeof(IList).IsAssignableTo(type))
         {
 
             object? list = null;
@@ -540,6 +547,18 @@ public sealed class DeserializationInfo
             }
             return dict;
         }
+
+        if (typeof(SerializationInfo).IsAssignableTo(type))
+        {
+            EngineSerializer.Instance.Deserialize(valueString, out var o, out var t);
+            if (o == null || t == null)
+            {
+                Console.WriteLine($"Failed to deserialize object of type {type.FullName} from string.");
+                return null;
+            }
+            
+            return o;
+        }
         
         try
         {
@@ -609,7 +628,7 @@ public sealed class SerializationInfo
             return;
         var value = obj.GetObjectData();
         
-        _values[name] = new SerializationEntry(value, value.GetType());
+        _values[name] = new SerializationEntry(value, value.ObjectType);
     }
 
     public void AddValue(string name, IDictionary obj)

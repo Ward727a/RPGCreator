@@ -6,7 +6,7 @@ namespace RPGCreator.Core.Type.Internal;
 
 public class BaseProjectLink : ISerializable, IDeserializable
 {
-    public Ulid Id = Ulid.NewUlid();
+    public Ulid ProjectID = Ulid.NewUlid();
     public string ProjectConfigPath = "";
 
     public bool TryGetProject(out BaseProject? project)
@@ -34,7 +34,7 @@ public class BaseProjectLink : ISerializable, IDeserializable
     public static BaseProjectLink CreateLinkFromProject(BaseProject project)
     {
         BaseProjectLink link = new BaseProjectLink();
-        link.Id = project.Id;
+        link.ProjectID = project.Id;
         link.ProjectConfigPath = Path.Combine(project.Path ?? "", $"project.config.xml");
         return link;
     }
@@ -46,14 +46,14 @@ public class BaseProjectLink : ISerializable, IDeserializable
     public SerializationInfo GetObjectData()
     {
         SerializationInfo info = new SerializationInfo(typeof(BaseProjectLink));
-        info.AddValue("id", Id);
+        info.AddValue("id", ProjectID);
         info.AddValue("project_config_path", ProjectConfigPath);
         return info;
     }
 
     public void SetObjectData(SerializationInfo info)
     {
-        info.TryGetValue("id", out Id);
+        info.TryGetValue("id", out ProjectID);
         info.TryGetValue("project_config_path", out ProjectConfigPath);
     }
 }

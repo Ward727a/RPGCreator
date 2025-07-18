@@ -65,7 +65,11 @@ namespace RPGCreator.Core.Type.Project
 
         #endregion
 
-
+        public BaseProject()
+        {
+            Event = new ProjectEvent();
+        }
+        
         public BaseProject(string name)
         {
             Name = name;
@@ -185,7 +189,6 @@ namespace RPGCreator.Core.Type.Project
             info.AddValue("authors", Authors);
             info.AddValue("assetsPackPath", AssetsPackPath);
             info.AddValue("gameData", GameData);
-            
             return info;
         }
 
@@ -222,6 +225,10 @@ namespace RPGCreator.Core.Type.Project
             Authors = authors;
             AssetsPackPath = assetsPackPath;
             GameData = gameData;
+            GameData.Maps.CollectionChanged += (_, _) =>
+            {
+                Event.OnMapsListChanged();
+            };
         }
     }
 }

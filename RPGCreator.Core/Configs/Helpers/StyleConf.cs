@@ -33,12 +33,19 @@ namespace RPGCreator.Core.Configs.Helpers
 {
     public class StyleConf : ConfHelper
     {
+        public override string ConfigName { get; set; } = "StyleConf";
+
         public override void LoadConfig()
         {
             return;
         }
 
-        public override void Save()
+        public override SerializationInfo GetObjectData()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void SetObjectData(SerializationInfo info)
         {
             throw new NotImplementedException();
         }

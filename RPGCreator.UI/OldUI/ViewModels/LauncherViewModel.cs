@@ -81,7 +81,7 @@ public partial class LauncherViewModel : ViewModelBase
 
         if (_projectsConf != null)
         {
-            ItemsList = _projectsConf.Projects;
+            // ItemsList = _projectsConf.Projects;
         }
         else
             throw new Exception("Couldn't get the project configuration object.");
@@ -112,7 +112,7 @@ public partial class LauncherViewModel : ViewModelBase
 
         EngineCore.Instance.Managers.Projects.Events.LoadedProject += Handler;
 
-        EngineCore.Instance.Managers.Projects.LoadProject(project_name);
+        // EngineCore.Instance.Managers.Projects.LoadProject(project_name);
 
         //ConfigurationService config = App.Services.GetRequiredService<ConfigurationService>();
 
