@@ -200,21 +200,18 @@ namespace RPGCreator.Core.Configs
 
         public T? GetConfig<T>(string configName) where T : ConfHelper
         {
-            if (LoadedConfig.ContainsKey(configName))
+            if (ConfigMap.TryGetValue(configName, out var configPath))
             {
-                if (LoadedConfig[configName] is T conf)
+                if (TryLoadConfig(configPath, out var confObject, out var confType))
                 {
-                    return conf;
-                }
-                else
-                {
-                    return null;
+                    if (confType == null || !typeof(T).IsAssignableFrom(confType))
+                    {
+                        return null;
+                    }
+                    return (T)confObject;
                 }
             }
-            else
-            {
-                return null;
-            }
+            return null;
         }
 
         public string GetPath(string config)

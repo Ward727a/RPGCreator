@@ -227,6 +227,11 @@ public class EngineSerializer
 /// </summary>
 public interface ISerializable
 {
+    /// <summary>
+    /// This method should return a <see cref="SerializationInfo"/> object that contains the data to be serialized.<br/>
+    /// It should include all the properties and fields that need to be serialized.<br/>
+    /// </summary>
+    /// <returns>SerializationInfo object containing the data to be serialized</returns>
     public SerializationInfo GetObjectData();
 }
 /// <summary>
@@ -234,6 +239,11 @@ public interface ISerializable
 /// </summary>
 public interface IDeserializable
 {
+    /// <summary>
+    /// This method should set the object data from the <see cref="SerializationInfo"/> object.<br/>
+    /// It should work in conjunction with <see cref="ISerializable.GetObjectData"/>.<br/>
+    /// </summary>
+    /// <param name="info">The <see cref="SerializationInfo"/> object containing the data to be set, which should be the same as the one returned by <see cref="ISerializable.GetObjectData"/>.</param>
     public void SetObjectData(SerializationInfo info);
 }
 

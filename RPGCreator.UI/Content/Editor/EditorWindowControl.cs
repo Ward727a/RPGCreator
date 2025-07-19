@@ -38,6 +38,7 @@ using RPGCreator.UI.Content.Editor.Toolbar;
 using RPGCreator.UI.Content.Preferences;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -100,6 +101,28 @@ namespace RPGCreator.UI.Content.Editor
             {
                 Header = "Open..."
             };
+            var openProjectFolderMenuItem = new MenuItem
+            {
+                Header = "Open Project Folder"
+            };
+            openProjectFolderMenuItem.Click += (_, _) =>
+            {
+                // Open the project folder in the file explorer
+                var projectPath = EngineCore.Instance.Data.EditedProject.Path;
+                if (!string.IsNullOrEmpty(projectPath))
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = projectPath,
+                        UseShellExecute = true
+                    });
+                }
+                else
+                {
+                    Console.WriteLine("Project path is not set.");
+                }
+            };
+            openFileMenuItem.Items.Add(openProjectFolderMenuItem);
             fileMenuItem.Items.Add(openFileMenuItem);
             var saveFileMenuItem = new MenuItem
             {

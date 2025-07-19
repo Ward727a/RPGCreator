@@ -51,7 +51,7 @@ namespace RPGCreator.Core.Managers.ProjectsManager
 
             Events.OnLoadingProject(PreArgs);
 
-            ProjectsConf projectsConf = EngineCore.Instance.Configs.GetConfig<ProjectsConf>("ProjectsConf");
+            ProjectsConf projectsConf = ProjectsConf.Instance;
 
             if (!projectsConf.TryGetProject(projectId, out var project))
             {

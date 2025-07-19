@@ -85,13 +85,6 @@ namespace RPGCreator.Core.Type.Project
         {
             EngineCore.Instance.Managers.Assets.ClearAssetsPacks();
 
-            //TODO: Need to switch to AssetsManager for this!
-
-            //foreach (string packPath in AssetsPackPath)
-            //{
-            //    EngineCore.Instance.Managers.AssetsPack.LoadAssetsPack(packPath);
-            //}
-
             foreach (string packPath in AssetsPackPath)
             {
                 EngineCore.Instance.Managers.Assets.LoadPack(packPath);
