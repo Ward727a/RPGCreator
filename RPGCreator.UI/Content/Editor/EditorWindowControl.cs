@@ -162,16 +162,35 @@ namespace RPGCreator.UI.Content.Editor
             {
                 Header = "Edit"
             };
+            menuBar.Items.Add(editMenuItem);
+            var openTestDialogMenuItem = new MenuItem
+            {
+                Header = "Open Test Dialog"
+            };
+            openTestDialogMenuItem.Click += (_, _) =>
+            {
+                // Open the testing dialog
+                var testDialog = new TestingDialog();
+                testDialog.ShowDialog(_Host).ContinueWith(t =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        // Handle any errors that occurred while showing the dialog
+                        Console.WriteLine("Error showing test dialog: " + t.Exception?.Message);
+                    }
+                });
+            };
+            editMenuItem.Items.Add(openTestDialogMenuItem);
             var undoEditMenuItem = new MenuItem
             {
                 Header = "Undo"
             };
-            menuBar.Items.Add(editMenuItem);
+            editMenuItem.Items.Add(undoEditMenuItem);
             var redoEditMenuItem = new MenuItem
             {
                 Header = "Redo"
             };
-            editMenuItem.Items.Add(undoEditMenuItem);
+            editMenuItem.Items.Add(redoEditMenuItem);
             var projectSettingsMenuItem = new MenuItem
             {
                 Header = "Project Settings"

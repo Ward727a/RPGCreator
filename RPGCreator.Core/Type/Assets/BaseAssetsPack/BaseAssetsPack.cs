@@ -33,17 +33,37 @@ using System.Xml.Linq;
 
 namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
 {
+    
+    /*
+     * BaseAssetsPack.cs
+     * =================
+     * This class represents a pack of assets in RPG Creator.
+     *
+     * DevNote:
+     * Right now, the assetsfolder variable is totally fucked, it should be set to the path of the assets folder,
+     * but when creating a new pack, it is set successfully, but when loading an existing pack, it is not set (or set to a wrong path / random ID).
+     * I NEED to fix this ASAP, because it is a major issue.
+     * [Ward727, 26/07/2025]
+     *
+     * 
+     */
+    
     public class BaseAssetsPack : ISerializable, IDeserializable
     {
 
+        // For now it's quite useless, but it will be used in the future to handle errors when loading assets packs.
         public bool ErrorOnLoad { get; private set; } = false;
 
-        public Dictionary<string, BaseAsset> Assets = [];
+        public Dictionary<string, BaseAsset> AssetsCache = [];
+        public Dictionary<string, string> AssetsPaths = [];
         public readonly BaseAssetsPackEvents Events = new();
 
         public string ConfigPath;
+        public string AssetsFolder;
+        [Obsolete("Need to remove this property, use AssetsCache instead.")]
         public XDocument ConfigDocument;
 
+        // Will probably be removed in the future, as it is not used anymore.
         public enum PACK_TYPE
         {
             UNKNOWN,
@@ -58,7 +78,7 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
 
         public BaseAssetsPack()
         {
-            ConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RPG Creator", "AssetsPacks", $"{Id}.xml");
+            ConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RPG Creator", "AssetsPacks",$"{Id}.xml");
         }
 
         public BaseAssetsPack(string configPath)
@@ -69,12 +89,10 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
             {
                 throw new Exception($"Error loading assets pack from path {ConfigPath}.");
             }
-            LoadAssets();
         }
 
-        protected virtual void LoadFromFile()
+        private void LoadFromFile()
         {
-
             if(string.IsNullOrEmpty(ConfigPath))
             {
                 ErrorOnLoad = true;
@@ -87,50 +105,64 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
                 throw new Exception($"Config file at path {ConfigPath} doesn't exist.");
             }
 
-            ConfigDocument ??= XDocument.Load(ConfigPath);
-            //            // For now we will use the parse for testing
-            //            ConfigDocument ??= XDocument.Parse(@"<?xml version=""1.0"" encoding=""utf-8""?>
-            //<pack>
-            //    <meta>
-            //        <name>Test</name>
-            //        <description>Test</description>
-            //        <type>PACK</type>
-            //    </meta>
-            //    <assets>
-            //        <asset>
-            //            <type>TILESETS</type>
-            //            <name>test.png</name>
-            //            <file_path>C:\Users\Ward\AppData\Roaming\RPG Creator\Assets\Tilesets\Spring Tile.png</file_path>
-            //            <tile_width>16</tile_width>
-            //            <tile_height>16</tile_height>
-            //         </asset>
-            //    </assets>
-            //</pack>
-            //");
-
-            XElement? root = ConfigDocument.Root;
-
-            if (root == null)
+            EngineSerializer.Instance.Deserialize(File.ReadAllText(ConfigPath), out object? pack, out System.Type? type);
+            if (type != typeof(BaseAssetsPack))
             {
                 ErrorOnLoad = true;
-                throw new Exception($"Config file at path {ConfigPath} is not valid.");
+                throw new Exception($"Loaded object is not a BaseAssetsPack, but {type?.Name ?? "null"}.");
             }
-
-            XElement meta = root.Element("meta") ?? throw new Exception($"Config file at path {ConfigPath} is not valid.");
-
-            Id = Ulid.Parse(meta.Element("id")?.Value ?? Ulid.NewUlid().ToString());
-            Name = meta.Element("name")?.Value ?? Path.GetFileNameWithoutExtension(ConfigPath);
-            Description = meta.Element("description")?.Value ?? "No description.";
-            Type = (PACK_TYPE)Enum.Parse(typeof(PACK_TYPE), meta.Element("type")?.Value ?? "UNKNOWN");
-
-            if(Type == PACK_TYPE.UNKNOWN)
+            if (pack is not BaseAssetsPack assetsPack)
             {
                 ErrorOnLoad = true;
-                throw new Exception($"Config file at path {ConfigPath} is not valid.");
+                throw new Exception("Loaded object is not a BaseAssetsPack.");
             }
+            foreach (var pathPair in assetsPack.AssetsPaths)
+            {
+                var assetID = pathPair.Key;
+                var assetPath = pathPair.Value;
+                
+                if (string.IsNullOrEmpty(assetID) || string.IsNullOrEmpty(assetPath))
+                {
+                    ErrorOnLoad = true;
+                    throw new Exception($"Asset ID or path is null or empty. ID: {assetID}, Path: {assetPath}");
+                }
+                if (AssetsCache.ContainsKey(assetID))
+                {
+                    ErrorOnLoad = true;
+                    throw new Exception($"Asset at path {assetPath} already exists in the pack.");
+                }
 
+                if (!File.Exists(assetPath))
+                {
+                    ErrorOnLoad = true;
+                    throw new Exception($"Asset file at path {assetPath} doesn't exist.");
+                }
+                
+                EngineSerializer.Instance.Deserialize(File.ReadAllText(assetPath), out var asset, out var assetType);
+                if (!typeof(BaseAsset).IsAssignableFrom(assetType))
+                {
+                    ErrorOnLoad = true;
+                    throw new Exception($"Loaded asset is not a valid asset, but {assetType.Name}.");
+                }
+
+                if(asset is BaseAsset baseAsset)
+                {
+                    AssetsCache[assetID] = baseAsset;
+                }
+                else
+                {
+                    ErrorOnLoad = true;
+                    throw new Exception($"Loaded asset is not a BaseAsset, but {assetType.Name} (weird, should not happen here?).");
+                }
+            }
+            Name = assetsPack.Name;
+            Description = assetsPack.Description;
+            Type = assetsPack.Type;
+            Id = assetsPack.Id;
+            ConfigPath = assetsPack.ConfigPath;
         }
 
+        [Obsolete("This method should not be used. Use LoadFromFile() method instead.")]
         public void LoadAssets()
         {
             var root = ConfigDocument.Root;
@@ -150,6 +182,7 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
             }
         }
 
+        [Obsolete("This method need to be refactored to use the new serialization system.")]
         protected virtual void AddAssetFromFile(XElement assetElem)
         {
             var assetType = assetElem.Element("type")?.Value ?? "UNKNOWN";
@@ -180,7 +213,7 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
                 throw new Exception($"Asset path is null or empty.");
             }
 
-            if (Assets.ContainsKey(asset_path))
+            if (AssetsCache.ContainsKey(asset_path))
             {
                 asset_path = $"{asset_path}_{Guid.NewGuid()}";
                 asset.PackPath = asset_path;
@@ -203,9 +236,7 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
                 }
             }
 
-            Assets.Add(asset_path, asset);
-
-            //SaveAsset(asset);
+            AssetsCache.Add(asset_path, asset);
         }
 
         public BaseAsset? GetAsset(string path)
@@ -216,7 +247,7 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
             if(preArgs.Cancel)
                 return null;
 
-            if(Assets.TryGetValue(path, out BaseAsset? asset))
+            if(AssetsCache.TryGetValue(path, out BaseAsset? asset))
             {
                 Events.OnAssetGot(preArgs.ToPost(asset));
                 return asset;
@@ -229,7 +260,7 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
 
         public bool HasAssetOfType(BaseAsset.TYPE type)
         {
-            return Assets.Values.Any(asset => asset.Type == type);
+            return AssetsCache.Values.Any(asset => asset.Type == type);
         }
 
         public void UpdateAsset<T>(T asset) where T : BaseAsset
@@ -238,7 +269,7 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
             {
                 throw new ArgumentNullException(nameof(asset), "Asset cannot be null.");
             }
-            if (!Assets.ContainsKey(asset.PackPath))
+            if (!AssetsCache.ContainsKey(asset.PackPath))
             {
                 throw new KeyNotFoundException($"Asset at path {asset.PackPath} does not exist in the pack.");
             }
@@ -247,7 +278,7 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
                 throw new InvalidOperationException($"Asset {asset.Name} doesn't belong to this pack (Belong to: {asset.PackName}).");
             }
 
-            SaveAsset(asset);
+            asset.Save();
         }
 
         public bool MoveAsset(string oldPath, string newPath)
@@ -257,14 +288,14 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
             Events.OnAssetMoving(preArgs);
             if (preArgs.Cancel)
                 return false;
-            if (!Assets.TryGetValue(oldPath, out BaseAsset? asset))
+            if (!AssetsCache.TryGetValue(oldPath, out BaseAsset? asset))
             {
                 Events.OnAssetMoved(preArgs.ToPost(asset).SetError(true, $"Asset at path {oldPath} doesn't exist."));
                 return false;
             }
-            Assets.Remove(oldPath);
+            AssetsCache.Remove(oldPath);
             asset.PackPath = newPath;
-            Assets.Add(newPath, asset);
+            AssetsCache.Add(newPath, asset);
             Events.OnAssetMoved(preArgs.ToPost(asset));
             return true;
         }
@@ -275,7 +306,7 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
             Events.OnAssetRemoving(preArgs);
             if (preArgs.Cancel)
                 return false;
-            if (!Assets.Remove(path, out BaseAsset? asset))
+            if (!AssetsCache.Remove(path, out BaseAsset? asset))
             {
                 Events.OnAssetRemoved(preArgs.ToPost().SetError(true, $"Asset at path {path} doesn't exist."));
                 return false;
@@ -291,7 +322,7 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
             Events.OnAssetRemoving(preArgs);
             if (preArgs.Cancel)
                 return false;
-            if (!Assets.Remove(asset.PackPath, out BaseAsset? _))
+            if (!AssetsCache.Remove(asset.PackPath, out BaseAsset? _))
             {
                 Events.OnAssetRemoved(preArgs.ToPost().SetError(true, $"Asset at path {asset.PackPath} doesn't exist."));
                 return false;
@@ -326,16 +357,22 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
                 return;
             }
 
-            if (!Assets.TryAdd(asset.PackPath, asset))
+            if (!AssetsCache.TryAdd(asset.Unique.ToString(), asset))
             {
                 Events.OnAssetAdded(PreArgs.ToPost().SetError(true, $"Asset at path {asset.Name} already exist."));
                 return;
             }
-            SaveAsset(asset);
+
+            if (string.IsNullOrEmpty(asset.AssetPath))
+            {
+                asset.AssetPath = Path.Combine(AssetsFolder, $"{asset.Unique}.xml");
+            }
+            AssetsPaths[asset.Unique.ToString()] = asset.AssetPath;
 
             Events.OnAssetAdded(PreArgs.ToPost());
         }
 
+        [Obsolete("This method should not be used. Use AddAsset<T>(T Asset) method instead.")]
         public void AddAsset<T>(string path, T asset) where T : BaseAsset
         {
             var PreArgs = new BaseAssetsPackAddingArgs(path, asset);
@@ -356,186 +393,39 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
 
             asset.PackPath = path;
 
-            if (!Assets.TryAdd(path, asset))
+            if (!AssetsCache.TryAdd(path, asset))
             {
                 Events.OnAssetAdded(PreArgs.ToPost().SetError(true, $"Asset at path {path} already exist."));
                 return;
             }
 
-            SaveAsset(asset);
+            asset.Save();
 
             Events.OnAssetAdded(PreArgs.ToPost());
         }
 
-        public BaseAsset? AddAsset(string path)
-        {
-            var preArgs = new BaseAssetsPackAddingArgs(path);
-            Events.OnAssetAdding(preArgs);
-
-            if(preArgs.Cancel)
-                return null;
-
-            string assetName;
-
-            if (path.Contains('/'))
-            {
-                var pathSplit = path.Split("/");
-                assetName = pathSplit[^1];
-            }
-            else
-                assetName = path;
-
-            if (!Assets.TryAdd(path, new BaseAsset(assetName) { PackPath = path, PackName = Name }))
-            {
-                Events.OnAssetAdded(preArgs.ToPost().SetError(true, $"Asset at path {path} already exist."));
-                return null;
-            }
-
-            Events.OnAssetAdded(preArgs.ToPost(Assets[path]));
-
-            return Assets[path];
-        }
-
-        public void SaveAsset<T>(T asset) where T : BaseAsset
-        {
-            if(asset == null)
-            {
-                throw new ArgumentNullException(nameof(asset), "Asset cannot be null.");
-            }
-
-            if(asset.PackName != Name)
-            {
-                throw new InvalidOperationException($"Asset {asset.Name} doesn't belong to this pack (Belong to: {asset.PackName}).");
-            }
-
-            if(ConfigDocument == null)
-            {
-                if(string.IsNullOrEmpty(Name) || string.IsNullOrEmpty(Description) || Type == PACK_TYPE.UNKNOWN)
-                {
-                    throw new InvalidOperationException("Pack name, description or type is not set and no configuration document found.");
-                }
-
-                CreateXMLDocument();
-                if(ConfigDocument == null)
-                {
-                    throw new InvalidOperationException("Configuration document is null and couldn't be created.");
-                }
-            }
-
-            asset.Save();
-
-            if(asset.AssetData == null)
-            {
-                throw new InvalidOperationException($"Asset data for {asset.Name} is null.");
-            }
-
-            XElement? assetsElement = ConfigDocument.Root?.Element("assets");
-            if (assetsElement == null)
-            {
-                throw new InvalidOperationException("Assets element in configuration document is null.");
-            }
-
-            XElement? existingAsset = assetsElement.Elements("asset").FirstOrDefault(a => a.Element("unique")?.Value == asset.Unique.ToString());
-            if (existingAsset != null)
-            {
-                existingAsset.ReplaceWith(asset.AssetData);
-            }
-            else
-            {
-                assetsElement.Add(asset.AssetData);
-            }
-
-            ConfigDocument.Save(ConfigPath);
-
-            EngineCore.Instance.Managers.Assets.Event.OnUpdatedAsset(new Managers.AssetsManager.EventsArgs.AssetsManagerUpdatedAssetArgs(asset.Type, asset));
-        }
-
+        [Obsolete("This method should not be used. Use Save() method instead.")]
         public void CreateXMLDocument()
         {
-            if(ConfigDocument != null)
-            {
-                return; // Already created
-            }
-
-            ConfigDocument = new XDocument(
-                new XElement("pack",
-                    new XElement("meta",
-                        new XElement("name", Name),
-                        new XElement("description", Description),
-                        new XElement("type", Type.ToString()),
-                        new XElement("id", Id.ToString())
-                    ),
-                    new XElement("assets")
-                )
-            );
-
-            // Save the document to the config path
-            if (!string.IsNullOrEmpty(ConfigPath))
-            {
-                
-                string configDir = Path.GetDirectoryName(ConfigPath) ?? throw new InvalidOperationException("Config path directory cannot be null.");
-                if (!Directory.Exists(configDir))
-                {
-                    Directory.CreateDirectory(configDir);
-                }
-            }
-            else
-            {
-                // Or else, create a default path
-                ConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RPG Creator", "AssetsPacks", $"{Id}.xml");
-                Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath) ?? throw new InvalidOperationException("Config path directory cannot be null."));
-            }
-
-            ConfigDocument.Save(ConfigPath);
         }
 
         public void Save()
         {
-            if(ConfigDocument == null)
+            EngineSerializer.Instance.Serialize(this, out string packStringData, false);
+            if (string.IsNullOrEmpty(ConfigPath))
             {
-                CreateXMLDocument();
+                throw new InvalidOperationException("Config path is not set. Cannot save assets pack.");
             }
-            if(ConfigDocument != null)
+            if (!Directory.Exists(Path.GetDirectoryName(ConfigPath)))
             {
-
-                // Update the asset data in the configuration document
-
-                XElement? assetsElement = ConfigDocument.Root?.Element("assets");
-                if (assetsElement == null)
-                {
-                    throw new InvalidOperationException("Assets element in configuration document is null.");
-                }
-
-                var assetsList = assetsElement.Elements("asset").ToList();
-
-                foreach (var asset in Assets.Values)
-                {
-                    XElement? existingAsset = assetsElement.Elements("asset").FirstOrDefault(a => a.Element("unique")?.Value == asset.Unique.ToString());
-                    if (existingAsset != null)
-                    {
-                        assetsList.Remove(existingAsset);
-                        existingAsset.ReplaceWith(asset.AssetData);
-                    }
-                    else
-                    {
-                        assetsElement.Add(asset.AssetData);
-                    }
-                }
-
-                // Remove any assets that are not in the current Assets dictionary
-                foreach (var asset in assetsList)
-                {
-                    if (!Assets.Values.Any(a => a.Unique.ToString() == asset.Element("unique")?.Value))
-                    {
-                        asset.Remove();
-                    }
-                }
-
-                ConfigDocument.Save(ConfigPath);
+                Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath)!);
             }
-            else
+            File.WriteAllText(ConfigPath, packStringData);
+            
+            // Save each asset in the pack
+            foreach (var asset in AssetsCache.Values)
             {
-                throw new InvalidOperationException("Configuration document is null and couldn't be created.");
+                asset.Save();
             }
         }
 
@@ -547,7 +437,7 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
             info.AddValue("Description", Description ?? "");
             info.AddValue("Type", Type);
             info.AddValue("Id", Id);
-            info.AddValue("Assets", Assets);
+            info.AddValue("Assets", AssetsPaths);
             return info;
         }
 
@@ -558,7 +448,19 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
             info.TryGetValue("Description", out Description, "");
             info.TryGetValue("Type", out Type, PACK_TYPE.UNKNOWN, "Field 'Type' not found in serialization info.");
             info.TryGetValue("Id", out Id, Ulid.NewUlid(), "Field 'Id' not found in serialization info.");
-            info.TryGetDictionary("Assets", out Assets);
+            info.TryGetDictionary("Assets", out AssetsPaths);
+            
+            AssetsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RPG Creator", "AssetsPacks", Id.ToString());
+            if (Directory.Exists(AssetsFolder)) return;
+            
+            try
+            {
+                Directory.CreateDirectory(AssetsFolder);
+            } catch (Exception ex)
+            {
+                ErrorOnLoad = true;
+                throw new Exception($"Error creating assets folder at path {AssetsFolder}.", ex);
+            }
         }
     }
 }

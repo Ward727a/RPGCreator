@@ -76,8 +76,10 @@ namespace RPGCreator.Core.Type.Assets
         /// True if the asset should be cached, false otherwise.<br/>
         /// </summary>
         public virtual bool ShouldBeCached => false;
+        public string AssetPath { get; set; } = string.Empty;
 
         public bool IsCached { get; internal set; } = false;
+        public BaseAssetsPack.BaseAssetsPack Pack { get; internal set; } = null!; // This should be set by the pack manager when the asset is loaded.
 
         public enum TYPE
         {
@@ -159,7 +161,45 @@ namespace RPGCreator.Core.Type.Assets
             return asset;
         }
 
-        public virtual void Save()
-        { }
+        public void Save()
+        {
+            if (this is ISerializable serializable)
+            {
+                EngineSerializer.Instance.Serialize(serializable, out var data, false);
+
+                if(string.IsNullOrEmpty(AssetPath))
+                {
+                    var assetDir = Pack.AssetsFolder;
+
+                    if (assetDir == null)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Asset {Name} of type {Type} with unique ID {Unique} has no path set, and the directory the pack couldn't be gotten.");
+                        Console.ResetColor();
+                        return;
+                    }
+                    
+                    // This shouldn't happen, but well, just in case...
+                    if (!Directory.Exists(assetDir))
+                    {
+                        Directory.CreateDirectory(assetDir);
+                    }
+                    
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine($"Asset {Name} of type {Type} with unique ID {Unique} has no path set, creating one.");
+                    AssetPath = Path.Combine(assetDir, $"{Unique}.xml");
+                }
+
+                File.WriteAllText(AssetPath, data);
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"Saved asset {Name} of type {Type} with unique ID {Unique} to {AssetPath}.");
+                Console.ResetColor();
+                return;
+            }
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Couldn't save asset {Name} of type {Type} with unique ID {Unique} because this is not an ISerializable object!.");
+            Console.ResetColor();
+        }
     }
 }

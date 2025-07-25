@@ -38,7 +38,7 @@ namespace RPGCreator.Core.Type.Project
 {
     public partial class BaseProject : ObservableObject, ISerializable, IDeserializable
     {
-        public Ulid Id { get; set; } = Ulid.NewUlid();
+        public Ulid Id { get; set; }
         public string? Name { get; set; } = "";
         public string? Description { get; set; } = "";
         public string? Path  { get; set; } = "";
@@ -75,6 +75,7 @@ namespace RPGCreator.Core.Type.Project
             Name = name;
             Event = new ProjectEvent();
             GameData = new ProjectGameData(this);
+            Id = Ulid.NewUlid();
             GameData.Maps.CollectionChanged += (_, _) =>
             {
                 Event.OnMapsListChanged();
@@ -141,9 +142,9 @@ namespace RPGCreator.Core.Type.Project
 
             foreach (BaseAssetsPack pack in EngineCore.Instance.Managers.Assets.GetAssetsPacks())
             {
-                if (pack.Assets.Values.Any(x => x.Type == type))
+                if (pack.AssetsCache.Values.Any(x => x.Type == type))
                 {
-                    assets_found.AddRange(pack.Assets.Values.Where(x => x.Type == type).ToList());
+                    assets_found.AddRange(pack.AssetsCache.Values.Where(x => x.Type == type).ToList());
                 }
             }
 
@@ -155,10 +156,10 @@ namespace RPGCreator.Core.Type.Project
 
             foreach (BaseAssetsPack pack in EngineCore.Instance.Managers.Assets.GetAssetsPacks())
             {
-                if (pack.Assets.Values.Any(x => x.Type == type))
+                if (pack.AssetsCache.Values.Any(x => x.Type == type))
                 {
                     assets_found.AddRange(
-                        pack.Assets.Values.Where(x => x.Type == type && x is T).Cast<T>().ToList()
+                        pack.AssetsCache.Values.Where(x => x.Type == type && x is T).Cast<T>().ToList()
                         );
                 }
             }
@@ -206,6 +207,7 @@ namespace RPGCreator.Core.Type.Project
             info.TryGetList("assetsPackPath", out List<string> assetsPackPath, [], "Assets pack path not found or invalid (Set to empty list by default).");
             info.TryGetValue("gameData", out ProjectGameData gameData, new ProjectGameData(this), "Game data not found or invalid (Set to null by default).");
 
+            Id = id;
             Name = name;
             Description = description;
             Path = path;

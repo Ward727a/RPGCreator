@@ -34,7 +34,7 @@ using static RPGCreator.Core.Configs.EngineConfigs;
  * DevNote:
  * Right now I'm trying to rework the old system that was used to save projects to use the project link system.
  * It will allow to have a better management, without having to load all the projects at once, and also to not have to save all the projects in 2 different places.
- * [Ward, 17/07/2025]
+ * [Ward, 17/07/2025] (Done)
  * 
  */
 

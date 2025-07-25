@@ -90,7 +90,6 @@ namespace RPGCreator.Core.Type.Assets
         }
     }
 
-    [Serializable]
     public class Autotiling() : ISerializable, IDeserializable
     {
         public RPGCreator.Core.Type.Internal.Point TilePosition = new RPGCreator.Core.Type.Internal.Point(0, 0);
@@ -316,7 +315,6 @@ namespace RPGCreator.Core.Type.Assets
 
     }
 
-    [Serializable]
     public class AutotilesGroup() : ISerializable, IDeserializable
     {
         public Ulid ID = Ulid.NewUlid();
@@ -559,6 +557,14 @@ namespace RPGCreator.Core.Type.Assets
         public void AddGroup(AutotilesGroup autotiling)
         {
             Autotilings.Add(autotiling);
+        }
+
+        public string GeneratePreviewImage()
+        {
+
+            
+            
+            return "";
         }
 
         public SerializationInfo GetObjectData()

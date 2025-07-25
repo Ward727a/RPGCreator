@@ -57,10 +57,8 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 {
                     foreach (string packPath in e.LoadedProject.AssetsPackPath)
                     {
-                        
                         LoadPack(packPath);
                     }
-
                 }
             };
 

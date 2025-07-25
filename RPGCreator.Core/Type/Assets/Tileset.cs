@@ -137,20 +137,6 @@ namespace RPGCreator.Core.Type.Assets
             return new Tile(this, tile_rect);
         }
 
-        public override void Save()
-        {
-            XElement xml_data = new XElement("asset",
-                new XElement("unique", Unique.ToString()),
-                new XElement("type", "TILESETS"),
-                new XElement("name", Name),
-                new XElement("file_path", ImagePath),
-                new XElement("tile_width", tile_width),
-                new XElement("tile_height", tile_height)
-            );
-
-            AssetData = xml_data;
-        }
-
         public Autotiling? GetTile(Ulid ID)
         {
             var group = Groups.FirstOrDefault(g => g.HasTile(ID));

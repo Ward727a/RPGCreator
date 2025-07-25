@@ -83,7 +83,7 @@ namespace RPGCreator.Core
 
             Managers.Init();
 
-            Managers.Projects.CreateProject("test project new config", "C:\\Users\\Ward\\Desktop\\Test");
+            // Managers.Projects.CreateProject("test project new config", "C:\\Users\\Ward\\Desktop\\Test");
 
         }
 

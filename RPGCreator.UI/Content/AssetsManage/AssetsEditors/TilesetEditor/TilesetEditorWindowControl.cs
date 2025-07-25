@@ -174,14 +174,12 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
                     {
                         if (File.Exists(path))
                         {
-                            // Load the image and set it to the preview
                             try
                             {
                                 ImagePreview.Source = new Bitmap(path);
                             }
                             catch (Exception ex)
                             {
-                                // Handle the exception if the image cannot be loaded
                                 Console.WriteLine($"Error loading image: {ex.Message}");
                                 ImagePreview.Source = null;
                             }
@@ -194,7 +192,6 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
                 }
             };
 
-            // Add input fields for tileset properties
             NameInput = new TextBox
             {
                 Watermark = "Tileset Name",
@@ -248,7 +245,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             }
             else
             {
-                AssetPackChoice.SelectedIndex = 0; // Default to the first pack if none matches
+                AssetPackChoice.SelectedIndex = 0;
             }
         }
 
@@ -388,7 +385,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
                 // Check if the tileset already exists in the pack
                 if (pack != null)
                 {
-                    if (pack.Assets.Any(a => a.Value.Unique == Tileset.Unique))
+                    if (pack.AssetsCache.Any(a => a.Value.Unique == Tileset.Unique))
                     {
                         // If it exists, update the existing tileset
                         pack.UpdateAsset(Tileset);

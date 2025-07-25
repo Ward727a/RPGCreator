@@ -172,8 +172,10 @@ public class EngineSerializer
             
             if (entryList.Value is SerializationInfo _info)
             {
+                sb.AppendLine($"    <Item Type=\"{entryList.Type}\">");
                 sb.AppendLine(
                     GetData(_info));
+                sb.AppendLine("    </Item>");
             }
             else
             {
@@ -362,6 +364,78 @@ public sealed class DeserializationInfo
                 continue;
             }
             newInfo.AddValue(entryName, value);
+        }
+
+        foreach (var entry in XmlData.Root.Elements("List"))
+        {
+            _currentElement = entry;
+            var entryName = entry.Attribute("N")?.Value;
+            if (entryName == null)
+            {
+                Console.WriteLine("List entry name is null.");
+                continue;
+            }
+            var entryTypeName = entry.Attribute("Type")?.Value;
+            if (entryTypeName == null)
+            {
+                Console.WriteLine("List entry type name is null.");
+                continue;
+            }
+            var entryType = System.Type.GetType(entryTypeName);
+            if (entryType == null)
+            {
+                Console.WriteLine($"Type '{entryTypeName}' could not be found.");
+                continue;
+            }
+            var list = new List<object>();
+            foreach (var item in entry.Elements("Item"))
+            {
+                var typeString = item.Attribute("Type")?.Value;
+                if (typeString == null)
+                {
+                    Console.WriteLine("List item type is null.");
+                    continue;
+                }
+                var itemType = System.Type.GetType(typeString);
+                if (itemType == null)
+                {
+                    Console.WriteLine($"Type '{typeString}' could not be found.");
+                    continue;
+                }
+                
+                object? convertedValue = null;
+                // If the item has a "Object" element, we need to deserialize it
+                if (item.Element("Object") != null)
+                {
+                    var objectElement = item.Element("Object");
+                    if (objectElement == null)
+                    {
+                        Console.WriteLine("List item object element is null.");
+                        continue;
+                    }
+                    var entryInfo = new DeserializationInfo(objectElement);
+                    convertedValue = entryInfo.GetObject();
+                }
+                else
+                {
+                    var itemValue = item.Value.Trim();
+                    convertedValue = ConvertStringToType(itemType, itemValue);
+                }
+                
+                if (convertedValue == null)
+                {
+                    Console.WriteLine($"Converted value for list entry '{entryName}' is null.");
+                    continue;
+                }
+                
+                list.Add(convertedValue);
+            }
+            if (list.Count == 0)
+            {
+                Console.WriteLine($"List entry '{entryName}' is empty.");
+                continue;
+            }
+            newInfo.AddValue(entryName, list);
         }
         
         foreach (var entry in XmlData.Root.Elements("Dictionary"))
@@ -862,14 +936,14 @@ public sealed class SerializationInfo
                             continue;
                         }
                         
-                        value.Add((T)item);
+                        value.Add(item);
                     }
                     else
                     {
-                        value.Add((T)listEntry.Value!);
+                        value.Add(listEntry.Value!);
                     }
                 }
-                value = (T?)o;
+                // value = (T?)o;
             
             
                 return true;
