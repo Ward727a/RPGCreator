@@ -59,9 +59,9 @@ namespace RPGCreator.Core.Managers.ProjectsManager
                 return;
             }
 
+            EngineCore.Instance.Data.EditedProject = project;
             project.Load();
 
-            EngineCore.Instance.Data.EditedProject = project;
 
 
             Events.OnLoadedProject(PreArgs.ToPost(EngineCore.Instance.Data.EditedProject));

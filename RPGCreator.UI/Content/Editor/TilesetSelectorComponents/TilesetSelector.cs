@@ -53,6 +53,12 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
         public bool IsMovingRoot { get; private set; } = false;
         public bool HasMovedRoot { get; private set; } = false;
 
+        private enum TilesetType
+        {
+            Tileset,
+            Autotiling
+        }
+        private TilesetType CurrentTilesetType = TilesetType.Tileset;
         public Tileset SelectedTileset
         {
             get
@@ -60,6 +66,17 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                 if (SelectBox.SelectedItem is TilesetItem item)
                 {
                     return item.Tileset;
+                }
+                return null;
+            }
+        }
+        public Autotiles SelectedAutotiles
+        {
+            get
+            {
+                if (SelectBox.SelectedItem is Autotiles item)
+                {
+                    return item;
                 }
                 return null;
             }

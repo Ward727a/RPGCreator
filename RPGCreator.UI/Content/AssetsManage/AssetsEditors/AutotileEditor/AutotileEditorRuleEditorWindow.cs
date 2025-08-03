@@ -6,7 +6,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor;
 public class AutotileEditorRuleEditorWindow : Window
 {
 
-    public AutotileEditorRuleEditorWindow(Tileset tileset)
+    public AutotileEditorRuleEditorWindow(NAutoTileset tileset)
     {
         Width = 1200;
         Height = 900;

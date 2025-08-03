@@ -79,7 +79,7 @@ namespace RPGCreator.Core.Type.Assets
         public string AssetPath { get; set; } = string.Empty;
 
         public bool IsCached { get; internal set; } = false;
-        public BaseAssetsPack.BaseAssetsPack Pack { get; internal set; } = null!; // This should be set by the pack manager when the asset is loaded.
+        public BaseAssetsPack.BaseAssetsPack Pack { get; set; } = null!; // This should be set by the pack manager when the asset is loaded.
 
         public enum TYPE
         {

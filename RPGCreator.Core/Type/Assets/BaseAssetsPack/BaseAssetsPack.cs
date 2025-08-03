@@ -44,8 +44,6 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
      * but when creating a new pack, it is set successfully, but when loading an existing pack, it is not set (or set to a wrong path / random ID).
      * I NEED to fix this ASAP, because it is a major issue.
      * [Ward727, 26/07/2025]
-     *
-     * 
      */
     
     public class BaseAssetsPack : ISerializable, IDeserializable
@@ -59,11 +57,11 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
         public readonly BaseAssetsPackEvents Events = new();
 
         public string ConfigPath;
-        public string AssetsFolder;
+        public string AssetsFolder { get; private set; }
         [Obsolete("Need to remove this property, use AssetsCache instead.")]
         public XDocument ConfigDocument;
 
-        // Will probably be removed in the future, as it is not used anymore.
+        // Will probably be removed in the future, as it is not really used anymore.
         public enum PACK_TYPE
         {
             UNKNOWN,
@@ -79,8 +77,10 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
         public BaseAssetsPack()
         {
             ConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RPG Creator", "AssetsPacks",$"{Id}.xml");
+            AssetsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RPG Creator", "AssetsPacks", Id.ToString());
         }
 
+        // Constructor used when loading an existing assets pack from a file. Used by the BaseProject class.
         public BaseAssetsPack(string configPath)
         {
             ConfigPath = configPath;
@@ -142,12 +142,14 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
                 if (!typeof(BaseAsset).IsAssignableFrom(assetType))
                 {
                     ErrorOnLoad = true;
-                    throw new Exception($"Loaded asset is not a valid asset, but {assetType.Name}.");
+                    throw new Exception($"Loaded asset is not a valid asset, but {assetType?.Name}.");
                 }
 
                 if(asset is BaseAsset baseAsset)
                 {
                     AssetsCache[assetID] = baseAsset;
+                    AssetsPaths[assetID] = assetPath;
+                    baseAsset.Pack = this;
                 }
                 else
                 {
@@ -160,6 +162,17 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
             Type = assetsPack.Type;
             Id = assetsPack.Id;
             ConfigPath = assetsPack.ConfigPath;
+            AssetsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RPG Creator", "AssetsPacks", Id.ToString());
+            if (Directory.Exists(AssetsFolder)) return;
+            
+            try
+            {
+                Directory.CreateDirectory(AssetsFolder);
+            } catch (Exception ex)
+            {
+                ErrorOnLoad = true;
+                throw new Exception($"Error creating assets folder at path {AssetsFolder}.", ex);
+            }
         }
 
         [Obsolete("This method should not be used. Use LoadFromFile() method instead.")]
@@ -268,14 +281,6 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
             if (asset == null)
             {
                 throw new ArgumentNullException(nameof(asset), "Asset cannot be null.");
-            }
-            if (!AssetsCache.ContainsKey(asset.PackPath))
-            {
-                throw new KeyNotFoundException($"Asset at path {asset.PackPath} does not exist in the pack.");
-            }
-            if (asset.PackName != Name)
-            {
-                throw new InvalidOperationException($"Asset {asset.Name} doesn't belong to this pack (Belong to: {asset.PackName}).");
             }
 
             asset.Save();
@@ -409,6 +414,12 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
         {
         }
 
+        /// <summary>
+        /// Save the assets pack to his config file.<br/>
+        /// This method will serialize the pack with <see cref="EngineSerializer"/> and save it to the <see cref="ConfigPath"/>.<br/>
+        /// It will also save each asset in the pack to their respective file.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">If the <see cref="ConfigPath"/> is not set.</exception>
         public void Save()
         {
             EngineSerializer.Instance.Serialize(this, out string packStringData, false);
@@ -438,6 +449,7 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
             info.AddValue("Type", Type);
             info.AddValue("Id", Id);
             info.AddValue("Assets", AssetsPaths);
+            info.AddValue("AssetsFolder", AssetsFolder);
             return info;
         }
 
@@ -449,8 +461,9 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
             info.TryGetValue("Type", out Type, PACK_TYPE.UNKNOWN, "Field 'Type' not found in serialization info.");
             info.TryGetValue("Id", out Id, Ulid.NewUlid(), "Field 'Id' not found in serialization info.");
             info.TryGetDictionary("Assets", out AssetsPaths);
+            info.TryGetValue("AssetsFolder", out string folder,  Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RPG Creator", "AssetsPacks", Id.ToString()), "Field 'AssetsFolder' not found in serialization info.");
+            AssetsFolder = folder;
             
-            AssetsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RPG Creator", "AssetsPacks", Id.ToString());
             if (Directory.Exists(AssetsFolder)) return;
             
             try

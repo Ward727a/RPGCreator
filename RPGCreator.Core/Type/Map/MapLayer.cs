@@ -239,12 +239,12 @@ namespace RPGCreator.Core.Type.Map
             TileSelected?.Invoke(this, tile);
         }
 
-        public Tile? GetTileAt(int x, int y)
+        public ITileable? GetTileAt(int x, int y)
         {
             var at = new Point(x, y);
             if (Tiles.TryGetValue(at, out Tile value))
             {
-                return value;
+                return null; // TODO: return the correct tile (need to change the type of the Tiles dictionary to ITileable)
             }
             return null;
         }

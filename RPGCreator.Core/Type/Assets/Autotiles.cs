@@ -31,29 +31,20 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Microsoft.Xna.Framework;
+using Avalonia;
+using Avalonia.Media.Imaging;
+using MonoGame.Extended.Tiled;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SkiaSharp;
+using ITileset = RPGCreator.Core.Type.Interfaces.ITileset;
 using Point = RPGCreator.Core.Type.Internal.Point;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
 namespace RPGCreator.Core.Type.Assets
 {
 
-    public enum ERulePos
-    {
-        TOP_LEFT,
-        TOP,
-        TOP_RIGHT,
-        LEFT,
-        RIGHT,
-        BOTTOM_LEFT,
-        BOTTOM,
-        BOTTOM_RIGHT,
-    }
-
-    public enum ERuleType
-    {
-        WHITELIST,
-        BLACKLIST,
-    }
 
     [Serializable]
     public class Autotile_rule() : ISerializable, IDeserializable
@@ -318,6 +309,8 @@ namespace RPGCreator.Core.Type.Assets
     public class AutotilesGroup() : ISerializable, IDeserializable
     {
         public Ulid ID = Ulid.NewUlid();
+        private Ulid _tilesetId = Ulid.Empty; // This is used to store the tileset ID, so we can retrieve it later when the project is loaded.
+        
         public string Name;
         public List<Autotiling> Tilings = [];
         public List<string> Tags = []; // Group tags, those are applied to all autotilings in the group (like a "global" tag).
@@ -329,6 +322,7 @@ namespace RPGCreator.Core.Type.Assets
             Name = name;
             Tileset = tileset ?? throw new ArgumentNullException(nameof(tileset), "Tileset cannot be null");
             BaseTile = baseTile;
+            _tilesetId = tileset.Unique;
         }
 
         public void SetBase(Autotiling autotiling)
@@ -505,7 +499,7 @@ namespace RPGCreator.Core.Type.Assets
             SerializationInfo info = new SerializationInfo(typeof(AutotilesGroup));
             info.AddValue("ID", ID);
             info.AddValue("Name", Name);
-            info.AddValue("TilesetID", Tileset.Unique);
+            info.AddValue("TilesetID", _tilesetId);
             info.AddValue("BaseTileID", BaseTile?.ID ?? Ulid.Empty);
             info.AddValue("Tags", Tags);
             info.AddValue("Tilings", Tilings);
@@ -519,7 +513,7 @@ namespace RPGCreator.Core.Type.Assets
             
             info.TryGetValue("ID", out ID, Ulid.Empty, "Field 'ID' not found in the serialization info.");
             info.TryGetValue("Name", out Name, string.Empty, "Field 'Name' not found in the serialization info.");
-            info.TryGetValue("TilesetID", out Ulid tilesetId, Ulid.Empty, "Field 'TilesetID' not found in the serialization info.");
+            info.TryGetValue("TilesetID", out _tilesetId, Ulid.Empty, "Field 'TilesetID' not found in the serialization info.");
             info.TryGetValue("BaseTileID", out Ulid baseTileId, Ulid.Empty, "Field 'BaseTileID' not found in the serialization info.");
             info.TryGetList("Tags", out Tags, new List<string>(), "Field 'Tags' not found in the serialization info.");
             info.TryGetList("Tilings", out Tilings, new List<Autotiling>(), "Field 'Tilings' not found in the serialization info.");
@@ -528,16 +522,31 @@ namespace RPGCreator.Core.Type.Assets
             {
                 autotiling.Group = this; // Set the group for each autotiling
             }
-            
-            Tileset = EngineCore.Instance.Data.EditedProject.GetAssetsType<Tileset>(BaseAsset.TYPE.TILESETS).Find(t => t.Unique == tilesetId) ?? throw new InvalidOperationException($"Tileset with ID {tilesetId} not found.");
-            BaseTile = GetTileById(baseTileId);
+
+            void OnEditedProjectOnOnProjectLoaded()
+            {
+                Tileset = EngineCore.Instance.Data.EditedProject.GetAssetsType<Tileset>(BaseAsset.TYPE.TILESETS)
+                    .Find(t => t.Unique == _tilesetId) ?? throw new InvalidOperationException($"Tileset with ID {_tilesetId} not found.");
+
+                BaseTile = GetTileById(baseTileId);
+                
+                EngineCore.Instance.Data.EditedProject.OnProjectLoaded -= OnEditedProjectOnOnProjectLoaded;
+            }
+
+            EngineCore.Instance.Data.EditedProject.OnProjectLoaded += OnEditedProjectOnOnProjectLoaded;
         }
     }
 
-    public class Autotiles : BaseAsset, ISerializable, IDeserializable
+    public class Autotiles : ImageAsset, ISerializable, IDeserializable
     {
         public List<AutotilesGroup> Autotilings = [];
+        private Bitmap? _bitmap = null;
 
+        public int TileWidth { get; set; }
+        public int TileHeight { get; set; }
+        
+        private Dictionary<Point, int> _baseTilesOwner = [];
+        
         public Autotiles() : base()
         {
             Type = TYPE.AUTOTILES;
@@ -559,12 +568,135 @@ namespace RPGCreator.Core.Type.Assets
             Autotilings.Add(autotiling);
         }
 
+        /// <summary>
+        /// This method generates an image preview of the autotiles.<br/>
+        /// This preview image is used to display the autotiles base tile in the editor.<br/>
+        /// Then, it can be used to select tile in the map editor to draw them.
+        /// </summary>
+        /// <returns></returns>
         public string GeneratePreviewImage()
         {
+            int MaxWidth = 256;
+            int width = 0;
+            int height = 0;
+            
+            if(string.IsNullOrEmpty(ImagePath))
+                ImagePath = Path.Combine(Pack.AssetsFolder, $"{Unique}.png");
+            
+            List<AutotilesGroup> groups = new List<AutotilesGroup>();
+            foreach (var group in Autotilings)
+            {
+                var baseTile = group.GetBaseTile();
 
+                if (baseTile == null || !baseTile.IsValid()) continue;
+                groups.Add(group);
+
+                Tileset tileset = group.Tileset;
+
+                height = Math.Max(height, tileset.tile_height);
+                if (width + tileset.tile_width > MaxWidth)
+                {
+                    // If the width exceeds the maximum width, we need to reset the current X position and increase the Y position
+                    height += tileset.tile_height;
+                }
+                else
+                {
+                    width += tileset.tile_width;
+                }
+            }
+            
+            // Image<Rgba64> image = new Image<Rgba64>(width, height);
+            int currentY = 0;
+            int currentX = 0;
+            int index = 0;
+            
+            using var finalBitmap = new SKBitmap(width, height);
             
             
-            return "";
+            using (var canvas = new SKCanvas(finalBitmap))
+            {
+                canvas.Clear(SKColors.Transparent);
+            
+                foreach (var group in groups)
+                {
+                    var baseTile = group.GetBaseTile();
+                    if (baseTile == null || !baseTile.IsValid()) continue;
+
+                    // Draw the base tile on the image
+                    var tileset = group.Tileset;
+                    var tilesetImage = tileset.GetBitmap();
+                    var rect = new PixelRect(
+                        baseTile.TilePosition.X * tileset.tile_width,
+                        baseTile.TilePosition.Y * tileset.tile_height,
+                        tileset.tile_width,
+                        tileset.tile_height
+                    );
+                    Stream xxStream = new MemoryStream();
+                    tilesetImage.Save(xxStream);
+                    xxStream.Seek(0, SeekOrigin.Begin);
+                    var skBitmapSource = SKBitmap.Decode(xxStream);
+
+                    var source = new SKRect(rect.X, rect.Y, rect.Width+ rect.X, rect.Height+ rect.Y);
+                    var dest = new SKRect(currentX, currentY, rect.Width + currentX , rect.Height + currentY);
+
+                    canvas.DrawBitmap(skBitmapSource, source, dest);
+                    
+                    _baseTilesOwner[new Point(currentX, currentY)] = index;
+                    
+                    // Update the current position
+
+                    if(currentX + tileset.tile_width >= MaxWidth)
+                    {
+                        // If the width exceeds the maximum width, we need to reset the current X position and increase the Y position
+                        currentX = 0;
+                        currentY += tileset.tile_height;
+                    }
+                    else
+                    {
+                        currentX += tileset.tile_width;
+                    }
+
+                    index++;
+
+                }
+            }
+
+            // Sauvegarder en PNG
+            try
+            {
+                using var rimage = SKImage.FromBitmap(finalBitmap);
+                using var data = rimage.Encode(SKEncodedImageFormat.Png, 100);
+                using var fs = File.OpenWrite(ImagePath);
+                data.SaveTo(fs);
+                Console.WriteLine($"Preview image generated successfully at {ImagePath}");
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error generating preview image: {ex.Message}");
+                return "Error generating preview image.";
+            }
+
+            return ImagePath;
+        }
+
+        public override Bitmap GetBitmap(bool forceReload = false)
+        {
+            if (_bitmap != null && !forceReload) return _bitmap;
+            
+            if (string.IsNullOrEmpty(ImagePath) || forceReload)
+            {
+                GeneratePreviewImage();
+            }
+
+            if (!File.Exists(ImagePath))
+            {
+                throw new FileNotFoundException($"Preview image not found at {ImagePath}");
+            }
+            
+            _bitmap = new Bitmap(ImagePath);
+
+            return _bitmap;
         }
 
         public SerializationInfo GetObjectData()
@@ -574,6 +706,7 @@ namespace RPGCreator.Core.Type.Assets
             info.AddValue("Name", Name);
             info.AddValue("Type", Type);
             info.AddValue("Autotilings", Autotilings);
+            info.AddValue("ImagePath", ImagePath);
             return info;
         }
 
@@ -585,10 +718,54 @@ namespace RPGCreator.Core.Type.Assets
             info.TryGetValue("Unique", out var unique, Ulid.Empty, "Field 'Unique' not found in the serialization info.");
             info.TryGetValue("Name", out var name, string.Empty, "Field 'Name' not found in the serialization info.");
             info.TryGetValue("Type", out TYPE type, TYPE.UNKNOWN, "Field 'Type' not found in the serialization info.");
+            info.TryGetValue("ImagePath", out var imagePath, string.Empty, "Field 'ImagePath' not found in the serialization info.");
+            ImagePath = imagePath;
             Unique = unique;
             Name = name;
             Type = type;
             info.TryGetList("Autotilings", out Autotilings, new List<AutotilesGroup>(), "Field 'Autotilings' not found in the serialization info.");
+        }
+
+        public Tile? GetTile(int row, int column)
+        {
+            var autilingIndex = _baseTilesOwner[new Point(row, column)];
+            if (autilingIndex < 0 || autilingIndex >= Autotilings.Count)
+            {
+                return null; // Index out of range
+            }
+            var autotiling = Autotilings[autilingIndex];
+            if (autotiling.BaseTile == null || !autotiling.BaseTile.IsValid())
+            {
+                return null; // No valid base tile found
+            }
+
+            var pos = autotiling.GetBaseTile()?.TilePosition ?? new  Point(0, 0);
+            
+            return autotiling.Tileset.GetTileAt(pos.X, pos.Y);
+        }
+
+        public Tile? GetTileAt(Point at)
+        {
+            if (at.X < 0 || at.Y < 0)
+            {
+                return null; // Invalid position
+            }
+
+            int row = at.X / TileWidth;
+            int column = at.Y / TileHeight;
+
+            return GetTile(row, column);
+        }
+
+        public bool HasTile(int row, int column)
+        {
+            if (row < 0 || column < 0)
+            {
+                return false; // Invalid position
+            }
+
+            var point = new Point(row, column);
+            return _baseTilesOwner.ContainsKey(point) && _baseTilesOwner[point] >= 0 && _baseTilesOwner[point] < Autotilings.Count;
         }
     }
 }

@@ -24,4 +24,10 @@
     <None Include="..\RPGCreator.UI\RPGCreatorAval.sln.licenseheader" Link="RPGCreatorAval.sln.licenseheader" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="SkiaSharp">
+      <HintPath>..\..\..\..\.nuget\packages\skiasharp\2.88.9\lib\net6.0\SkiaSharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

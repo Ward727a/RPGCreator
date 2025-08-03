@@ -6,12 +6,12 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor.RuleEd
 
 public class GroupItemControl : UserControl
 {
-    public AutotilesGroup Group { get; private set; }
+    public AutotileGroup Group { get; private set; }
 
     private StackPanel _body = null!;
     private TextBlock _nameTextBlock = null!;
     
-    public GroupItemControl(AutotilesGroup group)
+    public GroupItemControl(AutotileGroup group)
     {
         Group = group;
 

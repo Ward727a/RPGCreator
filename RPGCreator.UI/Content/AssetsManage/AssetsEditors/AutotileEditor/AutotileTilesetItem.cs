@@ -38,9 +38,9 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 
         public event Action? TilesetSelected;
 
-        public Tileset Tileset { get; set; }
+        public ITileset Tileset { get; set; }
 
-        public AutotileTilesetItem(Tileset tileset)
+        public AutotileTilesetItem(ITileset tileset)
         { 
         
             Tileset = tileset ?? throw new ArgumentNullException(nameof(tileset), "Tileset cannot be null");

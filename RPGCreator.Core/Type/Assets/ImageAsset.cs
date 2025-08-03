@@ -32,13 +32,25 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
+/*
+ * ImageAsset.cs
+ * =============
+ * This file defines the ImageAsset class, which represents an image asset in the RPG Creator engine.
+ * It includes properties for the image path, width, height, and methods to load the image
+ *
+ * DevNote:
+ * This class should be refactored to use the SkiaSharp library for better performance and compatibility.
+ * [Ward727, 30/07/2025]
+ * 
+ */
+
 namespace RPGCreator.Core.Type.Assets
 {
     public class ImageAsset : BaseAsset
     {
-
         public event EventHandler? ImageChanged;
 
+        public string Name;
         internal Image? _Image;
         protected string _ImagePathCached;
         protected Texture2D? _TextureCache;
@@ -55,12 +67,26 @@ namespace RPGCreator.Core.Type.Assets
                     _TextureCache = null; // Reset texture cache
                     _BitmapCache = null; // Reset bitmap cache
                     _Image = null; // Reset image
+                    try
+                    {
+                        Image image = Image.Load(_ImagePath);
+                        _Image = image;
+                        ImageWidth = image.Width;
+                        ImageHeight = image.Height;
+                    }
+                    catch (Exception e)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Error loading image from path '{value}': {e.Message}");
+                        Console.ResetColor();
+                    }
                     ImageChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
-        public int Width;
-        public int Height;
+
+        public int ImageWidth { get; set; }
+        public int ImageHeight { get; set; }
 
         public ImageAsset() : base()
         { }
@@ -100,21 +126,28 @@ namespace RPGCreator.Core.Type.Assets
                 throw new Exception($"File at {file_path} doesn't exist.");
             }
 
+            ImagePath = file_path;
+        }
+
+        protected void LoadImageFromPath(string path)
+        {
+            if (string.IsNullOrEmpty(path) || !File.Exists(path))
+            {
+                throw new ArgumentException("Invalid image path.", nameof(path));
+            }
+
             try
             {
-                Image image = Image.Load(file_path);
-
-                ImagePath = file_path;
-                _Image = image;
-                Width = image.Width;
-                Height = image.Height;
+                _Image = Image.Load(path);
+                ImageWidth = _Image.Width;
+                ImageHeight = _Image.Height;
             }
             catch (Exception e)
             {
-                throw new Exception($"File at {file_path} is not a valid image.", e);
+                throw new Exception($"Failed to load image from path '{path}'.", e);
             }
         }
-
+        
         public virtual Texture2D GetTexture(GraphicsDevice device)
         {
             if(device == null)
@@ -149,7 +182,7 @@ namespace RPGCreator.Core.Type.Assets
             }
         }
         
-        public virtual Bitmap GetBitmap()
+        public virtual Bitmap GetBitmap(bool forceReload = false)
         {
             if(_BitmapCache != null)
             {

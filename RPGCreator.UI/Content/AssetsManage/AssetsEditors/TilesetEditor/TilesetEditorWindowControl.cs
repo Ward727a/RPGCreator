@@ -379,7 +379,6 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             Tileset.ImagePath = ImagePick.SelectedPaths[0];
             Tileset.PackName = AssetPackChoice.SelectedItem as string;
 
-
             if (EngineCore.Instance.Managers.Assets.TryGetAssetsPack(Tileset.PackName, out var pack))
             {
                 // Check if the tileset already exists in the pack

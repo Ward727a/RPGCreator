@@ -38,6 +38,8 @@ namespace RPGCreator.Core.Type.Project
 {
     public partial class BaseProject : ObservableObject, ISerializable, IDeserializable
     {
+        public event Action? OnProjectLoaded;
+        
         public Ulid Id { get; set; }
         public string? Name { get; set; } = "";
         public string? Description { get; set; } = "";
@@ -85,13 +87,14 @@ namespace RPGCreator.Core.Type.Project
         public void Load()
         {
             EngineCore.Instance.Managers.Assets.ClearAssetsPacks();
+            EngineCore.Instance.Data.EditedProject = this;
 
             foreach (string packPath in AssetsPackPath)
             {
                 EngineCore.Instance.Managers.Assets.LoadPack(packPath);
             }
 
-            EngineCore.Instance.Data.EditedProject = this;
+            OnProjectLoaded?.Invoke();
         }
 
         public void Unload()

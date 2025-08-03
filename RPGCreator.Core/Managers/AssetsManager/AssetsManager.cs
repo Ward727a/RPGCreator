@@ -113,7 +113,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
         /// Use the AssetsPackManager for this!
         /// </summary>
         /// <param name="pack"></param>
-        public virtual void RegisterPack(BaseAssetsPack pack, bool shouldSaveConfig = true)
+        public virtual void RegisterPack(BaseAssetsPack pack, bool shouldSaveConfig = true, bool shouldSaveInProject = true)
         {
             Event.OnUpdatingAsset();
             var args = new AssetsManagerAddingPackArgs(pack);
@@ -134,7 +134,8 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 }
             }
 
-            EngineCore.Instance.Data.EditedProject?.AssetsPackPath.Add(pack.ConfigPath);
+            if(shouldSaveInProject)
+                EngineCore.Instance.Data.EditedProject?.AssetsPackPath.Add(pack.ConfigPath);
 
             if(shouldSaveConfig)
                 EngineCore.Instance.Data.EditedProject?.Save();
@@ -162,7 +163,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 throw new InvalidOperationException($"Failed to load assets pack from path: {packPath}.");
             }
 
-            RegisterPack(pack, false);
+            RegisterPack(pack, false, false);
         }
 
         public void UnregisterPack(Ulid packId, string pack_name = "")
