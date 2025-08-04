@@ -56,7 +56,7 @@ namespace RPGCreator.RTP.Editor.Components
             {
                 return;
             }
-            Map.PreviewLayer.Tiles.Clear(); // Clear the preview layer tiles
+            Map.PreviewLayer.Elements.Clear(); // Clear the preview layer tiles
             _LastPreviewAt = new(-1,-1); // Reset the last preview position
             _LastPreviewBrush = null; // Reset the last preview brush
         }
@@ -84,9 +84,9 @@ namespace RPGCreator.RTP.Editor.Components
                 return;
             }
 
-            if (Map.PreviewLayer.Tiles.Count > 0)
+            if (Map.PreviewLayer.Elements.Count > 0)
             {
-                Map.PreviewLayer.Tiles.Clear(); // Clear previous preview tiles
+                Map.PreviewLayer.Elements.Clear(); // Clear previous preview tiles
             }
 
             if (

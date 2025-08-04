@@ -32,6 +32,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Type.Internal.LayerRenderer;
 
 namespace RPGCreator.Core.Type.Map
 {
@@ -89,6 +90,16 @@ namespace RPGCreator.Core.Type.Map
 
         public Rectangle Bounds => new((int)Position.X, (int)Position.Y, (int)Scale.X, (int)Scale.Y);
 
+        /// <summary>
+        /// This method is used to draw the drawable on the map without a SpriteBatchExtend instance.<br/><br/>
+        /// Beaware that this method will directly call the _Draw method without any SpriteBatchExtend instance.<br/>
+        /// So the drawable should not rely on any SpriteBatchExtend instance to draw itself: <br/>For example, inside <see cref="TileLayer"/> with a LayerRenderer set to <see cref="AvaloniaLayerRenderer"/>).
+        /// </summary>
+        public void Draw()
+        {
+            _Draw(null);
+        }
+        
         public void Draw(SpriteBatchExtend sb)
         {
 
@@ -105,7 +116,7 @@ namespace RPGCreator.Core.Type.Map
 
             Drawed?.Invoke(this, EventArgs.Empty);
         }
-        protected abstract void _Draw(SpriteBatchExtend sb);
+        protected abstract void _Draw(SpriteBatchExtend? sb);
 
         public void Update(GameTime gameTime)
         {

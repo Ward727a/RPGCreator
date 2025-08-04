@@ -78,10 +78,10 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
                 {
                     for (int y = -Size / 2; y <= Size / 2; y++)
                     {
-                        Point tilePosition = new Point(at.X + x * tile.Tileset.tile_width, at.Y + y * tile.Tileset.tile_height);
+                        Point tilePosition = new Point(at.X + x * tile.Tileset.TileWidth, at.Y + y * tile.Tileset.TileHeight);
                         if (IBrush.InBorder(tilePosition, map))
                         {
-                            layer.AddTileAt(tile, tilePosition); // Add tile at the calculated position
+                            layer.AddElement(tile, tilePosition); // Add tile at the calculated position
                         }
                     }
                 }
@@ -89,7 +89,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
             else
             {
                 // If size is 1, just add the tile at the specified point
-                layer.AddTileAt(tile, at);
+                layer.AddElement(tile, at);
             }
         }
 
@@ -143,10 +143,10 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
                 {
                     for (int y = -Size / 2; y <= Size / 2; y++)
                     {
-                        Point tilePosition = new Point(at.X + x * tile.Tileset.tile_width, at.Y + y * tile.Tileset.tile_height);
+                        Point tilePosition = new Point(at.X + x * tile.Tileset.TileWidth, at.Y + y * tile.Tileset.TileHeight);
                         if (IBrush.InBorder(tilePosition, map))
                         {
-                            layer.AddTileAt(tile, tilePosition); // Add tile at the calculated position
+                            layer.AddElement(tile, tilePosition); // Add tile at the calculated position
                         }
                     }
                 }
@@ -154,7 +154,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
             else
             {
                 // If size is 1, just add the tile at the specified point
-                layer.AddTileAt(tile, at);
+                layer.AddElement(tile, at);
             }
         }
     }

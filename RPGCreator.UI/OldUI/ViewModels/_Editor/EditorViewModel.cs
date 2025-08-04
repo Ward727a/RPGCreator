@@ -51,7 +51,7 @@ namespace RPGCreator.UI.OLD.ViewModels._Editor
 
         public List<Tileset> AvalTilesets => ProjectItem?.GetAssetsType<Tileset>(BaseAsset.TYPE.TILESETS) ?? [];
         public List<BaseMap> Maps => GetRootMaps() ?? [new BaseMap("Test")];
-        public List<MapLayer> MapLayers => GetSortedMaps() ?? [];
+        public List<TileLayer> MapLayers => GetSortedMaps() ?? [];
 
         private List<BaseMap>? GetRootMaps()
         {
@@ -62,7 +62,7 @@ namespace RPGCreator.UI.OLD.ViewModels._Editor
             return ProjectItem?.GameData.Maps?.Where(map => !allChild.Contains(map)).ToList();
         }
 
-        private List<MapLayer>? GetSortedMaps()
+        private List<TileLayer>? GetSortedMaps()
         {
             return ProjectItem?.EditMap?.Layers.OrderBy(L => L.ZIndex).ToList() ?? [];
         }
@@ -226,7 +226,7 @@ namespace RPGCreator.UI.OLD.ViewModels._Editor
         [RelayCommand]
         private void AddLayer()
         {
-            ProjectItem?.EditMap?.AddLayer(new($"Test-{MapLayers.Count}", MapLayers.Count, true));
+            ProjectItem?.EditMap?.AddLayer(new($"Test-{MapLayers.Count}", null, MapLayers.Count, true));
         }
 
         [RelayCommand]

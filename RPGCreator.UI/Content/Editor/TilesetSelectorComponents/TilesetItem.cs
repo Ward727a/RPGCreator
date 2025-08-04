@@ -40,9 +40,9 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
         public StackPanel Body { get; private set; }
         public TextBlock NameTextBlock { get; private set; }
         public Image TilesetImage { get; private set; }
-        public Tileset Tileset { get; private set; }
+        public ITileset Tileset { get; private set; }
 
-        public TilesetItem(Tileset tileset)
+        public TilesetItem(ITileset tileset)
         {
             Body = new StackPanel
             {

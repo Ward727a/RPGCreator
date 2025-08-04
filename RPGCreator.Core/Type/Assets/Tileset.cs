@@ -1,5 +1,7 @@
 using Avalonia;
 using Avalonia.Media.Imaging;
+using Microsoft.Xna.Framework;
+using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Type.Map;
 using SkiaSharp;
 using Point = RPGCreator.Core.Type.Internal.Point;
@@ -42,10 +44,14 @@ public enum ERuleType
 
 public interface ITileable
 {
-    public Point UV { get; }
-    public Point Position { get; } // Position in the tileset grid (row by column)
+    public Vector2 Position { get; }
+    public Point SizeInTileset { get; }
+    public Point PositionInTileset { get; } // Position in the tileset grid (row by column)
     public NTileset Tileset { get; } // The tileset this tile belongs to
 
+
+    public void UpdateTileset(ITileset newTileset);
+    
     /// <summary>
     /// This method returns a drawable tile based on the current tileable object.<br/>
     /// It's mainly useful for autotiles or tiles that need to be drawn differently based on the context.<br/>
@@ -54,28 +60,56 @@ public interface ITileable
     /// <param name="layer">The map layer where this tile will be drawn</param>
     /// <param name="position">The position where this tile will be drawn</param>
     /// <returns></returns>
-    public ITileable? GetDrawableTile(MapLayer? layer = null, Point? position = null);
+    public ITileable? GetDrawableTile(TileLayer? layer = null, Point? position = null);
     public ITileable GetCopy(); // Returns a copy of the tileable object.
+    /// <summary>
+    /// This should be inherited from BaseDrawable.
+    /// </summary>
+    /// <param name="sb"></param>
+    public void Draw(SpriteBatchExtend sb);
+
+    /// <summary>
+    /// This should be inherited from BaseDrawable.
+    /// </summary>
+    /// <param name="gameTime"></param>
+    public void Update(GameTime gameTime);
+
+    public bool IsEqualTo(ITileable other);
 }
 
-public class NTile : ITileable
+public class NTile : BaseDrawable, ITileable
 {
-    public Point UV { get; }
-    public Point Position { get; }
-    public NTileset Tileset { get; }
+    public Point SizeInTileset { get; }
+    public Point PositionInTileset { get; }
+    public Rectangle UV => new Rectangle(PositionInTileset, SizeInTileset);
+    public NTileset Tileset { get; private set; }
     
     public NTile()
     {
     }
 
-    public NTile(Point uv, Point position, NTileset tileset)
+    public NTile(Point sizeInTileset, Point positionInTileset, NTileset tileset)
     {
-        UV = uv;
-        Position = position;
+        SizeInTileset = sizeInTileset;
+        PositionInTileset = positionInTileset;
         Tileset = tileset;
     }
-    
-    public ITileable? GetDrawableTile(MapLayer? layer = null, Point? position = null)
+
+    public void UpdateTileset(ITileset newTileset)
+    {
+        if(newTileset is NTileset tileset)
+            Tileset = tileset;
+        #if DEBUG
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Error: Attempted to update NTileset with a non-NTileset type: {newTileset.GetType().Name}");
+            Console.ResetColor();
+        }
+        #endif
+    }
+
+    public ITileable? GetDrawableTile(TileLayer? layer = null, Point? position = null)
     {
 
         return GetCopy();
@@ -85,9 +119,26 @@ public class NTile : ITileable
     public ITileable GetCopy()
     {
 
-        return new NTile(UV, Position, Tileset);
+        return new NTile(SizeInTileset, PositionInTileset, Tileset);
 
     }
+
+    public bool IsEqualTo(ITileable other)
+    {
+        return other.Tileset.Unique == Tileset.Unique &&
+               other.PositionInTileset.X == PositionInTileset.X && other.PositionInTileset.Y == PositionInTileset.Y &&
+               other.SizeInTileset.X == SizeInTileset.X && other.SizeInTileset.Y == SizeInTileset.Y;
+    }
+
+    protected override void _Draw(SpriteBatchExtend? sb)
+    {
+        sb.Draw(Tileset.GetTexture(sb.GraphicsDevice), Position, UV, Color.White);
+    }
+
+    protected override void _Update(GameTime gameTime)
+    {
+    }
+
     /// <summary>
     /// This bitmap SHOULD NOT be used directly for rendering.<br/>
     /// For rendering, use the GetTileAt method of the corresponding TilesetFamily or NTileset.<br/>
@@ -99,10 +150,10 @@ public class NTile : ITileable
         var imageToCrop = SKBitmap.Decode(Tileset.ImagePath);
         
         var cropRegion = new SKRectI(
-            UV.X,
-            UV.Y,
-            UV.X + Tileset.TileWidth,
-            UV.Y + Tileset.TileHeight
+            SizeInTileset.X,
+            SizeInTileset.Y,
+            SizeInTileset.X + Tileset.TileWidth,
+            SizeInTileset.Y + Tileset.TileHeight
         );
         var drawRegion = new SKRectI(
             0,
@@ -124,10 +175,10 @@ public class NTile : ITileable
         var tilesetBitmap = new Bitmap(Tileset.ImagePath);
         
         var cropRegion = new PixelRect(
-            UV.X,
-            UV.Y,
-            UV.X + Tileset.TileWidth,
-            UV.Y + Tileset.TileHeight
+            SizeInTileset.X,
+            SizeInTileset.Y,
+            SizeInTileset.X + Tileset.TileWidth,
+            SizeInTileset.Y + Tileset.TileHeight
         );
 
         var croppedBitmap = new CroppedBitmap(tilesetBitmap, cropRegion);
@@ -173,14 +224,15 @@ public class NAutotileRules : ISerializable, IDeserializable
     }
 }
 
-public class NAutotile : ITileable, ISerializable, IDeserializable
+public class NAutotile : BaseDrawable, ITileable, ISerializable, IDeserializable
 {
     public List<NAutotileRules> Rules = new(); // List of rules for this autotile
     public List<string> Tags = []; // Tags for this autotile, can be used for filtering or categorization
 
-    public Point UV { get; set; }
-    public Point Position { get; set; }
-    public NTileset Tileset { get; set; }
+    public Point SizeInTileset { get; set; }
+    public Point PositionInTileset { get; set; }
+    public Rectangle UV => new Rectangle(PositionInTileset, SizeInTileset);
+    public NTileset Tileset { get; private set; }
     private bool hasCheckedRule = false; // Flag to check if the rules have been checked already, to avoid unnecessary checks
     public AutotileGroup AutotileGroup { get; }
 
@@ -188,14 +240,35 @@ public class NAutotile : ITileable, ISerializable, IDeserializable
     {
     }
     
-    public NAutotile(Point uv, Point position, NTileset tileset)
+    public NAutotile(Point sizeInTileset, Point positionInTileset, NTileset tileset, AutotileGroup group)
     {
-        UV = uv;
-        Position = position;
+        SizeInTileset = sizeInTileset;
+        PositionInTileset = positionInTileset;
         Tileset = tileset;
+        AutotileGroup = group;
+    }
+    public bool IsEqualTo(ITileable other)
+    {
+        return other.Tileset.Unique == Tileset.Unique &&
+               other.PositionInTileset.X == PositionInTileset.X && other.PositionInTileset.Y == PositionInTileset.Y &&
+               other.SizeInTileset.X == SizeInTileset.X && other.SizeInTileset.Y == SizeInTileset.Y;
+    }
+    
+    public void UpdateTileset(ITileset newTileset)
+    {
+        if(newTileset is NTileset tileset)
+            Tileset = tileset;
+#if DEBUG
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Error: Attempted to update NTileset with a non-NTileset type: {newTileset.GetType().Name}");
+            Console.ResetColor();
+        }
+#endif
     }
 
-    public ITileable? GetDrawableTile(MapLayer? layer = null, Point? position = null)
+    public ITileable? GetDrawableTile(TileLayer? layer = null, Point? position = null)
     {
         if (layer == null || position == null)
             return null;
@@ -210,7 +283,7 @@ public class NAutotile : ITileable, ISerializable, IDeserializable
     public ITileable GetCopy()
     {
         // Create a copy of the autotile with the same UV, Position and Tileset
-        return new NAutotile(UV, Position, Tileset)
+        return new NAutotile(SizeInTileset, PositionInTileset, Tileset, AutotileGroup)
         {
             Rules = new List<NAutotileRules>(Rules), // Copy the rules
             Tags = new List<string>(Tags) // Copy the tags
@@ -229,8 +302,8 @@ public class NAutotile : ITileable, ISerializable, IDeserializable
     public SerializationInfo GetObjectData()
     {
         SerializationInfo info = new SerializationInfo(typeof(NAutotile));
-        info.AddValue("UV", UV);
-        info.AddValue("Position", Position);
+        info.AddValue("UV", SizeInTileset);
+        info.AddValue("Position", PositionInTileset);
         info.AddValue("Tileset", Tileset.Unique);
         info.AddValue("Rules", Rules);
         info.AddValue("Tags", Tags);
@@ -250,8 +323,8 @@ public class NAutotile : ITileable, ISerializable, IDeserializable
         info.TryGetList("Rules", out List<NAutotileRules> rules, [], "Rules not found or invalid (Set to empty list by default).");
         info.TryGetList("Tags", out List<string> tags, [], "Tags not found or invalid (Set to empty list by default).");
 
-        UV = uv;
-        Position = position;
+        SizeInTileset = uv;
+        PositionInTileset = position;
         Rules = rules ?? [];
         Tags = tags ?? [];
 
@@ -281,7 +354,7 @@ public class NAutotile : ITileable, ISerializable, IDeserializable
     /// This method is still in development and may not be fully optimized.<br/><br/>
     /// <b>Notable point:</b> it does not currently support parallel processing, which may lead to performance issues if there are many rules.
     /// </remarks>
-    public bool RespectRules(MapLayer? layer, Point position)
+    public bool RespectRules(TileLayer? layer, Point position)
     {
         if (layer == null)
             return false;
@@ -292,22 +365,20 @@ public class NAutotile : ITileable, ISerializable, IDeserializable
         {
             var rulePosition = rule.Side switch
             {
-                ERulePos.TOP_LEFT => new Point(position.X - 1, position.Y - 1),
-                ERulePos.TOP => new Point(position.X, position.Y - 1),
-                ERulePos.TOP_RIGHT => new Point(position.X + 1, position.Y - 1),
-                ERulePos.LEFT => new Point(position.X - 1, position.Y),
-                ERulePos.RIGHT => new Point(position.X + 1, position.Y),
-                ERulePos.BOTTOM_LEFT => new Point(position.X - 1, position.Y + 1),
-                ERulePos.BOTTOM => new Point(position.X, position.Y + 1),
-                ERulePos.BOTTOM_RIGHT => new Point(position.X + 1, position.Y + 1),
+                ERulePos.TOP_LEFT => new Point(position.X - Tileset.TileWidth, position.Y - Tileset.TileHeight),
+                ERulePos.TOP => new Point(position.X, position.Y - Tileset.TileHeight),
+                ERulePos.TOP_RIGHT => new Point(position.X + Tileset.TileWidth, position.Y - Tileset.TileHeight),
+                ERulePos.LEFT => new Point(position.X - Tileset.TileWidth, position.Y),
+                ERulePos.RIGHT => new Point(position.X + Tileset.TileWidth, position.Y),
+                ERulePos.BOTTOM_LEFT => new Point(position.X - Tileset.TileWidth, position.Y + Tileset.TileHeight),
+                ERulePos.BOTTOM => new Point(position.X, position.Y + Tileset.TileHeight),
+                ERulePos.BOTTOM_RIGHT => new Point(position.X + Tileset.TileWidth, position.Y + Tileset.TileHeight),
                 _ => throw new ArgumentOutOfRangeException()
             };
             
             var ruleType = rule.Type;
-            
-            var tileAtRulePosition = layer.GetTileAt(rulePosition.X, rulePosition.Y);
 
-            if (tileAtRulePosition == null)
+            if (!layer.TryGetElement(new(rulePosition.X, rulePosition.Y), out var tileAtRulePosition))
             {
                 if (ruleType == ERuleType.WHITELIST)
                 {
@@ -367,17 +438,27 @@ public class NAutotile : ITileable, ISerializable, IDeserializable
 
         return true;
     }
+
+    protected override void _Draw(SpriteBatchExtend? sb)
+    {
+        sb.Draw(Tileset.GetTexture(sb.GraphicsDevice), Position, UV, Color.White);
+    }
+
+    protected override void _Update(GameTime gameTime)
+    {
+        
+    }
 }
 
 public class AutotileGroup : ISerializable, IDeserializable
 {
     public string Name { get; set; } = "Unnamed Autotile Group"; // Name of the autotile group
     public Ulid Unique { get; private set; } = Ulid.NewUlid();
-    public List<Point> AffectedTiles; // List of affected tiles by this autotiling
-    public List<NAutotile> Autotiles;
-    public ITileable BaseTile; // The base tile for this autotile
+    public List<Point> AffectedTiles = []; // List of affected tiles by this autotiling
+    public List<NAutotile> Autotiles = [];
+    public ITileable? BaseTile; // The base tile for this autotile
     public List<string> GroupTags = []; // Tags for this autotile group, can be used for filtering or categorization
-    public ITileset Tileset => BaseTile.Tileset; // The tileset this autotile group belongs to
+    public ITileset? Tileset => BaseTile?.Tileset; // The tileset this autotile group belongs to
 
     public AutotileGroup()
     {
@@ -385,24 +466,24 @@ public class AutotileGroup : ISerializable, IDeserializable
 
     public bool AddTile(ITileable tile)
     {
-        if (tile == null || AffectedTiles.Contains(tile.Position))
+        if (tile == null || AffectedTiles.Contains(tile.PositionInTileset))
             return false; // If the tile is null or already in the list, we can't add it
         
-        AffectedTiles.Add(tile.Position);
-        Autotiles.Add(new NAutotile(tile.UV, tile.Position, tile.Tileset));
+        AffectedTiles.Add(tile.PositionInTileset);
+        Autotiles.Add(new NAutotile(tile.SizeInTileset, tile.PositionInTileset, tile.Tileset, this));
         return true; // Successfully added the tile
     }
 
-    public ITileable? GetTileAt(MapLayer? layer, Point position)
+    public ITileable? GetTileAt(TileLayer? layer, Point position)
     {
-        var tile = Autotiles.FirstOrDefault(autotile => autotile.RespectRules(layer, position));
+        var tile = Autotiles.FirstOrDefault(autotile => autotile.RespectRules(layer, position) && autotile != BaseTile);
         return tile ??
                BaseTile;
     }
 
     public ITileable? GetDirectTileAt(Point position)
     {
-        return Autotiles.FirstOrDefault(autotile => autotile.Position.X == position.X && autotile.Position.Y == position.Y);
+        return Autotiles.FirstOrDefault(autotile => autotile.PositionInTileset.X == position.X && autotile.PositionInTileset.Y == position.Y);
     }
 
     public bool RemoveTile(NAutotile tile)
@@ -412,7 +493,7 @@ public class AutotileGroup : ISerializable, IDeserializable
             return false;
         }
         
-        AffectedTiles.Remove(tile.Position);
+        AffectedTiles.Remove(tile.PositionInTileset);
         Autotiles.Remove(tile);
         return true;
     }
@@ -473,6 +554,10 @@ public class AutotileGroup : ISerializable, IDeserializable
 
 public interface ITileset
 {
+    
+    public event EventHandler? ImageChanged;
+    public string ImagePath { get; }
+    public Ulid Unique { get; }
     public string Name { get; set; }
     public int TileWidth { get; set; }
     public int TileHeight { get; set; }
@@ -550,8 +635,8 @@ public class NAutoTileset : ImageAsset, ITileset, ISerializable, IDeserializable
             }
             
             // Here we will crop the bitmap to the tile size & position and add it to the combined bitmap.
-            var tilePosX = tile.Position.X * TileWidth;
-            var tilePosY = tile.Position.Y * TileHeight;
+            var tilePosX = tile.PositionInTileset.X * TileWidth;
+            var tilePosY = tile.PositionInTileset.Y * TileHeight;
             var tileRect = new SKRectI(tilePosX, tilePosY, tilePosX + TileWidth, tilePosY + TileHeight);
             var tileNewPos = new SKRectI(currentX, currentY, currentX + TileWidth, currentY + TileHeight);
 
@@ -634,6 +719,7 @@ public class NTileset : ImageAsset, ITileset, ISerializable, IDeserializable
     public NTileset(string name, int tileWidth, int tileHeight, string imagePath) : base(name)
     {
         Type = TYPE.TILESETS;
+        Name = name;
         TileWidth = tileWidth;
         TileHeight = tileHeight;
         ImagePath = imagePath;
@@ -818,8 +904,8 @@ public class TilesetFamily : BaseAsset
             }
             
             // Here we will crop the bitmap to the tile size & position and add it to the combined bitmap.
-            var tilePosX = tile.Position.X * TileWidth;
-            var tilePosY = tile.Position.Y * TileHeight;
+            var tilePosX = tile.PositionInTileset.X * TileWidth;
+            var tilePosY = tile.PositionInTileset.Y * TileHeight;
             var tileRect = new SKRectI(tilePosX, tilePosY, tilePosX + TileWidth, tilePosY + TileHeight);
             var tileNewPos = new SKRectI(currentX, currentY, currentX + TileWidth, currentY + TileHeight);
 

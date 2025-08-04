@@ -184,7 +184,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                 {
                     // Logic to add a new layer with the specified name
                     var newLayerName = layerNameTextBox.Text;
-                    MapLayer layer = new Core.Type.Map.MapLayer(newLayerName);
+                    TileLayer layer = new Core.Type.Map.TileLayer(newLayerName, null);
 
                     layer.ZIndex = EngineCore.Instance.Data.EditedMap.Layers.Count - 1; // Set ZIndex to the last index
                     layer.ZIndexChanged += (value) =>

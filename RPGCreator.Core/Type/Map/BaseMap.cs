@@ -57,9 +57,9 @@ namespace RPGCreator.Core.Type.Map
         private string _Description = string.Empty;
         public ObservableCollection<BaseMap> Levels = [];
         [ObservableProperty]
-        private ObservableCollection<MapLayer> _Layers = [];
+        private ObservableCollection<TileLayer> _Layers = [];
 
-        public readonly MapLayer PreviewLayer = new MapLayer("Preview Layer", 99999, true);
+        public readonly TileLayer PreviewLayer = new TileLayer("Preview Layer", null, 99999, true);
 
         [ObservableProperty]
         private Size _Size = new(10, 20);
@@ -84,7 +84,7 @@ namespace RPGCreator.Core.Type.Map
             Name = name;
         }
 
-        protected override void _Draw(SpriteBatchExtend sb)
+        protected override void _Draw(SpriteBatchExtend? sb)
         {
             // Draw the map here
             // This is where you would implement the logic to draw the map using the provided SpriteBatchExtend instance.
@@ -105,28 +105,28 @@ namespace RPGCreator.Core.Type.Map
 
             foreach (var layer in Layers.OrderBy(l => l.ZIndex))
             {
-                if (layer.Visible)
+                if (layer.IsVisible)
                 {
                     layer.Draw(sb);
                 }
             }
         }
 
-        public void AddLayer(MapLayer layer)
+        public void AddLayer(TileLayer layer)
         {
             Layers.Add(layer);
             layer.Parent = this;
             _OnAddedChild();
         }
 
-        public void RemoveLayer(MapLayer layer)
+        public void RemoveLayer(TileLayer layer)
         {
             Layers.Remove(layer);
             layer.Parent = null;
             _OnRemovedChild();
         }
 
-        public void SelectLayer(MapLayer layer)
+        public void SelectLayer(TileLayer layer)
         {
             foreach (var l in Layers)
             {
@@ -142,7 +142,7 @@ namespace RPGCreator.Core.Type.Map
             SelectLayer(Layers[index]);
         }
 
-        public MapLayer? GetSelectedLayer()
+        public TileLayer? GetSelectedLayer()
         {
             return Layers.FirstOrDefault(l => l.IsSelected);
         }

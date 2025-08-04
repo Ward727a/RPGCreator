@@ -55,9 +55,9 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
         public TextBlock LayerNameText { get; private set; }
 
         #endregion
-        public MapLayer Layer { get; private set; } = null!;
+        public TileLayer Layer { get; private set; } = null!;
 
-        public LayerItem(MapLayer layer)
+        public LayerItem(TileLayer layer)
         {
             Layer = layer ?? throw new ArgumentNullException(nameof(layer), "Layer cannot be null.");
             CreateComponents();
@@ -122,7 +122,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
             var confirmation = new ConfirmDialog("Remove Layer", "Are you sure you want to remove this layer? This action cannot be undone.", "Remove", "Cancel");
             confirmation.Confirmed += () =>
             {
-                if (Layer != null && Layer is MapLayer mapLayer)
+                if (Layer != null && Layer is TileLayer mapLayer)
                 {
                     // Remove the layer from the engine data
                     EngineCore.Instance.Data.EditedMap?.Layers.Remove(mapLayer);

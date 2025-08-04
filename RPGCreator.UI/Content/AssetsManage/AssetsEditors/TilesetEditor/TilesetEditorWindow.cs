@@ -35,7 +35,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
     public class TilesetEditorWindow : Window
     {
 
-        public TilesetEditorWindow(Tileset tileset)
+        public TilesetEditorWindow(NTileset tileset)
         {
             Title = "Tileset Editor";
             Width = 800;

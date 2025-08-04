@@ -59,7 +59,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
             Autotiling
         }
         private TilesetType CurrentTilesetType = TilesetType.Tileset;
-        public Tileset SelectedTileset
+        public ITileset SelectedTileset
         {
             get
             {
@@ -82,7 +82,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
             }
         }
 
-        private Tileset CurrentTemp;
+        private ITileset CurrentTemp;
 
         public TilesetSelector()
         {
@@ -229,7 +229,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 
             var project = EngineCore.Instance.Data.EditedProject;
 
-            project.GetAssetsType<Tileset>(Core.Type.Assets.BaseAsset.TYPE.TILESETS).ForEach(tileset =>
+            project.GetAssetsType<NTileset>(Core.Type.Assets.BaseAsset.TYPE.TILESETS).ForEach(tileset =>
             {
                 var item = new TilesetItem(tileset);
                 if (item.Error)
@@ -303,14 +303,14 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 
             // Here we convert the location of the click to a tile position (tileCol, tileRow)
             var position = e.GetPosition(InnerTilesetCanvas);
-            int tileWidth = SelectedTileset.tile_width;
-            int tileHeight = SelectedTileset.tile_height;
+            int tileWidth = SelectedTileset.TileWidth;
+            int tileHeight = SelectedTileset.TileHeight;
 
             int tileCol = (int)(position.X / tileWidth);
             int tileRow = (int)(position.Y / tileHeight);
 
 
-            var tile = SelectedTileset.GetTile(tileCol, tileRow);
+            var tile = SelectedTileset.GetTileAt(tileCol, tileRow);
 
             if(tile == null)
             {

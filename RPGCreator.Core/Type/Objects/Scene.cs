@@ -38,7 +38,7 @@ namespace RPGCreator.Core.Type.Objects
     {
         public BaseMap? Map { get; private set; } = new BaseMap();
 
-        protected override void _Draw(SpriteBatchExtend sb)
+        protected override void _Draw(SpriteBatchExtend? sb)
         {
             if(!IsVisible)
                 return;

@@ -118,7 +118,7 @@ namespace RPGCreator.Core.Type.Assets
             return Rules.Any(e => e.Side == pos);
         }
 
-        public bool RespectRules(MapLayer layer, Point position, out List<Tile> tilesToAlert)
+        public bool RespectRules(TileLayer layer, Point position, out List<Tile> tilesToAlert)
         {
 
             List<bool> tags = [];
@@ -155,52 +155,52 @@ namespace RPGCreator.Core.Type.Assets
                 Point rulePosition = position + offset;
                 
                 // Now we need to check if the tile at the rule position has the tags we are looking for
-                if (layer.TryGetTileAt(rulePosition, out Tile? tile))
-                {
-
-                    if (!tile.IsAutotiling)
-                    {
-                        if (!isWhitelist)
-                        {
-                            tags.Add(true);
-                        }
-                        continue; // If the tile is not an autotiling, we skip it
-                    }
-                    
-                    var autotilingData = tile.Autotiling;
-                    
-                    // If the rule is a whitelist, we check if the tile has the tags we are looking for
-                    if (isWhitelist)
-                    {
-                        // If the tile has all the tags we are looking for, we return true
-                        if (rule.Tags.All(tag => autotilingData.Tags.Contains(tag)))
-                        {
-                            tags.Add(true);
-                            tilesToAlert.Add(tile);
-                            continue;
-                        }
-                        tags.Add(false);
-                    }
-                    else
-                    {
-                        // If the rule is a blacklist, we check if the tile has any of the tags we are looking for
-                        if (rule.Tags.Any(tag => autotilingData.Tags.Contains(tag)))
-                        {
-                            tags.Add(false); // If it has any of the tags, we return false
-                            continue;
-                        }
-                        tags.Add(true);
-                        tilesToAlert.Add(tile);
-                    }
-                    continue;
-                }
-                
-                if (!isWhitelist)
-                {
-                    tags.Add(true);
-                    continue;
-                }
-                tags.Add(false);
+                // if (layer.TryGetTileAt(rulePosition, out Tile? tile))
+                // {
+                //
+                //     if (!tile.IsAutotiling)
+                //     {
+                //         if (!isWhitelist)
+                //         {
+                //             tags.Add(true);
+                //         }
+                //         continue; // If the tile is not an autotiling, we skip it
+                //     }
+                //     
+                //     var autotilingData = tile.Autotiling;
+                //     
+                //     // If the rule is a whitelist, we check if the tile has the tags we are looking for
+                //     if (isWhitelist)
+                //     {
+                //         // If the tile has all the tags we are looking for, we return true
+                //         if (rule.Tags.All(tag => autotilingData.Tags.Contains(tag)))
+                //         {
+                //             tags.Add(true);
+                //             tilesToAlert.Add(tile);
+                //             continue;
+                //         }
+                //         tags.Add(false);
+                //     }
+                //     else
+                //     {
+                //         // If the rule is a blacklist, we check if the tile has any of the tags we are looking for
+                //         if (rule.Tags.Any(tag => autotilingData.Tags.Contains(tag)))
+                //         {
+                //             tags.Add(false); // If it has any of the tags, we return false
+                //             continue;
+                //         }
+                //         tags.Add(true);
+                //         tilesToAlert.Add(tile);
+                //     }
+                //     continue;
+                // }
+                //
+                // if (!isWhitelist)
+                // {
+                //     tags.Add(true);
+                //     continue;
+                // }
+                // tags.Add(false);
                 
             }
 
@@ -216,7 +216,7 @@ namespace RPGCreator.Core.Type.Assets
         /// A method to refresh the autotiling, this is used to update the appearance of the autotiling based on the rules and tags.<br/>
         /// Example: If the autotiling has a new tile added on the left, it will refresh the autotiling to update the appearance of the tile based on the rules and tags.<br/>
         /// </summary>
-        public void RefreshAutotiling(MapLayer layer, Point position)
+        public void RefreshAutotiling(TileLayer layer, Point position)
         {
             if (RespectRules(layer, position, out _))
                 return;
@@ -225,32 +225,32 @@ namespace RPGCreator.Core.Type.Assets
             var newTile = Group.GetTileByRule(layer, position, out _);
 
 
-            if (layer.TryGetTileAt(position, out var tile))
-            {
-                if (tile == null)
-                    return;
-                
-                layer.RemoveTile(tile);
-            }
-            
-            if (newTile == null)
-            {
-                // If no tile is found, we can just return
-                return;
-            }
-            
-            layer.AddTileAt(new Tile(
-                Group.Tileset,
-                new Rectangle(
-                    newTile.TilePosition.X * Group.Tileset.tile_width,
-                    newTile.TilePosition.Y * Group.Tileset.tile_height,
-                    Group.Tileset.tile_width,
-                    Group.Tileset.tile_height
-                )
-            )
-            {
-                Autotiling = newTile
-            }, position);
+            // if (layer.TryGetTileAt(position, out var tile))
+            // {
+            //     if (tile == null)
+            //         return;
+            //     
+            //     layer.RemoveTile(tile);
+            // }
+            //
+            // if (newTile == null)
+            // {
+            //     // If no tile is found, we can just return
+            //     return;
+            // }
+            //
+            // layer.AddTileAt(new Tile(
+            //     Group.Tileset,
+            //     new Rectangle(
+            //         newTile.TilePosition.X * Group.Tileset.tile_width,
+            //         newTile.TilePosition.Y * Group.Tileset.tile_height,
+            //         Group.Tileset.tile_width,
+            //         Group.Tileset.tile_height
+            //     )
+            // )
+            // {
+            //     Autotiling = newTile
+            // }, position);
             
         }
 
@@ -414,7 +414,7 @@ namespace RPGCreator.Core.Type.Assets
         /// <param name="layer">The layer where the tile will be added (will be used to compare the rule)</param>
         /// <param name="position">The position where the till will be added</param>
         /// <returns></returns>
-        public Autotiling? GetTileByRule(MapLayer layer, Point position, out List<Tile> tilesToAlert)
+        public Autotiling? GetTileByRule(TileLayer layer, Point position, out List<Tile> tilesToAlert)
         {
             tilesToAlert = [];
             int lastNumberOfChecks = -1;

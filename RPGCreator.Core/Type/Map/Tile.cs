@@ -69,7 +69,7 @@ namespace RPGCreator.Core.Type.Map
             Tileset = tileset;
         }
 
-        protected override void _Draw(SpriteBatchExtend sb)
+        protected override void _Draw(SpriteBatchExtend? sb)
         {
             sb.Draw(Tileset.GetTexture(sb.GraphicsDevice), Position, UV, Color.White);
         }
@@ -81,9 +81,9 @@ namespace RPGCreator.Core.Type.Map
 
         protected override void OnClick()
         {
-            if(Parent is MapLayer layer)
+            if(Parent is TileLayer layer)
             {
-                layer.SelectTile(this);
+                // layer.SelectTile(this);
                 Selected();
             }
         }

@@ -71,7 +71,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
                         Point tilePosition = new Point(at.X + x * map.GridParameter.CellWidth, at.Y + y * map.GridParameter.CellHeight);
                         if (IBrush.InBorder(tilePosition, map))
                         {
-                            layer.RemoveTileAt(tilePosition); // Add tile at the calculated position
+                            layer.TryRemoveElement(tilePosition, out _); // Add tile at the calculated position
                         }
                     }
                 }
@@ -79,7 +79,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
             else
             {
                 // If size is 1, just add the tile at the specified point
-                layer.RemoveTileAt(at);
+                layer.TryRemoveElement(at, out _);
             }
         }
 

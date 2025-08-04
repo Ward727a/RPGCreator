@@ -16,6 +16,20 @@ namespace RPGCreator.Core.Type.Internal
     {
         public int X { get; set; }
         public int Y { get; set; }
+        /// <summary>
+        /// The width of the point, which is the same as X.<br/>
+        /// </summary>
+        /// <remarks>
+        /// This is just a convenience property to access the X value as height for better readability.
+        /// </remarks>
+        public int Width => X;
+        /// <summary>
+        /// The height of the point, which is the same as Y.
+        /// </summary>
+        /// <remarks>
+        /// This is just a convenience property to access the Y value as height for better readability.
+        /// </remarks>
+        public int Height => Y;
         public Point(int x, int y)
         {
             X = x;

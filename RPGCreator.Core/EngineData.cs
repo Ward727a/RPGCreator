@@ -25,6 +25,7 @@
 using Avalonia.Controls;
 using Microsoft.Xna.Framework;
 using RPGCreator.Core.Managers.RTP.BrushManagers.Brushs;
+using RPGCreator.Core.Type.Assets;
 using RPGCreator.Core.Type.Map;
 using RPGCreator.Core.Type.Project;
 using RPGCreator.Core.Type.RTP;
@@ -34,9 +35,9 @@ namespace RPGCreator.Core
 
     public class SelectedTileChangedEventArgs : EventArgs
     {
-        public Tile? OldTile { get; }
-        public Tile? NewTile { get; }
-        public SelectedTileChangedEventArgs(Tile? oldTile, Tile? newTile)
+        public ITileable? OldTile { get; }
+        public ITileable? NewTile { get; }
+        public SelectedTileChangedEventArgs(ITileable? oldTile, ITileable? newTile)
         {
             OldTile = oldTile;
             NewTile = newTile;
@@ -46,9 +47,9 @@ namespace RPGCreator.Core
     public class  SelectedLayerChangedEventArgs : EventArgs
     {
         
-        public MapLayer? OldLayer { get; }
-        public MapLayer? NewLayer { get; }
-        public SelectedLayerChangedEventArgs(MapLayer? oldLayer, MapLayer? newLayer)
+        public TileLayer? OldLayer { get; }
+        public TileLayer? NewLayer { get; }
+        public SelectedLayerChangedEventArgs(TileLayer? oldLayer, TileLayer? newLayer)
         {
             OldLayer = oldLayer;
             NewLayer = newLayer;
@@ -126,8 +127,8 @@ namespace RPGCreator.Core
         public event EventHandler<SelectedTileChangedEventArgs>? SelectedTileChanged;
 
         private BaseMap? _editedMap;
-        private MapLayer? _selectedLayer;
-        private Tile? _selectedTile;
+        private TileLayer? _selectedLayer;
+        private ITileable? _selectedTile;
         public SEditorSettings EditorSettings { get; } = new SEditorSettings();
 
         internal EngineData()
@@ -137,7 +138,7 @@ namespace RPGCreator.Core
         public static Version AppVersion => new(0, 1, 0);
 
         public BaseProject? EditedProject { get; internal set; }
-        public MapLayer? SelectedLayer { get => _selectedLayer; 
+        public TileLayer? SelectedLayer { get => _selectedLayer; 
             set
             {
                 if (_selectedLayer != value)
@@ -158,7 +159,7 @@ namespace RPGCreator.Core
                 }
             }
         }
-        public Tile? SelectedTile { get => _selectedTile; 
+        public ITileable? SelectedTile { get => _selectedTile; 
             set
             {
                 if (_selectedTile != value)

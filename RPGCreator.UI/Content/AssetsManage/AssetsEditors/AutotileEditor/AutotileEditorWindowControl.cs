@@ -108,7 +108,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 
         public StackPanel TopBar;
 
-        public Button AddAutotileButton;
+        public Button AddGroupButton;
         public ComboBox AutotileComboBox;
 
         public ComboBox AutotileTools;
@@ -294,13 +294,13 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                 };
                 MainBody.Children.Add(TopBar);
 
-                AddAutotileButton = new Button
+                AddGroupButton = new Button
                 {
                     Content = "Add Group",
                     HorizontalAlignment = HorizontalAlignment.Left,
                     VerticalAlignment = VerticalAlignment.Center,
                 };
-                TopBar.Children.Add(AddAutotileButton);
+                TopBar.Children.Add(AddGroupButton);
 
                 AutotileComboBox = new ComboBox
                 {
@@ -640,18 +640,19 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                         if (!SelectedGroup.HasTile(tilePosition))
                         {
 
-                            var tileUv = new Point(tileX * tileWidth, tileY * tileHeight);
+                            var tileUv = new Point(tileWidth, tileHeight);
                             
                             SelectedAutotiling = new NAutotile(
                                 tileUv,
                                 tilePosition, 
-                                SelectedTileset);
+                                SelectedTileset,
+                                SelectedGroup);
                             SelectedGroup.AddTile(SelectedAutotiling);
                             Console.WriteLine($"New autotile created at: {tileX}, {tileY}");
                         }
                         else
                         {
-                            SelectedAutotiling = SelectedGroup.GetTileAt(null, tilePosition) as NAutotile;
+                            SelectedAutotiling = SelectedGroup.GetDirectTileAt(tilePosition) as NAutotile;
                             Console.WriteLine($"Autotile already exists at: {tileX}, {tileY}");
                         }
 
@@ -671,10 +672,10 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                     {
                         // Set base tile
                         Console.WriteLine($"Tile middle clicked at grid position: {tileX}, {tileY}");
-                        if (!SelectedGroup.HasTile(position))
+                        if (!SelectedGroup.HasTile(tilePosition))
                             return;
                         
-                        var tiling = SelectedGroup.GetDirectTileAt(position);
+                        var tiling = SelectedGroup.GetDirectTileAt(tilePosition);
 
                         if (tiling == null)
                             return;
@@ -738,7 +739,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
         private void RefreshAutotileCombo()
         {
             AutotileComboBox.Items.Clear();
-            if (Autotile == null)
+            if (AutoTileset == null)
                 return;
             AutoTileset.AutotileGroups.ForEach(group =>
             {
@@ -787,9 +788,9 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                 TagsList.Items.Add(tag);
             });
 
-            if (SelectedAutotiling != SelectedGroup.BaseTile)
+            if (SelectedAutotiling != SelectedGroup.BaseTile && SelectedGroup.BaseTile != null)
             {
-                var basePosition = SelectedGroup.BaseTile.Position;
+                var basePosition = SelectedGroup.BaseTile.PositionInTileset;
 
                 DrawBaseCase(basePosition);
             }
@@ -803,16 +804,16 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
             foreach (var tiling in SelectedGroup.Autotiles)
             {
                 if(tiling != SelectedGroup.BaseTile && tiling != SelectedAutotiling)
-                    AddBasedOnTileCase(tiling.Position);
+                    AddBasedOnTileCase(tiling.PositionInTileset);
             }
             
             // Get the position of the selected autotile
-            DrawSelectedTileCase(SelectedAutotiling.Position);
+            DrawSelectedTileCase(SelectedAutotiling.PositionInTileset);
         }
 
         public void RegisterEvents()
         {
-            AddAutotileButton.Click += OnAddAutotileButtonOnClick;
+            AddGroupButton.Click += OnAddGroupButtonOnClick;
             AutotileComboBox.SelectionChanged += OnAutotileComboBoxOnSelectionChanged;
             GroupTagsAddButn.Click += OnGroupTagsAddButnOnClick;
             AutotileTagsRemove.Click += OnAutotileTagsRemoveOnClick;
@@ -834,7 +835,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
             ruleEditor.ShowDialog((Window)this.GetVisualRoot()!);
         }
 
-        private void OnAddAutotileButtonOnClick(object? o, RoutedEventArgs routedEventArgs)
+        private void OnAddGroupButtonOnClick(object? o, RoutedEventArgs routedEventArgs)
         {
             AutoTileset.AutotileGroups.Add(new AutotileGroup(){Name = $"New Group - {AutotileComboBox.Items.Count}"});
             // SelectedTileset.Groups.Add(new AutotilesGroup($"New Group - {AutotileComboBox.Items.Count}", SelectedTileset));
