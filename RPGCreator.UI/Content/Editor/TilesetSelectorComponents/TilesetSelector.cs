@@ -34,6 +34,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Type.Assets.Tilesets;
 
 namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 {
@@ -70,11 +71,11 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                 return null;
             }
         }
-        public Autotiles SelectedAutotiles
+        public Autotile SelectedAutotiles
         {
             get
             {
-                if (SelectBox.SelectedItem is Autotiles item)
+                if (SelectBox.SelectedItem is Autotile item)
                 {
                     return item;
                 }
@@ -229,7 +230,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 
             var project = EngineCore.Instance.Data.EditedProject;
 
-            project.GetAssetsType<NTileset>(Core.Type.Assets.BaseAsset.TYPE.TILESETS).ForEach(tileset =>
+            project.GetAssetsType<Tileset>(Core.Type.Assets.BaseAsset.TYPE.TILESETS).ForEach(tileset =>
             {
                 var item = new TilesetItem(tileset);
                 if (item.Error)

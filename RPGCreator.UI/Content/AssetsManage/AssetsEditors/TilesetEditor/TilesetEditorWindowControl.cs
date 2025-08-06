@@ -36,6 +36,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Type.Assets.Tilesets;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
@@ -47,7 +48,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
 
         private bool _FromWindow;
         public Grid Body { get; private set; }
-        public NTileset Tileset { get; private set; }
+        public Tileset Tileset { get; private set; }
 
         public Grid ImageContainer { get; private set; }
         public Image ImagePreview { get; private set; }
@@ -64,7 +65,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
         public TextSeparator ExamplesTilesLabel { get; private set; }
         public Grid ExamplesTilesGrid { get; private set; }
 
-        public TilesetEditorWindowControl(NTileset tileset, bool FromWindow = false)
+        public TilesetEditorWindowControl(Tileset tileset, bool FromWindow = false)
         {
             Tileset = tileset ?? throw new ArgumentNullException(nameof(tileset), "Tileset cannot be null");
             CreateComponents();

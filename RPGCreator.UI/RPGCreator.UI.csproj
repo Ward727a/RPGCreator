@@ -68,4 +68,23 @@
 		<DependentUpon>Resources.resx</DependentUpon>
 	  </Compile>
 	</ItemGroup>
+	<ItemGroup>
+	  <UpToDateCheckInput Remove="OldUI\Views\Editor\Editor.axaml" />
+	  <UpToDateCheckInput Remove="OldUI\Views\Editor\EditorView.axaml" />
+	  <UpToDateCheckInput Remove="OldUI\Views\Editor\EditorView\Tabs\LevelEditorTab.axaml" />
+	  <UpToDateCheckInput Remove="OldUI\Views\Editor\Templates\Tileset_asset_item.axaml" />
+	  <UpToDateCheckInput Remove="OldUI\Views\Editor\Windows\ProjectSettings.axaml" />
+	  <UpToDateCheckInput Remove="OldUI\Views\Editor\Windows\ProjectSettings\AssetsTilesets.axaml" />
+	  <UpToDateCheckInput Remove="OldUI\Views\Editor\Windows\ProjectSettings\Dialogs\TilesetDeleteDialog.axaml" />
+	  <UpToDateCheckInput Remove="OldUI\Views\Editor\Windows\ProjectSettings\Dialogs\TilesetEditDialog.axaml" />
+	  <UpToDateCheckInput Remove="OldUI\Views\Editor\Windows\ProjectSettings\Dialogs\TilesetImportDialog.axaml" />
+	  <UpToDateCheckInput Remove="OldUI\Views\Editor\Windows\ProjectSettings\Information.axaml" />
+	  <UpToDateCheckInput Remove="OldUI\Views\Editor\Windows\ProjectSettings\Test.axaml" />
+	  <UpToDateCheckInput Remove="OldUI\Views\Launcher\Templates\ProjectItem.axaml" />
+	  <UpToDateCheckInput Remove="OldUI\Views\Launcher\Windows\ProjectCreator\ProjectCreatorView.axaml" />
+	  <UpToDateCheckInput Remove="OldUI\Views\Launcher\Windows\ProjectCreator\ProjectCreatorWindow.axaml" />
+	  <UpToDateCheckInput Remove="OldUI\Views\LauncherView.axaml" />
+	  <UpToDateCheckInput Remove="OldUI\Views\LauncherWindow.axaml" />
+	  <UpToDateCheckInput Remove="OldUI\Views\Modals\ErrorDialog.axaml" />
+	</ItemGroup>
 </Project>

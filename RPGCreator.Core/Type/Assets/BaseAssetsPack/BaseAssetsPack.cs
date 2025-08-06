@@ -30,6 +30,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using RPGCreator.Core.Type.Assets.Tilesets;
 
 namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
 {

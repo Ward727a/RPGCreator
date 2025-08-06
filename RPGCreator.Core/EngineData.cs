@@ -26,6 +26,7 @@ using Avalonia.Controls;
 using Microsoft.Xna.Framework;
 using RPGCreator.Core.Managers.RTP.BrushManagers.Brushs;
 using RPGCreator.Core.Type.Assets;
+using RPGCreator.Core.Type.Assets.Tilesets;
 using RPGCreator.Core.Type.Map;
 using RPGCreator.Core.Type.Project;
 using RPGCreator.Core.Type.RTP;

@@ -1,12 +1,13 @@
 using Avalonia.Controls;
 using RPGCreator.Core.Type.Assets;
+using RPGCreator.Core.Type.Assets.Tilesets;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor;
 
 public class AutotileEditorRuleEditorWindow : Window
 {
 
-    public AutotileEditorRuleEditorWindow(NAutoTileset tileset)
+    public AutotileEditorRuleEditorWindow(AutoTileset tileset)
     {
         Width = 1200;
         Height = 900;

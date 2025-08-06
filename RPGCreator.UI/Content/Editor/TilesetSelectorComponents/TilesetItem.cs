@@ -31,6 +31,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Type.Assets.Tilesets;
 
 namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 {

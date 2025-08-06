@@ -35,6 +35,7 @@ using Avalonia;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.VisualTree;
+using RPGCreator.Core.Type.Assets.Tilesets;
 using RPGCreator.UI.Common.Windows;
 using Point = RPGCreator.Core.Type.Internal.Point;
 
@@ -54,12 +55,11 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 
         public event Action? AutotileSaved;
         
-        private Autotiling BasedOn;
-        public NAutotile? SelectedAutotiling;
-        public NTileset? SelectedTileset;
-        public NAutoTileset AutoTileset;
+        public Autotile? SelectedAutotiling;
+        public Tileset? SelectedTileset;
+        public AutoTileset AutoTileset;
         public AutotileGroup? SelectedGroup { get; private set; }
-        public NAutotile Autotile;
+        public Autotile Autotile;
 
         public EAutotileTools SelectedTool => AutotileTools.SelectedIndex switch
         {
@@ -164,7 +164,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 
         #endregion
 
-        public AutotileEditorWindowControl(NAutoTileset tileset)
+        public AutotileEditorWindowControl(AutoTileset tileset)
         {
             AutoTileset = tileset;
             CreateComponents();
@@ -642,7 +642,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 
                             var tileUv = new Point(tileWidth, tileHeight);
                             
-                            SelectedAutotiling = new NAutotile(
+                            SelectedAutotiling = new Autotile(
                                 tileUv,
                                 tilePosition, 
                                 SelectedTileset,
@@ -652,7 +652,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                         }
                         else
                         {
-                            SelectedAutotiling = SelectedGroup.GetDirectTileAt(tilePosition) as NAutotile;
+                            SelectedAutotiling = SelectedGroup.GetDirectTileAt(tilePosition) as Autotile;
                             Console.WriteLine($"Autotile already exists at: {tileX}, {tileY}");
                         }
 
@@ -692,7 +692,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                     {
                         if (SelectedGroup != null)
                         {
-                            var tiling = SelectedGroup.GetDirectTileAt(tilePosition) as NAutotile;
+                            var tiling = SelectedGroup.GetDirectTileAt(tilePosition) as Autotile;
 
                             if (tiling == null)
                                 return;
@@ -719,7 +719,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                     if (SelectedGroup == null)
                         return;
                     
-                    var tiling = SelectedGroup.GetDirectTileAt(tilePosition) as NAutotile;
+                    var tiling = SelectedGroup.GetDirectTileAt(tilePosition) as Autotile;
 
                     if (tiling == null)
                         return;
@@ -749,7 +749,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 
         private void RefreshTilesetSelectorList()
         {
-            EngineCore.Instance.Data.EditedProject?.GetAssetsType<NTileset>(BaseAsset.TYPE.TILESETS)
+            EngineCore.Instance.Data.EditedProject?.GetAssetsType<Tileset>(BaseAsset.TYPE.TILESETS)
                 .ForEach(tileset =>
                 {
                     var item = new AutotileTilesetItem(tileset);

@@ -10,6 +10,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using RPGCreator.Core;
 using RPGCreator.Core.Type.Assets;
+using RPGCreator.Core.Type.Assets.Tilesets;
 using RPGCreator.Core.Type.Internal.LayerRenderer;
 using RPGCreator.Core.Type.Map;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor.RuleEditor;
@@ -20,11 +21,11 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor;
 
 public class AutotileEditorRuleEditorWindowControl : UserControl
 {
-    private NAutoTileset _tileset;
+    private AutoTileset _tileset;
     private AutotileGroup _autotileGroup;
     private GroupItemControl? _selectedGroupItem;
-    private NAutotile? _selectedAutotiling;
-    private NAutotileRules? _selectedRule;
+    private Autotile? _selectedAutotiling;
+    private AutotileRule? _selectedRule;
 
     // All the "null!" are just to suppress the nullability warnings, as these fields will be initialized in the CreateComponents method.
     private Grid _mainGrid = null!;
@@ -61,7 +62,7 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
     private TextBox _ruleDescriptionTextBox = null!;
     private Button _ruleConfirmButton = null!;
 
-    public AutotileEditorRuleEditorWindowControl(NAutoTileset autotileGroup)
+    public AutotileEditorRuleEditorWindowControl(AutoTileset autotileGroup)
     {
         _tileset = autotileGroup ?? throw new ArgumentNullException(nameof(autotileGroup), "Autotile group cannot be null");
 
@@ -396,7 +397,7 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
             Canvas.SetLeft(_tileSelectRect, tileCol * tileWidth);
             Canvas.SetTop(_tileSelectRect, tileRow * tileHeight);
 
-            _selectedAutotiling = _autotileGroup.GetDirectTileAt(new(tileCol, tileRow)) as NAutotile;
+            _selectedAutotiling = _autotileGroup.GetDirectTileAt(new(tileCol, tileRow)) as Autotile;
             
             if (_selectedAutotiling == null)
             {
@@ -539,7 +540,7 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
             if (_autotileGroup.BaseTile == null)
                 return;
             
-            var correspondingTile = _selectedGroupItem.Group.GetTileAt(_previewFakeLayer, new (tileX, tileY)) as NAutotile;
+            var correspondingTile = _selectedGroupItem.Group.GetTileAt(_previewFakeLayer, new (tileX, tileY)) as Autotile;
             
             if (correspondingTile == null)
             {
@@ -707,7 +708,7 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
         if (_selectedRule == null)
         {
             // If no rule is selected, we create a new one
-            _selectedRule = new NAutotileRules()
+            _selectedRule = new AutotileRule()
             {
                 Name = Name,
                 Tags = Tags.Split(',').Select(t => t.Trim()).ToList(),

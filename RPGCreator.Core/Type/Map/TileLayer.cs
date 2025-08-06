@@ -34,6 +34,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Type.Assets.Tilesets;
 using RPGCreator.Core.Type.Interfaces.UIRelated;
 using RPGCreator.Core.Type.Internal.LayerRenderer;
 using Color = Avalonia.Media.Color;
@@ -243,10 +244,10 @@ namespace RPGCreator.Core.Type.Map
             
             _watchdog++;
             _surroundingElementsToIgnore.Add(position);
-            if (tile is NAutotile)
+            if (tile is Autotile)
             {
                 // In this case, we need to check if the surrounding tile still respects their rules.
-                var autotile = (NAutotile)tile;
+                var autotile = (Autotile)tile;
                 
                 // Get the surrounding tiles
                 var surroundingTiles = GetSurroundingElements(position, tile.Tileset.TileWidth);
@@ -261,7 +262,7 @@ namespace RPGCreator.Core.Type.Map
                         Console.WriteLine($"TileLayer: Infinite loop detected while adding tile at {position}. Watchdog limit reached.");
                         return;
                     }
-                    if (surroundingTile.Value is NAutotile surroundingAutotile)
+                    if (surroundingTile.Value is Autotile surroundingAutotile)
                     {
                         if (!surroundingAutotile.RespectRules(this, surroundingTile.Key))
                         {
@@ -280,7 +281,7 @@ namespace RPGCreator.Core.Type.Map
                         if (surroundingAutotile.IsEqualTo(surroundingAutotile.AutotileGroup.BaseTile))
                         {
                             var newAutotile = autotile.GetDrawableTile(this, surroundingTile.Key);
-                            if (newAutotile != null && newAutotile is NAutotile newSurroundingAutotile)
+                            if (newAutotile != null && newAutotile is Autotile newSurroundingAutotile)
                             {
                                 // If the new autotile is not the same as the current autotile, we need to replace it
                                 if (!newSurroundingAutotile.IsEqualTo(surroundingAutotile))

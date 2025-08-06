@@ -37,6 +37,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Type.Assets.Tilesets;
 
 namespace RPGCreator.UI.Content.AssetsManage.Components
 {
@@ -291,8 +292,8 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
     public interface ITilesetViewItem
     {
-        public NTileset? Tileset { get; }
-        public NAutoTileset? Autotiles { get; }
+        public Tileset? Tileset { get; }
+        public AutoTileset? Autotiles { get; }
         public void Select();
         public void Deselect();
     }
@@ -301,13 +302,13 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
     {
         public event Action? OnSelected;
         public event Action? OnDeselected;
-        public NTileset? Tileset { get; private set; }
-        public NAutoTileset? Autotiles { get; private set; }
+        public Tileset? Tileset { get; private set; }
+        public AutoTileset? Autotiles { get; private set; }
         public bool IsSelected { get; private set; } = false;
 
         public Grid Body { get; private set; }
 
-        public TilesetViewListItem(NTileset tileset)
+        public TilesetViewListItem(Tileset tileset)
         {
             Tileset = tileset;
             CreateComponents();
@@ -315,7 +316,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
             Content = Body;
         }
         
-        public TilesetViewListItem(NAutoTileset autotiles)
+        public TilesetViewListItem(AutoTileset autotiles)
         {
             Autotiles = autotiles;
             CreateComponents();
@@ -745,8 +746,8 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
         private void TilesetsManageControl_OnNeedRefresh()
         {
-            var autotiles = EngineCore.Instance.Data.EditedProject?.GetAssetsType<NAutoTileset>(BaseAsset.TYPE.AUTOTILES) ?? new List<NAutoTileset>();
-            var tilesets = EngineCore.Instance.Data.EditedProject?.GetAssetsType<NTileset>(BaseAsset.TYPE.TILESETS) ?? new List<NTileset>();
+            var autotiles = EngineCore.Instance.Data.EditedProject?.GetAssetsType<AutoTileset>(BaseAsset.TYPE.AUTOTILES) ?? new List<AutoTileset>();
+            var tilesets = EngineCore.Instance.Data.EditedProject?.GetAssetsType<Tileset>(BaseAsset.TYPE.TILESETS) ?? new List<Tileset>();
             ViewPanel.Children.Clear();
             foreach (var tileset in tilesets)
             {
@@ -858,7 +859,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                 {
                     if(args.TilesetType == 0) // Tileset
                     {
-                        var tileset = new NTileset(args.Name, args.TileWidth, args.TileHeight, string.Empty)
+                        var tileset = new Tileset(args.Name, args.TileWidth, args.TileHeight, string.Empty)
                         {
                         };
                         var editor_control = new TilesetEditorWindowControl(tileset);
@@ -874,7 +875,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                     }
                     else if(args.TilesetType == 1) // Autotile
                     {
-                        var autotile = new NAutoTileset(){Name = args.Name};
+                        var autotile = new AutoTileset(){Name = args.Name};
                         autotile.TileWidth = args.TileWidth;
                         autotile.TileHeight = args.TileHeight;
                         autotile.Pack = EngineCore.Instance.Managers.Assets.GetAssetsPacks().FirstOrDefault(p => p.Name == args.AssetPack) ?? EngineCore.Instance.Managers.Assets.GetAssetsPacks().FirstOrDefault();

@@ -29,13 +29,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Type.Assets.Tilesets;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
 {
     public class TilesetEditorWindow : Window
     {
 
-        public TilesetEditorWindow(NTileset tileset)
+        public TilesetEditorWindow(Tileset tileset)
         {
             Title = "Tileset Editor";
             Width = 800;
