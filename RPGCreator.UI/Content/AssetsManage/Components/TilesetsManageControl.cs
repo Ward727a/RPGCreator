@@ -292,7 +292,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
     public interface ITilesetViewItem
     {
-        public Tileset? Tileset { get; }
+        public ITileset? Tileset { get; }
         public AutoTileset? Autotiles { get; }
         public void Select();
         public void Deselect();
@@ -302,13 +302,13 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
     {
         public event Action? OnSelected;
         public event Action? OnDeselected;
-        public Tileset? Tileset { get; private set; }
+        public ITileset? Tileset { get; private set; }
         public AutoTileset? Autotiles { get; private set; }
         public bool IsSelected { get; private set; } = false;
 
         public Grid Body { get; private set; }
 
-        public TilesetViewListItem(Tileset tileset)
+        public TilesetViewListItem(ITileset tileset)
         {
             Tileset = tileset;
             CreateComponents();
@@ -746,40 +746,28 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
         private void TilesetsManageControl_OnNeedRefresh()
         {
-            var autotiles = EngineCore.Instance.Data.EditedProject?.GetAssetsType<AutoTileset>(BaseAsset.TYPE.AUTOTILES) ?? new List<AutoTileset>();
-            var tilesets = EngineCore.Instance.Data.EditedProject?.GetAssetsType<Tileset>(BaseAsset.TYPE.TILESETS) ?? new List<Tileset>();
+            var tilesets = EngineCore.Instance.Data.EditedProject?.GetAssetsType<BaseAsset>(BaseAsset.TYPE.TILESETS) ?? new List<BaseAsset>();
             ViewPanel.Children.Clear();
             foreach (var tileset in tilesets)
             {
-                var item = new TilesetViewListItem(tileset);
-                item.OnSelected += () =>
+                if(tileset is not ITileset && tileset is not AutoTileset)
                 {
-                    SelectedTilesetViewItem = item;
-                };
-                item.OnDeselected += () =>
+                    continue; // Skip if it's not a Tileset or AutoTileset
+                }
+
+                if (tileset is ITileset tilesetInterface)
                 {
-                    if (SelectedTilesetViewItem == item)
+                    var item = new TilesetViewListItem(tilesetInterface);
+                    item.OnSelected += () => { SelectedTilesetViewItem = item; };
+                    item.OnDeselected += () =>
                     {
-                        SelectedTilesetViewItem = null;
-                    }
-                };
-                ViewPanel.Children.Add(item);
-            }
-            foreach (var autotile in autotiles)
-            {
-                var item = new TilesetViewListItem(autotile);
-                item.OnSelected += () =>
-                {
-                    SelectedTilesetViewItem = item;
-                };
-                item.OnDeselected += () =>
-                {
-                    if (SelectedTilesetViewItem == item)
-                    {
-                        SelectedTilesetViewItem = null;
-                    }
-                };
-                ViewPanel.Children.Add(item);
+                        if (SelectedTilesetViewItem == item)
+                        {
+                            SelectedTilesetViewItem = null;
+                        }
+                    };
+                    ViewPanel.Children.Add(item);
+                }
             }
         }
 
@@ -913,10 +901,10 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                     return;
                 }
                 
-                if(SelectedTilesetViewItem.Autotiles == null)
+                if(SelectedTilesetViewItem.Tileset is Tileset tileset)
                 {
                     TilesetEditorWindowControl editor_control =
-                        new TilesetEditorWindowControl(SelectedTilesetViewItem?.Tileset);
+                        new TilesetEditorWindowControl(tileset);
 
                     var host_ = ((AssetsManageWindow)this.GetVisualRoot()!);
                     editor_control.TilesetSaved += () =>
@@ -928,10 +916,10 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
                     Console.WriteLine("Edit Tileset button clicked.");
                 }
-                else if(SelectedTilesetViewItem.Tileset == null)
+                else if(SelectedTilesetViewItem.Tileset is AutoTileset autotiles)
                 {
                     AutotileEditorWindowControl editor_control =
-                        new AutotileEditorWindowControl(SelectedTilesetViewItem?.Autotiles);
+                        new AutotileEditorWindowControl(autotiles);
 
                     var host_ = ((AssetsManageWindow)this.GetVisualRoot()!);
                     editor_control.AutotileSaved += () =>
@@ -957,8 +945,11 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                     return;
                 }
                 // Here you would implement the logic to delete the selected tileset.
-                var tileset = SelectedTilesetViewItem.Tileset;
-                EngineCore.Instance.Managers.Assets.RemoveAsset(tileset);
+                var tilesetBase = SelectedTilesetViewItem.Tileset;
+                if(tilesetBase is Tileset tileset)
+                    EngineCore.Instance.Managers.Assets.RemoveAsset(tileset);
+                else if(tilesetBase is AutoTileset autotiles)
+                    EngineCore.Instance.Managers.Assets.RemoveAsset(autotiles);
                 TilesetsManageControl_OnNeedRefresh();
                 Console.WriteLine("Delete Tileset button clicked.");
             };

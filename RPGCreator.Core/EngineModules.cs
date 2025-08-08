@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace RPGCreator.Core
 {
@@ -34,7 +35,11 @@ namespace RPGCreator.Core
     {
 
         internal EngineModules()
-        { }
+        {
+            
+            Log.Information($"EngineModules initialized.");
+            
+        }
 
     }
 }

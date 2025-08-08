@@ -24,6 +24,7 @@
 #endregion
 using RPGCreator.Core.Configs.EventsArgs;
 using RPGCreator.Core.Configs.Helpers;
+using Serilog;
 
 namespace RPGCreator.Core.Configs
 {
@@ -46,6 +47,8 @@ namespace RPGCreator.Core.Configs
             LoadOrCreateConfig<ProjectsConf>(
                 Path.Combine(((AppConf)LoadedConfig[ConfigMap["AppConf"]]).Paths.ProjectsFolder, "Projects.conf.xml")
             );
+            
+            Log.Information($"EngineConfigs initialized.");
         }
         
         public T? LoadOrCreateConfig<T>(string configPath) where T : ConfHelper, new()
@@ -91,6 +94,7 @@ namespace RPGCreator.Core.Configs
             newConf.ConfigPath = configPath;
             AddConfig(configPath, newConf);
             newConf.LoadConfig();
+            Log.Information($"Config {configPath} loaded/created successfully.");
             return newConf;
         }
 
@@ -317,7 +321,7 @@ namespace RPGCreator.Core.Configs
                 Save(ConfigPath);
             }
             public abstract SerializationInfo GetObjectData();
-            public abstract void SetObjectData(SerializationInfo info);
+            public abstract void SetObjectData(DeserializationInfo info);
         }
     }
 }

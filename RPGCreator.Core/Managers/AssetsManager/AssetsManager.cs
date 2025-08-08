@@ -32,6 +32,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Serilog;
 
 namespace RPGCreator.Core.Managers.AssetsManager
 {
@@ -57,7 +58,15 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 {
                     foreach (string packPath in e.LoadedProject.AssetsPackPath)
                     {
-                        LoadPack(packPath);
+                        try
+                        {
+                            LoadPack(packPath);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex, "Failed to load assets pack from path: {packPath}", packPath);
+                            return;
+                        }
                     }
                 }
             };
@@ -70,6 +79,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
                     UnregisterPack(pack.Key);
                 }
             };
+            Log.Information("AssetsManager initialized.");
         }
 
         public bool CreateAssetsPack(string packName, BaseAssetsPack.PACK_TYPE type)

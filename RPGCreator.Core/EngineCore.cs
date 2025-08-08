@@ -27,6 +27,7 @@ using RPGCreator.Core.Events;
 using RPGCreator.Core.Events.EventArgs;
 using RPGCreator.Core.Scheduler;
 using RPGCreator.Core.Type.Assets.BaseAssetsPack;
+using Serilog;
 
 namespace RPGCreator.Core
 {
@@ -57,6 +58,8 @@ namespace RPGCreator.Core
         public EngineModules Modules { get; private set; }
         public EngineSerializer Serializer { get; private set; }
 
+        private EngineLogger Logger;
+
         // TODO: Remove?
         //public static BaseAssetsPack TESTPACK;
 
@@ -73,6 +76,7 @@ namespace RPGCreator.Core
             }
             Instance = this;
 
+            Logger = new EngineLogger();
             Scheduler = new EngineScheduler();
             Serializer = new EngineSerializer();
             Configs = new EngineConfigs();
@@ -82,6 +86,8 @@ namespace RPGCreator.Core
             Modules = new EngineModules();
 
             Managers.Init();
+            
+            Log.Information("EngineCore initialized at {Time}.", DateTime.Now);
 
             // Managers.Projects.CreateProject("test project new config", "C:\\Users\\Ward\\Desktop\\Test");
 

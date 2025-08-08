@@ -30,6 +30,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace RPGCreator.Core.Events
 {
@@ -46,7 +47,11 @@ namespace RPGCreator.Core.Events
     {
 
         internal EngineEvents()
-        { }
+        {
+            
+            Log.Information($"EngineEvents initialized.");
+            
+        }
 
         // This manage all the engine related events.
         // For example, once a project is unloaded, you can subscribe to this event to do something AFTER ALL parts of the engine are done unloading it.

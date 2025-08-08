@@ -51,6 +51,10 @@ namespace RPGCreator.Core.Type.Project
 
         public ObservableCollection<BaseMap> Maps = [];
 
+        public ProjectGameData()
+        {
+        }
+
         public ProjectGameData(BaseProject project)
         {
             Project = project;
@@ -64,11 +68,11 @@ namespace RPGCreator.Core.Type.Project
             return info;
         }
 
-        public void SetObjectData(SerializationInfo info)
+        public void SetObjectData(DeserializationInfo info)
         {
             if (info == null) throw new ArgumentNullException(nameof(info));
 
-            info.TryGetList("Maps", out Maps, [], "Could not load Maps from project game data.");
+            info.TryGetList("Maps", out List<BaseMap> maps, [], "Could not load Maps from project game data.");
             // Set other properties as needed
             if (Maps == null)
             {

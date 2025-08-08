@@ -8,10 +8,10 @@ using Point = RPGCreator.Core.Type.Internal.Point;
 
 namespace RPGCreator.Core.Type.Assets.Tilesets;
 
-public class Tile : BaseDrawable, ITileable
+public class Tile : BaseDrawable, ITileable, ISerializable, IDeserializable
 {
-    public Point SizeInTileset { get; }
-    public Point PositionInTileset { get; }
+    public Point SizeInTileset { get; set; }
+    public Point PositionInTileset { get; set; }
     public Rectangle UV => new Rectangle(PositionInTileset, SizeInTileset);
     public Tileset Tileset { get; private set; }
     
@@ -114,5 +114,46 @@ public class Tile : BaseDrawable, ITileable
 
         var croppedBitmap = new CroppedBitmap(tilesetBitmap, cropRegion);
         return croppedBitmap;
+    }
+
+    public SerializationInfo GetObjectData()
+    {
+        SerializationInfo info = new SerializationInfo(typeof(Tile));
+        info.AddValue("SizeInTileset", SizeInTileset);
+        info.AddValue("PositionInTileset", PositionInTileset);
+        info.AddValue("Tileset", Tileset.Unique);
+        return info;
+    }
+
+    public void SetObjectData(DeserializationInfo info)
+    {
+        if (info == null)
+        {
+            throw new ArgumentNullException(nameof(info), "SerializationInfo cannot be null.");
+        }
+
+        info.TryGetValue("SizeInTileset", out Point sizeInTileset, new Point(32, 32), "Size in tileset not found or invalid (Set to 32x32 by default).");
+        info.TryGetValue("PositionInTileset", out Point positionInTileset, new Point(0, 0), "Position in tileset not found or invalid (Set to 0,0 by default).");
+        info.TryGetValue("Tileset", out Ulid tilesetUnique, Ulid.Empty, "Tileset not found or invalid.");
+
+        SizeInTileset = sizeInTileset;
+        PositionInTileset = positionInTileset;
+
+        void OnEditedProjectLoaded()
+        {
+            var tileset = EngineCore.Instance.Data.EditedProject.GetAssetsType<Tileset>(BaseAsset.TYPE.TILESETS)
+                .FirstOrDefault(t => t.Unique == tilesetUnique);
+            
+            if (tileset == null)
+            {
+                throw new Exception($"Tileset with unique ID {tilesetUnique} not found in the project.");
+            }
+
+            Tileset = tileset;
+            
+            EngineCore.Instance.Data.EditedProject.OnProjectLoaded -= OnEditedProjectLoaded; // Unsubscribe from the event to avoid memory leaks
+        }
+
+        EngineCore.Instance.Data.EditedProject.OnProjectLoaded += OnEditedProjectLoaded;
     }
 }

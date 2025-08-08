@@ -99,7 +99,7 @@ namespace RPGCreator.Core.Configs.Helpers
             return info;
         }
 
-        public override void SetObjectData(SerializationInfo info)
+        public override void SetObjectData(DeserializationInfo info)
         {
             if (info == null)
             {

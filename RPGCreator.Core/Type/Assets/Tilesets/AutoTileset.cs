@@ -9,8 +9,13 @@ public class AutoTileset : ImageAsset, ITileset, ISerializable, IDeserializable
     public const int MaxTilesByRow = 8; // Maximum number of tiles in a row for the tileset family
     public int TileWidth { get; set; }
     public int TileHeight { get; set; }
-    public bool IsSimple { get; } = true;
     public List<AutotileGroup> AutotileGroups { get; set; } = new(); // List of autotilings for this tileset
+
+    public AutoTileset()
+    {
+        Type = TYPE.TILESETS; // Set the type of this asset to AutoTileset
+    }
+    
     public bool HasTile(int row, int column)
     {
         // Check if the autotilings contain a tile at the specified row and column.
@@ -98,12 +103,29 @@ public class AutoTileset : ImageAsset, ITileset, ISerializable, IDeserializable
 
     public SerializationInfo GetObjectData()
     {
-        throw new NotImplementedException();
+        SerializationInfo info = new SerializationInfo(typeof(AutoTileset));
+        AddBaseSerialization(info);
+        info.AddValue("TileWidth", TileWidth);
+        info.AddValue("TileHeight", TileHeight);
+        info.AddValue("AutotileGroups", AutotileGroups);
+        return info;
     }
 
-    public void SetObjectData(SerializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
-        throw new NotImplementedException();
+        if (info == null)
+        {
+            throw new ArgumentNullException(nameof(info), "SerializationInfo cannot be null.");
+        }
+
+        LoadBaseSerialization(info);
+        info.TryGetValue("TileWidth", out int tileWidth, 32, "Tile width not found or invalid (Set to 32 by default).");
+        info.TryGetValue("TileHeight", out int tileHeight, 32, "Tile height not found or invalid (Set to 32 by default).");
+        info.TryGetList("AutotileGroups", out List<AutotileGroup> autotileGroups, new List<AutotileGroup>(), "Autotile groups not found or invalid (Set to empty list by default).");
+
+        TileWidth = tileWidth;
+        TileHeight = tileHeight;
+        AutotileGroups = autotileGroups;
     }
 
     public override Bitmap GetBitmap(bool forceReload = false)

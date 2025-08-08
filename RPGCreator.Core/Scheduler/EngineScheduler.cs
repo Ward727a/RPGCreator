@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace RPGCreator.Core.Scheduler
 {
@@ -45,6 +46,12 @@ namespace RPGCreator.Core.Scheduler
     public class EngineScheduler
     {
         private List<BaseTask> _tasks = [];
+        
+        internal EngineScheduler()
+        {
+            // Private constructor to prevent instantiation from outside
+            Log.Information($"EngineScheduler started at {DateTime.Now}.");
+        }
 
         public void WaitSecond(float seconds, Action callback)
         {

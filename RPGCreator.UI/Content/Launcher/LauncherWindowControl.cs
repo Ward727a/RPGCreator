@@ -40,6 +40,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace RPGCreator.UI.Content.Launcher
 {
@@ -231,7 +232,7 @@ namespace RPGCreator.UI.Content.Launcher
 
         private void RefreshProjectDetails()
         {
-            Console.WriteLine("Refreshing project details.");
+            Log.Information("Refreshing project details.");
             // Update the project details panel with the selected project's information
             if (_selectedProject != null)
             {
@@ -250,7 +251,7 @@ namespace RPGCreator.UI.Content.Launcher
         private void RefreshButtonsState()
         {
             // Enable or disable buttons based on whether a project is selected
-            Console.WriteLine($"Refreshing buttons state. Is project selected: {_IsProjectSelected}");
+            Log.Information($"Refreshing buttons state. Is project selected: {_IsProjectSelected}");
             _DeleteButton.IsEnabled = _IsProjectSelected;
             _OpenButton.IsEnabled = _IsProjectSelected;
         }
@@ -258,7 +259,7 @@ namespace RPGCreator.UI.Content.Launcher
         private void RefreshProjectList()
         {
             // Logic to refresh the project list, e.g., reloading from disk or updating UI
-            Console.WriteLine("Refreshing project list.");
+            Log.Information("Refreshing project list.");
             // This could involve clearing the existing items and re-adding them
             // Reset the project details and buttons state
 
@@ -280,11 +281,11 @@ namespace RPGCreator.UI.Content.Launcher
                     var projectItem = new LauncherProjectItem(project);
                     _ProjectStackPanel.Children.Add(projectItem);
                     projectItem.ProjectSelected += OnSelectProject;
-                    Console.WriteLine($"Found project: {project.Name} at path {project.Path}");
+                    Log.Information($"Found project: {project.Name} at path {project.Path}");
                 }
                 else
                 {
-                    Console.WriteLine($"Project link with ID {projectLink.ProjectID} could not be resolved to a project.");
+                    Log.Error($"Project link with ID {projectLink.ProjectID} could not be resolved to a project.");
                 }
             }
         }
@@ -293,7 +294,7 @@ namespace RPGCreator.UI.Content.Launcher
         private void OnNewProjectButtonClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             // Logic to create a new project
-            Console.WriteLine("New Project button clicked.");
+            Log.Information("New Project button clicked.");
             // This should open a dialog to create a new project
             var newProjectDialog = new ProjectCreatorWindow();
             newProjectDialog.Control.ProjectCreated += Control_ProjectCreated;
@@ -310,13 +311,13 @@ namespace RPGCreator.UI.Content.Launcher
             // We check if a project is selected before proceeding
             if (!_IsProjectSelected)
             {
-                Console.WriteLine("No project selected to open.");
+                Log.Information("No project selected to open.");
                 RefreshButtonsState();
                 RefreshProjectDetails();
                 return;
             }
             _selectedProject.Load();
-            Console.WriteLine("Open Project button clicked.");
+            Log.Information("Open Project button clicked.");
             //this._Host.Close(); // Close the launcher window
             var ew = EditorWindow.Instance; 
         }
@@ -326,14 +327,14 @@ namespace RPGCreator.UI.Content.Launcher
             // We check if a project is selected before proceeding
             if (!_IsProjectSelected)
             {
-                Console.WriteLine("No project selected to delete.");
+                Log.Information("No project selected to delete.");
                 RefreshButtonsState();
                 RefreshProjectDetails();
                 return;
             }
 
             // Logic to delete the project
-            Console.WriteLine("Delete Project button clicked.");
+            Log.Information("Delete Project button clicked.");
             // This should prompt the user for confirmation and then delete the project
 
         }
@@ -342,7 +343,7 @@ namespace RPGCreator.UI.Content.Launcher
         {
             // Logic to handle project selection
             // Enable buttons and update details panel with the selected project's information
-            Console.WriteLine($"Project selected: {project.Name}");
+            Log.Information($"Project selected: {project.Name}");
             _selectedProject = project;
 
             RefreshButtonsState();

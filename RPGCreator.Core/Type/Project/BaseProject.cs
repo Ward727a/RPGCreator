@@ -33,6 +33,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace RPGCreator.Core.Type.Project
 {
@@ -91,7 +92,15 @@ namespace RPGCreator.Core.Type.Project
 
             foreach (string packPath in AssetsPackPath)
             {
-                EngineCore.Instance.Managers.Assets.LoadPack(packPath);
+                try
+                {
+                    EngineCore.Instance.Managers.Assets.LoadPack(packPath);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Failed to load assets pack at {packPath}: {Message}", packPath, ex.Message);
+                    continue; // Skip this pack and continue with the next one
+                }
             }
 
             OnProjectLoaded?.Invoke();
@@ -189,7 +198,7 @@ namespace RPGCreator.Core.Type.Project
             return info;
         }
 
-        public void SetObjectData(SerializationInfo info)
+        public void SetObjectData(DeserializationInfo info)
         {
             if (info == null)
             {

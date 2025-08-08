@@ -19,7 +19,7 @@ public enum ERuleType
 }
 public class AutotileRule : ISerializable, IDeserializable
 {
-    public Ulid ID { get; private set; } = Ulid.NewUlid();
+    public Ulid Unique { get; private set; } = Ulid.NewUlid();
     public string Name = "";
     public string Description = "";
     public ERuleType Type = ERuleType.WHITELIST;
@@ -33,7 +33,7 @@ public class AutotileRule : ISerializable, IDeserializable
     public SerializationInfo GetObjectData()
     {
         SerializationInfo info = new SerializationInfo(typeof(AutotileRule));
-        info.AddValue("ID", ID);
+        info.AddValue("ID", Unique);
         info.AddValue("Name", Name);
         info.AddValue("Description", Description);
         info.AddValue("Type", Type);
@@ -42,15 +42,15 @@ public class AutotileRule : ISerializable, IDeserializable
         return info;
     }
 
-    public void SetObjectData(SerializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
-        info.TryGetValue("ID", out Ulid ID);
+        info.TryGetValue("ID", out Ulid unique);
         info.TryGetValue("Name", out Name);
         info.TryGetValue("Description", out Description);
         info.TryGetValue("Type", out Type);
         info.TryGetValue("Side", out Side);
         info.TryGetList("Tags", out Tags);
             
-        this.ID = ID;
+        this.Unique = unique;
     }
 }

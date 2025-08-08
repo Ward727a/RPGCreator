@@ -23,18 +23,15 @@
 // 
 #endregion
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
-using Microsoft.Extensions.DependencyInjection;
 using RPGCreator.Core;
 using RPGCreator.Core.Events.EventArgs;
 using RPGCreator.UI.Content.Launcher;
 using RPGCreator.UI.Styles;
 using System;
-using System.Collections.Generic;
 
 namespace RPGCreator.UI;
 

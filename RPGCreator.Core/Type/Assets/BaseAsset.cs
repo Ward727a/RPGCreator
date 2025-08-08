@@ -201,5 +201,23 @@ namespace RPGCreator.Core.Type.Assets
             Console.WriteLine($"Couldn't save asset {Name} of type {Type} with unique ID {Unique} because this is not an ISerializable object!.");
             Console.ResetColor();
         }
+
+        protected void AddBaseSerialization(SerializationInfo info)
+        {
+            info.AddValue("unique", Unique);
+            info.AddValue("name", Name);
+            info.AddValue("type", Type);
+        }
+
+        protected void LoadBaseSerialization(DeserializationInfo info)
+        {
+            info.TryGetValue("unique", out Ulid unique, Ulid.Empty);
+            info.TryGetValue("name", out string name, "UNKNOWN ASSET");
+            info.TryGetValue("type", out TYPE type, TYPE.UNKNOWN);
+
+            Unique = unique;
+            Name = name;
+            Type = type;
+        }
     }
 }

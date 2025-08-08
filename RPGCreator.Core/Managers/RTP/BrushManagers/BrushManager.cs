@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace RPGCreator.Core.Managers.RTP.BrushManagers
 {
@@ -48,26 +49,20 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
 
             if(!EngineCore.Instance.Data.EditorSettings.IsDrawing)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Drawing is not enabled. Please enable drawing in the toolbar before clicking.");
-                Console.ResetColor();
+                Log.Error("Drawing is not enabled. Please enable drawing in the toolbar before clicking.");
                 return;
             }
 
             if (EngineCore.Instance.Data.EditedProject == null)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("No project is currently loaded. Please load a project before clicking.");
-                Console.ResetColor();
+                Log.Error("No project is currently loaded. Please load a project before clicking.");
                 return;
             }
 
             // Convert the point to a valid position in the tile width and height
             if (EngineCore.Instance.Data.SelectedTile == null)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("No tile is currently selected. Please select a tile before clicking.");
-                Console.ResetColor();
+                Log.Error("No tile is currently selected. Please select a tile before clicking.");
                 return;
             }
             var tileWidth = EngineCore.Instance.Data.SelectedTile.Tileset.TileWidth;
@@ -80,12 +75,10 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
 
             // Handle the click at the specified point
             // This is where you would implement the logic for what happens when a brush is clicked at a specific point
-            Console.WriteLine($"Brush clicked at: {at}");
+            Log.Information($"Brush clicked at: {at}");
             if(EngineCore.Instance.Data.EditorSettings.BrushType == null)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("No brush type is currently selected. Please select a brush type before clicking.");
-                Console.ResetColor();
+                Log.Error("No brush type is currently selected. Please select a brush type before clicking.");
                 return;
             }
             Event.OnClickedAt(at, EngineCore.Instance.Data.EditorSettings.BrushType);
@@ -158,9 +151,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
         {
             if (EngineCore.Instance.Data.SelectedTile == null)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("No tile is currently selected. Please select a tile before clicking.");
-                Console.ResetColor();
+                Log.Error("No tile is currently selected. Please select a tile before clicking.");
                 return new Point(-1, -1);
             }
             var tileWidth = EngineCore.Instance.Data.SelectedTile.Tileset.TileWidth;

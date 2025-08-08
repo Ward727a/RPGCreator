@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace RPGCreator.Core
 {
@@ -47,6 +48,8 @@ namespace RPGCreator.Core
             Brush = new BrushManager();
 
             EngineCore.Instance.Events.OnCoreManagersReady(new());
+            
+            Log.Information($"EngineManagers initialized.");
         }
 
         internal void Init()

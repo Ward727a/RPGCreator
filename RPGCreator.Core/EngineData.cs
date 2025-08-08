@@ -30,6 +30,7 @@ using RPGCreator.Core.Type.Assets.Tilesets;
 using RPGCreator.Core.Type.Map;
 using RPGCreator.Core.Type.Project;
 using RPGCreator.Core.Type.RTP;
+using Serilog;
 
 namespace RPGCreator.Core
 {
@@ -133,7 +134,11 @@ namespace RPGCreator.Core
         public SEditorSettings EditorSettings { get; } = new SEditorSettings();
 
         internal EngineData()
-        { }
+        {
+            
+            Log.Information($"EngineData initialized.");
+            
+        }
 
         public static string AppName => "RPG Creator";
         public static Version AppVersion => new(0, 1, 0);

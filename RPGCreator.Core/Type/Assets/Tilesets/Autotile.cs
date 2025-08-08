@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Type.Map;
+using Serilog;
 using Point = RPGCreator.Core.Type.Internal.Point;
 
 namespace RPGCreator.Core.Type.Assets.Tilesets;
@@ -12,9 +13,20 @@ public class Autotile : BaseDrawable, ITileable, ISerializable, IDeserializable
 
     public Point SizeInTileset { get; set; }
     public Point PositionInTileset { get; set; }
-    public Rectangle UV => new Rectangle(PositionInTileset, SizeInTileset);
-    public Tileset Tileset { get; private set; }
-    private bool hasCheckedRule = false; // Flag to check if the rules have been checked already, to avoid unnecessary checks
+    public Rectangle UV => new (PositionInTileset, SizeInTileset);
+
+    private Tileset _tileset;
+    public Tileset Tileset
+    {
+        get => _tileset;
+        private set
+        {
+            _tileset = value;
+            _tilesetUnique = value.Unique; // Store the unique ID of the tileset for serialization
+        }
+    }
+
+    private Ulid _tilesetUnique;
     public AutotileGroup AutotileGroup { get; }
 
     public Autotile()
@@ -43,7 +55,7 @@ public class Autotile : BaseDrawable, ITileable, ISerializable, IDeserializable
         else
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"Error: Attempted to update NTileset with a non-NTileset type: {newTileset.GetType().Name}");
+            Console.WriteLine($"Error: Attempted to update Tileset with a non-Tileset type: {newTileset.GetType().Name}");
             Console.ResetColor();
         }
 #endif
@@ -83,24 +95,24 @@ public class Autotile : BaseDrawable, ITileable, ISerializable, IDeserializable
     public SerializationInfo GetObjectData()
     {
         SerializationInfo info = new SerializationInfo(typeof(Autotile));
-        info.AddValue("UV", SizeInTileset);
-        info.AddValue("Position", PositionInTileset);
-        info.AddValue("Tileset", Tileset.Unique);
+        info.AddValue("SizeInTileset", SizeInTileset);
+        info.AddValue("PositionInTileset", PositionInTileset);
+        info.AddValue("Tileset", _tilesetUnique);
         info.AddValue("Rules", Rules);
         info.AddValue("Tags", Tags);
         return info;
     }
 
-    public void SetObjectData(SerializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         if (info == null)
         {
             throw new ArgumentNullException(nameof(info), "SerializationInfo cannot be null.");
         }
 
-        info.TryGetValue("UV", out Point uv, new Point(0, 0), "UV not found or invalid (Set to (0, 0) by default).");
-        info.TryGetValue("Position", out Point position, new Point(0, 0), "Position not found or invalid (Set to (0, 0) by default).");
-        info.TryGetValue("Tileset", out Ulid tilesetUnique, Ulid.NewUlid(), "Tileset not found or invalid (Set to new Ulid by default).");
+        info.TryGetValue("SizeInTileset", out Point uv, new Point(0, 0), "UV not found or invalid (Set to (0, 0) by default).");
+        info.TryGetValue("PositionInTileset", out Point position, new Point(0, 0), "Position not found or invalid (Set to (0, 0) by default).");
+        info.TryGetValue("Tileset", out _tilesetUnique, Ulid.NewUlid(), "Tileset not found or invalid (Set to new Ulid by default).");
         info.TryGetList("Rules", out List<AutotileRule> rules, [], "Rules not found or invalid (Set to empty list by default).");
         info.TryGetList("Tags", out List<string> tags, [], "Tags not found or invalid (Set to empty list by default).");
 
@@ -112,8 +124,13 @@ public class Autotile : BaseDrawable, ITileable, ISerializable, IDeserializable
         void OnEditedProjectOnOnProjectLoaded()
         {
             // When the project is loaded, we need to get the tileset from the project data
-            Tileset = EngineCore.Instance.Data.EditedProject.GetAssetsType<Tileset>(BaseAsset.TYPE.TILESETS)
-                .FirstOrDefault(t => t.Unique == tilesetUnique) ?? throw new Exception($"Tileset with unique ID {tilesetUnique} not found in the project.");
+            Tileset? tileset = EngineCore.Instance.Data.EditedProject.GetAssetsType<Tileset>(BaseAsset.TYPE.TILESETS)
+                .FirstOrDefault(t => t.Unique == _tilesetUnique);
+            
+            if(tileset == null)
+                Log.Error($"Tileset with unique ID {_tilesetUnique} not found in the project.");
+            else
+                Tileset = tileset;
             
             EngineCore.Instance.Data.EditedProject.OnProjectLoaded -= OnEditedProjectOnOnProjectLoaded; // Unsubscribe from the event to avoid memory leaks
         }

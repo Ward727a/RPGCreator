@@ -31,6 +31,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using RPGCreator.Core.Type.Assets.Tilesets;
+using Serilog;
 
 namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
 {
@@ -85,10 +86,21 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
         public BaseAssetsPack(string configPath)
         {
             ConfigPath = configPath;
-            LoadFromFile();
+            try
+            {
+                LoadFromFile();
+            }
+            catch(Exception ex)
+            {
+                ErrorOnLoad = true;
+                Log.Error($"Error loading assets pack from path {ConfigPath}: {ex.Message}");
+                return;
+            }
+
             if(ErrorOnLoad)
             {
-                throw new Exception($"Error loading assets pack from path {ConfigPath}.");
+                Log.Error($"Error loading assets pack from path {ConfigPath}.");
+                return;
             }
         }
 
@@ -150,6 +162,7 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
                 {
                     AssetsCache[assetID] = baseAsset;
                     AssetsPaths[assetID] = assetPath;
+                    Console.WriteLine($"Loaded asset of type {baseAsset.Type} with ID {baseAsset.Unique} from path {assetPath}.");
                     baseAsset.Pack = this;
                 }
                 else
@@ -454,7 +467,7 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
             return info;
         }
 
-        public void SetObjectData(SerializationInfo info)
+        public void SetObjectData(DeserializationInfo info)
         {
             info.TryGetValue("ConfigPath", out ConfigPath, "", "Field 'ConfigPath' not found in serialization info.");
             info.TryGetValue("Name", out Name, "", "Field 'Name' not found in serialization info.");

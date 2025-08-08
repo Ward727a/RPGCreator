@@ -78,15 +78,17 @@ public class AutotileGroup : ISerializable, IDeserializable
 
     public SerializationInfo GetObjectData()
     {
-        var info = new SerializationInfo(typeof(AutotileGroup));
+        SerializationInfo info = new SerializationInfo(typeof(AutotileGroup));
         info.AddValue("Unique", Unique);
         info.AddValue("AffectedTiles", AffectedTiles);
         info.AddValue("Autotiles", Autotiles);
-        info.AddValue("BaseTile", BaseTile);
+        info.AddValue("BaseTile", (ISerializable)BaseTile); // Force class to use the AddValue(string name, ISerializable? obj) method, and not the generic one.
+        info.AddValue("Name", Name);
+        info.AddValue("GroupTags", GroupTags);
         return info;
     }
 
-    public void SetObjectData(SerializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         if (info == null)
         {
@@ -97,10 +99,14 @@ public class AutotileGroup : ISerializable, IDeserializable
         info.TryGetList("AffectedTiles", out List<Point> affectedTiles, [], "Affected tiles not found or invalid (Set to empty list by default).");
         info.TryGetList("Autotiles", out List<Autotile> autotiles, [], "Autotiles not found or invalid (Set to empty list by default).");
         info.TryGetValue("BaseTile", out ITileable baseTile, null, "Base tile not found or invalid (Set to null by default).");
+        info.TryGetValue("Name", out string name, "Unnamed Autotile Group", "Name not found or invalid (Set to 'Unnamed Autotile Group' by default).");
+        info.TryGetList("GroupTags", out List<string> groupTags, [], "Group tags not found or invalid (Set to empty list by default).");
 
         Unique = unique;
         AffectedTiles = affectedTiles;
         Autotiles = autotiles;
-        BaseTile = baseTile ?? throw new InvalidOperationException("Base tile cannot be null.");
+        BaseTile = baseTile;
+        Name = name;
+        GroupTags = groupTags ?? [];
     }
 }

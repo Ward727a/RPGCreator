@@ -45,7 +45,7 @@ namespace RPGCreator.Core.Configs.Helpers
             throw new NotImplementedException();
         }
 
-        public override void SetObjectData(SerializationInfo info)
+        public override void SetObjectData(DeserializationInfo info)
         {
             throw new NotImplementedException();
         }

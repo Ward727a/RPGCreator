@@ -51,7 +51,7 @@ public class BaseProjectLink : ISerializable, IDeserializable
         return info;
     }
 
-    public void SetObjectData(SerializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue("id", out ProjectID);
         info.TryGetValue("project_config_path", out ProjectConfigPath);
