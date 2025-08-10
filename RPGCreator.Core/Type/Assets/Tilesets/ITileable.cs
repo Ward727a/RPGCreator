@@ -7,7 +7,7 @@ namespace RPGCreator.Core.Type.Assets.Tilesets;
 
 public interface ITileable
 {
-    public Vector2 Position { get; }
+    public Vector2 Position { get; set; }
     public Point SizeInTileset { get; }
     public Point PositionInTileset { get; } // Position in the tileset grid (row by column)
     public Tileset Tileset { get; } // The tileset this tile belongs to

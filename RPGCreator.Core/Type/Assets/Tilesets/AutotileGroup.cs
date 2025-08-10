@@ -29,7 +29,7 @@ public class AutotileGroup : ISerializable, IDeserializable
 
     public ITileable? GetTileAt(TileLayer? layer, Point position)
     {
-        var tile = Autotiles.FirstOrDefault(autotile => autotile.RespectRules(layer, position) && autotile != BaseTile);
+        var tile = Autotiles.FirstOrDefault(autotile => autotile.RespectRules(layer, position) && !autotile.IsEqualTo(BaseTile));
         return tile ??
                BaseTile;
     }
@@ -98,7 +98,21 @@ public class AutotileGroup : ISerializable, IDeserializable
         info.TryGetValue("Unique", out Ulid unique, Ulid.NewUlid(), "Unique ID not found or invalid (Set to new Ulid by default).");
         info.TryGetList("AffectedTiles", out List<Point> affectedTiles, [], "Affected tiles not found or invalid (Set to empty list by default).");
         info.TryGetList("Autotiles", out List<Autotile> autotiles, [], "Autotiles not found or invalid (Set to empty list by default).");
+        
+        // Set the autotileGroup for each autotile
+        foreach (var autotile in autotiles)
+        {
+            autotile.AutotileGroup = this;
+        }
+        
         info.TryGetValue("BaseTile", out ITileable baseTile, null, "Base tile not found or invalid (Set to null by default).");
+
+        if (baseTile is Autotile baseAutotile)
+        {
+            baseAutotile.AutotileGroup = this; // Ensure the base autotile has the correct group reference
+        }
+            
+        
         info.TryGetValue("Name", out string name, "Unnamed Autotile Group", "Name not found or invalid (Set to 'Unnamed Autotile Group' by default).");
         info.TryGetList("GroupTags", out List<string> groupTags, [], "Group tags not found or invalid (Set to empty list by default).");
 

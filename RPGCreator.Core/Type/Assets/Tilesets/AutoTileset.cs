@@ -1,5 +1,6 @@
 using Avalonia.Media.Imaging;
 using RPGCreator.Core.Type.Internal;
+using Serilog;
 using SkiaSharp;
 
 namespace RPGCreator.Core.Type.Assets.Tilesets;
@@ -44,9 +45,15 @@ public class AutoTileset : ImageAsset, ITileset, ISerializable, IDeserializable
         var maxX = TileWidth * MaxTilesByRow; // Assuming a maximum of 8 tiles horizontally
         var currentX = 0;
         var currentY = 0; // Current Y position in the combined bitmap
-        foreach (var tilesPair in AutotileGroups)
+        foreach (var autotileGroup in AutotileGroups)
         {
-            var tile = tilesPair.BaseTile;
+            var tile = autotileGroup.BaseTile;
+
+            if (tile == null)
+            {
+                Log.Warning("Autotile group {GroupName} has no base tile.", autotileGroup.Name);
+                continue; // Skip this autotile group if it has no base tile.
+            }
             
             var imagePath = tile.Tileset.ImagePath;
             

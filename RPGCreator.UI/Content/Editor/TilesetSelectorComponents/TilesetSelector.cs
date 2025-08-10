@@ -35,6 +35,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RPGCreator.Core.Type.Assets.Tilesets;
+using Serilog;
 
 namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 {
@@ -211,16 +212,8 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
             // We check if the assets pack "TestPack" exists, if not we create it.
             if (!EngineCore.Instance.Managers.Assets.HasAssetsPack("TestPack"))
             {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("Creating TestPack assets pack for testing purposes.");
-                Console.ResetColor();
-                EngineCore.Instance.Managers.Assets.CreateAssetsPack("TestPack", Core.Type.Assets.BaseAssetsPack.BaseAssetsPack.PACK_TYPE.PROJECT);
-
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("Adding TestTileset to TestPack assets pack for testing purposes.");
-                Console.ResetColor();
-
-                // EngineCore.Instance.Managers.Assets.AddAsset("TestPack", new Tileset("TestTileset", 32, 32, "/home/ward/Images/RPGCreatorAssets/basic_tileset_and_assets_standard/water_and_island_tiles_v2.png"));
+                Log.Warning("Creating TestPack assets pack for testing purposes.");
+                EngineCore.Instance.Managers.Assets.CreateAssetsPack("TestPack", Core.Type.Assets.BaseAssetsPack.BaseAssetsPack.PACK_TYPE.PROJECT); 
             }
 #endif
 
@@ -230,11 +223,14 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 
             var project = EngineCore.Instance.Data.EditedProject;
 
-            project.GetAssetsType<Tileset>(Core.Type.Assets.BaseAsset.TYPE.TILESETS).ForEach(tileset =>
+            project.GetAssetsType(Core.Type.Assets.BaseAsset.TYPE.TILESETS).ForEach(asset =>
             {
+                if (asset is not ITileset tileset) return;
+                
                 var item = new TilesetItem(tileset);
                 if (item.Error)
                     return;
+                
                 SelectBox.Items.Add(item);
             });
 

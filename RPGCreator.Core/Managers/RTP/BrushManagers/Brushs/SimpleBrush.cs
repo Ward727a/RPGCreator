@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Type.Assets.Tilesets;
 
 namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
 {
@@ -57,7 +58,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
                 return;
             }
 
-            var tile = EngineCore.Instance.Data.SelectedTile;
+            var tile = EngineCore.Instance.Data.SelectedTile.GetCopy();
 
             if (tile == null)
             {
@@ -81,6 +82,11 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
                         Point tilePosition = new Point(at.X + x * tile.Tileset.TileWidth, at.Y + y * tile.Tileset.TileHeight);
                         if (IBrush.InBorder(tilePosition, map))
                         {
+                            if (tile is Autotile autotile)
+                            {
+                                layer.AddElement(autotile.AutotileGroup.GetTileAt(layer, tilePosition).GetCopy() ?? tile, tilePosition);
+                                return;
+                            } 
                             layer.AddElement(tile, tilePosition); // Add tile at the calculated position
                         }
                     }
@@ -88,6 +94,11 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
             }
             else
             {
+                if (tile is Autotile autotile)
+                {
+                    layer.AddElement(autotile.AutotileGroup.GetTileAt(layer, at).GetCopy() ?? tile, at);
+                    return;
+                }
                 // If size is 1, just add the tile at the specified point
                 layer.AddElement(tile, at);
             }

@@ -59,16 +59,15 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                 Margin = new Avalonia.Thickness(5, 0, 0, 0),
             };
 
-            if(tileset.ImagePath == null)
+            if(tileset is not AutoTileset)
             {
-                throw new ArgumentNullException(nameof(tileset.ImagePath), "Tileset image path cannot be null.");
+                if(!File.Exists(tileset.ImagePath ?? ""))
+                {
+                    Error = true;
+                    return; // If the file doesn't exist, we can skip loading the image.
+                }
             }
 
-            if(!File.Exists(tileset.ImagePath))
-            {
-                Error = true;
-                return; // If the file doesn't exist, we can skip loading the image.
-            }
 
             TilesetImage = new Image
             {

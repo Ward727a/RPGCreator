@@ -22,21 +22,15 @@
 // 
 // 
 #endregion
-using Avalonia.Media;
-using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Xna.Framework;
 using RPGCreator.Core.Managers.AssetsManager.EventsArgs;
 using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Type.Assets;
 using RPGCreator.Core.Type.Internal;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RPGCreator.Core.Type.Assets.Tilesets;
 using RPGCreator.Core.Type.Interfaces.UIRelated;
 using RPGCreator.Core.Type.Internal.LayerRenderer;
+using Serilog;
 using Color = Avalonia.Media.Color;
 using Point = RPGCreator.Core.Type.Internal.Point;
 
@@ -231,6 +225,14 @@ namespace RPGCreator.Core.Type.Map
             ElementAdded += OnElementAdded;
         }
 
+        public override void AddElement(ITileable element, Point position)
+        {
+            if (Elements.ContainsKey(position))
+                return;
+            base.AddElement(element, position);
+            element.Position = position.ToMGVector2();
+        }
+
         private void OnElementAdded(object? sender, Point position)
         {
             var tile = Elements[position];
@@ -269,29 +271,40 @@ namespace RPGCreator.Core.Type.Map
                             TryRemoveElement(surroundingTile.Key, out _);
                             
                             // Get a new autotile that respects the rules
-                            var newAutotile = autotile.GetDrawableTile(this, surroundingTile.Key);
+                            var newAutotile = autotile.AutotileGroup.GetTileAt(this, surroundingTile.Key);
                             if (newAutotile != null)
                             {
                                 // Add the new autotile to the layer
-                                AddElement(newAutotile, surroundingTile.Key);
+                                AddElement(newAutotile.GetCopy(), surroundingTile.Key);
                             }
                         }
 
-                        // In the case of base tile, we have to check if it is still valid to be a base tile or not
-                        if (surroundingAutotile.IsEqualTo(surroundingAutotile.AutotileGroup.BaseTile))
+                        if (autotile.AutotileGroup is null)
                         {
-                            var newAutotile = autotile.GetDrawableTile(this, surroundingTile.Key);
-                            if (newAutotile != null && newAutotile is Autotile newSurroundingAutotile)
+                            Log.Fatal("TileLayer: Autotile group is null for autotile at position {Position}.",position);
+                            return;
+                        }
+                        // In the case of base tile, we have to check if it is still valid to be a base tile or not
+                        if(autotile.AutotileGroup.BaseTile is null)
+                            Log.Error("TileLayer: Autotile group base tile is null for autotile {AutotileName} at position {Position}.", autotile.AutotileGroup.Name, position);
+
+                        else
+                        {
+                            if (surroundingAutotile.IsEqualTo(surroundingAutotile.AutotileGroup.BaseTile))
                             {
-                                // If the new autotile is not the same as the current autotile, we need to replace it
-                                if (!newSurroundingAutotile.IsEqualTo(surroundingAutotile))
+                                var newAutotile = surroundingAutotile.AutotileGroup.GetTileAt(this, surroundingTile.Key);
+                                if (newAutotile != null && newAutotile is Autotile newSurroundingAutotile)
                                 {
-                                    TryRemoveElement(surroundingTile.Key, out _);
-                                    AddElement(newSurroundingAutotile, surroundingTile.Key);
+                                    // If the new autotile is not the same as the current autotile, we need to replace it
+                                    if (!newSurroundingAutotile.IsEqualTo(surroundingAutotile))
+                                    {
+                                        TryRemoveElement(surroundingTile.Key, out _);
+                                        AddElement(newSurroundingAutotile.GetCopy(), surroundingTile.Key);
+                                    }
                                 }
                             }
                         }
-                        
+
                     }
                     _watchdog--;
                     

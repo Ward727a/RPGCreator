@@ -13,7 +13,7 @@ public class Autotile : BaseDrawable, ITileable, ISerializable, IDeserializable
 
     public Point SizeInTileset { get; set; }
     public Point PositionInTileset { get; set; }
-    public Rectangle UV => new (PositionInTileset, SizeInTileset);
+    public Rectangle UV => new (new(PositionInTileset.X * Tileset.TileWidth, PositionInTileset.Y * Tileset.TileHeight), new(Tileset.TileWidth));
 
     private Tileset _tileset;
     public Tileset Tileset
@@ -27,7 +27,7 @@ public class Autotile : BaseDrawable, ITileable, ISerializable, IDeserializable
     }
 
     private Ulid _tilesetUnique;
-    public AutotileGroup AutotileGroup { get; }
+    public AutotileGroup AutotileGroup { get; internal set; }
 
     public Autotile()
     {

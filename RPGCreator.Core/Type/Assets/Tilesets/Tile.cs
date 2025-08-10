@@ -12,7 +12,7 @@ public class Tile : BaseDrawable, ITileable, ISerializable, IDeserializable
 {
     public Point SizeInTileset { get; set; }
     public Point PositionInTileset { get; set; }
-    public Rectangle UV => new Rectangle(PositionInTileset, SizeInTileset);
+    public Rectangle UV => new (new(PositionInTileset.X * Tileset.TileWidth, PositionInTileset.Y * Tileset.TileHeight), new(Tileset.TileWidth));
     public Tileset Tileset { get; private set; }
     
     public Tile()
