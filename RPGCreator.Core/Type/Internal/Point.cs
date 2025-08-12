@@ -155,5 +155,10 @@ namespace RPGCreator.Core.Type.Internal
 
             return point;
         }
+        
+        public bool IsEqualTo(Point other)
+        {
+            return X == other.X && Y == other.Y;
+        }
     }
 }

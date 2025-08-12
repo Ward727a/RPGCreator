@@ -39,6 +39,16 @@ namespace RPGCreator.Core.Type.Map
 
     public abstract class MapLayer<TLayerElement> : BaseDrawable, ICanBeSelected
     {
+        #region Structs
+
+        public struct ElementRemovedArg(Point position, TLayerElement element)
+        {
+            public Point Position = position;
+            public TLayerElement Element = element;
+        }
+
+        #endregion
+        
         #region Properties
 
         protected ILayerRenderer? _layerRenderer;
@@ -61,7 +71,7 @@ namespace RPGCreator.Core.Type.Map
         /// <summary>
         /// Event triggered when an element is removed from the layer. For example, for a TileLayer, this would be when a tile is removed.
         /// </summary>
-        public event EventHandler<Point>? ElementRemoved;
+        public event EventHandler<ElementRemovedArg>? ElementRemoved;
         /// <summary>
         /// Event triggered when an element is selected in the layer. For example, for a TileLayer, this would be when a tile is selected.
         /// </summary>
@@ -85,9 +95,9 @@ namespace RPGCreator.Core.Type.Map
         {
             ElementAdded?.Invoke(this, position);
         }
-        protected void _ElementRemoved(Point position)
+        protected void _ElementRemoved(Point position, TLayerElement element)
         {
-            ElementRemoved?.Invoke(this, position);
+            ElementRemoved?.Invoke(this, new(position, element));
         }
         protected void _ElementSelected(Point position)
         {
@@ -105,22 +115,25 @@ namespace RPGCreator.Core.Type.Map
         
         #endregion
         
-        public virtual void AddElement(TLayerElement element, Point position)
+        public virtual void AddElement(TLayerElement element, Point position, bool invokeEvent = true)
         {
             if (Elements.ContainsKey(position))
                 // throw new InvalidOperationException("An element already exists at the specified position.");
                 return;
 
             Elements[position] = element;
-            ElementAdded?.Invoke(this, position);
+            if(invokeEvent)
+                ElementAdded?.Invoke(this, position);
         }
         
-        public virtual bool TryRemoveElement(Point position, out TLayerElement? element)
+        public virtual bool TryRemoveElement(Point position, out TLayerElement? element, bool invokeEvent = true)
         {
+            // If the element exists, we remove it
             if (Elements.TryGetValue(position, out element))
             {
                 Elements.Remove(position);
-                ElementRemoved?.Invoke(this, position);
+                if(invokeEvent)
+                    ElementRemoved?.Invoke(this, new(position, element));
                 return true;
             }
             return false;
@@ -138,7 +151,7 @@ namespace RPGCreator.Core.Type.Map
             if (position == null || !Elements.ContainsKey(position.Value)) return false;
             
             Elements.Remove(position.Value);
-            ElementRemoved?.Invoke(this, position.Value);
+            ElementRemoved?.Invoke(this, new(position.Value, element));
             return true;
         }
         
@@ -223,13 +236,68 @@ namespace RPGCreator.Core.Type.Map
             EngineCore.Instance.Managers.Assets.Event.RemovedAsset += Assets_Event_RemovedAsset;
             
             ElementAdded += OnElementAdded;
+            ElementRemoved += OnElementRemoved;
         }
 
-        public override void AddElement(ITileable element, Point position)
+        private void OnElementRemoved(object? sender, ElementRemovedArg arg)
+        {
+            var tile = arg.Element;
+            var position = arg.Position;
+            _surroundingElementsToIgnore.Add(position);
+            if (tile is Autotile)
+            {
+                var surroundingTiles = GetSurroundingElements(position, tile.Tileset.TileWidth);
+                // Check if the surrounding tiles still respect their rules
+                foreach (var surroundingTile in surroundingTiles)
+                {
+                    var surroundingTileValue = surroundingTile.Value;
+                    
+                    if (surroundingTileValue is Autotile surroundingAutotile)
+                    {
+                        if (!surroundingAutotile.RespectRules(this, surroundingTile.Key))
+                        {
+                            TryRemoveElement(surroundingTile.Key, out _, false);
+                            
+                            // Get a new autotile that respects the rules
+                            var newAutotile = ((Autotile)tile).AutotileGroup.GetTileAt(this, surroundingTile.Key);
+                            if (newAutotile != null)
+                            {
+                                // Add the new autotile to the layer
+                                AddElement(newAutotile.GetCopy(), surroundingTile.Key);
+                            }
+                        }
+                        
+                        // If it's the base tile, we have to check if it is still valid to be a base tile or not
+                        if (surroundingAutotile.AutotileGroup is null)
+                        {
+                            Log.Fatal("TileLayer: Autotile group is null for autotile at position {Position}.",
+                                surroundingTile.Key);
+                            return;
+                        }
+
+                        if (surroundingAutotile.AutotileGroup.BaseTile.IsEqualTo(surroundingAutotile))
+                        {
+                            var newAutotile = surroundingAutotile.AutotileGroup.GetTileAt(this, surroundingTile.Key);
+                            
+                            if (newAutotile is not Autotile newSurroundingAutotile) continue;
+                            
+                            // If the new autotile is not the same as the current autotile, we need to replace it
+                            if (newSurroundingAutotile.IsEqualTo(surroundingAutotile)) continue;
+                            
+                            TryRemoveElement(surroundingTile.Key, out _, false);
+                            AddElement(newSurroundingAutotile.GetCopy(), surroundingTile.Key);
+                        }
+                    }
+                }
+            }
+            _surroundingElementsToIgnore.Remove(position);
+        }
+
+        public override void AddElement(ITileable element, Point position, bool invokeEvent = true)
         {
             if (Elements.ContainsKey(position))
                 return;
-            base.AddElement(element, position);
+            base.AddElement(element, position, invokeEvent);
             element.Position = position.ToMGVector2();
         }
 
@@ -268,7 +336,7 @@ namespace RPGCreator.Core.Type.Map
                     {
                         if (!surroundingAutotile.RespectRules(this, surroundingTile.Key))
                         {
-                            TryRemoveElement(surroundingTile.Key, out _);
+                            TryRemoveElement(surroundingTile.Key, out _, false);
                             
                             // Get a new autotile that respects the rules
                             var newAutotile = autotile.AutotileGroup.GetTileAt(this, surroundingTile.Key);
@@ -298,7 +366,7 @@ namespace RPGCreator.Core.Type.Map
                                     // If the new autotile is not the same as the current autotile, we need to replace it
                                     if (!newSurroundingAutotile.IsEqualTo(surroundingAutotile))
                                     {
-                                        TryRemoveElement(surroundingTile.Key, out _);
+                                        TryRemoveElement(surroundingTile.Key, out _, false);
                                         AddElement(newSurroundingAutotile.GetCopy(), surroundingTile.Key);
                                     }
                                 }

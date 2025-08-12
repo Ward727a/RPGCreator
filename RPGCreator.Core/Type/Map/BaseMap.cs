@@ -33,6 +33,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Type.Assets.Actors;
+using RPGCreator.Core.Type.Assets.Characters;
+using Point = RPGCreator.Core.Type.Internal.Point;
 using Size = RPGCreator.Core.Type.Internal.Size;
 
 namespace RPGCreator.Core.Type.Map
@@ -51,6 +54,17 @@ namespace RPGCreator.Core.Type.Map
         // The Ulid Identifier can be used to sort map by creation date
         // See more: https://github.com/ulid/spec
         public Ulid Identifier { get; private set; } = Ulid.NewUlid();
+        
+        public List<IActor> ActorsInMap { get; private set; } = [
+            // new CharacterActor()
+            // {
+            //     CharacterData = new CharacterData()
+            //     {
+            //         Name = "Default Character",
+            //     },
+            // }
+        ];
+        
         [ObservableProperty]
         private string _Name = string.Empty;
         [ObservableProperty]
@@ -90,25 +104,17 @@ namespace RPGCreator.Core.Type.Map
             // This is where you would implement the logic to draw the map using the provided SpriteBatchExtend instance.
             // For example, you might loop through the tiles in the map and draw them using sb.Draw() method.
 
-            sb.FillRectangle(new Rectangle(0, 0, Size.Width*GridParameter.CellWidth, Size.Height*GridParameter.CellHeight), BackgroundColor);
-
-            if (ShowGrid)
-            {
-                for (int i = 0; i < Size.Width* GridParameter.CellWidth; i += GridParameter.CellWidth)
-                {
-                    for (int j = 0; j < Size.Height * GridParameter.CellHeight; j += GridParameter.CellHeight)
-                    {
-                        sb.DrawRectangle(new Rectangle(i, j, GridParameter.CellWidth, GridParameter.CellHeight), GridParameter.CellBorderColor);
-                    }
-                }
-            }
-
             foreach (var layer in Layers.OrderBy(l => l.ZIndex))
             {
                 if (layer.IsVisible)
                 {
                     layer.Draw(sb);
                 }
+            }
+            // Nothing here for now, need to think about what the use of this function could be for the map
+            foreach (var actor in ActorsInMap)
+            {
+                actor.Draw(sb);
             }
         }
 
@@ -150,6 +156,10 @@ namespace RPGCreator.Core.Type.Map
         protected override void _Update(GameTime gameTime)
         {
             // Nothing here for now, need to think about what the use of this function could be for the map
+            foreach (var actor in ActorsInMap)
+            {
+                actor.Update(gameTime);
+            }
         }
 
         public BaseMap CreateChildMap(string MapName)

@@ -1,5 +1,6 @@
 
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Xml.Linq;
 using Serilog;
@@ -725,7 +726,7 @@ public sealed class DeserializationInfo
         
         _values[name] = new DeserializationEntry(value, value.GetType());
     }
-    public bool TryGetValue(string name, out object? value, out System.Type? type)
+    public bool TryGetValue(string name, [NotNullWhen(true)]out object? value, out System.Type? type)
     {
         value = null;
         type = null;
@@ -733,7 +734,8 @@ public sealed class DeserializationInfo
         {
             value = entry.Value;
             type = entry.Type;
-            return true;
+            if(value != null)
+                return true;
         }
         
         value = null;
@@ -741,7 +743,7 @@ public sealed class DeserializationInfo
         return false;
     }
 
-    public bool TryGetValue<T>(string name, out T? value)
+    public bool TryGetValue<T>(string name, [NotNullWhen(true)]out T? value)
     {
         if (TryGetValue(name, out var returnedObject, out var returnedType))
         {
@@ -760,7 +762,7 @@ public sealed class DeserializationInfo
         return false;
     }
     
-    public bool TryGetDictionary<TKey, TValue>(string name, out Dictionary<TKey, TValue>? value)
+    public bool TryGetDictionary<TKey, TValue>(string name, [NotNullWhen(true)]out Dictionary<TKey, TValue>? value)
         where TKey : notnull
         where TValue : class
     {
@@ -768,7 +770,7 @@ public sealed class DeserializationInfo
         {
             if (type.GetInterfaces().Contains(typeof(IDictionary)))
             {
-                value = null;
+                value = [];
             
                 if (o is Dictionary<object, object> rawDict)
                 {
@@ -790,13 +792,13 @@ public sealed class DeserializationInfo
         return false;
     }
     
-    public bool TryGetList<T>(string name, out List<T>? value)
+    public bool TryGetList<T>(string name, [NotNullWhen(true)]out List<T>? value)
     {
         if (TryGetValue(name, out var o, out var type))
         {
             if (type.GetInterfaces().Contains(typeof(IList)))
             {
-                value = null;
+                value = [];
                 if (o is IEnumerable list)
                 {
                     value = list.OfType<T>().ToList();
@@ -811,7 +813,7 @@ public sealed class DeserializationInfo
         return false;
     }
 
-    public bool TryGetValue<T>(string name, out T? value, T? defaultValue)
+    public bool TryGetValue<T>(string name, [NotNullWhen(true)]out T value, T defaultValue)
     {
         if (TryGetValue(name, out value))
         {
@@ -821,7 +823,7 @@ public sealed class DeserializationInfo
         return false;
     }
     
-    public bool TryGetList<T>(string name, out List<T>? value, List<T>? defaultValue)
+    public bool TryGetList<T>(string name, [NotNullWhen(true)]out List<T> value, List<T> defaultValue)
     {
         if (TryGetList(name, out value))
         {
@@ -831,7 +833,7 @@ public sealed class DeserializationInfo
         return false;
     }
     
-    public bool TryGetValue<T>(string name, out T? value, T? defaultValue, string errorMessage)
+    public bool TryGetValue<T>(string name, [NotNullWhen(true)]out T value, T defaultValue, string errorMessage)
     {
         if (TryGetValue(name, out value))
         {
@@ -842,7 +844,7 @@ public sealed class DeserializationInfo
         return false;
     }
     
-    public bool TryGetList<T>(string name, out List<T>? value, List<T>? defaultValue, string errorMessage)
+    public bool TryGetList<T>(string name, [NotNullWhen(true)]out List<T> value, List<T> defaultValue, string errorMessage)
     {
         if (TryGetList(name, out value))
         {
@@ -897,39 +899,41 @@ public sealed class SerializationInfo
         QualifiedName = objectType.FullName;
     }
     
-    public void AddValue(string name, object? value)
+    public SerializationInfo AddValue(string name, object? value)
     {
         if (_values.ContainsKey(name))
-            return;
+            return this;
         
         if (value == null)
         {
             Log.Error("Cannot add object {name} to SerializationInfo: object is null.", name);
-            return;
+            return this;
         }
         
         _values[name] = new SerializationEntry(value, value.GetType());
+        return this;
     }
 
-    public void AddValue(string name, ISerializable? obj)
+    public SerializationInfo AddValue(string name, ISerializable? obj)
     {
         if (_values.ContainsKey(name))
-            return;
+            return this;
 
         if (obj == null)
         {
             Log.Error("Cannot add object {name} to SerializationInfo: object is null.", name);
-            return;
+            return this;
         }
         var value = obj.GetObjectData();
         
         _values[name] = new SerializationEntry(value, value.ObjectType);
+        return this;
     }
 
-    public void AddValue(string name, IDictionary obj)
+    public SerializationInfo AddValue(string name, IDictionary obj)
     {
         if (_values.ContainsKey(name))
-            return;
+            return this;
         var dict = new Dictionary<string, SerializationListEntry?>();
         foreach (DictionaryEntry entry in obj)
         {
@@ -943,12 +947,13 @@ public sealed class SerializationInfo
             }
         }
         _values[name] = new SerializationEntry(dict, dict.GetType());
+        return this;
     }
     
-    public void AddValue(string name, IList obj)
+    public SerializationInfo AddValue(string name, IList obj)
     {
         if (_values.ContainsKey(name))
-            return;
+            return this;
         
         var list = new List<SerializationListEntry>();
         foreach (var item in obj)
@@ -963,29 +968,32 @@ public sealed class SerializationInfo
             }
         }
         _values[name] = new SerializationEntry(list, list.GetType());
+        return this;
     }
     
-    public void SetValue(string name, object obj)
+    public SerializationInfo SetValue(string name, object obj)
     {
         if (!_values.ContainsKey(name))
-            return;
+            return this;
 
         _values[name] = new SerializationEntry(obj, obj.GetType());
+        return this;
     }
     
-    public void SetValue(string name, ISerializable obj)
+    public SerializationInfo SetValue(string name, ISerializable obj)
     {
         if (!_values.ContainsKey(name))
-            return;
+            return this;
 
         var value = obj.GetObjectData();
         _values[name] = new SerializationEntry(value, obj.GetType());
+        return this;
     }
     
-    public void SetValue(string name, IDictionary obj)
+    public SerializationInfo SetValue(string name, IDictionary obj)
     {
         if (!_values.ContainsKey(name))
-            return;
+            return this;
 
         var dict = new Dictionary<string, SerializationListEntry?>();
         
@@ -1002,13 +1010,14 @@ public sealed class SerializationInfo
         }
 
         _values[name] = new SerializationEntry(dict, dict.GetType());
+        return this;
     }
     
-    public void SetValue(string name, IEnumerable obj)
+    public SerializationInfo SetValue(string name, IEnumerable obj)
     {
         
         if (!_values.ContainsKey(name))
-            return;
+            return this;
         
         var list = new List<object>();
         foreach (var item in obj)
@@ -1024,14 +1033,16 @@ public sealed class SerializationInfo
         }
 
         _values[name] = new SerializationEntry(list, list.GetType());
+        return this;
     }
     
-    public void DeleteValue(string name)
+    public SerializationInfo DeleteValue(string name)
     {
         if (_values.ContainsKey(name))
         {
             _values.Remove(name);
         }
+        return this;
     }
     
     /// <summary>

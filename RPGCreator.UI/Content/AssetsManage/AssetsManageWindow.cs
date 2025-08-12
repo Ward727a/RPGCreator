@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace RPGCreator.UI.Content.AssetsManage
 {
@@ -47,9 +48,9 @@ namespace RPGCreator.UI.Content.AssetsManage
 
         private Dictionary<string, UserControl> _AssetsMenuOptions = new()
         {
-            ["Tilesets"] = new TilesetsManageControl(), // Replace with actual assets panel
+            ["Tilesets"] = new TilesetsManageControl(), // Tilesets / Auto-tiling system
             ["---0"] = null, // Separator
-            ["Characters"] = new UserControl(), // Replace with actual assets panel
+            ["Characters"] = new CharactersManageControl(), // Replace with actual assets panel
             ["Enemies"] = new UserControl(), // Replace with actual assets panel
             ["Items"] = new UserControl(), // Replace with actual assets panel (This items section should be for consumables, weapons, armor, etc...)
             ["Skills"] = new UserControl(), // Replace with actual assets panel
@@ -132,7 +133,7 @@ namespace RPGCreator.UI.Content.AssetsManage
         {
             if (_AssetsMenuOptions.TryGetValue(key, out var panel))
             {
-                Console.WriteLine($"Showing assets panel: {key}");
+                Log.Debug("Showing assets panel: {key}", key);
                 if (AssetsPanel != null)
                 {
                     Body.Children.Remove(AssetsPanel);
@@ -143,7 +144,7 @@ namespace RPGCreator.UI.Content.AssetsManage
             }
             else
             {
-                Console.WriteLine($"Assets panel not found: {key}");
+                Log.Debug("Assets panel not found: {key}", key);
             }
         }
 

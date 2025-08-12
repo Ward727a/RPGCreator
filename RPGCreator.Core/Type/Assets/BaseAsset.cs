@@ -71,6 +71,13 @@ namespace RPGCreator.Core.Type.Assets
 
     public class BaseAsset : ObservableObject
     {
+        
+        #region Events
+        
+        public event EventHandler<string>? NameChanged;
+        
+        #endregion
+        
         /// <summary>
         /// Indicates if the asset should be cached or not.<br/>
         /// True if the asset should be cached, false otherwise.<br/>
@@ -91,6 +98,7 @@ namespace RPGCreator.Core.Type.Assets
             TILESETS,
             [AssetCategory(AssetCategoryType.Image)]
             AUTOTILES,
+            CHARACTER_DATA
         }
 
         public Ulid Unique { get; protected set; }
@@ -100,7 +108,19 @@ namespace RPGCreator.Core.Type.Assets
 
         public XElement AssetData;
 
-        public string Name { get; set; }
+        private string _name = "UNKNOWN";
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                if (_name != value)
+                {
+                    _name = value;
+                    NameChanged?.Invoke(this, value);
+                }
+            }
+        }
         public TYPE Type;
 
         public BaseAsset()

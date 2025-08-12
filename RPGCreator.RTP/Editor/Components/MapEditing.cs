@@ -133,11 +133,12 @@ namespace RPGCreator.RTP.Editor.Components
             if (!HasMap())
                 return;
 
+            Map.Draw(_sb);
             // Draw other map components here, such as tiles, entities, etc.
-            foreach (var layer in Map.Layers.OrderBy(layer => layer.ZIndex))
-            {
-                layer.Draw(_sb);
-            }
+            // foreach (var layer in Map.Layers.OrderBy(layer => layer.ZIndex))
+            // {
+            //     layer.Draw(_sb);
+            // }
 
             _sb.SetOpacity(0.5f); // Set opacity for the preview layer
             Map.PreviewLayer.Draw(_sb);
