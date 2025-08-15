@@ -23,14 +23,7 @@
 // 
 #endregion
 using Avalonia.Controls;
-using Avalonia.Media.Imaging;
-using RPGCreator.Core.Type.Assets;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RPGCreator.Core.Type.Assets.Tilesets;
 
 namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
@@ -41,9 +34,9 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
         public StackPanel Body { get; private set; }
         public TextBlock NameTextBlock { get; private set; }
         public Image TilesetImage { get; private set; }
-        public ITileset Tileset { get; private set; }
+        public ITilesetDef TilesetDef { get; private set; }
 
-        public TilesetItem(ITileset tileset)
+        public TilesetItem(ITilesetDef tilesetDef)
         {
             Body = new StackPanel
             {
@@ -54,14 +47,14 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 
             NameTextBlock = new TextBlock
             {
-                Text = tileset.Name,
+                Text = tilesetDef.Name,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
                 Margin = new Avalonia.Thickness(5, 0, 0, 0),
             };
 
-            if(tileset is not AutoTileset)
+            if(tilesetDef is not AutoTilesetInstance)
             {
-                if(!File.Exists(tileset.ImagePath ?? ""))
+                if(!File.Exists(tilesetDef.ImagePath ?? ""))
                 {
                     Error = true;
                     return; // If the file doesn't exist, we can skip loading the image.
@@ -71,17 +64,17 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 
             TilesetImage = new Image
             {
-                Source = tileset.GetBitmap(),
+                Source = tilesetDef.GetBitmap(),
                 Width = 32,
                 Height = 32,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
             };
-            tileset.ImageChanged += (sender, e) =>
+            tilesetDef.ImageChanged += () =>
             {
-                TilesetImage.Source = tileset.GetBitmap();
+                TilesetImage.Source = tilesetDef.GetBitmap();
             };
 
-            Tileset = tileset;
+            TilesetDef = tilesetDef;
 
             Body.Children.Add(TilesetImage);
             Body.Children.Add(NameTextBlock);

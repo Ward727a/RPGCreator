@@ -466,7 +466,7 @@ namespace RPGCreator.UI.Content.Editor
                 // Check if the mouse position has at least moved one tile from the last position
                 var normalizedCurrentPosition = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position);
 
-                if(_LastTilePlacePos != normalizedCurrentPosition)
+                if(!normalizedCurrentPosition.IsEqualTo(_LastTilePlacePos))
                 {
                     // If the position has changed, update the last position
                     _LastTilePlacePos = normalizedCurrentPosition;
@@ -487,7 +487,7 @@ namespace RPGCreator.UI.Content.Editor
                 // Check if the mouse position has at least moved one tile from the last position
                 var normalizedCurrentPosition = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position);
 
-                if (_LastTilePreviewPos != normalizedCurrentPosition)
+                if (!normalizedCurrentPosition.IsEqualTo(_LastTilePreviewPos))
                 {
                     // If the position has changed, update the last position
                     _LastTilePreviewPos = normalizedCurrentPosition;

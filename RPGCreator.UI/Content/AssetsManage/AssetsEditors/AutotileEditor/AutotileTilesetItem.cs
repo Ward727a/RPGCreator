@@ -39,12 +39,12 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 
         public event Action? TilesetSelected;
 
-        public ITileset Tileset { get; set; }
+        public ITilesetDef TilesetDef { get; set; }
 
-        public AutotileTilesetItem(ITileset tileset)
+        public AutotileTilesetItem(ITilesetDef tilesetDef)
         { 
         
-            Tileset = tileset ?? throw new ArgumentNullException(nameof(tileset), "Tileset cannot be null");
+            TilesetDef = tilesetDef ?? throw new ArgumentNullException(nameof(tilesetDef), "Tileset cannot be null");
             CreateComponents();
             RegisterEvents();
             Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Transparent);
@@ -70,7 +70,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
             
             var image = new Image
             {
-                Source = Tileset.GetBitmap(),
+                Source = TilesetDef.GetBitmap(),
                 Width = 64,
                 Height = 64,
                 Margin = new Avalonia.Thickness(5)
@@ -79,7 +79,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
             
             var textBlock = new TextBlock
             {
-                Text = Tileset.Name,
+                Text = TilesetDef.Name,
                 Margin = new Avalonia.Thickness(5),
                 VerticalAlignment = VerticalAlignment.Center,
                 HorizontalAlignment = HorizontalAlignment.Left

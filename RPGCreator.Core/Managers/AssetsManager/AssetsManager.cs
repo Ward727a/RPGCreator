@@ -22,16 +22,19 @@
 // 
 // 
 #endregion
+
+using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using RPGCreator.Core.Managers.AssetsManager.EventsArgs;
+using RPGCreator.Core.Managers.AssetsManager.Factories;
+using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Managers.ProjectsManager.Events;
 using RPGCreator.Core.Type.Assets;
 using RPGCreator.Core.Type.Assets.BaseAssetsPack;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+using RPGCreator.Core.Type.Assets.Characters.Stats;
+using RPGCreator.Core.Type.Assets.Tilesets;
+using RPGCreator.Core.Type.Internal;
+using RPGCreator.Core.Type.Map;
 using Serilog;
 
 namespace RPGCreator.Core.Managers.AssetsManager
@@ -40,14 +43,69 @@ namespace RPGCreator.Core.Managers.AssetsManager
     {
         private Dictionary<Ulid, BaseAsset> _cachedAssets = [];
 
+        public static readonly IReadOnlyDictionary<System.Type, Action<object>> AssetMapping =
+            new ReadOnlyDictionary<System.Type, Action<object>>(
+                new Dictionary<System.Type, Action<object>>
+                {
+                    { typeof(MapDefinition),obj => { if (obj is MapDefinition map)   EngineCore.Instance.Managers.Assets.MapRegistry.Register(map); } },
+                    { typeof(TilesetDef), obj => { if (obj is TilesetDef tileset) EngineCore.Instance.Managers.Assets.TilesetRegistry.Register(tileset); } },
+                    { typeof(IStatDef),   obj => { if (obj is IStatDef stat)      EngineCore.Instance.Managers.Assets.StatsRegistry.Register(stat); } },
+                }
+            );
+
         readonly Dictionary<Ulid, BaseAssetsPack> AssetsPacks = [];
         readonly Dictionary<string, Ulid> AssetsPacksMapping = [];
 
         public AssetsManagerEvent Event;
+        
+        #region Registries
 
+        public StatsRegistry StatsRegistry { get; }
+        public MapRegistry MapRegistry { get; } = new();
+        public TilesetRegistry TilesetRegistry { get; } = new();
+        
+        #endregion
+        
+        #region Factories
+        
+        public GenericPooledFactory<TileLayerInstance, TileLayerDefinition> TileLayerFactory = new();
+        public GenericCachedFactory<MapInstance, MapDefinition> MapFactory = new();
+        public TilesetFactory TilesetFactory { get; } = new();
+        public TileFactory TileFactory { get; } = new();
+        
+        #endregion
+        
         public AssetsManager()
         {
             Event = new();
+            StatsRegistry = new();
+        }
+        
+        public bool TryResolveStats(Ulid statId, out IStatDef? stat)
+        {
+            if (StatsRegistry.TryGet(statId, out stat))
+            {
+                return true;
+            }
+            else
+            {
+                Log.Error("Stat with ID {statId} not found in the registry.", statId);
+                stat = null;
+                return false;
+            }
+        }
+        public bool TryResolveStats(URN statUrn, out IStatDef? stat)
+        {
+            if (StatsRegistry.TryGetUrn(statUrn, out stat))
+            {
+                return true;
+            }
+            else
+            {
+                Log.Error("Stat with URN {statUrn} not found in the registry.", statUrn);
+                stat = null;
+                return false;
+            }
         }
 
         internal void Init()
@@ -291,124 +349,70 @@ namespace RPGCreator.Core.Managers.AssetsManager
             return _cachedAssets.TryGetValue(ulid, out asset);
         }
 
-        public virtual void AddCachedAsset(BaseAsset asset)
+        public bool TryResolveAsset<T>(string urnString, [NotNullWhen(true)] out T? returnValue)
         {
-            if (asset.ShouldBeCached)
+
+            returnValue = default;
+            var hasParsed = URN.TryParse(urnString, out URN? result);
+            TryResolveAsset(result.GetValueOrDefault(), out returnValue);
+            return hasParsed;
+        }
+
+        public bool TryResolveAsset<T>(URN urn, [NotNullWhen(true)] out T? result)
+        {
+            result = default;
+            
+            object? obj = urn.Module switch
             {
-                if (!_cachedAssets.ContainsKey(asset.Unique))
+                "tileset" => TilesetRegistry.GetUrn(urn),
+                "map" => MapRegistry.GetUrn(urn),
+                "stat" => StatsRegistry.GetUrn(urn),
+                _ => null
+            };
+
+            if (obj is T typedObj)
+            {
+                result = typedObj;
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool TryRemoveAsset(string urnString)
+        {
+            if (URN.TryParse(urnString, out URN? urn))
+            {
+                return TryRemoveAsset(urn.GetValueOrDefault());
+            }
+            Log.Error("Invalid URN format: {urnString}", urnString);
+            return false;
+        }
+
+        public bool TryRemoveAsset(URN urn)
+        {
+            var resolved= TryResolveAsset<object>(urn, out var value);
+
+            if (resolved)
+            {
+                switch (urn.Module)
                 {
-                    _cachedAssets.Add(asset.Unique, asset);
-                } else
-                {
-                    throw new InvalidOperationException($"Asset {asset.Name} is already cached.");
+                    case "map":
+                        EngineCore.Instance.Managers.Assets.MapRegistry.Unregister(value as IMapDef);
+                        return true;
+                    case "tileset":
+                        EngineCore.Instance.Managers.Assets.TilesetRegistry.Unregister(value as ITilesetDef);
+                        return true;
+                    case "stat":
+                        EngineCore.Instance.Managers.Assets.StatsRegistry.Unregister(value as IStatDef);
+                        return true;
+                    default:
+                        Log.Error("Unsupported asset type: {assetType}", value.GetType());
+                        return false;
                 }
             }
-            else
-            {
-                throw new InvalidOperationException($"Asset {asset.Name} is not cacheable.");
-            }
-        }
-
-        public virtual BaseAsset? GetAsset(string fullPath) // TODO: Add a caching system for the assets?
-        {
-
-            AssetsManagerGettingAssetArgs PreArgs = new(fullPath);
-
-            Event.OnGettingAsset(PreArgs);
-
-            if(PreArgs.Cancel)
-            {
-                return null;
-            }
-
-            string[] parts = PreArgs.Fullpath.Split(":"); // Example: "packname:assetpath"
-            if (parts.Length != 2)
-            {
-                Event.OnGotAsset(PreArgs.ToPost().SetError(true, $"Invalid asset path {PreArgs.Fullpath}"));
-                return null;
-            }
-
-            string packName = parts[0];
-            string assetPath = parts[1];
-
-            if (TryGetAssetsPack(packName, out BaseAssetsPack? pack))
-            {
-
-                BaseAsset asset = pack!.GetAsset(assetPath);
-
-                if (asset != null)
-                {
-                    Event.OnGotAsset(PreArgs.ToPost(asset));
-                    return asset;
-                }
-                else
-                {
-                    Event.OnGotAsset(PreArgs.ToPost().SetError(true, $"Asset {PreArgs.Fullpath} not found in pack {packName}"));
-                    return null;
-                }
-            }
-            else
-            {
-                Event.OnGotAsset(PreArgs.ToPost().SetError(true, $"Pack {packName} not found"));
-                return null;
-            }
-        }
-
-        public virtual void AddAsset<T>(string packname, T asset) where T : BaseAsset
-        {
-            AssetsManagerUpdatingAssetArgs preUpdateArgs = new(asset.Type);
-            Event.OnUpdatingAsset(preUpdateArgs);
-
-            if(TryGetAssetsPack(packname, out BaseAssetsPack? pack))
-            {
-                pack.AddAsset(asset);
-            }
-
-            AssetsManagerAddingAssetArgs PreArgs = new(packname, asset);
-            Event.OnAddingAsset(PreArgs);
-        }
-
-        public virtual void MoveAsset(string oldPath, string newPath)
-        {
-            AssetsManagerMovingAssetArgs PreArgs = new(oldPath, newPath);
-            Event.OnMovingAsset(PreArgs);
-            if (PreArgs.Cancel)
-                return;
-            string[] parts = PreArgs.OldPath.Split(":"); // Example: "packname:assetpath"
-            if (parts.Length != 2)
-            {
-                Event.OnMovedAsset(PreArgs.ToPost(false).SetError(true, $"Invalid asset path {PreArgs.OldPath}"));
-                return;
-            }
-            string packName = parts[0];
-            string assetPath = parts[1];
-            if (TryGetAssetsPack(packName, out BaseAssetsPack? pack))
-            {
-                AssetsManagerUpdatingAssetArgs PreUpdateArgs = new(pack.GetAsset(assetPath)?.Type ?? BaseAsset.TYPE.UNKNOWN);
-                Event.OnUpdatingAsset(PreUpdateArgs);
-                bool result = pack.MoveAsset(assetPath, newPath);
-                Event.OnMovedAsset(PreArgs.ToPost(result));
-                Event.OnUpdatedAsset(PreUpdateArgs.ToPost().SetError(result));
-            }
-            else
-            {
-                Event.OnMovedAsset(PreArgs.ToPost(false).SetError(true, $"No asset pack with name {packName} could be found."));
-            }
-        }
-
-        public void RemoveAsset(BaseAsset asset)
-        {
-            if (asset == null)
-            {
-                throw new ArgumentNullException(nameof(asset), "Asset cannot be null.");
-            }
-
-            if(!TryGetAssetsPack(asset.PackName, out BaseAssetsPack? pack))
-            {
-                throw new InvalidOperationException($"No assets pack found with name: {asset.PackName}");
-            }
-
-            pack.RemoveAsset(asset);
+            Log.Error("Failed to resolve asset with URN: {urn}", urn);
+            return false;
         }
 
         public virtual void RemoveAsset(string fullPath)

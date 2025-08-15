@@ -31,7 +31,7 @@ using System.Threading.Tasks;
 
 namespace RPGCreator.UI.Common
 {
-    public class ClosableBox : UserControl
+    public class Accordion : UserControl
     {
         // Bottom arrow text
         const string DOWN_ARROW_TEXT = "▼";
@@ -55,7 +55,7 @@ namespace RPGCreator.UI.Common
 
         #endregion
 
-        public ClosableBox(Control content, string title = "Closable box", bool closed = false)
+        public Accordion(Control content, string title = "Closable box", bool closed = false)
         {
             IsClosed = closed;
 
@@ -119,7 +119,7 @@ namespace RPGCreator.UI.Common
             if(IsClosed)
             {
                 ContentBorder.IsVisible = false; // Hide content if closed
-                CloseStatus.Text = UP_ARROW_TEXT; // Show up arrow when closed
+                CloseStatus.Text = DOWN_ARROW_TEXT; // Show up arrow when closed
             }
         }
 
@@ -128,14 +128,14 @@ namespace RPGCreator.UI.Common
             if(ContentBorder.IsVisible)
             {
                 ContentBorder.IsVisible = false;
-                CloseStatus.Text = UP_ARROW_TEXT; // Change to up arrow
+                CloseStatus.Text = DOWN_ARROW_TEXT; // Change to up arrow
                 IsClosed = true; // Mark as closed
                 Closed?.Invoke(); // Invoke the closed event
             }
             else
             {
                 ContentBorder.IsVisible = true;
-                CloseStatus.Text = DOWN_ARROW_TEXT; // Change to down arrow
+                CloseStatus.Text = UP_ARROW_TEXT; // Change to down arrow
                 IsClosed = false; // Mark as open
                 Opened?.Invoke(); // Invoke the opened event
             }

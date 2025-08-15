@@ -30,12 +30,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Managers.AssetsManager.Factories;
 using RPGCreator.Core.Type.Assets.Tilesets;
 
 namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
 {
     public class SimpleBrush : IBrush, IBrushResizeFeature, IBrushPreviewFeature
     {
+        private TileFactory _tiles => EngineCore.Instance.Managers.Assets.TileFactory;
         int Size { get; set; } = 1; // Default size of the brush
         public int Step => 1;
         public int MaxSize => 6;
@@ -44,9 +46,9 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
         private bool _isPreviewEnabled = true;
         public bool IsPreviewEnabled { get => _isPreviewEnabled; set => _isPreviewEnabled = value; }
 
-        public void Draw(SpriteBatchExtend sb, Point at, Type.Map.BaseMap map)
+        public void Draw(SpriteBatchExtend sb, Point at, Type.Map.MapInstance mapInstance)
         {
-            if (map == null)
+            if (mapInstance == null)
             {
                 return;
             }
@@ -58,14 +60,14 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
                 return;
             }
 
-            var tile = EngineCore.Instance.Data.SelectedTile.GetCopy();
+            var tile = EngineCore.Instance.Data.SelectedTile;
 
             if (tile == null)
             {
                 return; // No tile selected, nothing to add
             }
 
-            if (!IBrush.InBorder(at, map))
+            if (!IBrush.InBorder(at, mapInstance))
             {
                 return; // Clicked outside the map border, do not add tile
             }
@@ -79,12 +81,12 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
                 {
                     for (int y = -Size / 2; y <= Size / 2; y++)
                     {
-                        Point tilePosition = new Point(at.X + x * tile.Tileset.TileWidth, at.Y + y * tile.Tileset.TileHeight);
-                        if (IBrush.InBorder(tilePosition, map))
+                        Point tilePosition = new Point(at.X + x * tile.TilesetDef.TileWidth, at.Y + y * tile.TilesetDef.TileHeight);
+                        if (IBrush.InBorder(tilePosition, mapInstance))
                         {
-                            if (tile is Autotile autotile)
+                            if (tile is AutotileInstance autotile)
                             {
-                                layer.AddElement(autotile.AutotileGroup.GetTileAt(layer, tilePosition).GetCopy() ?? tile, tilePosition);
+                                layer.AddElement(autotile.AutotileGroupInstance.Definition.GetTileAt(layer, at) ?? tile, tilePosition);
                                 return;
                             } 
                             layer.AddElement(tile, tilePosition); // Add tile at the calculated position
@@ -94,9 +96,9 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
             }
             else
             {
-                if (tile is Autotile autotile)
+                if (tile is AutotileInstance autotile)
                 {
-                    layer.AddElement(autotile.AutotileGroup.GetTileAt(layer, at).GetCopy() ?? tile, at);
+                    layer.AddElement(autotile.AutotileGroupInstance.Definition.GetTileAt(layer, at) ?? tile, at);
                     return;
                 }
                 // If size is 1, just add the tile at the specified point
@@ -114,19 +116,19 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
             Size = newSize; // Update the brush size
         }
 
-        public void ShowPreview(SpriteBatchExtend sb, Point at, BaseMap map)
+        public void ShowPreview(SpriteBatchExtend sb, Point at, MapInstance mapInstance)
         {
             if(!_isPreviewEnabled)
             {
                 return; // If preview is disabled, do not show anything
             }
 
-            if (map == null)
+            if (mapInstance == null)
             {
                 return;
             }
 
-            var layer = map.PreviewLayer;
+            var layer = mapInstance.PreviewLayer;
 
             if (layer == null)
             {
@@ -140,7 +142,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
                 return; // No tile selected, nothing to add
             }
 
-            if (!IBrush.InBorder(at, map))
+            if (!IBrush.InBorder(at, mapInstance))
             {
                 return; // Clicked outside the map border, do not add tile
             }
@@ -154,10 +156,12 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
                 {
                     for (int y = -Size / 2; y <= Size / 2; y++)
                     {
-                        Point tilePosition = new Point(at.X + x * tile.Tileset.TileWidth, at.Y + y * tile.Tileset.TileHeight);
-                        if (IBrush.InBorder(tilePosition, map))
+                        Point tilePosition = new Point(at.X + x * tile.TilesetDef.TileWidth, at.Y + y * tile.TilesetDef.TileHeight);
+                        if (IBrush.InBorder(tilePosition, mapInstance))
                         {
-                            layer.AddElement(tile, tilePosition); // Add tile at the calculated position
+                            var tileInstance = _tiles.Create(tile);
+                            tileInstance.Position = tilePosition;
+                            layer.InstancedElements.Add(tilePosition,tileInstance); // Add tile at the calculated position
                         }
                     }
                 }
@@ -165,7 +169,9 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
             else
             {
                 // If size is 1, just add the tile at the specified point
-                layer.AddElement(tile, at);
+                var tileInstance = _tiles.Create(tile);
+                tileInstance.Position = at;
+                layer.InstancedElements.Add(at, tileInstance);
             }
         }
     }

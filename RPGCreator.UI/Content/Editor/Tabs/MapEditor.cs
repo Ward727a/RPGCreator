@@ -44,7 +44,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
         // Sections
 
         #region LayersSection
-        public ClosableBox LayersBox { get; private set; }
+        public Accordion LayersBox { get; private set; }
         public StackPanel LayersBody { get; private set; }
         public TextBlock SelectedLayerText { get; private set; }
         public Button AddLayerButton { get; private set; }
@@ -52,7 +52,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
         #endregion
 
         #region MapPropertiesSection
-        public ClosableBox MapPropertiesBox { get; private set; }
+        public Accordion MapPropertiesBox { get; private set; }
         public StackPanel MapPropertiesBody { get; private set; }
         public TextBlock MapNameText { get; private set; }
         public TextBlock MapSizeText { get; private set; }
@@ -154,7 +154,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
             MapPropertiesBody.Children.Add(MapLayersNumberText);
 
-            MapPropertiesBox = new ClosableBox(MapPropertiesBody, "Map Properties", true);
+            MapPropertiesBox = new Accordion(MapPropertiesBody, "Map Properties", true);
 
             BodyContent.Children.Add(MapPropertiesBox);
 
@@ -181,7 +181,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
             MapSizeText.Text = $"Map Size: {EngineCore.Instance.Data.EditedMap.Size.Width}x{EngineCore.Instance.Data.EditedMap.Size.Height}";
             MapDescriptionText.Text = $"Map Description: {EngineCore.Instance.Data.EditedMap.Description}";
             MapEntitiesNumberText.Text = $"Entities: 0 (not working yet)";
-            MapLayersNumberText.Text = $"Layers: {EngineCore.Instance.Data.EditedMap.Layers.Count}";
+            MapLayersNumberText.Text = $"Layers: {EngineCore.Instance.Data.EditedMap.TileLayers.Count}";
         }
 
         public static TabItem CreateTab(Window host)

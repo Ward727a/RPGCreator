@@ -36,7 +36,7 @@ namespace RPGCreator.Core.Type.Objects
 {
     public class Scene : BaseDrawable
     {
-        public BaseMap? Map { get; private set; } = new BaseMap();
+        public MapInstance? Map { get; private set; } = new MapInstance();
 
         protected override void _Draw(SpriteBatchExtend? sb)
         {

@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using RPGCreator.Core.Type.Assets;
+using RPGCreator.Core.Type.Assets.Tilesets;
 using RPGCreator.Core.Type.Map;
 
 namespace RPGCreator.Core.Type.Internal.LayerRenderer;
@@ -11,7 +12,7 @@ namespace RPGCreator.Core.Type.Internal.LayerRenderer;
 /// This class is responsible for rendering tile layers in the Avalonia UI framework.<br/>
 /// It implements the <see cref="ILayerRenderer"/> interface, which defines the contract for rendering layers.
 /// </summary>
-public class AvaloniaLayerRenderer : ILayerRenderer
+public class AvaloniaLayerRenderer : ILayerRenderer<ITileDef, ITileInstance>
 {
     private readonly Canvas _drawingCanvas;
     
@@ -23,34 +24,32 @@ public class AvaloniaLayerRenderer : ILayerRenderer
     {
         _drawingCanvas = drawingCanvas;
     }
-    
-    public void Draw(TileLayer tileLayer)
+
+    public void Draw(IMapLayerInstance<ITileDef, ITileInstance> tileLayer)
     {
         _drawingCanvas.Children.Clear(); // Clear the canvas before drawing
 
-        var copyOfElements = tileLayer.Elements.ToList(); // Create a copy of the elements to avoid modifying the collection while iterating
-        foreach (var element in copyOfElements)
+        foreach (var element in tileLayer.InstancedElements.ToList())
         {
             var tile = element.Value;
             var position = element.Key;
             
-            var croppedBitmap = new CroppedBitmap(tile.Tileset.GetSimpleBitmap(), new PixelRect(
-                tile.PositionInTileset.X * tile.SizeInTileset.Width,
-                tile.PositionInTileset.Y * tile.SizeInTileset.Height,
-                tile.Tileset.TileWidth,
-                tile.Tileset.TileHeight
-                ));
+            var croppedBitmap = new CroppedBitmap(tile.Definition.TilesetDef.GetSimpleBitmap(), new PixelRect(
+                tile.Definition.PositionInTileset.X * tile.Definition.SizeInTileset.Width,
+                tile.Definition.PositionInTileset.Y * tile.Definition.SizeInTileset.Height,
+                tile.Definition.TilesetDef.TileWidth,
+                tile.Definition.TilesetDef.TileHeight
+            ));
             var tileImage = new Image()
             {
                 Source = croppedBitmap,
-                Width = tile.Tileset.TileWidth,
-                Height = tile.Tileset.TileHeight
+                Width = tile.Definition.TilesetDef.TileWidth,
+                Height = tile.Definition.TilesetDef.TileHeight
             };
             
             Canvas.SetLeft(tileImage, position.X);
             Canvas.SetTop(tileImage, position.Y);
             _drawingCanvas.Children.Add(tileImage);
         }
-        
     }
 }

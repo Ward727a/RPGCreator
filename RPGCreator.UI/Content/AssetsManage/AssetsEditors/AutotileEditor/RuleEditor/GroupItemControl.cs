@@ -7,14 +7,14 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor.RuleEd
 
 public class GroupItemControl : UserControl
 {
-    public AutotileGroup Group { get; private set; }
+    public AutotileGroupDef GroupDefinition { get; private set; }
 
     private StackPanel _body = null!;
     private TextBlock _nameTextBlock = null!;
     
-    public GroupItemControl(AutotileGroup group)
+    public GroupItemControl(AutotileGroupDef groupDefinition)
     {
-        Group = group;
+        GroupDefinition = groupDefinition;
 
         CreateComponents();
         this.Content = _body;
@@ -30,7 +30,7 @@ public class GroupItemControl : UserControl
         
         _nameTextBlock = new TextBlock()
         {
-            Text = Group.Name,
+            Text = GroupDefinition.Name,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Avalonia.Thickness(5, 0, 0, 0),
         };

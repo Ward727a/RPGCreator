@@ -111,13 +111,11 @@ namespace RPGCreator.Core.Managers.AssetsPackManager
                         case BaseAssetsPack.PACK_TYPE.PACK:
                             pack = new ExternAssetsPack(doc);
                             AssetsPacks.Add(packName, new ExternAssetsPack(doc));
-                            pack.LoadAssets();
                             EngineCore.Instance.Managers.Assets.RegisterPack(pack);
                             break;
                         case BaseAssetsPack.PACK_TYPE.PROJECT:
                             pack = new ProjectAssetsPack(path, doc);
                             AssetsPacks.Add(packName, new ProjectAssetsPack(path, doc));
-                            pack.LoadAssets();
                             EngineCore.Instance.Managers.Assets.RegisterPack(pack);
                             break;
                         default:

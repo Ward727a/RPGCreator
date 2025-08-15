@@ -16,7 +16,7 @@ namespace RPGCreator.RTP.Editor.Components
     public class MapEditing
     {
         public bool ShowGridInFront { get; set; } = false;
-        public BaseMap? Map;
+        public MapInstance? MapInstance;
         private SpriteBatchExtend _sb;
 
         public Point _LastPreviewAt;
@@ -35,10 +35,10 @@ namespace RPGCreator.RTP.Editor.Components
             // This could include setting up layers, properties, and other map-related functionalities
         }
 
-        public MapEditing(BaseMap map, SpriteBatchExtend spriteBatchExtend) : this()
+        public MapEditing(MapInstance mapInstance, SpriteBatchExtend spriteBatchExtend) : this()
         {
             _sb = spriteBatchExtend;
-            Map = map;
+            MapInstance = mapInstance;
             // Initialize components related to the provided map
             // This could include setting up layers, properties, and other map-related functionalities
         }
@@ -52,41 +52,41 @@ namespace RPGCreator.RTP.Editor.Components
 
         private void Brush_ClearPreview()
         {
-            if (Map == null)
+            if (MapInstance == null)
             {
                 return;
             }
-            Map.PreviewLayer.Elements.Clear(); // Clear the preview layer tiles
+            MapInstance.PreviewLayer.InstancedElements.Clear(); // Clear the preview layer tiles
             _LastPreviewAt = new(-1,-1); // Reset the last preview position
             _LastPreviewBrush = null; // Reset the last preview brush
         }
 
         private void Brush_ClickedAt(object? sender, ClickedAtEventArgs e)
         {
-            if(Map == null)
+            if(MapInstance == null)
             {
                 return;
             }
 
-            e.brush.Draw(_sb, e.At, Map);
+            e.brush.Draw(_sb, e.At, MapInstance);
         }
 
         private void Brush_PreviewAt(object? sender, PreviewAtEventArgs e)
         {
 
-            if(_LastPreviewAt == e.At && _LastPreviewBrush == e.Brush)
+            if(e.At.IsEqualTo(_LastPreviewAt) && _LastPreviewBrush == e.Brush)
             {
                 return; // No need to update the preview if the position and brush are the same
             }
 
-            if (Map == null)
+            if (MapInstance == null)
             {
                 return;
             }
 
-            if (Map.PreviewLayer.Elements.Count > 0)
+            if (MapInstance.PreviewLayer.InstancedElements.Count > 0)
             {
-                Map.PreviewLayer.Elements.Clear(); // Clear previous preview tiles
+                MapInstance.PreviewLayer.InstancedElements.Clear(); // Clear previous preview tiles
             }
 
             if (
@@ -95,7 +95,7 @@ namespace RPGCreator.RTP.Editor.Components
                 return;
             }
 
-            e.Brush.ShowPreview(_sb, e.At, Map);
+            e.Brush.ShowPreview(_sb, e.At, MapInstance);
             _LastPreviewAt = e.At;
             _LastPreviewBrush = e.Brush;
         }
@@ -125,7 +125,7 @@ namespace RPGCreator.RTP.Editor.Components
 
         protected bool HasMap()
         {
-            return Map != null;
+            return MapInstance != null;
         }
         protected void DrawLayers()
         {
@@ -133,7 +133,7 @@ namespace RPGCreator.RTP.Editor.Components
             if (!HasMap())
                 return;
 
-            Map.Draw(_sb);
+            MapInstance.Draw(_sb);
             // Draw other map components here, such as tiles, entities, etc.
             // foreach (var layer in Map.Layers.OrderBy(layer => layer.ZIndex))
             // {
@@ -141,7 +141,7 @@ namespace RPGCreator.RTP.Editor.Components
             // }
 
             _sb.SetOpacity(0.5f); // Set opacity for the preview layer
-            Map.PreviewLayer.Draw(_sb);
+            MapInstance.PreviewLayer.Draw(_sb);
             _sb.ResetOpacity(); // Reset opacity after drawing the preview layer
         }
 
@@ -152,9 +152,9 @@ namespace RPGCreator.RTP.Editor.Components
                 return false;
             }
 
-            int cellSize = Map.GridParameter.CellWidth;
-            int horizontalCells = Map.Size.Width;
-            int verticalCells = Map.Size.Height;
+            int cellSize = MapInstance.Definition.GridParameter.CellWidth;
+            int horizontalCells = MapInstance.Definition.Size.Width;
+            int verticalCells = MapInstance.Definition.Size.Height;
 
             // Check if the point is within the bounds of the map
             if (at.X < 0 || at.Y < 0 || at.X >= horizontalCells * cellSize || at.Y >= verticalCells * cellSize)
@@ -171,16 +171,11 @@ namespace RPGCreator.RTP.Editor.Components
                 return;
             }
 
-            if (!Map.ShowGrid)
-            {
-                return;
-            }
-
             // Number of cells on the horizontal axis
-            int cellSize = Map.GridParameter.CellWidth;
+            int cellSize = MapInstance.Definition.GridParameter.CellWidth;
 
-            int horizontalCells = Map.Size.Width;
-            int verticalCells = Map.Size.Height;
+            int horizontalCells = MapInstance.Definition.Size.Width;
+            int verticalCells = MapInstance.Definition.Size.Height;
 
             int totalCells = horizontalCells * verticalCells;
 
@@ -190,7 +185,7 @@ namespace RPGCreator.RTP.Editor.Components
             {
                 for (int j = 0; j < verticalCells; j++)
                 {
-                    _sb.DrawRectangle(new Rectangle(i * cellSize + 1, j * cellSize + 1, cellSize, cellSize), Map.GridParameter.CellBorderColor, 1f);
+                    _sb.DrawRectangle(new Rectangle(i * cellSize + 1, j * cellSize + 1, cellSize, cellSize), MapInstance.Definition.GridParameter.CellBorderColor, 1f);
                 }
             }
             _sb.End();
@@ -211,10 +206,10 @@ namespace RPGCreator.RTP.Editor.Components
             {
                 return;
             }
-            int cellSize = Map.GridParameter.CellWidth;
+            int cellSize = MapInstance.Definition.GridParameter.CellWidth;
             // Draw the border of the map
             _sb.Begin();
-            _sb.DrawRectangle(new Rectangle(0, 0, Map.Size.Width * cellSize+2, Map.Size.Height * cellSize+2), Color.Black, 1f);
+            _sb.DrawRectangle(new Rectangle(0, 0, MapInstance.Definition.Size.Width * cellSize+2, MapInstance.Definition.Size.Height * cellSize+2), Color.Black, 1f);
             _sb.End();
 
         }

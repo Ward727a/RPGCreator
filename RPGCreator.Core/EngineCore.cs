@@ -54,6 +54,7 @@ namespace RPGCreator.Core
         public EngineConfigs Configs { get; private set; }
         public EngineData Data { get; private set; }
         public EngineEvents Events { get; private set; }
+        public EngineServiceProvider ServiceProvider { get; private set; }
         public EngineManagers Managers { get; private set; }
         public EngineModules Modules { get; private set; }
         public EngineSerializer Serializer { get; private set; }
@@ -82,6 +83,7 @@ namespace RPGCreator.Core
             Configs = new EngineConfigs();
             Data = new EngineData();
             Events = new EngineEvents();
+            ServiceProvider = new EngineServiceProvider();
             Managers = new EngineManagers();
             Modules = new EngineModules();
 

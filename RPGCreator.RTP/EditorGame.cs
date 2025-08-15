@@ -52,7 +52,7 @@ namespace RPGCreator.MonoGame
 
             EngineCore.Instance.Data.EditedMapChanged += (s, e) =>
             {
-                _mapEditing.Map = EngineCore.Instance.Data.EditedMap;
+                _mapEditing.MapInstance = EngineCore.Instance.Managers.Assets.MapFactory.Create(EngineCore.Instance.Data.EditedMap);
             };
 
             var mainPanel = new Panel(Gum.Root);

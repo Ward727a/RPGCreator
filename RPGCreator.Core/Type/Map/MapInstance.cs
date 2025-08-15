@@ -49,12 +49,14 @@ namespace RPGCreator.Core.Type.Map
         public Color CellBorderColor;
     }
 
-    public partial class BaseMap : BaseDrawable
+    public partial class MapInstance : BaseDrawable
     {
         // The Ulid Identifier can be used to sort map by creation date
         // See more: https://github.com/ulid/spec
         public Ulid Identifier { get; private set; } = Ulid.NewUlid();
         
+        public MapDefinition Definition { get; private set; }
+        public List<TileLayerInstance> TileLayers { get; private set; } = new List<TileLayerInstance>();
         public List<IActor> ActorsInMap { get; private set; } = [
             // new CharacterActor()
             // {
@@ -64,38 +66,58 @@ namespace RPGCreator.Core.Type.Map
             //     },
             // }
         ];
-        
-        [ObservableProperty]
-        private string _Name = string.Empty;
-        [ObservableProperty]
-        private string _Description = string.Empty;
-        public ObservableCollection<BaseMap> Levels = [];
-        [ObservableProperty]
-        private ObservableCollection<TileLayer> _Layers = [];
 
-        public readonly TileLayer PreviewLayer = new TileLayer("Preview Layer", null, 99999, true);
-
-        [ObservableProperty]
-        private Size _Size = new(10, 20);
-        [ObservableProperty]
-        private bool _ShowGrid = true;
-        [ObservableProperty]
-        private GRID_PARAMETER _GridParameter = new()
+        public readonly TileLayerInstance PreviewLayer = new TileLayerInstance(new TileLayerDefinition()
         {
-            CellWidth = 32,
-            CellHeight = 32,
-            CellBorderColor = Color.Black
-        };
-        [ObservableProperty]
-        private Color _BackgroundColor = Color.DeepSkyBlue;
+            Name = "Preview Layer",
+            ZIndex = 1000, // High ZIndex to ensure it is drawn on top of other layers
+            VisibleByDefault = true,
+        });
 
-        [ObservableProperty]
-        private List<BaseMap> childMaps = [];
-
-        public BaseMap() { }
-        public BaseMap(string name)
+        public MapInstance() { }
+        public MapInstance(MapDefinition definition)
         {
-            Name = name;
+            Definition = definition;
+            if (Definition == null)
+            {
+                throw new ArgumentNullException(nameof(definition), "Map definition cannot be null.");
+            }
+            
+            // Initialize the map with the provided definition
+            foreach (var layerDef in Definition.TileLayers)
+            {
+                var layerInstance = EngineCore.Instance.Managers.Assets.TileLayerFactory.Create(layerDef);
+                TileLayers.Add(layerInstance);
+            }
+            
+            // Subscribe to events for layer management
+            Definition.TileLayerAdded += OnTileLayerAdded;
+            Definition.TileLayerRemoved += OnTileLayerRemoved;
+        }
+
+        private void OnTileLayerRemoved(object? sender, TileLayerDefinition e)
+        {
+            var layerToRemove = TileLayers.FirstOrDefault(l => l.Definition.Unique == e.Unique);
+            if (layerToRemove != null)
+            {
+                TileLayers.Remove(layerToRemove);
+                EngineCore.Instance.Managers.Assets.TileLayerFactory.Release(layerToRemove);
+            }
+            else
+            {
+                throw new InvalidOperationException("Layer to remove not found in the map instance.");
+            }
+        }
+
+        private void OnTileLayerAdded(object? sender, TileLayerDefinition e)
+        {
+            if (e == null)
+            {
+                throw new ArgumentNullException(nameof(e), "Tile layer definition cannot be null.");
+            }
+
+            var newLayer = EngineCore.Instance.Managers.Assets.TileLayerFactory.Create(e);
+            TileLayers.Add(newLayer);
         }
 
         protected override void _Draw(SpriteBatchExtend? sb)
@@ -104,7 +126,7 @@ namespace RPGCreator.Core.Type.Map
             // This is where you would implement the logic to draw the map using the provided SpriteBatchExtend instance.
             // For example, you might loop through the tiles in the map and draw them using sb.Draw() method.
 
-            foreach (var layer in Layers.OrderBy(l => l.ZIndex))
+            foreach (var layer in TileLayers.OrderBy(l => l.Definition.ZIndex))
             {
                 if (layer.IsVisible)
                 {
@@ -118,23 +140,9 @@ namespace RPGCreator.Core.Type.Map
             }
         }
 
-        public void AddLayer(TileLayer layer)
+        public void SelectLayer(TileLayerInstance layer)
         {
-            Layers.Add(layer);
-            layer.Parent = this;
-            _OnAddedChild();
-        }
-
-        public void RemoveLayer(TileLayer layer)
-        {
-            Layers.Remove(layer);
-            layer.Parent = null;
-            _OnRemovedChild();
-        }
-
-        public void SelectLayer(TileLayer layer)
-        {
-            foreach (var l in Layers)
+            foreach (var l in TileLayers)
             {
                 l.IsSelected = false;
             }
@@ -143,14 +151,14 @@ namespace RPGCreator.Core.Type.Map
 
         public void SelectLayer(int index)
         {
-            if (index < 0 || index >= Layers.Count)
+            if (index < 0 || index >= Definition.TileLayers.Count)
                 throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range.");
-            SelectLayer(Layers[index]);
+            SelectLayer(TileLayers[index]);
         }
 
-        public TileLayer? GetSelectedLayer()
+        public TileLayerInstance? GetSelectedLayer()
         {
-            return Layers.FirstOrDefault(l => l.IsSelected);
+            return TileLayers.FirstOrDefault(l => l.IsSelected);
         }
 
         protected override void _Update(GameTime gameTime)
@@ -160,17 +168,6 @@ namespace RPGCreator.Core.Type.Map
             {
                 actor.Update(gameTime);
             }
-        }
-
-        public BaseMap CreateChildMap(string MapName)
-        {
-            BaseMap Child = new(MapName);
-
-            ChildMaps.Add(Child);
-
-            EngineCore.Instance.Data.EditedProject.GameData.Maps.Add(Child);
-
-            return Child;
         }
     }
 }

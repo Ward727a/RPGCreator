@@ -35,6 +35,6 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
     public interface IBrushPreviewFeature
     {
         public bool IsPreviewEnabled { get; set; }
-        public void ShowPreview(SpriteBatchExtend sb, Point at, Type.Map.BaseMap map);
+        public void ShowPreview(SpriteBatchExtend sb, Point at, Type.Map.MapInstance mapDefinition);
     }
 }

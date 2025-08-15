@@ -55,11 +55,11 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 
         public event Action? AutotileSaved;
         
-        public Autotile? SelectedAutotiling;
-        public Tileset? SelectedTileset;
-        public AutoTileset AutoTileset;
-        public AutotileGroup? SelectedGroup { get; private set; }
-        public Autotile Autotile;
+        public AutotileDef? SelectedAutotiling;
+        public TilesetDef? SelectedTileset;
+        public AutoTilesetDef AutoTilesetInstance;
+        public AutotileGroupDef? SelectedGroup { get; private set; }
+        public AutotileDef AutotileInstance;
 
         public EAutotileTools SelectedTool => AutotileTools.SelectedIndex switch
         {
@@ -79,7 +79,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
         public StackPanel LeftBar;
 
         #region Preview
-        public ClosableBox LeftPreviewBox;
+        public Accordion LeftPreviewBox;
         public StackPanel LeftPreview;
         public Image TestPreview;
 
@@ -88,7 +88,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 
         #region Properties
 
-        public ClosableBox GroupTagsBox;
+        public Accordion GroupTagsBox;
         public Grid GroupTagsGrid;
         public ScrollViewer GroupTagsScroller;
         public StackPanel GroupTagsPanel;
@@ -164,9 +164,9 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 
         #endregion
 
-        public AutotileEditorWindowControl(AutoTileset tileset)
+        public AutotileEditorWindowControl(AutoTilesetDef tilesetInstance)
         {
-            AutoTileset = tileset;
+            AutoTilesetInstance = tilesetInstance;
             CreateComponents();
 
             this.Content = Body;
@@ -211,7 +211,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                 Margin = new Thickness(10),
             };
 
-            LeftPreviewBox = new ClosableBox(LeftPreview, "Preview");
+            LeftPreviewBox = new Accordion(LeftPreview, "Preview");
 
             LeftBar.Children.Add(LeftPreviewBox);
 
@@ -237,7 +237,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                 VerticalAlignment = VerticalAlignment.Stretch,
             };
 
-            GroupTagsBox = new ClosableBox(GroupTagsGrid, "Group Tags");
+            GroupTagsBox = new Accordion(GroupTagsGrid, "GroupDefinition Tags");
             LeftBar.Children.Add(GroupTagsBox);
             GroupTagsScroller = new ScrollViewer
             {
@@ -296,7 +296,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 
                 AddGroupButton = new Button
                 {
-                    Content = "Add Group",
+                    Content = "Add GroupDefinition",
                     HorizontalAlignment = HorizontalAlignment.Left,
                     VerticalAlignment = VerticalAlignment.Center,
                 };
@@ -554,26 +554,26 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 
         private void OnSaveButtonOnClick(object? s, RoutedEventArgs e)
         {
-            var pack = AutoTileset.Pack;
+            var pack = AutoTilesetInstance.Pack;
             // Check if the tileset already exists in the pack
             if (pack != null)
             {
-                if (pack.AssetsCache.Any(a => a.Value.Unique == AutoTileset.Unique))
+                if (pack.AssetsCache.Any(a => a.Value.Unique == AutoTilesetInstance.Unique))
                 {
                     // If it exists, update the existing tileset
-                    pack.UpdateAsset(AutoTileset);
-                    AutoTileset.GetBitmap(true);
-                    Console.WriteLine($"Autotile Updated: {AutoTileset.Name}, Width: {AutoTileset.ImageWidth}, Height: {AutoTileset.ImageHeight}, Asset Pack: {AutoTileset.PackName}");
+                    pack.UpdateAsset(AutoTilesetInstance);
+                    AutoTilesetInstance.GetBitmap(true);
+                    Console.WriteLine($"Autotile Updated: {AutoTilesetInstance.Name}, Width: {AutoTilesetInstance.ImageWidth}, Height: {AutoTilesetInstance.ImageHeight}, Asset Pack: {AutoTilesetInstance.PackName}");
                 }
                 else
                 {
                     // If it doesn't exist, add the new tileset to the pack
-                    pack.AddAsset(AutoTileset);
-                    Console.WriteLine($"Autotile Added: {AutoTileset.Name}, Width: {AutoTileset.ImageWidth}, Height: {AutoTileset.ImageHeight}, Asset Pack: {AutoTileset.PackName}");
+                    pack.AddAsset(AutoTilesetInstance);
+                    Console.WriteLine($"Autotile Added: {AutoTilesetInstance.Name}, Width: {AutoTilesetInstance.ImageWidth}, Height: {AutoTilesetInstance.ImageHeight}, Asset Pack: {AutoTilesetInstance.PackName}");
                 }
             }
 
-            Console.WriteLine($"New Autotile Created: {AutoTileset.Name}, Width: {AutoTileset.ImageWidth}, Height: {AutoTileset.ImageHeight}, Asset Pack: {AutoTileset.PackName}");
+            Console.WriteLine($"New Autotile Created: {AutoTilesetInstance.Name}, Width: {AutoTilesetInstance.ImageWidth}, Height: {AutoTilesetInstance.ImageHeight}, Asset Pack: {AutoTilesetInstance.PackName}");
 
             AutotileSaved?.Invoke();
         }
@@ -633,7 +633,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                 {
                     if (e.GetCurrentPoint(CenterSubCanvas).Properties.IsLeftButtonPressed)
                     {
-                        // Add or select tile in group
+                        // Add or select tile in groupInstance
                         Console.WriteLine($"Tile left clicked at grid position: {tileX}, {tileY}");
 
                         TestPreview.Source = new CroppedBitmap(SelectedTileset.GetBitmap(), new PixelRect(tileX * tileWidth, tileY * tileHeight, tileWidth, tileHeight));
@@ -642,17 +642,17 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 
                             var tileUv = new Point(tileWidth, tileHeight);
                             
-                            SelectedAutotiling = new Autotile(
+                            SelectedAutotiling = new AutotileDef(
+                                SelectedTileset.Unique,
                                 tileUv,
                                 tilePosition, 
-                                SelectedTileset,
                                 SelectedGroup);
                             SelectedGroup.AddTile(SelectedAutotiling);
                             Console.WriteLine($"New autotile created at: {tileX}, {tileY}");
                         }
                         else
                         {
-                            SelectedAutotiling = SelectedGroup.GetDirectTileAt(tilePosition) as Autotile;
+                            SelectedAutotiling = SelectedGroup.GetDirectTileAt(tilePosition);
                             Console.WriteLine($"Autotile already exists at: {tileX}, {tileY}");
                         }
 
@@ -660,7 +660,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                     }
                     else if (e.GetCurrentPoint(CenterSubCanvas).Properties.IsRightButtonPressed)
                     {
-                        // Remove tile from group
+                        // Remove tile from groupInstance
                         Console.WriteLine($"Tile right clicked at grid position: {tileX}, {tileY}");
                         if (SelectedGroup.HasTile(tilePosition))
                         {
@@ -692,12 +692,12 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                     {
                         if (SelectedGroup != null)
                         {
-                            var tiling = SelectedGroup.GetDirectTileAt(tilePosition) as Autotile;
+                            var tiling = SelectedGroup.GetDirectTileAt(tilePosition);
 
                             if (tiling == null)
                                 return;
 
-                            if (SelectedGroup.GroupTags.Contains(SelectedTag))
+                            if (SelectedGroup.Tags.Contains(SelectedTag))
                                 return;
 
                             if (tiling.Tags.Contains(SelectedTag))
@@ -719,7 +719,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                     if (SelectedGroup == null)
                         return;
                     
-                    var tiling = SelectedGroup.GetDirectTileAt(tilePosition) as Autotile;
+                    var tiling = SelectedGroup.GetDirectTileAt(tilePosition);
 
                     if (tiling == null)
                         return;
@@ -739,9 +739,9 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
         private void RefreshAutotileCombo()
         {
             AutotileComboBox.Items.Clear();
-            if (AutoTileset == null)
+            if (AutoTilesetInstance == null)
                 return;
-            AutoTileset.AutotileGroups.ForEach(group =>
+            AutoTilesetInstance.AutotileGroups.ForEach(group =>
             {
                 AutotileComboBox.Items.Add(group.Name);
             });
@@ -749,7 +749,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 
         private void RefreshTilesetSelectorList()
         {
-            EngineCore.Instance.Data.EditedProject?.GetAssetsType<Tileset>(BaseAsset.TYPE.TILESETS)
+            EngineCore.Instance.Data.EditedProject?.GetAssetsType<TilesetDef>(BaseAsset.TYPE.TILESETS)
                 .ForEach(tileset =>
                 {
                     var item = new AutotileTilesetItem(tileset);
@@ -777,7 +777,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                 return;
             
             GroupTagsTagsList.Items.Clear();
-            SelectedGroup.GroupTags.ForEach(tag =>
+            SelectedGroup.Tags.ToList().ForEach(tag =>
             {
                 GroupTagsTagsList.Items.Add(tag);
             });
@@ -801,7 +801,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
             
             ClearBasedOnTilesCases();
             // Get all autotiles based on the base autotile
-            foreach (var tiling in SelectedGroup.Autotiles)
+            foreach (var tiling in SelectedGroup.Tiles)
             {
                 if(tiling != SelectedGroup.BaseTile && tiling != SelectedAutotiling)
                     AddBasedOnTileCase(tiling.PositionInTileset);
@@ -826,30 +826,30 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
             Console.WriteLine("Opening Rule Editor...");
             if (SelectedGroup == null)
             {
-                Console.WriteLine("No group selected.");
+                Console.WriteLine("No groupInstance selected.");
                 return;
             }
 
-            var ruleEditor = new AutotileEditorRuleEditorWindow(AutoTileset);
+            var ruleEditor = new AutotileEditorRuleEditorWindow(AutoTilesetInstance);
 
             ruleEditor.ShowDialog((Window)this.GetVisualRoot()!);
         }
 
         private void OnAddGroupButtonOnClick(object? o, RoutedEventArgs routedEventArgs)
         {
-            AutoTileset.AutotileGroups.Add(new AutotileGroup(){Name = $"New Group - {AutotileComboBox.Items.Count}"});
-            // SelectedTileset.Groups.Add(new AutotilesGroup($"New Group - {AutotileComboBox.Items.Count}", SelectedTileset));
+            AutoTilesetInstance.AutotileGroups.Add(new AutotileGroupDef($"New GroupDefinition - {AutotileComboBox.Items.Count}"));
+            // SelectedTileset.Groups.Add(new AutotilesGroup($"New GroupDefinition - {AutotileComboBox.Items.Count}", SelectedTileset));
             RefreshAutotileCombo();
             AutotileComboBox.SelectedIndex = AutotileComboBox.Items.Count - 1;
         }
 
         private void OnAutotileComboBoxOnSelectionChanged(object? s, SelectionChangedEventArgs e)
         {
-            if (AutotileComboBox.SelectedIndex >= 0 && AutotileComboBox.SelectedIndex < AutoTileset.AutotileGroups.Count)
+            if (AutotileComboBox.SelectedIndex >= 0 && AutotileComboBox.SelectedIndex < AutoTilesetInstance.AutotileGroups.Count)
             {
-                // Load the selected group
+                // Load the selected groupInstance
                 // SelectedGroup = SelectedTileset.Groups[AutotileComboBox.SelectedIndex];
-                SelectedGroup = AutoTileset.AutotileGroups[AutotileComboBox.SelectedIndex];
+                SelectedGroup = AutoTilesetInstance.AutotileGroups[AutotileComboBox.SelectedIndex];
                 RefreshProperties();
             }
         }
@@ -861,9 +861,9 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
             var dialog = new TextInputDialog("New Tag", "Enter the name of the new tag:", allowEmpty: false);
             dialog.Confirmed += (tag) =>
             {
-                if (SelectedGroup.GroupTags.Contains(tag)) return;
+                if (SelectedGroup.Tags.Contains(tag)) return;
 
-                SelectedGroup.GroupTags.Add(tag);
+                SelectedGroup.AddTag(tag);
                 RefreshProperties();
             };
             dialog.ShowDialog((Window)this.GetVisualRoot()!);
@@ -877,7 +877,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
             var dialog = new TextInputDialog("New Tag", "Enter the name of the new tag:", allowEmpty: false);
             dialog.Confirmed += (tag) =>
             {
-                if (SelectedGroup.GroupTags.Contains(tag)) return;
+                if (SelectedGroup.Tags.Contains(tag)) return;
 
                 AutotileTagsSelector.Items.Add(tag);
                 AutotileTagsSelector.SelectedItem = tag;

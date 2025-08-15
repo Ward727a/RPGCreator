@@ -44,6 +44,31 @@ namespace RPGCreator.Core.Type.Internal
             return $"Width: {Width}, Height: {Height}";
         }
 
+        /// <summary>
+        /// This method parses a string representation of a Size object.
+        /// The string should be in the format "Width: {width}, Height: {height}".
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public static Size Parse(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s))
+            {
+                throw new ArgumentException("Input string cannot be null or empty.", nameof(s));
+            }
+
+            var parts = s.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length != 4 || !parts[0].StartsWith("Width:") || !parts[2].StartsWith("Height:"))
+            {
+                throw new FormatException("Input string is not in the correct format.");
+            }
+
+            int width = int.Parse(parts[1]);
+            int height = int.Parse(parts[3]);
+
+            return new Size(width, height);
+        }
+
         public readonly MonoGame.Extended.Size ToMGExtendedSize()
         {
             return new MonoGame.Extended.Size(Width, Height);

@@ -37,18 +37,18 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
     {
 
 
-        void Draw(SpriteBatchExtend sb, Point at, Type.Map.BaseMap map);
+        void Draw(SpriteBatchExtend sb, Point at, Type.Map.MapInstance mapInstance);
 
-        protected static bool InBorder(Point at, BaseMap Map)
+        protected static bool InBorder(Point at, MapInstance mapInstance)
         {
-            if (Map == null)
+            if (mapInstance == null)
             {
                 return false;
             }
 
-            int cellSize = Map.GridParameter.CellWidth;
-            int horizontalCells = Map.Size.Width;
-            int verticalCells = Map.Size.Height;
+            int cellSize = mapInstance.Definition.GridParameter.CellWidth;
+            int horizontalCells = mapInstance.Definition.Size.Width;
+            int verticalCells = mapInstance.Definition.Size.Height;
 
             // Check if the point is within the bounds of the map
             if (at.X < 0 || at.Y < 0 || at.X >= horizontalCells * cellSize || at.Y >= verticalCells * cellSize)

@@ -48,7 +48,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
 
         private bool _FromWindow;
         public Grid Body { get; private set; }
-        public Tileset Tileset { get; private set; }
+        public TilesetDef TilesetDefinition { get; private set; }
 
         public Grid ImageContainer { get; private set; }
         public Image ImagePreview { get; private set; }
@@ -65,9 +65,9 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
         public TextSeparator ExamplesTilesLabel { get; private set; }
         public Grid ExamplesTilesGrid { get; private set; }
 
-        public TilesetEditorWindowControl(Tileset tileset, bool FromWindow = false)
+        public TilesetEditorWindowControl(TilesetDef tilesetDefinition, bool FromWindow = false)
         {
-            Tileset = tileset ?? throw new ArgumentNullException(nameof(tileset), "Tileset cannot be null");
+            TilesetDefinition = tilesetDefinition ?? throw new ArgumentNullException(nameof(tilesetDefinition), "Tileset cannot be null");
             CreateComponents();
             this.Content = Body;
             _FromWindow = FromWindow;
@@ -158,11 +158,11 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
 
             };
 
-            if(File.Exists(Tileset.ImagePath))
+            if(File.Exists(TilesetDefinition.ImagePath))
             {
-                ImagePick.SelectedPathsText = Tileset.ImagePath;
-                ImagePick.SelectedPaths.Append(Tileset.ImagePath);
-                ImagePreview.Source = Tileset.GetBitmap();
+                ImagePick.SelectedPathsText = TilesetDefinition.ImagePath;
+                ImagePick.SelectedPaths.Append(TilesetDefinition.ImagePath);
+                ImagePreview.Source = TilesetDefinition.GetBitmap();
             }
 
             MainPanel.Children.Add(ImagePick);
@@ -196,7 +196,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             NameInput = new TextBox
             {
                 Watermark = "Tileset Name",
-                Text = Tileset.Name,
+                Text = TilesetDefinition.Name,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 Margin = new Avalonia.Thickness(0, 0, 0, 10)
             };
@@ -205,7 +205,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             TileHeightInput = new TextBox
             {
                 Watermark = "Tile Height",
-                Text = Tileset.TileHeight > 0 ? Tileset.TileHeight.ToString() : string.Empty,
+                Text = TilesetDefinition.TileHeight > 0 ? TilesetDefinition.TileHeight.ToString() : string.Empty,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 Margin = new Avalonia.Thickness(0, 0, 0, 10)
             };
@@ -213,7 +213,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             TileWidthInput = new TextBox
             {
                 Watermark = "Tile Width",
-                Text = Tileset.TileWidth > 0 ? Tileset.TileWidth.ToString() : string.Empty,
+                Text = TilesetDefinition.TileWidth > 0 ? TilesetDefinition.TileWidth.ToString() : string.Empty,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 Margin = new Avalonia.Thickness(0, 0, 0, 10)
             };
@@ -231,7 +231,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             foreach (var packName in EngineCore.Instance.Managers.Assets.GetAssetsPackNames())
             {
                 AssetPackChoice.Items.Add(packName);
-                if (Tileset.PackName != null && Tileset.PackName == packName)
+                if (TilesetDefinition.PackName != null && TilesetDefinition.PackName == packName)
                 {
                     currentPack = index;
                 }
@@ -306,8 +306,8 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             if (image != null)
             {
 
-                var maxRows = (int)(image.Size.Height / Tileset.TileHeight);
-                var maxColumns = (int)(image.Size.Width / Tileset.TileWidth);
+                var maxRows = (int)(image.Size.Height / TilesetDefinition.TileHeight);
+                var maxColumns = (int)(image.Size.Width / TilesetDefinition.TileWidth);
 
                 for (int i = 0; i < 8; i++)
                 {
@@ -318,16 +318,16 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
                     {
                         HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
                         VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                        Width = Tileset.TileWidth,
-                        Height = Tileset.TileHeight,
+                        Width = TilesetDefinition.TileWidth,
+                        Height = TilesetDefinition.TileHeight,
                         Margin = new Avalonia.Thickness(2)
                     };
 
                     // Calculate the position of the tile in the tileset image
-                    var x = (i % 4) * Tileset.TileWidth;
-                    var y = (i / 4) * Tileset.TileHeight;
+                    var x = (i % 4) * TilesetDefinition.TileWidth;
+                    var y = (i / 4) * TilesetDefinition.TileHeight;
                     // Create a cropped bitmap for the tile
-                    var croppedBitmap = new CroppedBitmap(image, new PixelRect(x, y, Tileset.TileWidth, Tileset.TileHeight));
+                    var croppedBitmap = new CroppedBitmap(image, new PixelRect(x, y, TilesetDefinition.TileWidth, TilesetDefinition.TileHeight));
                     tileImage.Source = croppedBitmap;
                     // Add the tile image to the grid
                     ExamplesTilesGrid.Children.Add(tileImage);
@@ -374,36 +374,38 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             }
 
             // Update the tileset properties
-            Tileset.Name = NameInput.Text;
-            Tileset.TileHeight = int.TryParse(TileHeightInput.Text, out var height) ? height : 0;
-            Tileset.TileWidth = int.TryParse(TileWidthInput.Text, out var width) ? width : 0;
-            Tileset.ImagePath = ImagePick.SelectedPaths[0];
-            Tileset.PackName = AssetPackChoice.SelectedItem as string;
+            TilesetDefinition.Name = NameInput.Text;
+            TilesetDefinition.TileHeight = int.TryParse(TileHeightInput.Text, out var height) ? height : 0;
+            TilesetDefinition.TileWidth = int.TryParse(TileWidthInput.Text, out var width) ? width : 0;
+            TilesetDefinition.ImagePath = ImagePick.SelectedPaths[0];
+            TilesetDefinition.PackName = AssetPackChoice.SelectedItem as string;
 
-            if (EngineCore.Instance.Managers.Assets.TryGetAssetsPack(Tileset.PackName, out var pack))
+            if (EngineCore.Instance.Managers.Assets.TryGetAssetsPack(TilesetDefinition.PackName, out var pack))
             {
                 // Check if the tileset already exists in the pack
                 if (pack != null)
                 {
-                    if (pack.AssetsCache.Any(a => a.Value.Unique == Tileset.Unique))
+                    if (pack.AssetsCache.Any(a => a.Value.Unique == TilesetDefinition.Unique))
                     {
                         // If it exists, update the existing tileset
-                        pack.UpdateAsset(Tileset);
-                        Console.WriteLine($"Tileset Updated: {Tileset.Name}, Width: {Tileset.TileWidth}, Height: {Tileset.TileHeight}, Asset Pack: {Tileset.PackName}");
+                        pack.UpdateAsset(TilesetDefinition);
+                        Console.WriteLine($"Tileset Updated: {TilesetDefinition.Name}, Width: {TilesetDefinition.TileWidth}, Height: {TilesetDefinition.TileHeight}, Asset Pack: {TilesetDefinition.PackName}");
                     }
                     else
                     {
                         // If it doesn't exist, add the new tileset to the pack
-                        pack.AddAsset(Tileset);
-                        Console.WriteLine($"Tileset Added: {Tileset.Name}, Width: {Tileset.TileWidth}, Height: {Tileset.TileHeight}, Asset Pack: {Tileset.PackName}");
+                        pack.AddAsset(TilesetDefinition);
+                        Console.WriteLine($"Tileset Added: {TilesetDefinition.Name}, Width: {TilesetDefinition.TileWidth}, Height: {TilesetDefinition.TileHeight}, Asset Pack: {TilesetDefinition.PackName}");
                     }
                 }
 
-                Console.WriteLine($"New Tileset Created: {Tileset.Name}, Width: {Tileset.TileWidth}, Height: {Tileset.TileHeight}, Asset Pack: {Tileset.PackName}");
+                Console.WriteLine($"New Tileset Created: {TilesetDefinition.Name}, Width: {TilesetDefinition.TileWidth}, Height: {TilesetDefinition.TileHeight}, Asset Pack: {TilesetDefinition.PackName}");
             } else
             {
                 throw new Exception("Couldn't get the pack from the pack name... INTERNAL ERROR!");
             }
+            
+            EngineCore.Instance.Managers.Assets.TilesetRegistry.Register(TilesetDefinition);
 
             TilesetSaved?.Invoke();
         }

@@ -45,7 +45,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
         #region Components
 
         public StackPanel LayersBody { get; private set; }
-        public ClosableBox Body { get; private set; }
+        public Accordion Body { get; private set; }
         public Button AddLayerButton { get; private set; }
         public ListBox LayersList { get; private set; }
         public TextBlock SelectedLayerText { get; private set; }
@@ -102,7 +102,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
 
             LayersBody.Children.Add(LayersList);
 
-            Body = new ClosableBox(LayersBody, "Layers");
+            Body = new Accordion(LayersBody, "Layers");
 
             RefreshComponents();
             RegisterEvents();
@@ -112,7 +112,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
         {
             LayersList.Items.Clear();
             if (EngineCore.Instance.Data.EditedMap == null) return;
-            foreach (var layer in EngineCore.Instance.Data.EditedMap.Layers.OrderBy(l=>l.ZIndex))
+            foreach (var layer in EngineCore.Instance.Data.EditedMap.TileLayers.OrderBy(l=>l.ZIndex))
             {
                 LayerItem layerItem = new LayerItem(layer);
                 LayersList.Items.Add(layerItem);
@@ -184,15 +184,18 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                 {
                     // Logic to add a new layer with the specified name
                     var newLayerName = layerNameTextBox.Text;
-                    TileLayer layer = new Core.Type.Map.TileLayer(newLayerName, null);
-
-                    layer.ZIndex = EngineCore.Instance.Data.EditedMap.Layers.Count - 1; // Set ZIndex to the last index
-                    layer.ZIndexChanged += (value) =>
+                    TileLayerDefinition layer = new TileLayerDefinition()
                     {
-                        RefreshComponents();
+                        Name = newLayerName
                     };
 
-                    EngineCore.Instance.Data.EditedMap?.Layers.Add(layer);
+                    layer.ZIndex = EngineCore.Instance.Data.EditedMap.TileLayers.Count - 1; // Set ZIndex to the last index
+                    // layer.ZIndexChanged += (value) =>
+                    // {
+                    //     RefreshComponents();
+                    // };
+
+                    EngineCore.Instance.Data.EditedMap?.AddLayer(layer);
 
                     LayerItem newLayerItem = new LayerItem(layer);
 

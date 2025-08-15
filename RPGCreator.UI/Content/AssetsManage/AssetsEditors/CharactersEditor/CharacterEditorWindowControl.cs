@@ -149,12 +149,36 @@ public class CharacterEditorWindowControl : UserControl
             Header = "Properties",
             Content = new CharacterPropertiesTab(Data)
         });
-        MainContent.Items.Add("Skills");
-        MainContent.Items.Add("Equipment");
-        MainContent.Items.Add("Animations");
-        MainContent.Items.Add("Stats");
-        MainContent.Items.Add("Features");
-        MainContent.Items.Add("RP Informations");
+        MainContent.Items.Add(new TabItem()
+        {
+            Header = "Skills",
+            Content = new CharacterSkillsTab(Data)
+        });
+        MainContent.Items.Add(new TabItem()
+        {
+            Header = "Equipment",
+            Content = new CharacterEquipmentTab(Data)
+        });
+        MainContent.Items.Add(new TabItem()
+        {
+            Header = "Animations",
+            Content = new CharacterAnimationsTab(Data)
+        });
+        MainContent.Items.Add(new TabItem()
+        {
+            Header = "Stats",
+            Content = new CharacterStatsTab(Data)
+        });
+        MainContent.Items.Add(new TabItem()
+        {
+            Header = "Features",
+            Content = new CharacterFeaturesTab(Data)
+        });
+        MainContent.Items.Add(new TabItem()
+        {
+            Header = "RP Informations",
+            Content = new CharacterRPInfoTab(Data)
+        });
     }
 
     private void RegisterEvents()

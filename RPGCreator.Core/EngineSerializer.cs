@@ -582,6 +582,41 @@ public sealed class DeserializationInfo
         
         if (type == typeof(string))
             return valueString;
+
+        if (type == typeof(Microsoft.Xna.Framework.Color))
+        {
+            // Need to convert string like "{R:0 G:0 B:0 A:0}" to Microsoft.Xna.Framework.Color
+            if (valueString.StartsWith("{") && valueString.EndsWith("}"))
+            {
+                valueString = valueString[1..^1]; // Remove the curly braces
+                var parts = valueString.Split(' ');
+                int r = 0, g = 0, b = 0, a = 0;
+                foreach (var part in parts)
+                {
+                    var keyValue = part.Split(':');
+                    if (keyValue.Length != 2)
+                        continue; // Invalid key-value pair
+                    var key = keyValue[0].Trim();
+                    var val = keyValue[1].Trim();
+                    switch (key)
+                    {
+                        case "R":
+                            r = int.Parse(val);
+                            break;
+                        case "G":
+                            g = int.Parse(val);
+                            break;
+                        case "B":
+                            b = int.Parse(val);
+                            break;
+                        case "A":
+                            a = int.Parse(val);
+                            break;
+                    }
+                }
+                return new Microsoft.Xna.Framework.Color(r, g, b, a);
+            }
+        }
         
         var parseMethod = type.GetMethod("Parse", new[] { typeof(string) });
         if (parseMethod != null && parseMethod.IsStatic)
@@ -747,9 +782,6 @@ public sealed class DeserializationInfo
     {
         if (TryGetValue(name, out var returnedObject, out var returnedType))
         {
-            if(returnedType.FullName == "RPGCreator.Core.Type.Assets.Tilesets.Autotile")
-                Console.WriteLine("");
-            
             if(returnedObject is T castedObject)
             {
                 value = castedObject;

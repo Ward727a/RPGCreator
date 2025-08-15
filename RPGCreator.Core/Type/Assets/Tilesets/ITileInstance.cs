@@ -1,20 +1,15 @@
 using Microsoft.Xna.Framework;
 using RPGCreator.Core.Rendering.Batching;
+using RPGCreator.Core.Type.Internal;
 using RPGCreator.Core.Type.Map;
-using Point = RPGCreator.Core.Type.Internal.Point;
+using Point = Microsoft.Xna.Framework.Point;
 
 namespace RPGCreator.Core.Type.Assets.Tilesets;
 
-public interface ITileable
+public interface ITileInstance : ICleanable, IResettable<ITileDef>
 {
-    public Vector2 Position { get; set; }
-    public Point SizeInTileset { get; }
-    public Point PositionInTileset { get; } // Position in the tileset grid (row by column)
-    public Tileset Tileset { get; } // The tileset this tile belongs to
-
-
-    public void UpdateTileset(ITileset newTileset);
-    
+    public Vector2 Position { get; set; } // Position in the map, not in the tileset
+    public ITileDef Definition { get; }
     /// <summary>
     /// This method returns a drawable tile based on the current tileable object.<br/>
     /// It's mainly useful for autotiles or tiles that need to be drawn differently based on the context.<br/>
@@ -23,8 +18,8 @@ public interface ITileable
     /// <param name="layer">The map layer where this tile will be drawn</param>
     /// <param name="position">The position where this tile will be drawn</param>
     /// <returns></returns>
-    public ITileable? GetDrawableTile(TileLayer? layer = null, Point? position = null);
-    public ITileable GetCopy(); // Returns a copy of the tileable object.
+    public ITileInstance? GetDrawableTile(TileLayerDefinition? layer = null, Point? position = null);
+    public ITileInstance GetCopy(); // Returns a copy of the tileable object.
     /// <summary>
     /// This should be inherited from BaseDrawable.
     /// </summary>
@@ -36,6 +31,4 @@ public interface ITileable
     /// </summary>
     /// <param name="gameTime"></param>
     public void Update(GameTime gameTime);
-
-    public bool IsEqualTo(ITileable other);
 }

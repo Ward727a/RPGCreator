@@ -55,7 +55,7 @@ namespace RPGCreator.Core.Type.Project
         public List<string> AssetsPackPath = [];
 
         [ObservableProperty]
-        private BaseMap? _EditMap = null;
+        private MapInstance? _EditMap = null;
 
         public bool EditingMap => EditMap != null;
 
@@ -121,46 +121,6 @@ namespace RPGCreator.Core.Type.Project
         private string[] FormatString(string unformatedString)
         {
             return unformatedString.Split([':'], StringSplitOptions.TrimEntries);
-        }
-
-        public BaseAsset? GetAsset(string path)
-        {
-            var pathParts = FormatString(path);
-
-            if(pathParts.Length != 2)
-                return null;
-
-            string AssetPack = pathParts[0];
-            string AssetPath = pathParts[1];
-
-            if(!EngineCore.Instance.Managers.Assets.HasAssetsPack(AssetPack))
-            {
-                return null;
-            }
-
-            BaseAsset? asset = EngineCore.Instance.Managers.Assets.GetAsset(path);
-
-            if(asset == null)
-            {
-                return null;
-            }
-
-            return asset;
-        }
-
-        public List<BaseAsset> GetAssetsType(BaseAsset.TYPE type)
-        {
-            List<BaseAsset> assets_found = [];
-
-            foreach (BaseAssetsPack pack in EngineCore.Instance.Managers.Assets.GetAssetsPacks())
-            {
-                if (pack.AssetsCache.Values.Any(x => x.Type == type))
-                {
-                    assets_found.AddRange(pack.AssetsCache.Values.Where(x => x.Type == type).ToList());
-                }
-            }
-
-            return assets_found;
         }
         public List<T> GetAssetsType<T>(BaseAsset.TYPE type) where T:BaseAsset
         {

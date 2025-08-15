@@ -88,13 +88,13 @@ namespace RPGCreator.UI.Content.Editor.Tabs
             private Border _leftLine;
             public string MapName { get; set; } = "New Map";
             public int MapId { get; set; } = 0;
-            public BaseMap Map;
+            public MapDefinition MapDef;
 
-            public MapItem(BaseMap map) : this(map.Name)
+            public MapItem(MapDefinition mapDef) : this(mapDef.Name)
             {
-                Map = map;
+                MapDef = mapDef;
 
-                foreach(BaseMap level in map.Levels)
+                foreach(MapDefinition level in mapDef.MapDefs)
                 {
                     var levelItem = new LevelItem(level.Name);
                     LevelsList.Children.Add(levelItem);
@@ -119,8 +119,8 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch;
                 Margin = App.style.Margin;
-                Map = new(MapName);
-                EngineCore.Instance.Data.EditedProject.GameData.Maps.Add(Map);
+                MapDef = new(MapName);
+                EngineCore.Instance.Data.EditedProject.GameData.Maps.Add(MapDef);
 
                 var header = new TextBlock
                 {
@@ -144,7 +144,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                             return; // If the double click is not on the MapItem itself, do nothing
                         e.Handled = true; // Mark the event as handled to prevent further processing
 
-                        EngineCore.Instance.Data.EditedMap = Map; // Set the edited map to the current map
+                        EngineCore.Instance.Data.EditedMap = MapDef; // Set the edited map to the current map
 
                         // Open the map editor
                         Console.ForegroundColor = ConsoleColor.Green;
@@ -172,7 +172,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                         openMapItem.Click += (s, e) =>
                         {
 
-                            EngineCore.Instance.Data.EditedMap = Map; // Set the edited map to the current map
+                            EngineCore.Instance.Data.EditedMap = MapDef; // Set the edited map to the current map
                             // Open the map editor
                             Console.ForegroundColor = ConsoleColor.Green;
                             Console.WriteLine($"Opening map editor for map: {MapName}");
@@ -299,7 +299,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                     var levelItem = new LevelItem(levelNameInput.Text ?? "New Level");
                     LevelsList.Children.Add(levelItem);
 
-                    Map.Levels.Add(levelItem.Level); // Add the level to the map's levels
+                    MapDef.AddMap(levelItem.Level); // Add the level to the map's levels
 
                     popup.Close();
                 };
@@ -313,7 +313,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                         var levelItem = new LevelItem(levelNameInput.Text ?? "New Level");
                         LevelsList.Children.Add(levelItem);
 
-                        Map.Levels.Add(levelItem.Level); // Add the level to the map's levels
+                        MapDef.AddMap(levelItem.Level); // Add the level to the map's levels
 
                         popup.Close();
                     }
@@ -338,7 +338,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                     // Logic to remove the map
                     var parent = this.Parent as StackPanel;
                     parent?.Children.Remove(this);
-                    EngineCore.Instance.Data.EditedProject.GameData.Maps.Remove(Map); // Remove the map from the project data
+                    EngineCore.Instance.Data.EditedProject.GameData.Maps.Remove(MapDef); // Remove the map from the project data
                 };
 
                 confirmDialog.ShowDialog(EditorWindow.Instance);
@@ -357,7 +357,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
         {
             public string LevelName { get; set; } = "New Level";
             public int LevelId { get; set; } = 0;
-            public BaseMap Level;
+            public MapDefinition Level;
             public LevelItem(string levelName)
             {
                 Orientation = Avalonia.Layout.Orientation.Horizontal;

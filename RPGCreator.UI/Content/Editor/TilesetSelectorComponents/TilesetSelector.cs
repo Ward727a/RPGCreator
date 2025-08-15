@@ -61,22 +61,22 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
             Autotiling
         }
         private TilesetType CurrentTilesetType = TilesetType.Tileset;
-        public ITileset SelectedTileset
+        public ITilesetDef SelectedTilesetInstance
         {
             get
             {
                 if (SelectBox.SelectedItem is TilesetItem item)
                 {
-                    return item.Tileset;
+                    return item.TilesetDef;
                 }
                 return null;
             }
         }
-        public Autotile SelectedAutotiles
+        public AutotileInstance SelectedAutotilesInstance
         {
             get
             {
-                if (SelectBox.SelectedItem is Autotile item)
+                if (SelectBox.SelectedItem is AutotileInstance item)
                 {
                     return item;
                 }
@@ -84,7 +84,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
             }
         }
 
-        private ITileset CurrentTemp;
+        private ITilesetDef CurrentTemp;
 
         public TilesetSelector()
         {
@@ -181,7 +181,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 
             RootTilesetCanvas.Children.Add(InnerTilesetCanvas);
 
-            EngineCore.Instance.Managers.Assets.Event.AddedAsset += OnAssetAdded;
+            EngineCore.Instance.Managers.Assets.TilesetRegistry.AssetRegistered += OnAssetAdded;
             EngineCore.Instance.Managers.Assets.Event.UpdatedAsset += (sender, e) =>
             {
                 if (e.Type == BaseAsset.TYPE.TILESETS)
@@ -190,13 +190,9 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                     RefreshComponent();
                 }
             };
-            EngineCore.Instance.Managers.Assets.Event.RemovedAsset += (sender, e) =>
+            EngineCore.Instance.Managers.Assets.TilesetRegistry.AssetUnregistered += (sender, e) =>
             {
-                if (e.Type == BaseAsset.TYPE.TILESETS)
-                {
-                    // If the removed asset is a tileset, we refresh the component
-                    RefreshComponent();
-                }
+                RefreshComponent();
             };
 
             RefreshComponent();
@@ -223,16 +219,14 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 
             var project = EngineCore.Instance.Data.EditedProject;
 
-            project.GetAssetsType(Core.Type.Assets.BaseAsset.TYPE.TILESETS).ForEach(asset =>
+            foreach (var tilesetDef in EngineCore.Instance.Managers.Assets.TilesetRegistry.All())
             {
-                if (asset is not ITileset tileset) return;
-                
-                var item = new TilesetItem(tileset);
+                var item = new TilesetItem(tilesetDef);
                 if (item.Error)
                     return;
                 
                 SelectBox.Items.Add(item);
-            });
+            }
 
             // Check if we can still select the previous selected tileset, else select the first one
             if (current_selected >= 0 && current_selected < SelectBox.Items.Count)
@@ -253,14 +247,14 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
             // This could involve updating the UI or performing some action based on the selected tileset
             if (SelectBox.SelectedItem is TilesetItem item)
             {
-                Console.WriteLine($"Selected Tileset: {item.Tileset.Name}");
+                Console.WriteLine($"Selected Tileset: {item.TilesetDef.Name}");
                 // You can add more logic here to handle the selected tileset
                 InnerTilesetCanvas.Children.Clear();
                 var tilesetImage = new Image
                 {
-                    Source = item.Tileset.GetBitmap(),
-                    Width = item.Tileset.GetBitmap().Size.Width,
-                    Height = item.Tileset.GetBitmap().Size.Height,
+                    Source = item.TilesetDef.GetBitmap(),
+                    Width = item.TilesetDef.GetBitmap().Size.Width,
+                    Height = item.TilesetDef.GetBitmap().Size.Height,
                     HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
                     VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top
                 };
@@ -269,7 +263,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 
                 if (TileBorder != null)
                 {
-                    CurrentTemp = item.Tileset;
+                    CurrentTemp = item.TilesetDef;
                     InnerTilesetCanvas.Children.Remove(TileBorder);
                     TileBorder = null; // Clear the border when a new tileset is selected
                     EngineCore.Instance.Data.SelectedTile = null; // Clear the selected tile
@@ -292,7 +286,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 
             Console.WriteLine("Select button clicked.");
 
-            if (SelectedTileset == null)
+            if (SelectedTilesetInstance == null)
             {
                 Console.WriteLine("No tileset selected.");
                 return;
@@ -300,14 +294,14 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 
             // Here we convert the location of the click to a tile position (tileCol, tileRow)
             var position = e.GetPosition(InnerTilesetCanvas);
-            int tileWidth = SelectedTileset.TileWidth;
-            int tileHeight = SelectedTileset.TileHeight;
+            int tileWidth = SelectedTilesetInstance.TileWidth;
+            int tileHeight = SelectedTilesetInstance.TileHeight;
 
             int tileCol = (int)(position.X / tileWidth);
             int tileRow = (int)(position.Y / tileHeight);
 
 
-            var tile = SelectedTileset.GetTileAt(tileCol, tileRow);
+            var tile = SelectedTilesetInstance.GetTileAt(tileCol, tileRow);
 
             if(tile == null)
             {
@@ -384,7 +378,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                         0, 
                         Math.Max(
                             newPosition.X, 
-                            (SelectedTileset.GetBitmap().Size.Width - RootTilesetCanvas.Width) * -1)
+                            (SelectedTilesetInstance.GetBitmap().Size.Width - RootTilesetCanvas.Width) * -1)
                         )
                     );
                 newPosition = newPosition.WithY(
@@ -392,7 +386,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                         0, 
                         Math.Max(
                             newPosition.Y, 
-                            (SelectedTileset.GetBitmap().Size.Height - RootTilesetCanvas.Height) * -1)
+                            (SelectedTilesetInstance.GetBitmap().Size.Height - RootTilesetCanvas.Height) * -1)
                         )
                     );
 
@@ -427,10 +421,9 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
             Console.WriteLine("Root tileset canvas position reset.");
         }
 
-        private void OnAssetAdded(object? sender, AssetsManagerAddedAssetArgs e)
+        private void OnAssetAdded(object? sender, ITilesetDef def)
         {
-            if(e.Asset.Type == BaseAsset.TYPE.TILESETS)
-                RefreshComponent();
+            RefreshComponent();
         }
 
         #endregion

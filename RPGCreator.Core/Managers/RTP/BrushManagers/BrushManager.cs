@@ -65,8 +65,8 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
                 Log.Error("No tile is currently selected. Please select a tile before clicking.");
                 return;
             }
-            var tileWidth = EngineCore.Instance.Data.SelectedTile.Tileset.TileWidth;
-            var tileHeight = EngineCore.Instance.Data.SelectedTile.Tileset.TileHeight;
+            var tileWidth = EngineCore.Instance.Data.SelectedTile.TilesetDef.TileWidth;
+            var tileHeight = EngineCore.Instance.Data.SelectedTile.TilesetDef.TileHeight;
 
             int tileX = (at.X / tileWidth) * tileWidth;
             int tileY = (at.Y / tileHeight) * tileHeight;
@@ -110,8 +110,8 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
                 //Console.ResetColor();
                 return;
             }
-            var tileWidth = EngineCore.Instance.Data.SelectedTile.Tileset.TileWidth;
-            var tileHeight = EngineCore.Instance.Data.SelectedTile.Tileset.TileHeight;
+            var tileWidth = EngineCore.Instance.Data.SelectedTile.TilesetDef.TileWidth;
+            var tileHeight = EngineCore.Instance.Data.SelectedTile.TilesetDef.TileHeight;
 
             int tileX = (at.X / tileWidth) * tileWidth;
             int tileY = (at.Y / tileHeight) * tileHeight;
@@ -154,8 +154,8 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
                 Log.Error("No tile is currently selected. Please select a tile before clicking.");
                 return new Point(-1, -1);
             }
-            var tileWidth = EngineCore.Instance.Data.SelectedTile.Tileset.TileWidth;
-            var tileHeight = EngineCore.Instance.Data.SelectedTile.Tileset.TileHeight;
+            var tileWidth = EngineCore.Instance.Data.SelectedTile.TilesetDef.TileWidth;
+            var tileHeight = EngineCore.Instance.Data.SelectedTile.TilesetDef.TileHeight;
             int tileX = (position.X / tileWidth) * tileWidth;
             int tileY = (position.Y / tileHeight) * tileHeight;
             return new Point(tileX, tileY);

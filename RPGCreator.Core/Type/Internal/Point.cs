@@ -12,7 +12,7 @@ namespace RPGCreator.Core.Type.Internal
     /// Universal Point structure representing a point in 2D space.<br/>
     /// It can be used to convert to and from MonoGame.Extended.Point and Avalonia.Point.<br/>
     /// </summary>
-    public struct Point
+    public record struct Point
     {
         public int X { get; set; }
         public int Y { get; set; }
@@ -30,6 +30,9 @@ namespace RPGCreator.Core.Type.Internal
         /// This is just a convenience property to access the Y value as height for better readability.
         /// </remarks>
         public int Height => Y;
+        
+        public static Point Empty => new Point(0, 0);
+        
         public Point(int x, int y)
         {
             X = x;

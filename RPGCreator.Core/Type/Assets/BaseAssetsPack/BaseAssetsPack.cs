@@ -30,6 +30,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using RPGCreator.Core.Managers.AssetsManager;
+using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Type.Assets.Tilesets;
 using Serilog;
 
@@ -152,24 +154,35 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
                 }
                 
                 EngineSerializer.Instance.Deserialize(File.ReadAllText(assetPath), out var asset, out var assetType);
-                if (!typeof(BaseAsset).IsAssignableFrom(assetType))
-                {
-                    ErrorOnLoad = true;
-                    throw new Exception($"Loaded asset is not a valid asset, but {assetType?.Name}.");
-                }
 
-                if(asset is BaseAsset baseAsset)
+                if (assetType != null && asset != null)
                 {
-                    AssetsCache[assetID] = baseAsset;
+                    AssetsManager.AssetMapping[assetType](asset);
                     AssetsPaths[assetID] = assetPath;
-                    Console.WriteLine($"Loaded asset of type {baseAsset.Type} with ID {baseAsset.Unique} from path {assetPath}.");
-                    baseAsset.Pack = this;
                 }
                 else
                 {
-                    ErrorOnLoad = true;
-                    throw new Exception($"Loaded asset is not a BaseAsset, but {assetType.Name} (weird, should not happen here?).");
+                    Log.Error("Failed to deserialize asset at path {AssetPath}. Type or asset is null.", assetPath);
                 }
+                //
+                // if (!typeof(BaseAsset).IsAssignableFrom(assetType))
+                // {
+                //     ErrorOnLoad = true;
+                //     throw new Exception($"Loaded asset is not a valid asset, but {assetType?.Name}.");
+                // }
+                //
+                // if(asset is BaseAsset baseAsset)
+                // {
+                //     AssetsCache[assetID] = baseAsset;
+                //     AssetsPaths[assetID] = assetPath;
+                //     Console.WriteLine($"Loaded asset of type {baseAsset.Type} with ID {baseAsset.Unique} from path {assetPath}.");
+                //     baseAsset.Pack = this;
+                // }
+                // else
+                // {
+                //     ErrorOnLoad = true;
+                //     throw new Exception($"Loaded asset is not a BaseAsset, but {assetType.Name} (weird, should not happen here?).");
+                // }
             }
             Name = assetsPack.Name;
             Description = assetsPack.Description;
@@ -187,83 +200,6 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
                 ErrorOnLoad = true;
                 throw new Exception($"Error creating assets folder at path {AssetsFolder}.", ex);
             }
-        }
-
-        [Obsolete("This method should not be used. Use LoadFromFile() method instead.")]
-        public void LoadAssets()
-        {
-            var root = ConfigDocument.Root;
-            
-            if (root == null) return;
-            
-            var assets = root.Element("assets") ?? throw new Exception($"Config file at path {ConfigPath} is not valid.");
-            
-            if (!assets.HasElements) return;
-            
-            foreach (var assetElem in assets.Elements())
-            {
-                if (assetElem.Name == "asset")
-                {
-                    AddAssetFromFile(assetElem);
-                }
-            }
-        }
-
-        [Obsolete("This method need to be refactored to use the new serialization system.")]
-        protected virtual void AddAssetFromFile(XElement assetElem)
-        {
-            var assetType = assetElem.Element("type")?.Value ?? "UNKNOWN";
-
-            if (string.IsNullOrEmpty(assetType) || assetType == "UNKNOWN")
-            {
-                throw new Exception($"Asset type is null or empty.");
-            }
-
-            var assetTypeEnum = (BaseAsset.TYPE)Enum.Parse(typeof(BaseAsset.TYPE), assetType);
-
-            if (assetTypeEnum == BaseAsset.TYPE.UNKNOWN)
-            {
-                throw new Exception($"Asset type is unknown.");
-            }
-
-            BaseAsset asset = assetTypeEnum switch
-            {
-                BaseAsset.TYPE.TILESETS => BaseAsset.CreateFromFile<Tileset>(assetElem, assetTypeEnum),
-                _ => throw new Exception($"Asset type {assetType} is not supported.")
-            };
-
-            string asset_path = asset.PackPath;
-            asset.PackName = Name;
-
-            if (string.IsNullOrEmpty(asset_path))
-            {
-                throw new Exception($"Asset path is null or empty.");
-            }
-
-            if (AssetsCache.ContainsKey(asset_path))
-            {
-                asset_path = $"{asset_path}_{Guid.NewGuid()}";
-                asset.PackPath = asset_path;
-            }
-
-            if (asset.ShouldBeCached)
-            {
-                asset.IsCached = true;
-                if (!EngineCore.ManagersReady)
-                {
-                    EventHandler<CoreManagersReadyArgs> handler = null;
-                    handler = (object? sender, CoreManagersReadyArgs args) =>
-                    {
-                        EngineCore.Instance.Events.CoreManagersReady -= handler;
-                        EngineCore.Instance.Managers.Assets.AddCachedAsset(asset);
-                    };
-                    EngineCore.Instance.Events.CoreManagersReady += handler;
-                } else {
-                    EngineCore.Instance.Managers.Assets.AddCachedAsset(asset);
-                }
-            }
-
-            AssetsCache.Add(asset_path, asset);
         }
 
         public BaseAsset? GetAsset(string path)

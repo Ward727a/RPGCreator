@@ -26,9 +26,11 @@ using Avalonia.Controls;
 using RPGCreator.UI.Content.AssetsManage.Components;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia.Collections;
 using Serilog;
 
 namespace RPGCreator.UI.Content.AssetsManage
@@ -46,31 +48,34 @@ namespace RPGCreator.UI.Content.AssetsManage
 
         #endregion
 
-        private Dictionary<string, UserControl> _AssetsMenuOptions = new()
-        {
-            ["Tilesets"] = new TilesetsManageControl(), // Tilesets / Auto-tiling system
-            ["---0"] = null, // Separator
-            ["Characters"] = new CharactersManageControl(), // Replace with actual assets panel
-            ["Enemies"] = new UserControl(), // Replace with actual assets panel
-            ["Items"] = new UserControl(), // Replace with actual assets panel (This items section should be for consumables, weapons, armor, etc...)
-            ["Skills"] = new UserControl(), // Replace with actual assets panel
-            ["Classes"] = new UserControl(), // Replace with actual assets panel
-            ["Actors"] = new UserControl(), // Replace with actual assets panel
-            ["Maps"] = new UserControl(), // Replace with actual assets panel
-            ["Events"] = new UserControl(), // Replace with actual assets panel
-            ["Quests"] = new UserControl(), // Replace with actual assets panel
-            ["---4"] = null, // Separator
-            ["Backgrounds"] = new UserControl(), // Replace with actual assets panel (This should be for backgrounds, like the title screen background, fighting background, map background etc...)
-            ["System"] = new UserControl(), // Replace with actual assets panel (This should be for the system settings, like game title, game over screen, etc...)
-            ["---1"] = null, // Separator
-            ["Animations"] = new UserControl(), // Replace with actual assets panel
-            ["---2"] = null, // Separator
-            ["Sounds"] = new UserControl(), // Replace with actual assets panel
-            ["Music"] = new UserControl(), // Replace with actual assets panel  
-            ["---3"] = null, // Separator
-            ["Plugins"] = new UserControl(), // Replace with actual assets panel
+        private ReadOnlyDictionary<string, Func<UserControl>> _AssetsMenuOptions = new(
+            new Dictionary<string, Func<UserControl>>
+            {
+                ["Tilesets"] = () => new TilesetsManageControl(), // Tilesets / Auto-tiling system
+                ["---0"] = null, // Separator
+                ["Characters"] = () => new CharactersManageControl(), // Replace with actual assets panel
+                ["Enemies"] = () => new UserControl(), // Replace with actual assets panel
+                ["Stats"] = () => new UserControl(), // Replace with the actual assets panel (This should be for creating / editing stats, like HP, MP, ATK, DEf, etc...)
+                ["Items"] = () => new UserControl(), // Replace with actual assets panel (This items section should be for consumables, weapons, armor, etc...)
+                ["Skills"] = () => new UserControl(), // Replace with actual assets panel
+                ["Classes"] = () => new UserControl(), // Replace with actual assets panel
+                ["Actors"] = () => new UserControl(), // Replace with actual assets panel
+                ["Maps"] = () => new UserControl(), // Replace with actual assets panel
+                ["Events"] = () => new UserControl(), // Replace with actual assets panel
+                ["Quests"] = () => new UserControl(), // Replace with actual assets panel
+                ["---4"] = null, // Separator
+                ["Backgrounds"] = () => new UserControl(), // Replace with actual assets panel (This should be for backgrounds, like the title screen background, fighting background, map background etc...)
+                ["System"] = () => new UserControl(), // Replace with actual assets panel (This should be for the system settings, like game title, game over screen, etc...)
+                ["---1"] = null, // Separator
+                ["Animations"] = () => new UserControl(), // Replace with actual assets panel
+                ["---2"] = null, // Separator
+                ["Sounds"] = () => new UserControl(), // Replace with actual assets panel
+                ["Music"] = () => new UserControl(), // Replace with actual assets panel  
+                ["---3"] = null, // Separator
+                ["Plugins"] = () => new UserControl(), // Replace with actual assets panel
 
-        };
+            }
+        );
 
         public AssetsManageWindow()
         {
@@ -138,7 +143,7 @@ namespace RPGCreator.UI.Content.AssetsManage
                 {
                     Body.Children.Remove(AssetsPanel);
                 }
-                AssetsPanel = panel;
+                AssetsPanel = panel();
                 Body.Children.Add(AssetsPanel);
                 Grid.SetColumn(AssetsPanel, 1);
             }

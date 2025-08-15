@@ -21,10 +21,10 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor;
 
 public class AutotileEditorRuleEditorWindowControl : UserControl
 {
-    private AutoTileset _tileset;
-    private AutotileGroup _autotileGroup;
+    private AutoTilesetDef _tilesetDefinition;
+    private AutotileGroupDef _autotileGroupDefinition;
     private GroupItemControl? _selectedGroupItem;
-    private Autotile? _selectedAutotiling;
+    private AutotileDef? _selectedAutotilingDefinition;
     private AutotileRule? _selectedRule;
 
     // All the "null!" are just to suppress the nullability warnings, as these fields will be initialized in the CreateComponents method.
@@ -51,7 +51,7 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
 
     private Canvas _previewMainCanvas = null!;
     private Canvas _previewSubCanvas = null!;
-    private TileLayer _previewFakeLayer = null!; // This will be used ONLY for the rule system, not to display the autotilings
+    private TileLayerDefinition _previewFakeLayer = null!; // This will be used ONLY for the rule system, not to display the autotilings
     
     private StackPanel _ruleEditorPanel = null!;
     private ComboBox _ruleTypeComboBox = null!;
@@ -62,9 +62,9 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
     private TextBox _ruleDescriptionTextBox = null!;
     private Button _ruleConfirmButton = null!;
 
-    public AutotileEditorRuleEditorWindowControl(AutoTileset autotileGroup)
+    public AutotileEditorRuleEditorWindowControl(AutoTilesetDef autoTilesetDefinition)
     {
-        _tileset = autotileGroup ?? throw new ArgumentNullException(nameof(autotileGroup), "Autotile group cannot be null");
+        _tilesetDefinition = autoTilesetDefinition ?? throw new ArgumentNullException(nameof(autoTilesetDefinition), "AutoTilesetDefinition cannot be null");
 
         CreateComponents();
         RegisterEvents();
@@ -145,7 +145,7 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
         
         _tileSelectImage = new Image()
         {
-            Source = _selectedGroupItem?.Group.Tileset.GetBitmap(),
+            Source = _selectedGroupItem?.GroupDefinition.TilesetDef.GetBitmap(),
             Stretch = Avalonia.Media.Stretch.Uniform,
         };
         _tileSelectSubCanvas.Children.Add(_tileSelectImage);
@@ -217,7 +217,7 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
             Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Transparent),
         };
         _previewMainCanvas.Children.Add(_previewSubCanvas);
-        _previewFakeLayer = new TileLayer("fake_layer", new AvaloniaLayerRenderer(_previewSubCanvas));
+        _previewFakeLayer = new TileLayerDefinition();
     }
 
     private void CreateRuleEditorContent()
@@ -302,7 +302,7 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
     private void RefreshGroupSelector()
     {
         _groupSelector.Items.Clear();
-        foreach (var autotilesGroup in _tileset.AutotileGroups)
+        foreach (var autotilesGroup in _tilesetDefinition.AutotileGroups)
         {
             var groupItem = new GroupItemControl(autotilesGroup);
             _groupSelector.Items.Add(groupItem);
@@ -315,18 +315,18 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
         {
             if (_selectedGroupItem != null)
             {
-                // _selectedGroupItem.Group.UncombineGroupTags();
+                // _selectedGroupItem.GroupDefinition.UncombineGroupTags();
             }
             _selectedGroupItem = selectedGroup;
-            _autotileGroup = _selectedGroupItem.Group;
-            // _selectedGroupItem.Group.CombineGroupTags();
-            Console.WriteLine($"Selected group: {selectedGroup.Group.Name}");
-            _tileSelectImage.Source = _autotileGroup.Tileset?.GetBitmap();
+            _autotileGroupDefinition = _selectedGroupItem.GroupDefinition;
+            // _selectedGroupItem.GroupDefinition.CombineGroupTags();
+            Console.WriteLine($"Selected groupInstance: {selectedGroup.GroupDefinition.Name}");
+            _tileSelectImage.Source = _autotileGroupDefinition.TilesetDef?.GetBitmap();
             
-            // Add shadow on the tile that are not concerned by the group
+            // Add shadow on the tile that are not concerned by the groupInstance
             var shadowBrush = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Black);
-            var maxCol = _autotileGroup.Tileset?.GetBitmap().Size.Width / _tileset.TileWidth;
-            var maxRow = _autotileGroup.Tileset?.GetBitmap().Size.Height / _tileset.TileHeight;
+            var maxCol = _autotileGroupDefinition.TilesetDef?.GetBitmap().Size.Width / _tilesetDefinition.TileWidth;
+            var maxRow = _autotileGroupDefinition.TilesetDef?.GetBitmap().Size.Height / _tilesetDefinition.TileHeight;
             
             _tileSelectShadowCanvas.Children.Clear();
             
@@ -335,22 +335,22 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
                 for (int col = 0; col < maxCol; col++)
                 {
                     
-                    if(selectedGroup.Group.HasTile(new(col, row)))
+                    if(selectedGroup.GroupDefinition.HasTile(new(col, row)))
                     {
-                        // If the tile is part of the group, we don't draw a shadow
+                        // If the tile is part of the groupInstance, we don't draw a shadow
                         continue;
                     }
                     
                     var rect = new Rectangle
                     {
-                        Width = _tileset.TileWidth,
-                        Height = _tileset.TileHeight,
+                        Width = _tilesetDefinition.TileWidth,
+                        Height = _tilesetDefinition.TileHeight,
                         Fill = shadowBrush,
                         Opacity = .7,
                     };
                     
-                    Canvas.SetLeft(rect, col * _tileset.TileWidth);
-                    Canvas.SetTop(rect, row * _tileset.TileHeight);
+                    Canvas.SetLeft(rect, col * _tilesetDefinition.TileWidth);
+                    Canvas.SetTop(rect, row * _tilesetDefinition.TileHeight);
                     
                     _tileSelectShadowCanvas.Children.Add(rect);
                 }
@@ -367,14 +367,14 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
         if (e.GetCurrentPoint(_tileSelectSubCanvas).Properties.IsLeftButtonPressed)
         {
             var position = e.GetPosition(_tileSelectSubCanvas);
-            int tileWidth = _tileset.TileWidth;
-            int tileHeight = _tileset.TileHeight;
+            int tileWidth = _tilesetDefinition.TileWidth;
+            int tileHeight = _tilesetDefinition.TileHeight;
 
             int tileCol = (int)(position.X / tileWidth);
             int tileRow = (int)(position.Y / tileHeight);
             Console.WriteLine($"Tileset selected at position: col:{tileCol} row:{tileRow}");
 
-            if (!_autotileGroup.HasTile(new(tileCol, tileRow)))
+            if (!_autotileGroupDefinition.HasTile(new(tileCol, tileRow)))
                 return;
             
             // Draw a rectangle around the selected tile
@@ -397,9 +397,9 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
             Canvas.SetLeft(_tileSelectRect, tileCol * tileWidth);
             Canvas.SetTop(_tileSelectRect, tileRow * tileHeight);
 
-            _selectedAutotiling = _autotileGroup.GetDirectTileAt(new(tileCol, tileRow)) as Autotile;
+            _selectedAutotilingDefinition = _autotileGroupDefinition.GetDirectTileAt(new(tileCol, tileRow));
             
-            if (_selectedAutotiling == null)
+            if (_selectedAutotilingDefinition == null)
             {
                 Console.WriteLine("Selected autotiling is null, this should not happen.");
                 return;
@@ -407,7 +407,7 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
             
             // Populate the left bar rule list box with the rules of the selected autotiling
             _leftBarRuleListBox.Items.Clear();
-            foreach (var rule in _selectedAutotiling.Rules)
+            foreach (var rule in _selectedAutotilingDefinition.Rules)
             {
                 _leftBarRuleListBox.Items.Add(rule.Name);
             }
@@ -441,7 +441,7 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
 
         var newPosition = new Point(position.X - LastMousePosition.X, position.Y - LastMousePosition.Y) +
                           CurrentPointOfInner;
-        if (_autotileGroup.Tileset == null)
+        if (_autotileGroupDefinition.TilesetDef == null)
             return;
         // Lock the new position to be within the bounds of the InnerTilesetCanvas
         newPosition = newPosition.WithX(
@@ -449,7 +449,7 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
                 0,
                 Math.Max(
                     newPosition.X,
-                    (_autotileGroup.Tileset.GetBitmap().Size.Width - _tileSelectMainCanvas.Width) * -1)
+                    (_autotileGroupDefinition.TilesetDef.GetBitmap().Size.Width - _tileSelectMainCanvas.Width) * -1)
             )
         );
         newPosition = newPosition.WithY(
@@ -457,7 +457,7 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
                 0,
                 Math.Max(
                     newPosition.Y,
-                    (_autotileGroup.Tileset.GetBitmap().Size.Height - _tileSelectMainCanvas.Height) * -1)
+                    (_autotileGroupDefinition.TilesetDef.GetBitmap().Size.Height - _tileSelectMainCanvas.Height) * -1)
             )
         );
 
@@ -492,7 +492,7 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
     private void OnClickOnPreview(object? sender, PointerPressedEventArgs e)
     {
 
-        if (_selectedAutotiling == null)
+        if (_selectedAutotilingDefinition == null)
             return;
 
         if (_selectedGroupItem == null)
@@ -503,8 +503,8 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
         {
             var clickPosition = e.GetPosition(_previewMainCanvas);
             
-            int tileWidth = _tileset.TileWidth;
-            int tileHeight = _tileset.TileHeight;
+            int tileWidth = _tilesetDefinition.TileWidth;
+            int tileHeight = _tilesetDefinition.TileHeight;
             int tileCol = (int)(clickPosition.X / tileWidth);
             int tileRow = (int)(clickPosition.Y / tileHeight);
             int tileX = tileCol * tileWidth;
@@ -537,10 +537,10 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
             Canvas.SetTop(clickedTileRect, tileY);
             _previewSubCanvas.Children.Add(clickedTileRect);
 
-            if (_autotileGroup.BaseTile == null)
+            if (_autotileGroupDefinition.BaseTile == null)
                 return;
             
-            var correspondingTile = _selectedGroupItem.Group.GetTileAt(_previewFakeLayer, new (tileX, tileY)) as Autotile;
+            var correspondingTile = _selectedGroupItem.GroupDefinition.GetTileAt(_previewFakeLayer, new (tileX, tileY));
             
             if (correspondingTile == null)
             {
@@ -548,7 +548,7 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
                 return;
             }
 
-            var cropped = new CroppedBitmap(correspondingTile.Tileset.GetBitmap(), new PixelRect(
+            var cropped = new CroppedBitmap(correspondingTile.TilesetDef.GetBitmap(), new PixelRect(
                 correspondingTile.PositionInTileset.X * tileWidth,
                 correspondingTile.PositionInTileset.Y * tileHeight,
                 tileWidth,
@@ -580,13 +580,13 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
     
     private void RefreshPreview()
     {
-        if (_selectedAutotiling == null)
+        if (_selectedAutotilingDefinition == null)
         {
             Console.WriteLine("No autotiling selected, cannot refresh preview.");
             return;
         }
         
-        _previewFakeLayer.Draw();
+        EngineCore.Instance.Managers.Assets.TileLayerFactory.Create(_previewFakeLayer).Draw(null);
     }
 
     private void RegisterEvents()
@@ -610,7 +610,7 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
 
     private void AddButtonOnClick(object? sender, RoutedEventArgs e)
     {
-        if (_selectedAutotiling == null)
+        if (_selectedAutotilingDefinition == null)
             return;
         _selectedRule = null;
         _previewMainCanvas.IsVisible = false;
@@ -631,7 +631,7 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
         if (string.IsNullOrWhiteSpace(selectedRuleName))
             return;
 
-        _selectedRule = _selectedAutotiling.Rules.FirstOrDefault(r => r.Name == selectedRuleName);
+        _selectedRule = _selectedAutotilingDefinition.Rules.FirstOrDefault(r => r.Name == selectedRuleName);
         if (_selectedRule == null)
             return;
 
@@ -657,12 +657,12 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
             return;
 
         // Find the rule in the selected autotiling
-        var ruleToDelete = _selectedAutotiling.Rules.FirstOrDefault(r => r.Name == selectedRuleName);
+        var ruleToDelete = _selectedAutotilingDefinition.Rules.FirstOrDefault(r => r.Name == selectedRuleName);
         if (ruleToDelete == null)
             return;
 
         // Remove the rule from the autotiling
-        _selectedAutotiling.Rules.Remove(ruleToDelete);
+        _selectedAutotilingDefinition.Rules.Remove(ruleToDelete);
 
         // Remove the rule from the list box
         _leftBarRuleListBox.Items.Remove(selectedRuleName);
@@ -717,7 +717,7 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
                 Side = (ERulePos)_ruleSideComboBox.SelectedIndex
             };
             // Add to selected tiling
-            _selectedAutotiling.AddRule(_selectedRule);
+            _selectedAutotilingDefinition.AddRule(_selectedRule);
             // Add to the list box
             _leftBarRuleListBox.Items.Add(_selectedRule.Name);
         }

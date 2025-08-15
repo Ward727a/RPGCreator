@@ -325,6 +325,42 @@ public struct CharacterRolePlayInfo() : ISerializable, IDeserializable
     }
 }
 
+public struct CharacterEquipSlot(string slotName, int slotIndex, string itemType, string itemId = "") : ISerializable, IDeserializable
+{
+    
+    public string SlotName { get; set; } = slotName; // Name of the slot (e.g., "Head", "Chest", "Legs", etc.)
+    public int SlotIndex { get; set; } = slotIndex; // Index of the slot (e.g., 0 for Head, 1 for Chest, etc.)
+    public string ItemId { get; set; } = itemId; // ID of the item equipped in this slot (if any)
+    public string ItemType { get; set; } = itemType; // Type of the item (e.g., "Weapon", "Armor", etc.)
+    
+    public SerializationInfo GetObjectData()
+    {
+        return new SerializationInfo(typeof(CharacterEquipSlot))
+            .AddValue("SlotName", SlotName)
+            .AddValue("SlotIndex", SlotIndex)
+            .AddValue("ItemId", ItemId)
+            .AddValue("ItemType", ItemType);
+    }
+
+    public void SetObjectData(DeserializationInfo info)
+    {
+        if (info == null)
+        {
+            throw new ArgumentNullException(nameof(info), "SerializationInfo cannot be null.");
+        }
+
+        info.TryGetValue("SlotName", out string slotName, string.Empty, "SlotName not found or invalid (Set to empty by default).");
+        info.TryGetValue("SlotIndex", out int slotIndex, 0, "SlotIndex not found or invalid (Set to 0 by default).");
+        info.TryGetValue("ItemId", out string itemId, string.Empty, "ItemId not found or invalid (Set to empty by default).");
+        info.TryGetValue("ItemType", out string itemType, string.Empty, "ItemType not found or invalid (Set to empty by default).");
+
+        SlotName = slotName;
+        SlotIndex = slotIndex;
+        ItemId = itemId;
+        ItemType = itemType;
+    }
+}
+
 /// <summary>
 /// This class represents a character in the game.
 /// </summary>

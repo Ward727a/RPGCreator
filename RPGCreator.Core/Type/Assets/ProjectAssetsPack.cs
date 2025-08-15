@@ -43,18 +43,5 @@ namespace RPGCreator.Core.Type.Assets
         {
         }
 
-        public void AddAsset(BaseAsset asset)
-        {
-            if (asset.ShouldBeCached)
-            {
-                if (!asset.IsCached)
-                {
-                    asset.IsCached = true;
-                    EngineCore.Instance.Managers.Assets.AddCachedAsset(asset);
-                }
-            }
-
-
-        }
     }
 }

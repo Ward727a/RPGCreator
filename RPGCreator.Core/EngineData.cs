@@ -37,9 +37,9 @@ namespace RPGCreator.Core
 
     public class SelectedTileChangedEventArgs : EventArgs
     {
-        public ITileable? OldTile { get; }
-        public ITileable? NewTile { get; }
-        public SelectedTileChangedEventArgs(ITileable? oldTile, ITileable? newTile)
+        public ITileDef? OldTile { get; }
+        public ITileDef? NewTile { get; }
+        public SelectedTileChangedEventArgs(ITileDef? oldTile, ITileDef? newTile)
         {
             OldTile = oldTile;
             NewTile = newTile;
@@ -49,9 +49,9 @@ namespace RPGCreator.Core
     public class  SelectedLayerChangedEventArgs : EventArgs
     {
         
-        public TileLayer? OldLayer { get; }
-        public TileLayer? NewLayer { get; }
-        public SelectedLayerChangedEventArgs(TileLayer? oldLayer, TileLayer? newLayer)
+        public TileLayerDefinition? OldLayer { get; }
+        public TileLayerDefinition? NewLayer { get; }
+        public SelectedLayerChangedEventArgs(TileLayerDefinition? oldLayer, TileLayerDefinition? newLayer)
         {
             OldLayer = oldLayer;
             NewLayer = newLayer;
@@ -128,9 +128,9 @@ namespace RPGCreator.Core
         public event EventHandler<SelectedLayerChangedEventArgs>? SelectedLayerChanged;
         public event EventHandler<SelectedTileChangedEventArgs>? SelectedTileChanged;
 
-        private BaseMap? _editedMap;
-        private TileLayer? _selectedLayer;
-        private ITileable? _selectedTile;
+        private MapDefinition? _editedMap;
+        private TileLayerDefinition? _selectedLayer;
+        private ITileDef? _selectedTile;
         public SEditorSettings EditorSettings { get; } = new SEditorSettings();
 
         internal EngineData()
@@ -144,7 +144,7 @@ namespace RPGCreator.Core
         public static Version AppVersion => new(0, 1, 0);
 
         public BaseProject? EditedProject { get; internal set; }
-        public TileLayer? SelectedLayer { get => _selectedLayer; 
+        public TileLayerDefinition? SelectedLayer { get => _selectedLayer; 
             set
             {
                 if (_selectedLayer != value)
@@ -155,7 +155,7 @@ namespace RPGCreator.Core
                 }
             }
         }
-        public BaseMap? EditedMap { get => _editedMap; 
+        public MapDefinition? EditedMap { get => _editedMap; 
             set
             {
                 if (_editedMap != value)
@@ -165,7 +165,7 @@ namespace RPGCreator.Core
                 }
             }
         }
-        public ITileable? SelectedTile { get => _selectedTile; 
+        public ITileDef? SelectedTile { get => _selectedTile; 
             set
             {
                 if (_selectedTile != value)

@@ -32,6 +32,10 @@ using System.Xml.Linq;
 using static RPGCreator.Core.Type.Assets.AssetCategoryAttribute;
 using static RPGCreator.Core.Type.Assets.BaseAsset;
 
+// Devnote:
+// This class should be removed or at least refactored to be more generic.
+// It should be designed for the new definition system.
+
 namespace RPGCreator.Core.Type.Assets
 {
 
