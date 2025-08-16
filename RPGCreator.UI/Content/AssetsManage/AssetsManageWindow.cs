@@ -107,8 +107,7 @@ namespace RPGCreator.UI.Content.AssetsManage
                 //Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.LightGray),
             };
             Body.Children.Add(MenuPanel);
-
-
+            
         }
 
         protected void LoadAssetsMenuOptions()

@@ -1,12 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Layout;
 using Avalonia.Media;
+using AvaloniaEdit;
+using AvaloniaEdit.TextMate;
 using RPGCreator.Core.Parser.PRATT;
 using RPGCreator.Core.Type.Assets.Characters.Stats;
 using RPGCreator.UI.Common;
 using Serilog;
+using TextMateSharp.Grammars;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor.Tabs;
 
@@ -33,6 +38,7 @@ public class StatEditorTab : UserControl
     private ComboBox _statTypeCap;
     private NumericUpDown _statMaxValue;
     private ToggleSwitch _statIsVisible;
+    private TextEditor _statFormulaEditor;
     #endregion
     
     #region Constructors
@@ -50,14 +56,14 @@ public class StatEditorTab : UserControl
     {
         _body = new ScrollBox()
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
             Margin = App.style.Margin
         };
         _bodyPanel = new StackPanel
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
             Margin = App.style.Margin
         };
         _body.Content = _bodyPanel;
@@ -65,8 +71,8 @@ public class StatEditorTab : UserControl
         _statName = new TextBox
         {
             Watermark = "(Required)",
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
             Margin = App.style.Margin,
             Text = StatDef.Name
         };
@@ -75,8 +81,8 @@ public class StatEditorTab : UserControl
         _statDescription = new TextBox
         {
             Watermark = "(Optional)",
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
             Margin = App.style.Margin,
             Text = StatDef.Description,
             AcceptsReturn = true,
@@ -87,8 +93,8 @@ public class StatEditorTab : UserControl
         
         _statTypeKind = new ComboBox
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
             Margin = App.style.Margin,
             SelectedItem = StatDef.StatTypeKind
         };
@@ -106,8 +112,8 @@ public class StatEditorTab : UserControl
         
         _statDefaultValue = new NumericUpDown
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
             Margin = App.style.Margin,
             Value = (decimal)StatDef.DefaultValue
         };
@@ -115,8 +121,8 @@ public class StatEditorTab : UserControl
         
         _statMinValue = new NumericUpDown
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
             Margin = App.style.Margin,
             Value = (decimal)StatDef.StatMinValue
         };
@@ -124,8 +130,8 @@ public class StatEditorTab : UserControl
         
         _statTypeCap = new ComboBox
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
             Margin = App.style.Margin,
             SelectedItem = StatDef.StatCapType.ToString()
         };
@@ -142,8 +148,8 @@ public class StatEditorTab : UserControl
         
         _statMaxValue = new NumericUpDown
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
             Margin = App.style.Margin,
             Value = (decimal)StatDef.StatCapValue
         };
@@ -151,8 +157,8 @@ public class StatEditorTab : UserControl
         
         _statIsVisible = new ToggleSwitch
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
             Margin = App.style.Margin,
             IsChecked = StatDef.IsVisible
         };
@@ -160,15 +166,42 @@ public class StatEditorTab : UserControl
         _bodyPanel.Children.Add(inputStatIsVisible);
         ToolTip.SetTip(inputStatIsVisible, "Determines if the stat is visible in the UI.\n" +
                                            "If unchecked, the stat will not be displayed in the UI, but it can still be used in calculations.");
+
+        var fakeRadiusBorder = new Border()
+        {
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            CornerRadius = new CornerRadius(3),
+            Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x2A, 0x2A, 0x2A)),
+            ClipToBounds = true,
+        };
+        _statFormulaEditor = new TextEditor
+        {
+            Watermark = "(Required only if Stat Type Kind is Derived)",
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Text = StatDef.StatNonCompiledFormula,
+            Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x2A, 0x2A, 0x2A)),
+            Padding = new Thickness(8, 8, 8, 8),
+            MinHeight = 100,
+            CornerRadius = new CornerRadius(3)
+        };
+        fakeRadiusBorder.Child = _statFormulaEditor;
+        _bodyPanel.Children.Add(new InputLabel("Stat Formula", fakeRadiusBorder));
+        
+        var registryOptions = new RegistryOptions(ThemeName.DarkPlus);
+        var textMateInstallation = _statFormulaEditor.InstallTextMate(registryOptions);
+        var filepath = $"{AppDomain.CurrentDomain.BaseDirectory}Assets/TMGrammar/RPGFormula.tmLanguage.json";
+        textMateInstallation.SetGrammarFile(filepath);
         
         // TEST FORMULA PRATT PARSE
-        #if DEBUG
+        #if false
         
         var testFormula = new TextBox
         {
             Watermark = "(Optional)",
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
             Margin = App.style.Margin,
         };
         var inputTestFormula = new InputLabel("Test Formula", testFormula);
@@ -176,8 +209,8 @@ public class StatEditorTab : UserControl
         var buttonTestFormula = new Button
         {
             Content = "Test Formula",
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
             Margin = App.style.Margin
         };
         buttonTestFormula.Click += (sender, args) =>
@@ -211,7 +244,8 @@ public class StatEditorTab : UserControl
             }
         };
         _bodyPanel.Children.Add(buttonTestFormula);
-#endif
+        
+        #endif
     }
 
     private void RegisterEvents()

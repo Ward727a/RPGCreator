@@ -9,7 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <AvaloniaResource Include="Assets\**" />
+    <AvaloniaResource Include="Assets\**">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </AvaloniaResource>
   </ItemGroup>
 
   <ItemGroup>
@@ -17,6 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Assets\TMGrammar\RPGFormula.tmLanguage.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Assets\avalonia-logo.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -24,8 +29,10 @@
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.2.6" />
+    <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.3.0" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.6" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.6" />
+    <PackageReference Include="AvaloniaEdit.TextMate" Version="11.3.0" />
     <PackageReference Include="AvaloniaInside.MonoGame" Version="1.0.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 

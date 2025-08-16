@@ -65,5 +65,5 @@ public interface IStatDef : ISerializable, IDeserializable, IHasUniqueId
     /// It can be used to define how the stat value is calculated based on other stats or conditions.<br/>
     /// For example, a derived stat like "Attack Power" could be defined as a non-compiled formula like "AttackPower = (Strength * 1.5) + (Agility * 0.5)" or similar expressions.
     /// </summary>
-    public string statNonCompiledFormula { get; set; }
+    public string StatNonCompiledFormula { get; set; }
 }

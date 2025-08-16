@@ -18,7 +18,7 @@ public class StatDefinition : IStatDef
     public bool IsVisible { get; set; }
     
     public PrattCompiledFormula? StatCompiledFormula { get; set; }
-    public string statNonCompiledFormula { get; set; } = string.Empty;
+    public string StatNonCompiledFormula { get; set; } = string.Empty;
 
     public SerializationInfo GetObjectData()
     {
@@ -31,7 +31,8 @@ public class StatDefinition : IStatDef
             .AddValue(nameof(StatMinValue), StatMinValue)
             .AddValue(nameof(StatCapType), StatCapType)
             .AddValue(nameof(StatCapValue), StatCapValue)
-            .AddValue(nameof(StatCapStatUnique), StatCapStatUnique);
+            .AddValue(nameof(StatCapStatUnique), StatCapStatUnique)
+            .AddValue(nameof(StatNonCompiledFormula), StatNonCompiledFormula);
     }
 
     public void SetObjectData(DeserializationInfo info)
@@ -56,5 +57,7 @@ public class StatDefinition : IStatDef
         StatCapValue = statCapValue;
         info.TryGetValue(nameof(StatCapStatUnique), out var statCapStatUnique, null as Ulid?, $"{nameof(StatDefinition)}.{nameof(StatCapStatUnique)} not found, using default value null.");
         StatCapStatUnique = statCapStatUnique;
+        info.TryGetValue(nameof(StatNonCompiledFormula), out var statNonCompiledFormula, string.Empty, $"{nameof(StatDefinition)}.{nameof(StatNonCompiledFormula)} not found, using default value empty string.");
+        StatNonCompiledFormula = statNonCompiledFormula;
     }
 }

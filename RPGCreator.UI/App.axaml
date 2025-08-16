@@ -28,13 +28,14 @@
 	xmlns:u-semi="https://irihi.tech/ursa/themes/semi"
 	RequestedThemeVariant="Dark">
     <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
-
 	<Application.Resources>
 		<SolidColorBrush x:Key="Warning">Yellow</SolidColorBrush>
 		<SolidColorBrush x:Key="Error">Red</SolidColorBrush>
 	</Application.Resources>
 	<Application.Styles>
+		<FluentTheme />
 		<semi:SemiTheme Locale="zh-CN" />
 		<u-semi:SemiTheme Locale="zh-CN"/>
+		<StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
 	</Application.Styles>
 </Application>
