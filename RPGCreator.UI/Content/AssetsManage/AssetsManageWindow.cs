@@ -31,6 +31,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Collections;
+using RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor;
 using Serilog;
 
 namespace RPGCreator.UI.Content.AssetsManage
@@ -55,7 +56,7 @@ namespace RPGCreator.UI.Content.AssetsManage
                 ["---0"] = null, // Separator
                 ["Characters"] = () => new CharactersManageControl(), // Replace with actual assets panel
                 ["Enemies"] = () => new UserControl(), // Replace with actual assets panel
-                ["Stats"] = () => new UserControl(), // Replace with the actual assets panel (This should be for creating / editing stats, like HP, MP, ATK, DEf, etc...)
+                ["Stats"] = () => new StatsManageControl(), // Replace with the actual assets panel (This should be for creating / editing stats, like HP, MP, ATK, DEf, etc...)
                 ["Items"] = () => new UserControl(), // Replace with actual assets panel (This items section should be for consumables, weapons, armor, etc...)
                 ["Skills"] = () => new UserControl(), // Replace with actual assets panel
                 ["Classes"] = () => new UserControl(), // Replace with actual assets panel

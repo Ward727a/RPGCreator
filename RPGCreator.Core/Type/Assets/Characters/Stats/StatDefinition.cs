@@ -1,9 +1,25 @@
+using RPGCreator.Core.Parser.PRATT;
 using RPGCreator.Core.Type.Internal;
 
 namespace RPGCreator.Core.Type.Assets.Characters.Stats;
 
 public class StatDefinition : IStatDef
 {
+    public Ulid Unique { get; private set; }
+    public URN Urn { get; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public float DefaultValue { get; set; }
+    public EStatTypeKind StatTypeKind { get; set; }
+    public float StatMinValue { get; set; }
+    public EStatTypeCap StatCapType { get; set; }
+    public float StatCapValue { get; set; }
+    public Ulid? StatCapStatUnique { get; set; }
+    public bool IsVisible { get; set; }
+    
+    public PrattCompiledFormula? StatCompiledFormula { get; set; }
+    public string statNonCompiledFormula { get; set; } = string.Empty;
+
     public SerializationInfo GetObjectData()
     {
         return new SerializationInfo(typeof(StatDefinition))
@@ -41,15 +57,4 @@ public class StatDefinition : IStatDef
         info.TryGetValue(nameof(StatCapStatUnique), out var statCapStatUnique, null as Ulid?, $"{nameof(StatDefinition)}.{nameof(StatCapStatUnique)} not found, using default value null.");
         StatCapStatUnique = statCapStatUnique;
     }
-
-    public Ulid Unique { get; private set; }
-    public URN Urn { get; }
-    public string Name { get; set; }
-    public string Description { get; set; }
-    public float DefaultValue { get; set; }
-    public EStatTypeKind StatTypeKind { get; set; }
-    public float StatMinValue { get; set; }
-    public EStatTypeCap StatCapType { get; set; }
-    public float StatCapValue { get; set; }
-    public Ulid? StatCapStatUnique { get; set; }
 }
