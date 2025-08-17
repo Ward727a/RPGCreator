@@ -1,10 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Layout;
 using RPGCreator.Core;
+using RPGCreator.Core.Parser.PRATT;
 using RPGCreator.Core.Type.Assets.BaseAssetsPack;
+using Serilog;
 
 namespace RPGCreator.UI.Common.Windows;
 
@@ -94,6 +98,77 @@ public class TestingDialog : Window
             };
             contentPanel.Children.Add(button);
         }
+        // TEST ASSETS EXPLORER DIALOG
+        #if DEBUG
+        
+        var buttonTestAssetsExplorer = new Button
+        {
+            Content = "Test Assets Explorer",
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = App.style.Margin
+        };
+        buttonTestAssetsExplorer.Click += (sender, args) =>
+        {
+            var assetsExplorer = new AssetExplorerDialog();
+            assetsExplorer.Show();
+        };
+        contentPanel.Children.Add(buttonTestAssetsExplorer);
+        
+        #endif
+        
+        // TEST FORMULA PRATT PARSE
+        #if DEBUG
+        
+        var testFormula = new TextBox
+        {
+            Watermark = "(Optional)",
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = App.style.Margin,
+        };
+        var inputTestFormula = new InputLabel("Test Formula", testFormula);
+        contentPanel.Children.Add(inputTestFormula);
+        var buttonTestFormula = new Button
+        {
+            Content = "Test Formula",
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = App.style.Margin
+        };
+        buttonTestFormula.Click += (sender, args) =>
+        {
+            if (string.IsNullOrEmpty(testFormula.Text))
+            {
+                Log.Error("Test formula is empty, please enter a valid formula to test.");
+                return;
+            }
+            try
+            {
+                PrattCompiler compiler = new PrattCompiler();
+                var result = compiler.Compile(testFormula.Text);
+                if (result != null)
+                {
+                    var value = result.Eval(
+                        new PrattEvaluationEnvironment()
+                        {
+                            Variables = new ReadOnlyDictionary<string, double>(
+                                new Dictionary<string, double>()
+                                {
+                                    ["testVar"] = 20.0
+                                })
+                        });
+                    Log.Debug($"PrattCompiledFormula: {value}");
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error("Got error while testing formula: {Message}", e.Message);
+            }
+        };
+        contentPanel.Children.Add(buttonTestFormula);
+        
+        #endif
     }
     
 }

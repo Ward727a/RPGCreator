@@ -38,6 +38,12 @@ namespace RPGCreator.Core.Type.Internal
             X = x;
             Y = y;
         }
+
+        public Point(double x, double y)
+        {
+            X = (int)x;
+            Y = (int)y;
+        }
         public Point(Microsoft.Xna.Framework.Point point)
         {
             X = point.X;

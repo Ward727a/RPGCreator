@@ -10,6 +10,7 @@ using AvaloniaEdit.TextMate;
 using RPGCreator.Core.Parser.PRATT;
 using RPGCreator.Core.Type.Assets.Characters.Stats;
 using RPGCreator.UI.Common;
+using RPGCreator.UI.Common.Windows;
 using Serilog;
 using TextMateSharp.Grammars;
 
@@ -167,14 +168,6 @@ public class StatEditorTab : UserControl
         ToolTip.SetTip(inputStatIsVisible, "Determines if the stat is visible in the UI.\n" +
                                            "If unchecked, the stat will not be displayed in the UI, but it can still be used in calculations.");
 
-        var fakeRadiusBorder = new Border()
-        {
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            CornerRadius = new CornerRadius(3),
-            Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x2A, 0x2A, 0x2A)),
-            ClipToBounds = true,
-        };
         _statFormulaEditor = new TextEditor
         {
             Watermark = "(Required only if Stat Type Kind is Derived)",
@@ -186,7 +179,15 @@ public class StatEditorTab : UserControl
             MinHeight = 100,
             CornerRadius = new CornerRadius(3)
         };
-        fakeRadiusBorder.Child = _statFormulaEditor;
+        var fakeRadiusBorder = new Border()
+        {
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            CornerRadius = new CornerRadius(3),
+            Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x2A, 0x2A, 0x2A)),
+            ClipToBounds = true,
+            Child = _statFormulaEditor,
+        };
         _bodyPanel.Children.Add(new InputLabel("Stat Formula", fakeRadiusBorder));
         
         var registryOptions = new RegistryOptions(ThemeName.DarkPlus);
@@ -194,58 +195,6 @@ public class StatEditorTab : UserControl
         var filepath = $"{AppDomain.CurrentDomain.BaseDirectory}Assets/TMGrammar/RPGFormula.tmLanguage.json";
         textMateInstallation.SetGrammarFile(filepath);
         
-        // TEST FORMULA PRATT PARSE
-        #if false
-        
-        var testFormula = new TextBox
-        {
-            Watermark = "(Optional)",
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = App.style.Margin,
-        };
-        var inputTestFormula = new InputLabel("Test Formula", testFormula);
-        _bodyPanel.Children.Add(inputTestFormula);
-        var buttonTestFormula = new Button
-        {
-            Content = "Test Formula",
-            HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = App.style.Margin
-        };
-        buttonTestFormula.Click += (sender, args) =>
-        {
-            if (string.IsNullOrEmpty(testFormula.Text))
-            {
-                Log.Error("Test formula is empty, please enter a valid formula to test.");
-                return;
-            }
-            try
-            {
-                PrattCompiler compiler = new PrattCompiler();
-                var result = compiler.Compile(testFormula.Text);
-                if (result != null)
-                {
-                    var value = result.Eval(
-                        new PrattEvaluationEnvironment()
-                        {
-                            Variables = new ReadOnlyDictionary<string, double>(
-                                new Dictionary<string, double>()
-                                {
-                                    ["testVar"] = 20.0
-                                })
-                        });
-                    Log.Debug($"PrattCompiledFormula: {value}");
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Error("Got error while testing formula: {Message}", e.Message);
-            }
-        };
-        _bodyPanel.Children.Add(buttonTestFormula);
-        
-        #endif
     }
 
     private void RegisterEvents()
