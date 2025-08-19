@@ -29,7 +29,7 @@ using Avalonia.Layout;
 using Avalonia.VisualTree;
 using RPGCreator.Core;
 using RPGCreator.Core.Type.Assets;
-using RPGCreator.UI.Common;
+using RPGCreator.Core.Type;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor;
 using System;

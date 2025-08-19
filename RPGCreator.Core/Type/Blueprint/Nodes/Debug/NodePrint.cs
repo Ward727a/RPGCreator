@@ -1,0 +1,69 @@
+using System;
+using RPGCreator.Core.Parser.Graph;
+using RPGCreator.Core.Type.Blueprint;
+using Serilog;
+
+namespace RPGCreator.Core.Type.Blueprint.Nodes.Debug;
+
+public class NodePrint : Node
+{
+
+    public enum EPrintLevel
+    {
+        Debug,
+        Info,
+        Warning,
+        Error
+    }
+    
+    public override EGraphOpCode Type => EGraphOpCode.debug_print;
+    public override string Title { get; protected set; } = "Print message";
+    private Port MessagePort => Inputs[1];
+    private EnumPort LevelPort => (EnumPort)Inputs[2];
+    
+    public NodePrint()
+    {
+        Inputs.Add(
+        new Port(){
+            Kind = PortKind.Exec,
+            AllowManualInput = false,
+            Name = "In",
+            IsInput = true
+        });
+        
+        Inputs.Add(
+        new Port(){
+            Kind = PortKind.String,
+            AllowManualInput = true,
+            Name = "message",
+            IsInput = true
+        });
+        Inputs.Add(
+            new EnumPort(typeof(EPrintLevel))
+            {
+                Name = "Level",
+                AllowManualInput = true,
+                IsInput = true,
+            });
+        
+        Outputs.Add(
+        new Port(){
+            Kind = PortKind.Exec,
+            AllowManualInput = false,
+            Name = "Out"
+        });
+    }
+    
+    public override IEnumerable<GraphInstr> Emit(GraphDocument graph, GraphCompileContext context)
+    {
+        // Set value to properties
+        Properties["message"] = MessagePort.Value;
+        Properties["level"] = LevelPort.Value;
+        
+        var instrs = new List<GraphInstr>();
+        var message = context.ValueArg(graph, this, MessagePort.Id, "message", instrs, "");
+        var level = context.ValueArg(graph, this, LevelPort.Id, "level", instrs, EPrintLevel.Debug);
+        instrs.Add(GraphIR.Op(EGraphOpCode.debug_print, GraphIR.Operands(EGraphOperandKind.LiteralString | EGraphOperandKind.Register, message), GraphIR.Operands(EGraphOperandKind.Enum | EGraphOperandKind.Register, level)));
+        return instrs;
+    }
+}

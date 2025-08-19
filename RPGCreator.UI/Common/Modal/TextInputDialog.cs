@@ -1,7 +1,7 @@
 using System;
 using Avalonia.Controls;
 
-namespace RPGCreator.UI.Common.Windows;
+namespace RPGCreator.Core.Type.Windows;
 
 public class TextInputDialog : ConfirmDialog
 {

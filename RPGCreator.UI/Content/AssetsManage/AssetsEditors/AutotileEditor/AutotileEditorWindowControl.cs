@@ -27,7 +27,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using RPGCreator.Core;
 using RPGCreator.Core.Type.Assets;
-using RPGCreator.UI.Common;
+using RPGCreator.Core.Type;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,7 +36,7 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.VisualTree;
 using RPGCreator.Core.Type.Assets.Tilesets;
-using RPGCreator.UI.Common.Windows;
+using RPGCreator.Core.Type.Windows;
 using Point = RPGCreator.Core.Type.Internal.Point;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor

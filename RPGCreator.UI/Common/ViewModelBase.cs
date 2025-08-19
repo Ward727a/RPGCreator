@@ -25,7 +25,7 @@
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace RPGCreator.UI.Common;
+namespace RPGCreator.Core.Type;
 
 public class ViewModelBase : ObservableObject
 {

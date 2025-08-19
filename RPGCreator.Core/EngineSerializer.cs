@@ -27,6 +27,14 @@ namespace RPGCreator.Core;
  * 
  */
 
+public interface ISerializerFormatting
+{
+    public SerializationInfo UnformattedValue { get; }
+    public object? FormattedValue { get; }
+    public void Format(SerializationInfo info);
+    public object? Unformat(DeserializationInfo info);
+}
+
 public class EngineSerializer
 {
     public static EngineSerializer Instance = null!;
@@ -74,6 +82,32 @@ public class EngineSerializer
         {
             Log.Error($"Failed to write serialized data to file: {ex.Message}");
         }
+    }
+
+    public void Serialize<T>(T obj, ISerializerFormatting formatting, out object? data) where T: class, ISerializable
+    {
+        
+        data = null;
+
+        var info = obj.GetObjectData();
+        
+        if (info == null)
+        {
+            Log.Error("Serialization failed: Object data is null.");
+            return;
+        }
+
+        data = GetData(info);
+        
+        Log.Information("Serialization completed successfully.");
+        
+        if (formatting == null)
+        {
+            Log.Error("Serialization failed: Formatting is null.");
+            return;
+        }
+        formatting.Format(info);
+        Log.Information("Serialization formatting completed successfully.");
     }
     
     /// <summary>
@@ -929,6 +963,11 @@ public sealed class SerializationInfo
         ObjectType = objectType;
         AssemblyName = objectType.Assembly.FullName;
         QualifiedName = objectType.FullName;
+    }
+
+    public object? GetValue(string name)
+    {
+        return _values.TryGetValue(name, out SerializationEntry entry) ? entry.Value : null;
     }
     
     public SerializationInfo AddValue(string name, object? value)

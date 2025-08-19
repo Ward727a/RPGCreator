@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using RPGCreator.Core;
-using RPGCreator.UI.Common;
+using RPGCreator.Core.Type;
 using Serilog;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor;

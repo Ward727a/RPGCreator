@@ -29,7 +29,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using RPGCreator.Core;
 using RPGCreator.Core.Type.Assets;
-using RPGCreator.UI.Common;
+using RPGCreator.Core.Type;
 using System;
 using System.Collections.Generic;
 using System.IO;

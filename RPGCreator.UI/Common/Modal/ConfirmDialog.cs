@@ -30,8 +30,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.UI;
 
-namespace RPGCreator.UI.Common.Windows
+namespace RPGCreator.Core.Type.Windows
 {
     public class ConfirmDialog : Window
     {

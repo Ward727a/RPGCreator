@@ -2,8 +2,9 @@ using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
+using RPGCreator.UI;
 
-namespace RPGCreator.UI.Common.Windows;
+namespace RPGCreator.Core.Type.Windows;
 
 public class LoadDialog : Window
 {

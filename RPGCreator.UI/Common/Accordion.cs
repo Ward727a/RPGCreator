@@ -28,8 +28,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.UI;
 
-namespace RPGCreator.UI.Common
+namespace RPGCreator.Core.Type
 {
     public class Accordion : UserControl
     {

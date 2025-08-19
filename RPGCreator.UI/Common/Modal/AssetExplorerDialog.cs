@@ -9,7 +9,7 @@ using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Type.Assets;
 using RPGCreator.Core.Type.Internal;
 
-namespace RPGCreator.UI.Common.Windows;
+namespace RPGCreator.Core.Type.Windows;
 
 public class AssetExplorerDialog : Window
 {

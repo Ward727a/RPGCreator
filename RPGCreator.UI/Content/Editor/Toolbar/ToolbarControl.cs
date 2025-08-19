@@ -26,7 +26,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using RPGCreator.Core;
 using RPGCreator.Core.Managers.RTP.BrushManagers.Brushs;
-using RPGCreator.UI.Common;
+using RPGCreator.Core.Type;
 using System;
 using System.Collections.Generic;
 using System.Linq;

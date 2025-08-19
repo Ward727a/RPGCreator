@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <Folder Include="Runtimes\Factories\" />
+    <Folder Include="Type\Blueprint\Nodes\Math\" />
     <Folder Include="Type\Map\Interactable\BaseEventsArgs\" />
   </ItemGroup>
 

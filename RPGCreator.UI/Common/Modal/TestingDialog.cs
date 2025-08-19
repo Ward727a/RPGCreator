@@ -8,9 +8,10 @@ using Avalonia.Layout;
 using RPGCreator.Core;
 using RPGCreator.Core.Parser.PRATT;
 using RPGCreator.Core.Type.Assets.BaseAssetsPack;
+using RPGCreator.UI;
 using Serilog;
 
-namespace RPGCreator.UI.Common.Windows;
+namespace RPGCreator.Core.Type.Windows;
 
 public class TestingDialog : Window
 {
@@ -41,7 +42,7 @@ public class TestingDialog : Window
             var textDialog = new TextInputDialog("Enter the path to the pack to load:");
             textDialog.Confirmed += (path) =>
             {
-                EngineSerializer.Instance.Deserialize(File.ReadAllText(path), out object? pack, out Type? type);
+                EngineSerializer.Instance.Deserialize(File.ReadAllText(path), out object? pack, out System.Type? type);
                 if (type == typeof(BaseAssetsPack))
                 {
                     Console.WriteLine($"Pack loaded successfully: {((BaseAssetsPack)pack).Name}");

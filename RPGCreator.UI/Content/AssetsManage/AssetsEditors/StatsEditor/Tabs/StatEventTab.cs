@@ -1,7 +1,14 @@
 
+using System;
 using Avalonia.Controls;
+using Avalonia.Layout;
 using RPGCreator.Core.Type.Assets.Characters.Stats;
+using RPGCreator.Core.Type.Blueprint;
+using RPGCreator.Core.Type.Blueprint.Nodes;
+using RPGCreator.Core.Type.Blueprint.Nodes.Debug;
+using RPGCreator.Core.Type.Blueprint.Nodes.Gets;
 using RPGCreator.UI.Common.Blueprint;
+using Serilog;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor.Tabs;
 
@@ -37,24 +44,47 @@ public class StatEventTab : UserControl
 
     private void CreateComponents()
     {
-        var graph = new GraphView();
-        Content = graph;
+        var grid = new Grid
+        {
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            RowDefinitions = new RowDefinitions("30, *"),
+            ClipToBounds = true,
+        };
+        Content = grid;
 
-        var n1 = new Node { Title = "Start", X = 50, Y = 100 };
-        n1.Outputs.Add(new Port { Name = "Out", Kind = PortKind.Exec });
-        _doc.AddNode(n1);
-
-        var n2 = new Node { Title = "Print", X = 300, Y = 120 };
-        n2.Inputs.Add(new Port { Name = "In", Kind = PortKind.Exec, IsInput = true });
-        _doc.AddNode(n2);
+        var testbutton = new Button()
+        {
+            Content = "Test compile"
+        };
+        testbutton.Click += (s, e) =>
+        {
+            try
+            {
+                Log.Information("Compiling the graph...");
+                // _doc.Compile();
+                _doc.Save("test.json");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error while compiling the graph");
+            }
+        };
+        grid.Children.Add(testbutton);
+        Grid.SetRow(testbutton, 0);
         
-        // Add a third node for demonstration
-        var n3 = new Node { Title = "End", X = 550, Y = 100 };
-        n3.Inputs.Add(new Port { Name = "In", Kind = PortKind.Exec, IsInput = true});
-        n3.Outputs.Add(new Port { Name = "Out", Kind = PortKind.Exec });
-        _doc.AddNode(n3);
+        var graph = new GraphView();
+        grid.Children.Add(graph);
+        Grid.SetRow(graph, 1);
+        
+        _doc.AddNode(new NodeEnd());
 
-        _doc.AddLink(new Link(n1.Id, n1.Outputs[0].Id, n2.Id, n2.Inputs[0].Id));
+        _doc.AddNode(new NodeStart());
+        _doc.AddNode(new GetPlayerName());
+        _doc.AddNode(new NodePrint());
+        _doc.AddNode(new GetPlayerName());
+        
+        _doc.AddNode(new NodePrint());
 
         graph.SetDocument(_doc);
     }

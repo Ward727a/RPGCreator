@@ -26,7 +26,7 @@ using Avalonia.Controls;
 using Avalonia.VisualTree;
 using RPGCreator.Core;
 using RPGCreator.Core.Type.Map;
-using RPGCreator.UI.Common;
+using RPGCreator.Core.Type;
 using System;
 using System.Collections.Generic;
 using System.Linq;

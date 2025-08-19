@@ -42,7 +42,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RPGCreator.UI.Common.Windows;
+using RPGCreator.Core.Type.Windows;
 
 namespace RPGCreator.UI.Content.Editor
 {

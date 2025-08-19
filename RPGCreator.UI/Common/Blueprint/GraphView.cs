@@ -5,15 +5,21 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.VisualTree;
-using AvaloniaEdit.Utils;
-using RPGCreator.UI.Common.Blueprint;
+using RPGCreator.Core.Type.Blueprint;
+using Serilog;
+
+namespace RPGCreator.UI.Common.Blueprint;
 
 public sealed class GraphView : Control
 {
-    private readonly Canvas _root = new();
-    private readonly Canvas _links = new();
-    private readonly Canvas _nodes = new();
-    private readonly Canvas _overlay = new();
+    private readonly Grid _root = new();
+    private readonly Canvas _content = new(){Name = "_contentCanvas"};
+    private readonly Canvas _links = new(){Name = "_linksCanvas"};
+    private readonly Canvas _nodes = new(){Name = "_nodesCanvas"};
+    private readonly Canvas _overlay = new(){Name = "_overlayCanvas"};
+    
+    private readonly Border _hitbox = new() { Background = Brushes.Transparent }; 
+
 
     private Matrix _view = Matrix.Identity;
     private GraphDocument? _doc;
@@ -24,18 +30,42 @@ public sealed class GraphView : Control
     private LinkControl? _previewLink;
     private Point _previewLinkPosition;
 
+    private Point? _lastPointerPosition;
+    
     public GraphView()
     {
-        _root.Children.Add(_links);
-        _root.Children.Add(_nodes);
-        _root.Children.Add(_overlay);
+        _content.Children.Add(_links);
+        _content.Children.Add(_nodes);
+        _content.Children.Add(_overlay);
+        _root.Children.Add(_hitbox);
+        _root.Children.Add(_content);
         VisualChildren.Add(_root);
         LogicalChildren.Add(_root);
+        
+        
 
         PointerWheelChanged += OnWheel;
         PointerPressed += OnPointerDown;
         PointerMoved += OnPointerMove;
         PointerReleased += OnPointerUp;
+    }
+    public Point ScreenToWorld(Point pScreen)
+    {
+        if (!_view.TryInvert(out var inv))
+            return pScreen; // fallback
+
+        return inv.Transform(pScreen);
+    }
+
+    public Vector ScreenDeltaToWorld(Vector dScreen)
+    {
+        if (!_view.TryInvert(out var inv))
+            return dScreen;
+
+        // Convertit deux points séparés par dScreen
+        var originW = inv.Transform(new Point(0, 0));
+        var endW    = inv.Transform(new Point(dScreen.X, dScreen.Y));
+        return endW - originW;
     }
 
     private void OnPointerMove(object? sender, PointerEventArgs e)
@@ -50,10 +80,38 @@ public sealed class GraphView : Control
             _previewLinkPosition = e.GetPosition(_nodes);
             _previewLink.InvalidateVisual();
         }
+        else
+        {
+            if (e.GetCurrentPoint(_hitbox).Properties.IsRightButtonPressed)
+            {
+                // Move the view
+                var delta = e.GetCurrentPoint(_hitbox).Position;
+                if (_lastPointerPosition == null)
+                {
+                    _lastPointerPosition = delta;
+                }
+                delta -= _lastPointerPosition.Value;
+                delta /= _view.M11; // scale by current zoom level
+                if (delta.X == 0 && delta.Y == 0) return; // no movement
+                _lastPointerPosition = e.GetCurrentPoint(_hitbox).Position;
+                if (delta != default)
+                {
+                    _view = Matrix.CreateTranslation(delta.X, delta.Y) * _view;
+                    InvalidateArrange();
+                    Log.Debug("GraphView.OnPointerMove: View moved by {Delta}", delta);
+                    e.Handled = true;
+                }
+            }
+        }
     }
 
     private void OnPointerDown(object? sender, PointerPressedEventArgs e)
     {
+        if (e.GetCurrentPoint(_hitbox).Properties.IsRightButtonPressed)
+        {
+            Log.Information("GraphView.OnPointerDown: Right click detected, clearing link state.");
+            e.Handled = true;
+        }
         return;
     }
 
@@ -116,19 +174,55 @@ public sealed class GraphView : Control
 
     private void AddLinkControl(Link l)
     {
+        if(l.FromNodeId == l.ToNodeId)
+        {
+            // self-link, skip for now
+            return;
+        }
         var lp = new LinkControl(
             () => GetPortScreenPoint(l.FromNodeId, l.FromPortId),
             () => GetPortScreenPoint(l.ToNodeId, l.ToPortId),
+            GetPortKind(l.FromNodeId, l.FromPortId),
+            GetPortKind(l.ToNodeId, l.ToPortId),
             l.FromNodeId, 
-            l.ToNodeId
+            l.ToNodeId,
+            l.FromPortId,
+            l.ToPortId
         );
+        
+        lp.BreakLink += (s, e) => _doc?.RemoveLink(l);
+        
+        // Get Port Controls
+        if (_nodeCtrls.TryGetValue(l.FromNodeId, out var fromNode) &&
+            fromNode.GetPortControl(l.FromPortId) is PortControl fromPort &&
+            _nodeCtrls.TryGetValue(l.ToNodeId, out var toNode) &&
+            toNode.GetPortControl(l.ToPortId) is PortControl toPort)
+        {
+            if(fromPort is IPortInput portInput)
+            {
+                portInput.OnAttached();
+                foreach (var lp0 in _linkCtrls.Where(lc => lc.IsAttachedTo(l.FromNodeId) && lc != lp).ToList())
+                {
+                    lp0.InvalidateVisual();
+                }
+            }
+            if(toPort is IPortInput portInput2)
+            {
+                portInput2.OnAttached();
+                foreach (var lp0 in _linkCtrls.Where(lc => lc.IsAttachedTo(l.ToNodeId) && lc != lp).ToList())
+                {
+                    lp0.InvalidateVisual();
+                }
+            }
+        }
+
         _linkCtrls.Add(lp);
         _links.Children.Add(lp);
     }
 
     private void AddPreviewLinkControl(NodeControl node, PortControl port, Point p)
     {
-        _previewLink = new LinkControl(
+        _previewLink = new PreviewLinkControl(
             () => port.Def.IsInput? _previewLinkPosition : GetPortScreenPoint(node.Node.Id, port.Def.Id),
             () => port.Def.IsInput? GetPortScreenPoint(node.Node.Id, port.Def.Id) : _previewLinkPosition,
             node.Node.Id,
@@ -141,7 +235,35 @@ public sealed class GraphView : Control
     private void RemoveLinkControl(Link l)
     {
         var idx = _linkCtrls.FindIndex(x => x.Matches(l));
-        if (idx >= 0) { _links.Children.Remove(_linkCtrls[idx]); _linkCtrls.RemoveAt(idx); }
+        if (idx >= 0)
+        {
+            _links.Children.Remove(_linkCtrls[idx]);
+            _linkCtrls.RemoveAt(idx);
+            // Get Port Controls
+            if (_nodeCtrls.TryGetValue(l.FromNodeId, out var fromNode) &&
+                fromNode.GetPortControl(l.FromPortId) is PortControl fromPort &&
+                _nodeCtrls.TryGetValue(l.ToNodeId, out var toNode) &&
+                toNode.GetPortControl(l.ToPortId) is PortControl toPort)
+            {
+                if(fromPort is IPortInput portInput)
+                {
+                    portInput.OnDetached();
+                    foreach (var lp0 in _linkCtrls.Where(lc => lc.IsAttachedTo(l.FromNodeId)).ToList())
+                    {
+                        lp0.InvalidateVisual();
+                    }
+                }
+
+                if (toPort is IPortInput portInput2)
+                {
+                    portInput2.OnDetached();
+                    foreach (var lp0 in _linkCtrls.Where(lc => lc.IsAttachedTo(l.ToNodeId)).ToList())
+                    {
+                        lp0.InvalidateVisual();
+                    }
+                }
+            }
+        }
     }
 
     private void OnNodeMoved(Node n)
@@ -166,21 +288,45 @@ public sealed class GraphView : Control
         pNode = pNode.WithX(pNode.X + (port.Def.IsInput ? -pLocal.X : pLocal.X));
         return pNode;
     }
+    private PortKind GetPortKind(string nodeId, string portId)
+    {
+        if (_nodeCtrls.TryGetValue(nodeId, out var ctrl))
+        {
+            return ctrl.GetPortControl(portId).Def.Kind;
+        }
+        throw new KeyNotFoundException($"Node {nodeId} or port {portId} not found.");
+    }
 
     // Pan/zoom
     protected override Size ArrangeOverride(Size finalSize)
     {
-        _root.RenderTransform = new MatrixTransform(_view);
+        _content.RenderTransform = new MatrixTransform(_view);
+        _content.Arrange(new Rect(finalSize));
         _root.Arrange(new Rect(finalSize));
+        _hitbox.Arrange(new Rect(finalSize));
         return finalSize;
     }
+    protected override Size MeasureOverride(Size availableSize)
+    {
+        _root.Measure(availableSize);
+        return _root.DesiredSize;
+    }
+    
     private void OnWheel(object? s, PointerWheelEventArgs e)
     {
-        var p = e.GetPosition(this);
+        Log.Debug("GraphView.OnWheel: {Delta}", e.Delta);
+        var p = e.GetPosition(_hitbox);
         var f = e.Delta.Y > 0 ? 1.1 : 1/1.1;
-        _view = Matrix.CreateTranslation(-p.X, -p.Y) * _view;
+        // _view = Matrix.CreateTranslation(-p.X, -p.Y) * _view;
+        
+        // Max zoom out to 0.1, max zoom in to 5
+        if (_view.M11 * f < 0.1 || _view.M11 * f > 5)
+        {
+            Log.Debug("GraphView.OnWheel: Zoom limit reached, ignoring.");
+            return;
+        }
         _view = Matrix.CreateScale(f, f) * _view;
-        _view = Matrix.CreateTranslation(p.X, p.Y) * _view;
+        // _view = Matrix.CreateTranslation(p.X, p.Y) * _view;
         InvalidateArrange();
     }
 
@@ -205,6 +351,8 @@ public sealed class GraphView : Control
             _previewLink = null;
             _overlay.Children.Clear();
         }
+
+        _lastPointerPosition = null;
     }
 
     private PortControl? HitTestPort(Point p) => _nodes.GetVisualAt(p) as PortControl;
