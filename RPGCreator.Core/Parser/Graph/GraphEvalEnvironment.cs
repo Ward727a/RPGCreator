@@ -4,6 +4,7 @@ public sealed class GraphEvalEnvironment
 {
     public const int MaxRegisters = 256;
     public object?[] Registers { get; } = new object?[MaxRegisters];
+    public Dictionary<string, Object?> Variables { get; } = new(); // This holds instance-specific variables.
     public static Dictionary<string, Object?> GlobalsVariables { get; } = new(); // This should be static to hold global variables across all instances of the environment.
     /// <summary>
     /// Dictionary to hold labels and their corresponding block index.

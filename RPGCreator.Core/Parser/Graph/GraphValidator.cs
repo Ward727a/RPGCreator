@@ -13,8 +13,7 @@ public static class GraphValidator
     /// Validate the given program against the graph table.
     /// </summary>
     /// <param name="program"></param>
-    /// <param name="table"></param>
-    public static bool Validate(IReadOnlyList<GraphLabeledInstr> program, GraphTable table)
+    public static bool Validate(IReadOnlyList<GraphLabeledInstr> program)
     {
         for (int i=0; i < program.Count; i++)
         {
@@ -23,28 +22,28 @@ public static class GraphValidator
             var instrIndex = 0;
             foreach (var instr in programInstruction)
             {
-                var spec = table.Get(instr.OpCode);
+                var spec = GraphTable.Get(instr.OpCode);
                 if (spec == null)
                 {
                     Log.Error("Invalid opcode {OpCode} at program block {BlockIndex}, instruction {InstructionIndex}.", 
                         instr.OpCode, i, instrIndex);
-                    Log.Error("Available opcodes: {AvailableOpcodes}", string.Join(", ", table.ValidOpcodes));
+                    Log.Error("Available opcodes: {AvailableOpcodes}", string.Join(", ", GraphTable.ValidOpcodes));
                     // Invalid opcode
                     return false;
                 }
 
                 // Validate operands
-                if (instr.Operands.Length != spec.Signatures.Length)
+                if (instr.Operands.Length != spec.Signature.Length)
                 {
                     Log.Error("Invalid number of operands for opcode {OpCode} at program block {BlockIndex}, instruction {InstructionIndex}. Expected {Expected}, got {Got}.",
-                        instr.OpCode, i, instrIndex, spec.Signatures.Length, instr.Operands.Length);
+                        instr.OpCode, i, instrIndex, spec.Signature.Length, instr.Operands.Length);
                     return false;
                 }
                 
                 for (int j = 0; j < instr.Operands.Length; j++)
                 {
                     var operand = instr.Operands[j];
-                    var signature = spec.Signatures[j];
+                    var signature = spec.Signature[j];
 
                     if ((operand.Kind & signature) == 0)
                     {

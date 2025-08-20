@@ -1,10 +1,12 @@
 using System;
 using RPGCreator.Core.Parser.Graph;
+using RPGCreator.Core.Parser.Graph.NodesMaker;
 using RPGCreator.Core.Type.Blueprint;
 using Serilog;
 
 namespace RPGCreator.Core.Type.Blueprint.Nodes.Debug;
 
+[GraphNode]
 public class NodePrint : Node
 {
 
@@ -16,8 +18,11 @@ public class NodePrint : Node
         Error
     }
     
-    public override EGraphOpCode Type => EGraphOpCode.debug_print;
-    public override string Title { get; protected set; } = "Print message";
+    public override EGraphOpCode OpCode => EGraphOpCode.debug_print;
+    public override string DisplayName { get; protected set; } = "Print message";
+    public override string Description => "Print a message to the debug console with a specific level.";
+    public override string Path => "Debug";
+    
     private Port MessagePort => Inputs[1];
     private EnumPort LevelPort => (EnumPort)Inputs[2];
     
@@ -61,8 +66,8 @@ public class NodePrint : Node
         Properties["level"] = LevelPort.Value;
         
         var instrs = new List<GraphInstr>();
-        var message = context.ValueArg(graph, this, MessagePort.Id, "message", instrs, "");
-        var level = context.ValueArg(graph, this, LevelPort.Id, "level", instrs, EPrintLevel.Debug);
+        var message = context.ResolveInput(graph, this, MessagePort.Id, "message", instrs, "");
+        var level = context.ResolveInput(graph, this, LevelPort.Id, "level", instrs, EPrintLevel.Debug);
         instrs.Add(GraphIR.Op(EGraphOpCode.debug_print, GraphIR.Operands(EGraphOperandKind.LiteralString | EGraphOperandKind.Register, message), GraphIR.Operands(EGraphOperandKind.Enum | EGraphOperandKind.Register, level)));
         return instrs;
     }

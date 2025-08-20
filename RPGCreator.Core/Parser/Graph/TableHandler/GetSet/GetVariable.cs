@@ -1,0 +1,18 @@
+using RPGCreator.Core.Type.Blueprint.Nodes;
+
+namespace RPGCreator.Core.Parser.Graph.TableHandler.GetSet;
+
+[Opcode(EGraphOpCode.get_variable)]
+public sealed class GetVariable : IGraphInstrHandler
+{
+    public void Exec(GraphInstr instr, GraphEvalEnvironment env, GraphInterpreter interpreter)
+    {
+        var from = interpreter.ParsePathOperand(instr.Operands[0]);
+        var to = interpreter.ParseRegisterOperand(instr.Operands[1]);
+
+        env.Registers[to] = env.Variables[from];
+    }
+
+    public EGraphOperandKind[] Signature { get; } = 
+        [EGraphOperandKind.Path, EGraphOperandKind.Register];
+}

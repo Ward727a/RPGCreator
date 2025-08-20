@@ -51,7 +51,7 @@ public sealed class NodeControl : Control
         Grid.SetColumnSpan(titleBorder, 2);
         var title = new TextBlock
         {
-            Text=node.Title,
+            Text=node.DisplayName,
             FontWeight=FontWeight.Bold,
             TextAlignment = TextAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center,
@@ -388,11 +388,21 @@ public sealed class PortNumInputControl : PortControl, IPortInput
         {
             Value = decimal.TryParse(Def.Name, out var result) ? result : (decimal)0.0,
             Foreground = Brushes.White,
+            Text = def.Value as string,
             FontSize = 12,
             Padding = new Thickness(4, 0),
             Margin = new Thickness(!_isOutput?16:8, 4, !_isOutput?8:16, 4),
             BorderThickness = new Thickness(1),
         };
+
+        if (def is NumberPort numberPort)
+        {
+            _inputBox.ValueChanged += (s, e) =>
+            {
+                numberPort.Value = (double)_inputBox.Value;
+                ValueChanged?.Invoke(this, def.Value.ToString());
+            };
+        }
 
         this.VisualChildren.Add(_inputBox);
         this.LogicalChildren.Add(_inputBox);

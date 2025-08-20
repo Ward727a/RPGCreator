@@ -68,7 +68,7 @@ public sealed class GraphDocumentCompiler(GraphDocument doc)
         }
         Log.Information("Inheritance graph built successfully with {Count} nodes.", _sortedNodes.Count);
         // Log the sorted nodes titles for debugging
-        Log.Debug("Sorted nodes: {Nodes}", string.Join(", ", _sortedNodes.Select(id => $"{id} ({Graph.Nodes[id].Title})")));
+        Log.Debug("Sorted nodes: {Nodes}", string.Join(", ", _sortedNodes.Select(id => $"{id} ({Graph.Nodes[id].DisplayName})")));
         
         Log.Information("Validating nodes in the graph...");
         ValidateNodes();
@@ -81,12 +81,12 @@ public sealed class GraphDocumentCompiler(GraphDocument doc)
         foreach (var nodeId in _sortedNodes)
         {
             var node = Graph.Nodes[nodeId];
-            Log.Information("Compiling node {NodeId} ({NodeTitle})...", nodeId, node.Title);
+            Log.Information("Compiling node {NodeId} ({NodeTitle})...", nodeId, node.DisplayName);
 
-            if (node.Type is EGraphOpCode.start or EGraphOpCode.comment or EGraphOpCode.comment
+            if (node.OpCode is EGraphOpCode.start or EGraphOpCode.comment or EGraphOpCode.comment
                 or EGraphOpCode.none or EGraphOpCode.end)
             {
-                Log.Information("Node {NodeId} ({NodeTitle}) is a special node of code {OPCode} and will not be compiled.", nodeId, node.Title, node.Type);
+                Log.Information("Node {NodeId} ({NodeTitle}) is a special node of code {OPCode} and will not be compiled.", nodeId, node.DisplayName, node.OpCode);
                 continue; // Skip special nodes that do not need compilation
             }
             
@@ -94,7 +94,7 @@ public sealed class GraphDocumentCompiler(GraphDocument doc)
             var instrs = node.Emit(Graph, CompileContext).ToList();
             if (!instrs.Any())
             {
-                Log.Warning("Node {NodeId} ({NodeTitle}) has no instructions to execute.", nodeId, node.Title);
+                Log.Warning("Node {NodeId} ({NodeTitle}) has no instructions to execute.", nodeId, node.DisplayName);
                 continue; // Skip nodes with no instructions
             }
             
@@ -102,7 +102,7 @@ public sealed class GraphDocumentCompiler(GraphDocument doc)
             {
                 if (IsPure(node))
                 {
-                    Log.Error("Node {NodeId} ({NodeTitle}) is pure and as such should not be added to the instructions list directly. It should be linked to another node.", nodeId, node.Title);
+                    Log.Error("Node {NodeId} ({NodeTitle}) is pure and as such should not be added to the instructions list directly. It should be linked to another node.", nodeId, node.DisplayName);
                     Log.Error("This is a bug in the graph compiler, please report it to the developers.");
                     Log.Error("The graph can't be compiled due to this issue.");
                     FormattedValue = null;
@@ -114,20 +114,22 @@ public sealed class GraphDocumentCompiler(GraphDocument doc)
                 if (label != null)
                 {
                     _program.Add(GraphIR.Label(label, instrs));
-                    Log.Information("Node {NodeId} ({NodeTitle}) compiled successfully with label {Label}.", nodeId, node.Title, label);
+                    Log.Information("Node {NodeId} ({NodeTitle}) compiled successfully with label {Label}.", nodeId, node.DisplayName, label);
                     continue;
                 }
                 
-                Log.Error("Node {NodeId} ({NodeTitle}) generated an empty or null label. This is a bug in the graph compiler, please report it to the developers.", nodeId, node.Title);
+                Log.Error("Node {NodeId} ({NodeTitle}) generated an empty or null label. This is a bug in the graph compiler, please report it to the developers.", nodeId, node.DisplayName);
                 Log.Error("The graph can't be compiled due to this issue.");
                 FormattedValue = null;
                 return;
             }
             
-            Log.Information("Node {NodeId} ({NodeTitle}) compiled but has no instructions to execute.", nodeId, node.Title);
+            Log.Information("Node {NodeId} ({NodeTitle}) compiled but has no instructions to execute.", nodeId, node.DisplayName);
             Log.Information("Is this intended? If not, please check node implementation and ensure it emits instructions correctly.");
         }
 
+        Log.Information("Starting to optimize register allocation for the instructions...");
+        
         Allocator = new(_program);
         Allocator.OptimizeRegisterAllocation(); // Optimize the register allocation for the instructions
 
@@ -141,7 +143,13 @@ public sealed class GraphDocumentCompiler(GraphDocument doc)
             return;
         }
         
-        DEBUG_SaveInstructions("debug_instructions.txt"); // Save the instructions to a file for debugging purposes
+        Log.Information("Register allocation optimized successfully");
+        
+        Log.Information("Compiling instruction program to bytecode...");
+        // Compile the instructions to bytecode
+        
+        File.WriteAllText("test_bp.rpg.bp",new GraphDocumentWriter(_program).Write());
+        // return;
         
         // Add a fake player.name to the environment, this is used to get the player name in the graph
         GraphEvalEnvironment.AddVM("player.name", "Player Name");
@@ -210,7 +218,7 @@ public sealed class GraphDocumentCompiler(GraphDocument doc)
             {
                 if (IsParentless(node))
                 {
-                    Log.Warning("Node {NodeId} is parentless and will not be executed: {NodeTitle}", id, node.Title);
+                    Log.Warning("Node {NodeId} is parentless and will not be executed: {NodeTitle}", id, node.DisplayName);
                 }
             }
         }
@@ -324,7 +332,7 @@ public sealed class GraphDocumentCompiler(GraphDocument doc)
         var label = node.Id.Replace(" ", "_").ToLowerInvariant();
         if (!string.IsNullOrEmpty(label)) return $"{label}:";
         
-        Log.Error("Node {NodeId} generated an empty or null label (title: {NodeTitle}).", node.Id, node.Title);
+        Log.Error("Node {NodeId} generated an empty or null label (title: {NodeTitle}).", node.Id, node.DisplayName);
         
         return null;
 
@@ -367,8 +375,24 @@ public sealed class GraphDocumentCompiler(GraphDocument doc)
 public abstract class Node
 {
     public string Id { get; } = Ulid.NewUlid().ToString();
-    public abstract EGraphOpCode Type { get; }
-    public abstract string Title { get; protected set; }
+    public abstract EGraphOpCode OpCode { get; }
+    public abstract string DisplayName { get; protected set; }
+    /// <summary>
+    /// A description of the node, used to provide more information about what the node does.<br/>
+    /// This description will be displayed in the UI when the user hovers over the node.<br/>
+    /// It can be used to provide more information about the node, such as its purpose, how to use it, or any other relevant information.<br/>
+    /// If no description is provided, a default description will be used.<br/>
+    /// The default description is "No description provided for this node.".<br/>
+    /// It is recommended to provide a description for each node to help users understand what the node does and how to use it.<br/>
+    /// The description should be concise and to the point, ideally no more than a few sentences.
+    /// </summary>
+    public virtual string Description { get; protected set; } = "No description provided for this node.";
+    /// <summary>
+    /// A path to the node, used to identify the node in the graph.<br/>
+    /// It will also be used for the menu that allow to add the node to the graph.<br/>
+    /// Each node can have the same path, each "section" should be separated by a '|' character.
+    /// </summary>
+    public abstract string Path { get; }
     public double X, Y;
     public readonly List<Port> Inputs = new();
     public readonly List<Port> Outputs = new();

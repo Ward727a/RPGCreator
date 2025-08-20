@@ -25,8 +25,10 @@
 using RPGCreator.Core.Configs;
 using RPGCreator.Core.Events;
 using RPGCreator.Core.Events.EventArgs;
+using RPGCreator.Core.Parser.Graph;
 using RPGCreator.Core.Scheduler;
 using RPGCreator.Core.Type.Assets.BaseAssetsPack;
+using RPGCreator.Core.Type.Blueprint;
 using Serilog;
 
 namespace RPGCreator.Core
@@ -88,6 +90,31 @@ namespace RPGCreator.Core
             Modules = new EngineModules();
 
             Managers.Init();
+            
+            Log.Information("Starting scanning for blueprint opcodes handlers...");
+            
+            // Scan the assemblies for all blueprint opcodes handlers
+            // This will register all the handlers in the graph table.
+            GraphTable.ScanAssemblies();
+            
+            Log.Information("Blueprint opcodes handlers scanning completed.");
+            Log.Information("Found {Count} handlers.", GraphTable.ValidOpcodes.Count);
+            
+            Log.Information("Starting scanning for graph nodes...");
+            
+            // Scan the assemblies for all graph nodes
+            // This will register all the nodes in the graph node registry.
+            GraphNodeRegistry.AnalyzeNodes();
+            Log.Information("Graph nodes scanning completed.");
+            Log.Information("Found {Count} nodes.", GraphNodeRegistry.GetAllNodes().Count);
+            
+            Log.Information("Checking graph nodes and opcodes handlers consistency...");
+            // Check if all registered handlers have a corresponding node in the graph node registry.
+
+            GraphTable.CheckHandlersAndNodesConsistency();
+            
+            Log.Information("Graph nodes and opcodes handlers consistency check completed.");
+            Log.Information("Check above for any errors or warnings.");
             
             Log.Information("EngineCore initialized at {Time}.", DateTime.Now);
 

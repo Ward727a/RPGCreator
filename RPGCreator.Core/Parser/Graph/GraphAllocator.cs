@@ -108,14 +108,13 @@ public class GraphAllocator
             var instructions = block.Instrs;
             foreach (var instruction in instructions)
             {
-                index++;
                 int str_index = 0;
                 // Check if the instruction has a register to remap
                 if (instruction.Operands.Where(a =>
                     {
                         str_index++;
                         return a.Kind.HasFlag(EGraphOperandKind.Register);
-                    }) is List<GraphOperands> operands)
+                    }).ToList() is List<GraphOperands> operands)
                 {
                     foreach (var operand in operands)
                     {
@@ -131,7 +130,7 @@ public class GraphAllocator
                         if (_registerRemap.ContainsKey(registerId))
                         {
                             // If the register is already being remapped, we need to update the instruction
-                            instruction.Operands[str_index - 1] = GraphIR.Operands(EGraphOperandKind.Register, _registerRemap[registerId]);
+                            instruction.Operands[str_index - 1] = GraphIR.Operands(operand.Kind, _registerRemap[registerId]);
                             continue;
                         }
                         // Check if the current register can be replaced (if it's the first time we see it)
@@ -158,9 +157,11 @@ public class GraphAllocator
                         _registerRemap[registerId] = newRegisterId;
                         _registerLiveness[registerId] = ([], 0); // Clear the liveness of the old register so we can reuse it
                         
-                        instruction.Operands[str_index - 1] = GraphIR.Operands(EGraphOperandKind.Register, newRegisterId);
+                        instruction.Operands[str_index - 1] = GraphIR.Operands(operand.Kind, newRegisterId);
                     }
                 }
+                
+                index++;
             }
         }
     }

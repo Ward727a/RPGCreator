@@ -18,7 +18,7 @@ public sealed class GraphCompileContext
         return $"rx{_nextRegisterId++}";
     }
 
-    public void BindValue(Node node, string outPort, string registerId) =>
+    public void BindOuput(Node node, string outPort, string registerId) =>
         _producedValues[(node.Id, outPort)] = registerId;
 
     /// This method is used to allocate a register for a node's output port.<br/>
@@ -62,6 +62,7 @@ public sealed class GraphCompileContext
         
         // If not, create a new register for it
         var dest = NewRegister();
+        var type = value?.GetType() ?? typeof(object);
         switch (value)
         {
             case string str:
@@ -88,6 +89,13 @@ public sealed class GraphCompileContext
                         GraphIR.Operands(EGraphOperandKind.Register, dest))
                     );
                 break;
+            case double d:
+                instructions.Add(
+                    GraphIR.Op(
+                        EGraphOpCode.alloc_literal_float,
+                        GraphIR.Operands(EGraphOperandKind.LiteralNumber, d.ToString(CultureInfo.InvariantCulture)),
+                        GraphIR.Operands(EGraphOperandKind.Register, dest)));
+                break;
             case bool b:
                 instructions.Add(
                     GraphIR.Op
@@ -110,7 +118,7 @@ public sealed class GraphCompileContext
         return dest;
     }
 
-    public string ValueArg(GraphDocument graph, Node node, string inPort, string propKey, List<GraphInstr> instructions,
+    public string ResolveInput(GraphDocument graph, Node node, string inPort, string propKey, List<GraphInstr> instructions,
         object? defaultValue = null)
     {
         if (TryResolveFromPort(graph, node, inPort, out var registerId))
@@ -147,6 +155,6 @@ public sealed class GraphCompileContext
             return AllocateConstant(defaultValue, instructions);
         }
         
-        throw new InvalidOperationException($"Argument '{inPort}' for node '{node.Id}'({node.Title}) is not bound to a register and no default value is provided.");
+        throw new InvalidOperationException($"Argument '{inPort}' for node '{node.Id}'({node.DisplayName}) is not bound to a register and no default value is provided.");
     }
 }

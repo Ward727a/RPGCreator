@@ -7,6 +7,7 @@ using RPGCreator.Core.Type.Blueprint;
 using RPGCreator.Core.Type.Blueprint.Nodes;
 using RPGCreator.Core.Type.Blueprint.Nodes.Debug;
 using RPGCreator.Core.Type.Blueprint.Nodes.Gets;
+using RPGCreator.Core.Type.Blueprint.Nodes.Math;
 using RPGCreator.UI.Common.Blueprint;
 using Serilog;
 
@@ -79,10 +80,11 @@ public class StatEventTab : UserControl
         
         _doc.AddNode(new NodeEnd());
 
+        _doc.AddNode(new NodeMathMultiply());
         _doc.AddNode(new NodeStart());
-        _doc.AddNode(new GetPlayerName());
-        _doc.AddNode(new NodePrint());
-        _doc.AddNode(new GetPlayerName());
+        // _doc.AddNode(new GetPlayerName());
+        // _doc.AddNode(new NodePrint());
+        // _doc.AddNode(new GetPlayerName());
         
         _doc.AddNode(new NodePrint());
 

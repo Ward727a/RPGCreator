@@ -1,13 +1,18 @@
 using RPGCreator.Core.Parser.Graph;
+using RPGCreator.Core.Parser.Graph.NodesMaker;
 using RPGCreator.Core.Type.Blueprint;
 using RPGCreator.Core.Type.Blueprint.Nodes;
 
 namespace RPGCreator.Core.Type.Blueprint.Nodes.Gets;
 
+[GraphNode]
 public class GetPlayerName : Node
 {
-    public override EGraphOpCode Type => EGraphOpCode.get_vm;
-    public override string Title { get; protected set; } = "Get Player Name";
+    public override EGraphOpCode OpCode => EGraphOpCode.get_vm;
+    public override string DisplayName { get; protected set; } = "Get Player Name";
+
+    public override string Description => "Get the name of the player character from the game state.";
+    public override string Path => "Player|Getters";
 
     public GetPlayerName()
     {
@@ -19,7 +24,7 @@ public class GetPlayerName : Node
         // For now this will be a "fake" emit and variable!
         var instrs = new List<GraphInstr>();
         var dst = context.NewRegister();
-        context.BindValue(this, Outputs[0].Id, dst);
+        context.BindOuput(this, Outputs[0].Id, dst);
         context.AllocateRegister(this, Outputs[0].Id, dst, new List<GraphInstr>{
             GraphIR.Op(EGraphOpCode.get_vm, GraphIR.Operands(EGraphOperandKind.Path, "player.name"), GraphIR.Operands(EGraphOperandKind.Register, dst))
         });

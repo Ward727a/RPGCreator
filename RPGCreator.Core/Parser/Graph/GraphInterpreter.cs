@@ -1,3 +1,4 @@
+using RPGCreator.Core.Parser.Graph.TableHandler;
 using RPGCreator.Core.Type.Blueprint.Nodes;
 using RPGCreator.Core.Type.Blueprint.Nodes.Debug;
 using Serilog;
@@ -29,6 +30,9 @@ public sealed class GraphInterpreter
         }
     }
 
+    /// <summary>
+    /// Run the program from the beginning.
+    /// </summary>
     public void Run()
     {
         _env.CurrentBlock = 0;
@@ -64,68 +68,34 @@ public sealed class GraphInterpreter
         }
     }
 
+    /// <summary>
+    /// Execute a single instruction.<br/>
+    /// This method interprets the instruction and performs the corresponding operation.<br/>
+    /// It checks if the opcode is registered in the graph table, retrieves the handler, and executes it.<br/>
+    /// If the opcode is not registered or the number of operands does not match the handler's signature, it throws an exception.<br/>
+    /// The handler's <see cref="IGraphInstrHandler.Exec(GraphInstr, GraphEvalEnvironment, GraphInterpreter)"/> method is called to perform the operation.<br/>
+    /// </summary>
+    /// <param name="instr">Instruction to execute</param>
+    /// <exception cref="InvalidOperationException">Thrown when the opcode is not registered, no handler is found, or the number of operands does not match the handler's signature.</exception>
     public void Execute(GraphInstr instr)
     {
-        switch (instr.OpCode)
+        if (!GraphTable.IsOpcodeRegistered(instr.OpCode))
         {
-            case EGraphOpCode.get_vm:
-            {
-                var path = ParsePathOperand(instr.Operands[0]);
-                var dest = ParseRegisterOperand(instr.Operands[1]);
-
-                _env.Registers[dest] = _env.GetVM(path);
-                break;
-            }
-            case EGraphOpCode.debug_print:
-            {
-                var value = EvalOperand(instr.Operands[0]);
-                var level = ParseEnumOperand<NodePrint.EPrintLevel>(instr.Operands[1]);
-
-                switch (level)
-                {
-                    case NodePrint.EPrintLevel.Debug:
-                        Log.Debug("[BP] {Value}", value);
-                        break;
-                    case NodePrint.EPrintLevel.Info:
-                        Log.Information("[BP] {Value}", value);
-                        break;
-                    case NodePrint.EPrintLevel.Warning:
-                        Log.Warning("[BP] {Value}", value);
-                        break;
-                    case NodePrint.EPrintLevel.Error:
-                        Log.Error("[BP] {Value}", value);
-                        break;
-                    default:
-                        throw new InvalidOperationException($"Unknown print level: {level}");
-                }
-                
-                break;
-            }
-            case EGraphOpCode.alloc_literal_string:
-            {
-                var value = ParseStringOperand(instr.Operands[0]);
-                var dest = ParseRegisterOperand(instr.Operands[1]);
-                _env.Registers[dest] = value;
-                break;
-            }
-            case EGraphOpCode.alloc_literal_object:
-            {
-                var value = EvalOperand(instr.Operands[0]);
-                var dest = ParseRegisterOperand(instr.Operands[1]);
-                if (value == null)
-                {
-                    throw new InvalidOperationException("Cannot allocate a null object.");
-                }
-                _env.Registers[dest] = value;
-                break;
-            }
-            default:
-                Log.Error("Unknown opcode: {OpCode}", instr.OpCode);
-                break;
+            throw new InvalidOperationException($"Opcode {instr.OpCode} is not registered in the graph table.");
         }
+        var handler = GraphTable.Get(instr.OpCode);
+        if (handler == null)
+        {
+            throw new InvalidOperationException($"No handler found for opcode {instr.OpCode}.");
+        }
+        if (instr.Operands.Length != handler.Signature.Length)
+        {
+            throw new InvalidOperationException($"Invalid number of operands for opcode {instr.OpCode}. Expected {handler.Signature.Length}, got {instr.Operands.Length}.");
+        }
+        handler.Exec(instr, _env, this);
     }
 
-    private int ParseRegisterOperand(GraphOperands operand)
+    internal int ParseRegisterOperand(GraphOperands operand)
     {
         if(!operand.Kind.HasFlag(EGraphOperandKind.Register))
             throw new InvalidOperationException($"Expected a register operand, but got {operand.Kind}.");
@@ -139,7 +109,7 @@ public sealed class GraphInterpreter
         return registerId;
     }
 
-    private string ParsePathOperand(GraphOperands operand)
+    internal string ParsePathOperand(GraphOperands operand)
     {
         if(!operand.Kind.HasFlag(EGraphOperandKind.Path))
             throw new InvalidOperationException($"Expected a path operand, but got {operand.Kind}.");
@@ -148,7 +118,7 @@ public sealed class GraphInterpreter
         return operand.Text;
     }
 
-    private string ParseStringOperand(GraphOperands operand)
+    internal string ParseStringOperand(GraphOperands operand)
     {
         if (!operand.Kind.HasFlag(EGraphOperandKind.LiteralString))
         {
@@ -162,8 +132,40 @@ public sealed class GraphInterpreter
         return operand.Text.Trim('"');
     }
     
-    private T ParseEnumOperand<T>(GraphOperands operand) where T : struct, Enum
+    internal double ParseFloatOperand(GraphOperands operand)
     {
+        if (!operand.Kind.HasFlag(EGraphOperandKind.LiteralNumber))
+        {
+            throw new InvalidOperationException($"Expected a float operand, but got {operand.Kind}.");
+        }
+
+        var value = EvalOperand(operand);
+        if (value == null)
+        {
+            throw new InvalidOperationException($"Float operand cannot be null. Expected a valid float value.");
+        }
+        
+        if (value is not string sValue)
+        {
+            throw new InvalidOperationException($"Invalid float operand type: {value.GetType()}. Expected a string.");
+        }
+
+        if (string.IsNullOrEmpty(sValue))
+        {
+            throw new InvalidOperationException($"Invalid float operand: {operand.Text}. Expected a non-empty string.");
+        }
+
+        if (double.TryParse(sValue, out var result))
+        {
+            return result;
+        }
+        
+        throw new InvalidOperationException($"Invalid float value: {sValue}. Expected a valid float value.");
+    }
+    
+    internal T ParseEnumOperand<T>(GraphOperands operand) where T : struct, Enum
+    {
+        
         if (!operand.Kind.HasFlag(EGraphOperandKind.Enum))
         {
             throw new InvalidOperationException($"Expected an enum operand, but got {operand.Kind}.");
@@ -192,7 +194,17 @@ public sealed class GraphInterpreter
         throw new InvalidOperationException($"Invalid enum value: {enumValueStr}. Expected a valid value for {typeof(T).Name}.");
     }
     
-    private object? EvalOperand(GraphOperands operand)
+    internal bool IsOperandOfKind(GraphOperands operand, EGraphOperandKind kind)
+    {
+        return operand.Kind.HasFlag(kind);
+    }
+    
+    internal bool IsOperandOnlyOfKind(GraphOperands operand, EGraphOperandKind kind)
+    {
+        return operand.Kind == kind;
+    }
+    
+    internal object? EvalOperand(GraphOperands operand)
     {
         if (operand.Kind is EGraphOperandKind.Label or EGraphOperandKind.Path)
         {
