@@ -13,7 +13,7 @@ public sealed class AllocLiteralObject : IGraphInstrHandler
         {
             throw new InvalidOperationException("Cannot allocate a null object.");
         }
-        env.Registers[dest] = value;
+        env.SetRegister(dest, value);
     }
 
     public EGraphOperandKind[] Signature { get; } = 

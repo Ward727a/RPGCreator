@@ -763,6 +763,25 @@ public sealed class DeserializationInfo
             
             return o;
         }
+
+        
+        if (typeof(System.Type).IsAssignableFrom(type))
+        {
+            // If the type is System.Type, we can return the type itself
+            var typeName = valueString.Trim();
+            if (string.IsNullOrEmpty(typeName))
+            {
+                Log.Error("Type name is null or empty.");
+                return null;
+            }
+            var resolvedType = System.Type.GetType(typeName);
+            if (resolvedType == null)
+            {
+                Log.Error($"Type '{typeName}' could not be found.");
+                return null;
+            }
+            return resolvedType;
+        }
         
         try
         {

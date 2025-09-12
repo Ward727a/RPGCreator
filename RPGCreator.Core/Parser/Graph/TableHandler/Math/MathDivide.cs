@@ -7,8 +7,8 @@ public sealed class MathDivide : IGraphInstrHandler
 {
     public void Exec(GraphInstr instr, GraphEvalEnvironment env, GraphInterpreter interpreter)
     {
-        var a = (double)(interpreter.EvalOperand(instr.Operands[0]) ?? 0);
-        var b = (double)(interpreter.EvalOperand(instr.Operands[1]) ?? 1);
+        var a = interpreter.EvalRegisterOperand<double>(instr.Operands[0]);
+        var b = interpreter.EvalRegisterOperand<double>(instr.Operands[1]);
         var dest = interpreter.ParseRegisterOperand(instr.Operands[2]);
 
         if (b == 0)
@@ -16,7 +16,7 @@ public sealed class MathDivide : IGraphInstrHandler
             throw new DivideByZeroException("Division by zero is not allowed.");
         }
 
-        env.Registers[dest] = a / b;
+        env.SetRegister(dest, a / b);
     }
 
     public EGraphOperandKind[] Signature { get; }

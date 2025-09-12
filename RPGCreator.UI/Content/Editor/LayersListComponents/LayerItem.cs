@@ -107,12 +107,12 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
             {
                 e.Handled = true;
 
-                GlobalStaticUIData.CurrentContext?.Close();
+                GlobalStaticUIData.CloseContext();
                 GlobalStaticUIData.CurrentContext = new ContextMenu();
                 var removeLayerItem = new MenuItem { Header = "Remove Layer" };
                 removeLayerItem.Click += (s, e) => OnRemoveLayer();
-                GlobalStaticUIData.CurrentContext.Items.Add(removeLayerItem);
-                GlobalStaticUIData.CurrentContext.Open(Body);
+                (GlobalStaticUIData.CurrentContext as ContextMenu).Items.Add(removeLayerItem);
+                GlobalStaticUIData.OpenContext(Body);
             }
         }
 

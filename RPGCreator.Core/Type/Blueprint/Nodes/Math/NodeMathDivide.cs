@@ -6,11 +6,11 @@ namespace RPGCreator.Core.Type.Blueprint.Nodes.Math;
 [GraphNode]
 public class NodeMathDivide : Node
 {
-    public override EGraphOpCode OpCode => EGraphOpCode.math_divide;
+    public override EGraphOpCode OpCode { get; protected set; } = EGraphOpCode.math_divide;
     public override string DisplayName { get; protected set; } = "Math Divide";
 
-    public override string Description => "Divides two numbers and returns the result.";
-    public override string Path => "Math|Operations";
+    public override string Description  { get; protected set; } = "Divides two numbers and returns the result.";
+    public override string Path  { get; protected set; } = "Math|Operations";
     NumberPort InputA => (NumberPort)Inputs[0];
     NumberPort InputB => (NumberPort)Inputs[1];
     

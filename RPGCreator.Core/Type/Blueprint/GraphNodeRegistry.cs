@@ -17,6 +17,14 @@ public static class GraphNodeRegistry
 
         throw new KeyNotFoundException($"Node with path {path} not found!");
     }
+
+    public static Node GetNode(string path)
+    {
+        if (Nodes.TryGetValue(path, out var node))
+            return node;
+
+        throw new KeyNotFoundException($"Node with path {path} not found!");
+    }
     
     public static List<Node> GetNodes(string path)
     {
@@ -33,12 +41,50 @@ public static class GraphNodeRegistry
     
     public static List<String> GetNodesPaths(int depth = 0)
     {
-        if (depth <= 0)
-            return Nodes.Keys.ToList();
 
+        // Return all paths, but only the parts that are at depth (ex: depth = 1 will return only the first part of the path)
+        // Example: "Math|Operations|Add" at depth 1 will return "Math"
+        // Example: "Math|Operations|Add" at depth 2 will return "Math|Operations"
         return Nodes.Keys
-            .Where(path => path.Split('|').Length <= depth + 1)
+            .Select(path => path.Split('|').Take(depth + 1).Aggregate((a, b) => $"{a}|{b}"))
+            .Distinct()
             .ToList();
+    }
+
+    public static Dictionary<string, object?> GetNestedPaths()
+    {
+        
+        var root = new Dictionary<string, object>();
+
+        foreach (var kvp in Nodes)
+        {
+            var parts = kvp.Key.Split('|');
+            var current = root;
+
+            for (int i = 0; i < parts.Length; i++)
+            {
+                var part = parts[i];
+
+                // Dernière partie → on place la valeur
+                if (i == parts.Length - 1)
+                {
+                    current[part] = kvp.Value!;
+                }
+                else
+                {
+                    // Si la clé existe déjà, on descend dedans
+                    if (!current.TryGetValue(part, out var next))
+                    {
+                        next = new Dictionary<string, object>();
+                        current[part] = next;
+                    }
+
+                    current = (Dictionary<string, object>)next;
+                }
+            }
+        }
+
+        return root;
     }
     
     public static List<string> GetNodesPaths(string rootPath, int depth = 0)

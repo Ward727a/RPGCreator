@@ -7,10 +7,10 @@ namespace RPGCreator.Core.Type.Blueprint.Nodes;
 [GraphNode]
 public class NodeStart : Node
 {
-    public override EGraphOpCode OpCode => EGraphOpCode.start;
-    public override string Description => "This is the start node of the graph. It is the entry point for execution.";
+    public override EGraphOpCode OpCode { get; protected set; } = EGraphOpCode.start;
+    public override string Description  { get; protected set; } = "This is the start node of the graph. It is the entry point for execution.";
     // A path with "@hide" indicates that this node is not meant to be displayed in the menu.
-    public override string Path => "@hide";
+    public override string Path  { get; protected set; } = "@hide";
     public override string DisplayName { get; protected set; } = "Start";
 
     public NodeStart()

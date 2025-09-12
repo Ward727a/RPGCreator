@@ -17,7 +17,7 @@ public enum EOpCodeHandlerType
     Internal,
     /// <summary>
     /// Deprecated operations that are no longer recommended for use.<br/>
-    /// They may still work, but their use is discouraged and they may be removed in the future.<br/>
+    /// They may still work, but their use is discouraged, and they may be removed in the future.<br/>
     /// Example: Old operations that have been replaced by new ones, but are still present for compatibility reasons.
     /// </summary>
     Deprecated,

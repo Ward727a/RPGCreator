@@ -10,7 +10,7 @@ public sealed class SetVariable : IGraphInstrHandler
         var from = interpreter.ParseRegisterOperand(instr.Operands[0]);
         var to = interpreter.ParsePathOperand(instr.Operands[1]);
 
-        env.Variables[to] = env.Registers[from];
+        env.SetVariable(to, env.GetRegister(from));
     }
 
     public EGraphOperandKind[] Signature { get; }

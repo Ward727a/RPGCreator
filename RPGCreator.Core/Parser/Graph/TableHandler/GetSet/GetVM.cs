@@ -10,7 +10,7 @@ public sealed class GetVM : IGraphInstrHandler
         var path = interpreter.ParsePathOperand(instr.Operands[0]);
         var dest = interpreter.ParseRegisterOperand(instr.Operands[1]);
 
-        env.Registers[dest] = env.GetVM(path);
+        env.SetRegister(dest, env.GetVM(path));
     }
 
     public EGraphOperandKind[] Signature { get; } = 

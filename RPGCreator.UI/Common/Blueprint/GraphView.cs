@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
@@ -5,6 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.VisualTree;
+using RPGCreator.Core.Type;
 using RPGCreator.Core.Type.Blueprint;
 using Serilog;
 
@@ -12,14 +14,14 @@ namespace RPGCreator.UI.Common.Blueprint;
 
 public sealed class GraphView : Control
 {
-    private readonly Grid _root = new();
+    public readonly Grid _root = new();
     private readonly Canvas _content = new(){Name = "_contentCanvas"};
     private readonly Canvas _links = new(){Name = "_linksCanvas"};
     private readonly Canvas _nodes = new(){Name = "_nodesCanvas"};
     private readonly Canvas _overlay = new(){Name = "_overlayCanvas"};
+    private readonly Canvas _ui = new(){Name = "_uiCanvas"};
     
     private readonly Border _hitbox = new() { Background = Brushes.Transparent }; 
-
 
     private Matrix _view = Matrix.Identity;
     private GraphDocument? _doc;
@@ -31,18 +33,21 @@ public sealed class GraphView : Control
     private Point _previewLinkPosition;
 
     private Point? _lastPointerPosition;
+
+    private bool _isMovingView = false;
+    private bool _rightClicking = false;
     
     public GraphView()
     {
         _content.Children.Add(_links);
         _content.Children.Add(_nodes);
         _content.Children.Add(_overlay);
+        
         _root.Children.Add(_hitbox);
         _root.Children.Add(_content);
+        _root.Children.Add(_ui);
         VisualChildren.Add(_root);
         LogicalChildren.Add(_root);
-        
-        
 
         PointerWheelChanged += OnWheel;
         PointerPressed += OnPointerDown;
@@ -53,7 +58,6 @@ public sealed class GraphView : Control
     {
         if (!_view.TryInvert(out var inv))
             return pScreen; // fallback
-
         return inv.Transform(pScreen);
     }
 
@@ -82,8 +86,9 @@ public sealed class GraphView : Control
         }
         else
         {
-            if (e.GetCurrentPoint(_hitbox).Properties.IsRightButtonPressed)
+            if (_rightClicking)
             {
+                _isMovingView = true;
                 // Move the view
                 var delta = e.GetCurrentPoint(_hitbox).Position;
                 if (_lastPointerPosition == null)
@@ -109,6 +114,7 @@ public sealed class GraphView : Control
     {
         if (e.GetCurrentPoint(_hitbox).Properties.IsRightButtonPressed)
         {
+            _rightClicking = true;
             Log.Information("GraphView.OnPointerDown: Right click detected, clearing link state.");
             e.Handled = true;
         }
@@ -126,6 +132,10 @@ public sealed class GraphView : Control
         _links.Children.Clear();
         _nodeCtrls.Clear();
         _linkCtrls.Clear();
+        
+        _ui.Children.Clear();
+        var leftBar = new GraphViewLeftBar(_doc);
+        _ui.Children.Add(leftBar);
 
         foreach (var n in doc.Nodes.Values) AddNodeControl(n);
         foreach (var l in doc.Links) AddLinkControl(l);
@@ -151,7 +161,7 @@ public sealed class GraphView : Control
 
     private void AddNodeControl(Node n)
     {
-        var ctrl = new NodeControl(n, BeginLinkFromPort);
+        var ctrl = new NodeControl(n, BeginLinkFromPort, RemovingNode);
         _nodeCtrls[n.Id] = ctrl;
         Canvas.SetLeft(ctrl, n.X);
         Canvas.SetTop(ctrl, n.Y);
@@ -165,11 +175,15 @@ public sealed class GraphView : Control
         _nodes.Children.Remove(ctrl);
         _nodeCtrls.Remove(n.Id);
         // remove all link controls attached to this node
-        foreach (var lp in _linkCtrls.Where(l => l.IsAttachedTo(n.Id)).ToList())
-            _links.Children.Remove(lp);
-        _linkCtrls.RemoveAll(l => l.IsAttachedTo(n.Id));
-        // delete all links attached to this node
-        _doc?.Links.RemoveAll(l => l.FromNodeId == n.Id || l.ToNodeId == n.Id);
+        var links = _doc?.Links.Where(l => l.FromNodeId == n.Id || l.ToNodeId == n.Id).ToList();
+        
+        if (links != null)
+        {
+            foreach (var l in links)
+            {
+                _doc?.RemoveLink(l);
+            }
+        }
     }
 
     private void AddLinkControl(Link l)
@@ -241,9 +255,7 @@ public sealed class GraphView : Control
             _linkCtrls.RemoveAt(idx);
             // Get Port Controls
             if (_nodeCtrls.TryGetValue(l.FromNodeId, out var fromNode) &&
-                fromNode.GetPortControl(l.FromPortId) is PortControl fromPort &&
-                _nodeCtrls.TryGetValue(l.ToNodeId, out var toNode) &&
-                toNode.GetPortControl(l.ToPortId) is PortControl toPort)
+                fromNode.GetPortControl(l.FromPortId) is PortControl fromPort)
             {
                 if(fromPort is IPortInput portInput)
                 {
@@ -253,6 +265,10 @@ public sealed class GraphView : Control
                         lp0.InvalidateVisual();
                     }
                 }
+            }
+            if(_nodeCtrls.TryGetValue(l.ToNodeId, out var toNode) &&
+                toNode.GetPortControl(l.ToPortId) is PortControl toPort)
+            {
 
                 if (toPort is IPortInput portInput2)
                 {
@@ -330,6 +346,12 @@ public sealed class GraphView : Control
         InvalidateArrange();
     }
 
+    // Removing node
+    private void RemovingNode(Node node)
+    {
+        _doc.RemoveNode(node.Id);
+    }
+    
     // Linking
     private void BeginLinkFromPort(NodeControl node, PortControl port)
     {
@@ -350,9 +372,22 @@ public sealed class GraphView : Control
             _linking = null;
             _previewLink = null;
             _overlay.Children.Clear();
+        } else if (!e.GetCurrentPoint(_hitbox).Properties.IsRightButtonPressed && _rightClicking && !_isMovingView)
+        {
+            _rightClicking = false;
+            // Right click released, and wasn't moving the view, We need to show the context menu
+            var pos = e.GetPosition(_overlay);
+            Log.Information("GraphView.OnPointerUp: Right click released at {Position}, showing context menu.", pos);
+            var menu = new GraphViewCtxMenu(_doc);
+            
+            var newPos = pos;
+            menu.Open(_root, newPos);
+            e.Handled = true;
         }
 
         _lastPointerPosition = null;
+        _isMovingView = false;
+        _rightClicking = false;
     }
 
     private PortControl? HitTestPort(Point p) => _nodes.GetVisualAt(p) as PortControl;

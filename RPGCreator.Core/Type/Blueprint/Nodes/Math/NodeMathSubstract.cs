@@ -6,11 +6,11 @@ namespace RPGCreator.Core.Type.Blueprint.Nodes.Math;
 [GraphNode]
 public class NodeMathSubstract : Node
 {
-    public override EGraphOpCode OpCode => EGraphOpCode.math_subtract;
+    public override EGraphOpCode OpCode { get; protected set; } = EGraphOpCode.math_subtract;
     public override string DisplayName { get; protected set; } = "Math Subtract";
 
-    public override string Description => "Subtracts two numbers and returns the result.";
-    public override string Path => "Math|Operations";
+    public override string Description  { get; protected set; } = "Subtracts two numbers and returns the result.";
+    public override string Path  { get; protected set; } = "Math|Operations";
     NumberPort InputA => (NumberPort)Inputs[0];
     NumberPort InputB => (NumberPort)Inputs[1];
     

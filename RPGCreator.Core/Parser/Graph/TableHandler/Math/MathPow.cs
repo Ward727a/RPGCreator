@@ -7,24 +7,13 @@ public sealed class MathPow : IGraphInstrHandler
 {
     public void Exec(GraphInstr instr, GraphEvalEnvironment env, GraphInterpreter interpreter)
     {
-        var baseValue = interpreter.EvalOperand(instr.Operands[0]);
-        var exponent = interpreter.EvalOperand(instr.Operands[1]);
+        var baseValue = interpreter.EvalRegisterOperand<double>(instr.Operands[0]);
+        var exponent = interpreter.EvalRegisterOperand<double>(instr.Operands[1]);
         var dest = interpreter.ParseRegisterOperand(instr.Operands[2]);
 
-        if (baseValue is double dBase && exponent is double dExponent)
-        {
-            env.Registers[dest] = System.Math.Pow(dBase, dExponent);
-        }
-        else if (baseValue is int iBase && exponent is int iExponent)
-        {
-            env.Registers[dest] = System.Math.Pow(iBase, iExponent);
-        }
-        else
-        {
-            throw new InvalidOperationException("Unsupported operand types for power operation.");
-        }
+        env.SetRegister(dest, System.Math.Pow(baseValue, exponent));
     }
 
     public EGraphOperandKind[] Signature { get; }
-        = [EGraphOperandKind.Register | EGraphOperandKind.Literal, EGraphOperandKind.Register | EGraphOperandKind.Literal, EGraphOperandKind.Register];
+        = [EGraphOperandKind.Register, EGraphOperandKind.Register, EGraphOperandKind.Register];
 }

@@ -28,11 +28,53 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia.Controls.Diagnostics;
+using Avalonia.Controls.Primitives;
 
 namespace RPGCreator.Core.Type
 {
     public static class GlobalStaticUIData
     {
-        public static ContextMenu? CurrentContext;
+        public static IPopupHostProvider? CurrentContext;
+
+        public static void OpenContext(Control? hostControl)
+        {
+            if(CurrentContext is Flyout flyout)
+            {
+                flyout.ShowAt(hostControl);
+                return;
+            }
+            if (CurrentContext is Popup popup)
+            {
+                popup.Open();
+                return;
+            }
+            if(CurrentContext is ContextMenu contextMenu)
+            {
+                contextMenu.Open(hostControl);
+                return;
+            }
+        }
+        
+        public static void CloseContext()
+        {
+            if(CurrentContext is Flyout flyout)
+            {
+                flyout.Hide();
+                return;
+            }
+            if (CurrentContext is Popup popup)
+            {
+                popup.Close();
+                CurrentContext = null;
+                return;
+            }
+            if(CurrentContext is ContextMenu contextMenu)
+            {
+                contextMenu.Close();
+                CurrentContext = null;
+                return;
+            }
+        }
     }
 }

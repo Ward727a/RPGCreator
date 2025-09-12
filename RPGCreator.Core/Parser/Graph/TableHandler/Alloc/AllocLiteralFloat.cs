@@ -9,7 +9,7 @@ public sealed class AllocLiteralFloat : IGraphInstrHandler
     {
         var value = interpreter.ParseFloatOperand(instr.Operands[0]);
         var dest = interpreter.ParseRegisterOperand(instr.Operands[1]);
-        env.Registers[dest] = value;
+        env.SetRegister(dest, value);
     }
 
     public EGraphOperandKind[] Signature { get; } = 

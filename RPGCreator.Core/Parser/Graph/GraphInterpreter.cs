@@ -95,6 +95,14 @@ public sealed class GraphInterpreter
         handler.Exec(instr, _env, this);
     }
 
+    /// <summary>
+    /// Return the register ID from a register operand.<br/>
+    /// This method parses the operand text to extract the register ID.<br/>
+    /// It expects the operand to be in the format "rxN", where N is the register ID.
+    /// </summary>
+    /// <param name="operand"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
     internal int ParseRegisterOperand(GraphOperands operand)
     {
         if(!operand.Kind.HasFlag(EGraphOperandKind.Register))
@@ -109,6 +117,14 @@ public sealed class GraphInterpreter
         return registerId;
     }
 
+    /// <summary>
+    /// Return the path from a path operand.<br/>
+    /// This method parses the operand text to extract the path.<br/>
+    /// It expects the operand to be a valid path string.
+    /// </summary>
+    /// <param name="operand"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
     internal string ParsePathOperand(GraphOperands operand)
     {
         if(!operand.Kind.HasFlag(EGraphOperandKind.Path))
@@ -118,6 +134,14 @@ public sealed class GraphInterpreter
         return operand.Text;
     }
 
+    /// <summary>
+    /// Return the string from a string operand.<br/>
+    /// This method parses the operand text to extract the string value.<br/>
+    /// It expects the operand to be a valid string literal.
+    /// </summary>
+    /// <param name="operand"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
     internal string ParseStringOperand(GraphOperands operand)
     {
         if (!operand.Kind.HasFlag(EGraphOperandKind.LiteralString))
@@ -132,6 +156,11 @@ public sealed class GraphInterpreter
         return operand.Text.Trim('"');
     }
     
+    /// <summary>
+    /// Return the float from a float operand.<br/>
+    /// This method parses the operand text to extract the float value.<br/>
+    /// It expects the operand to be a valid float literal.
+    /// </summary>
     internal double ParseFloatOperand(GraphOperands operand)
     {
         if (!operand.Kind.HasFlag(EGraphOperandKind.LiteralNumber))
@@ -163,6 +192,11 @@ public sealed class GraphInterpreter
         throw new InvalidOperationException($"Invalid float value: {sValue}. Expected a valid float value.");
     }
     
+    /// <summary>
+    /// Return the enum value from an enum operand.<br/>
+    /// This method parses the operand text to extract the enum value.<br/>
+    /// It expects the operand to be a valid enum value string.
+    /// </summary>
     internal T ParseEnumOperand<T>(GraphOperands operand) where T : struct, Enum
     {
         
@@ -204,6 +238,12 @@ public sealed class GraphInterpreter
         return operand.Kind == kind;
     }
     
+    /// <summary>
+    /// Evaluate an operand and return its value.<br/>
+    /// This method checks the kind of the operand and evaluates it accordingly.<br/>
+    /// It supports label, path, register, string, and literal operands.<br/>
+    /// If the operand is not of a supported kind, it throws an exception.
+    /// </summary>
     internal object? EvalOperand(GraphOperands operand)
     {
         if (operand.Kind is EGraphOperandKind.Label or EGraphOperandKind.Path)
@@ -212,8 +252,55 @@ public sealed class GraphInterpreter
         }
         
         var sValue = operand.Text;
-        if (sValue.StartsWith("rx")) return _env.Registers[ParseRegisterOperand(operand)];
-        if (sValue.StartsWith("\"")) return sValue.Trim('"');
+        if (sValue.StartsWith("rx")) return EvalRegisterOperand(operand);
         return sValue;
+    }
+    
+    internal T? EvalOperand<T>(GraphOperands operand)
+    {
+        var value = EvalOperand(operand);
+        if (value is T tValue)
+        {
+            return tValue;
+        }
+        throw new InvalidCastException($"Cannot cast operand value '{value}' to type {typeof(T).Name}.");
+    }
+    
+    /// <summary>
+    /// Evaluate a register operand and return its value.<br/>
+    /// This method checks if the operand is a register operand and retrieves the value from the environment.<br/>
+    /// It parses the operand to get the register ID and then retrieves the value from the environment's registers.
+    /// </summary>
+    /// <param name="operand"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    internal object? EvalRegisterOperand(GraphOperands operand)
+    {
+        if (!operand.Kind.HasFlag(EGraphOperandKind.Register))
+        {
+            throw new InvalidOperationException($"Expected a register operand, but got {operand.Kind}.");
+        }
+        
+        var registerId = ParseRegisterOperand(operand);
+        return _env.GetRegister(registerId);
+    }
+    /// <summary>
+    /// Evaluate a register operand and return its value as a specific type.<br/>
+    /// This method checks if the operand is a register operand and retrieves the value from the environment.<br/>
+    /// It parses the operand to get the register ID and then retrieves the value from the environment's registers.<br/>
+    /// If the value is not of the expected type, it returns null.
+    /// </summary>
+    /// <param name="operand"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    internal T? EvalRegisterOperand<T>(GraphOperands operand)
+    {
+        var value = EvalRegisterOperand(operand);
+        if (value is T tValue)
+        {
+            return tValue;
+        }
+
+        return default;
     }
 }

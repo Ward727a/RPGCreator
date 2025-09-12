@@ -7,9 +7,9 @@ namespace RPGCreator.Core.Type.Blueprint.Nodes;
 [GraphNode]
 public class NodeEnd : Node
 {
-    public override EGraphOpCode OpCode => EGraphOpCode.end;
-    public override string Description => "End the execution of the current graph.";
-    public override string Path => "@hide";
+    public override EGraphOpCode OpCode { get; protected set; } = EGraphOpCode.end;
+    public override string Description  { get; protected set; } = "End the execution of the current graph.";
+    public override string Path  { get; protected set; } = "@hide";
     public override string DisplayName { get; protected set; } = "End";
 
     public NodeEnd()

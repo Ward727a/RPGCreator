@@ -8,7 +8,9 @@ using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
 using AvaloniaEdit.Utils;
+using RPGCreator.Core.Type;
 using RPGCreator.Core.Type.Blueprint;
+using RPGCreator.Core.Type.Blueprint.Nodes;
 using RPGCreator.Core.Type.Blueprint.Nodes.Debug;
 using Serilog;
 using Point = RPGCreator.Core.Type.Internal.Point;
@@ -19,13 +21,15 @@ public sealed class NodeControl : Control
 {
     public Node Node { get; }
     private readonly Action<NodeControl, PortControl> _beginLink;
+    private readonly Action<Node> _removeNode; // TODO: Implement this action to remove the node from the graph (and not do the actual thing)
     private readonly StackPanel _left = new(){ Spacing=4 };
     private readonly StackPanel _right = new(){ Spacing=4 };
 
-    public NodeControl(Node node, Action<NodeControl,PortControl> beginLink)
+    public NodeControl(Node node, Action<NodeControl,PortControl> beginLink, Action<Node> removeNode)
     {
         Node = node;
         _beginLink = beginLink;
+        _removeNode = removeNode;
         var border = new Border
         {
             CornerRadius=new(8), 
@@ -181,6 +185,24 @@ public sealed class NodeControl : Control
             _start = new Point(Node.X, Node.Y);
             e.Handled = true;
         }
+        else if (e.GetCurrentPoint(this).Properties.IsRightButtonPressed)
+        {
+            e.Handled = true;
+            if (Node.OpCode is EGraphOpCode.start or EGraphOpCode.end)
+                return; // Do not allow to delete start or end nodes
+            // Right click to open context menu
+            var menu = new ContextMenu();
+            var item = new MenuItem { Header = "Delete Node" };
+            item.Click += (sender, args) =>
+            {
+                _removeNode(Node);
+            };
+            menu.Items.Add(item);
+            if(GlobalStaticUIData.CurrentContext != null)
+                GlobalStaticUIData.CloseContext();
+            GlobalStaticUIData.CurrentContext = menu;
+            GlobalStaticUIData.OpenContext(this);
+        }
     }
     private void Dragging(object? s, PointerEventArgs e)
     {
@@ -268,6 +290,12 @@ public sealed class PortTextInputControl : PortControl, IPortInput
         PortAttached?.Invoke();
         _inputBox.IsVisible = false;
         Height = 22;
+        if (Width - 100 <= 0)
+        {
+            Log.Error("(Internal error) PortControl width cannot be less or equal than 0, resetting to 100.");
+            Width = 100;
+            return;
+        }
         Width -= 100;
     }
 
@@ -519,6 +547,12 @@ public sealed class PortEnumInputControl : PortControl, IPortInput
         PortAttached?.Invoke();
         _inputBox.IsVisible = false;
         Height = 22;
+        if (Width - 100 <= 0)
+        {
+            Log.Error("(Internal error) PortControl width cannot be less or equal than 0, resetting to 100.");
+            Width = 100;
+            return;
+        }
         Width -= 100;
     }
 

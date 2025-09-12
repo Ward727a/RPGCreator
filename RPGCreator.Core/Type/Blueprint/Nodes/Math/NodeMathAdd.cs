@@ -6,12 +6,12 @@ namespace RPGCreator.Core.Type.Blueprint.Nodes.Math;
 [GraphNode]
 public class NodeMathAdd : Node
 {
-    public override EGraphOpCode OpCode { get; } = EGraphOpCode.math_add;
+    public override EGraphOpCode OpCode { get; protected set; } = EGraphOpCode.math_add;
     public override string DisplayName { get; protected set; } = "Math Add";
 
 
-    public override string Description => "Adds two numbers together.";
-    public override string Path => "Math|Operations";
+    public override string Description  { get; protected set; } = "Adds two numbers together.";
+    public override string Path  { get; protected set; } = "Math|Operations";
     
     private NumberPort InputA => (NumberPort)Inputs[0];
     private NumberPort InputB => (NumberPort)Inputs[1];

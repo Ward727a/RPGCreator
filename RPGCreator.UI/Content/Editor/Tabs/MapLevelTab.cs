@@ -163,7 +163,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
                         if (GlobalStaticUIData.CurrentContext != null)
                         {
-                            GlobalStaticUIData.CurrentContext.Close();
+                            GlobalStaticUIData.CloseContext();
                         }
 
                         GlobalStaticUIData.CurrentContext = new ContextMenu();
@@ -179,21 +179,21 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                             Console.ResetColor();
                             //EditorWindow.Instance.OpenMapEditor(Map);
                         };
-                        GlobalStaticUIData.CurrentContext.Items.Add(openMapItem);
+                        (GlobalStaticUIData.CurrentContext as ContextMenu).Items.Add(openMapItem);
 
                         var addLevelItem = new MenuItem { Header = "Add Level" };
                         addLevelItem.Click += (s, e) => OnAddLevel();
-                        GlobalStaticUIData.CurrentContext.Items.Add(addLevelItem);
+                        (GlobalStaticUIData.CurrentContext as ContextMenu).Items.Add(addLevelItem);
 
                         var renameMapItem = new MenuItem { Header = "Rename Map" };
                         renameMapItem.Click += (s, e) => OnRenameMap();
-                        GlobalStaticUIData.CurrentContext.Items.Add(renameMapItem);
+                        (GlobalStaticUIData.CurrentContext as ContextMenu).Items.Add(renameMapItem);
 
                         var removeMapItem = new MenuItem { Header = "Remove Map" };
                         removeMapItem.Click += (s, e) => OnRemoveMap();
-                        GlobalStaticUIData.CurrentContext.Items.Add(removeMapItem);
+                        (GlobalStaticUIData.CurrentContext as ContextMenu).Items.Add(removeMapItem);
 
-                        GlobalStaticUIData.CurrentContext.Open(this);
+                        GlobalStaticUIData.OpenContext(this);
                     }
                     else if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
                     {
@@ -392,13 +392,13 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                         e.Handled = true; // Mark the event as handled to prevent further processing
                         if (GlobalStaticUIData.CurrentContext != null)
                         {
-                            GlobalStaticUIData.CurrentContext.Close();
+                            GlobalStaticUIData.CloseContext();
                         }
                         GlobalStaticUIData.CurrentContext = new ContextMenu();
                         var removeLevelItem = new MenuItem { Header = "Remove Level" };
                         removeLevelItem.Click += (s, e) => OnRemoveLevel();
-                        GlobalStaticUIData.CurrentContext.Items.Add(removeLevelItem);
-                        GlobalStaticUIData.CurrentContext.Open(this);
+                        (GlobalStaticUIData.CurrentContext as ContextMenu).Items.Add(removeLevelItem);
+                        GlobalStaticUIData.OpenContext(this);
                     }
                 };
                 PointerEntered += (s, e) =>
@@ -449,13 +449,13 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                         e.Handled = true; // Mark the event as handled to prevent further processing
                         if (GlobalStaticUIData.CurrentContext != null)
                         {
-                            GlobalStaticUIData.CurrentContext.Close();
+                            GlobalStaticUIData.CloseContext();
                         }
                         GlobalStaticUIData.CurrentContext = new ContextMenu();
                         var removeLevelItem = new MenuItem { Header = "Remove Level" };
                         removeLevelItem.Click += (s, e) => OnRemoveLevel();
-                        GlobalStaticUIData.CurrentContext.Items.Add(removeLevelItem);
-                        GlobalStaticUIData.CurrentContext.Open(this);
+                        (GlobalStaticUIData.CurrentContext as ContextMenu).Items.Add(removeLevelItem);
+                        GlobalStaticUIData.OpenContext(this);
                     }
                 };
                 PointerEntered += (s, e) =>
@@ -551,12 +551,12 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
                     e.Handled = true;
 
-                    GlobalStaticUIData.CurrentContext?.Close();
+                    GlobalStaticUIData.CloseContext();
                     GlobalStaticUIData.CurrentContext = new ContextMenu();
                     var addMapItem = new MenuItem { Header = "Add Map" };
                     addMapItem.Click += (s, e) => OnCreateNewMap();
-                    GlobalStaticUIData.CurrentContext.Items.Add(addMapItem);
-                    GlobalStaticUIData.CurrentContext.Open(cont);
+                    (GlobalStaticUIData.CurrentContext as ContextMenu).Items.Add(addMapItem);
+                    GlobalStaticUIData.OpenContext(cont);
                 }
             };
         }

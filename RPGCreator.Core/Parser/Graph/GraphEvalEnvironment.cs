@@ -3,15 +3,86 @@ namespace RPGCreator.Core.Parser.Graph;
 public sealed class GraphEvalEnvironment
 {
     public const int MaxRegisters = 256;
-    public object?[] Registers { get; } = new object?[MaxRegisters];
-    public Dictionary<string, Object?> Variables { get; } = new(); // This holds instance-specific variables.
-    public static Dictionary<string, Object?> GlobalsVariables { get; } = new(); // This should be static to hold global variables across all instances of the environment.
+    /// <summary>
+    /// Registers are used to store temporary values during the evaluation of the graph.<br/>
+    /// To access a register, you should use the `GetRegister` and `SetRegister` methods.<br/>
+    /// NEVER access the `Registers` array directly unless you know what you're doing.<br/>
+    /// The index of the register should be between 0 and `MaxRegisters - 1`.<br/>
+    /// If you need to store more than `MaxRegisters` values, consider using a different data structure or breaking your graph into smaller parts.<br/>
+    /// The registers are initialized to `null` by default, so you can safely use them without worrying about uninitialized values.
+    /// </summary>
+    internal object?[] Registers { get; } = new object?[MaxRegisters];
+    private Dictionary<string, Object?> Variables { get; } = new(); // This holds instance-specific variables.
+    public static Dictionary<string, object?> GlobalsVariables { get; } = new(); // This should be static to hold global variables across all instances of the environment.
     /// <summary>
     /// Dictionary to hold labels and their corresponding block index.
     /// </summary>
     public Dictionary<string, int> Labels { get; } = new();
     public int CurrentBlock { get; set; } = 0;
     public int CurrentInstruction { get; set; } = 0;
+    
+    public bool SetRegister(int index, object? value)
+    {
+        if (index < 0 || index >= MaxRegisters)
+        {
+            throw new ArgumentOutOfRangeException(nameof(index), $"Register index must be between 0 and {MaxRegisters - 1}.");
+        }
+        Registers[index] = value;
+        return true;
+    }
+
+    public object? GetRegister(int index)
+    {
+        if (index < 0 || index >= MaxRegisters)
+        {
+            throw new ArgumentOutOfRangeException(nameof(index), $"Register index must be between 0 and {MaxRegisters - 1}.");
+        }
+        return Registers[index];
+    }
+    
+    public T GetRegister<T>(int index)
+    {
+        if (index < 0 || index >= MaxRegisters)
+        {
+            throw new ArgumentOutOfRangeException(nameof(index), $"Register index must be between 0 and {MaxRegisters - 1}.");
+        }
+        if (Registers[index] is T value)
+        {
+            return value;
+        }
+        throw new InvalidCastException($"Register at index {index} cannot be cast to type {typeof(T).Name}.");
+    }
+
+    public object? GetVariable(string name)
+    {
+        if (Variables.TryGetValue(name, out var value))
+        {
+            return value;
+        }
+        throw new KeyNotFoundException($"Variable '{name}' not found.");
+    }
+    
+    public void SetVariable(string name, object? value)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            throw new ArgumentException("Variable name cannot be null or empty.", nameof(name));
+        }
+        Variables[name] = value;
+    }
+    
+    public T? GetVariable<T>(string name)
+    {
+        if (Variables.TryGetValue(name, out var value))
+        {
+            if (value is T typedValue)
+            {
+                return typedValue;
+            }
+            throw new InvalidCastException($"Variable '{name}' cannot be cast to type {typeof(T).Name}.");
+        }
+        throw new KeyNotFoundException($"Variable '{name}' not found.");
+    }
 
     static public void AddVM(string path, object? value)
     {

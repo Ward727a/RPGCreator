@@ -18,10 +18,10 @@ public class NodePrint : Node
         Error
     }
     
-    public override EGraphOpCode OpCode => EGraphOpCode.debug_print;
+    public override EGraphOpCode OpCode { get; protected set; } = EGraphOpCode.debug_print;
     public override string DisplayName { get; protected set; } = "Print message";
-    public override string Description => "Print a message to the debug console with a specific level.";
-    public override string Path => "Debug";
+    public override string Description { get; protected set; } = "Print a message to the debug console with a specific level.";
+    public override string Path { get; protected set; } = "Debug";
     
     private Port MessagePort => Inputs[1];
     private EnumPort LevelPort => (EnumPort)Inputs[2];

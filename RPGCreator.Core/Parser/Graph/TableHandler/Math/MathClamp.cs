@@ -7,17 +7,17 @@ public sealed class MathClamp : IGraphInstrHandler
 {
     public void Exec(GraphInstr instr, GraphEvalEnvironment env, GraphInterpreter interpreter)
     {
-        var value = (double)(interpreter.EvalOperand(instr.Operands[0]) ?? 0);
-        var min = (double)(interpreter.EvalOperand(instr.Operands[1]) ?? 0);
-        var max = (double)(interpreter.EvalOperand(instr.Operands[2]) ?? 0);
+        var value = interpreter.EvalRegisterOperand<double>(instr.Operands[0]);
+        var min = interpreter.EvalRegisterOperand<double>(instr.Operands[1]);
+        var max = interpreter.EvalRegisterOperand<double>(instr.Operands[2]);
         var dest = interpreter.ParseRegisterOperand(instr.Operands[3]);
 
-        env.Registers[dest] = System.Math.Clamp(value, min, max);
+        env.SetRegister(dest, System.Math.Clamp(value, min, max));
     }
 
     public EGraphOperandKind[] Signature { get; }
-        = [EGraphOperandKind.Register | EGraphOperandKind.Literal, 
-           EGraphOperandKind.Register | EGraphOperandKind.Literal, 
-           EGraphOperandKind.Register | EGraphOperandKind.Literal, 
+        = [EGraphOperandKind.Register, 
+           EGraphOperandKind.Register, 
+           EGraphOperandKind.Register, 
            EGraphOperandKind.Register];
 }

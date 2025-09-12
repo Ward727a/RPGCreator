@@ -6,11 +6,11 @@ namespace RPGCreator.Core.Type.Blueprint.Nodes.Math;
 [GraphNode]
 public class NodeMathMultiply : Node
 {
-    public override EGraphOpCode OpCode => EGraphOpCode.math_multiply;
+    public override EGraphOpCode OpCode { get; protected set; } = EGraphOpCode.math_multiply;
     public override string DisplayName { get; protected set; } = "Math Multiply";
 
-    public override string Description => "Multiplies two numbers together.";
-    public override string Path => "Math|Operations";
+    public override string Description  { get; protected set; } = "Multiplies two numbers together.";
+    public override string Path  { get; protected set; } = "Math|Operations";
     NumberPort InputA => (NumberPort)Inputs[0];
     NumberPort InputB => (NumberPort)Inputs[1];
     

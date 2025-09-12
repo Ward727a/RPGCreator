@@ -8,11 +8,11 @@ namespace RPGCreator.Core.Type.Blueprint.Nodes.Gets;
 [GraphNode]
 public class GetPlayerName : Node
 {
-    public override EGraphOpCode OpCode => EGraphOpCode.get_vm;
+    public override EGraphOpCode OpCode { get; protected set; } = EGraphOpCode.get_vm;
     public override string DisplayName { get; protected set; } = "Get Player Name";
 
     public override string Description => "Get the name of the player character from the game state.";
-    public override string Path => "Player|Getters";
+    public override string Path  { get; protected set; } = "Player|Getters";
 
     public GetPlayerName()
     {
