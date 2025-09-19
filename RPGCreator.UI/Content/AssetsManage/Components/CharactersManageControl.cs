@@ -312,7 +312,7 @@ public class CharactersManageControl : UserControl
     private void OnAddCharacter(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         var host_ = ((AssetsManageWindow)this.GetVisualRoot()!);
-        var characterEditor = new CharacterEditorWindowControl(new CharacterData());
+        var characterEditor = new CharacterEditorWindowControl(new CharacterData(""));
         host_.OpenCustom(characterEditor);
         OnNeedRefresh?.Invoke();
     }

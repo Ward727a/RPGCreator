@@ -11,7 +11,7 @@ public class MapRegistry : IAssetRegistry<IMapDef>
     public event EventHandler<IMapDef>? AssetRegistered;
     public event EventHandler<IMapDef>? AssetUnregistered;
 
-    public void Register(IMapDef asset)
+    public void Register(IMapDef asset, bool overwrite = false)
     {
         if (_byId.ContainsKey(asset.Unique))
         {

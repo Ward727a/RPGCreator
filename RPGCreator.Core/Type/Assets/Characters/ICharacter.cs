@@ -1,6 +1,8 @@
+using RPGCreator.Core.Type.Internal;
+
 namespace RPGCreator.Core.Type.Assets.Characters;
 
-public interface ICharacter
+public interface ICharacter : IHasSavePath, IHasUniqueId
 {
     public event EventHandler<string>? PortraitChanged;
     public event EventHandler<string>? SpriteChanged;
@@ -9,7 +11,6 @@ public interface ICharacter
     public event EventHandler<int>? InitialLevelChanged;
     public event EventHandler<Ulid>? ClassChanged;
     
-    public Ulid Unique { get; }
     public string Name { get; }
     public string PortraitPath { get; set; }
     public string SpritePath { get; set; }
@@ -17,7 +18,7 @@ public interface ICharacter
     public int CurrentLevel { get; set; }
     public int MaxLevel { get; set; }
     public Ulid ClassId { get; set; }
-    public CharacterStats Stats { get; }
+    public Dictionary<Ulid,CharacterStats> Stats { get; }
     public CharacterFeatures Features { get; }
     public CharacterRolePlayInfo RolePlayInfo { get; }
 }

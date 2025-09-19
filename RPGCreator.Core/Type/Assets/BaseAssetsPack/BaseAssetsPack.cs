@@ -32,7 +32,9 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Managers.AssetsManager.Registries;
+using RPGCreator.Core.Type.Assets.Characters.Stats;
 using RPGCreator.Core.Type.Assets.Tilesets;
+using RPGCreator.Core.Type.Internal;
 using Serilog;
 
 namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
@@ -157,7 +159,20 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
 
                 if (assetType != null && asset != null)
                 {
-                    AssetsManager.AssetMapping[assetType](asset);
+                    
+                    var trueType = assetType switch
+                    {
+                        _ when assetType == typeof(StatDefinition) => typeof(IStatDef),
+                        _ => assetType
+                    };
+                    
+                    if (!AssetsManager.AssetMapping.ContainsKey(trueType))
+                    {
+                        
+                        Log.Warning("No asset mapping found for type {AssetType}. Skipping asset at path {AssetPath}.", trueType.Name, assetPath);
+                        continue;
+                    }
+                    AssetsManager.AssetMapping[trueType](asset);
                     AssetsPaths[assetID] = assetPath;
                 }
                 else
@@ -236,6 +251,12 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
             asset.Save();
         }
 
+        /// <summary>
+        /// Old system, need to be updated or removed depending on usage.
+        /// </summary>
+        /// <param name="oldPath"></param>
+        /// <param name="newPath"></param>
+        /// <returns></returns>
         public bool MoveAsset(string oldPath, string newPath)
         {
 
@@ -288,43 +309,28 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
             return true;
         }
 
-        public void AddAsset<T>(T asset) where T : BaseAsset
+        public void AddAsset<T>(T asset) where T : IHasUniqueId, IHasSavePath
         {
-            var PreArgs = new BaseAssetsPackAddingArgs(asset.Name, asset);
-            Events.OnAssetAdding(PreArgs);
+            // Old way, need to be updated or removed depending on if the global events are kept or not.
+            // var PreArgs = new BaseAssetsPackAddingArgs(asset.Unique.ToString(), asset);
+            // Events.OnAssetAdding(PreArgs);
+            
+            // if(PreArgs.Cancel)
+                // return;
 
-            if(PreArgs.Cancel)
-                return;
+            // if (!AssetsCache.TryAdd(asset.Unique.ToString(), asset))
+            // {
+            //     // Events.OnAssetAdded(PreArgs.ToPost().SetError(true, $"Asset at path {asset.Unique} already exist."));
+            //     return;
+            // }
 
-            if(string.IsNullOrEmpty(asset.PackName))
+            if (string.IsNullOrEmpty(asset.SavePath))
             {
-                asset.PackName = Name;
+                asset.SavePath = Path.Combine(AssetsFolder, $"{asset.Unique}.xml");
             }
+            AssetsPaths[asset.Unique.ToString()] = asset.SavePath;
 
-            if(string.IsNullOrEmpty(asset.PackPath))
-            {
-                asset.PackPath = $"{asset.Type}/{asset.Name}";
-            }
-
-            else if(asset.PackName != Name)
-            {
-                Events.OnAssetAdded(PreArgs.ToPost().SetError(true, $"Asset {asset.Name} doesn't belong to this pack (Belong to: {asset.PackName}."));
-                return;
-            }
-
-            if (!AssetsCache.TryAdd(asset.Unique.ToString(), asset))
-            {
-                Events.OnAssetAdded(PreArgs.ToPost().SetError(true, $"Asset at path {asset.Name} already exist."));
-                return;
-            }
-
-            if (string.IsNullOrEmpty(asset.AssetPath))
-            {
-                asset.AssetPath = Path.Combine(AssetsFolder, $"{asset.Unique}.xml");
-            }
-            AssetsPaths[asset.Unique.ToString()] = asset.AssetPath;
-
-            Events.OnAssetAdded(PreArgs.ToPost());
+            // Events.OnAssetAdded(PreArgs.ToPost());
         }
 
         [Obsolete("This method should not be used. Use AddAsset<T>(T Asset) method instead.")]

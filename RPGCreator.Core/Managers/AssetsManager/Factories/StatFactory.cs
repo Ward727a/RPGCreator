@@ -1,0 +1,52 @@
+using Avalonia.Input;
+using RPGCreator.Core.Type.Assets.Characters.Stats;
+using RPGCreator.Core.Type.Internal;
+
+namespace RPGCreator.Core.Managers.AssetsManager.Factories;
+
+public class StatFactory : IAssetFactory<StatInstance, IStatDef>
+{
+    private readonly Dictionary<Ulid, StatInstance> _instances = [];
+    
+    public StatInstance Create(IStatDef def)
+    {
+        if (_instances.TryGetValue(def.Unique, out var foundedInstance))
+        {
+            return foundedInstance;
+        }
+
+        var instance = new StatInstance(def);
+        _instances[def.Unique] = instance;
+        return instance;
+    }
+
+    public ValueTask<StatInstance> CreateAsync(IStatDef def, CancellationToken ct = default)
+    {
+        return new ValueTask<StatInstance>(Create(def));
+    }
+
+    public void Refresh(IStatDef def)
+    {
+        if (_instances.TryGetValue(def.Unique, out var instance))
+        {
+            instance.Reload(def);
+        }
+    }
+
+    public void Release(IStatDef def)
+    {
+        if (_instances.ContainsKey(def.Unique))
+        {
+            _instances.Remove(def.Unique);
+        }
+        else
+        {
+            throw new KeyNotFoundException($"Tileset instance with unique ID {def.Unique} not found.");
+        }
+    }
+
+    public void Clear()
+    {
+        _instances.Clear();
+    }
+}

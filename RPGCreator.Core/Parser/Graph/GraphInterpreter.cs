@@ -7,11 +7,11 @@ namespace RPGCreator.Core.Parser.Graph;
 
 public sealed class GraphInterpreter
 {
-    private readonly List<GraphLabeledInstr> _program;
+    private readonly IList<GraphLabeledInstr> _program;
     private readonly GraphEvalEnvironment _env;
     private Dictionary<string, Object?> GlobalsVariables => GraphEvalEnvironment.GlobalsVariables;
 
-    public GraphInterpreter(List<GraphLabeledInstr> program, GraphEvalEnvironment env)
+    public GraphInterpreter(IList<GraphLabeledInstr> program, GraphEvalEnvironment env)
     {
         _program = program;
         _env = env;

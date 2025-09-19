@@ -12,7 +12,7 @@ public class TilesetRegistry : IAssetRegistry<ITilesetDef>
     public event EventHandler<ITilesetDef>? AssetRegistered;
     public event EventHandler<ITilesetDef>? AssetUnregistered;
 
-    public void Register(ITilesetDef asset)
+    public void Register(ITilesetDef asset, bool overwrite = false)
     {
         if (_byId.ContainsKey(asset.Unique))
         {

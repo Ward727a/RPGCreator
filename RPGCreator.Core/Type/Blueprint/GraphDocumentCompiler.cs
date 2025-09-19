@@ -22,6 +22,22 @@ public sealed class GraphDocumentCompiler(GraphDocument doc)
     private List<string> _pureNodesExecutionOrder = new();
     
     private List<GraphLabeledInstr> _program = new();
+
+    public static GraphDocumentCompiled Compile(GraphDocument doc)
+    {
+        var compiler = new GraphDocumentCompiler(doc);
+        try
+        {
+            compiler.Format();
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "Error while compiling the graph document: {Message}", e.Message);
+            return new GraphDocumentCompiled(new List<GraphLabeledInstr>(), doc.GraphVariables){ DocumentPath = doc.SavePath };
+        }
+
+        return new GraphDocumentCompiled(compiler._program, doc.GraphVariables){ DocumentPath = doc.SavePath };
+    }
     
     public void Format()
     {

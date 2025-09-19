@@ -1,6 +1,9 @@
+using RPGCreator.Core.Parser.Graph;
+using RPGCreator.Core.Type.Internal;
+
 namespace RPGCreator.Core.Type.Assets.Characters.Stats;
 
-public sealed class StatInstance
+public sealed class StatInstance : IReloadable<IStatDef>
 {
     /// <summary>
     /// Define the unique identifier of the stat type.
@@ -24,4 +27,43 @@ public sealed class StatInstance
     /// It can be modified by modifiers, such as items, effects, or any other object that can modify the stat.
     /// </summary>
     public float CurrentValue { get; private set; }
+
+    private IStatDef _statDefinition;
+    public IStatDef StatDefinition => _statDefinition;
+
+    public StatInstance()
+    {
+        
+    }
+
+    public StatInstance(IStatDef def)
+    {
+        _statDefinition = def ?? throw new ArgumentNullException(nameof(def));
+        StatDefinitionId = def.Unique;
+        RuntimeId = Ulid.NewUlid();
+        BaseValue = def.DefaultValue;
+        CurrentValue = BaseValue;
+    }
+    
+    public bool TryRunEvent(string eventName, GraphEvalEnvironment? env = null)
+    {
+        if(StatDefinition.TryGetEvent(eventName, out var eventCompiled) && eventCompiled != null)
+        {
+            return eventCompiled.Run(env);
+        }
+        return false;
+    }
+
+    public void Reload(IStatDef newDefinition)
+    {
+        if (newDefinition.Unique != StatDefinitionId)
+        {
+            throw new InvalidOperationException("Cannot reload StatInstance with a different StatDefinition unique ID.");
+        }
+        _statDefinition = newDefinition;
+        // Optionally, you might want to reset the BaseValue to the new definition's DefaultValue
+        BaseValue = newDefinition.DefaultValue;
+        // And reset CurrentValue to BaseValue or keep it as is, depending on your game's logic
+        // CurrentValue = Math.Clamp(CurrentValue, newDefinition.StatMinValue, GetStatCapValue());
+    }
 }

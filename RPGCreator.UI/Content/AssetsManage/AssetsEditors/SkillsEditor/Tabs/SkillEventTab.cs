@@ -1,25 +1,20 @@
-
 using System;
 using System.IO;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using RPGCreator.Core;
-using RPGCreator.Core.Type.Assets.Characters.Stats;
+using RPGCreator.Core.Type.Assets.Skills;
 using RPGCreator.Core.Type.Blueprint;
 using RPGCreator.Core.Type.Blueprint.Nodes;
 using RPGCreator.Core.Type.Blueprint.Nodes.Debug;
-using RPGCreator.Core.Type.Blueprint.Nodes.Gets;
 using RPGCreator.Core.Type.Blueprint.Nodes.Math;
 using RPGCreator.UI.Common.Blueprint;
 using Serilog;
 
-namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor.Tabs;
+namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEditor.Tabs;
 
-/// <summary>
-/// This will manage what happens for different "events" related to the stat in the game (e.g. When the stat come to the minimum value, when the stat is modified, etc.).
-/// </summary>
-public class StatEventTab : UserControl
+public class SkillEventTab : UserControl
 {
     #region Constants
     #endregion
@@ -28,25 +23,23 @@ public class StatEventTab : UserControl
     #endregion
     
     #region Properties
-    public IStatDef StatDef { get; private set; }
+    public ISkillDef SkillDef { get; private set; }
     private GraphDocument _doc = new();
     #endregion
     
     #region Components
-
     private GraphView _graph;
     private StackPanel _topMenu;
     private Button _compileAndRunButton;
     private Button _saveGraphButton;
     private Button _testLoadGraphButton;
-    
-    
     #endregion
     
     #region Constructors
-    public StatEventTab(IStatDef statDef)
+    public SkillEventTab(ISkillDef skillDef)
     {
-        StatDef = statDef;
+        ArgumentNullException.ThrowIfNull(skillDef, nameof(skillDef));
+        SkillDef = skillDef;
         CreateComponents();
     }
     #endregion
@@ -115,8 +108,6 @@ public class StatEventTab : UserControl
                 Log.Information("Graph saved successfully.");
                 
                 _doc.SavePath = "test_save_graph.xml";
-                
-                StatDef.AddEvent("test", GraphDocumentCompiler.Compile(_doc));
             }
             catch (Exception ex)
             {

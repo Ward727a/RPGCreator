@@ -29,6 +29,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using RPGCreator.Core.Type.Internal;
 using static RPGCreator.Core.Type.Assets.AssetCategoryAttribute;
 using static RPGCreator.Core.Type.Assets.BaseAsset;
 
@@ -73,9 +74,11 @@ namespace RPGCreator.Core.Type.Assets
         }
     }
 
-    public class BaseAsset : ObservableObject
+    public class BaseAsset : ObservableObject, IHasSavePath
     {
         
+
+        public string SavePath { get; set; }
         #region Events
         
         public event EventHandler<string>? NameChanged;
@@ -87,7 +90,6 @@ namespace RPGCreator.Core.Type.Assets
         /// True if the asset should be cached, false otherwise.<br/>
         /// </summary>
         public virtual bool ShouldBeCached => false;
-        public string AssetPath { get; set; } = string.Empty;
 
         public bool IsCached { get; internal set; } = false;
         public BaseAssetsPack.BaseAssetsPack Pack { get; set; } = null!; // This should be set by the pack manager when the asset is loaded.
@@ -191,7 +193,7 @@ namespace RPGCreator.Core.Type.Assets
             {
                 EngineSerializer.Instance.Serialize(serializable, out var data, false);
 
-                if(string.IsNullOrEmpty(AssetPath))
+                if(string.IsNullOrEmpty(SavePath))
                 {
                     var assetDir = Pack.AssetsFolder;
 
@@ -211,12 +213,12 @@ namespace RPGCreator.Core.Type.Assets
                     
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine($"Asset {Name} of type {Type} with unique ID {Unique} has no path set, creating one.");
-                    AssetPath = Path.Combine(assetDir, $"{Unique}.xml");
+                    SavePath = Path.Combine(assetDir, $"{Unique}.xml");
                 }
 
-                File.WriteAllText(AssetPath, data);
+                File.WriteAllText(SavePath, data);
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"Saved asset {Name} of type {Type} with unique ID {Unique} to {AssetPath}.");
+                Console.WriteLine($"Saved asset {Name} of type {Type} with unique ID {Unique} to {SavePath}.");
                 Console.ResetColor();
                 return;
             }

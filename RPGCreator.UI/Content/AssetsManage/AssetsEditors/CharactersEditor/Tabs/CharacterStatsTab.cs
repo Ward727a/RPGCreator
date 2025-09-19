@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Layout;
 using RPGCreator.Core.Type.Assets.Characters;
 using RPGCreator.Core.Type;
+using RPGCreator.Core.Type.Assets.Characters.Stats;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;
@@ -15,7 +16,7 @@ public class CharacterStatsTab : UserControl
 
     #region Properties
 
-    public CharacterData Data;
+    private CharacterData Data;
     
     #endregion
     
@@ -60,109 +61,82 @@ public class CharacterStatsTab : UserControl
             Margin = new Avalonia.Thickness(10)
         };
 
-        HealthPanel = new StackPanel
+        // Adding stats input accordions dynamically based on the stats defined in CharacterData (so the stats found in the StatsRegistry)
+        foreach (var keyValuePair in Data.Stats)
         {
-            Orientation = Orientation.Vertical,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            Margin = new Avalonia.Thickness(10)
-        };
-        HealthAccordion = new Accordion(HealthPanel, "Health stat", true);
-        Body.Children.Add(HealthAccordion);
-        
-        InitialHealth = new NumericIntUpDown()
-        {
-            Watermark = "Initial Health",
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            Minimum = 1,
-            Maximum = 100,
-            Value = 100,
-            Margin = new Avalonia.Thickness(0, 0, 0, 10)
-        };
-        HealthPanel.Children.Add(
-            new InputLabel("Initial Health", InitialHealth, "100")
-        );
-        
-        MaxHealth = new NumericIntUpDown()
-        {
-            Watermark = "Max Health",
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            Minimum = 1,
-            Maximum = 100,
-            Value = 100,
-            Margin = new Avalonia.Thickness(0, 0, 0, 10)
-        };
-        HealthPanel.Children.Add(
-            new InputLabel("Max Health", MaxHealth, "100")
-        );
-        
-        ManaPanel = new StackPanel
-        {
-            Orientation = Orientation.Vertical,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            Margin = new Avalonia.Thickness(10)
-        };
-        ManaAccordion = new Accordion(ManaPanel, "Mana stat", true);
-        Body.Children.Add(ManaAccordion);
-        InitialMana = new NumericIntUpDown()
-        {
-            Watermark = "Initial Mana",
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            Minimum = 0,
-            Maximum = 100,
-            Value = 50,
-            Margin = new Avalonia.Thickness(0, 0, 0, 10)
-        };
-        ManaPanel.Children.Add(
-            new InputLabel("Initial Mana", InitialMana, "100")
-        );
-        MaxMana = new NumericIntUpDown()
-        {
-            Watermark = "Max Mana",
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            Minimum = 0,
-            Maximum = 100,
-            Value = 50,
-            Margin = new Avalonia.Thickness(0, 0, 0, 10)
-        };
-        ManaPanel.Children.Add(
-            new InputLabel("Max Mana", MaxMana, "100")
-        );
-        StaminaPanel = new StackPanel
-        {
-            Orientation = Orientation.Vertical,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            Margin = new Avalonia.Thickness(10)
-        };
-        StaminaAccordion = new Accordion(StaminaPanel, "Stamina stat", true);
-        Body.Children.Add(StaminaAccordion);
-        InitialStamina = new NumericIntUpDown()
-        {
-            Watermark = "Initial Stamina",
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            Minimum = 0,
-            Maximum = 100,
-            Value = 50,
-            Margin = new Avalonia.Thickness(0, 0, 0, 10)
-        };
-        StaminaPanel.Children.Add(
-            new InputLabel("Initial Stamina", InitialStamina, "100")
-        );
-        MaxStamina = new NumericIntUpDown()
-        {
-            Watermark = "Max Stamina",
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            Minimum = 0,
-            Maximum = 100,
-            Value = 50,
-            Margin = new Avalonia.Thickness(0, 0, 0, 10)
-        };
-        StaminaPanel.Children.Add(
-            new InputLabel("Max Stamina", MaxStamina, "100")
-        );
+            var accordion = new Expander()
+            {
+                Header = keyValuePair.Value.StatDef.Name
+            };
+            var panel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Top,
+                Margin = new Avalonia.Thickness(5)
+            };
+            accordion.Content = panel;
+            Body.Children.Add(accordion);
+            
+            var initialValue = new NumericFloatUpDown
+            {
+                Minimum = 0,
+                Value = keyValuePair.Value.CurrentValue,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Center,
+                Width = 200,
+                Margin = new Avalonia.Thickness(5),
+                Watermark = "Initial Value"
+            };
+            initialValue.ValueChanged += (s, e) =>
+            {
+                if (initialValue.Value.HasValue)
+                {
+                    keyValuePair.Value.CurrentValue = initialValue.Value.Value;
+                }
+            };
+            panel.Children.Add(new InputLabel("Initial Value", initialValue));
+            var maxValue = new NumericFloatUpDown
+            {
+                Minimum = 1,
+                Value = keyValuePair.Value.MaxValue,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Center,
+                Width = 200,
+                Margin = new Avalonia.Thickness(5),
+                Watermark = "Max Value"
+            };
+            maxValue.ValueChanged += (s, e) =>
+            {
+                if (maxValue.Value.HasValue)
+                {
+                    keyValuePair.Value.MaxValue = maxValue.Value.Value;
+                }
+            };
+            panel.Children.Add(new InputLabel("Max Value", maxValue));
+            
+            maxValue.IsEnabled = keyValuePair.Value.StatDef.StatCapType.Equals(EStatTypeCap.ByValue);
+            
+            var minValue = new NumericFloatUpDown
+            {
+                Minimum = 0,
+                Value = keyValuePair.Value.MinValue,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Center,
+                Width = 200,
+                Margin = new Avalonia.Thickness(5),
+                Watermark = "Minimum Value"
+            };
+            minValue.ValueChanged += (s, e) =>
+            {
+                if (minValue.Value.HasValue)
+                {
+                    keyValuePair.Value.MinValue = minValue.Value.Value;
+                }
+            };
+            panel.Children.Add(new InputLabel("Minimum Value", minValue));
 
+        }
     }
     
     #endregion

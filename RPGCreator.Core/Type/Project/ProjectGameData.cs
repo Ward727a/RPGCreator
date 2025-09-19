@@ -31,6 +31,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Type.Assets.BaseAssetsPack;
+using RPGCreator.Core.Type.Assets.Characters.Stats;
 
 namespace RPGCreator.Core.Type.Project
 {
@@ -50,6 +52,7 @@ namespace RPGCreator.Core.Type.Project
         private BaseProject Project;
 
         public ObservableCollection<MapDefinition> Maps = [];
+        public string GamePackPath;
 
         public ProjectGameData()
         {
@@ -63,7 +66,8 @@ namespace RPGCreator.Core.Type.Project
         public SerializationInfo GetObjectData()
         {
             SerializationInfo info = new SerializationInfo(typeof(ProjectGameData));
-            info.AddValue("Maps", Maps);
+            info.AddValue(nameof(Maps), Maps);
+            info.AddValue(nameof(GamePackPath), GamePackPath);
             // Add other properties as needed
             return info;
         }
@@ -72,12 +76,10 @@ namespace RPGCreator.Core.Type.Project
         {
             if (info == null) throw new ArgumentNullException(nameof(info));
 
-            info.TryGetList("Maps", out List<MapInstance> maps, [], "Could not load Maps from project game data.");
+            info.TryGetList("Maps", out List<MapDefinition> maps, [], "Could not load Maps from project game data.");
             // Set other properties as needed
-            if (Maps == null)
-            {
-                Maps = new ObservableCollection<MapDefinition>();
-            }
+            Maps = new ObservableCollection<MapDefinition>(maps);
+            
         }
     }
 }

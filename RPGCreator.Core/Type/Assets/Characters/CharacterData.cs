@@ -1,4 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
+using RPGCreator.Core.Type.Assets.Characters.Stats;
+using RPGCreator.Core.Type.Internal;
 
 namespace RPGCreator.Core.Type.Assets.Characters;
 
@@ -8,185 +10,96 @@ namespace RPGCreator.Core.Type.Assets.Characters;
 /// Basic character stats structure. <br/>
 /// This structure is just a simple container for now, but it will be changed and extended in the future.
 /// </summary>
-public struct CharacterStats() : ISerializable, IDeserializable
+public class CharacterStats(IStatDef def) : ISerializable, IDeserializable
 {
-    public struct CharacterStatsChangedEventArgs(string statName, int oldValue, int newValue)
+    public Ulid Unique => StatDef.Unique;
+    public IStatDef StatDef { get; private set; } = def;
+    public float CurrentValue { get; set; } = def.DefaultValue;
+    public float MaxValue { get; set; } = def.StatCapValue;
+    public float MinValue { get; set; } = def.StatMinValue;
+
+    public IStatDef GenerateDefinition()
     {
-        public string StatName { get; } = statName;
-        public int OldValue { get; } = oldValue;
-        public int NewValue { get; } = newValue;
-    }
-    public event EventHandler<CharacterStatsChangedEventArgs>? StatsChanged;
-    
-    private int _health = 100;
-    public int Health 
-    {
-        get => _health;
-        set
+        if(Math.Abs(CurrentValue - def.DefaultValue) < 0.001 && Math.Abs(MaxValue - def.StatCapValue) < 0.001 && Math.Abs(MinValue - def.StatMinValue) < 0.001)
         {
-            if (_health == value) return; // Avoid unnecessary updates
-            int oldValue = _health;
-            _health = value;
-            StatsChanged?.Invoke(this, new CharacterStatsChangedEventArgs(nameof(Health), oldValue, value));
+            return StatDef;
         }
-    }
-    
-    private int _maxHealth = 100;
-    public int MaxHealth 
-    {
-        get => _maxHealth;
-        set
+        
+        var statDef = new StatDefinition
         {
-            if (_maxHealth == value) return; // Avoid unnecessary updates
-            int oldValue = _maxHealth;
-            _maxHealth = value;
-            StatsChanged?.Invoke(this, new CharacterStatsChangedEventArgs(nameof(MaxHealth), oldValue, value));
-        }
-    }
-    
-    private int _mana = 50;
-    public int Mana 
-    {
-        get => _mana;
-        set
+            Name = StatDef.Name,
+            Description = StatDef.Description,
+            DefaultValue = CurrentValue,
+            StatTypeKind = StatDef.StatTypeKind,
+            StatMinValue = MinValue,
+            StatCapType = EStatTypeCap.ByValue,
+            StatCapValue = MaxValue,
+            IsVisible = StatDef.IsVisible,
+            StatCapStatUnique = StatDef.StatCapStatUnique,
+            PackId = StatDef.PackId,
+            StatCompiledFormula = StatDef.StatCompiledFormula,
+            StatNonCompiledFormula = StatDef.StatNonCompiledFormula,
+            SavePath = StatDef.SavePath
+        };
+
+        foreach (var graphDocumentCompiled in StatDef.GetAllEvents())
         {
-            if (_mana == value) return; // Avoid unnecessary updates
-            int oldValue = _mana;
-            _mana = value;
-            StatsChanged?.Invoke(this, new CharacterStatsChangedEventArgs(nameof(Mana), oldValue, value));
+            statDef.AddEvent(graphDocumentCompiled.Key, graphDocumentCompiled.Value);
         }
-    }
-    private int _maxMana = 50;
-    public int MaxMana 
-    {
-        get => _maxMana;
-        set
-        {
-            if (_maxMana == value) return; // Avoid unnecessary updates
-            int oldValue = _maxMana;
-            _maxMana = value;
-            StatsChanged?.Invoke(this, new CharacterStatsChangedEventArgs(nameof(MaxMana), oldValue, value));
-        }
-    }
-    
-    private int _strength = 10;
-    public int Strength 
-    {
-        get => _strength;
-        set
-        {
-            if (_strength == value) return; // Avoid unnecessary updates
-            int oldValue = _strength;
-            _strength = value;
-            StatsChanged?.Invoke(this, new CharacterStatsChangedEventArgs(nameof(Strength), oldValue, value));
-        }
-    }
-    private int _maxStrength = 100;
-    public int MaxStrength 
-    {
-        get => _maxStrength;
-        set
-        {
-            if (_maxStrength == value) return; // Avoid unnecessary updates
-            int oldValue = _maxStrength;
-            _maxStrength = value;
-            StatsChanged?.Invoke(this, new CharacterStatsChangedEventArgs(nameof(MaxStrength), oldValue, value));
-        }
-    }
-    
-    private int _agility = 10;
-    public int Agility 
-    {
-        get => _agility;
-        set
-        {
-            if (_agility == value) return; // Avoid unnecessary updates
-            int oldValue = _agility;
-            _agility = value;
-            StatsChanged?.Invoke(this, new CharacterStatsChangedEventArgs(nameof(Agility), oldValue, value));
-        }
-    }
-    private int _maxAgility = 100;
-    public int MaxAgility 
-    {
-        get => _maxAgility;
-        set
-        {
-            if (_maxAgility == value) return; // Avoid unnecessary updates
-            int oldValue = _maxAgility;
-            _maxAgility = value;
-            StatsChanged?.Invoke(this, new CharacterStatsChangedEventArgs(nameof(MaxAgility), oldValue, value));
-        }
-    }
-    
-    private int _intelligence = 10;
-    public int Intelligence 
-    {
-        get => _intelligence;
-        set
-        {
-            if (_intelligence == value) return; // Avoid unnecessary updates
-            int oldValue = _intelligence;
-            _intelligence = value;
-            StatsChanged?.Invoke(this, new CharacterStatsChangedEventArgs(nameof(Intelligence), oldValue, value));
-        }
-    }
-    private int _maxIntelligence = 100;
-    public int MaxIntelligence 
-    {
-        get => _maxIntelligence;
-        set
-        {
-            if (_maxIntelligence == value) return; // Avoid unnecessary updates
-            int oldValue = _maxIntelligence;
-            _maxIntelligence = value;
-            StatsChanged?.Invoke(this, new CharacterStatsChangedEventArgs(nameof(MaxIntelligence), oldValue, value));
-        }
+        
+        return statDef;
     }
 
+    public bool IsStatDefDifferent(IStatDef otherDef)
+    {
+        if(otherDef.Unique != StatDef.Unique) return false;
+        if(Math.Abs(otherDef.DefaultValue - StatDef.DefaultValue) > 0.001) return true;
+        if(Math.Abs(otherDef.StatCapValue - StatDef.StatCapValue) > 0.001) return true;
+        if(Math.Abs(otherDef.StatMinValue - StatDef.StatMinValue) > 0.001) return true;
+        if(otherDef.IsVisible != StatDef.IsVisible) return true;
+        if(otherDef.PackId != StatDef.PackId) return true;
+        if(otherDef.Name != StatDef.Name) return true;
+        if(otherDef.Description != StatDef.Description) return true;
+        if(otherDef.StatTypeKind != StatDef.StatTypeKind) return true;
+        if(otherDef.StatCapType != StatDef.StatCapType) return true;
+        if(otherDef.StatCapStatUnique != StatDef.StatCapStatUnique) return true;
+        if(otherDef.StatNonCompiledFormula != StatDef.StatNonCompiledFormula) return true;
+        if(otherDef.GetAllEvents() != StatDef.GetAllEvents()) return true;
+        return false;
+    }
+
+    public void SetDef(IStatDef newDef)
+    {
+        if (newDef.Unique != StatDef.Unique)
+        {
+            throw new InvalidOperationException("Cannot set CharacterStats with a different StatDefinition unique ID.");
+        }
+        var oldDef = StatDef;
+        StatDef = newDef;
+        
+        if(Math.Abs(MaxValue - oldDef.StatCapValue) < 0.001)
+        {
+            MaxValue = newDef.StatCapValue;
+        }
+
+        if (Math.Abs(MinValue - oldDef.StatMinValue) < 0.001)
+        {
+            MinValue = newDef.StatMinValue;
+        }
+        if (Math.Abs(CurrentValue - oldDef.DefaultValue) < 0.001)
+        {
+            CurrentValue = newDef.DefaultValue;
+        }
+    }
+    
     public SerializationInfo GetObjectData()
     {
-        return new SerializationInfo(typeof(CharacterStats))
-            .AddValue("Health", Health)
-            .AddValue("MaxHealth", MaxHealth)
-            .AddValue("Mana", Mana)
-            .AddValue("MaxMana", MaxMana)
-            .AddValue("Strength", Strength)
-            .AddValue("MaxStrength", MaxStrength)
-            .AddValue("Agility", Agility)
-            .AddValue("MaxAgility", MaxAgility)
-            .AddValue("Intelligence", Intelligence)
-            .AddValue("MaxIntelligence", MaxIntelligence);
+        throw new NotImplementedException();
     }
 
     public void SetObjectData(DeserializationInfo info)
     {
-        if (info == null)
-        {
-            throw new ArgumentNullException(nameof(info), "SerializationInfo cannot be null.");
-        }
-
-        info.TryGetValue("Health", out int health, 100, "Health not found or invalid (Set to 100 by default).");
-        info.TryGetValue("MaxHealth", out int maxHealth, 100, "MaxHealth not found or invalid (Set to 100 by default).");
-        info.TryGetValue("Mana", out int mana, 50, "Mana not found or invalid (Set to 50 by default).");
-        info.TryGetValue("MaxMana", out int maxMana, 50, "MaxMana not found or invalid (Set to 50 by default).");
-        info.TryGetValue("Strength", out int strength, 10, "Strength not found or invalid (Set to 10 by default).");
-        info.TryGetValue("MaxStrength", out int maxStrength, 100, "MaxStrength not found or invalid (Set to 100 by default).");
-        info.TryGetValue("Agility", out int agility, 10, "Agility not found or invalid (Set to 10 by default).");
-        info.TryGetValue("MaxAgility", out int maxAgility, 100, "MaxAgility not found or invalid (Set to 100 by default).");
-        info.TryGetValue("Intelligence", out int intelligence, 10, "Intelligence not found or invalid (Set to 10 by default).");
-        info.TryGetValue("MaxIntelligence", out int maxIntelligence, 100, "MaxIntelligence not found or invalid (Set to 100 by default).");
-
-        Health = health;
-        MaxHealth = maxHealth;
-        Mana = mana;
-        MaxMana = maxMana;
-        Strength = strength;
-        MaxStrength = maxStrength;
-        Agility = agility;
-        MaxAgility = maxAgility;
-        Intelligence = intelligence;
-        MaxIntelligence = maxIntelligence;
+        throw new NotImplementedException();
     }
 }
 
@@ -378,6 +291,8 @@ public class CharacterData : BaseAsset, ICharacter, ISerializable, IDeserializab
     #endregion
     
     #region Properties
+
+    public URN Urn { get; }
     
     private string _portraitPath = string.Empty;
     private string _spritePath = string.Empty;
@@ -458,7 +373,7 @@ public class CharacterData : BaseAsset, ICharacter, ISerializable, IDeserializab
         }
     }
 
-    public CharacterStats Stats { get; private set; } = new CharacterStats();
+    public Dictionary<Ulid, CharacterStats> Stats { get; private set; } = new();
 
     public CharacterFeatures Features { get; private set; } = new CharacterFeatures();
     
@@ -477,6 +392,32 @@ public class CharacterData : BaseAsset, ICharacter, ISerializable, IDeserializab
     public CharacterData(string name) : this()
     {
         Name = name;
+        RefreshStats();
+        Urn = new URN("character", $"{name}@{Unique}");
+    }
+    
+    #endregion
+    
+    #region Methods
+
+    public void RefreshStats()
+    {
+        var stats = EngineCore.Instance.Managers.Assets.StatsRegistry.All();
+
+        foreach (var statDef in stats)
+        {
+            if (!Stats.ContainsKey(statDef.Unique))
+            {
+                Stats[statDef.Unique] = new CharacterStats(statDef);
+                continue;
+            }
+            
+            var charStat = Stats[statDef.Unique];
+            if (charStat.IsStatDefDifferent(statDef))
+            {
+                Stats[statDef.Unique].SetDef(statDef);
+            }
+        }
     }
     
     #endregion
@@ -514,7 +455,7 @@ public class CharacterData : BaseAsset, ICharacter, ISerializable, IDeserializab
         info.TryGetValue("CurrentLevel", out int currentLevel, 1, "Current level not found or invalid (Set to 1 by default).");
         info.TryGetValue("MaxLevel", out int maxLevel, 99, "Max level not found or invalid (Set to 99 by default).");
         info.TryGetValue("ClassId", out Ulid classId, Ulid.Empty, "Class ID not found or invalid (Set to empty by default).");
-        info.TryGetValue("Stats", out CharacterStats stats, new CharacterStats(), "Character stats not found or invalid (Set to default stats).");
+        info.TryGetDictionary("Stats", out Dictionary<Ulid, CharacterStats>? stats);
         info.TryGetValue("Features", out CharacterFeatures features, new CharacterFeatures(), "Character features not found or invalid (Set to default features).");
         info.TryGetValue("RolePlayInfo", out CharacterRolePlayInfo rolePlayInfo, new CharacterRolePlayInfo(), "Character role-play info not found or invalid (Set to default role-play info).");
         
@@ -526,9 +467,11 @@ public class CharacterData : BaseAsset, ICharacter, ISerializable, IDeserializab
         CurrentLevel = currentLevel;
         MaxLevel = maxLevel;
         ClassId = classId;
-        Stats = stats;
+        Stats = stats ?? new Dictionary<Ulid, CharacterStats>();
         Features = features;
         RolePlayInfo = rolePlayInfo;
+        
+        RefreshStats();
     }
     
     #endregion

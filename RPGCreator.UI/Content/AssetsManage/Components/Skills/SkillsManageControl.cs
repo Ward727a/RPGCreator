@@ -4,14 +4,15 @@ using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using RPGCreator.Core;
 using RPGCreator.Core.Type;
-using RPGCreator.Core.Type.Assets.Characters.Stats;
+using RPGCreator.Core.Type.Assets.Skills;
+using RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEditor;
+using RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor;
 using Serilog;
 
-namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor;
+namespace RPGCreator.UI.Content.AssetsManage.Components.Skills;
 
-public class StatsManageControl : UserControl
+public class SkillsManageControl : UserControl
 {
-    
     #region Constants
     #endregion
     
@@ -19,9 +20,7 @@ public class StatsManageControl : UserControl
     #endregion
     
     #region Properties
-    
-    private IStatDef? SelectedStat { get; set; }
-    
+    private ISkillDef? SelectedSkill { get; set; }
     #endregion
     
     #region Components
@@ -36,21 +35,22 @@ public class StatsManageControl : UserControl
     private Button AddButton { get; set; }
     private Button DeleteButton { get; set; }
     private Button EditButon { get; set; }
-    
     #endregion
     
     #region Constructors
-    public StatsManageControl()
+    public SkillsManageControl()
     {
         CreateComponents();
         RegisterEvents();
         ReloadContent();
-        
         Content = Body;
     }
+
+
     #endregion
     
     #region Methods
+
     private void CreateComponents()
     {
         Body = new Grid
@@ -62,7 +62,6 @@ public class StatsManageControl : UserControl
         CreateMainView();
         CreateFooter();
     }
-
     private void CreateHeader()
     {
         Header = new Grid
@@ -76,7 +75,7 @@ public class StatsManageControl : UserControl
         
         SearchBar = new TextBox
         {
-            Watermark = "Search Stats...",
+            Watermark = "Search Skills...",
             Margin = App.style.Margin,
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch
         };
@@ -154,7 +153,6 @@ public class StatsManageControl : UserControl
         Grid.SetColumn(EditButon, 3);
         
     }
-
     private void RegisterEvents()
     {
         SearchButton.Click += OnSearchButtonClicked;
@@ -162,26 +160,23 @@ public class StatsManageControl : UserControl
         DeleteButton.Click += OnDeleteButtonClicked;
         EditButon.Click += OnEditButtonClicked;
     }
-
-    public void ReloadContent()
+    private void ReloadContent()
     {
-        Log.Debug("Reloading Stats Editor content.");
-        
+        Log.Debug("Reloading Skills Manager content...");
         MainContent.Children.Clear();
         
-        foreach (var statDef in EngineCore.Instance.Managers.Assets.StatsRegistry.All())
+        foreach (var skillDef in EngineCore.Instance.Managers.Assets.SkillRegistry.All())
         {
-            var itemControl = new StatsManageItemControl(statDef);
+            var itemControl = new SkillManageItemControl(skillDef);
             itemControl.ItemSelected += OnItemSelected;
             MainContent.Children.Add(itemControl);
-            Log.Debug("Added stat item: {statName}", statDef.Name);
+            Log.Debug("Added skill item: {skillName}", skillDef.Name);
         }
     }
-
+    
     #endregion
 
     #region Events Handlers
-
     private void OnSearchButtonClicked(object? sender, RoutedEventArgs e)
     {
         Log.Debug("Search button clicked. Search term: {searchTerm}", SearchBar.Text);
@@ -189,10 +184,10 @@ public class StatsManageControl : UserControl
     
     private void OnAddButtonClicked(object? sender, RoutedEventArgs e)
     {
-        Log.Debug("Add button clicked. Opening new stat editor.");
-        var newStatEditor = new StatsEditorWindowControl(null);
+        Log.Debug("Add button clicked. Opening new skill editor.");
+        var newSkillEditor = new SkillsEditorWindowControl(null);
         var host = ((AssetsManageWindow)this.GetVisualRoot()!);
-        host?.OpenCustom(newStatEditor);
+        host?.OpenCustom(newSkillEditor);
     }
     private void OnDeleteButtonClicked(object? sender, RoutedEventArgs e)
     {
@@ -201,18 +196,12 @@ public class StatsManageControl : UserControl
 
     private void OnEditButtonClicked(object? sender, RoutedEventArgs e)
     {
-        if(SelectedStat != null)
         Log.Debug("Edit button clicked.");
-        var newStatEditor = new StatsEditorWindowControl(SelectedStat);
-        var host = ((AssetsManageWindow)this.GetVisualRoot()!);
-        host?.OpenCustom(newStatEditor);
     }
-
     private void OnItemSelected(object? sender, EventArgs e)
     {
-        Log.Debug("Stat {name} selected.", ((StatsManageItemControl)sender).StatDef.Name);
-        SelectedStat = ((StatsManageItemControl)sender).StatDef;
+        Log.Debug("Stat {name} selected.", ((SkillManageItemControl)sender).SkillDef.Name);
+        SelectedSkill = ((SkillManageItemControl)sender).SkillDef;
     }
-    
     #endregion
 }

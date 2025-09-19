@@ -19,7 +19,7 @@ public interface IAssetRegistry<TDef> where TDef : IHasUniqueId
     /// This method is used to add an asset to the registry, ensuring that it is unique and does not already exist in the registry.
     /// </summary>
     /// <param name="asset">The asset to register.</param>
-    public void Register(TDef asset);
+    public void Register(TDef asset, bool overwrite = false);
     /// <summary>
     /// Unregister an asset from the registry.<br/>
     /// This method is used to remove an asset from the registry, ensuring that it is no longer tracked by the system.

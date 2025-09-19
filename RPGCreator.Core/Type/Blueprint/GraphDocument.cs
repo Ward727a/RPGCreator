@@ -8,6 +8,7 @@ namespace RPGCreator.Core.Type.Blueprint;
 
 public sealed class GraphDocument : ISerializable, IDeserializable
 {
+    public string SavePath;
     public readonly Dictionary<string, Node> Nodes = new();
     public readonly List<Link> Links = new();
 

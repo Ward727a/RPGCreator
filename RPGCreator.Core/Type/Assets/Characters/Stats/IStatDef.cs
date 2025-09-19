@@ -1,10 +1,15 @@
+using RPGCreator.Core.Parser.Graph;
 using RPGCreator.Core.Parser.PRATT;
 using RPGCreator.Core.Type.Internal;
 
 namespace RPGCreator.Core.Type.Assets.Characters.Stats;
 
-public interface IStatDef : ISerializable, IDeserializable, IHasUniqueId
+public interface IStatDef : ISerializable, IDeserializable, IHasUniqueId, IHasSavePath
 {
+    /// <summary>
+    /// The pack identifier that this stat belongs to.
+    /// </summary>
+    public Ulid? PackId { get; set; }
     /// <summary>
     /// The unique identifier for the stat type used for identification.
     /// </summary>
@@ -66,4 +71,9 @@ public interface IStatDef : ISerializable, IDeserializable, IHasUniqueId
     /// For example, a derived stat like "Attack Power" could be defined as a non-compiled formula like "AttackPower = (Strength * 1.5) + (Agility * 0.5)" or similar expressions.
     /// </summary>
     public string StatNonCompiledFormula { get; set; }
+
+    public abstract void AddEvent(string eventName, GraphDocumentCompiled eventDocumentCompiled);
+    public abstract bool TryGetEvent(string eventName, out GraphDocumentCompiled? eventCompiled);
+
+    public abstract Dictionary<string, GraphDocumentCompiled> GetAllEvents();
 }

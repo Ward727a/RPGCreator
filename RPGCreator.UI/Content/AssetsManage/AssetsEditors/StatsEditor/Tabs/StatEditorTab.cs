@@ -7,9 +7,11 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using AvaloniaEdit;
 using AvaloniaEdit.TextMate;
+using RPGCreator.Core;
 using RPGCreator.Core.Parser.PRATT;
 using RPGCreator.Core.Type.Assets.Characters.Stats;
 using RPGCreator.Core.Type;
+using RPGCreator.Core.Type.Assets.BaseAssetsPack;
 using RPGCreator.Core.Type.Windows;
 using Serilog;
 using TextMateSharp.Grammars;
@@ -31,6 +33,7 @@ public class StatEditorTab : UserControl
     #region Components
     private ScrollBox _body;
     private StackPanel _bodyPanel;
+    private ComboBox _statPack;
     private TextBox _statName;
     private TextBox _statDescription;
     private ComboBox _statTypeKind;
@@ -68,6 +71,35 @@ public class StatEditorTab : UserControl
             Margin = App.style.Margin
         };
         _body.Content = _bodyPanel;
+        
+        _statPack = new ComboBox()
+        {
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = App.style.Margin,
+        };
+        var inputStatPack = new InputLabel("Assets Pack", _statPack);
+        _bodyPanel.Children.Add(inputStatPack);
+        ToolTip.SetTip(inputStatPack, "The assets pack this stat belongs to.");
+        
+        foreach (var pack in EngineCore.Instance.Managers.Assets.GetAssetsPacks())
+        {
+            _statPack.Items.Add(pack.Name);
+        }
+
+        if (StatDef.PackId.HasValue && StatDef.PackId.Value != Ulid.Empty)
+        {
+            var hasPack = EngineCore.Instance.Managers.Assets.TryGetAssetsPack(StatDef.PackId.Value, out var assetsPack);
+            if (hasPack)
+            {
+                _statPack.SelectedItem = assetsPack;
+            }
+        }
+        else
+        {
+            _statPack.SelectedIndex = 0;
+            StatDef.PackId = EngineCore.Instance.Managers.Assets.GetAssetsPacks()[0].Id;
+        }
         
         _statName = new TextBox
         {
@@ -110,6 +142,14 @@ public class StatEditorTab : UserControl
         {
             _statTypeKind.Items.Add(kind.ToString());
         }
+
+        _statTypeKind.SelectedIndex = StatDef.StatTypeKind switch
+        {
+            EStatTypeKind.Resource => 0,
+            EStatTypeKind.Attribute => 1,
+            EStatTypeKind.Derived => 2,
+            _ => 0
+        };
         
         _statDefaultValue = new NumericUpDown
         {
@@ -146,6 +186,13 @@ public class StatEditorTab : UserControl
         {
             _statTypeCap.Items.Add(capType.ToString());
         }
+
+        _statTypeCap.SelectedIndex = StatDef.StatCapType switch
+        {
+            EStatTypeCap.ByValue => 0,
+            EStatTypeCap.ByStat => 1,
+            _ => 0
+        };
         
         _statMaxValue = new NumericUpDown
         {
@@ -199,6 +246,81 @@ public class StatEditorTab : UserControl
 
     private void RegisterEvents()
     {
+        _statName.TextChanged += (sender, args) =>
+        {
+            if (string.IsNullOrEmpty(_statName.Text))
+            {
+                _statName.BorderBrush = Brushes.Red;
+                _statName.BorderThickness = new Thickness(1);
+            } else
+            {
+                _statName.ClearValue(Border.BorderBrushProperty);
+                _statName.ClearValue(Border.BorderThicknessProperty);
+            }
+            StatDef.Name = _statName.Text ?? "";
+        };
+        
+        _statDescription.TextChanged += (sender, args) =>
+        {
+            StatDef.Description = _statDescription.Text ?? "";
+        };
+        
+        _statTypeKind.SelectionChanged += (sender, args) =>
+        {
+            if (_statTypeKind.SelectedItem == null)
+                return;
+            if (Enum.TryParse<EStatTypeKind>(_statTypeKind.SelectedItem.ToString(), out var kind))
+            {
+                StatDef.StatTypeKind = kind;
+            }
+        };
+        
+        _statDefaultValue.ValueChanged += (sender, args) =>
+        {
+            StatDef.DefaultValue = (float)(_statDefaultValue.Value ?? 0);
+        };
+        
+        _statMinValue.ValueChanged += (sender, args) =>
+        {
+            StatDef.StatMinValue = (float)(_statMinValue.Value ?? 0);
+        };
+        
+        _statTypeCap.SelectionChanged += (sender, args) =>
+        {
+            if (_statTypeCap.SelectedItem == null)
+                return;
+            if (!Enum.TryParse<EStatTypeCap>(_statTypeCap.SelectedItem.ToString(), out var capType)) return;
+            
+            StatDef.StatCapType = capType;
+
+            _statMaxValue.IsEnabled = capType != EStatTypeCap.ByStat;
+        };
+        
+        _statMaxValue.ValueChanged += (sender, args) =>
+        {
+            StatDef.StatCapValue = (float)(_statMaxValue.Value ?? 0);
+        };
+        
+        _statIsVisible.IsCheckedChanged += (sender, args) =>
+        {
+            StatDef.IsVisible = _statIsVisible.IsChecked ?? false;
+        };
+
+        _statFormulaEditor.TextChanged += (sender, args) =>
+        {
+            StatDef.StatNonCompiledFormula = _statFormulaEditor.Text ?? "";
+            try
+            {
+                StatDef.StatCompiledFormula = new PrattCompiler().Compile(StatDef.StatNonCompiledFormula);
+                _statFormulaEditor.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x2A, 0x2A, 0x2A));
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Error parsing formula: {Formula}", StatDef.StatNonCompiledFormula);
+                // Set background to red
+                _statFormulaEditor.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x5A, 0x1A, 0x1A));
+            }
+        };
     }
 
     #endregion

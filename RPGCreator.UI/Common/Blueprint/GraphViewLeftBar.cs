@@ -23,7 +23,6 @@ public class GraphViewLeftBar : UserControl
     public GraphViewLeftBar(GraphDocument doc)
     {
         _doc = doc;
-        // _nodesList = new GraphLeftBarNodesList(addNode);
         CreateComponents();
         RegisterEvents();
     }
@@ -213,8 +212,6 @@ public class GraphViewLeftBar : UserControl
                 }
             }
         };
-
-        // stackPanel.Children.Add(_nodesList);
 
     }
 

@@ -32,6 +32,7 @@ using RPGCreator.Core.Managers.ProjectsManager.Events;
 using RPGCreator.Core.Type.Assets;
 using RPGCreator.Core.Type.Assets.BaseAssetsPack;
 using RPGCreator.Core.Type.Assets.Characters.Stats;
+using RPGCreator.Core.Type.Assets.Skills;
 using RPGCreator.Core.Type.Assets.Tilesets;
 using RPGCreator.Core.Type.Internal;
 using RPGCreator.Core.Type.Map;
@@ -49,7 +50,8 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 {
                     { typeof(MapDefinition),obj => { if (obj is MapDefinition map)   EngineCore.Instance.Managers.Assets.MapRegistry.Register(map); } },
                     { typeof(TilesetDef), obj => { if (obj is TilesetDef tileset) EngineCore.Instance.Managers.Assets.TilesetRegistry.Register(tileset); } },
-                    { typeof(IStatDef),   obj => { if (obj is IStatDef stat)      EngineCore.Instance.Managers.Assets.StatsRegistry.Register(stat); } },
+                    { typeof(IStatDef),   obj => { if (obj is IStatDef stat)      EngineCore.Instance.Managers.Assets.StatsRegistry.Register(stat, true); } },
+                    { typeof(ISkillDef), obj => { if (obj is ISkillDef skill)    EngineCore.Instance.Managers.Assets.SkillRegistry.Register(skill); } },
                 }
             );
 
@@ -60,9 +62,10 @@ namespace RPGCreator.Core.Managers.AssetsManager
         
         #region Registries
 
-        public StatsRegistry StatsRegistry { get; }
+        public StatsRegistry StatsRegistry { get; } = new();
         public MapRegistry MapRegistry { get; } = new();
         public TilesetRegistry TilesetRegistry { get; } = new();
+        public SkillsRegistry SkillRegistry { get; } = new();
         
         #endregion
         
@@ -72,13 +75,13 @@ namespace RPGCreator.Core.Managers.AssetsManager
         public GenericCachedFactory<MapInstance, MapDefinition> MapFactory = new();
         public TilesetFactory TilesetFactory { get; } = new();
         public TileFactory TileFactory { get; } = new();
+        public StatFactory StatFactory { get; } = new();
         
         #endregion
         
         public AssetsManager()
         {
             Event = new();
-            StatsRegistry = new();
         }
         
         public bool TryResolveStats(Ulid statId, out IStatDef? stat)
@@ -181,7 +184,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
         /// Use the AssetsPackManager for this!
         /// </summary>
         /// <param name="pack"></param>
-        public virtual void RegisterPack(BaseAssetsPack pack, bool shouldSaveConfig = true, bool shouldSaveInProject = true)
+        public void RegisterPack(BaseAssetsPack pack, bool shouldSaveConfig = true, bool shouldSaveInProject = true)
         {
             Event.OnUpdatingAsset();
             var args = new AssetsManagerAddingPackArgs(pack);
@@ -194,6 +197,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
 
             AssetsPacks[pack.Id] = pack;
             AssetsPacksMapping[pack.Name] = pack.Id;
+            
             foreach (var type in Enum.GetValues(typeof(BaseAsset.TYPE)))
             {
                 if (pack.HasAssetOfType((BaseAsset.TYPE)type))
@@ -282,7 +286,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
         /// Use the AssetsPackManager for this!
         /// </summary>
         /// <param name="pack"></param>
-        public virtual void UnregisterPack(string packName)
+        public void UnregisterPack(string packName)
         {
 
             if(string.IsNullOrEmpty(packName))
@@ -310,7 +314,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             }
         }
 
-        public virtual BaseAssetsPack[] GetAssetsPacks()
+        public BaseAssetsPack[] GetAssetsPacks()
         {
             return [.. AssetsPacks.Values];
         }
@@ -333,7 +337,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             }
         }
 
-        public virtual BaseAsset? GetCachedAsset(Ulid ulid)
+        public BaseAsset? GetCachedAsset(Ulid ulid)
         {
             if (_cachedAssets.TryGetValue(ulid, out BaseAsset? asset))
             {
@@ -344,7 +348,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 return null;
             }
         }
-        public virtual bool TryGetCachedAsset(Ulid ulid, out BaseAsset? asset)
+        public bool TryGetCachedAsset(Ulid ulid, out BaseAsset? asset)
         {
             return _cachedAssets.TryGetValue(ulid, out asset);
         }
@@ -415,7 +419,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             return false;
         }
 
-        public virtual void RemoveAsset(string fullPath)
+        public void RemoveAsset(string fullPath)
         {
             AssetsManagerRemovingAssetArgs PreArgs = new(fullPath);
             Event.OnRemovingAsset(PreArgs);
@@ -446,7 +450,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             }
         }
 
-        public virtual void SwitchAsset(string currentFullPath, string newFullPath)
+        public void SwitchAsset(string currentFullPath, string newFullPath)
         {
 
             AssetsManagerSwitchingAssetArgs PreArgs = new(currentFullPath, newFullPath);

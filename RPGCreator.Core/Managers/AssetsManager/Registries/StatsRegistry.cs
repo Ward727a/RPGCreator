@@ -13,12 +13,19 @@ public sealed class StatsRegistry : IAssetRegistry<IStatDef>
     public event EventHandler<IStatDef>? AssetRegistered;
     public event EventHandler<IStatDef>? AssetUnregistered;
 
-    public void Register(IStatDef asset)
+    public void Register(IStatDef asset, bool overwrite = false)
     {
         if (_byId.ContainsKey(asset.Unique))
         {
-            Log.Error("Asset with unique ID {assetUnique} already exists in the registry.", asset.Unique);
-            return;
+            if (overwrite)
+            {
+                Unregister(_byId[asset.Unique]);
+            }
+            else
+            {
+                Log.Error("Asset with unique ID {assetUnique} already exists in the registry.", asset.Unique);
+                return;
+            }
         }
 
         if (_byUrn.ContainsKey(asset.Urn))
