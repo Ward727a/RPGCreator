@@ -1,14 +1,151 @@
 using System;
+using System.Linq;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
+using Avalonia.Media;
+using AvaloniaEdit;
+using AvaloniaEdit.TextMate;
 using RPGCreator.Core;
 using RPGCreator.Core.Type;
+using RPGCreator.Core.Type.Assets.Characters.Stats;
 using RPGCreator.Core.Type.Assets.Skills;
+using Serilog;
+using TextMateSharp.Grammars;
+using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEditor.Tabs;
 
+
+
 public class SkillEditorTab : UserControl
 {
+
+    private class SkillCostItem : UserControl
+    {
+
+        public event Action? OnSelected;
+        public event Action? OnDeselected;
+        public event Action? OnDeleted;
+        
+        public IStatDef CostStat { get; set; }
+        public float CostAmount { get; set; }
+
+        private Grid _body;
+        
+        private CheckBox _selectBox;
+        private TextBlock _statName;
+        private TextBlock _statAmount;
+        private Button _deleteButton;
+        
+        public SkillCostItem(IStatDef stat, float amount)
+        {
+            CostStat = stat;
+            CostAmount = amount;
+            CreateComponents();
+        }
+
+        private void CreateComponents()
+        {
+            _body = new Grid()
+            {
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = App.style.Margin,
+                ColumnDefinitions = new ColumnDefinitions("Auto, *, *, Auto")
+            };
+            Content = _body;
+            _selectBox = new CheckBox
+            {
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = App.style.Margin
+            };
+            _selectBox.Checked += (s, e) => OnSelected?.Invoke();
+            _selectBox.Unchecked += (s, e) => OnDeselected?.Invoke();
+            _body.Children.Add(_selectBox);
+            _statName = new TextBlock
+            {
+                Text = CostStat.Name,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = App.style.Margin
+            };
+            _body.Children.Add(_statName);
+            Grid.SetColumn(_statName, 1);
+            _statAmount = new TextBlock
+            {
+                Text = CostAmount.ToString(),
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = App.style.Margin
+            };
+            _body.Children.Add(_statAmount);
+            Grid.SetColumn(_statAmount, 2);
+            
+            _deleteButton = new Button
+            {
+                Content = "Delete",
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = App.style.Margin
+            };
+            _deleteButton.Click += (s, e) => OnDeleted?.Invoke();
+            _body.Children.Add(_deleteButton);
+            Grid.SetColumn(_deleteButton, 3);
+        }
+    }
+    
+    private class SkillCostList : UserControl
+    {
+        
+        private ScrollBox _body;
+        private StackPanel _bodyPanel;
+        
+        public SkillCostList()
+        {
+            CreateComponents();
+        }
+
+        private void CreateComponents()
+        {
+            _body = new ScrollBox()
+            {
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Stretch,
+                MaxHeight = 180,
+                Margin = App.style.Margin
+            };
+            _bodyPanel = new StackPanel
+            {
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Stretch,
+                Margin = App.style.Margin
+            };
+            _body.Content = _bodyPanel;
+            Content = _body;
+        }
+        
+        public void AddCost(IStatDef stat, float amount)
+        {
+            var costItem = new SkillCostItem(stat, amount);
+            costItem.OnDeleted += () => _bodyPanel.Children.Remove(costItem);
+            _bodyPanel.Children.Add(costItem);
+        }
+
+        public void AddCost(SkillCostItem item)
+        {
+            item.OnDeleted += () => _bodyPanel.Children.Remove(item);
+            _bodyPanel.Children.Add(item);
+        }
+        
+        public void ClearCosts()
+        {
+            _bodyPanel.Children.Clear();
+        }
+        
+    }
+    
     #region Constants
     #endregion
     
@@ -23,6 +160,12 @@ public class SkillEditorTab : UserControl
     private ScrollBox _body;
     private StackPanel _bodyPanel;
     private ComboBox _skillPack;
+    private TextBox _skillName;
+    private TextBox _skillDescription;
+    private PathPicker _skillIconPath;
+    private SkillCostList _skillCosts;
+    private TextEditor _skillFormulaEditor;
+
     #endregion
     
     #region Constructors
@@ -31,7 +174,7 @@ public class SkillEditorTab : UserControl
         ArgumentNullException.ThrowIfNull(skillDef, nameof(skillDef));
         SkillDef = skillDef;
         CreateComponents();
-        Content = SkillDef.Name;
+        Content = _body;
     }
     #endregion
     
@@ -81,6 +224,183 @@ public class SkillEditorTab : UserControl
             _skillPack.SelectedIndex = 0;
             SkillDef.PackId = EngineCore.Instance.Managers.Assets.GetAssetsPacks()[0].Id;
         }
+        
+        _skillName = new TextBox()
+        {
+            Text = SkillDef.Name,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = App.style.Margin
+        };
+        var inputStatName = new InputLabel("Name", _skillName);
+        _bodyPanel.Children.Add(inputStatName);
+        ToolTip.SetTip(inputStatName, "The name of the skill.");
+        
+        _skillDescription = new TextBox()
+        {
+            Text = SkillDef.Description,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = App.style.Margin
+        };
+        var inputStatDescription = new InputLabel("Description", _skillDescription);
+        _bodyPanel.Children.Add(inputStatDescription);
+        ToolTip.SetTip(inputStatDescription, "The description of the skill.");
+        
+        _skillIconPath = new PathPicker()
+        {
+            Title = "Select Skill Icon",
+            FileFilter = "[Image Files,*.png,*.jpg,*.jpeg,*.bmp,*.gif][All Files,*.*]",
+            SelectedPathsText = SkillDef.IconPath,
+            AllowMultiple = false,
+            UsePickerType = UsePickerTypes.OpenFile,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = App.style.Margin
+        };
+        var inputStatIconPath = new InputLabel("Icon Path", _skillIconPath);
+        _bodyPanel.Children.Add(inputStatIconPath);
+        ToolTip.SetTip(inputStatIconPath, "The icon path of the skill.");
+        
+        var gridAddingCost = new Grid()
+        {
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            ColumnDefinitions = new ColumnDefinitions("*, *, Auto")
+        };
+        _bodyPanel.Children.Add(gridAddingCost);
+        
+        var selectCostBox = new ComboBox()
+        {
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        gridAddingCost.Children.Add(selectCostBox);
+        Grid.SetColumn(selectCostBox, 0);
+        foreach (var statDef in EngineCore.Instance.Managers.Assets.StatsRegistry.All())
+        {
+            if(statDef.StatTypeKind != EStatTypeKind.Resource) continue;
+            selectCostBox.Items.Add(statDef.Name);
+        }
+        
+        var costAmountBox = new NumericFloatUpDown()
+        {
+            Value = 0,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = App.style.Margin
+        };
+        gridAddingCost.Children.Add(costAmountBox);
+        Grid.SetColumn(costAmountBox, 1);
+        
+        var addCostButton = new Button()
+        {
+            Content = "Add Cost",
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = App.style.Margin
+        };
+        addCostButton.Click += (s, e) =>
+        {
+            var statDef = EngineCore.Instance.Managers.Assets.StatsRegistry.All().FirstOrDefault(s => s.Name == (string?)selectCostBox.SelectedItem);
+            if (statDef == null)
+            {
+                // No stat definitions available
+                Log.Warning("No stat definitions available to add as skill cost.");
+                return;
+            }
+            _skillCosts.AddCost(statDef, costAmountBox.Value ?? 0);
+        };
+        gridAddingCost.Children.Add(addCostButton);
+        Grid.SetColumn(addCostButton, 2);
+        
+        if (selectCostBox.Items.Count > 0)
+        {
+            selectCostBox.SelectedIndex = 0;
+        }
+        else
+        {
+            selectCostBox.IsEnabled = false;
+            costAmountBox.IsEnabled = false;
+            addCostButton.IsEnabled = false;
+            selectCostBox.PlaceholderText = "No resource stats defined";
+        }
+        
+        _skillCosts = new SkillCostList();
+        var inputSkillCosts = new InputLabel("Skill Costs", _skillCosts);
+        _bodyPanel.Children.Add(inputSkillCosts);
+        
+        foreach (var cost in SkillDef.Cost)
+        {
+            _skillCosts.AddCost(cost.Key, cost.Value);
+        }
+        
+        var cooldownInput = new NumericFloatUpDown()
+        {
+            Value = SkillDef.Cooldown,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = App.style.Margin,
+            Minimum = 0
+        };
+        var inputCooldown = new InputLabel("Cooldown (seconds)", cooldownInput);
+        _bodyPanel.Children.Add(inputCooldown);
+        ToolTip.SetTip(inputCooldown, "The cooldown time of the skill in seconds.");
+        
+        var selectTargetType = new ComboBox()
+        {
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = App.style.Margin
+        };
+        ESkillTargetType[] targetTypes = (ESkillTargetType[])Enum.GetValues(typeof(ESkillTargetType));
+        foreach (var targetType in targetTypes)
+        {
+            selectTargetType.Items.Add(targetType.ToString());
+        }
+        selectTargetType.SelectedItem = SkillDef.TargetType.ToString();
+        var inputTargetType = new InputLabel("Target Type", selectTargetType);
+        _bodyPanel.Children.Add(inputTargetType);
+        ToolTip.SetTip(inputTargetType, "The target type of the skill.");
+        
+        var inputRange = new NumericFloatUpDown()
+        {
+            Value = SkillDef.Range,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            Minimum = 0,
+            Margin = App.style.Margin
+        };
+        var rangeLabel = new InputLabel("Range", inputRange);
+        _bodyPanel.Children.Add(rangeLabel);
+        ToolTip.SetTip(rangeLabel, "The range of the skill.");
+        _skillFormulaEditor = new TextEditor
+        {
+            Watermark = "Enter skill formula here...",
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Text = SkillDef.SkillNonCompiledFormula,
+            Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x2A, 0x2A, 0x2A)),
+            Padding = new Thickness(8, 8, 8, 8),
+            MinHeight = 100,
+            CornerRadius = new CornerRadius(3),
+        };
+        var fakeRadiusBorder = new Border()
+        {
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            CornerRadius = new CornerRadius(3),
+            Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x2A, 0x2A, 0x2A)),
+            ClipToBounds = true,
+            Child = _skillFormulaEditor,
+            Margin = App.style.Margin
+        };
+        _bodyPanel.Children.Add(new InputLabel("Stat Formula", fakeRadiusBorder));
+        
+        var registryOptions = new RegistryOptions(ThemeName.DarkPlus);
+        var textMateInstallation = _skillFormulaEditor.InstallTextMate(registryOptions);
+        var filepath = $"{AppDomain.CurrentDomain.BaseDirectory}Assets/TMGrammar/RPGFormula.tmLanguage.json";
+        textMateInstallation.SetGrammarFile(filepath);
     }
     #endregion
 

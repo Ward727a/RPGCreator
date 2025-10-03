@@ -6,8 +6,8 @@ public enum EGraphOpCode
     /* NON-NODE OPCODES */
     // Those are special opcodes that are not associated with a specific node type.
     // They are used in the back-end to control the flow of the graph, allocate constants or variables, etc.
-    none, // This is a no-op, it does nothing. It can be used to fill empty slots in the graph.
-    comment, // This is a comment, it will be ignored by the compiler. It can be used to add notes to the graph.
+    none, // This is a no-op, it does nothing. It can be used to fill empty slots in the graph. (should not be used in a valid graph)
+    comment, // This is a comment, it will be ignored by the compiler. It can be used to add notes to the graph. (not implemented yet)
     
     /* SYSTEM OPCODES */
     
