@@ -51,7 +51,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
                     { typeof(MapDefinition),obj => { if (obj is MapDefinition map)   EngineCore.Instance.Managers.Assets.MapRegistry.Register(map); } },
                     { typeof(TilesetDef), obj => { if (obj is TilesetDef tileset) EngineCore.Instance.Managers.Assets.TilesetRegistry.Register(tileset); } },
                     { typeof(IStatDef),   obj => { if (obj is IStatDef stat)      EngineCore.Instance.Managers.Assets.StatsRegistry.Register(stat, true); } },
-                    { typeof(ISkillDef), obj => { if (obj is ISkillDef skill)    EngineCore.Instance.Managers.Assets.SkillRegistry.Register(skill); } },
+                    { typeof(ISkillDef), obj => { if (obj is ISkillDef skill)    EngineCore.Instance.Managers.Assets.SkillRegistry.Register(skill, true); } },
                 }
             );
 

@@ -181,15 +181,8 @@ public class StatEventTab : UserControl
         grid.Children.Add(testbutton);
         Grid.SetRow(testbutton, 0);
         
-        _doc.AddNode(new NodeEnd());
-
-        _doc.AddNode(new NodeMathMultiply());
         _doc.AddNode(new NodeStart());
-        // _doc.AddNode(new GetPlayerName());
-        // _doc.AddNode(new NodePrint());
-        // _doc.AddNode(new GetPlayerName());
-        
-        _doc.AddNode(new NodePrint());
+        _doc.AddNode(new NodeEnd(){X = 200, Y = 0});
 
         _graph.SetDocument(_doc);
     }

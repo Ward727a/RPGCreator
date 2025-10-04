@@ -1,12 +1,16 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.VisualTree;
 using AvaloniaEdit;
 using AvaloniaEdit.TextMate;
 using RPGCreator.Core;
+using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Type;
 using RPGCreator.Core.Type.Assets.Characters.Stats;
 using RPGCreator.Core.Type.Assets.Skills;
@@ -143,6 +147,11 @@ public class SkillEditorTab : UserControl
         {
             _bodyPanel.Children.Clear();
         }
+
+        public List<SkillCostItem> GetCosts()
+        {
+            return _bodyPanel.Children.OfType<SkillCostItem>().ToList();
+        }
         
     }
     
@@ -179,9 +188,10 @@ public class SkillEditorTab : UserControl
     #endregion
     
     #region Methods
+
     private void CreateComponents()
     {
-        
+
         _body = new ScrollBox()
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -195,7 +205,7 @@ public class SkillEditorTab : UserControl
             Margin = App.style.Margin
         };
         _body.Content = _bodyPanel;
-        
+
         _skillPack = new ComboBox()
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -205,7 +215,7 @@ public class SkillEditorTab : UserControl
         var inputStatPack = new InputLabel("Assets Pack", _skillPack);
         _bodyPanel.Children.Add(inputStatPack);
         ToolTip.SetTip(inputStatPack, "The assets pack this skill belongs to.");
-        
+
         foreach (var pack in EngineCore.Instance.Managers.Assets.GetAssetsPacks())
         {
             _skillPack.Items.Add(pack.Name);
@@ -213,7 +223,8 @@ public class SkillEditorTab : UserControl
 
         if (SkillDef.PackId.HasValue && SkillDef.PackId.Value != Ulid.Empty)
         {
-            var hasPack = EngineCore.Instance.Managers.Assets.TryGetAssetsPack(SkillDef.PackId.Value, out var assetsPack);
+            var hasPack =
+                EngineCore.Instance.Managers.Assets.TryGetAssetsPack(SkillDef.PackId.Value, out var assetsPack);
             if (hasPack)
             {
                 _skillPack.SelectedItem = assetsPack;
@@ -224,7 +235,7 @@ public class SkillEditorTab : UserControl
             _skillPack.SelectedIndex = 0;
             SkillDef.PackId = EngineCore.Instance.Managers.Assets.GetAssetsPacks()[0].Id;
         }
-        
+
         _skillName = new TextBox()
         {
             Text = SkillDef.Name,
@@ -235,7 +246,7 @@ public class SkillEditorTab : UserControl
         var inputStatName = new InputLabel("Name", _skillName);
         _bodyPanel.Children.Add(inputStatName);
         ToolTip.SetTip(inputStatName, "The name of the skill.");
-        
+
         _skillDescription = new TextBox()
         {
             Text = SkillDef.Description,
@@ -246,7 +257,7 @@ public class SkillEditorTab : UserControl
         var inputStatDescription = new InputLabel("Description", _skillDescription);
         _bodyPanel.Children.Add(inputStatDescription);
         ToolTip.SetTip(inputStatDescription, "The description of the skill.");
-        
+
         _skillIconPath = new PathPicker()
         {
             Title = "Select Skill Icon",
@@ -261,7 +272,7 @@ public class SkillEditorTab : UserControl
         var inputStatIconPath = new InputLabel("Icon Path", _skillIconPath);
         _bodyPanel.Children.Add(inputStatIconPath);
         ToolTip.SetTip(inputStatIconPath, "The icon path of the skill.");
-        
+
         var gridAddingCost = new Grid()
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -269,7 +280,7 @@ public class SkillEditorTab : UserControl
             ColumnDefinitions = new ColumnDefinitions("*, *, Auto")
         };
         _bodyPanel.Children.Add(gridAddingCost);
-        
+
         var selectCostBox = new ComboBox()
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -279,10 +290,10 @@ public class SkillEditorTab : UserControl
         Grid.SetColumn(selectCostBox, 0);
         foreach (var statDef in EngineCore.Instance.Managers.Assets.StatsRegistry.All())
         {
-            if(statDef.StatTypeKind != EStatTypeKind.Resource) continue;
+            if (statDef.StatTypeKind != EStatTypeKind.Resource) continue;
             selectCostBox.Items.Add(statDef.Name);
         }
-        
+
         var costAmountBox = new NumericFloatUpDown()
         {
             Value = 0,
@@ -292,7 +303,7 @@ public class SkillEditorTab : UserControl
         };
         gridAddingCost.Children.Add(costAmountBox);
         Grid.SetColumn(costAmountBox, 1);
-        
+
         var addCostButton = new Button()
         {
             Content = "Add Cost",
@@ -302,18 +313,20 @@ public class SkillEditorTab : UserControl
         };
         addCostButton.Click += (s, e) =>
         {
-            var statDef = EngineCore.Instance.Managers.Assets.StatsRegistry.All().FirstOrDefault(s => s.Name == (string?)selectCostBox.SelectedItem);
+            var statDef = EngineCore.Instance.Managers.Assets.StatsRegistry.All()
+                .FirstOrDefault(s => s.Name == (string?)selectCostBox.SelectedItem);
             if (statDef == null)
             {
                 // No stat definitions available
                 Log.Warning("No stat definitions available to add as skill cost.");
                 return;
             }
+
             _skillCosts.AddCost(statDef, costAmountBox.Value ?? 0);
         };
         gridAddingCost.Children.Add(addCostButton);
         Grid.SetColumn(addCostButton, 2);
-        
+
         if (selectCostBox.Items.Count > 0)
         {
             selectCostBox.SelectedIndex = 0;
@@ -325,16 +338,16 @@ public class SkillEditorTab : UserControl
             addCostButton.IsEnabled = false;
             selectCostBox.PlaceholderText = "No resource stats defined";
         }
-        
+
         _skillCosts = new SkillCostList();
         var inputSkillCosts = new InputLabel("Skill Costs", _skillCosts);
         _bodyPanel.Children.Add(inputSkillCosts);
-        
+
         foreach (var cost in SkillDef.Cost)
         {
             _skillCosts.AddCost(cost.Key, cost.Value);
         }
-        
+
         var cooldownInput = new NumericFloatUpDown()
         {
             Value = SkillDef.Cooldown,
@@ -346,7 +359,7 @@ public class SkillEditorTab : UserControl
         var inputCooldown = new InputLabel("Cooldown (seconds)", cooldownInput);
         _bodyPanel.Children.Add(inputCooldown);
         ToolTip.SetTip(inputCooldown, "The cooldown time of the skill in seconds.");
-        
+
         var selectTargetType = new ComboBox()
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -358,11 +371,12 @@ public class SkillEditorTab : UserControl
         {
             selectTargetType.Items.Add(targetType.ToString());
         }
+
         selectTargetType.SelectedItem = SkillDef.TargetType.ToString();
         var inputTargetType = new InputLabel("Target Type", selectTargetType);
         _bodyPanel.Children.Add(inputTargetType);
         ToolTip.SetTip(inputTargetType, "The target type of the skill.");
-        
+
         var inputRange = new NumericFloatUpDown()
         {
             Value = SkillDef.Range,
@@ -395,13 +409,85 @@ public class SkillEditorTab : UserControl
             Child = _skillFormulaEditor,
             Margin = App.style.Margin
         };
-        _bodyPanel.Children.Add(new InputLabel("Stat Formula", fakeRadiusBorder));
-        
+        _bodyPanel.Children.Add(new InputLabel("Skill Formula", fakeRadiusBorder));
+
         var registryOptions = new RegistryOptions(ThemeName.DarkPlus);
         var textMateInstallation = _skillFormulaEditor.InstallTextMate(registryOptions);
         var filepath = $"{AppDomain.CurrentDomain.BaseDirectory}Assets/TMGrammar/RPGFormula.tmLanguage.json";
         textMateInstallation.SetGrammarFile(filepath);
+
+        // Save Button
+        var saveButton = new Button()
+        {
+            Content = "Save Skill",
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = App.style.Margin
+        };
+        saveButton.Click += (s, e) =>
+        {
+            SkillDef.SetName(_skillName.Text ?? string.Empty);
+            SkillDef.Description = _skillDescription.Text ?? string.Empty;
+            SkillDef.IconPath = _skillIconPath.SelectedPathsText ?? string.Empty;
+            SkillDef.Cost.Clear();
+            foreach (var child in _skillCosts.GetCosts())
+            {
+                if (child is SkillCostItem costItem)
+                {
+                    SkillDef.Cost[costItem.CostStat] = costItem.CostAmount;
+                }
+            }
+
+            SkillDef.Cooldown = cooldownInput.Value ?? 0;
+            if (selectTargetType.SelectedItem != null &&
+                Enum.TryParse<ESkillTargetType>((string)selectTargetType.SelectedItem, out var targetType))
+            {
+                SkillDef.TargetType = targetType;
+            }
+
+            SkillDef.Range = inputRange.Value ?? 0;
+            SkillDef.SkillNonCompiledFormula = _skillFormulaEditor.Text ?? string.Empty;
+            if (_skillPack.SelectedItem != null)
+            {
+                var selectedPackName = (string)_skillPack.SelectedItem;
+                var selectedPack = EngineCore.Instance.Managers.Assets.GetAssetsPacks()
+                    .FirstOrDefault(p => p.Name == selectedPackName);
+                if (selectedPack != null)
+                {
+                    SkillDef.PackId = selectedPack.Id;
+                }
+            }
+
+            AssetsManager.AssetMapping[typeof(ISkillDef)](SkillDef);
+
+            Log.Information("Skill '{SkillName}' saved.", SkillDef.Name);
+            
+            
+            EngineSerializer.Instance.Serialize(SkillDef, out string data, false);
+            // Add the stat definition to the selected asset pack in the statdef
+            if(SkillDef.PackId.HasValue && SkillDef.PackId != Ulid.Empty)
+            {
+                var hasPack = EngineCore.Instance.Managers.Assets.TryGetAssetsPack(SkillDef.PackId.Value, out var assetsPack);
+                if (hasPack != null)
+                {
+                    assetsPack.AddAsset(SkillDef);
+                    assetsPack.Save();
+                    File.WriteAllText(SkillDef.SavePath, data);
+                    Log.Information("Stat Definition added to the selected Assets Pack.");
+                }
+                else
+                {
+                    Log.Warning("Assets Pack with ID {PackId} not found. Stat Definition not added to any pack.", SkillDef.PackId);
+                }
+            }
+            else
+            {
+                Log.Warning("No Assets Pack selected for this Stat Definition. It won't be part of any pack.");
+            }
+        };
+        _bodyPanel.Children.Add(saveButton);
     }
+
     #endregion
 
     #region Events Handlers

@@ -17,4 +17,6 @@ public interface ISkillDef : IHasSavePath, IHasUniqueId, ISerializable, IDeseria
     
     public PrattCompiledFormula? SkillScalingFormula { get; set; }
     public string SkillNonCompiledFormula { get; set; }
+    
+    public void SetName(string name);
 }

@@ -850,7 +850,6 @@ public sealed class DeserializationInfo
     
     public bool TryGetDictionary<TKey, TValue>(string name, [NotNullWhen(true)]out Dictionary<TKey, TValue>? value)
         where TKey : notnull
-        where TValue : class
     {
         if (TryGetValue(name, out var o, out var type))
         {

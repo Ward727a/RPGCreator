@@ -33,6 +33,7 @@ using System.Xml.Linq;
 using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Type.Assets.Characters.Stats;
+using RPGCreator.Core.Type.Assets.Skills;
 using RPGCreator.Core.Type.Assets.Tilesets;
 using RPGCreator.Core.Type.Internal;
 using Serilog;
@@ -163,6 +164,7 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
                     var trueType = assetType switch
                     {
                         _ when assetType == typeof(StatDefinition) => typeof(IStatDef),
+                        _ when assetType == typeof(SkillDef) => typeof(ISkillDef),
                         _ => assetType
                     };
                     
@@ -327,6 +329,7 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
             if (string.IsNullOrEmpty(asset.SavePath))
             {
                 asset.SavePath = Path.Combine(AssetsFolder, $"{asset.Unique}.xml");
+                Log.Warning("Asset {AssetName} had no save path, setting it to {SavePath}.", asset is IHasUniqueId ba ? ba.Urn : "Unknown", asset.SavePath);
             }
             AssetsPaths[asset.Unique.ToString()] = asset.SavePath;
 
