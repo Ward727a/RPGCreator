@@ -95,4 +95,15 @@
 	  <UpToDateCheckInput Remove="OldUI\Views\LauncherWindow.axaml" />
 	  <UpToDateCheckInput Remove="OldUI\Views\Modals\ErrorDialog.axaml" />
 	</ItemGroup>
+
+    <Target Name="CopyAssets" AfterTargets="Build">
+        <ItemGroup>
+            <!-- Tous les fichiers dans le dossier Assets -->
+            <AssetFiles Include="Assets\**\*.*" />
+        </ItemGroup>
+
+        <Copy SourceFiles="@(AssetFiles)"
+              DestinationFolder="$(OutputPath)Assets\%(RecursiveDir)"
+              SkipUnchangedFiles="true" />
+    </Target>
 </Project>

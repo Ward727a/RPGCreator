@@ -34,10 +34,57 @@ namespace RPGCreator.Core
     public class EngineModules
     {
 
+        // This is the SHA256 checksum of the module DLL file to ensure integrity.
+        // Those should be updated with each new module version. (even for small changes!)
+        private readonly List<string> CHECKSUM_INTERNAL_MODULES = new(
+            [
+                "bb7628e141ccbcb8c095d771c3e8f46338134e85ddecbdffecbbe2edd1471618", // TestModule.dll
+                ]
+            );
+
+        private readonly string MODULES_PATH = $"{AppContext.BaseDirectory}Assets/Modules/";
+        
         internal EngineModules()
         {
             
             Log.Information($"EngineModules initialized.");
+
+            foreach (var directory in Directory.GetDirectories(MODULES_PATH))
+            {
+                var files = Directory.GetFiles(directory, "*.dll");
+                foreach (var file in files)
+                {
+                    try
+                    {
+                        // Calculate the SHA256 checksum of the file.
+                        using var sha256 = System.Security.Cryptography.SHA256.Create();
+                        using var stream = File.OpenRead(file);
+                        var hash = sha256.ComputeHash(stream);
+                        var hashString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                        if (CHECKSUM_INTERNAL_MODULES.Contains(hashString))
+                        {
+                            var assembly = System.Reflection.Assembly.LoadFrom(file);
+                            var types = assembly.GetTypes().Where(t =>
+                                typeof(ModuleSDK.IEngineModule).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
+                            foreach (var type in types)
+                            {
+                                var module = (ModuleSDK.IEngineModule)Activator.CreateInstance(type)!;
+                                module.Initialize();
+                                Log.Information(
+                                    $"Module '{module.Name}' v{module.Version} by {module.Author} initialized.");
+                            }
+                        }
+                        else
+                        {
+                            Log.Warning($"Module file '{file}' failed integrity check and will not be loaded.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, $"Failed to load module from file '{file}'.");
+                    }
+                }
+            }
             
         }
 

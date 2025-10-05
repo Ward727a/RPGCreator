@@ -1,0 +1,63 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <TargetFramework>net8.0</TargetFramework>
+      <OutputPath>../../RPGCreator.UI/Assets/Modules/$(AssemblyName)/</OutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <TargetFramework>net8.0</TargetFramework>
+      <OutputPath>../../RPGCreator.UI/Assets/Modules/$(AssemblyName)/</OutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\RPGCreator.Core\RPGCreator.Core.csproj">
+          <Private>false</Private>
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>compile;runtime</IncludeAssets>
+      </ProjectReference>
+      <ProjectReference Include="..\..\RPGCreator.Desktop\RPGCreator.Desktop.csproj">
+          <Private>false</Private>
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>none</IncludeAssets>
+      </ProjectReference>
+      <ProjectReference Include="..\..\RPGCreator.RTP\RPGCreator.RTP.csproj">
+          <Private>false</Private>
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>none</IncludeAssets>
+      </ProjectReference>
+      <ProjectReference Include="..\..\RPGCreator.UI\RPGCreator.UI.csproj">
+          <Private>false</Private>
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>none</IncludeAssets>
+      </ProjectReference>
+      <ProjectReference Include="..\..\thirdparty\Gum\GumCommon\GumCommon.csproj">
+          <Private>false</Private>
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>none</IncludeAssets>
+      </ProjectReference>
+      <ProjectReference Include="..\..\thirdparty\Gum\GumDataTypes\GumDataTypesNet6.csproj">
+          <Private>false</Private>
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>none</IncludeAssets>
+      </ProjectReference>
+      <ProjectReference Include="..\..\thirdparty\Gum\MonoGameGum\MonoGameGum.csproj">
+          <Private>false</Private>
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>none</IncludeAssets>
+      </ProjectReference>
+      <ProjectReference Include="..\..\thirdparty\Gum\ToolsUtilities\ToolsUtilitiesStandard.csproj">
+          <Private>false</Private>
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>none</IncludeAssets>
+      </ProjectReference>
+    </ItemGroup>
+
+</Project>
