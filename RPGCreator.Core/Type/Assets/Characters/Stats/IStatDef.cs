@@ -6,6 +6,7 @@ namespace RPGCreator.Core.Type.Assets.Characters.Stats;
 
 public interface IStatDef : ISerializable, IDeserializable, IHasUniqueId, IHasSavePath
 {
+    public const string OnValueChangedEvent = "OnValueChanged";
     /// <summary>
     /// The pack identifier that this stat belongs to.
     /// </summary>

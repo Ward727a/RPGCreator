@@ -21,6 +21,11 @@ public class ObjectPool<T> where T : class, ICleanable
         }
     }
     
+    /// <summary>
+    /// Get an object from the pool. If the pool is empty, a new instance will be created using the factory method if provided.
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
     public T Rent() => _stack.Count > 0 ? _stack.Pop() : 
         _factory != null ? _factory() : throw new InvalidOperationException("No factory method provided to create new instances.");
     

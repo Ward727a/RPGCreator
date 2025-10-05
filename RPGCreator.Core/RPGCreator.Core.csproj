@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Runtimes\ECS\Systems\" />
     <Folder Include="Runtimes\Factories\" />
     <Folder Include="Type\Map\Interactable\BaseEventsArgs\" />
   </ItemGroup>

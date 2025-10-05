@@ -66,6 +66,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
         public MapRegistry MapRegistry { get; } = new();
         public TilesetRegistry TilesetRegistry { get; } = new();
         public SkillsRegistry SkillRegistry { get; } = new();
+        public SkillEffectsRegistry SkillEffectsRegistry { get; } = new();
         
         #endregion
         
@@ -113,6 +114,9 @@ namespace RPGCreator.Core.Managers.AssetsManager
 
         internal void Init()
         {
+            
+            SkillEffectsRegistry.ReloadData();
+            
             EngineCore.Instance.Managers.Projects.Events.LoadedProject += (object? sender, ProjectsManagerLoadedProjectArgs e) =>
             {
                 if (e.LoadedProject != null && !e.HasError)

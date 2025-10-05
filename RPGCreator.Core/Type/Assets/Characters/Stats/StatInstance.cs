@@ -66,4 +66,12 @@ public sealed class StatInstance : IReloadable<IStatDef>
         // And reset CurrentValue to BaseValue or keep it as is, depending on your game's logic
         // CurrentValue = Math.Clamp(CurrentValue, newDefinition.StatMinValue, GetStatCapValue());
     }
+    
+    public void SetCurrentValue(float newValue)
+    {
+        // For now we use the statCapValue directly from the definition.
+        // In the future we might want to calculate it based on the other cap type.
+        CurrentValue = Math.Clamp(newValue, StatDefinition.StatMinValue, _statDefinition.StatCapValue);
+        TryRunEvent(IStatDef.OnValueChangedEvent);
+    }
 }
