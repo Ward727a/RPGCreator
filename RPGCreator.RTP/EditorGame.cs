@@ -17,10 +17,12 @@ using RPGCreator.Core.Type.RTP;
 using RPGCreator.RTP.Editor.Components;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using RPGCreator.Core.Runtimes.ECS;
 using RPGCreator.Core.Runtimes.ECS.Components.Display;
 using RPGCreator.Core.Runtimes.ECS.Systems;
+using Serilog;
 
 namespace RPGCreator.MonoGame
 {
@@ -79,8 +81,8 @@ namespace RPGCreator.MonoGame
             _ecsWorld.AddSystem(new SpriteRenderSystem(_ecsWorld._componentManager, GraphicsDevice));
 
             // Test loop to create multiple entities with sprite and transform components and test the sprite rendering system.
-            
-            for(int i = 0; i < 1000; i++)
+            // Very basic test - Result for now : 10k entities with simple sprites renders, no movement at ~60 FPS => 3-4ms per frame.
+            for(int i = 0; i < 10000; i++)
             {
                 var entity = _ecsWorld.CreateEntity();
 
@@ -175,6 +177,7 @@ namespace RPGCreator.MonoGame
         {
             _events.OnRTPDraw(new(gameTime));
             GraphicsDevice.Clear(Color.CornflowerBlue);
+            
 
             _mapEditing.Draw();
             _ecsWorld.Draw(gameTime);
