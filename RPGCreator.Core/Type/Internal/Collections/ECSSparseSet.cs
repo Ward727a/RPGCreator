@@ -1,72 +1,106 @@
+using System.Diagnostics.CodeAnalysis;
 using RPGCreator.Core.Runtimes.ECS;
 
 namespace RPGCreator.Core.Type.Internal;
 
 public sealed class ECSSparseSet<T> where T : struct, IComponent
 {
-    private List<T> dense = new();
-    private List<int> sparse = new(); // entityId => dense index mapping
-    private List<int> entities = new(); // dense => entityId mapping
+    private T[] dense;
+    private int[] sparse;     // entityId => dense index
+    private int[] entities;   // dense index => entityId
+    private int count;
+    
+    public Span<T> ComponentsSpan => new Span<T>(dense, 0, count);
+    public ReadOnlySpan<int> EntitiesSpan => new ReadOnlySpan<int>(entities, 0, count);
 
-    public int Count => dense.Count;
+
+    public int Count => count;
 
     public ECSSparseSet(int capacity = 16)
     {
-        dense.Capacity = capacity;
-        sparse.Capacity = capacity;
-        entities.Capacity = capacity;
+        dense = new T[capacity];
+        sparse = new int[capacity];
+        entities = new int[capacity];
+
+        Array.Fill(sparse, -1);
+        count = 0;
     }
-    
-    public void Add(int entityId, T component)
+
+    public ref T Add(int entityId, T component)
     {
         EnsureCapacity(entityId);
 
         if (Has(entityId))
         {
-            dense[sparse[entityId]] = component; // écrase si déjà existant
-            return;
+            dense[sparse[entityId]] = component; // écrase l’ancien
+            return ref dense[sparse[entityId]];
         }
 
-        sparse[entityId] = dense.Count;
-        dense.Add(component);
-        entities.Add(entityId);
+        if (count == dense.Length)
+            Grow();
+
+        sparse[entityId] = count;
+        dense[count] = component;
+        entities[count] = entityId;
+        count++;
+        
+        return ref dense[count - 1];
     }
-    
+
     public void Remove(int entityId)
     {
-        if (!Has(entityId)) return;
+        if (!Has(entityId))
+            return;
 
         int index = sparse[entityId];
-        int lastIndex = dense.Count - 1;
+        int lastIndex = count - 1;
+        int lastEntity = entities[lastIndex];
 
+        // swap
         dense[index] = dense[lastIndex];
-        entities[index] = entities[lastIndex];
+        entities[index] = lastEntity;
+        sparse[lastEntity] = index;
 
-        sparse[entities[index]] = index;
-
-        dense.RemoveAt(lastIndex);
-        entities.RemoveAt(lastIndex);
-
+        // nettoie
         sparse[entityId] = -1;
-    }
-    public T Get(int entityId)
-    {
-        if (!Has(entityId)) throw new Exception("Entity has no component.");
-        return dense[sparse[entityId]];
-    }
-    public bool Has(int entityId)
-    {
-        return entityId < sparse.Count && sparse[entityId] != -1;
-    }
-    public IEnumerable<(int entityId, T component)> ActiveElements()
-    {
-        for (int i = 0; i < dense.Count; i++)
-            yield return (entities[i], dense[i]);
+        count--;
     }
     
+    public ref T Get(int entityId)
+    {
+        if (!Has(entityId))
+            throw new Exception($"Entity has no component of type {typeof(T)}");
+        return ref dense[sparse[entityId]];
+    }
+
+    public bool Has(int entityId)
+    {
+        return entityId < sparse.Length && sparse[entityId] != -1;
+    }
+    
+    public IEnumerable<(int entityId, T component)> ActiveElements()
+    {
+        for (int i = 0; i < count; i++)
+            yield return (entities[i], dense[i]);
+    }
+
     private void EnsureCapacity(int entityId)
     {
-        while (sparse.Count <= entityId)
-            sparse.Add(-1);
+        if (entityId < sparse.Length)
+            return;
+
+        int newSize = sparse.Length;
+        while (newSize <= entityId)
+            newSize *= 2;
+
+        Array.Resize(ref sparse, newSize);
+        Array.Fill(sparse, -1, count, newSize - count);
+    }
+
+    private void Grow()
+    {
+        int newSize = dense.Length * 2;
+        Array.Resize(ref dense, newSize);
+        Array.Resize(ref entities, newSize);
     }
 }

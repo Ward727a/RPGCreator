@@ -1,7 +1,27 @@
 
+using Microsoft.Xna.Framework;
+
 namespace RPGCreator.Core.Runtimes.ECS;
 
-public interface ISystem
+public abstract class ISystem
 {
-    void Update(IWorld world, float deltaTime);
+    public Action? OnEnable;
+    public Action? OnDisable;
+
+    /// <summary>
+    /// Define the priority of the system. Lower values are executed first.
+    /// Default priority is 0.
+    /// Negative values are allowed.
+    /// </summary>
+    public abstract int Priority { get; }
+    /// <summary>
+    /// Indicate if the system is a drawing system.
+    /// True => It will be executed inside the 'Draw' loop.
+    /// False => It will be executed inside the 'Update' loop.
+    /// Default is false.
+    /// </summary>
+    public abstract bool IsDrawingSystem { get; } 
+
+    public abstract void Initialize(IECSWorld iecsWorld);
+    public abstract void Update(GameTime deltaTime);
 }

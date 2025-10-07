@@ -18,6 +18,9 @@ using RPGCreator.RTP.Editor.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RPGCreator.Core.Runtimes.ECS;
+using RPGCreator.Core.Runtimes.ECS.Components.Display;
+using RPGCreator.Core.Runtimes.ECS.Systems;
 
 namespace RPGCreator.MonoGame
 {
@@ -29,6 +32,8 @@ namespace RPGCreator.MonoGame
 
         public GraphicsDeviceManager _graphics;
         private SpriteBatchExtend _spriteBatch;
+
+        private ECSWorld _ecsWorld;
 
         private MapEditing _mapEditing;
 
@@ -70,6 +75,27 @@ namespace RPGCreator.MonoGame
             _spriteBatch = new(GraphicsDevice);
             _mapEditing = new(_spriteBatch);
 
+            _ecsWorld = new();
+            _ecsWorld.AddSystem(new SpriteRenderSystem(_ecsWorld._componentManager, GraphicsDevice));
+
+            // Test loop to create multiple entities with sprite and transform components and test the sprite rendering system.
+            
+            for(int i = 0; i < 1000; i++)
+            {
+                var entity = _ecsWorld.CreateEntity();
+
+                ref var spriteComponent = ref entity.AddComponent<SpriteComponent>();
+
+                // For now we will use a hardcoded path for a test sprite found in the engine assets folder.
+                spriteComponent.SpritePath = $"{AppContext.BaseDirectory}Assets/sprites/character/test_character.png";
+                spriteComponent.Size = new(16, 16); // Right now the size isn't used by the sprite renderer system.
+                
+                ref var transformComponent = ref entity.AddComponent<TransformComponent>();
+
+                transformComponent.Y = 5 + i * 20;
+                transformComponent.X = 5 + i * 20;
+            }
+            
             //CurrentMap = new(_spriteBatch) { game = this };
 
             _events.OnRTPLoadedContent(new());
@@ -86,6 +112,7 @@ namespace RPGCreator.MonoGame
 
             _mapEditing.Update(gameTime);
             Gum.Update(gameTime);
+            _ecsWorld.Update(gameTime);
 
             if (CanUseMouse)
             {
@@ -150,6 +177,7 @@ namespace RPGCreator.MonoGame
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             _mapEditing.Draw();
+            _ecsWorld.Draw(gameTime);
 
             //_spriteBatch.Begin();
 

@@ -8,6 +8,7 @@ public class ObjectPool<T> where T : class, ICleanable
     private readonly int _maxSize;
     private readonly Func<T>? _factory;
     public int Count => _stack.Count;
+    public int RentedCount { get; private set; } = 0;
     
     public ObjectPool(Func<T>? factory = null, int maxSize = 1024)
     {
@@ -20,18 +21,37 @@ public class ObjectPool<T> where T : class, ICleanable
                       "Consider using a different pool size or factory method.", _maxSize);
         }
     }
-    
+
     /// <summary>
     /// Get an object from the pool. If the pool is empty, a new instance will be created using the factory method if provided.
     /// </summary>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public T Rent() => _stack.Count > 0 ? _stack.Pop() : 
-        _factory != null ? _factory() : throw new InvalidOperationException("No factory method provided to create new instances.");
-    
+    public T Rent()
+    {
+        RentedCount++;
+        return _stack.Count > 0 ? _stack.Pop() :
+            _factory != null ? _factory() :
+            throw new InvalidOperationException("No factory method provided to create new instances.");
+    }
+
+    /// <summary>
+    /// Return an object to the pool. If the pool is full, the object will be discarded.
+    /// The object will be cleaned before being added back to the pool by calling <see cref="ICleanable.Clean"/>.
+    /// </summary>
+    /// <param name="item"></param>
+    /// <exception cref="ArgumentNullException"></exception>
     public void Return(T item)
     {
         if (item == null) throw new ArgumentNullException(nameof(item));
+        
+        RentedCount--;
+        
+        if(RentedCount < 0)
+        {
+            Log.Error("ObjectPool Return called more times than Rent. RentedCount is now negative.");
+            RentedCount = 0;
+        }
         
         if (_stack.Count < _maxSize)
         {

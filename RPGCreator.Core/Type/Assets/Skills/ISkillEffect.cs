@@ -1,4 +1,5 @@
 using MonoGame.Extended.ECS;
+using RPGCreator.Core.Runtimes;
 using RPGCreator.Core.Type.Assets.Actors;
 using RPGCreator.Core.Type.Internal;
 
@@ -16,5 +17,5 @@ public interface ISkillEffect : IHasUniqueId
     /// The properties can be accessed in the ApplyEffect method to modify the behavior of the effect.
     /// </summary>
     public Dictionary<string, object> Properties { get; set; }
-    public void ApplyEffect(Entity caster, List<Entity> target);
+    public void ApplyEffect(IEntity caster, List<IEntity> target);
 }

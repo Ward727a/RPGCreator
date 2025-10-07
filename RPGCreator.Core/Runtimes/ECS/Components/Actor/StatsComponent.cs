@@ -3,7 +3,7 @@ using RPGCreator.Core.Type.Assets.Characters.Stats;
 
 namespace RPGCreator.Core.Runtimes.ECS.Components.Actor;
 
-public struct StatsComponent<T> : IComponent where T : IStatDef
+public struct StatsComponent : IComponent
 {
     
     private List<StatInstance> _stats = new();
