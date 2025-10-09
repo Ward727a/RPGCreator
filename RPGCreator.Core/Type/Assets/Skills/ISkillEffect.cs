@@ -8,8 +8,9 @@ namespace RPGCreator.Core.Type.Assets.Skills;
 /// <summary>
 /// Native C# implementation of a skill effect.
 /// </summary>
-public interface ISkillEffect : IHasUniqueId
+public interface ISkillEffect : IHasUniqueId, ICloneable
 {
+    public string DisplayName { get; }
     /// <summary>
     /// Custom properties for the skill effect.<br/>
     /// It can be used to allow users to configure the effect in the editor.<br/>
@@ -17,5 +18,8 @@ public interface ISkillEffect : IHasUniqueId
     /// The properties can be accessed in the ApplyEffect method to modify the behavior of the effect.
     /// </summary>
     public Dictionary<string, object> Properties { get; set; }
+    
+    static IReadOnlyList<SkillEffectPropertyDescriptor> PropertyDescriptors { get; } = new List<SkillEffectPropertyDescriptor>();
+    
     public void ApplyEffect(IEntity caster, List<IEntity> target);
 }

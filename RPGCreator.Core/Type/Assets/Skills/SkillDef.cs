@@ -17,6 +17,7 @@ public class SkillDef : ISkillDef
     public float Cooldown { get; set; }
     public ESkillTargetType TargetType { get; set; }
     public float Range { get; set; }
+    public List<URN> EffectsURN { get; set; } = new();
     public PrattCompiledFormula? SkillScalingFormula { get; set; }
     public string SkillNonCompiledFormula { get; set; } = string.Empty;
     
@@ -106,4 +107,5 @@ public class SkillDef : ISkillDef
         // Note: We do not deserialize the compiled formula, as it can be recompiled from the non-compiled formula.
         Urn = new URN("skill", $"{Name}@{Unique}");
     }
+
 }

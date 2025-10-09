@@ -12,7 +12,6 @@ public class SkillEffectsRegistry: IAssetRegistry<ISkillEffect>
 {
     private readonly Dictionary<Ulid, ISkillEffect> _byId = new();
     private readonly Dictionary<URN, Ulid> _byUrn = new();
-    
     public event EventHandler<ISkillEffect>? AssetRegistered;
     public event EventHandler<ISkillEffect>? AssetUnregistered;
     

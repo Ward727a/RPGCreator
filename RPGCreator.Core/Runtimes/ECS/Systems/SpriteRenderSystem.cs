@@ -15,7 +15,6 @@ public class SpriteRenderSystem : ISystem
     private readonly GraphicsDevice _graphicsDevice;
     private readonly SpriteBatchExtend _spriteBatch;
     
-    // Cache des textures pour éviter de recharger à chaque frame
     private readonly Dictionary<string, Texture2D> _textureCache = new();
     
     public SpriteRenderSystem(ComponentManager componentManager, GraphicsDevice graphicsDevice)
@@ -30,7 +29,6 @@ public class SpriteRenderSystem : ISystem
 
     public override void Initialize(IECSWorld iecsWorld)
     {
-        // Initialisation si nécessaire
         Log.Information("SpriteRenderSystem initialized.");
     }
 

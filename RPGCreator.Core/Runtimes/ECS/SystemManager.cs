@@ -20,7 +20,6 @@ public class SystemManager
 
     public void Update(GameTime gameTime)
     {
-        // Appliquer les ajouts
         while (_toAdd.Count > 0)
         {
             var sys = _toAdd.Dequeue();
@@ -29,7 +28,6 @@ public class SystemManager
             sys.OnEnable?.Invoke();
         }
 
-        // Appliquer les suppressions
         while (_toRemove.Count > 0)
         {
             var sys = _toRemove.Dequeue();
@@ -37,7 +35,6 @@ public class SystemManager
                 sys.OnDisable?.Invoke();
         }
 
-        // Exécution de tous les systèmes
         foreach (var system in _systems.Where(s => !s.IsDrawingSystem))
         {
             system.Update(gameTime);

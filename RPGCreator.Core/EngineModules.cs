@@ -38,7 +38,7 @@ namespace RPGCreator.Core
         // Those should be updated with each new module version. (even for small changes!)
         private readonly List<string> CHECKSUM_INTERNAL_MODULES = new(
             [
-                "b4d142bbfc195776b01385526f68608a22b8ba6cb9b134948f3aaf1986027c85", // TestModule.dll
+                "37dd0521d9dc2796ba8c67020f8f596d9196aaeec68891f9517dc669c45ba691", // TestModule.dll
                 ]
             );
 

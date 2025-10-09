@@ -6,11 +6,35 @@ using Serilog;
 
 namespace RPGCreator.Core.Runtimes.Contents.SkillEffects;
 
+[SkillEffect]
 public class SetStatEffect : ISkillEffect
 {
     public Ulid Unique { get; } = Ulid.NewUlid();
     public URN Urn { get; } = new URN("skill_effect","set_stat");
-    public Dictionary<string, object> Properties { get; set; }
+    public string DisplayName { get; } = "Set Stat";
+    public Dictionary<string, object> Properties { get; set; } = new Dictionary<string, object>()
+    {
+        { "StatDefUnique", Ulid.Empty }, // The unique ID of the stat definition to modify
+        { "Value", 0f } // The value to set the stat to
+    };
+
+    public static IReadOnlyList<SkillEffectPropertyDescriptor> PropertyDescriptors { get; } = new List<SkillEffectPropertyDescriptor>
+    {
+        new SkillEffectPropertyDescriptor
+        {
+            Name = "StatDefUnique",
+            Type = EffectPropertyType.StatReference,
+            DefaultValue = Ulid.Empty
+        },
+        new SkillEffectPropertyDescriptor
+        {
+            Name = "Value",
+            Type = EffectPropertyType.Number,
+            DefaultValue = 0f
+        }
+    };
+
+
     public void ApplyEffect(IEntity caster, List<IEntity> target)
     {
         // First check if we have all the required properties
@@ -43,5 +67,13 @@ public class SetStatEffect : ISkillEffect
             return;
         }
         Log.Error("SetStatEffect: Target entity does not have a StatsComponent.");
+    }
+
+    public object Clone()
+    {
+        return new SetStatEffect
+        {
+            Properties = new Dictionary<string, object>(Properties),
+        };
     }
 }
