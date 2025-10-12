@@ -6,6 +6,7 @@ using RPGCreator.Core;
 using RPGCreator.Core.Type;
 using RPGCreator.Core.Type.Assets.Skills;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEditor;
+using RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEffectEditor;
 using Serilog;
 
 namespace RPGCreator.UI.Content.AssetsManage.Components.Skills.Tabs;
@@ -183,6 +184,9 @@ public class SkillEffectManageControl : UserControl
     private void OnAddButtonClicked(object? sender, RoutedEventArgs e)
     {
         Log.Debug("Add button clicked. Opening new skill effect editor.");
+        var newSkillEffectEditor = new SkillsEffectEditorWindowControl();
+        var host = ((AssetsManageWindow)this.GetVisualRoot()!);
+        host?.OpenCustom(newSkillEffectEditor);
     }
     private void OnDeleteButtonClicked(object? sender, RoutedEventArgs e)
     {

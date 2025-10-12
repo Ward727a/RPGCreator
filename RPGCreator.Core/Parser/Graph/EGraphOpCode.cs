@@ -29,10 +29,27 @@ public enum EGraphOpCode
     
     /* GET/SET OPCODES */
     
+    /// <summary>
+    /// Get variable from the current context (like the current skill effect, event, etc).
+    /// </summary>
     get_variable, // This will get a variable from the context. (operands: path, register)
+    /// <summary>
+    /// Set variable in the current context (like the current skill effect, event, etc).
+    /// </summary>
     set_variable, // This will set a variable in the context. (operands: register, path)
+    /// <summary>
+    /// Get variable from the Global Game Memory (the VM).
+    /// </summary>
     get_vm, // This will get a variable from the VM. (operands: path, register)
+    /// <summary>
+    /// Set variable in the Global Game Memory (the VM).
+    /// </summary>
     set_vm, // This will set a variable in the VM. (operands: register, path)
+    
+    /* CHECK OPCODES */
+    
+    check_is_null, // This will check if a value is null. (operands: register | object, register)
+    check_is_type, // This will check if a value is of a specific type. (operands: register | object, string | register, register)
     
     /* MATH OPCODES */
     

@@ -70,7 +70,9 @@ public sealed class NodeControl : Control
         Grid.SetRow(_right,1);
         Grid.SetColumn(_right,1);
         grid.Children.Add(_right);
+        
         border.Child = grid;
+        
         this.VisualChildren.Add(border);
         this.LogicalChildren.Add(border);
 
@@ -257,16 +259,30 @@ public class PortControl : Control
             _beginLink(ParentNode, this);
             e.Handled=true;
         };
+        if (def.Kind == PortKind.Object)
+        {
+            ToolTip.SetTip(this, $"Type: {def.ObjectInternalType.Name}");
+        }
     }
 
     public override void Render(DrawingContext ctx)
     {
         var r = new Rect(Bounds.Size);
-        var color = new SolidColorBrush(Def.Kind.GetColor());
-        ctx.DrawEllipse(color, new Pen(Brushes.Black,1), new((_isOutput ? r.Right : r.Left ), r.Center.Y) , 6, 6);
+
         var name = new FormattedText(Def.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, Typeface.Default, 12, Brushes.White);
         var x = !_isOutput ? 16 : (Bounds.Width - name.Width - 16);
         ctx.DrawText(name, new Point(x, (Bounds.Height - name.Height)/2));
+        var color = new SolidColorBrush(Def.Kind.GetColor());
+        if (Def.Type == EPortType.Array)
+        {
+            // Draw a square for array ports
+            ctx.DrawRectangle(color, new Pen(Brushes.Black, 1), new Rect(new Point(_isOutput ? r.Right - 6 : r.Left + 6, r.Center.Y - 6), new Size(12, 12)));
+        }
+        else
+        {
+            ctx.DrawEllipse(color, new Pen(Brushes.Black, 1), new((_isOutput ? r.Right : r.Left), r.Center.Y), 6, 6);
+            
+        }
     }
 }
 
@@ -624,7 +640,7 @@ public sealed class PortEnumInputControl : PortControl, IPortInput
             };
             _inputBox.SelectionChanged += (s, e) =>
             {
-                def.Value = (_inputBox.SelectedItem as Enum)?.ToString() ?? string.Empty;
+                def.Value = (_inputBox.SelectedItem as Enum);
                 ValueChanged?.Invoke(this, _inputBox.SelectedItem as string ?? string.Empty);
             };
         }

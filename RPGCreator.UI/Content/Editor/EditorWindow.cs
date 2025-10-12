@@ -52,8 +52,10 @@ namespace RPGCreator.UI.Content.Editor
             Height = 900;
             Title = "RPGCreator - Editor";
             // For now we will use the default avalonia icon, but you can replace it with your own icon.
-            Icon = new WindowIcon("Assets/avalonia-logo.ico");
-            WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            Icon = new WindowIcon("Assets/rpgc-logo.ico");
+            WindowStartupLocation = WindowStartupLocation.Manual;
+                Position = Position.WithX(this.Screens.Primary.WorkingArea.Center.X-1500/2)
+                .WithY(this.Screens.Primary.WorkingArea.Center.Y-900/2);
 
             Content = new EditorWindowControl();
             //InitializeIfNeeded();

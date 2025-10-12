@@ -16,7 +16,7 @@ public class NodeStart : Node
     public NodeStart()
     {
         // The start node does not have any outputs, as it is the entry point of the graph.
-        Outputs.Add(new Port() { Kind = PortKind.Exec, AllowManualInput = false, Name = "Out"});
+        Outputs.Add(new Port() { Kind = PortKind.Exec, AllowManualInput = false, Name = "Begin"});
     }
     
     public override IEnumerable<GraphInstr> Emit(GraphDocument graph, GraphCompileContext context)

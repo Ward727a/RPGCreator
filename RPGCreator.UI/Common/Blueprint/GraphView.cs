@@ -66,7 +66,7 @@ public sealed class GraphView : Control
         if (!_view.TryInvert(out var inv))
             return dScreen;
 
-        // Convertit deux points séparés par dScreen
+        // Convert the delta by transforming the origin and the end point, then subtracting
         var originW = inv.Transform(new Point(0, 0));
         var endW    = inv.Transform(new Point(dScreen.X, dScreen.Y));
         return endW - originW;

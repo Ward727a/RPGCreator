@@ -41,7 +41,7 @@ namespace RPGCreator.UI.Content.ProjectCreator
             Width = 600;
             Height = 400;
             Title = "Project Creator";
-            Icon = new WindowIcon("Assets/avalonia-logo.ico");
+            Icon = new WindowIcon("Assets/rpgc-logo.ico");
             WindowStartupLocation = WindowStartupLocation.CenterOwner;
             // Set the content of the window to the ProjectCreatorWindowControl
             Control = new ProjectCreatorWindowControl();

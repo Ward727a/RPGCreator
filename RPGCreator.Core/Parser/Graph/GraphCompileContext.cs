@@ -108,7 +108,7 @@ public sealed class GraphCompileContext
                 instructions.Add(
                     GraphIR.Op(
                         EGraphOpCode.alloc_literal_object, 
-                        GraphIR.Operands(EGraphOperandKind.Literal, value?.ToString() ?? ""), 
+                        GraphIR.Operands(EGraphOperandKind.Literal, value?.ToString() ?? "", value ?? null!), 
                         GraphIR.Operands(EGraphOperandKind.Register, dest))
                     );
                 break;

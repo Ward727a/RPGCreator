@@ -15,14 +15,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AvaloniaResource Remove="Assets\avalonia-logo.ico" />
+    <AvaloniaResource Remove="Assets\rpgc-logo.ico" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="Assets\TMGrammar\RPGFormula.tmLanguage.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\avalonia-logo.ico">
+    <Content Include="Assets\rpgc-logo.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

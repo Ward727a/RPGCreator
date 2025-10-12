@@ -2,6 +2,82 @@ namespace RPGCreator.Core.Parser.Graph;
 
 public sealed class GraphEvalEnvironment
 {
+
+    public struct RegisterValue
+    {
+        private enum ValueType
+        {
+            Null,
+            Integer,
+            Float,
+            String,
+            Boolean,
+            Object
+        }
+
+        private ValueType Type;
+
+        private int IntValue;
+        private float FloatValue;
+        private string? StringValue;
+        private bool BoolValue;
+        private object? ObjectValue;
+        
+        public override string ToString()
+        {
+            return Type switch
+            {
+                ValueType.Null => "null",
+                ValueType.Integer => IntValue.ToString(),
+                ValueType.Float => FloatValue.ToString(),
+                ValueType.String => StringValue ?? string.Empty,
+                ValueType.Boolean => BoolValue.ToString(),
+                ValueType.Object => ObjectValue?.ToString() ?? "null",
+                _ => "unknown"
+            };
+        }
+        
+        public static RegisterValue FromObject(object? value)
+        {
+            return value switch
+            {
+                int i => new RegisterValue { Type = ValueType.Integer, IntValue = i },
+                float f => new RegisterValue { Type = ValueType.Float, FloatValue = f },
+                bool b => new RegisterValue { Type = ValueType.Boolean, BoolValue = b },
+                string s => new RegisterValue { Type = ValueType.String, StringValue = s },
+                null => new RegisterValue { Type = ValueType.Null },
+                _ => new RegisterValue { Type = ValueType.Object, ObjectValue = value }
+            };
+        }
+        
+        public T As<T>()
+        {
+            return Type switch
+            {
+                ValueType.Integer when typeof(T) == typeof(int) => (T)(object)IntValue,
+                ValueType.Float when typeof(T) == typeof(float) => (T)(object)FloatValue,
+                ValueType.Boolean when typeof(T) == typeof(bool) => (T)(object)BoolValue,
+                ValueType.String when typeof(T) == typeof(string) => (T)(object)(StringValue ?? string.Empty),
+                ValueType.Object when typeof(T).IsAssignableFrom(ObjectValue?.GetType()) => (T)ObjectValue,
+                _ => throw new InvalidCastException($"Cannot convert register of type {Type} to {typeof(T).Name}.")
+            };
+        }
+
+        public object? GetValue()
+        {
+            return Type switch
+            {
+                ValueType.Integer => IntValue,
+                ValueType.Float => FloatValue,
+                ValueType.Boolean => BoolValue,
+                ValueType.String => StringValue,
+                ValueType.Object => ObjectValue,
+                ValueType.Null => null,
+                _ => null
+            };
+        }
+    }
+    
     public const int MaxRegisters = 256;
     /// <summary>
     /// Registers are used to store temporary values during the evaluation of the graph.<br/>
@@ -11,7 +87,7 @@ public sealed class GraphEvalEnvironment
     /// If you need to store more than `MaxRegisters` values, consider using a different data structure or breaking your graph into smaller parts.<br/>
     /// The registers are initialized to `null` by default, so you can safely use them without worrying about uninitialized values.
     /// </summary>
-    internal object?[] Registers { get; } = new object?[MaxRegisters];
+    internal RegisterValue?[] Registers { get; } = new RegisterValue?[MaxRegisters];
     private Dictionary<string, Object?> Variables { get; } = new(); // This holds instance-specific variables.
     public static Dictionary<string, object?> GlobalsVariables { get; } = new(); // This should be static to hold global variables across all instances of the environment.
     /// <summary>
@@ -21,17 +97,17 @@ public sealed class GraphEvalEnvironment
     public int CurrentBlock { get; set; } = 0;
     public int CurrentInstruction { get; set; } = 0;
     
-    public bool SetRegister(int index, object? value)
+    public bool SetRegister<T>(int index, T value)
     {
         if (index < 0 || index >= MaxRegisters)
         {
             throw new ArgumentOutOfRangeException(nameof(index), $"Register index must be between 0 and {MaxRegisters - 1}.");
         }
-        Registers[index] = value;
+        Registers[index] = RegisterValue.FromObject(value);
         return true;
     }
 
-    public object? GetRegister(int index)
+    public RegisterValue? GetRegister(int index)
     {
         if (index < 0 || index >= MaxRegisters)
         {
@@ -46,9 +122,10 @@ public sealed class GraphEvalEnvironment
         {
             throw new ArgumentOutOfRangeException(nameof(index), $"Register index must be between 0 and {MaxRegisters - 1}.");
         }
-        if (Registers[index] is T value)
+
+        if (Registers[index].HasValue)
         {
-            return value;
+            return Registers[index]!.Value.As<T>();
         }
         throw new InvalidCastException($"Register at index {index} cannot be cast to type {typeof(T).Name}.");
     }

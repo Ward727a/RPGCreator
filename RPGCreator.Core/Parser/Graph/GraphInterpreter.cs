@@ -210,22 +210,30 @@ public sealed class GraphInterpreter
         {
             throw new InvalidOperationException($"Enum operand cannot be null. Expected a valid enum value for {typeof(T).Name}.");
         }
-        if (enumValue is not string enumValueStr)
+        
+        if(enumValue.GetType() == typeof(T))
         {
-            throw new InvalidOperationException($"Invalid enum operand type: {enumValue.GetType()}. Expected a string.");
-        }
-
-        if (string.IsNullOrEmpty(enumValueStr))
-        {
-            throw new InvalidOperationException($"Invalid enum operand: {operand.Text}. Expected a non-empty string.");
-        }
-
-        if (Enum.TryParse<T>(enumValueStr, out var result))
-        {
-            return result;
+            return (T)enumValue;
         }
         
-        throw new InvalidOperationException($"Invalid enum value: {enumValueStr}. Expected a valid value for {typeof(T).Name}.");
+        // if (enumValue is not string enumValueStr)
+        // {        
+        //     throw new InvalidOperationException($"Invalid enum value: {enumValue}({enumValue.GetType().Name}. Expected a valid value for {typeof(T).Name} (string or enum).");
+        // }
+        //
+        // if (string.IsNullOrEmpty(enumValueStr))
+        // {
+        //     throw new InvalidOperationException($"Invalid enum operand: {operand.Text}. Expected a non-empty string.");
+        // }
+        //
+        // if (Enum.TryParse<T>(enumValueStr, out var result))
+        // {
+        //     return result;
+        // }
+        
+        
+        
+        throw new InvalidOperationException($"Invalid enum value: {enumValue}({enumValue.GetType().Name}. Expected a valid value for {typeof(T).Name}.");
     }
     
     internal bool IsOperandOfKind(GraphOperands operand, EGraphOperandKind kind)
@@ -253,7 +261,7 @@ public sealed class GraphInterpreter
         
         var sValue = operand.Text;
         if (sValue.StartsWith("rx")) return EvalRegisterOperand(operand);
-        return sValue;
+        return operand.Value;
     }
     
     internal T? EvalOperand<T>(GraphOperands operand)
@@ -282,7 +290,7 @@ public sealed class GraphInterpreter
         }
         
         var registerId = ParseRegisterOperand(operand);
-        return _env.GetRegister(registerId);
+        return _env.GetRegister(registerId).Value.GetValue();
     }
     /// <summary>
     /// Evaluate a register operand and return its value as a specific type.<br/>

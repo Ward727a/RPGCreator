@@ -12,10 +12,8 @@ public sealed class GraphDocument : ISerializable, IDeserializable
     public readonly Dictionary<string, Node> Nodes = new();
     public readonly List<Link> Links = new();
 
-    public readonly Dictionary<string, (System.Type, object)> GraphVariables = new()
-    {
-        ["test"] = (typeof(double), 0D),
-    };
+    private Dictionary<string, (System.Type, object)> _GraphVariables = new();
+    public IReadOnlyDictionary<string, (System.Type, object)> GraphVariables => _GraphVariables;
 
     public event Action<string, (System.Type, object)>? GraphVariableAdded;
     public event Action<string>? GraphVariableRemoved;
@@ -27,13 +25,20 @@ public sealed class GraphDocument : ISerializable, IDeserializable
     
     public void AddGraphVariable(string name, System.Type type, object defaultValue)
     {
-        GraphVariables[name] = (type, defaultValue);
+        _GraphVariables[name] = (type, defaultValue);
         GraphVariableAdded?.Invoke(name, (type, defaultValue));
     }
     public void RemoveGraphVariable(string name)
     {
-        if (GraphVariables.Remove(name))
+        if (_GraphVariables.Remove(name))
             GraphVariableRemoved?.Invoke(name);
+    }
+    public void ClearGraphVariables()
+    {
+        var keys = _GraphVariables.Keys.ToList();
+        _GraphVariables.Clear();
+        foreach (var key in keys)
+            GraphVariableRemoved?.Invoke(key);
     }
     public Node AddNode(Node n) { Nodes[n.Id] = n; NodeAdded?.Invoke(n); return n; }
     public void RemoveNode(string id) { if (Nodes.Remove(id, out var n)) NodeRemoved?.Invoke(n); }

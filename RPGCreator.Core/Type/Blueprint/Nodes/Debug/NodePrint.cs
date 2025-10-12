@@ -66,8 +66,11 @@ public class NodePrint : Node
         Properties["level"] = LevelPort.Value;
         
         var instrs = new List<GraphInstr>();
+        // Resolve the input values
         var message = context.ResolveInput(graph, this, MessagePort.Id, "message", instrs, "");
         var level = context.ResolveInput(graph, this, LevelPort.Id, "level", instrs, EPrintLevel.Debug);
+        
+        // Add the instruction to print the message
         instrs.Add(GraphIR.Op(EGraphOpCode.debug_print, GraphIR.Operands(EGraphOperandKind.LiteralString | EGraphOperandKind.Register, message), GraphIR.Operands(EGraphOperandKind.Enum | EGraphOperandKind.Register, level)));
         return instrs;
     }
