@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using RPGCreator.Core.Type.Assets.Characters.Stats;
+using RPGCreator.Core.Type.Assets.Skills;
 using RPGCreator.Core.Type.Internal;
 
 namespace RPGCreator.Core.Type.Assets.Characters;
@@ -92,6 +93,29 @@ public class CharacterStats(IStatDef def) : ISerializable, IDeserializable
         }
     }
     
+    public SerializationInfo GetObjectData()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SetObjectData(DeserializationInfo info)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class CharacterSkill(ISkillDef def) : ISerializable, IDeserializable
+{
+    public Ulid Unique => SkillDef.Unique;
+    public ISkillDef SkillDef { get; private set; } = def;
+    
+    public int SkillLevel { get; set; } = 1;
+    public bool HasMaxLevel { get; set; } = false;
+    /// <summary>
+    /// If <see cref="HasMaxLevel"/> is true, this is the max level of the skill (it will be removed if the character reaches this level)
+    /// </summary>
+    public int MaxSkillLevel { get; set; } = 1; 
+
     public SerializationInfo GetObjectData()
     {
         throw new NotImplementedException();
@@ -374,7 +398,9 @@ public class CharacterData : BaseAsset, ICharacter, ISerializable, IDeserializab
     }
 
     public Dictionary<Ulid, CharacterStats> Stats { get; private set; } = new();
-
+    
+    public Dictionary<Ulid, CharacterSkill> Skills { get; private set; } = new();
+    
     public CharacterFeatures Features { get; private set; } = new CharacterFeatures();
     
     public CharacterRolePlayInfo RolePlayInfo { get; private set; } = new CharacterRolePlayInfo();

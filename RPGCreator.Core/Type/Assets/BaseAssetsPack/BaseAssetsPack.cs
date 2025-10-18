@@ -165,6 +165,7 @@ namespace RPGCreator.Core.Type.Assets.BaseAssetsPack
                     {
                         _ when assetType == typeof(StatDefinition) => typeof(IStatDef),
                         _ when assetType == typeof(SkillDef) => typeof(ISkillDef),
+                        _ when assetType == typeof(GraphSkillEffect) => typeof(ISkillEffect),
                         _ => assetType
                     };
                     

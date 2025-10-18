@@ -63,9 +63,30 @@ public static class EffectPropertyTypeExtensions
     }
 }
 
-public record SkillEffectPropertyDescriptor
+public record SkillEffectPropertyDescriptor : ISerializable, IDeserializable
 {
-    public string Name {get; init; }
-    public EffectPropertyType Type {get; init; }
-    public object DefaultValue {get; init; }
+    public string Name {get; set; }
+    public EffectPropertyType Type {get; set; }
+    
+    public object DefaultValue {get; set; }
+    public SerializationInfo GetObjectData()
+    {
+        
+        return new SerializationInfo(typeof(SkillEffectPropertyDescriptor))
+            .AddValue(nameof(Name), Name)
+            .AddValue(nameof(Type), Type)
+            .AddValue(nameof(DefaultValue), DefaultValue);
+        
+    }
+
+    public void SetObjectData(DeserializationInfo info)
+    {
+        info.TryGetValue(nameof(Name), out string name, string.Empty, "Error while deserializing SkillEffectPropertyDescriptor.Name");
+        info.TryGetValue(nameof(Type), out EffectPropertyType type, EffectPropertyType.None, "Error while deserializing SkillEffectPropertyDescriptor.Type");
+        info.TryGetValue(nameof(DefaultValue), out object defaultValue, type.GetDefaultValue(), "Error while deserializing SkillEffectPropertyDescriptor.DefaultValue");
+        
+        Name = name;
+        Type = type;
+        DefaultValue = defaultValue;
+    }
 }

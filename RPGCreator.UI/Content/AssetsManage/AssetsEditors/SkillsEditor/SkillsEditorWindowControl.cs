@@ -71,6 +71,12 @@ public class SkillsEditorWindowControl : UserControl
                 Header = "Effects",
                 Content = new SkillEffectTab(SkillDef)
             });
+        _body.Items.Add(
+            new TabItem()
+            {
+                Header = "Display",
+                Content = new SkillDisplayTab(SkillDef)
+            });
         
         var buttonsPanel = new StackPanel
         {

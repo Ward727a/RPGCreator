@@ -386,6 +386,7 @@ namespace RPGCreator.UI.Content.Editor
             MonoGameScreen.PointerReleased += MonoGameScreen_PointerReleased;
             MonoGameScreen.PointerMoved += MonoGameScreen_PointerMoved;
             MonoGameScreen.PointerExited += MonoGameScreen_PointerExited;
+            MonoGameScreen.KeyDown += MonoGameScreenOnKeyDown;
 
             game._events.RTPDraw += (s, e) =>
             {
@@ -400,6 +401,11 @@ namespace RPGCreator.UI.Content.Editor
             };
 
             this.Content = MainGrid;
+        }
+
+        private void MonoGameScreenOnKeyDown(object? sender, KeyEventArgs e)
+        {
+            EngineCore.Instance.Events.OnRTPKeyPressed(e);
         }
 
         private void MonoGameScreen_PointerExited(object? sender, PointerEventArgs e)

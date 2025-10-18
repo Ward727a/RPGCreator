@@ -2,8 +2,10 @@ using System.Collections.Generic;
 using System.IO;
 using Avalonia;
 using Avalonia.Controls;
+using RPGCreator.Core;
 using RPGCreator.Core.Type.Assets.Characters;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;
+using Serilog;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor;
@@ -49,6 +51,9 @@ public class CharacterEditorWindowControl : UserControl
         public TabControl MainContent { get; private set; }
         
         #endregion
+        
+        private StackPanel BottomPanel { get; set; }
+        private Button SaveButton { get; set; }
     
     #endregion
     
@@ -75,7 +80,8 @@ public class CharacterEditorWindowControl : UserControl
 
         Body = new Grid()
         {
-            ColumnDefinitions = new ColumnDefinitions("Auto, 4, *")
+            ColumnDefinitions = new ColumnDefinitions("Auto, 4, *"),
+            RowDefinitions = new RowDefinitions("*, Auto"),
         };
         
         CreateLeftPanel();
@@ -143,6 +149,25 @@ public class CharacterEditorWindowControl : UserControl
         
         Body.Children.Add(MainContent);
         Grid.SetColumn(MainContent, ColumnIndexMainContent);
+        
+        BottomPanel = new StackPanel()
+        {
+            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            Margin = new Thickness(5)
+        };
+        Body.Children.Add(BottomPanel);
+        Grid.SetRow(BottomPanel, 1);
+        Grid.SetColumnSpan(BottomPanel, 3);
+        SaveButton = new Button()
+        {
+            Content = "Save",
+            Width = 100,
+            Margin = new Thickness(5)
+        };
+        SaveButton.Click += OnSaveButtonClick;
+        BottomPanel.Children.Add(SaveButton);
 
         MainContent.Items.Add(new TabItem()
         {
@@ -268,6 +293,14 @@ public class CharacterEditorWindowControl : UserControl
             CharacterPortrait.Source = null;
             Data.PortraitPath = null;
         }
+    }
+    
+    private void OnSaveButtonClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        Log.Information("Character '{characterName}' saved.", Data.Name);
+        
+        Log.Debug("Character Data: {@characterData}", Data);
+        EngineCore.Instance.Managers.Assets.CharacterRegistry.Register(Data);
     }
     #endregion
     

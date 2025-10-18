@@ -1,5 +1,5 @@
-using MonoGame.Extended.ECS;
 using RPGCreator.Core.Runtimes;
+using RPGCreator.Core.Runtimes.ECS;
 using RPGCreator.Core.Type.Assets.Actors;
 using RPGCreator.Core.Type.Internal;
 
@@ -21,5 +21,5 @@ public interface ISkillEffect : IHasUniqueId, ICloneable
     
     static IReadOnlyList<SkillEffectPropertyDescriptor> PropertyDescriptors { get; } = new List<SkillEffectPropertyDescriptor>();
     
-    public void ApplyEffect(IEntity caster, List<IEntity> target);
+    public void ApplyEffect(Entity caster, List<Entity> target);
 }

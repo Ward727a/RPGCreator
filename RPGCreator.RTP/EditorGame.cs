@@ -19,9 +19,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Avalonia.Input;
+using RPGCreator.Core.Runtimes;
 using RPGCreator.Core.Runtimes.ECS;
 using RPGCreator.Core.Runtimes.ECS.Components.Display;
 using RPGCreator.Core.Runtimes.ECS.Systems;
+using RPGCreator.Core.Type.Assets.Characters;
 using Serilog;
 
 namespace RPGCreator.MonoGame
@@ -38,6 +41,9 @@ namespace RPGCreator.MonoGame
         private ECSWorld _ecsWorld;
 
         private MapEditing _mapEditing;
+        
+        private List<Ulid> SpawnedCharacters = new();
+        private IEntity _playerEntity;
 
         GumService Gum => GumService.Default;
 
@@ -66,6 +72,33 @@ namespace RPGCreator.MonoGame
 
             base.Initialize();
 
+            EngineCore.Instance.Events.RTPKeyPressed += (sender, keyEventArgs) =>
+            {
+
+                // manage arrows key to move the only entity we have for now.
+                if (SpawnedCharacters.Count != 0)
+                {
+                    var entity = _playerEntity;
+                    ref var transformComponent = ref entity.GetComponent<TransformComponent>();
+
+                    switch (keyEventArgs.Key)
+                    {
+                        case Key.Up:
+                            transformComponent.Y -= 32;
+                            break;
+                        case Key.Down:
+                            transformComponent.Y += 32;
+                            break;
+                        case Key.Left:
+                            transformComponent.X -= 32;
+                            break;
+                        case Key.Right:
+                            transformComponent.X += 32;
+                            break;
+                    }
+                }
+            };
+
             _events.OnRTPInitialized(new());
         }
 
@@ -82,21 +115,21 @@ namespace RPGCreator.MonoGame
 
             // Test loop to create multiple entities with sprite and transform components and test the sprite rendering system.
             // Very basic test - Result for now : 10k entities with simple sprites renders, no movement at ~60 FPS => 3-4ms per frame.
-            for(int i = 0; i < 10000; i++)
-            {
-                var entity = _ecsWorld.CreateEntity();
-
-                ref var spriteComponent = ref entity.AddComponent<SpriteComponent>();
-
-                // For now we will use a hardcoded path for a test sprite found in the engine assets folder.
-                spriteComponent.SpritePath = $"{AppContext.BaseDirectory}Assets/sprites/character/test_character.png";
-                spriteComponent.Size = new(16, 16); // Right now the size isn't used by the sprite renderer system.
-                
-                ref var transformComponent = ref entity.AddComponent<TransformComponent>();
-
-                transformComponent.Y = 5 + i * 20;
-                transformComponent.X = 5 + i * 20;
-            }
+            // for(int i = 0; i < 10000; i++)
+            // {
+            //     var entity = _ecsWorld.CreateEntity();
+            //
+            //     ref var spriteComponent = ref entity.AddComponent<SpriteComponent>();
+            //
+            //     // For now we will use a hardcoded path for a test sprite found in the engine assets folder.
+            //     spriteComponent.SpritePath = $"{AppContext.BaseDirectory}Assets/sprites/character/test_character.png";
+            //     spriteComponent.Size = new(16, 16); // Right now the size isn't used by the sprite renderer system.
+            //     
+            //     ref var transformComponent = ref entity.AddComponent<TransformComponent>();
+            //
+            //     transformComponent.Y = 5 + i * 20;
+            //     transformComponent.X = 5 + i * 20;
+            // }
             
             //CurrentMap = new(_spriteBatch) { game = this };
 
@@ -115,6 +148,27 @@ namespace RPGCreator.MonoGame
             _mapEditing.Update(gameTime);
             Gum.Update(gameTime);
             _ecsWorld.Update(gameTime);
+
+            
+            foreach (var data in EngineCore.Instance.Managers.Assets.CharacterRegistry.All())
+            {
+                if(!SpawnedCharacters.Contains(data.Unique))
+                {
+                    var entity = _ecsWorld.CreateEntity();
+
+                    ref var spriteComponent = ref entity.AddComponent<SpriteComponent>();
+
+                    spriteComponent.SpritePath = data.PortraitPath;
+                    spriteComponent.Size = new(32, 32);
+
+                    ref var transformComponent = ref entity.AddComponent<TransformComponent>();
+
+                    transformComponent.Y = 32*3;
+                    transformComponent.X = 32*2;
+                    _playerEntity = entity;
+                    SpawnedCharacters.Add(data.Unique);
+                }
+            }
 
             if (CanUseMouse)
             {
@@ -177,11 +231,11 @@ namespace RPGCreator.MonoGame
         {
             _events.OnRTPDraw(new(gameTime));
             GraphicsDevice.Clear(Color.CornflowerBlue);
-            
 
             _mapEditing.Draw();
             _ecsWorld.Draw(gameTime);
-
+            _spriteBatch.Begin();
+            
             //_spriteBatch.Begin();
 
             //if(HasProject)

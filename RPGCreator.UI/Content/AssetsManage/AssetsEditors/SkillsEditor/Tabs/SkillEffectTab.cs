@@ -63,15 +63,24 @@ public class SkillEffectTab : UserControl
             _gridBody.Children.Add(nameLabel);
             Grid.SetColumn(nameLabel, 0);
             
+            
             // We need to display the properties input of the effect
             // For this, we have the 'PropertyDescriptors' static property in the ISkillEffect interface
             // We can use this to create the input fields for the properties following the EffectPropertyType enum
             var type = _skillEffect.GetType();
+            var isFromGraph = type.IsAssignableTo(typeof(GraphSkillEffect));
             var propertyDescriptorsProperty = type.GetProperty("PropertyDescriptors", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+            
+            // check if the effect is a GraphSkillEffect
+            if(isFromGraph)
+            {
+                // For GraphSkillEffect, we need to get the PropertyDescriptors from the instance
+                propertyDescriptorsProperty = type.GetProperty("PropertyDescriptors", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+            }
             
             if (propertyDescriptorsProperty != null)
             {
-                var propertyDescriptors = propertyDescriptorsProperty.GetValue(null) as IReadOnlyList<SkillEffectPropertyDescriptor>;
+                var propertyDescriptors = propertyDescriptorsProperty.GetValue(isFromGraph?_skillEffect : null) as IReadOnlyList<SkillEffectPropertyDescriptor>;
                 if (propertyDescriptors != null)
                 {
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
+using RPGCreator.Core;
 using RPGCreator.Core.Type;
 using RPGCreator.Core.Type.Assets.Skills;
 
@@ -219,6 +220,9 @@ public class SkillEffectGeneralEditorControl : UserControl
     #endregion
     
     #region Properties
+        
+    public Ulid? SelectedEffectPackId => (_effectPack.SelectedItem as ComboBoxItem)?.Tag as Ulid?;
+    public string EffectName => string.IsNullOrEmpty(DisplayNameInput.Text)? "Unnamed Skill Effect" : DisplayNameInput.Text;
     #endregion
     
     #region Components
@@ -226,6 +230,7 @@ public class SkillEffectGeneralEditorControl : UserControl
     private Grid Body;
     private StackPanel BodyPanel;
 
+    private ComboBox _effectPack;
     private TextBox DisplayNameInput;
     private Button AddPropButton;
     #endregion
@@ -256,6 +261,28 @@ public class SkillEffectGeneralEditorControl : UserControl
             Orientation = Orientation.Vertical,
             Spacing = 5
         };
+        _effectPack = new ComboBox()
+        {
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = App.style.Margin,
+        };
+        var inputEffectPack = new InputLabel("Assets Pack", _effectPack);
+        BodyPanel.Children.Add(inputEffectPack);
+        ToolTip.SetTip(inputEffectPack, "The assets pack this effect belongs to.");
+        
+        foreach (var pack in EngineCore.Instance.Managers.Assets.GetAssetsPacks())
+        {
+            _effectPack.Items.Add(new ComboBoxItem()
+            {
+                Content = pack.Name,
+                Tag = pack.Id
+            });
+        }
+        
+        if(_effectPack.Items.Count > 0)
+            _effectPack.SelectedIndex = 0;
+        
 
         Body.Children.Add(BodyPanel);
         Content = Body;

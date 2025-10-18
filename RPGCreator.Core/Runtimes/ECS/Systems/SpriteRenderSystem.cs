@@ -51,8 +51,10 @@ public class SpriteRenderSystem : ISystem
                 texture = LoadTexture(sprite.SpritePath);
                 _textureCache[sprite.SpritePath] = texture;
             }
+            
+            Size spriteSize = sprite.Size;
 
-            _spriteBatch.Draw(texture, position, Color.White);
+            _spriteBatch.Draw(texture, new Rectangle((int)position.X, (int)position.Y, spriteSize.Width, spriteSize.Height), Color.White);
         }
         // #if DEBUG
         // sw.Stop();

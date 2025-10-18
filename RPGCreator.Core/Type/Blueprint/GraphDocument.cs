@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using RPGCreator.Core;
+using Serilog;
 
 namespace RPGCreator.Core.Type.Blueprint;
 
@@ -53,7 +54,22 @@ public sealed class GraphDocument : ISerializable, IDeserializable
 
     public void Save(string toFile)
     {
-        // Serialize nodes to JSON
+        EngineCore.Instance.Serializer.Serialize(this, out var serializedData);
+        File.WriteAllText(toFile, serializedData, Encoding.UTF8);
+        SavePath = toFile;
+        Log.Information("GraphDocument saved to {toFile}", toFile);
+    }
+    
+    public static GraphDocument Load(string fromFile)
+    {
+        var serializedData = File.ReadAllText(fromFile, Encoding.UTF8);
+        EngineCore.Instance.Serializer.Deserialize(serializedData, out var obj, out var type);
+        if (obj is GraphDocument doc)
+        {
+            doc.SavePath = fromFile;
+            return doc;
+        }
+        throw new Exception($"Error while loading GraphDocument from file {fromFile}: Deserialized object is not a GraphDocument.");
     }
 
     public struct NodeData() : IDeserializable, ISerializable

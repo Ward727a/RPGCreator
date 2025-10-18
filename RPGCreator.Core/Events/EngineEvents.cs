@@ -30,6 +30,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia.Input;
 using Serilog;
 
 namespace RPGCreator.Core.Events
@@ -257,6 +258,9 @@ namespace RPGCreator.Core.Events
         /// </summary>
         public event EventHandler<RTPHiddenArgs>? RTPHidden;
         public virtual void OnRTPHidden(RTPHiddenArgs e) => RTPHidden?.Invoke(this, e);
+        
+        public event EventHandler<KeyEventArgs>? RTPKeyPressed;
+        public virtual void OnRTPKeyPressed(KeyEventArgs e) => RTPKeyPressed?.Invoke(this, e);
 
         //// ===
         //// Project part

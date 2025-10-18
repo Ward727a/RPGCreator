@@ -23,7 +23,7 @@ public sealed class GraphDocumentCompiler(GraphDocument doc)
     
     private List<GraphLabeledInstr> _program = new();
 
-    public static GraphDocumentCompiled Compile(GraphDocument doc)
+    public static GraphDocumentCompiled Compile(GraphDocument doc, bool shouldSaveTemp = true)
     {
         var compiler = new GraphDocumentCompiler(doc);
         try
@@ -33,9 +33,16 @@ public sealed class GraphDocumentCompiler(GraphDocument doc)
         catch (Exception e)
         {
             Log.Error(e, "Error while compiling the graph document: {Message}", e.Message);
-            return new GraphDocumentCompiled(new List<GraphLabeledInstr>(), doc.GraphVariables.ToDictionary()){ DocumentPath = doc.SavePath };
+            
+            return new GraphDocumentCompiled(new List<GraphLabeledInstr>(), doc.GraphVariables.ToDictionary()){ DocumentPath = doc.SavePath};
         }
 
+        if(shouldSaveTemp && string.IsNullOrWhiteSpace(doc.SavePath))
+        {
+            // Generate a temporary path for saving the document
+            var path = Path.Combine(Path.GetTempPath(), $"graph_temp_{Ulid.NewUlid()}.rpg.bp");
+            doc.Save(path);
+        }
         return new GraphDocumentCompiled(compiler._program, doc.GraphVariables.ToDictionary()){ DocumentPath = doc.SavePath };
     }
     

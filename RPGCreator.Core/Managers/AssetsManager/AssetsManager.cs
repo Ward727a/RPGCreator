@@ -31,6 +31,7 @@ using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Managers.ProjectsManager.Events;
 using RPGCreator.Core.Type.Assets;
 using RPGCreator.Core.Type.Assets.BaseAssetsPack;
+using RPGCreator.Core.Type.Assets.Characters;
 using RPGCreator.Core.Type.Assets.Characters.Stats;
 using RPGCreator.Core.Type.Assets.Skills;
 using RPGCreator.Core.Type.Assets.Tilesets;
@@ -52,6 +53,12 @@ namespace RPGCreator.Core.Managers.AssetsManager
                     { typeof(TilesetDef), obj => { if (obj is TilesetDef tileset) EngineCore.Instance.Managers.Assets.TilesetRegistry.Register(tileset); } },
                     { typeof(IStatDef),   obj => { if (obj is IStatDef stat)      EngineCore.Instance.Managers.Assets.StatsRegistry.Register(stat, true); } },
                     { typeof(ISkillDef), obj => { if (obj is ISkillDef skill)    EngineCore.Instance.Managers.Assets.SkillRegistry.Register(skill, true); } },
+                    { typeof(ISkillEffect), obj =>
+                    {
+                        if (obj is ISkillEffect effect)
+                            EngineCore.Instance.Managers.Assets.SkillEffectsRegistry.Register(effect, true);
+                    }},
+                    { typeof(CharacterData), obj => { if (obj is CharacterData character) EngineCore.Instance.Managers.Assets.CharacterRegistry.Register(character); } },
                 }
             );
 
@@ -67,6 +74,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
         public TilesetRegistry TilesetRegistry { get; } = new();
         public SkillsRegistry SkillRegistry { get; } = new();
         public SkillEffectsRegistry SkillEffectsRegistry { get; } = new();
+        public CharacterRegistry CharacterRegistry { get; } = new();
         
         #endregion
         

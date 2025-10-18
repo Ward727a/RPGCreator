@@ -1,4 +1,4 @@
-using MonoGame.Extended.ECS;
+using RPGCreator.Core.Runtimes.ECS;
 using RPGCreator.Core.Runtimes.ECS.Components.Actor;
 using RPGCreator.Core.Type.Assets.Skills;
 using RPGCreator.Core.Type.Internal;
@@ -35,7 +35,7 @@ public class SetStatEffect : ISkillEffect
     };
 
 
-    public void ApplyEffect(IEntity caster, List<IEntity> target)
+    public void ApplyEffect(Entity caster, List<Entity> target)
     {
         // First check if we have all the required properties
         if (!Properties.ContainsKey("StatDefUnique") || !Properties.ContainsKey("Value"))
@@ -54,7 +54,7 @@ public class SetStatEffect : ISkillEffect
         }
     }
 
-    private void ApplyStatChange(IEntity target, Ulid statDefUnique, float value)
+    private void ApplyStatChange(Entity target, Ulid statDefUnique, float value)
     {
         if (target.HasComponent<StatsComponent>())
         {

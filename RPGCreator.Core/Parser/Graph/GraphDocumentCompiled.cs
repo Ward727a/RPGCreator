@@ -4,13 +4,13 @@ namespace RPGCreator.Core.Parser.Graph;
 
 public class GraphDocumentCompiled(List<GraphLabeledInstr> instructions, Dictionary<string, (System.Type, object)>? variables = null)
 {
-    public string DocumentPath { get; init; } = string.Empty;
+    public string DocumentPath { get; set; } = string.Empty;
     List<GraphLabeledInstr> Instructions { get; } = instructions;
     public IList<GraphLabeledInstr> GetInstructions() => Instructions.ToList();
     
     Dictionary<string, (System.Type, object)> Variables { get; } = variables ?? new();
     public IReadOnlyDictionary<string, (System.Type, object)> GetVariables() => Variables;
-    
+
     public bool Run(GraphEvalEnvironment? env = null)
     {
         if(env == null)

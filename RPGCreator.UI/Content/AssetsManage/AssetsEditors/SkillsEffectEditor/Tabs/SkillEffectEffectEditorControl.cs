@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Avalonia.Controls;
+using RPGCreator.Core.Parser.Graph;
 using RPGCreator.Core.Type.Assets.Skills;
 using RPGCreator.Core.Type.Blueprint;
 using RPGCreator.Core.Type.Blueprint.Nodes;
@@ -19,6 +20,8 @@ public class SkillEffectEffectEditorControl : UserControl
     #endregion
     
     #region Properties
+    
+    public GraphDocumentCompiled CompiledDocument => GraphDocumentCompiler.Compile(_doc);
     
     private List<SkillEffectPropertyDescriptor> _effectProperties;
     private GraphDocument _doc = new();

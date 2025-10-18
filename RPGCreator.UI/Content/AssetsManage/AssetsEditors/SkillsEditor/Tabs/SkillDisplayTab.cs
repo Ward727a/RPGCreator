@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using RPGCreator.Core.Type.Assets.Skills;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEditor.Tabs;
 /// <summary>
@@ -13,17 +14,37 @@ public class SkillDisplayTab : UserControl
     #endregion
     
     #region Properties
+
+    private ISkillDef _skillDef;
+
     #endregion
-    
+
     #region Components
+
     #endregion
-    
+
     #region Constructors
-    #endregion
+
+    public SkillDisplayTab(ISkillDef skillDef)
+    {
+        _skillDef = skillDef;
+
+        Content = new TextBlock
+        {
+            Text = "Skill Display Tab - To be implemented",
+            Margin = App.style.Margin,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center
+        };
+    }
     
+    #endregion
+
     #region Methods
+
     #endregion
 
     #region Events Handlers
+
     #endregion
 }

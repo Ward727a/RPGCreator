@@ -1,7 +1,10 @@
 using System.Collections.Generic;
+using Avalonia;
 using Avalonia.Controls;
+using RPGCreator.Core;
 using RPGCreator.Core.Type.Assets.Skills;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEffectEditor.Tabs;
+using Serilog;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEffectEditor;
 
@@ -21,9 +24,13 @@ public class SkillsEffectEditorWindowControl : UserControl
     
     #region Components
     
-    private TabControl Body { get; set; }
+    private Grid Body { get; set; }
+    private TabControl TabBody { get; set; }
     private TabItem GeneralTab { get; set; }
     private TabItem EffectTab { get; set; }
+    
+    private StackPanel ButtonBar { get; set; }
+    private Button SaveButton { get; set; }
     
     #endregion
     
@@ -43,8 +50,16 @@ public class SkillsEffectEditorWindowControl : UserControl
     private void CreateComponents()
     {
 
-        Body = new TabControl()
+        Body = new Grid()
+        {
+            RowDefinitions = new RowDefinitions("*, Auto"),
+        };
+        
+        
+        TabBody = new TabControl()
             { };
+        Body.Children.Add(TabBody);
+        Grid.SetRow(TabBody, 0);
         
         GeneralTab = new TabItem
         {
@@ -58,20 +73,68 @@ public class SkillsEffectEditorWindowControl : UserControl
             Content = new SkillEffectEffectEditorControl(Properties)
         };
         
-        Body.Items.Add(GeneralTab);
-        Body.Items.Add(EffectTab);
+        TabBody.Items.Add(GeneralTab);
+        TabBody.Items.Add(EffectTab);
+        
+        ButtonBar = new StackPanel()
+        {
+            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+            Margin = new Thickness(5)
+        };
+        Body.Children.Add(ButtonBar);
+        Grid.SetRow(ButtonBar, 1);
+        
+        SaveButton = new Button()
+        {
+            Content = "Save",
+            Width = 80,
+            Margin = new Thickness(5)
+        };
+        ButtonBar.Children.Add(SaveButton);
 
     }
     private void RegisterEvents()
     {
         
-        Body.SelectionChanged += (s, e) =>
+        TabBody.SelectionChanged += (s, e) =>
         {
-            if (Body.SelectedItem == EffectTab)
+            if (TabBody.SelectedItem == EffectTab)
             {
                 var effectTabContent = EffectTab.Content as SkillEffectEffectEditorControl;
                 effectTabContent.SetSkillEffectProperties((GeneralTab.Content as SkillEffectGeneralEditorControl).GetProperties());
             }
+        };
+        
+        SaveButton.Click += (s, e) =>
+        {
+            var generalTabContent = GeneralTab.Content as SkillEffectGeneralEditorControl;
+            var effectTabContent = EffectTab.Content as SkillEffectEffectEditorControl;
+
+            if(generalTabContent == null || effectTabContent == null)
+            {
+                Log.Error("SkillEffectEditor: Unable to save, general or effect tab content is null.");
+                return;
+            }
+            
+            var newEffect = new GraphSkillEffect(generalTabContent.EffectName);
+            newEffect.PackId = generalTabContent.SelectedEffectPackId;
+            newEffect.SetPropertiesDescriptors(generalTabContent.GetProperties());
+            newEffect.SetEvent(effectTabContent.CompiledDocument);
+
+            if (!newEffect.PackId.HasValue)
+                return;
+            Log.Debug("Saving Skill Effect: {0} with {numberProperties} props and {numberInstructions} instrs in pack {packId}.", newEffect.DisplayName, newEffect.PropertyDescriptors.Count, newEffect.GetEvent().GetInstructions().Count, newEffect.PackId.ToString());
+            EngineCore.Instance.Managers.Assets.SkillEffectsRegistry.Register(newEffect);
+            
+            if (EngineCore.Instance.Managers.Assets.TryGetAssetsPack(newEffect.PackId.Value, out var pack))
+            {
+                pack?.AddAsset(newEffect);
+                newEffect.Save();
+                pack?.Save();
+            }
+            
+            
         };
     }
     

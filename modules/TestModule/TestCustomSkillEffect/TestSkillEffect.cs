@@ -3,6 +3,7 @@ using RPGCreator.Core.Runtimes;
 using RPGCreator.Core.Runtimes.Contents;
 using RPGCreator.Core.Type.Assets.Skills;
 using RPGCreator.Core.Type.Internal;
+using Entity = RPGCreator.Core.Runtimes.ECS.Entity;
 
 namespace TestModule.TestCustomSkillEffect;
 
@@ -58,7 +59,7 @@ public class TestSkillEffect : ISkillEffect
             }
         };
 
-    public void ApplyEffect(IEntity caster, List<IEntity> target)
+    public void ApplyEffect(Entity caster, List<Entity> target)
     {
         // Example effect: Log the application of the effect
         Console.WriteLine($"TestSkillEffect applied by caster {caster.Id} to {target.Count} targets.");
