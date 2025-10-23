@@ -38,26 +38,6 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>none</IncludeAssets>
       </ProjectReference>
-      <ProjectReference Include="..\..\thirdparty\Gum\GumCommon\GumCommon.csproj">
-          <Private>false</Private>
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>none</IncludeAssets>
-      </ProjectReference>
-      <ProjectReference Include="..\..\thirdparty\Gum\GumDataTypes\GumDataTypesNet6.csproj">
-          <Private>false</Private>
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>none</IncludeAssets>
-      </ProjectReference>
-      <ProjectReference Include="..\..\thirdparty\Gum\MonoGameGum\MonoGameGum.csproj">
-          <Private>false</Private>
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>none</IncludeAssets>
-      </ProjectReference>
-      <ProjectReference Include="..\..\thirdparty\Gum\ToolsUtilities\ToolsUtilitiesStandard.csproj">
-          <Private>false</Private>
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>none</IncludeAssets>
-      </ProjectReference>
     </ItemGroup>
 
 </Project>

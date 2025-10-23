@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Common;
 using Serilog;
 
 namespace RPGCreator.Core
@@ -49,6 +50,11 @@ namespace RPGCreator.Core
             
             Log.Information($"EngineModules initialized.");
 
+            if (!Directory.Exists(MODULES_PATH))
+            {
+                Log.Error("Engine modules directory not found.");
+                return;
+            }
             foreach (var directory in Directory.GetDirectories(MODULES_PATH))
             {
                 var files = Directory.GetFiles(directory, "*.dll");
@@ -57,10 +63,7 @@ namespace RPGCreator.Core
                     try
                     {
                         // Calculate the SHA256 checksum of the file.
-                        using var sha256 = System.Security.Cryptography.SHA256.Create();
-                        using var stream = File.OpenRead(file);
-                        var hash = sha256.ComputeHash(stream);
-                        var hashString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                        var hashString = ShaUtil.ComputeSha256(file);
                         if (CHECKSUM_INTERNAL_MODULES.Contains(hashString))
                         {
                             var assembly = System.Reflection.Assembly.LoadFrom(file);

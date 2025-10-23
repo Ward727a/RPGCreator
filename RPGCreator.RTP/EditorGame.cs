@@ -1,14 +1,9 @@
-﻿using Gum.Wireframe;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended;
 using MonoGame.Extended.Graphics;
 using MonoGame.Extended.VectorDraw;
-using MonoGameGum;
-using MonoGameGum.Forms.Controls;
-using MonoGameGum.Forms.Controls.Editor;
-using MonoGameGum.GueDeriving;
 using RPGCreator.Core;
 using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Type.Assets;
@@ -45,7 +40,7 @@ namespace RPGCreator.MonoGame
         private List<Ulid> SpawnedCharacters = new();
         private IEntity _playerEntity;
 
-        GumService Gum => GumService.Default;
+        // GumService Gum => GumService.Default;
 
         public EditorGame()
         {
@@ -61,14 +56,14 @@ namespace RPGCreator.MonoGame
         {
             _events.OnRTPInitializing(new());
 
-            Gum.Initialize(this);
+            // Gum.Initialize(this);
 
             EngineCore.Instance.Data.EditedMapChanged += (s, e) =>
             {
                 _mapEditing.MapInstance = EngineCore.Instance.Managers.Assets.MapFactory.Create(EngineCore.Instance.Data.EditedMap);
             };
 
-            var mainPanel = new Panel(Gum.Root);
+            // var mainPanel = new Panel(Gum.Root);
 
             base.Initialize();
 
@@ -141,12 +136,12 @@ namespace RPGCreator.MonoGame
 
         protected override void Update(GameTime gameTime)
         {
-            GraphicalUiElement.CanvasHeight = (_graphics.PreferredBackBufferHeight);
-            GraphicalUiElement.CanvasWidth = (_graphics.PreferredBackBufferWidth);
+            // GraphicalUiElement.CanvasHeight = (_graphics.PreferredBackBufferHeight);
+            // GraphicalUiElement.CanvasWidth = (_graphics.PreferredBackBufferWidth);
             _events.OnRTPUpdate(new(gameTime));
 
             _mapEditing.Update(gameTime);
-            Gum.Update(gameTime);
+            // Gum.Update(gameTime);
             _ecsWorld.Update(gameTime);
 
             
@@ -234,7 +229,6 @@ namespace RPGCreator.MonoGame
 
             _mapEditing.Draw();
             _ecsWorld.Draw(gameTime);
-            _spriteBatch.Begin();
             
             //_spriteBatch.Begin();
 
@@ -281,7 +275,7 @@ namespace RPGCreator.MonoGame
             //}
             //_spriteBatch.End();
 
-            Gum.Draw();
+            // Gum.Draw();
 
             base.Draw(gameTime);
         }

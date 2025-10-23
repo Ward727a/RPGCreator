@@ -37,13 +37,9 @@ public class CharacterEditorWindowControl : UserControl
         #region LeftPanel
         public StackPanel LeftPanel { get; private set; }
         
-        public Image CharacterPortrait { get; private set; }
-        public PathPicker CharacterPortraitPicker { get; private set; }
-        
         public Image CharacterSprite { get; private set; }
         public PathPicker CharacterSpritePicker { get; private set; }
         
-        public TextBox CharacterName { get; private set; }
         #endregion
         
         #region MainContent
@@ -99,21 +95,6 @@ public class CharacterEditorWindowControl : UserControl
 
         Body.Children.Add(LeftPanel);
         Grid.SetColumn(LeftPanel, ColumnIndexLeftPanel);
-        
-        CharacterPortrait = new Image()
-        {
-            Width = 128,
-            Height = 128,
-            Margin = new Thickness(5)
-        };
-        LeftPanel.Children.Add(CharacterPortrait);
-        CharacterPortraitPicker = new PathPicker()
-        {
-            Margin = new Thickness(5),
-            Title = "Select Portrait...",
-            Width = 200
-        };
-        LeftPanel.Children.Add(CharacterPortraitPicker);
 
         CharacterSprite = new Image()
         {
@@ -130,13 +111,6 @@ public class CharacterEditorWindowControl : UserControl
         };
         LeftPanel.Children.Add(CharacterSpritePicker);
         
-        CharacterName = new TextBox()
-        {
-            Margin = new Thickness(5),
-            Width = 200,
-            Watermark = "Character Name..."
-        };
-        LeftPanel.Children.Add(CharacterName);
     }
 
     private void CreateMainContent()
@@ -186,8 +160,8 @@ public class CharacterEditorWindowControl : UserControl
         });
         MainContent.Items.Add(new TabItem()
         {
-            Header = "Animations",
-            Content = new CharacterAnimationsTab(Data)
+            Header = "Display",
+            Content = new CharacterDisplayTab(Data)
         });
         MainContent.Items.Add(new TabItem()
         {
@@ -213,23 +187,10 @@ public class CharacterEditorWindowControl : UserControl
     
     private void RegisterLeftEvents()
     {
-        CharacterPortraitPicker.PropertyChanged += OnCharacterPortraitPickerChanged;
-        CharacterSpritePicker.PropertyChanged += OnCharacterSpritePickerChanged;
-        CharacterName.TextChanged += OnCharacterNameChanged;
     }
 
     private void ReloadContent()
     {
-        CharacterName.Text = Data.Name;
-        
-        if (!string.IsNullOrEmpty(Data.PortraitPath) && File.Exists(Data.PortraitPath))
-        {
-            CharacterPortrait.Source = new Avalonia.Media.Imaging.Bitmap(Data.PortraitPath);
-        }
-        else
-        {
-            CharacterPortrait.Source = null;
-        }
 
         if (!string.IsNullOrEmpty(Data.SpritePath) && File.Exists(Data.SpritePath))
         {
@@ -244,12 +205,6 @@ public class CharacterEditorWindowControl : UserControl
     #endregion
 
     #region Events Handlers
-    private void OnCharacterNameChanged(object? sender, TextChangedEventArgs e)
-    {
-        
-        Data.Name = CharacterName.Text ?? string.Empty;
-        
-    }
 
     private void OnCharacterSpritePickerChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
@@ -270,28 +225,6 @@ public class CharacterEditorWindowControl : UserControl
             // Handle the case where the file does not exist
             CharacterSprite.Source = null;
             Data.SpritePath = null;
-        }
-    }
-
-    private void OnCharacterPortraitPickerChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-    {
-        if (e.Property.Name != nameof(PathPicker.SelectedPaths)) return;
-        if (e.NewValue is not List<string> paths) return;
-        if (paths.Count == 0) return;
-        
-        var newPath = paths[0];
-        if (string.IsNullOrEmpty(newPath)) return;
-        
-        if(File.Exists(newPath))
-        {
-            CharacterPortrait.Source = new Avalonia.Media.Imaging.Bitmap(newPath);
-            Data.PortraitPath = newPath;
-        }
-        else
-        {
-            // Handle the case where the file does not exist
-            CharacterPortrait.Source = null;
-            Data.PortraitPath = null;
         }
     }
     

@@ -1,4 +1,5 @@
 using System.Globalization;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using RPGCreator.Core.Type.Assets.Characters;
@@ -23,6 +24,7 @@ public class CharacterPropertiesTab : UserControl
     #region Components
     
     private StackPanel Body { get; set; }
+    private TextBox CharacterName { get; set; }
     private NumericIntUpDown InitialLevel { get; set; }
     private NumericIntUpDown MaxLevel { get; set; }
     private TextBox Classes { get; set; }
@@ -36,6 +38,7 @@ public class CharacterPropertiesTab : UserControl
         Data = data;
         Name = "Properties"; // Define the name of the tab
         CreateComponents();
+        RegisterEvents();
         Content = Body;
     }
     #endregion
@@ -49,8 +52,17 @@ public class CharacterPropertiesTab : UserControl
             Orientation = Avalonia.Layout.Orientation.Vertical,
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-            Margin = new Avalonia.Thickness(10)
+            Margin = new Avalonia.Thickness(10),
+            Spacing = 10
         };
+        
+        CharacterName = new TextBox()
+        {
+            Watermark = "Character Name...",
+            Text = Data.Name ?? string.Empty,
+            HorizontalAlignment = HorizontalAlignment.Stretch
+        };
+        Body.Children.Add(new InputLabel("Character Name", CharacterName, "120"));
         
         InitialLevel = new NumericIntUpDown()
         {
@@ -59,7 +71,6 @@ public class CharacterPropertiesTab : UserControl
             Minimum = 1,
             Maximum = 100,
             Value = 1,
-            Margin = new Avalonia.Thickness(0, 0, 0, 10)
         };
         Body.Children.Add(
             new InputLabel("Initial Level", InitialLevel, "120")
@@ -71,7 +82,6 @@ public class CharacterPropertiesTab : UserControl
             Minimum = 1,
             Maximum = 100,
             Value = 100,
-            Margin = new Avalonia.Thickness(0, 0, 0, 10)
         };
         Body.Children.Add(
             new InputLabel("Max Level", MaxLevel, "120"));
@@ -80,7 +90,6 @@ public class CharacterPropertiesTab : UserControl
         {
             Watermark = "Classes (comma separated)",
             HorizontalAlignment = HorizontalAlignment.Stretch,
-            Margin = new Avalonia.Thickness(0, 0, 0, 10)
         };
         Body.Children.Add(
             new InputLabel("Classes", Classes, "120"));
@@ -89,16 +98,26 @@ public class CharacterPropertiesTab : UserControl
         {
             Watermark = "EXP Curves (comma separated)",
             HorizontalAlignment = HorizontalAlignment.Stretch,
-            Margin = new Avalonia.Thickness(0, 0, 0, 10)
         };
         Body.Children.Add(
             new InputLabel("EXP Curves", EXPCurves, "120"));
         
     }
     
+    private void RegisterEvents()
+    {
+        CharacterName.TextChanged += OnCharacterNameChanged;
+    }
+
     #endregion
     
     #region Events Handlers
+    private void OnCharacterNameChanged(object? sender, TextChangedEventArgs e)
+    {
+        
+        Data.Name = CharacterName.Text ?? string.Empty;
+        
+    }
     #endregion
     
 }

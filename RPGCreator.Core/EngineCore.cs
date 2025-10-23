@@ -41,6 +41,15 @@ namespace RPGCreator.Core
     /// </summary>
     public class EngineCore
     {
+
+        public enum EEngineMode
+        {
+            EditorMode,
+            PlayerMode
+        }
+        
+        public readonly EEngineMode engineMode = EEngineMode.EditorMode;
+        
         // Suppressing this error, this should never happen. And if it happen, then it should cause a fatal crash!
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         static public EngineCore Instance { get; private set; }
@@ -63,16 +72,15 @@ namespace RPGCreator.Core
 
         private EngineLogger Logger;
 
-        // TODO: Remove?
-        //public static BaseAssetsPack TESTPACK;
-
         public static bool ManagersReady = false;
         public static bool ModulesReady = false;
 
         private int _openedWindowsCount = 0; // Count of opened windows, used to know if the engine is ready to be closed or not.
 
-        private EngineCore() 
+        private EngineCore(EEngineMode mode) 
         {
+            engineMode = mode;
+            
             if (Instance != null)
             {
                 throw new Exception("Engine core has already been initialized, it should happen only once.");
@@ -177,9 +185,9 @@ namespace RPGCreator.Core
         }
 
 
-        static public EngineCore InitCore()
+        static public EngineCore InitCore(EEngineMode mode = EEngineMode.EditorMode)
         {
-            Instance = new();
+            Instance = new(mode);
 
             IsCoreReady = true;
             Instance.Events.OnCoreReady(new());

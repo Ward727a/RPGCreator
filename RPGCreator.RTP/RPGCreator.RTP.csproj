@@ -29,10 +29,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RPGCreator.Core\RPGCreator.Core.csproj" />
-    <ProjectReference Include="..\thirdparty\Gum\GumCommon\GumCommon.csproj" />
-    <ProjectReference Include="..\thirdparty\Gum\GumDataTypes\GumDataTypesNet6.csproj" />
-    <ProjectReference Include="..\thirdparty\Gum\MonoGameGum\MonoGameGum.csproj" />
-    <ProjectReference Include="..\thirdparty\Gum\ToolsUtilities\ToolsUtilitiesStandard.csproj" />
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
     <Message Text="Restoring dotnet tools" Importance="High" />
