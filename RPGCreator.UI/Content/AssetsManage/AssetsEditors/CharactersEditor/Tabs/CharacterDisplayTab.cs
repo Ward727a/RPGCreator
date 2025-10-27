@@ -3,6 +3,7 @@ using System.IO;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
+using Avalonia.Media;
 using RPGCreator.Core.Type.Assets.Characters;
 using Ursa.Controls;
 
@@ -72,6 +73,7 @@ public class CharacterDisplayTab : UserControl
         };
         PortraitPanel.Children.Add(PortraitImage);
         Grid.SetColumn(PortraitImage, 0);
+        RenderOptions.SetBitmapInterpolationMode(PortraitImage, Avalonia.Media.Imaging.BitmapInterpolationMode.None);
         
         PortraitPicker = new PathPicker()
         {

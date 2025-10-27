@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using RPGCreator.Core.Type.Assets.Animations;
+using Ursa.Controls;
 
 namespace RPGCreator.UI.Common;
 
@@ -30,6 +33,9 @@ public class AnimationPreviewer : UserControl
     
     private bool IsFraming { get; set; } = false;
     
+    private AnimationDef _animationDef = new AnimationDef();
+    private AnimationInstance? _animationInstance;
+    
     private string _animationPath = string.Empty;
 
     public string AnimationPath
@@ -38,6 +44,9 @@ public class AnimationPreviewer : UserControl
         set
         {
             _animationPath = value;
+            _animationDef.FrameSize = new Core.Type.Internal.Size(48, 64);
+            _animationDef.AnimationPath = value;
+            _animationInstance ??= new AnimationInstance(_animationDef);
             AnimationPathChanged?.Invoke(_animationPath);
         }
     }
@@ -49,7 +58,18 @@ public class AnimationPreviewer : UserControl
     /// <summary>
     /// Milliseconds per frame
     /// </summary>
-    public double FrameDuration { get; set; } = 100;
+    private double FrameDuration { get; set; } = 100;
+
+    public int FPS
+    {
+        get => (int)(1000 / FrameDuration);
+        set
+        {
+            FrameDuration = 1000.0 / value;
+            if(AnimationTimer != null)
+                AnimationTimer.Interval = FrameDuration;
+        }
+    }
     
     public System.Timers.Timer? AnimationTimer { get; private set; }
     
@@ -68,6 +88,7 @@ public class AnimationPreviewer : UserControl
     private Button playButton { get; set; }
     private Button pauseButton { get; set; }
     private Button stopButton { get; set; }
+    private NumericIntUpDown FPSSpeedUpDown { get; set; }
     #endregion
     
     #region Constructors
@@ -113,6 +134,7 @@ public class AnimationPreviewer : UserControl
             VerticalAlignment = VerticalAlignment.Center
         };
         bodyPanel.Children.Add(animationImage);
+        RenderOptions.SetBitmapInterpolationMode(animationImage, Avalonia.Media.Imaging.BitmapInterpolationMode.None);
         
         buttonsPanel = new StackPanel
         {
@@ -143,6 +165,18 @@ public class AnimationPreviewer : UserControl
             Margin = new Thickness(5)
         };
         buttonsPanel.Children.Add(stopButton);
+        
+        FPSSpeedUpDown = new NumericIntUpDown
+        {
+            Minimum = 1,
+            Maximum = 60,
+            Value = 10,
+            InnerRightContent = "FPS",
+            Margin = new Thickness(5),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        buttonsPanel.Children.Add(FPSSpeedUpDown);
     }
 
     private void RegisterEvents()
@@ -150,6 +184,7 @@ public class AnimationPreviewer : UserControl
         playButton.Click += (s, e) => Play();
         pauseButton.Click += (s, e) => Pause();
         stopButton.Click += (s, e) => Stop();
+        FPSSpeedUpDown.ValueChanged += (s, e) => UpdateFPS();
 
         AnimationPathChanged += OnAnimationPathChanged;
         
@@ -158,7 +193,7 @@ public class AnimationPreviewer : UserControl
             if (IsPlaying && !IsPaused)
             {
                 CurrentFrame++;
-                if (CurrentFrame >= TotalFrames)
+                if (CurrentFrame >= _animationDef.TotalFrames)
                 {
                     CurrentFrame = 0; // Loop back to the first frame
                 }
@@ -201,6 +236,14 @@ public class AnimationPreviewer : UserControl
         Stopped?.Invoke();
         // Stop animation timer logic here
     }
+    
+    public void UpdateFPS(int fps = -1)
+    {
+        if(fps == -1)
+            fps = FPSSpeedUpDown.Value ?? 10;
+        
+        FPS = fps;
+    }
 
     private void UpdateFrame(int frameIndex = -1)
     {
@@ -208,29 +251,9 @@ public class AnimationPreviewer : UserControl
         if(frameIndex == -1)
             frameIndex = CurrentFrame;
 
-        // If we have the frame cached, use it
-        CroppedBitmap? cachedFrame;
-        if (_frames.Count > frameIndex)
-        {
-            cachedFrame = _frames[frameIndex];
-            // Call from ui thread
-            Avalonia.Threading.Dispatcher.UIThread.Post(() => { animationImage.Source = cachedFrame; });
-            return;
-        }
-        
-        // Update animationImage to show the frame at frameIndex
-        var frameX = (frameIndex * (int)FrameSize.Width) % (int)AnimationImageSize.Width;
-        var frameY = ((frameIndex * (int)FrameSize.Width) / (int)AnimationImageSize.Width) * (int)FrameSize.Height;
-        
-        // Set the source rectangle of animationImage to the calculated frameX and frameY
-        var sourceRect = new Avalonia.PixelRect(frameX, frameY, (int)FrameSize.Width, (int)FrameSize.Height);
-        
-        
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
-            var cropped = new Avalonia.Media.Imaging.CroppedBitmap(_animationImageSource, sourceRect);
-            _frames.Add(cropped);
-            animationImage.Source = cropped;
+            animationImage.Source = _animationInstance.GetFrame(frameIndex);
         });
     }
     

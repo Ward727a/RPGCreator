@@ -90,23 +90,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             CreateFooter();
 
         }
-        // TODO: Voir pour implementer la création de nouveaux tilesets.
-        // Si j'ai le temps, faut que j'vois aussi pour le système d'autotiling (Création du nouveaux types, etc...)
-        // Pour l'autotiling, je pourrait voir pour créé un type contenant une liste de tilesets utilisés pour l'autotiling,
-        // Puis à chaque placement d'une tile, il vérifie si l'autotile le contient, et si oui, il place la tile correspondante.
-        // OU
-        // Voir pour implémenter un nouveau système dans le TilesetSelector qui permet de choisir un autotile,
-        // l'utilisateur pourrait assigner des tiles "basique" sur une image généré depuis les datas de l'autotile, puis les placer,
-        // Comme ça y'aura pas besoin de check chaque autotiles à chaque placement de tile,
-        // Mais qu'un seul, celui que l'utilisateur a choisi.
-        // A réfléchir, mais je pense que c'est la meilleure solution.
-        //
-        //
-        // Pour l'instant je vais bossé sur la création de nouveaux tilesets,
-        // Puis je créé le type d'autotile qui contiendra une liste de tilesets,
-        // Et je créé un système de base de création d'autotile,
-        // Je modifierai le TilesetSelector pour qu'il puisse afficher les autotiles et en séléctionner les tiles,
-        // Et enfin je verrai pour implémenter le système de placement d'autotile.
+        
         private void CreateImagePick()
         {
 

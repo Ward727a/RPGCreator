@@ -64,8 +64,8 @@ public class AnimationDef : IHasUniqueId, IHasSavePath, ISerializable, IDeserial
         AnimationSha = ShaUtil.ComputeSha256(_animationPath);
         var bitmap = new Avalonia.Media.Imaging.Bitmap(_animationPath);
         AnimationImageSize = new Size(bitmap.PixelSize.Width, bitmap.PixelSize.Height);
-        int columns = AnimationImageSize.Width / FrameSize.Width;
-        int rows = AnimationImageSize.Height / FrameSize.Height;
+        int columns = (int)Math.Floor((double)AnimationImageSize.Width / (double)FrameSize.Width);
+        int rows = (int)Math.Floor((double)AnimationImageSize.Height / (double)FrameSize.Height);
         TotalFrames = columns * rows;
     }
 
