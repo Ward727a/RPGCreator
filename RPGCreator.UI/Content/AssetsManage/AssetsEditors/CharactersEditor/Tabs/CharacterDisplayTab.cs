@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
+using RPGCreator.Core;
 using RPGCreator.Core.Type.Assets.Characters;
 using Ursa.Controls;
 
@@ -119,6 +120,54 @@ public class CharacterDisplayTab : UserControl
                 animPlayer.AnimationPath = (newPath);
                 Data.SpritePath = newPath;
             }
+        };
+        
+        var idleAnimPicker = new PathPicker()
+        {
+            Title = "Select Idle Animation",
+            FileFilter = "[Image Files,*.png,*.jpg,*.jpeg,*.bmp,*.gif][All Files,*.*]",
+            SelectedPathsText = "",
+            AllowMultiple = false,
+            UsePickerType = UsePickerTypes.OpenFile,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Avalonia.Thickness(0, 10, 0, 0)
+        };
+        Body.Children.Add(idleAnimPicker);
+        
+        var idleAnimPlayer = new Common.AnimationPreviewer();
+        idleAnimPlayer.Margin = new Avalonia.Thickness(0, 10, 0, 0);
+        idleAnimPlayer.FrameSize = new Size(48, 64);
+        
+        Body.Children.Add(idleAnimPlayer);
+
+        idleAnimPicker.PropertyChanged += (s, e) =>
+        {
+            if (e.Property.Name != nameof(PathPicker.SelectedPaths)) return;
+            if (e.NewValue is not List<string> paths) return;
+            if (paths.Count == 0) return;
+
+            var newPath = paths[0];
+            if (string.IsNullOrEmpty(newPath)) return;
+
+            if (File.Exists(newPath))
+            {
+                // Handle idle animation path change
+                idleAnimPlayer.AnimationPath = (newPath);
+            }
+        };
+        
+        var saveAnimationButton = new Button()
+        {
+            Content = "Save Animation",
+            Width = 120,
+            Height = 30,
+            Margin = new Avalonia.Thickness(0, 10, 0, 0),
+            HorizontalAlignment = HorizontalAlignment.Left
+        };
+        Body.Children.Add(saveAnimationButton);
+        saveAnimationButton.Click += (s, e) =>
+        {
+            EngineCore.Instance.Events.OnDEBUG_RTPAnimationAtlasGenerated(animPlayer._animationInstance, idleAnimPlayer._animationInstance);
         };
     }
     

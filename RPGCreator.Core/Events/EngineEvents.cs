@@ -31,6 +31,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Input;
+using Microsoft.Xna.Framework.Graphics;
+using RPGCreator.Core.Type.Assets.Animations;
 using Serilog;
 
 namespace RPGCreator.Core.Events
@@ -262,6 +264,11 @@ namespace RPGCreator.Core.Events
         public event EventHandler<KeyEventArgs>? RTPKeyPressed;
         public virtual void OnRTPKeyPressed(KeyEventArgs e) => RTPKeyPressed?.Invoke(this, e);
 
+        
+        public event EventHandler<(AnimationInstance, AnimationInstance)>? DEBUG_RTPAnimationAtlasGenerated;
+        public virtual void OnDEBUG_RTPAnimationAtlasGenerated(AnimationInstance e, AnimationInstance e2) => DEBUG_RTPAnimationAtlasGenerated?.Invoke(this, (e, e2));
+        
+        
         //// ===
         //// Project part
         //// ===

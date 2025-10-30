@@ -9,7 +9,7 @@ public abstract class ISystem
     public Action? OnDisable;
 
     /// <summary>
-    /// Define the priority of the system. Lower values are executed first.
+    /// Define the priority of the system. Upper values are executed first.
     /// Default priority is 0.
     /// Negative values are allowed.
     /// </summary>

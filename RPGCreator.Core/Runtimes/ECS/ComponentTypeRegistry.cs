@@ -13,7 +13,7 @@ public static class ComponentTypeRegistry
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public static int GetComponentTypeId<T>() where T : struct, IComponent
+    public static int GetComponentTypeId<T>() where T : IComponent
     {
         var type = typeof(T);
         if (!_componentTypeToId.TryGetValue(type, out var id))
@@ -42,5 +42,5 @@ public static class ComponentTypeRegistry
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public static int GetBit<T>() where T : struct, IComponent => GetComponentTypeId<T>();
+    public static int GetBit<T>() where T : IComponent => GetComponentTypeId<T>();
 }

@@ -6,6 +6,8 @@ public interface IECSWorld
 {
     EntityManager _entityManager { get; }
     ComponentManager _componentManager { get; }
+    SystemManager _systemManager { get; }
+    ECSEventBus _eventBus { get; }
     
     IEntity CreateEntity();
     void DestroyEntity(IEntity entity);

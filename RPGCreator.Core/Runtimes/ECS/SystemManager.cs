@@ -2,8 +2,9 @@ using Microsoft.Xna.Framework;
 
 namespace RPGCreator.Core.Runtimes.ECS;
 
-public class SystemManager
+public class SystemManager(ECSWorld world)
 {
+    private ECSWorld _world = world;
     private readonly List<ISystem> _systems = new();
     private readonly Queue<ISystem> _toAdd = new();
     private readonly Queue<ISystem> _toRemove = new();
@@ -23,8 +24,11 @@ public class SystemManager
         while (_toAdd.Count > 0)
         {
             var sys = _toAdd.Dequeue();
-            if (!_systems.Contains(sys))
-                _systems.Add(sys);
+            
+            if (_systems.Contains(sys)) continue;
+            
+            sys.Initialize(_world);
+            _systems.Add(sys);
             sys.OnEnable?.Invoke();
         }
 
@@ -35,7 +39,7 @@ public class SystemManager
                 sys.OnDisable?.Invoke();
         }
 
-        foreach (var system in _systems.Where(s => !s.IsDrawingSystem))
+        foreach (var system in _systems.Where(s => !s.IsDrawingSystem).OrderBy(s => s.Priority))
         {
             system.Update(gameTime);
         }
@@ -43,7 +47,7 @@ public class SystemManager
     
     public void Draw(GameTime gameTime)
     {
-        foreach (var system in _systems.Where(s => s.IsDrawingSystem))
+        foreach (var system in _systems.Where(s => s.IsDrawingSystem).OrderBy(s => s.Priority))
         {
             system.Update(gameTime);
         }

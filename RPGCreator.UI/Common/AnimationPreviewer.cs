@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using RPGCreator.Core;
+using RPGCreator.Core.Common;
 using RPGCreator.Core.Type.Assets.Animations;
+using Serilog;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Common;
@@ -34,7 +38,7 @@ public class AnimationPreviewer : UserControl
     private bool IsFraming { get; set; } = false;
     
     private AnimationDef _animationDef = new AnimationDef();
-    private AnimationInstance? _animationInstance;
+    public AnimationInstance? _animationInstance ;
     
     private string _animationPath = string.Empty;
 
@@ -165,6 +169,12 @@ public class AnimationPreviewer : UserControl
             Margin = new Thickness(5)
         };
         buttonsPanel.Children.Add(stopButton);
+        
+        var testSaveFrame = new Button
+        {
+            Content = "Save Frame",
+            Margin = new Thickness(5)
+        };
         
         FPSSpeedUpDown = new NumericIntUpDown
         {

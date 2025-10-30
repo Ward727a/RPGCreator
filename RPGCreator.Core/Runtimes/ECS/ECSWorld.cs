@@ -8,12 +8,14 @@ public class ECSWorld : IECSWorld
     public EntityManager _entityManager { get; }
     public ComponentManager _componentManager { get; }
     public SystemManager _systemManager { get; }
+    public ECSEventBus _eventBus { get; }
 
     public ECSWorld()
     {
-        _componentManager = new ComponentManager();
+        _eventBus = new ECSEventBus();
+        _componentManager = new ComponentManager(_eventBus);
         _entityManager = new EntityManager(_componentManager);
-        _systemManager = new SystemManager();
+        _systemManager = new SystemManager(this);
     }
     
     public IEntity CreateEntity()

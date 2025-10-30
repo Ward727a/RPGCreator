@@ -14,10 +14,10 @@ public interface IEntity
     /// </summary>
     public int Id { get; set; }
     
-    public bool HasComponent<T>() where T : struct, IComponent;
-    public ref T GetComponent<T>() where T : struct, IComponent;
-    public ref T AddComponent<T>() where T : struct, IComponent;
-    public void RemoveComponent<T>() where T : struct, IComponent;
+    public bool HasComponent<T>() where T : IComponent;
+    public ref T GetComponent<T>() where T : IComponent;
+    public ref T AddComponent<T>() where T  : IComponent, new();
+    public void RemoveComponent<T>() where T : IComponent;
     
     /// <summary>
     /// A bit vector representing the components attached to this entity.

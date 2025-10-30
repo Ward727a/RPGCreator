@@ -2,8 +2,13 @@ using System.Diagnostics.CodeAnalysis;
 using RPGCreator.Core.Runtimes.ECS;
 
 namespace RPGCreator.Core.Type.Internal;
-
-public sealed class ECSSparseSet<T> where T : struct, IComponent
+public interface ISparseSet
+{
+    int Count { get; }
+    ReadOnlySpan<int> EntitiesSpan { get; }
+    bool Contains(int entityId);
+}
+public sealed class ECSSparseSet<T> : ISparseSet where T : IComponent
 {
     private T[] dense;
     private int[] sparse;     // entityId => dense index
@@ -12,6 +17,7 @@ public sealed class ECSSparseSet<T> where T : struct, IComponent
     
     public Span<T> ComponentsSpan => new Span<T>(dense, 0, count);
     public ReadOnlySpan<int> EntitiesSpan => new ReadOnlySpan<int>(entities, 0, count);
+    public bool Contains(int entityId) => Has(entityId);
 
 
     public int Count => count;

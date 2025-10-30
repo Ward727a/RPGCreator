@@ -18,9 +18,12 @@ using Avalonia.Input;
 using RPGCreator.Core.Runtimes;
 using RPGCreator.Core.Runtimes.ECS;
 using RPGCreator.Core.Runtimes.ECS.Components.Display;
+using RPGCreator.Core.Runtimes.ECS.Components.Display.Animation;
 using RPGCreator.Core.Runtimes.ECS.Systems;
+using RPGCreator.Core.Type.Assets.Animations;
 using RPGCreator.Core.Type.Assets.Characters;
 using Serilog;
+using Size = RPGCreator.Core.Type.Internal.Size;
 
 namespace RPGCreator.MonoGame
 {
@@ -39,6 +42,9 @@ namespace RPGCreator.MonoGame
         
         private List<Ulid> SpawnedCharacters = new();
         private IEntity _playerEntity;
+
+        private AnimationInstance? _spritePlayerAtlas = null;
+        private AnimationInstance? _spritePlayerIdle = null;
 
         // GumService Gum => GumService.Default;
 
@@ -75,23 +81,37 @@ namespace RPGCreator.MonoGame
                 {
                     var entity = _playerEntity;
                     ref var transformComponent = ref entity.GetComponent<TransformComponent>();
+                    ref var stateComponent = ref entity.GetComponent<StateComponent>();
 
                     switch (keyEventArgs.Key)
                     {
                         case Key.Up:
                             transformComponent.Y -= 32;
+                            stateComponent.CurrentState = "walk_down"; // Temporary, we only have walk_down animation for now.
                             break;
                         case Key.Down:
                             transformComponent.Y += 32;
+                            stateComponent.CurrentState = "walk_down"; // Temporary, we only have walk_down animation for now.
                             break;
                         case Key.Left:
                             transformComponent.X -= 32;
+                            stateComponent.CurrentState = "walk_down"; // Temporary, we only have walk_down animation for now.
                             break;
                         case Key.Right:
                             transformComponent.X += 32;
+                            stateComponent.CurrentState = "walk_down"; // Temporary, we only have walk_down animation for now.
+                            break;
+                        default:
+                            stateComponent.CurrentState = "idle";
                             break;
                     }
                 }
+            };
+
+            EngineCore.Instance.Events.DEBUG_RTPAnimationAtlasGenerated += (s, e) =>
+            {
+                _spritePlayerAtlas = e.Item1;
+                _spritePlayerIdle = e.Item2;
             };
 
             _events.OnRTPInitialized(new());
@@ -107,6 +127,7 @@ namespace RPGCreator.MonoGame
 
             _ecsWorld = new();
             _ecsWorld.AddSystem(new SpriteRenderSystem(_ecsWorld._componentManager, GraphicsDevice));
+            _ecsWorld.AddSystem(new AnimationSystem(_ecsWorld._componentManager));
 
             // Test loop to create multiple entities with sprite and transform components and test the sprite rendering system.
             // Very basic test - Result for now : 10k entities with simple sprites renders, no movement at ~60 FPS => 3-4ms per frame.
@@ -154,7 +175,30 @@ namespace RPGCreator.MonoGame
                     ref var spriteComponent = ref entity.AddComponent<SpriteComponent>();
 
                     spriteComponent.SpritePath = data.PortraitPath;
-                    spriteComponent.Size = new(32, 32);
+                    spriteComponent.Size = new(48*2, 64*2);
+                    spriteComponent.IsAnimated = false;
+
+                    if (_spritePlayerIdle != null)
+                    {
+                        spriteComponent.IsAnimated = true;
+                        spriteComponent.TextureAtlas = _spritePlayerIdle.TextureAtlas;
+                    }
+                    
+                    ref var animationComponent = ref entity.AddComponent<AnimationComponent>();
+                    animationComponent.CurrentAnimation = "idle";
+                    animationComponent.CurrentFrame = 0;
+                    animationComponent.ElapsedTime = 0;
+                    
+                    ref var animationSetComponent = ref entity.AddComponent<AnimationSetComponent>();
+                    animationSetComponent.Animations = new ()
+                    {
+                        ["idle"] = _spritePlayerIdle,
+                        ["walk_down"] = _spritePlayerAtlas,
+                    };
+                    
+                    ref var stateComponent = ref entity.AddComponent<StateComponent>();
+                    stateComponent.CurrentState = "idle";
+                    stateComponent.PreviousState = "idle";
 
                     ref var transformComponent = ref entity.AddComponent<TransformComponent>();
 

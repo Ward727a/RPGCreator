@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended.Graphics;
 using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Runtimes.ECS.Components.Display;
 using RPGCreator.Core.Type.Internal;
@@ -34,7 +35,7 @@ public class SpriteRenderSystem : ISystem
 
     public override void Update(GameTime deltaTime)
     {
-        _spriteBatch.Begin(SpriteSortMode.Deferred);
+        _spriteBatch.Begin();
 
         // #if DEBUG
         // var sw = System.Diagnostics.Stopwatch.StartNew();
@@ -46,15 +47,32 @@ public class SpriteRenderSystem : ISystem
             var transform = _componentManager.GetComponent<TransformComponent>(entityId);
             position = transform.Position;
 
-            if (!_textureCache.TryGetValue(sprite.SpritePath, out var texture))
+            if (sprite.IsAnimated)
             {
-                texture = LoadTexture(sprite.SpritePath);
-                _textureCache[sprite.SpritePath] = texture;
+                if (sprite.TextureAtlas == null)
+                {
+                    Log.Warning($"Entity {entityId} has an animated sprite but no TextureAtlas assigned.");
+                    continue;
+                }
+                
+                Size spriteSize = sprite.Size;
+                
+                _spriteBatch.Draw(sprite.TextureAtlasRegion.Texture, new Rectangle((int)position.X, (int)position.Y, spriteSize.Width, spriteSize.Height), sprite.TextureAtlasRegion.Bounds, Color.White);
             }
-            
-            Size spriteSize = sprite.Size;
+            else
+            {
 
-            _spriteBatch.Draw(texture, new Rectangle((int)position.X, (int)position.Y, spriteSize.Width, spriteSize.Height), Color.White);
+                if (!_textureCache.TryGetValue(sprite.SpritePath, out var texture))
+                {
+                    texture = LoadTexture(sprite.SpritePath);
+                    _textureCache[sprite.SpritePath] = texture;
+                }
+
+                Size spriteSize = sprite.Size;
+
+                _spriteBatch.Draw(texture,
+                    new Rectangle((int)position.X, (int)position.Y, spriteSize.Width, spriteSize.Height), Color.White);
+            }
         }
         // #if DEBUG
         // sw.Stop();
