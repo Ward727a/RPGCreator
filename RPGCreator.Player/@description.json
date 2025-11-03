@@ -1,0 +1,4 @@
+{
+    "description": "The main executable for exported games",
+    "ignore_dir": ["Content"]
+}

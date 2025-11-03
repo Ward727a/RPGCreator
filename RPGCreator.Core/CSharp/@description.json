@@ -1,0 +1,4 @@
+{
+    "description": "Contains C# scripting related functionalities (like C# extensions for the engine code).",
+    "ignore_dir": ["Extensions"]
+}

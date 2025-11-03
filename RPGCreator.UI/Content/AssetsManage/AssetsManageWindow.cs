@@ -50,6 +50,8 @@ namespace RPGCreator.UI.Content.AssetsManage
 
         #endregion
 
+        public static AssetsManageWindow Instance { get; private set; }
+        
         private ReadOnlyDictionary<string, Func<UserControl>> _AssetsMenuOptions = new(
             new Dictionary<string, Func<UserControl>>
             {
@@ -88,6 +90,7 @@ namespace RPGCreator.UI.Content.AssetsManage
             CreateComponents();
             Content = Body;
             LoadAssetsMenuOptions();
+            Instance = this;
         }
 
         protected void CreateComponents()

@@ -56,6 +56,27 @@ public class ComponentManager(ECSEventBus eventBus)
             return list;
         return Array.Empty<int>();
     }
+    
+    public IEnumerable<int> QueryDirty<T>() where T : IComponent
+    {
+        return QueryDirty(typeof(T));
+    }
+    
+    public IEnumerable<int> QueryDirty<T1, T2>()
+        where T1 : IComponent
+        where T2 : IComponent
+    {
+        return QueryDirty(typeof(T1), typeof(T2));
+    }
+    
+    public IEnumerable<int> QueryDirty<T1, T2, T3>()
+        where T1 : IComponent
+        where T2 : IComponent
+        where T3 : IComponent
+    {
+        return QueryDirty(typeof(T1), typeof(T2), typeof(T3));
+    }
+    
     public IEnumerable<int> QueryDirty(params System.Type[] componentTypes)
     {
         if (componentTypes == null || componentTypes.Length == 0)
@@ -114,6 +135,27 @@ public class ComponentManager(ECSEventBus eventBus)
         
         return (ECSSparseSet<T>)set;
     }
+    
+    public IEnumerable<int> Query<T>() where T : IComponent
+    {
+        return Query(typeof(T));
+    }
+    
+    public IEnumerable<int> Query<T1, T2>()
+        where T1 : IComponent
+        where T2 : IComponent
+    {
+        return Query(typeof(T1), typeof(T2));
+    }
+    
+    public IEnumerable<int> Query<T1, T2, T3>()
+        where T1 : IComponent
+        where T2 : IComponent
+        where T3 : IComponent
+    {
+        return Query(typeof(T1), typeof(T2), typeof(T3));
+    }
+    
     public IEnumerable<int> Query(params System.Type[] componentTypes)
     {
         if (componentTypes == null || componentTypes.Length == 0)

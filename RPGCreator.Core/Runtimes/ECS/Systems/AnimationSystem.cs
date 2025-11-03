@@ -18,6 +18,8 @@ public class AnimationSystem : ISystem
     public override int Priority { get; } = -1; // Need to run before SpriteRenderSystem
     public override bool IsDrawingSystem { get; } = true;
     
+    private string _lastKnownWorkingAnimation = "idle";
+    
     public AnimationSystem(ComponentManager componentManager)
     {
         _componentManager = componentManager;
@@ -37,8 +39,12 @@ public class AnimationSystem : ISystem
         {
             ref var sprite = ref _componentManager.GetComponent<SpriteComponent>(entityId);
             ref var animation = ref _componentManager.GetComponent<AnimationComponent>(entityId);
+            ref var animationSet = ref _componentManager.GetComponent<AnimationSetComponent>(entityId);
             
-            var instance = _componentManager.GetComponent<AnimationSetComponent>(entityId).Animations[animation.CurrentAnimation];
+            if(!animationSet.Animations.ContainsKey(animation.CurrentAnimation) || animationSet.Animations[animation.CurrentAnimation] == null)
+                animation.CurrentAnimation = _lastKnownWorkingAnimation;
+            
+            var instance = animationSet.Animations[animation.CurrentAnimation];
             animation.ElapsedTime += deltaTime.ElapsedGameTime.TotalMilliseconds;
             
             if(sprite.TextureAtlas != instance.TextureAtlas)
@@ -66,6 +72,8 @@ public class AnimationSystem : ISystem
                     _logger.Debug("Added frame {frameIndex} at {frameRect} to TextureAtlas.", i, frameRect);
                 }
             }
+            
+            _lastKnownWorkingAnimation = animation.CurrentAnimation;
             
             if(sprite.TextureAtlasRegion == null)
             {

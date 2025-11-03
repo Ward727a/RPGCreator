@@ -16,7 +16,7 @@ public class CharacterEditorWindowControl : UserControl
     #region Constants
     
     private const int ColumnIndexLeftPanel = 0;
-    private const int ColumnIndexMainContent = 2;
+    private const int ColumnIndexMainContent = 0;
     
     #endregion
     
@@ -76,7 +76,7 @@ public class CharacterEditorWindowControl : UserControl
 
         Body = new Grid()
         {
-            ColumnDefinitions = new ColumnDefinitions("Auto, 4, *"),
+            ColumnDefinitions = new ColumnDefinitions("*"),
             RowDefinitions = new RowDefinitions("*, Auto"),
         };
         
@@ -86,30 +86,30 @@ public class CharacterEditorWindowControl : UserControl
 
     private void CreateLeftPanel()
     {
-        LeftPanel = new StackPanel()
-        {
-            Orientation = Avalonia.Layout.Orientation.Vertical,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch
-        };
-
-        Body.Children.Add(LeftPanel);
-        Grid.SetColumn(LeftPanel, ColumnIndexLeftPanel);
-
-        CharacterSprite = new Image()
-        {
-            Width = 128,
-            Height = 128,
-            Margin = new Thickness(5)
-        };
-        LeftPanel.Children.Add(CharacterSprite);
-        CharacterSpritePicker = new PathPicker()
-        {
-            Margin = new Thickness(5),
-            Title = "Select Sprite...",
-            Width = 200
-        };
-        LeftPanel.Children.Add(CharacterSpritePicker);
+        // LeftPanel = new StackPanel()
+        // {
+        //     Orientation = Avalonia.Layout.Orientation.Vertical,
+        //     HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+        //     VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch
+        // };
+        //
+        // Body.Children.Add(LeftPanel);
+        // Grid.SetColumn(LeftPanel, ColumnIndexLeftPanel);
+        //
+        // CharacterSprite = new Image()
+        // {
+        //     Width = 128,
+        //     Height = 128,
+        //     Margin = new Thickness(5)
+        // };
+        // LeftPanel.Children.Add(CharacterSprite);
+        // CharacterSpritePicker = new PathPicker()
+        // {
+        //     Margin = new Thickness(5),
+        //     Title = "Select Sprite...",
+        //     Width = 200
+        // };
+        // LeftPanel.Children.Add(CharacterSpritePicker);
         
     }
 
@@ -191,15 +191,15 @@ public class CharacterEditorWindowControl : UserControl
 
     private void ReloadContent()
     {
-
-        if (!string.IsNullOrEmpty(Data.SpritePath) && File.Exists(Data.SpritePath))
-        {
-            CharacterSprite.Source = new Avalonia.Media.Imaging.Bitmap(Data.SpritePath);
-        }
-        else
-        {
-            CharacterSprite.Source = null;
-        }
+        //
+        // if (!string.IsNullOrEmpty(Data.SpritePath) && File.Exists(Data.SpritePath))
+        // {
+        //     CharacterSprite.Source = new Avalonia.Media.Imaging.Bitmap(Data.SpritePath);
+        // }
+        // else
+        // {
+        //     CharacterSprite.Source = null;
+        // }
     }
 
     #endregion

@@ -17,6 +17,7 @@ using System.Linq;
 using Avalonia.Input;
 using RPGCreator.Core.Runtimes;
 using RPGCreator.Core.Runtimes.ECS;
+using RPGCreator.Core.Runtimes.ECS.Components.Actor;
 using RPGCreator.Core.Runtimes.ECS.Components.Display;
 using RPGCreator.Core.Runtimes.ECS.Components.Display.Animation;
 using RPGCreator.Core.Runtimes.ECS.Systems;
@@ -80,28 +81,34 @@ namespace RPGCreator.MonoGame
                 if (SpawnedCharacters.Count != 0)
                 {
                     var entity = _playerEntity;
-                    ref var transformComponent = ref entity.GetComponent<TransformComponent>();
+                    ref var movementComponent = ref entity.GetComponent<MovementComponent>();
                     ref var stateComponent = ref entity.GetComponent<StateComponent>();
 
                     switch (keyEventArgs.Key)
                     {
                         case Key.Up:
-                            transformComponent.Y -= 32;
-                            stateComponent.CurrentState = "walk_down"; // Temporary, we only have walk_down animation for now.
+                            movementComponent.TargetDirection = new System.Numerics.Vector2(0, -1);
+                            movementComponent.IsMoving = true;
+                            stateComponent.CurrentState = "walk_up"; // Temporary, we only have walk_down animation for now.
                             break;
                         case Key.Down:
-                            transformComponent.Y += 32;
+                            movementComponent.TargetDirection = new System.Numerics.Vector2(0, 1);
+                            movementComponent.IsMoving = true;
                             stateComponent.CurrentState = "walk_down"; // Temporary, we only have walk_down animation for now.
                             break;
                         case Key.Left:
-                            transformComponent.X -= 32;
-                            stateComponent.CurrentState = "walk_down"; // Temporary, we only have walk_down animation for now.
+                            movementComponent.TargetDirection = new System.Numerics.Vector2(-1, 0);
+                            movementComponent.IsMoving = true;
+                            stateComponent.CurrentState = "walk_left"; // Temporary, we only have walk_down animation for now.
                             break;
                         case Key.Right:
-                            transformComponent.X += 32;
-                            stateComponent.CurrentState = "walk_down"; // Temporary, we only have walk_down animation for now.
+                            movementComponent.TargetDirection = new System.Numerics.Vector2(1, 0);
+                            movementComponent.IsMoving = true;
+                            stateComponent.CurrentState = "walk_right"; // Temporary, we only have walk_down animation for now.
                             break;
                         default:
+                            movementComponent.IsMoving = false;
+                            movementComponent.TargetDirection = new System.Numerics.Vector2(0, 0);
                             stateComponent.CurrentState = "idle";
                             break;
                     }
@@ -128,6 +135,7 @@ namespace RPGCreator.MonoGame
             _ecsWorld = new();
             _ecsWorld.AddSystem(new SpriteRenderSystem(_ecsWorld._componentManager, GraphicsDevice));
             _ecsWorld.AddSystem(new AnimationSystem(_ecsWorld._componentManager));
+            _ecsWorld.AddSystem(new MovementSystem(_ecsWorld._componentManager));
 
             // Test loop to create multiple entities with sprite and transform components and test the sprite rendering system.
             // Very basic test - Result for now : 10k entities with simple sprites renders, no movement at ~60 FPS => 3-4ms per frame.
@@ -188,6 +196,12 @@ namespace RPGCreator.MonoGame
                     animationComponent.CurrentAnimation = "idle";
                     animationComponent.CurrentFrame = 0;
                     animationComponent.ElapsedTime = 0;
+                    
+                    ref var movementComponent = ref entity.AddComponent<MovementComponent>();
+                    movementComponent.IsMoving = false;
+                    movementComponent.Mode = MovementMode.Grid4;
+                    movementComponent.Speed = 32f;
+                    movementComponent.TargetDirection = new System.Numerics.Vector2(0, 0);
                     
                     ref var animationSetComponent = ref entity.AddComponent<AnimationSetComponent>();
                     animationSetComponent.Animations = new ()

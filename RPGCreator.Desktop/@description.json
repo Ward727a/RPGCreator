@@ -1,0 +1,4 @@
+{
+    "description": "The desktop version of the engine (needed by Avalonia)",
+    "ignore_dir": []
+}

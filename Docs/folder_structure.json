@@ -1,0 +1,752 @@
+{
+  "name": "RPGCreator",
+  "description": "",
+  "children": [
+    {
+      "name": "Docs",
+      "description": "Contains all the script or file related to the documentation.",
+      "children": []
+    },
+    {
+      "name": "RPGCreator.Core",
+      "description": "Core engine functionalities (types, parsers, etc.)",
+      "children": [
+        {
+          "name": "CSharp",
+          "description": "Contains C# scripting related functionalities (like C# extensions for the engine code).",
+          "children": []
+        },
+        {
+          "name": "Common",
+          "description": "Shared functionalities used across different engine modules.",
+          "children": []
+        },
+        {
+          "name": "Configs",
+          "description": "Contains configuration-related functionalities.",
+          "children": [
+            {
+              "name": "EventsArgs",
+              "description": "",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Events",
+          "description": "Contains event-related functionalities, and mostly events used in the engine and that should be exposed to the .UI and .RTP projects.",
+          "children": []
+        },
+        {
+          "name": "Inputs",
+          "description": "Contains input-related functionalities (like mouse and keyboard handling).",
+          "children": [
+            {
+              "name": "Mouse",
+              "description": "",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Managers",
+          "description": "Contains various manager classes that handle different aspects of the engine.",
+          "children": [
+            {
+              "name": "AssetsManager",
+              "description": "",
+              "children": [
+                {
+                  "name": "EventsArgs",
+                  "description": "",
+                  "children": []
+                },
+                {
+                  "name": "Factories",
+                  "description": "",
+                  "children": []
+                },
+                {
+                  "name": "Registries",
+                  "description": "",
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "AssetsPackManager",
+              "description": "",
+              "children": [
+                {
+                  "name": "EventsArgs",
+                  "description": "",
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "ProjectsManager",
+              "description": "",
+              "children": [
+                {
+                  "name": "Events",
+                  "description": "",
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "RTP",
+              "description": "",
+              "children": [
+                {
+                  "name": "BrushManagers",
+                  "description": "",
+                  "children": [
+                    {
+                      "name": "Brushs",
+                      "description": "",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ModuleSDK",
+          "description": "Contains classes and functionalities to help create engine modules (SDK = Software Development Kit).",
+          "children": []
+        },
+        {
+          "name": "Parser",
+          "description": "This folder contains all the code related to parsing graphs (Blueprints) and PRATT scripts used in the engine.",
+          "children": [
+            {
+              "name": "Graph",
+              "description": "",
+              "children": [
+                {
+                  "name": "TableHandler",
+                  "description": "",
+                  "children": [
+                    {
+                      "name": "Alloc",
+                      "description": "",
+                      "children": []
+                    },
+                    {
+                      "name": "Debug",
+                      "description": "",
+                      "children": []
+                    },
+                    {
+                      "name": "Entity",
+                      "description": "",
+                      "children": []
+                    },
+                    {
+                      "name": "GetSet",
+                      "description": "",
+                      "children": []
+                    },
+                    {
+                      "name": "Math",
+                      "description": "",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "PRATT",
+              "description": "",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Rendering",
+          "description": "",
+          "children": [
+            {
+              "name": "Batching",
+              "description": "",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Runtimes",
+          "description": "",
+          "children": [
+            {
+              "name": "Contents",
+              "description": "",
+              "children": [
+                {
+                  "name": "SkillEffects",
+                  "description": "",
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "Context",
+              "description": "",
+              "children": []
+            },
+            {
+              "name": "ECS",
+              "description": "",
+              "children": [
+                {
+                  "name": "Components",
+                  "description": "",
+                  "children": [
+                    {
+                      "name": "Actor",
+                      "description": "",
+                      "children": []
+                    },
+                    {
+                      "name": "Display",
+                      "description": "",
+                      "children": [
+                        {
+                          "name": "Animation",
+                          "description": "",
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Systems",
+                  "description": "",
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "Factories",
+              "description": "",
+              "children": []
+            },
+            {
+              "name": "Services",
+              "description": "",
+              "children": [
+                {
+                  "name": "Actors",
+                  "description": "",
+                  "children": []
+                },
+                {
+                  "name": "Core",
+                  "description": "",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Scheduler",
+          "description": "",
+          "children": [
+            {
+              "name": "Tasks",
+              "description": "",
+              "children": [
+                {
+                  "name": "Condition",
+                  "description": "",
+                  "children": []
+                },
+                {
+                  "name": "Time",
+                  "description": "",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Type",
+          "description": "",
+          "children": [
+            {
+              "name": "Assets",
+              "description": "",
+              "children": [
+                {
+                  "name": "Actors",
+                  "description": "",
+                  "children": []
+                },
+                {
+                  "name": "Animations",
+                  "description": "",
+                  "children": []
+                },
+                {
+                  "name": "BaseAssetsPack",
+                  "description": "",
+                  "children": [
+                    {
+                      "name": "EventsArgs",
+                      "description": "",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "name": "Characters",
+                  "description": "",
+                  "children": [
+                    {
+                      "name": "Stats",
+                      "description": "",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "name": "Effect",
+                  "description": "",
+                  "children": []
+                },
+                {
+                  "name": "Items",
+                  "description": "",
+                  "children": []
+                },
+                {
+                  "name": "Skills",
+                  "description": "",
+                  "children": []
+                },
+                {
+                  "name": "Tilesets",
+                  "description": "",
+                  "children": [
+                    {
+                      "name": "AutoTilings",
+                      "description": "",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Blueprint",
+              "description": "",
+              "children": [
+                {
+                  "name": "Nodes",
+                  "description": "",
+                  "children": [
+                    {
+                      "name": "Debug",
+                      "description": "",
+                      "children": []
+                    },
+                    {
+                      "name": "Entity",
+                      "description": "",
+                      "children": [
+                        {
+                          "name": "Position",
+                          "description": "",
+                          "children": []
+                        },
+                        {
+                          "name": "Stats",
+                          "description": "",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Gets",
+                      "description": "",
+                      "children": []
+                    },
+                    {
+                      "name": "Math",
+                      "description": "",
+                      "children": []
+                    },
+                    {
+                      "name": "Skills",
+                      "description": "",
+                      "children": [
+                        {
+                          "name": "Effects",
+                          "description": "",
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Ports",
+                  "description": "",
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "Interfaces",
+              "description": "",
+              "children": [
+                {
+                  "name": "UIRelated",
+                  "description": "",
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "Internal",
+              "description": "",
+              "children": [
+                {
+                  "name": "Collections",
+                  "description": "",
+                  "children": []
+                },
+                {
+                  "name": "LayerRenderer",
+                  "description": "",
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "Map",
+              "description": "",
+              "children": [
+                {
+                  "name": "Interactable",
+                  "description": "",
+                  "children": [
+                    {
+                      "name": "BaseEventsArgs",
+                      "description": "",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Misc",
+              "description": "",
+              "children": []
+            },
+            {
+              "name": "Objects",
+              "description": "",
+              "children": []
+            },
+            {
+              "name": "Project",
+              "description": "",
+              "children": [
+                {
+                  "name": "EventsArgs",
+                  "description": "",
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "RTP",
+              "description": "",
+              "children": [
+                {
+                  "name": "EventsArgs",
+                  "description": "",
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RPGCreator.Desktop",
+      "description": "The desktop version of the engine (needed by Avalonia)",
+      "children": []
+    },
+    {
+      "name": "RPGCreator.Player",
+      "description": "The main executable for exported games",
+      "children": []
+    },
+    {
+      "name": "RPGCreator.RTP",
+      "description": "The Real-Time Player (used to run games inside the editor)",
+      "children": []
+    },
+    {
+      "name": "RPGCreator.UI",
+      "description": "The engine editor UI",
+      "children": [
+        {
+          "name": "Assets",
+          "description": "",
+          "children": [
+            {
+              "name": "Licenses",
+              "description": "",
+              "children": []
+            },
+            {
+              "name": "Modules",
+              "description": "",
+              "children": [
+                {
+                  "name": "TestModule",
+                  "description": "",
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "TMGrammar",
+              "description": "",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Common",
+          "description": "",
+          "children": [
+            {
+              "name": "AnimEditor",
+              "description": "",
+              "children": []
+            },
+            {
+              "name": "Blueprint",
+              "description": "",
+              "children": [
+                {
+                  "name": "LeftBar",
+                  "description": "",
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "Modal",
+              "description": "",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Content",
+          "description": "",
+          "children": [
+            {
+              "name": "AssetsManage",
+              "description": "",
+              "children": [
+                {
+                  "name": "AssetsEditors",
+                  "description": "",
+                  "children": [
+                    {
+                      "name": "AutotileEditor",
+                      "description": "",
+                      "children": [
+                        {
+                          "name": "RuleEditor",
+                          "description": "",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "name": "CharactersEditor",
+                      "description": "",
+                      "children": [
+                        {
+                          "name": "Tabs",
+                          "description": "",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "name": "SkillsEditor",
+                      "description": "",
+                      "children": [
+                        {
+                          "name": "Tabs",
+                          "description": "",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "name": "SkillsEffectEditor",
+                      "description": "",
+                      "children": [
+                        {
+                          "name": "Tabs",
+                          "description": "",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "name": "StatsEditor",
+                      "description": "",
+                      "children": [
+                        {
+                          "name": "Tabs",
+                          "description": "",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "name": "TilesetEditor",
+                      "description": "",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "name": "Components",
+                  "description": "",
+                  "children": [
+                    {
+                      "name": "Items",
+                      "description": "",
+                      "children": []
+                    },
+                    {
+                      "name": "Skills",
+                      "description": "",
+                      "children": [
+                        {
+                          "name": "Tabs",
+                          "description": "",
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Stats",
+                      "description": "",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Editor",
+              "description": "",
+              "children": [
+                {
+                  "name": "LayersListComponents",
+                  "description": "",
+                  "children": []
+                },
+                {
+                  "name": "Tabs",
+                  "description": "",
+                  "children": []
+                },
+                {
+                  "name": "TilesetSelectorComponents",
+                  "description": "",
+                  "children": []
+                },
+                {
+                  "name": "Toolbar",
+                  "description": "",
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "Launcher",
+              "description": "",
+              "children": []
+            },
+            {
+              "name": "Preferences",
+              "description": "",
+              "children": [
+                {
+                  "name": "Components",
+                  "description": "",
+                  "children": [
+                    {
+                      "name": "General",
+                      "description": "",
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "ProjectCreator",
+              "description": "",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Lang",
+          "description": "",
+          "children": []
+        },
+        {
+          "name": "Styles",
+          "description": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "name": "modules",
+      "description": "Built-in modules of the engine",
+      "children": [
+        {
+          "name": "TestModule",
+          "description": "",
+          "children": [
+            {
+              "name": "TestCustomSkillEffect",
+              "description": "",
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "thirdparty",
+      "description": "Third-party libraries used in the engine",
+      "children": []
+    }
+  ]
+}

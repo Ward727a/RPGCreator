@@ -1,0 +1,4 @@
+{
+    "description": "Contains configuration-related functionalities.",
+    "ignore_dir": ["Helpers", "EventArgs"]
+}

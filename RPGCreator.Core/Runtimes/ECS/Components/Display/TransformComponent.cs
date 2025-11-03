@@ -12,6 +12,14 @@ public struct TransformComponent : IComponent
     public float Rotation;
     public float ScaleX;
     public float ScaleY;
-    
-    public Vector2 Position => new Vector2(X, Y);
+
+    public Vector2 Position
+    {
+        get => new Vector2(X, Y);
+        set
+        {
+            X = value.X;
+            Y = value.Y;
+        }
+    }
 }

@@ -321,6 +321,8 @@ public class CharacterData : BaseAsset, ICharacter, ISerializable, IDeserializab
     private string _portraitPath = string.Empty;
     private string _spritePath = string.Empty;
     
+    private Dictionary<string, string> _animations = new();
+    
     private int _initialLevel = 1;
     private int _currentLevel = 1;
     private int _maxLevel = 99;

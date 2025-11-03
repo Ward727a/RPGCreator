@@ -1,0 +1,4 @@
+{
+    "description": "The Real-Time Player (used to run games inside the editor)",
+    "ignore_dir": ["Content", "Editor"]
+}

@@ -4,5 +4,5 @@ namespace RPGCreator.Core.Runtimes.ECS.Components.Display.Animation;
 
 public struct AnimationSetComponent : IComponent
 {
-        public Dictionary<string, AnimationInstance> Animations;
+        public Dictionary<string, AnimationInstance?> Animations;
 }

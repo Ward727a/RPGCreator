@@ -27,6 +27,8 @@ public class AnimationPreviewer : UserControl
     public event Action? Paused;
     public event Action? Stopped;
     
+    public event Action<int>? FpsChanged;
+    
     #endregion
     
     #region Properties
@@ -144,7 +146,7 @@ public class AnimationPreviewer : UserControl
         {
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Bottom,
             Margin = new Thickness(5)
         };
         bodyPanel.Children.Add(buttonsPanel);
@@ -194,7 +196,12 @@ public class AnimationPreviewer : UserControl
         playButton.Click += (s, e) => Play();
         pauseButton.Click += (s, e) => Pause();
         stopButton.Click += (s, e) => Stop();
-        FPSSpeedUpDown.ValueChanged += (s, e) => UpdateFPS();
+        FPSSpeedUpDown.ValueChanged += (s, e) =>
+        {
+            UpdateFPS();
+            if(e.NewValue.HasValue)
+                FpsChanged?.Invoke(e.NewValue.Value);
+        };
 
         AnimationPathChanged += OnAnimationPathChanged;
         
@@ -235,14 +242,15 @@ public class AnimationPreviewer : UserControl
         // Pause animation timer logic here
     }
     
-    public void Stop()
+    public void Stop(bool resetFrame = true)
     {
         if (!IsPlaying) return;
         IsPlaying = false;
         IsPaused = false;
         AnimationTimer.Stop();
         CurrentFrame = 0;
-        UpdateFrame(0);
+        if(resetFrame)
+            UpdateFrame(0);
         Stopped?.Invoke();
         // Stop animation timer logic here
     }
@@ -253,9 +261,11 @@ public class AnimationPreviewer : UserControl
             fps = FPSSpeedUpDown.Value ?? 10;
         
         FPS = fps;
+        if(FPSSpeedUpDown.Value != fps)
+            FPSSpeedUpDown.Value = fps;
     }
 
-    private void UpdateFrame(int frameIndex = -1)
+    public void UpdateFrame(int frameIndex = -1)
     {
         
         if(frameIndex == -1)
@@ -264,6 +274,14 @@ public class AnimationPreviewer : UserControl
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
             animationImage.Source = _animationInstance.GetFrame(frameIndex);
+        });
+    }
+
+    public void ClearImage()
+    {
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            animationImage.Source = null;
         });
     }
     
