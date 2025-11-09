@@ -10,6 +10,30 @@ public class AnimationDef : IHasUniqueId, IHasSavePath, ISerializable, IDeserial
     public URN Urn { get; }
     public string SavePath { get; set; }
     
+    private bool fromBitmap = false;
+    
+    public AnimationDef()
+    {
+        Unique = Ulid.NewUlid();
+        Urn = new URN("animation", Unique.ToString());
+        SavePath = string.Empty;
+    }
+    
+    public AnimationDef(Bitmap bitmap)
+    {
+        Unique = Ulid.NewUlid();
+        Urn = new URN("animation", Unique.ToString());
+        SavePath = string.Empty;
+        fromBitmap = true;
+        _cachedAnimationImage = bitmap;
+        AnimationImageSize = new Size((int)bitmap.Size.Width, (int)bitmap.Size.Height);
+        // Default frame size
+        FrameSize = new Size(42, 64);
+        int columns = (int)Math.Floor((double)AnimationImageSize.Width / (double)FrameSize.Width);
+        int rows = (int)Math.Floor((double)AnimationImageSize.Height / (double)FrameSize.Height);
+        TotalFrames = columns * rows;
+    }
+    
     #region Events
     
     public event Action<string>? AnimationPathChanged;

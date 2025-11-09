@@ -60,7 +60,7 @@ public class AnimationInstance
             var frame = this.GetFrame(currentFrame);
             Byte[] bytes = ImageUtil.ExtractPixelsFromCroppedBitmap(frame);
                 
-            // Ensure directory exists
+            // Ensure directory exists 
             
             var dir = $"frames_test_animation/{Path.GetFileNameWithoutExtension(Definition.AnimationPath)}";
             

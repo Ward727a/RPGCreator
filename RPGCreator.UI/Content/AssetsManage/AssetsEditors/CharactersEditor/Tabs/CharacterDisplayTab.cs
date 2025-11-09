@@ -226,11 +226,24 @@ public class CharacterDisplayTab : UserControl
             var bulkImportDialog = new ConfirmDialog()
             {
                 Title = "Bulk Import Animations",
-                MinWidth = 850,
+                MinWidth = 1050,
                 MinHeight = 400,
+                Width = 1050,
+                Height = 400,
                 CanMinimize = false,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                SizeToContent = SizeToContent.Manual
             };
+            
+            List<string> existingAnimationNames = new List<string>();
+            
+            existingAnimationNames.AddRange(BasicAnimationsNames);
+            if(AnimationTypeComboBox.SelectedIndex != 0)
+            {
+                existingAnimationNames.AddRange(FreeMovementAnimationsNames);
+            }
+            
+            existingAnimationNames.AddRange(AvailableAnimationsNames);
             
             bulkImportDialog.Content = new BulkAnimationImportControl((importedAnimations) =>
             {
@@ -243,7 +256,7 @@ public class CharacterDisplayTab : UserControl
                     AnimationList.Items.Add(item);
                     orderIndex++;
                 }
-            });
+            }, existingAnimationNames);
             
             
             bulkImportDialog.ShowDialog(AssetsManageWindow.Instance);

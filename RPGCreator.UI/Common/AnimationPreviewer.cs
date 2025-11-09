@@ -40,7 +40,7 @@ public class AnimationPreviewer : UserControl
     private bool IsFraming { get; set; } = false;
     
     private AnimationDef _animationDef = new AnimationDef();
-    public AnimationInstance? _animationInstance ;
+    public AnimationInstance? _animationInstance;
     
     private string _animationPath = string.Empty;
 

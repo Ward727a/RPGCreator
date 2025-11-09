@@ -8,7 +8,11 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Styling;
+using RPGCreator.Core.Common;
+using RPGCreator.Core.Type;
+using RPGCreator.Core.Type.Assets.Animations;
 using RPGCreator.UI.Common;
+using Serilog;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;
@@ -26,9 +30,15 @@ public class BulkAnimationImportControl : UserControl
     
     // Need to separate those by the file name later if multiple images are allowed
     // Because right now, if multiple images are allowed, the map will be overridden, and row 1 on image 1 will conflict with row 1 on image 2
-    public Dictionary<int, string> RowToAnimationNameMap { get; private set; } = new Dictionary<int, string>();
+    public Dictionary<string, Dictionary<int, string>> RowToAnimationNameMap { get; private set; } = new Dictionary<string, Dictionary<int, string>>();
     
     private int _selectedRow = -1;
+    private string _currentImagePath = string.Empty;
+    private List<string> _animationNames = new List<string>();
+    private List<string> _usedAnimationNames = new List<string>();
+    private Dictionary<string, ListBoxItem> _assignedAnimationsItems = new();
+    private Dictionary<string, Dictionary<int, Bitmap>> _imageRowCache = new();
+    private Dictionary<string, string> _imageCache = new();
     
     #endregion
     
@@ -38,11 +48,15 @@ public class BulkAnimationImportControl : UserControl
     private Grid LeftGrid { get; set; }
     
     private AnimationPreviewer Previewer { get; set; }
+
+    private ScrollBox ScrollList;
+    private StackPanel ScrollListContent;
+    private ListBox AssignedAnimationsListBox;
     
     private Grid TopPanel { get; set; }
     private PathPicker ImportButton { get; set; }
     private ComboBox ImageListBox { get; set; }
-    private TextBox AssignedToInput { get; set; }
+    private ComboBox AssignedToInput { get; set; }
     
     private StackPanel SpritesheetPanel { get; set; }
     private MoveableCanvas SpritesheetCanvas { get; set; }
@@ -56,12 +70,24 @@ public class BulkAnimationImportControl : UserControl
     
     #region Constructors
 
-    public BulkAnimationImportControl(Action<Dictionary<string, AnimationData>> onImport)
+    public BulkAnimationImportControl(Action<Dictionary<string, AnimationData>> onImport, List<string> animationNames)
     {
+        _animationNames = animationNames;
         OnImport = onImport;
         CreateComponents();
         RegisterEvents();
-        Content = Body;
+        // IMPORTANT : forcer une hauteur mesurable
+        var root = new DockPanel
+        {
+            LastChildFill = true,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch
+        };
+
+        DockPanel.SetDock(Body, Dock.Top);
+        root.Children.Add(Body);
+
+        Content = root;
     }
     
     #endregion
@@ -72,23 +98,50 @@ public class BulkAnimationImportControl : UserControl
     {
         Body = new Grid()
         {
-            ColumnDefinitions = new ColumnDefinitions("*, 0,auto"),
-            RowDefinitions = new RowDefinitions("Auto, *")
+            ColumnDefinitions = new ColumnDefinitions("Auto, *, 0,auto"),
+            RowDefinitions = new RowDefinitions("*, Auto")
         };
+        
+        ScrollList = new ScrollBox()
+        {
+            Width = 200,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+        Body.Children.Add(ScrollList);
+        Grid.SetColumn(ScrollList, 0);
+        
+        ScrollListContent = new StackPanel()
+        {
+            Orientation = Orientation.Vertical,
+            VerticalAlignment = VerticalAlignment.Top
+        };
+        ScrollList.Content = ScrollListContent;
+
+        ScrollListContent.Children.Add(new TextBlock()
+        {
+            Text = "Assigned Animations(0)"
+        });
+        
+        AssignedAnimationsListBox = new ListBox()
+        {
+            VerticalAlignment = VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+        ScrollListContent.Children.Add(AssignedAnimationsListBox);
 
         LeftGrid = new Grid()
         {
             RowDefinitions = new RowDefinitions("Auto, *, *"),
         };
         Body.Children.Add(LeftGrid);
-        Grid.SetColumn(LeftGrid, 0);
+        Grid.SetColumn(LeftGrid, 1);
         
         Previewer = new AnimationPreviewer()
         {
             FrameSize = new Size(42, 64),
         };
         Body.Children.Add(Previewer);
-        Grid.SetColumn(Previewer, 2);
+        Grid.SetColumn(Previewer, 3);
         
         TopPanel = new Grid()
         {
@@ -123,10 +176,25 @@ public class BulkAnimationImportControl : UserControl
         TopPanel.Children.Add(ImageListBox);
         Grid.SetColumn(ImageListBox, 1);
         
-        AssignedToInput = new TextBox()
+        AssignedToInput = new ComboBox()
         {
-            Watermark = "Assign to animation",
+            PlaceholderText = "Assign to animation...",
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
         };
+        AssignedToInput.Items.Add(new ComboBoxItem()
+        {
+            Content = "None",
+            Tag = null
+        });
+        foreach (var animationName in _animationNames)
+        {
+            AssignedToInput.Items.Add(new ComboBoxItem()
+            {
+                Content = animationName,
+                Tag = animationName
+            });
+        }
         TopPanel.Children.Add(AssignedToInput);
         Grid.SetColumn(AssignedToInput, 2);
 
@@ -162,17 +230,128 @@ public class BulkAnimationImportControl : UserControl
         Grid.SetRow(AnimationsDataGrid, 2);
     }
 
+    private Bitmap GetOrCreateRowBitmap(string imagePath, int rowIndex)
+    {
+        if (!_imageRowCache.ContainsKey(imagePath))
+        {
+            _imageRowCache[imagePath] = new Dictionary<int, Bitmap>();
+        }
+
+        if (_imageRowCache[imagePath].ContainsKey(rowIndex))
+        {
+            return _imageRowCache[imagePath][rowIndex];
+        }
+
+        var bitmap = new Bitmap(imagePath);
+        var cropped = new CroppedBitmap(bitmap, new PixelRect(0, rowIndex * 64, (int)bitmap.Size.Width, 64));
+        var bmp = ImageUtil.ConvertCroppedBitmapToBitmap(cropped);
+        _imageRowCache[imagePath][rowIndex] = bmp;
+        return bmp;
+    }
 
     private void RegisterEvents()
     {
         ImportButton.PropertyChanged += OnImportNewImage;
         SpritesheetCanvas.CanvasBody.PointerPressed += CanvasBodyOnPointerPressed;
         ImageListBox.SelectionChanged += OnImageSelectionChanged;
-        AssignedToInput.TextChanged += (s, e) =>
+        AssignedToInput.SelectionChanged += (s, e) =>
         {
+
+            var _selectedAnimation = AssignedToInput.SelectedItem as ComboBoxItem;
+            var _selectedAnimationName = _selectedAnimation?.Tag as string;
+
+            if (_selectedAnimationName == null)
+            {
+                // Clear assignment for the selected row
+                if (!string.IsNullOrWhiteSpace(_currentImagePath) &&
+                    RowToAnimationNameMap.ContainsKey(_currentImagePath) &&
+                    RowToAnimationNameMap[_currentImagePath].ContainsKey(_selectedRow))
+                {
+                    var existingAnimationName = RowToAnimationNameMap[_currentImagePath][_selectedRow];
+                    _usedAnimationNames.Remove(existingAnimationName);
+                    RowToAnimationNameMap[_currentImagePath].Remove(_selectedRow);
+                    
+                    // Clear selection in the AssignedAnimationsListBox
+                    _assignedAnimationsItems[existingAnimationName].IsSelected = false;
+                    AssignedAnimationsListBox.Items.Remove(_assignedAnimationsItems[existingAnimationName]);
+                    _assignedAnimationsItems.Remove(existingAnimationName);
+                }
+                return;
+            }
+            
+            if(_usedAnimationNames.Contains(_selectedAnimationName))
+            {
+                Log.Error("Animation name '{AnimationName}' is already assigned to another row.", _selectedAnimationName);
+                // Animation name already used, ignore selection
+                return;
+            }
+            
+            if (!string.IsNullOrWhiteSpace(_currentImagePath))
+            {
+                if (!RowToAnimationNameMap.ContainsKey(_currentImagePath))
+                {
+                    RowToAnimationNameMap[_currentImagePath] = new Dictionary<int, string>();
+                }
+            }
+
+            if (RowToAnimationNameMap[_currentImagePath].ContainsKey(_selectedRow))
+            {
+                var existingAnimationName = RowToAnimationNameMap[_currentImagePath][_selectedRow];
+                _usedAnimationNames.Remove(existingAnimationName);
+                _assignedAnimationsItems[existingAnimationName].IsSelected = false;
+                AssignedAnimationsListBox.Items.Remove(_assignedAnimationsItems[existingAnimationName]);
+                _assignedAnimationsItems.Remove(existingAnimationName);
+            }
+            
             if(_selectedRow >= 0)
             {
-                RowToAnimationNameMap[_selectedRow] = AssignedToInput.Text;
+                RowToAnimationNameMap[_currentImagePath][_selectedRow] = 
+                    _selectedAnimationName ?? $"animation_{_selectedRow}";
+                
+                _usedAnimationNames.Add(_selectedAnimationName);
+                _assignedAnimationsItems.TryAdd(_selectedAnimationName, new ListBoxItem(){Content = _selectedAnimationName, Tag = (_currentImagePath, _selectedRow) });
+                AssignedAnimationsListBox.Items.Add(_assignedAnimationsItems[_selectedAnimationName]);
+            }
+        };
+        
+        AssignedAnimationsListBox.SelectionChanged += (s, e) =>
+        {
+            if(AssignedAnimationsListBox.SelectedItem is ListBoxItem selectedItem)
+            {
+                var (imagePath, rowIndex) = ((string, int))selectedItem.Tag;
+
+                if (imagePath != _currentImagePath)
+                {
+                    // Change selected image in ImageListBox
+                    for (int i = 0; i < ImageListBox.Items.Count; i++)
+                    {
+                        if (ImageListBox.Items[i] is ComboBoxItem item && 
+                            item.Tag as string == imagePath)
+                        {
+                            ImageListBox.SelectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+                SelectRow(rowIndex);
+                
+                LoadPreviewerForCurrentSelection();
+                
+                // Update AssignedToInput selection based on the selected row
+                if(_selectedRow >= 0 && 
+                   RowToAnimationNameMap.ContainsKey(_currentImagePath) && 
+                   RowToAnimationNameMap[_currentImagePath].ContainsKey(_selectedRow))
+                {
+                    var animationName = RowToAnimationNameMap[_currentImagePath][_selectedRow];
+                    foreach (ComboBoxItem item in AssignedToInput.Items)
+                    {
+                        if (item.Tag as string == animationName)
+                        {
+                            AssignedToInput.SelectedItem = item;
+                            break;
+                        }
+                    }
+                }
             }
         };
     }
@@ -184,6 +363,7 @@ public class BulkAnimationImportControl : UserControl
         if (paths is null || paths.Count == 0) return;
         
         var imagePath = paths[0];
+        _currentImagePath = imagePath;
 
         SpritesheetImage.Source = new Bitmap(imagePath);
         var item = new ComboBoxItem()
@@ -203,32 +383,58 @@ public class BulkAnimationImportControl : UserControl
             var position = e.GetPosition(SpritesheetImage);
             var frameX = (int)(position.X / 42);
             var frameY = (int)(position.Y / 64);
-            SpritesheetText.Text = $"Selected Row: {frameY}";
             
-            // Clear previous overlays
-            SpritesheetOverlayCanvas.Children.Clear();
+            SelectRow(frameY);
             
-            // Draw overlay rectangle on the selected row
-            var overlayRect = new Rectangle()
+            if (!string.IsNullOrWhiteSpace(_currentImagePath))
             {
-                Width = SpritesheetImage.Source?.Size.Width ?? 0,
-                Height = 64,
-                Fill = new SolidColorBrush(Color.FromArgb(50, 2, 155, 000)),
-            };
-            Canvas.SetLeft(overlayRect, 0);
-            Canvas.SetTop(overlayRect, frameY * 64);
-            SpritesheetOverlayCanvas.Children.Add(overlayRect);
-            _selectedRow = frameY;
+                if (!RowToAnimationNameMap.ContainsKey(_currentImagePath))
+                {
+                    RowToAnimationNameMap[_currentImagePath] = new Dictionary<int, string>();
+                }
+            }
             
-            if(RowToAnimationNameMap.ContainsKey(_selectedRow))
+            // Update AssignedToInput selection based on the selected row
+            if(_selectedRow >= 0 && 
+               RowToAnimationNameMap.ContainsKey(_currentImagePath) && 
+               RowToAnimationNameMap[_currentImagePath].ContainsKey(_selectedRow))
             {
-                AssignedToInput.Text = RowToAnimationNameMap[_selectedRow];
+                var animationName = RowToAnimationNameMap[_currentImagePath][_selectedRow];
+                foreach (ComboBoxItem item in AssignedToInput.Items)
+                {
+                    if (item.Tag as string == animationName)
+                    {
+                        AssignedToInput.SelectedItem = item;
+                        break;
+                    }
+                }
             }
             else
             {
-                AssignedToInput.Text = "";
+                AssignedToInput.SelectedItem = null;
             }
+            LoadPreviewerForCurrentSelection();
         }
+    }
+    
+    private void SelectRow(int rowIndex)
+    {
+        // Clear previous overlays
+        SpritesheetOverlayCanvas.Children.Clear();
+        
+        SpritesheetText.Text = $"Selected Row: {rowIndex}";
+        
+        // Draw overlay rectangle on the selected row
+        var overlayRect = new Rectangle()
+        {
+            Width = SpritesheetImage.Source?.Size.Width ?? 0,
+            Height = 64,
+            Fill = new SolidColorBrush(Color.FromArgb(50, 2, 155, 000)),
+        };
+        Canvas.SetLeft(overlayRect, 0);
+        Canvas.SetTop(overlayRect, rowIndex * 64);
+        SpritesheetOverlayCanvas.Children.Add(overlayRect);
+        _selectedRow = rowIndex;
     }
     
     private void OnImageSelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -238,12 +444,61 @@ public class BulkAnimationImportControl : UserControl
             var imagePath = selectedItem.Tag as string;
             if (imagePath != null)
             {
+                _currentImagePath = imagePath;
                 SpritesheetImage.Source = new Bitmap(imagePath);
                 // Clear previous overlays and text
                 SpritesheetOverlayCanvas.Children.Clear();
                 SpritesheetText.Text = "Click to select animation row";
+                _selectedRow = -1;
+                AssignedToInput.SelectedItem = null;
+                AssignedToInput.SelectedIndex = -1;
+                Previewer.Stop(false);
+                Previewer.ClearImage();
             }
         }
+    }
+    
+    private void LoadPreviewerForCurrentSelection()
+    {
+        if (string.IsNullOrWhiteSpace(_currentImagePath) || _selectedRow < 0) return;
+        var bitmap = GetOrCreateRowBitmap(_currentImagePath, _selectedRow);
+        string bitmapPath = "";
+        string bitmapHash = bitmap.GetHashCode().ToString();
+        if(_imageCache.ContainsKey(bitmapHash))
+        {
+            bitmapPath = _imageCache[bitmapHash];
+            if(System.IO.File.Exists(bitmapPath))
+            {
+                Log.Debug("Using cached image for previewer for image '{ImagePath}' row {RowIndex}", _currentImagePath, _selectedRow);
+            }
+            else
+            {
+                bitmapPath = System.IO.Path.GetTempFileName() + ".png";
+                using (var fs = System.IO.File.OpenWrite(bitmapPath))
+                {
+                    bitmap.Save(fs);
+                }
+                _imageCache[bitmapHash] = bitmapPath;
+                Log.Debug("Re-creating cached image for previewer for image '{ImagePath}' row {RowIndex} at {tempFilePath}", _currentImagePath, _selectedRow, bitmapPath);
+            }
+        }
+        else
+        {
+            // Save bitmap to a temporary file to be loaded by the previewer
+            bitmapPath = System.IO.Path.GetTempFileName() + ".png";
+            using (var fs = System.IO.File.OpenWrite(bitmapPath))
+            {
+                bitmap.Save(fs);
+            }
+            _imageCache[bitmapHash] = bitmapPath;
+            Log.Debug("Caching image for previewer for image '{ImagePath}' row {RowIndex} at {temppath}", _currentImagePath, _selectedRow, bitmapPath);
+        }
+        
+        Log.Debug("Loading previewer for image '{ImagePath}' row {RowIndex}", _currentImagePath, _selectedRow);
+        Log.Debug("Temporary file found at '{TempFilePath}'", bitmapPath);
+        Previewer.AnimationPath = bitmapPath;
+        Previewer.FrameSize = new Size(42, 64);
+        Previewer.Play();
     }
 
     #endregion

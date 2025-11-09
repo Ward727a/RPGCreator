@@ -1,5 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Layout;
+using Avalonia.Media;
 using RPGCreator.UI;
 using ScrollViewer = Avalonia.Controls.ScrollViewer;
 using UserControl = Avalonia.Controls.UserControl;
@@ -14,26 +16,25 @@ public class ScrollBox : UserControl
         set => scroller.Content = value;
     }
     private ScrollViewer scroller;
-    private Border BackgroundGrid;
+    private DockPanel BackgroundGrid;
 
     public ScrollBox()
     {
-        BackgroundGrid = new Border
+        var root = new Grid
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-            Margin = App.style.Margin
+            RowDefinitions = new RowDefinitions("*"),
+            ColumnDefinitions = new ColumnDefinitions("*")
         };
-        
+
         scroller = new ScrollViewer
         {
             HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch
         };
-        
-        BackgroundGrid.Child = (scroller);
-        base.Content = BackgroundGrid;
+
+        root.Children.Add(scroller);
+        base.Content = root;
     }
 }

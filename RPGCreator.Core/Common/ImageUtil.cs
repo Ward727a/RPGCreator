@@ -69,7 +69,7 @@ public static class ImageUtil
         var textures = new List<Texture2D>();
         var rectangles = new List<Rectangle>();
 
-        // charge les textures une par une
+        // loads all textures one by one
         foreach (var file in files.OrderBy(f => f.ToLower()))
         {
             using var fs = File.OpenRead(file);
@@ -77,7 +77,7 @@ public static class ImageUtil
             textures.Add(tex);
         }
 
-        // on suppose que toutes ont la même taille
+        // Assume all frames have the same size
         int frameWidth = textures[0].Width;
         int frameHeight = textures[0].Height;
 
@@ -85,7 +85,7 @@ public static class ImageUtil
         int atlasHeight = frameHeight;
         var atlas = new Texture2D(device, atlasWidth, atlasHeight, false, SurfaceFormat.Color);
 
-        // buffer pour fusionner
+        // Create atlas data
         var atlasData = new Color[atlasWidth * atlasHeight];
 
         for (int i = 0; i < textures.Count; i++)
@@ -128,6 +128,35 @@ public static class ImageUtil
         data.SaveTo(stream);
         timer.Stop();
         Log.Debug("Saved PNG image to {path} in {time}", path, timer.Elapsed);
+    }
+    
+    public static Bitmap SavePixelsAsBitmap(byte[] rgba, int width, int height)
+    {
+        var timer = System.Diagnostics.Stopwatch.StartNew();
+        
+        using var bitmap = new SKBitmap(width, height, SKColorType.Rgba8888, SKAlphaType.Premul);
+        var ptr = bitmap.GetPixels();
+        Marshal.Copy(rgba, 0, ptr, rgba.Length);
+
+        using var image = SKImage.FromBitmap(bitmap);
+        using var data = image.Encode(SKEncodedImageFormat.Png, 100);
+        using var ms = new MemoryStream();
+        data.SaveTo(ms);
+        ms.Seek(0, SeekOrigin.Begin);
+        var avaloniaBitmap = new Bitmap(ms);
+        
+        timer.Stop();
+        Log.Debug("Converted pixels to Bitmap in {time}", timer.Elapsed);
+        
+        return avaloniaBitmap;
+    }
+    
+    public static Bitmap ConvertCroppedBitmapToBitmap(CroppedBitmap cropped)
+    {
+        var pixels = ExtractPixelsFromCroppedBitmap(cropped);
+        int width = (int)cropped.Size.Width;
+        int height = (int)cropped.Size.Height;
+        return SavePixelsAsBitmap(pixels, width, height);
     }
     //
     // public static Texture2DAtlas CreateTextureAtlas(Bitmap bitmap)
