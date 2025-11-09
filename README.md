@@ -12,6 +12,34 @@ Join us:
 
 **Want to check what is working on without having to join us? No problem, go inside the "Discussions" tab! :)**
 
+Here are some preview of the engine, but please note that all of this are still in work, so what you see as maybe changed!
+
+*All date are of this format: (dd-mm-yyyy)*
+
+*Date doesn't mean 'feature completion' but just at what time this video has been taken!*
+
+---
+
+Character animation: (31-10-2025)
+
+![](Images/character_anim_2025_10_31.gif)
+
+Skill editor: (09-10-2025)
+
+![](Images/skill_editor_2025_10_09.gif)
+
+Graph feature: (13-09-2025)
+
+![](Images/graph_feature_2025_09_13.gif)
+
+Bulk animation importer: (09-11-2025)
+
+![](Images/bulk_anim_2025_11_09.gif)
+
+Auto tiling: (10-08-2025)
+
+![](Images/auto_tiling_2025_08_10.gif)
+
 ---
 ### Why?
 
