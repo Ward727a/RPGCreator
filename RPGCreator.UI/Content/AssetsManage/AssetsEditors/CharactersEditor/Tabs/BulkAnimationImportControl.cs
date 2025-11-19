@@ -66,6 +66,10 @@ public class BulkAnimationImportControl : UserControl
     
     private DataGrid AnimationsDataGrid { get; set; }
     
+    private StackPanel ButtonsPanel { get; set; }
+    private Button ImportAllButton { get; set; }
+    private Button CancelButton { get; set; }
+    
     #endregion
     
     #region Constructors
@@ -76,18 +80,7 @@ public class BulkAnimationImportControl : UserControl
         OnImport = onImport;
         CreateComponents();
         RegisterEvents();
-        // IMPORTANT : forcer une hauteur mesurable
-        var root = new DockPanel
-        {
-            LastChildFill = true,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch
-        };
-
-        DockPanel.SetDock(Body, Dock.Top);
-        root.Children.Add(Body);
-
-        Content = root;
+        Content = Body;
     }
     
     #endregion
@@ -228,6 +221,30 @@ public class BulkAnimationImportControl : UserControl
         AnimationsDataGrid = new DataGrid();
         LeftGrid.Children.Add(AnimationsDataGrid);
         Grid.SetRow(AnimationsDataGrid, 2);
+        
+        ButtonsPanel = new StackPanel()
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Margin = new Thickness(5),
+        };
+        Body.Children.Add(ButtonsPanel);
+        Grid.SetRow(ButtonsPanel, 1);
+        Grid.SetColumn(ButtonsPanel, 3);
+        
+        ImportAllButton = new Button()
+        {
+            Content = "Import All",
+            Margin = new Thickness(5),
+        };
+        ButtonsPanel.Children.Add(ImportAllButton);
+        
+        CancelButton = new Button()
+        {
+            Content = "Cancel",
+            Margin = new Thickness(5),
+        };
+        ButtonsPanel.Children.Add(CancelButton);
     }
 
     private Bitmap GetOrCreateRowBitmap(string imagePath, int rowIndex)
@@ -254,106 +271,185 @@ public class BulkAnimationImportControl : UserControl
         ImportButton.PropertyChanged += OnImportNewImage;
         SpritesheetCanvas.CanvasBody.PointerPressed += CanvasBodyOnPointerPressed;
         ImageListBox.SelectionChanged += OnImageSelectionChanged;
-        AssignedToInput.SelectionChanged += (s, e) =>
+        AssignedToInput.SelectionChanged += OnAssignedToInputOnSelectionChanged;
+        AssignedAnimationsListBox.SelectionChanged += OnAssignedAnimationsListBoxOnSelectionChanged;
+        ImportAllButton.Click += (s, e) =>
         {
-
-            var _selectedAnimation = AssignedToInput.SelectedItem as ComboBoxItem;
-            var _selectedAnimationName = _selectedAnimation?.Tag as string;
-
-            if (_selectedAnimationName == null)
+            var animationsToImport = new Dictionary<string, AnimationDef>();
+            foreach (var (imagePath, rowMap) in RowToAnimationNameMap)
             {
-                // Clear assignment for the selected row
-                if (!string.IsNullOrWhiteSpace(_currentImagePath) &&
-                    RowToAnimationNameMap.ContainsKey(_currentImagePath) &&
-                    RowToAnimationNameMap[_currentImagePath].ContainsKey(_selectedRow))
+                foreach (var (rowIndex, animationName) in rowMap)
                 {
-                    var existingAnimationName = RowToAnimationNameMap[_currentImagePath][_selectedRow];
-                    _usedAnimationNames.Remove(existingAnimationName);
-                    RowToAnimationNameMap[_currentImagePath].Remove(_selectedRow);
-                    
-                    // Clear selection in the AssignedAnimationsListBox
-                    _assignedAnimationsItems[existingAnimationName].IsSelected = false;
-                    AssignedAnimationsListBox.Items.Remove(_assignedAnimationsItems[existingAnimationName]);
-                    _assignedAnimationsItems.Remove(existingAnimationName);
-                }
-                return;
-            }
-            
-            if(_usedAnimationNames.Contains(_selectedAnimationName))
-            {
-                Log.Error("Animation name '{AnimationName}' is already assigned to another row.", _selectedAnimationName);
-                // Animation name already used, ignore selection
-                return;
-            }
-            
-            if (!string.IsNullOrWhiteSpace(_currentImagePath))
-            {
-                if (!RowToAnimationNameMap.ContainsKey(_currentImagePath))
-                {
-                    RowToAnimationNameMap[_currentImagePath] = new Dictionary<int, string>();
+                    var bitmap = GetOrCreateRowBitmap(imagePath, rowIndex);
+                    var animationData = new AnimationData();
+                    animationData.ImagePath = imagePath;
+                    // animationData.
+                    // animationsToImport[animationName] = animationData;
                 }
             }
+            OnImport?.Invoke(animationsToImport);
+        };
+    }
 
-            if (RowToAnimationNameMap[_currentImagePath].ContainsKey(_selectedRow))
+    private void SelectRow(int rowIndex)
+    {
+        // Clear previous overlays
+        SpritesheetOverlayCanvas.Children.Clear();
+        
+        SpritesheetText.Text = $"Selected Row: {rowIndex}";
+        
+        // Draw overlay rectangle on the selected row
+        var overlayRect = new Rectangle()
+        {
+            Width = SpritesheetImage.Source?.Size.Width ?? 0,
+            Height = 64,
+            Fill = new SolidColorBrush(Color.FromArgb(50, 2, 155, 000)),
+        };
+        Canvas.SetLeft(overlayRect, 0);
+        Canvas.SetTop(overlayRect, rowIndex * 64);
+        SpritesheetOverlayCanvas.Children.Add(overlayRect);
+        _selectedRow = rowIndex;
+    }
+    
+    private void LoadPreviewerForCurrentSelection()
+    {
+        if (string.IsNullOrWhiteSpace(_currentImagePath) || _selectedRow < 0) return;
+        var bitmap = GetOrCreateRowBitmap(_currentImagePath, _selectedRow);
+        string bitmapPath = "";
+        string bitmapHash = bitmap.GetHashCode().ToString();
+        if(_imageCache.ContainsKey(bitmapHash))
+        {
+            bitmapPath = _imageCache[bitmapHash];
+            if(System.IO.File.Exists(bitmapPath))
+            {
+                Log.Debug("Using cached image for previewer for image '{ImagePath}' row {RowIndex}", _currentImagePath, _selectedRow);
+            }
+            else
+            {
+                bitmapPath = System.IO.Path.GetTempFileName() + ".png";
+                using (var fs = System.IO.File.OpenWrite(bitmapPath))
+                {
+                    bitmap.Save(fs);
+                }
+                _imageCache[bitmapHash] = bitmapPath;
+                Log.Debug("Re-creating cached image for previewer for image '{ImagePath}' row {RowIndex} at {tempFilePath}", _currentImagePath, _selectedRow, bitmapPath);
+            }
+        }
+        else
+        {
+            // Save bitmap to a temporary file to be loaded by the previewer
+            bitmapPath = System.IO.Path.GetTempFileName() + ".png";
+            using (var fs = System.IO.File.OpenWrite(bitmapPath))
+            {
+                bitmap.Save(fs);
+            }
+            _imageCache[bitmapHash] = bitmapPath;
+            Log.Debug("Caching image for previewer for image '{ImagePath}' row {RowIndex} at {temppath}", _currentImagePath, _selectedRow, bitmapPath);
+        }
+        
+        Log.Debug("Loading previewer for image '{ImagePath}' row {RowIndex}", _currentImagePath, _selectedRow);
+        Log.Debug("Temporary file found at '{TempFilePath}'", bitmapPath);
+        Previewer.AnimationPath = bitmapPath;
+        Previewer.FrameSize = new Size(42, 64);
+        Previewer.Play();
+    }
+
+    #endregion
+
+    #region Events Handlers
+    private void OnAssignedToInputOnSelectionChanged(object? s, SelectionChangedEventArgs e)
+    {
+        var _selectedAnimation = AssignedToInput.SelectedItem as ComboBoxItem;
+        var _selectedAnimationName = _selectedAnimation?.Tag as string;
+
+        if (_selectedAnimationName == null)
+        {
+            // Clear assignment for the selected row
+            if (!string.IsNullOrWhiteSpace(_currentImagePath) && RowToAnimationNameMap.ContainsKey(_currentImagePath) && RowToAnimationNameMap[_currentImagePath].ContainsKey(_selectedRow))
             {
                 var existingAnimationName = RowToAnimationNameMap[_currentImagePath][_selectedRow];
                 _usedAnimationNames.Remove(existingAnimationName);
+                RowToAnimationNameMap[_currentImagePath].Remove(_selectedRow);
+
+                // Clear selection in the AssignedAnimationsListBox
                 _assignedAnimationsItems[existingAnimationName].IsSelected = false;
                 AssignedAnimationsListBox.Items.Remove(_assignedAnimationsItems[existingAnimationName]);
                 _assignedAnimationsItems.Remove(existingAnimationName);
             }
-            
-            if(_selectedRow >= 0)
-            {
-                RowToAnimationNameMap[_currentImagePath][_selectedRow] = 
-                    _selectedAnimationName ?? $"animation_{_selectedRow}";
-                
-                _usedAnimationNames.Add(_selectedAnimationName);
-                _assignedAnimationsItems.TryAdd(_selectedAnimationName, new ListBoxItem(){Content = _selectedAnimationName, Tag = (_currentImagePath, _selectedRow) });
-                AssignedAnimationsListBox.Items.Add(_assignedAnimationsItems[_selectedAnimationName]);
-            }
-        };
-        
-        AssignedAnimationsListBox.SelectionChanged += (s, e) =>
-        {
-            if(AssignedAnimationsListBox.SelectedItem is ListBoxItem selectedItem)
-            {
-                var (imagePath, rowIndex) = ((string, int))selectedItem.Tag;
 
-                if (imagePath != _currentImagePath)
+            return;
+        }
+
+        if (_usedAnimationNames.Contains(_selectedAnimationName))
+        {
+            Log.Error("Animation name '{AnimationName}' is already assigned to another row.", _selectedAnimationName);
+            // Animation name already used, ignore selection
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_currentImagePath))
+        {
+            if (!RowToAnimationNameMap.ContainsKey(_currentImagePath))
+            {
+                RowToAnimationNameMap[_currentImagePath] = new Dictionary<int, string>();
+            }
+        }
+
+        if (RowToAnimationNameMap[_currentImagePath].ContainsKey(_selectedRow))
+        {
+            var existingAnimationName = RowToAnimationNameMap[_currentImagePath][_selectedRow];
+            _usedAnimationNames.Remove(existingAnimationName);
+            _assignedAnimationsItems[existingAnimationName].IsSelected = false;
+            AssignedAnimationsListBox.Items.Remove(_assignedAnimationsItems[existingAnimationName]);
+            _assignedAnimationsItems.Remove(existingAnimationName);
+        }
+
+        if (_selectedRow >= 0)
+        {
+            RowToAnimationNameMap[_currentImagePath][_selectedRow] = _selectedAnimationName ?? $"animation_{_selectedRow}";
+
+            _usedAnimationNames.Add(_selectedAnimationName);
+            _assignedAnimationsItems.TryAdd(_selectedAnimationName, new ListBoxItem() { Content = _selectedAnimationName, Tag = (_currentImagePath, _selectedRow) });
+            AssignedAnimationsListBox.Items.Add(_assignedAnimationsItems[_selectedAnimationName]);
+        }
+    }
+    private void OnAssignedAnimationsListBoxOnSelectionChanged(object? s, SelectionChangedEventArgs e)
+    {
+        if (AssignedAnimationsListBox.SelectedItem is ListBoxItem selectedItem)
+        {
+            var (imagePath, rowIndex) = ((string, int))selectedItem.Tag;
+
+            if (imagePath != _currentImagePath)
+            {
+                // Change selected image in ImageListBox
+                for (int i = 0; i < ImageListBox.Items.Count; i++)
                 {
-                    // Change selected image in ImageListBox
-                    for (int i = 0; i < ImageListBox.Items.Count; i++)
+                    if (ImageListBox.Items[i] is ComboBoxItem item && item.Tag as string == imagePath)
                     {
-                        if (ImageListBox.Items[i] is ComboBoxItem item && 
-                            item.Tag as string == imagePath)
-                        {
-                            ImageListBox.SelectedIndex = i;
-                            break;
-                        }
-                    }
-                }
-                SelectRow(rowIndex);
-                
-                LoadPreviewerForCurrentSelection();
-                
-                // Update AssignedToInput selection based on the selected row
-                if(_selectedRow >= 0 && 
-                   RowToAnimationNameMap.ContainsKey(_currentImagePath) && 
-                   RowToAnimationNameMap[_currentImagePath].ContainsKey(_selectedRow))
-                {
-                    var animationName = RowToAnimationNameMap[_currentImagePath][_selectedRow];
-                    foreach (ComboBoxItem item in AssignedToInput.Items)
-                    {
-                        if (item.Tag as string == animationName)
-                        {
-                            AssignedToInput.SelectedItem = item;
-                            break;
-                        }
+                        ImageListBox.SelectedIndex = i;
+                        break;
                     }
                 }
             }
-        };
+
+            SelectRow(rowIndex);
+
+            LoadPreviewerForCurrentSelection();
+
+            // Update AssignedToInput selection based on the selected row
+            if (_selectedRow >= 0 && RowToAnimationNameMap.ContainsKey(_currentImagePath) && RowToAnimationNameMap[_currentImagePath].ContainsKey(_selectedRow))
+            {
+                var animationName = RowToAnimationNameMap[_currentImagePath][_selectedRow];
+                foreach (ComboBoxItem item in AssignedToInput.Items)
+                {
+                    if (item.Tag as string == animationName)
+                    {
+                        AssignedToInput.SelectedItem = item;
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     private void OnImportNewImage(object? sender, AvaloniaPropertyChangedEventArgs e)
@@ -417,26 +513,6 @@ public class BulkAnimationImportControl : UserControl
         }
     }
     
-    private void SelectRow(int rowIndex)
-    {
-        // Clear previous overlays
-        SpritesheetOverlayCanvas.Children.Clear();
-        
-        SpritesheetText.Text = $"Selected Row: {rowIndex}";
-        
-        // Draw overlay rectangle on the selected row
-        var overlayRect = new Rectangle()
-        {
-            Width = SpritesheetImage.Source?.Size.Width ?? 0,
-            Height = 64,
-            Fill = new SolidColorBrush(Color.FromArgb(50, 2, 155, 000)),
-        };
-        Canvas.SetLeft(overlayRect, 0);
-        Canvas.SetTop(overlayRect, rowIndex * 64);
-        SpritesheetOverlayCanvas.Children.Add(overlayRect);
-        _selectedRow = rowIndex;
-    }
-    
     private void OnImageSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (ImageListBox.SelectedItem is ComboBoxItem selectedItem)
@@ -457,52 +533,5 @@ public class BulkAnimationImportControl : UserControl
             }
         }
     }
-    
-    private void LoadPreviewerForCurrentSelection()
-    {
-        if (string.IsNullOrWhiteSpace(_currentImagePath) || _selectedRow < 0) return;
-        var bitmap = GetOrCreateRowBitmap(_currentImagePath, _selectedRow);
-        string bitmapPath = "";
-        string bitmapHash = bitmap.GetHashCode().ToString();
-        if(_imageCache.ContainsKey(bitmapHash))
-        {
-            bitmapPath = _imageCache[bitmapHash];
-            if(System.IO.File.Exists(bitmapPath))
-            {
-                Log.Debug("Using cached image for previewer for image '{ImagePath}' row {RowIndex}", _currentImagePath, _selectedRow);
-            }
-            else
-            {
-                bitmapPath = System.IO.Path.GetTempFileName() + ".png";
-                using (var fs = System.IO.File.OpenWrite(bitmapPath))
-                {
-                    bitmap.Save(fs);
-                }
-                _imageCache[bitmapHash] = bitmapPath;
-                Log.Debug("Re-creating cached image for previewer for image '{ImagePath}' row {RowIndex} at {tempFilePath}", _currentImagePath, _selectedRow, bitmapPath);
-            }
-        }
-        else
-        {
-            // Save bitmap to a temporary file to be loaded by the previewer
-            bitmapPath = System.IO.Path.GetTempFileName() + ".png";
-            using (var fs = System.IO.File.OpenWrite(bitmapPath))
-            {
-                bitmap.Save(fs);
-            }
-            _imageCache[bitmapHash] = bitmapPath;
-            Log.Debug("Caching image for previewer for image '{ImagePath}' row {RowIndex} at {temppath}", _currentImagePath, _selectedRow, bitmapPath);
-        }
-        
-        Log.Debug("Loading previewer for image '{ImagePath}' row {RowIndex}", _currentImagePath, _selectedRow);
-        Log.Debug("Temporary file found at '{TempFilePath}'", bitmapPath);
-        Previewer.AnimationPath = bitmapPath;
-        Previewer.FrameSize = new Size(42, 64);
-        Previewer.Play();
-    }
-
-    #endregion
-
-    #region Events Handlers
     #endregion
 }

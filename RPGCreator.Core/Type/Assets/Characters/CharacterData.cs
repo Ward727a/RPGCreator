@@ -264,7 +264,6 @@ public struct CharacterRolePlayInfo() : ISerializable, IDeserializable
 
 public struct CharacterEquipSlot(string slotName, int slotIndex, string itemType, string itemId = "") : ISerializable, IDeserializable
 {
-    
     public string SlotName { get; set; } = slotName; // Name of the slot (e.g., "Head", "Chest", "Legs", etc.)
     public int SlotIndex { get; set; } = slotIndex; // Index of the slot (e.g., 0 for Head, 1 for Chest, etc.)
     public string ItemId { get; set; } = itemId; // ID of the item equipped in this slot (if any)

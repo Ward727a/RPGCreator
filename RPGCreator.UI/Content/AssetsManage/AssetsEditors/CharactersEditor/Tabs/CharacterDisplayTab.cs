@@ -21,25 +21,26 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs
 
 public class AnimationData
 {
-    public string Name;
-    public string Path;
+    public readonly string AnimationName;
+    public string ImagePath;
     public int Fps;
+    public Size FrameSize = new Size(48, 64);
     public int OrderIndex;
+    public int AnimationRow;
     public bool IsDefault = false;
 
-    public AnimationData(int fps, string name, int orderIndex, string path)
+    public AnimationData(int fps = 10, string animationName = "", int orderIndex = 0, string imagePath = "")
     {
         Fps = fps;
-        Name = name;
+        AnimationName = animationName;
         OrderIndex = orderIndex;
-        Path = path;
+        ImagePath = imagePath;
     }
 }
 
 
 public class CharacterDisplayTab : UserControl
 {
-    
     
     #region Events
     #endregion
@@ -251,7 +252,7 @@ public class CharacterDisplayTab : UserControl
                 foreach (var anim in importedAnimations)
                 {
                     ListBoxItem item = new ListBoxItem();
-                    item.Content = anim.Value.Name;
+                    item.Content = anim.Value.AnimationName;
                     item.Tag = anim;
                     AnimationList.Items.Add(item);
                     orderIndex++;
@@ -565,7 +566,7 @@ public class CharacterDisplayTab : UserControl
         
         if(File.Exists(newPath))
         {
-            SelectedAnimationData.Path = newPath;
+            SelectedAnimationData.ImagePath = newPath;
             AnimationPreviewer.AnimationPath = newPath;
         }
     }
@@ -589,9 +590,9 @@ public class CharacterDisplayTab : UserControl
             RemoveAnimationButton.IsEnabled = true;
         }
 
-        if (string.IsNullOrEmpty(animationData.Path)) return;
-        if(!File.Exists(animationData.Path)) return;
-        AnimationPreviewer.AnimationPath = animationData.Path;
+        if (string.IsNullOrEmpty(animationData.ImagePath)) return;
+        if(!File.Exists(animationData.ImagePath)) return;
+        AnimationPreviewer.AnimationPath = animationData.ImagePath;
         AnimationPreviewer.UpdateFrame(0);
         if(AutoPlayCheckBox.IsChecked.HasValue && AutoPlayCheckBox.IsChecked.Value)
             AnimationPreviewer.Play();

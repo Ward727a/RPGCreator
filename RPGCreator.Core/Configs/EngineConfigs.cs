@@ -100,6 +100,17 @@ namespace RPGCreator.Core.Configs
 
         private void AddConfig(string configPath, ConfHelper conf)
         {
+            var status = EngineDB.AddConfig(new EngineDB.DatabaseFileData()
+            {
+                FilePath = configPath,
+                LastModified = File.GetLastWriteTimeUtc(configPath)
+            });
+            
+            if(status != EngineDB.EFileInsertStatus.Success)
+            {
+                Log.Error($"Failed to add config {configPath} to EngineDB. Status: {status}");
+            }
+            
             LoadedConfig[configPath] = conf;
             ConfigMap[conf.ConfigName] = configPath;
         }

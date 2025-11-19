@@ -5,14 +5,34 @@ namespace RPGCreator.Core;
 
 public class DataBaseMetaData()
 {
-    public int Id; // DB Related ID
-    public Ulid ObjectId; // DataBase ID
-    public string Name; // DataBase Name
+    public int Id { get; set; } // DB Related ID
+    public Ulid ObjectId { get; set; } = Ulid.NewUlid() ; // DataBase ID
+    public string Name { get; set; } // DataBase Name
 }
+
 
 
 public class EngineDB
 {
+    
+    public class DatabaseFileData()
+    {
+        public int Id { get; set; }
+        public string FilePath { get; set; } = string.Empty;
+        public DateTime LastModified { get; set; }
+        public Dictionary<string, string> MetaDatas { get; set; } = new Dictionary<string, string>();
+    }
+    
+    const string DbHashExtension = ".dbhash";
+
+    public const string EngineSettingsDbKey = "@settings";
+    public const string EngineProjectsDbKey = "@projects";
+
+    private static readonly Dictionary<string, string> EngineReservedDatabase  = new Dictionary<string, string>()
+    {
+        { "@settings", "engine_settings.db" },
+        { "@projects", "engine_projects.db" }
+    };
     
     private enum ERegisterDbStatus
     {
@@ -22,8 +42,30 @@ public class EngineDB
         PathAlreadyRegistered,
         Success,
     }
+    
+    private enum ECreateDbHashStatus
+    {
+        UnexpectedError,
+        FileNotFound,
+        Success,
+    }
+    
+    private enum ECheckDbHashStatus
+    {
+        UnexpectedError,
+        FileNotFound,
+        HashMismatch,
+        HashMatch,
+    }
 
     public enum ECloseDbStatus
+    {
+        UnexpectedError,
+        DbNotFound,
+        Success,
+    }
+
+    public enum EFileInsertStatus
     {
         UnexpectedError,
         DbNotFound,
@@ -35,11 +77,51 @@ public class EngineDB
     private static Dictionary<Ulid, LiteDatabase>  Databases { get; } = new Dictionary<Ulid, LiteDatabase>();
     private static Dictionary<string, Ulid> DatabaseIds { get; } = new Dictionary<string, Ulid>();
 
+    /// <summary>
+    /// Opening a database file, if it does not exist it will be created.
+    /// </summary>
+    /// <param name="dbFilePath">The file path to the database file.</param>
+    /// <returns>The Ulid of the opened database, or Ulid.Empty if an error occurred.</returns>
     public static Ulid OpenDB(string dbFilePath)
     {
+        dbFilePath = CheckReservedPath(dbFilePath);
+        
+        if (DatabaseIds.TryGetValue(dbFilePath, out var existingId))
+        {
+            Logger.Information("Database at {dbFilePath} is already opened with id {dbId}", dbFilePath, existingId);
+            return existingId;
+        }
 
         if (File.Exists(dbFilePath))
         {
+            var hashStatus = CheckDbHash(dbFilePath);
+            if (hashStatus != ECheckDbHashStatus.HashMatch)
+            {
+                if (hashStatus == ECheckDbHashStatus.HashMismatch)
+                {
+                    Logger.Error("Database file at {dbFilePath} failed integrity check.", dbFilePath);
+                    return Ulid.Empty;
+                }
+
+                if (hashStatus == ECheckDbHashStatus.FileNotFound)
+                {
+                    Logger.Warning("No hash file found for database at {dbFilePath}, creating new hash file.", dbFilePath);
+                    var createHashStatus = CreateDbHash(dbFilePath);
+                    if (createHashStatus != ECreateDbHashStatus.Success)
+                    {
+                        Logger.Error("Failed to create hash file for database at {dbFilePath} with code {errorCode}",
+                            dbFilePath, createHashStatus);
+                        return Ulid.Empty;
+                    }
+                }
+                else
+                {
+                    Logger.Error("Failed to check hash for database at {dbFilePath} with code {errorCode}",
+                        dbFilePath, hashStatus);
+                    return Ulid.Empty;
+                }
+            }
+
             var db = new LiteDatabase(dbFilePath);
             
             var metadataCollection = db.GetCollection<DataBaseMetaData>("metadata");
@@ -84,37 +166,165 @@ public class EngineDB
                 return Ulid.Empty;
             }
             
+            Logger.Debug("Created new database at {dbFilePath} with id {dbId}", dbFilePath, metadata.ObjectId);
+            
             return metadata.ObjectId;
         }
     }
 
+    public static bool IsDBOpen(string dbFilePath)
+    {
+        dbFilePath = CheckReservedPath(dbFilePath);
+        
+        return DatabaseIds.ContainsKey(dbFilePath);
+    }
+    
+    public static LiteDatabase? GetDB(string dbFilePath)
+    {
+        dbFilePath = CheckReservedPath(dbFilePath);
+        
+        if (DatabaseIds.TryGetValue(dbFilePath, out var dbId))
+        {
+            return GetDB(dbId);
+        }
+        Logger.Warning("Tried to get database at path {dbFilePath} but it was not found", dbFilePath);
+        return null;
+    }
+    
+    public static LiteDatabase? GetDB(Ulid dbId)
+    {
+        if (Databases.TryGetValue(dbId, out var db))
+        {
+            return db;
+        }
+        Logger.Warning("Tried to get database with id {dbId} but it was not found", dbId);
+        return null;
+    }
+    
+    /// <summary>
+    /// Closes the database with the given id.
+    /// </summary>
+    /// <param name="dbId">The Ulid of the database to close.</param>
+    /// <returns>Status of the close operation. <br/>(<see cref="ECloseDbStatus.Success"/> if successful)</returns>
     public static ECloseDbStatus CloseDB(Ulid dbId)
     {
-
-        var kvp = DatabaseIds.FirstOrDefault(x => x.Value == dbId);
-        
-        if(kvp.Equals(default(KeyValuePair<string, Ulid>)))
+        try
         {
-            Logger.Warning("Tried to close database with id {dbId} but it was not found", dbId);
-            return ECloseDbStatus.DbNotFound;
+            var kvp = DatabaseIds.FirstOrDefault(x => x.Value == dbId);
+
+            if (kvp.Equals(default(KeyValuePair<string, Ulid>)))
+            {
+                Logger.Warning("Tried to close database with id {dbId} but it was not found", dbId);
+                return ECloseDbStatus.DbNotFound;
+            }
+
+            if (Databases.ContainsKey(dbId))
+            {
+                
+                var createDbHashStatus = CreateDbHash(kvp.Key);
+                
+                if(createDbHashStatus != ECreateDbHashStatus.Success)
+                {
+                    Logger.Error("Failed to create hash for database at {dbFilePath} while closing with code {errorCode}", kvp.Key, createDbHashStatus);
+                    return ECloseDbStatus.UnexpectedError;
+                }
+                
+                Databases[dbId].Dispose();
+                Databases.Remove(dbId);
+                DatabaseIds.Remove(kvp.Key);
+                return ECloseDbStatus.Success;
+            }
+            else
+            {
+                Logger.Warning("Tried to close database with id {dbId} but it was not found", dbId);
+                return ECloseDbStatus.DbNotFound;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("Failed to close database with id {dbId}: {errorMessage}", dbId, ex.Message);
+            return ECloseDbStatus.UnexpectedError;
+        }
+    }
+
+    public static EFileInsertStatus AddConfig(DatabaseFileData data)
+    {
+        if (!IsDBOpen(EngineSettingsDbKey))
+        {
+            var dbId = OpenDB(EngineSettingsDbKey);
+            if (dbId == Ulid.Empty)
+            {
+                Logger.Error("Failed to open engine settings database to insert config file.");
+                return EFileInsertStatus.DbNotFound;
+            }
         }
         
-        if(Databases.ContainsKey(dbId))
+        var db = GetDB(EngineSettingsDbKey);
+        
+        if(db == null)
         {
-            Databases[dbId].Dispose();
-            Databases.Remove(dbId);
-            DatabaseIds.Remove(kvp.Key);
+            Logger.Error("Failed to insert config file to engine settings database: Database not found");
+            return EFileInsertStatus.DbNotFound;
+        }
+        
+        var collection = db.GetCollection<DatabaseFileData>();
+        
+        var existing = collection.FindOne(x => x.FilePath == data.FilePath);
+        if (existing != null)
+        {
+            data.Id = existing.Id;
+            collection.Update(data);
+            return EFileInsertStatus.Success;
+        }
+        
+        db.GetCollection<DatabaseFileData>().Insert(data);
+        
+        return EFileInsertStatus.Success;
+    }
+
+    public static EFileInsertStatus AddFile(Ulid dbId, DatabaseFileData data)
+    {
+        var db = GetDB(dbId);
+        
+        if(db == null)
+        {
+            Logger.Error("Failed to insert file to database with id {dbId}: Database not found", dbId);
+            return EFileInsertStatus.DbNotFound;
+        }
+        
+        db.GetCollection<DatabaseFileData>().Insert(data);
+
+        return EFileInsertStatus.Success;
+    }
+    
+    internal static ECloseDbStatus CloseAllDBs()
+    {
+        try
+        {
+            foreach (var db in Databases.Values)
+            {
+                db.Dispose();
+            }
+            Databases.Clear();
+            DatabaseIds.Clear();
             return ECloseDbStatus.Success;
         }
-        else
+        catch (Exception ex)
         {
-            Logger.Warning("Tried to close database with id {dbId} but it was not found", dbId);
-            return ECloseDbStatus.DbNotFound;
+            Logger.Error("Failed to close all databases: {errorMessage}", ex.Message);
+            return ECloseDbStatus.UnexpectedError;
         }
     }
     
     // HELPERS
 
+    /// <summary>
+    /// Registers a database with the given metadata.
+    /// </summary>
+    /// <param name="dbFilePath"></param>
+    /// <param name="metaData"></param>
+    /// <param name="db"></param>
+    /// <returns></returns>
     private static ERegisterDbStatus RegisterDB(string dbFilePath, DataBaseMetaData metaData, LiteDatabase db)
     {
         var id = metaData.ObjectId;
@@ -129,6 +339,80 @@ public class EngineDB
             return ERegisterDbStatus.PathAlreadyRegistered;
 
         return ERegisterDbStatus.Success;
+    }
+
+    private static ECreateDbHashStatus CreateDbHash(string dbFilePath)
+    {
+        var hashFilePath = dbFilePath + DbHashExtension;
+        var hash = string.Empty;
+
+        if (!File.Exists(dbFilePath))
+            return ECreateDbHashStatus.FileNotFound;
+
+        try
+        {
+
+            // Compute hash of database file
+            using (var stream = File.OpenRead(dbFilePath))
+            {
+                using (var sha256 = System.Security.Cryptography.SHA256.Create())
+                {
+                    var hashBytes = sha256.ComputeHash(stream);
+                    hash = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+                }
+            }
+
+            File.WriteAllText(hashFilePath, hash);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("Failed to create DB hash for {dbFilePath}: {errorMessage}", dbFilePath, ex.Message);
+            return ECreateDbHashStatus.UnexpectedError;
+        }
+        return ECreateDbHashStatus.Success;
+    }
+    
+    private static ECheckDbHashStatus CheckDbHash(string dbFilePath)
+    {
+        var hashFilePath = dbFilePath + DbHashExtension;
+        var existingHash = string.Empty;
+        var currentHash = string.Empty;
+
+        if (!File.Exists(dbFilePath) || !File.Exists(hashFilePath))
+            return ECheckDbHashStatus.FileNotFound;
+
+        try
+        {
+            existingHash = File.ReadAllText(hashFilePath);
+
+            // Compute current hash of database file
+            using (var stream = File.OpenRead(dbFilePath))
+            {
+                using (var sha256 = System.Security.Cryptography.SHA256.Create())
+                {
+                    var hashBytes = sha256.ComputeHash(stream);
+                    currentHash = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+                }
+            }
+
+            // Compare hashes
+            return existingHash == currentHash ? ECheckDbHashStatus.HashMatch : ECheckDbHashStatus.HashMismatch;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("Failed to check DB hash for {dbFilePath}: {errorMessage}", dbFilePath, ex.Message);
+            return ECheckDbHashStatus.UnexpectedError;
+        }
+    }
+    
+    private static string CheckReservedPath(string dbFilePath)
+    {
+        if(EngineReservedDatabase.TryGetValue(dbFilePath, out var reservedPath))
+        {
+            var engineDbPath = Path.Combine(AppContext.BaseDirectory, reservedPath);
+            return engineDbPath;
+        }
+        return dbFilePath;
     }
     
 }
