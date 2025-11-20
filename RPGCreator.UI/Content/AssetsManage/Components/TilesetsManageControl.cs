@@ -189,9 +189,9 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                 VerticalAlignment = VerticalAlignment.Center,
             };
 
-            EngineCore.Instance.Managers.Assets.GetAssetsPackNames().ForEach(name =>
+            EngineCore.Instance.Managers.Assets.GetLoadedPacks().ForEach(pack =>
             {
-                assetPackSelector.Items.Add(name);
+                assetPackSelector.Items.Add(pack.Name);
             });
 
             assetPackSelector.SelectedIndex = 0; // Default to the first asset pack
@@ -864,7 +864,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                     else if(args.TilesetType == 1) // Autotile
                     {
                         var autotile = new AutoTilesetDef(args.Name, args.TileWidth, args.TileHeight);
-                        autotile.Pack = EngineCore.Instance.Managers.Assets.GetAssetsPacks().FirstOrDefault(p => p.Name == args.AssetPack) ?? EngineCore.Instance.Managers.Assets.GetAssetsPacks().FirstOrDefault();
+                        // autotile.Pack = EngineCore.Instance.Managers.Assets.GetAssetsPacks().FirstOrDefault(p => p.Name == args.AssetPack) ?? EngineCore.Instance.Managers.Assets.GetAssetsPacks().FirstOrDefault();
                         var editor_control = new AutotileEditorWindowControl(autotile);
                         var host_ = ((AssetsManageWindow)this.GetVisualRoot()!);
                         editor_control.AutotileSaved += () =>
@@ -944,10 +944,10 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                 }
                 // Here you would implement the logic to delete the selected tileset.
                 var tilesetBase = SelectedTilesetViewItem.TilesetDef;
-                if(tilesetBase is TilesetDef tileset)
-                    EngineCore.Instance.Managers.Assets.TilesetRegistry.Unregister(tileset);
-                else if(tilesetBase is AutoTilesetDef autotiles)
-                    EngineCore.Instance.Managers.Assets.TilesetRegistry.Unregister(autotiles);
+                // if(tilesetBase is TilesetDef tileset)
+                //     EngineCore.Instance.Managers.Assets.TilesetRegistry.Unregister(tileset);
+                // else if(tilesetBase is AutoTilesetDef autotiles)
+                //     EngineCore.Instance.Managers.Assets.TilesetRegistry.Unregister(autotiles);
                 TilesetsManageControl_OnNeedRefresh();
                 Console.WriteLine("Delete Tileset button clicked.");
             };

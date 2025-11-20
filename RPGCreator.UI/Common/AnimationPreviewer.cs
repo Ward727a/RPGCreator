@@ -50,8 +50,8 @@ public class AnimationPreviewer : UserControl
         set
         {
             _animationPath = value;
-            _animationDef.FrameSize = new Core.Type.Internal.Size(48, 64);
-            _animationDef.AnimationPath = value;
+            // _animationDef.FrameSize = new Core.Type.Internal.Size(48, 64);
+            // _animationDef.AnimationPath = value;
             _animationInstance ??= new AnimationInstance(_animationDef);
             AnimationPathChanged?.Invoke(_animationPath);
         }

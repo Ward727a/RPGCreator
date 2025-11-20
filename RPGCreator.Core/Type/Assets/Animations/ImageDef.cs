@@ -3,8 +3,17 @@ using RPGCreator.Core.Type.Internal;
 using Serilog;
 
 namespace RPGCreator.Core.Type.Assets.Animations;
+/*
+ * LOAD IMAGE LOGIC
+ *
+   _cachedImage = new UnifiedImage(SpriteSheetPath);
+   var bitmap = _cachedImage.UI;
+   ImageSize = new Size(bitmap.PixelSize.Width, bitmap.PixelSize.Height);
+   Hash = ShaUtil.ComputeSha256(SpriteSheetPath);
+ * 
+ */
 
-public class SpriteSheetDef : IHasUniqueId
+public class ImageDef : IHasUniqueId
 {
     public Ulid Unique { get; }
     public URN Urn { get; }
@@ -19,10 +28,6 @@ public class SpriteSheetDef : IHasUniqueId
             if (File.Exists(value))
             {
                 _spriteSheetPath = value;
-                _cachedImage = new UnifiedImage(SpriteSheetPath);
-                var bitmap = _cachedImage.UI;
-                ImageSize = new Size(bitmap.PixelSize.Width, bitmap.PixelSize.Height);
-                Hash = ShaUtil.ComputeSha256(SpriteSheetPath);
                 SpriteSheetPathChanged?.Invoke(_spriteSheetPath);
             }
             else
@@ -37,7 +42,7 @@ public class SpriteSheetDef : IHasUniqueId
     private UnifiedImage? _cachedImage;
     public Size ImageSize { get; private set; }
     
-    public SpriteSheetDef(string spriteSheetPath)
+    public ImageDef(string spriteSheetPath)
     {
         Unique = Ulid.NewUlid();
         Urn = new URN("rpgcreator", "spritesheet", Unique.ToString());

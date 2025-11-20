@@ -113,4 +113,5 @@ public class MapDefinition : IMapDef
         BackgroundColor = backgroundColor;
     }
 
+    public bool IsDirty { get; set; }
 }

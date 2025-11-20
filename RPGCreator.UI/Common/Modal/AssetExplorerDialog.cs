@@ -140,16 +140,16 @@ public class AssetExplorerDialog : Window
 
     private void AddTilesets()
     {
-        AddRegistry(_assets.TilesetRegistry);
+        //AddRegistry(_assets.TilesetRegistry);
     }
     
     private void AddMaps()
     {
-        AddRegistry(_assets.MapRegistry);
+        //AddRegistry(_assets.MapRegistry);
     }
     private void AddStats()
     {
-        AddRegistry(_assets.StatsRegistry);
+        //AddRegistry(_assets.StatsRegistry);
     }
     
     private void AddRegistry<T>(IAssetRegistry<T> registry) where T : IHasUniqueId

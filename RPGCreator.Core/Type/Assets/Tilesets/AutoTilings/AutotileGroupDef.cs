@@ -12,7 +12,7 @@ public class AutotileGroupDef : IHasUniqueId, ISerializable, IDeserializable
     
     public string Name { get; set; } = string.Empty;
     public Ulid TilesetUnique { get; set; }
-    public ITilesetDef? TilesetDef => EngineCore.Instance.Managers.Assets.TilesetRegistry.Get(TilesetUnique);
+    public ITilesetDef? TilesetDef => EngineCore.Instance.Managers.Assets.TryResolveAsset(TilesetUnique, out ITilesetDef? result) ? result : null;
     
     private readonly List<AutotileDef> _tiles = new List<AutotileDef>();
     public IReadOnlyList<AutotileDef> Tiles => _tiles.AsReadOnly();

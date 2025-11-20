@@ -5,7 +5,7 @@ using SkiaSharp;
 
 namespace RPGCreator.Core.Type.Assets.Tilesets;
 
-public interface ITilesetDef : IHasUniqueId, ISerializable, IDeserializable
+public interface ITilesetDef : IHasUniqueId, ISerializable, IDeserializable, IAssetDef
 {
     
     event Action? ImageChanged;

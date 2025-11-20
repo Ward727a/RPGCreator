@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using RPGCreator.Core;
+using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Type;
 using RPGCreator.Core.Type.Assets.Skills;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEditor;
@@ -163,8 +164,12 @@ public class SkillEffectManageControl : UserControl
     {
         Log.Debug("Reloading Skills Effect Manager content...");
         MainContent.Children.Clear();
+        var skillEffectsRegistry = EngineCore.Instance.Managers.Assets.TryResolveRegistry("skill_effects", out var registry)
+            ? registry as SkillEffectsRegistry
+            : null;
+
         
-        foreach (var skillDef in EngineCore.Instance.Managers.Assets.SkillEffectsRegistry.All())
+        foreach (var skillDef in skillEffectsRegistry.All())
         {
             var itemControl = new SkillEffectManageItemControl(skillDef);
             itemControl.ItemSelected += OnItemSelected;

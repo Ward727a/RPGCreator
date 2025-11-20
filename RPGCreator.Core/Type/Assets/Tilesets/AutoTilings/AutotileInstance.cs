@@ -19,8 +19,8 @@ public class AutotileInstance : BaseDrawable, ITileInstance
     private readonly AutotileDef _def;
     public ITilesetDef TilesetDef { get; }
 
-    private TilesetInstance _tilesetInstance;
-    public TilesetInstance TilesetInstance
+    private ITilesetInstance _tilesetInstance;
+    public ITilesetInstance TilesetInstance
     {
         get => _tilesetInstance;
         private set
@@ -40,14 +40,14 @@ public class AutotileInstance : BaseDrawable, ITileInstance
     public AutotileInstance(AutotileDef tileDef)
     {
         Definition = tileDef;
-        TilesetInstance = (TilesetInstance)EngineCore.Instance.Managers.Assets.TilesetFactory.Create(Definition.TilesetDef);
+        TilesetInstance = EngineCore.Instance.Managers.GameFactory.CreateInstance<AutoTilesetInstance>(tileDef);
     }
     
     public AutotileInstance(AutotileDef def, AutotileGroupInstance groupInstance)
     {
         Definition = def;
-        if(EngineCore.Instance.Managers.Assets.TilesetRegistry.TryGet(groupInstance.Definition.TilesetUnique, out var tilesetDef))
-            TilesetInstance = EngineCore.Instance.Managers.Assets.TilesetFactory.Create<TilesetInstance>(tilesetDef);
+        if(EngineCore.Instance.Managers.Assets.TryResolveAsset<TilesetDef>(groupInstance.Definition.TilesetUnique, out var tilesetDef))
+            TilesetInstance = EngineCore.Instance.Managers.GameFactory.CreateInstance<TilesetInstance>(tilesetDef);
         AutotileGroupInstance = groupInstance;
     }
 
@@ -128,7 +128,7 @@ public class AutotileInstance : BaseDrawable, ITileInstance
         throw new NotImplementedException();
     }
 
-    public void ResetFrom(ITileDef def)
+    public void ResetFrom(ITileDef def, params object[] parameters)
     {
         throw new NotImplementedException();
     }

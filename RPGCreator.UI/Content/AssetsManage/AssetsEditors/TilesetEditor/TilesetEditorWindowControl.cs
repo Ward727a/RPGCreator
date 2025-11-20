@@ -212,10 +212,10 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             var index = 0;
             var currentPack = -1;
             // Populate the ComboBox with available asset packs
-            foreach (var packName in EngineCore.Instance.Managers.Assets.GetAssetsPackNames())
+            foreach (var pack in EngineCore.Instance.Managers.Assets.GetLoadedPacks())
             {
-                AssetPackChoice.Items.Add(packName);
-                if (TilesetDefinition.PackName != null && TilesetDefinition.PackName == packName)
+                AssetPackChoice.Items.Add(pack.Name);
+                if (TilesetDefinition.PackName != null && TilesetDefinition.PackName == pack.Name)
                 {
                     currentPack = index;
                 }
@@ -363,33 +363,19 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             TilesetDefinition.TileWidth = int.TryParse(TileWidthInput.Text, out var width) ? width : 0;
             TilesetDefinition.ImagePath = ImagePick.SelectedPaths[0];
             TilesetDefinition.PackName = AssetPackChoice.SelectedItem as string;
-
-            if (EngineCore.Instance.Managers.Assets.TryGetAssetsPack(TilesetDefinition.PackName, out var pack))
+            
+            if (EngineCore.Instance.Managers.Assets.TryGetPack(TilesetDefinition.PackName, out var pack))
             {
-                // Check if the tileset already exists in the pack
-                if (pack != null)
-                {
-                    if (pack.AssetsCache.Any(a => a.Value.Unique == TilesetDefinition.Unique))
-                    {
-                        // If it exists, update the existing tileset
-                        pack.UpdateAsset(TilesetDefinition);
-                        Console.WriteLine($"Tileset Updated: {TilesetDefinition.Name}, Width: {TilesetDefinition.TileWidth}, Height: {TilesetDefinition.TileHeight}, Asset Pack: {TilesetDefinition.PackName}");
-                    }
-                    else
-                    {
-                        // If it doesn't exist, add the new tileset to the pack
-                        pack.AddAsset(TilesetDefinition);
-                        Console.WriteLine($"Tileset Added: {TilesetDefinition.Name}, Width: {TilesetDefinition.TileWidth}, Height: {TilesetDefinition.TileHeight}, Asset Pack: {TilesetDefinition.PackName}");
-                    }
-                }
-
+                
+                pack.AddOrUpdateAsset(TilesetDefinition);
+            
                 Console.WriteLine($"New Tileset Created: {TilesetDefinition.Name}, Width: {TilesetDefinition.TileWidth}, Height: {TilesetDefinition.TileHeight}, Asset Pack: {TilesetDefinition.PackName}");
             } else
             {
                 throw new Exception("Couldn't get the pack from the pack name... INTERNAL ERROR!");
             }
             
-            EngineCore.Instance.Managers.Assets.TilesetRegistry.Register(TilesetDefinition);
+            EngineCore.Instance.Managers.Assets.RegisterAsset(TilesetDefinition);
 
             TilesetSaved?.Invoke();
         }

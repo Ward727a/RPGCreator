@@ -233,7 +233,7 @@ public class CharacterEditorWindowControl : UserControl
         Log.Information("Character '{characterName}' saved.", Data.Name);
         
         Log.Debug("Character Data: {@characterData}", Data);
-        EngineCore.Instance.Managers.Assets.CharacterRegistry.Register(Data);
+        EngineCore.Instance.Managers.Assets.RegisterAsset(Data);
     }
     #endregion
     

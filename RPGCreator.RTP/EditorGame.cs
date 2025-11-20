@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Avalonia.Input;
+using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Runtimes;
 using RPGCreator.Core.Runtimes.ECS;
 using RPGCreator.Core.Runtimes.ECS.Components.Actor;
@@ -173,8 +174,10 @@ namespace RPGCreator.MonoGame
             // Gum.Update(gameTime);
             _ecsWorld.Update(gameTime);
 
+            var _registry = EngineCore.Instance.Managers.Assets.TryResolveRegistry("characters", out var registry) ? registry as CharacterRegistry
+                : null;
             
-            foreach (var data in EngineCore.Instance.Managers.Assets.CharacterRegistry.All())
+            foreach (var data in _registry.All()) 
             {
                 if(!SpawnedCharacters.Contains(data.Unique))
                 {

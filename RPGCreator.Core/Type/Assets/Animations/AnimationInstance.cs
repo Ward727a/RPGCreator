@@ -1,100 +1,82 @@
+using Avalonia;
 using Avalonia.Media.Imaging;
 using MonoGame.Extended.Graphics;
 using RPGCreator.Core.Common;
+using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Type.Internal;
 using Serilog;
 
 namespace RPGCreator.Core.Type.Assets.Animations;
 
-public class AnimationInstance
+public class AnimationInstance: IResettable<AnimationDef>, ICleanable
 {
-    public AnimationDef Definition { get; }
+    public AnimationDef Definition { get; private set; }
     
-    private List<CroppedBitmap> _frames = new List<CroppedBitmap>();
+    private CroppedBitmap?[] _frames = Array.Empty<CroppedBitmap?>();
     public IReadOnlyList<CroppedBitmap> Frames => _frames;
-    
-    private Bitmap _animationImageSource;
+
+    private SpritesheetDef? _sourceSpritesheet;
     public Texture2DAtlas? TextureAtlas { get; private set; }
     
     public AnimationInstance(AnimationDef definition)
     {
         Definition = definition;
-        _animationImageSource = Definition.GetOrLoadAnimationImage();
-        Definition.AnimationPathChanged += OnAnimationPathChanged;
-        for (int i = 0; i < Definition.TotalFrames; i++)
-        {
-            int currentFrame = i;
-            var frame = this.GetFrame(currentFrame);
-            Byte[] bytes = ImageUtil.ExtractPixelsFromCroppedBitmap(frame);
-                
-            // Ensure directory exists
-            
-            var dir = $"frames_test_animation/{Path.GetFileNameWithoutExtension(Definition.AnimationPath)}";
-            
-            Directory.CreateDirectory(dir);
-                
-            ImageUtil.SavePixelsAsPng(bytes, (int)frame.Size.Width, (int)frame.Size.Height, $"{dir}/frame_{currentFrame}.png");
-
-            var data = ImageUtil.BuildFromFrames(EngineCore.Instance.Data.RTPGame.GraphicsDevice, dir);
-                
-            using (var fs = File.OpenWrite($"{dir}/atlas.png"))
-                data.Atlas.SaveAsPng(fs, data.Atlas.Width, data.Atlas.Height);
-                
-            Log.Debug("Saved frame {0} to {1}/frame_{frame}.png", currentFrame, dir, currentFrame);
-            
-            if(TextureAtlas == null)
-                TextureAtlas = new Texture2DAtlas(data.Atlas);
-        }
-    }
-
-    private void OnAnimationPathChanged(string obj)
-    {
-        
-        _animationImageSource = Definition.GetOrLoadAnimationImage();
-        
-        _frames.Clear();
-        
-        for (int i = 0; i < Definition.TotalFrames; i++)
-        {
-            int currentFrame = i;
-            var frame = this.GetFrame(currentFrame);
-            Byte[] bytes = ImageUtil.ExtractPixelsFromCroppedBitmap(frame);
-                
-            // Ensure directory exists 
-            
-            var dir = $"frames_test_animation/{Path.GetFileNameWithoutExtension(Definition.AnimationPath)}";
-            
-            Directory.CreateDirectory(dir);
-                
-            ImageUtil.SavePixelsAsPng(bytes, (int)frame.Size.Width, (int)frame.Size.Height, $"{dir}/frame_{currentFrame}.png");
-
-            var data = ImageUtil.BuildFromFrames(EngineCore.Instance.Data.RTPGame.GraphicsDevice, dir);
-                
-            using (var fs = File.OpenWrite($"{dir}/atlas.png"))
-                data.Atlas.SaveAsPng(fs, data.Atlas.Width, data.Atlas.Height);
-                
-            Log.Debug("Saved frame {0} to {1}/frame_{frame}.png", currentFrame, dir, currentFrame);
-            
-            if(TextureAtlas == null)
-                TextureAtlas = new Texture2DAtlas(data.Atlas);
-        }
-            
-        
+        _frames = new CroppedBitmap?[Definition.TotalFrames];
     }
 
     public CroppedBitmap GetFrame(int frame)
     {
+        if (_sourceSpritesheet == null)
+        {
+            Log.Error("Source spritesheet is null for animation \"{0}\"", Definition.Urn);
+            return new CroppedBitmap(UnifiedImage.DefaultUI, new PixelRect(0, 0, 32, 32));
+        }
         
-        if(frame < 0 || frame > Definition.TotalFrames)
+        if(frame < 0 || frame >= Definition.TotalFrames)
         {
             Log.Error($"Frame index {frame} is out of range. Total frames: {Definition.TotalFrames}");
             frame = Definition.TotalFrames - 1;
         }
         
-        int x = (frame * Definition.FrameSize.Width) % Definition.AnimationImageSize.Width;
-        int y = ((frame * Definition.FrameSize.Width) / Definition.AnimationImageSize.Width) * Definition.FrameSize.Height;
-        var cropRect = new Avalonia.PixelRect(x, y, Definition.FrameSize.Width, Definition.FrameSize.Height);
-        var croppedBitmap = new CroppedBitmap(_animationImageSource, cropRect);
+        if(_frames[frame] != null)
+            return _frames[frame];
+        
+        var cropRect = _sourceSpritesheet.GetFrameRect(Definition.FrameIndexes[frame]);
+        Bitmap bitmap = _sourceSpritesheet.SourceImage.Image;
+        var croppedBitmap = new CroppedBitmap(bitmap, cropRect);
+        _frames[frame] = (croppedBitmap);
         return croppedBitmap;
+    }
+
+
+    public void Clean()
+    {
+        Array.Clear(_frames, 0, _frames.Length);
+        TextureAtlas = null;
+        _sourceSpritesheet = null;
+    }
+
+    public void ResetFrom(AnimationDef def, params object[] parameters)
+    {
+        Definition = def;
+
+        if (_frames.Length != def.TotalFrames)
+        {
+            _frames = new CroppedBitmap?[def.TotalFrames];
+        }
+        else
+        {
+            Array.Clear(_frames, 0, _frames.Length);
+        }
+
+        if (parameters.Length > 0 && parameters[0] is SpritesheetDef spritesheetDef)
+        {
+            _sourceSpritesheet = spritesheetDef;
+        }
+        else
+        {
+            Log.Error("AnimationInstance.ResetFrom: Missing SpritesheetDef parameter.");
+            _sourceSpritesheet = null;
+        }
     }
 }

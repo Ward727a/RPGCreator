@@ -33,12 +33,12 @@ public class CharacterActor : ISerializable, IDeserializable, IMoveableActor, II
         set
         {
             if (_characterDataId == value) return;
-            var data = (CharacterData?)EngineCore.Instance.Managers.Assets.GetCachedAsset(value);
+            EngineCore.Instance.Managers.Assets.TryResolveAsset<CharacterData>(value, out var result);
             
-            if(data is not null)
+            if(result is not null)
             {
                 _characterDataId = value;
-                CharacterData = data;
+                CharacterData = result;
                 CharacterDataIdChanged?.Invoke(this, _characterDataId);
             }
             else

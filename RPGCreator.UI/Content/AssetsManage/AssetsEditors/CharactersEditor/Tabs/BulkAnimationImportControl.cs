@@ -287,7 +287,7 @@ public class BulkAnimationImportControl : UserControl
                     // animationsToImport[animationName] = animationData;
                 }
             }
-            OnImport?.Invoke(animationsToImport);
+            // OnImport?.Invoke(animationsToImport);
         };
     }
 

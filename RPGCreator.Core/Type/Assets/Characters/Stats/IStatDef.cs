@@ -4,7 +4,7 @@ using RPGCreator.Core.Type.Internal;
 
 namespace RPGCreator.Core.Type.Assets.Characters.Stats;
 
-public interface IStatDef : ISerializable, IDeserializable, IHasUniqueId, IHasSavePath
+public interface IStatDef : ISerializable, IDeserializable, IHasUniqueId, IHasSavePath, IAssetDef
 {
     public const string OnValueChangedEvent = "OnValueChanged";
     /// <summary>

@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using RPGCreator.Core.Type.Internal;
 using RPGCreator.Core.Type.Map;
 using Point = RPGCreator.Core.Type.Internal.Point;
 
@@ -175,4 +176,8 @@ public class AutotileDef : ITileDef, ISerializable, IDeserializable
         Tags.Clear();
         Tags.AddRange(tags);
     }
+
+    public Ulid Unique { get; }
+    public URN Urn { get; }
+    public bool IsDirty { get; set; }
 }

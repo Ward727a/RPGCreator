@@ -1,6 +1,7 @@
 using System;
 using Avalonia.Controls;
 using RPGCreator.Core;
+using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Type;
 using RPGCreator.Core.Type.Assets.Characters;
 using RPGCreator.Core.Type.Assets.Skills;
@@ -310,7 +311,7 @@ public class CharacterSkillsTab : UserControl
 
                 var skillUnique = itemTag.Value;
                 
-                var skillDef = EngineCore.Instance.Managers.Assets.SkillRegistry.Get(skillUnique);
+                var skillDef = EngineCore.Instance.Managers.Assets.TryResolveAsset(skillUnique, out ISkillDef? result) ? result : null;
                 if (skillDef != null && !Data.Skills.ContainsKey(skillUnique))
                 {
                     var skillData = new CharacterSkill(skillDef);
@@ -326,7 +327,9 @@ public class CharacterSkillsTab : UserControl
         Log.Debug("Refreshing Skills List...");
         SkillComboBox.Items.Clear();
 
-        foreach (var skillDef in EngineCore.Instance.Managers.Assets.SkillRegistry.All())
+        var skillRegistry = EngineCore.Instance.Managers.Assets.TryResolveRegistry("skills", out var registry) ? registry as SkillsRegistry: null;
+        
+        foreach (var skillDef in skillRegistry.All())
         {
             SkillComboBox.Items.Add(
                 new ComboBoxItem()
@@ -345,7 +348,7 @@ public class CharacterSkillsTab : UserControl
         SkillsListPanel.Children.Clear();
         foreach (var skillEntry in Data.Skills)
         {
-            var skillDef = EngineCore.Instance.Managers.Assets.SkillRegistry.Get(skillEntry.Key);
+            var skillDef = EngineCore.Instance.Managers.Assets.TryResolveAsset(skillEntry.Key, out ISkillDef? result) ? result : null;
             if (skillDef != null)
             {
                 SkillsListPanel.Children.Add(new CharaSkillItem(skillDef, skillEntry.Value));

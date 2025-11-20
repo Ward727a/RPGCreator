@@ -182,4 +182,6 @@ public class TileLayerDefinition : IMapLayerDef<ITileDef>
         VisibleByDefault = visibleByDefault;
         _elements = elements;
     }
+
+    public bool IsDirty { get; set; }
 }

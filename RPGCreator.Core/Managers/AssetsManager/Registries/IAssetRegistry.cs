@@ -2,13 +2,27 @@ using RPGCreator.Core.Type.Internal;
 
 namespace RPGCreator.Core.Managers.AssetsManager.Registries;
 
+public interface IAssetRegistry
+{
+    System.Type ManagedType { get; }
+    string ModuleName { get; }
+    
+    IEnumerable<System.Type> SupportedTypes { get; }
+    
+    void RegisterUntyped(IHasUniqueId asset, bool overwrite = false);
+    void UnregisterUntyped(IHasUniqueId asset);
+    
+    bool TryResolveUrnUntyped(URN urn, out IHasUniqueId? asset);
+    bool TryGetUntyped(Ulid unique, out IHasUniqueId? asset);
+}
+
 /// <summary>
 /// Defines a registry for assets.<br/>
 /// Be it a registry for actors, items, or any other type of asset, this interface is used to define the basic structure of an asset registry.<br/>
 /// ALL REGISTRIES WITHOUT EXCEPTIONS MUST IMPLEMENT THIS INTERFACE.<br/>
 /// This is used to ensure that all registries have a common structure and can be used interchangeably in the system.
 /// </summary>
-public interface IAssetRegistry<TDef> where TDef : IHasUniqueId
+public interface IAssetRegistry<TDef> : IAssetRegistry where TDef : IHasUniqueId
 {
     
     event EventHandler<TDef>? AssetRegistered;

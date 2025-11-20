@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using RPGCreator.Core.Type.Internal;
 using Point = RPGCreator.Core.Type.Internal.Point;
 
 namespace RPGCreator.Core.Type.Assets.Tilesets;
@@ -77,7 +78,7 @@ public class TileDefinition : ITileDef
 
         void OnEditedProjectLoaded()
         {
-            var tileset = EngineCore.Instance.Managers.Assets.TilesetRegistry.Get(tilesetUnique);
+            var tileset = EngineCore.Instance.Managers.Assets.TryResolveAsset<TilesetDef>(tilesetUnique, out var result) ? result : null;
             
             if (tileset == null)
             {
@@ -91,4 +92,8 @@ public class TileDefinition : ITileDef
 
         EngineCore.Instance.Data.EditedProject.OnProjectLoaded += OnEditedProjectLoaded;
     }
+
+    public Ulid Unique { get; }
+    public URN Urn { get; }
+    public bool IsDirty { get; set; }
 }

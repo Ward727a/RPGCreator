@@ -195,25 +195,7 @@ namespace RPGCreator.Core.Type.Assets
 
                 if(string.IsNullOrEmpty(SavePath))
                 {
-                    var assetDir = Pack.AssetsFolder;
 
-                    if (assetDir == null)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"Asset {Name} of type {Type} with unique ID {Unique} has no path set, and the directory the pack couldn't be gotten.");
-                        Console.ResetColor();
-                        return;
-                    }
-                    
-                    // This shouldn't happen, but well, just in case...
-                    if (!Directory.Exists(assetDir))
-                    {
-                        Directory.CreateDirectory(assetDir);
-                    }
-                    
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine($"Asset {Name} of type {Type} with unique ID {Unique} has no path set, creating one.");
-                    SavePath = Path.Combine(assetDir, $"{Unique}.xml");
                 }
 
                 File.WriteAllText(SavePath, data);

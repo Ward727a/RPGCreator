@@ -215,26 +215,26 @@ public class SkillEditorTab : UserControl
         var inputStatPack = new InputLabel("Assets Pack", _skillPack);
         _bodyPanel.Children.Add(inputStatPack);
         ToolTip.SetTip(inputStatPack, "The assets pack this skill belongs to.");
-
-        foreach (var pack in EngineCore.Instance.Managers.Assets.GetAssetsPacks())
-        {
-            _skillPack.Items.Add(pack.Name);
-        }
-
-        if (SkillDef.PackId.HasValue && SkillDef.PackId.Value != Ulid.Empty)
-        {
-            var hasPack =
-                EngineCore.Instance.Managers.Assets.TryGetAssetsPack(SkillDef.PackId.Value, out var assetsPack);
-            if (hasPack)
-            {
-                _skillPack.SelectedItem = assetsPack;
-            }
-        }
-        else
-        {
-            _skillPack.SelectedIndex = 0;
-            SkillDef.PackId = EngineCore.Instance.Managers.Assets.GetAssetsPacks()[0].Id;
-        }
+        //
+        // foreach (var pack in EngineCore.Instance.Managers.Assets.GetAssetsPacks())
+        // {
+        //     _skillPack.Items.Add(pack.Name);
+        // }
+        //
+        // if (SkillDef.PackId.HasValue && SkillDef.PackId.Value != Ulid.Empty)
+        // {
+        //     var hasPack =
+        //         EngineCore.Instance.Managers.Assets.TryGetAssetsPack(SkillDef.PackId.Value, out var assetsPack);
+        //     if (hasPack)
+        //     {
+        //         _skillPack.SelectedItem = assetsPack;
+        //     }
+        // }
+        // else
+        // {
+        //     _skillPack.SelectedIndex = 0;
+        //     SkillDef.PackId = EngineCore.Instance.Managers.Assets.GetAssetsPacks()[0].Id;
+        // }
 
         _skillName = new TextBox()
         {
@@ -288,11 +288,11 @@ public class SkillEditorTab : UserControl
         };
         gridAddingCost.Children.Add(selectCostBox);
         Grid.SetColumn(selectCostBox, 0);
-        foreach (var statDef in EngineCore.Instance.Managers.Assets.StatsRegistry.All())
-        {
-            if (statDef.StatTypeKind != EStatTypeKind.Resource) continue;
-            selectCostBox.Items.Add(statDef.Name);
-        }
+        // foreach (var statDef in EngineCore.Instance.Managers.Assets.StatsRegistry.All())
+        // {
+        //     if (statDef.StatTypeKind != EStatTypeKind.Resource) continue;
+        //     selectCostBox.Items.Add(statDef.Name);
+        // }
 
         var costAmountBox = new NumericFloatUpDown()
         {
@@ -311,19 +311,19 @@ public class SkillEditorTab : UserControl
             VerticalAlignment = VerticalAlignment.Center,
             Margin = App.style.Margin
         };
-        addCostButton.Click += (s, e) =>
-        {
-            var statDef = EngineCore.Instance.Managers.Assets.StatsRegistry.All()
-                .FirstOrDefault(s => s.Name == (string?)selectCostBox.SelectedItem);
-            if (statDef == null)
-            {
-                // No stat definitions available
-                Log.Warning("No stat definitions available to add as skill cost.");
-                return;
-            }
-
-            _skillCosts.AddCost(statDef, costAmountBox.Value ?? 0);
-        };
+        // addCostButton.Click += (s, e) =>
+        // {
+        //     var statDef = EngineCore.Instance.Managers.Assets.StatsRegistry.All()
+        //         .FirstOrDefault(s => s.Name == (string?)selectCostBox.SelectedItem);
+        //     if (statDef == null)
+        //     {
+        //         // No stat definitions available
+        //         Log.Warning("No stat definitions available to add as skill cost.");
+        //         return;
+        //     }
+        //
+        //     _skillCosts.AddCost(statDef, costAmountBox.Value ?? 0);
+        // };
         gridAddingCost.Children.Add(addCostButton);
         Grid.SetColumn(addCostButton, 2);
 
@@ -450,15 +450,15 @@ public class SkillEditorTab : UserControl
             if (_skillPack.SelectedItem != null)
             {
                 var selectedPackName = (string)_skillPack.SelectedItem;
-                var selectedPack = EngineCore.Instance.Managers.Assets.GetAssetsPacks()
-                    .FirstOrDefault(p => p.Name == selectedPackName);
-                if (selectedPack != null)
-                {
-                    SkillDef.PackId = selectedPack.Id;
-                }
+                // var selectedPack = EngineCore.Instance.Managers.Assets.GetAssetsPacks()
+                //     .FirstOrDefault(p => p.Name == selectedPackName);
+                // if (selectedPack != null)
+                // {
+                //     SkillDef.PackId = selectedPack.Id;
+                // }
             }
 
-            AssetsManager.AssetMapping[typeof(ISkillDef)](SkillDef);
+            //AssetsManager.AssetMapping[typeof(ISkillDef)](SkillDef);
 
             Log.Information("Skill '{SkillName}' saved.", SkillDef.Name);
             
@@ -467,18 +467,18 @@ public class SkillEditorTab : UserControl
             // Add the stat definition to the selected asset pack in the statdef
             if(SkillDef.PackId.HasValue && SkillDef.PackId != Ulid.Empty)
             {
-                var hasPack = EngineCore.Instance.Managers.Assets.TryGetAssetsPack(SkillDef.PackId.Value, out var assetsPack);
-                if (hasPack != null)
-                {
-                    assetsPack.AddAsset(SkillDef);
-                    assetsPack.Save();
-                    File.WriteAllText(SkillDef.SavePath, data);
-                    Log.Information("Stat Definition added to the selected Assets Pack.");
-                }
-                else
-                {
-                    Log.Warning("Assets Pack with ID {PackId} not found. Stat Definition not added to any pack.", SkillDef.PackId);
-                }
+                //var hasPack = EngineCore.Instance.Managers.Assets.TryGetAssetsPack(SkillDef.PackId.Value, out var assetsPack);
+                //if (hasPack != null)
+                //{
+                //    assetsPack.AddAsset(SkillDef);
+                //    assetsPack.Save();
+                //    File.WriteAllText(SkillDef.SavePath, data);
+                //    Log.Information("Stat Definition added to the selected Assets Pack.");
+                //}
+                //else
+                //{
+                //    Log.Warning("Assets Pack with ID {PackId} not found. Stat Definition not added to any pack.", SkillDef.PackId);
+                //}
             }
             else
             {

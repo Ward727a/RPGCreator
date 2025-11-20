@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using RPGCreator.Core;
+using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Type;
 using RPGCreator.Core.Type.Assets.Characters.Stats;
 using Serilog;
@@ -169,7 +170,10 @@ public class StatsManageControl : UserControl
         
         MainContent.Children.Clear();
         
-        foreach (var statDef in EngineCore.Instance.Managers.Assets.StatsRegistry.All())
+        var skillEffectsRegistry = EngineCore.Instance.Managers.Assets.TryResolveRegistry("stats", out var registry)
+            ? registry as StatsRegistry
+            : null;
+        foreach (var statDef in skillEffectsRegistry.All())
         {
             var itemControl = new StatsManageItemControl(statDef);
             itemControl.ItemSelected += OnItemSelected;

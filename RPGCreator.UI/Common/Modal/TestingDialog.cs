@@ -27,8 +27,7 @@ public class TestingDialog : Window
     [
         new("Test Save pack", () =>
         {
-            // Add your test logic here
-            var pack = EngineCore.Instance.Managers.Assets.GetAssetsPacks()[0];
+            var pack = EngineCore.Instance.Managers.Assets.GetLoadedPacks()[0];
             if (pack == null)
             {
                 Console.WriteLine("No assets pack found to test saving.");
@@ -36,6 +35,17 @@ public class TestingDialog : Window
             }
             Console.WriteLine($"Testing save for pack: {pack.Name}");
             pack.Save();
+        }),
+        new("Close Pack", () =>
+        {
+            var pack = EngineCore.Instance.Managers.Assets.GetLoadedPacks()[0];
+            if (pack == null)
+            {
+                Console.WriteLine("No assets pack found to test closing.");
+                return;
+            }
+            Console.WriteLine($"Testing close for pack: {pack.Name}");
+            EngineCore.Instance.Managers.Assets.UnregisterPack(pack.Id);
         }),
         new("Test Load pack", () =>
         {

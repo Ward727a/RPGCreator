@@ -18,7 +18,7 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
     /// <summary>
     /// Instanced elements of this layer.<br/>
     /// This dictionary is not saved between sessions, it's only used for the current game session.<br/>
-    /// If you need those to be saved, you should check the <see cref="TileLayerDefinition"/>.<see cref="TileLayerDefinition._elements"/> instead.<br/>
+    /// If you need those to be saved, you should check the <see cref="TileLayerDefinition._elements"/> instead.<br/>
     /// Check <see cref="TileLayerDefinition"/> for more information on how to add or remove elements from the layer definition.
     /// </summary>
     public Dictionary<Point, ITileInstance> InstancedElements { get; } = new();
@@ -39,12 +39,12 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
         _def.ElementAdded += OnElementAdded;
         _def.ElementRemoved += OnElementRemoved;
     }
-    private void OnElementAdded(object? sender, (Point, ITileDef) e)
+    private void OnElementAdded(object? sender, (Point location, ITileDef def) e)
     {
         InstancedElements.TryAdd
             (
-                e.Item1,
-                EngineCore.Instance.Managers.Assets.TileFactory.Create(e.Item2)
+                e.location,
+                EngineCore.Instance.Managers.Assets.TileFactory.Create(e.def)
             );
     }
 
@@ -90,7 +90,23 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
         }
     }
 
-    public void ResetFrom(TileLayerDefinition def)
+    public void Clean()
+    {
+        foreach (var tile in InstancedElements.Values)
+        {
+            EngineCore.Instance.Managers.Assets.TileFactory.Release(tile);
+        }
+        
+        InstancedElements.Clear();
+        
+        _def.ElementAdded -= OnElementAdded;
+        _def.ElementRemoved -= OnElementRemoved;
+        
+        Renderer = null;
+        _def = null!;
+    }
+
+    public void ResetFrom(TileLayerDefinition def, params object[] parameters)
     {
         if (def == null)
             throw new ArgumentNullException(nameof(def), "The definition cannot be null.");
@@ -106,21 +122,5 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
         
         _def.ElementAdded += OnElementAdded;
         _def.ElementRemoved += OnElementRemoved;
-    }
-
-    public void Clean()
-    {
-        foreach (var tile in InstancedElements.Values)
-        {
-            EngineCore.Instance.Managers.Assets.TileFactory.Release(tile);
-        }
-        
-        InstancedElements.Clear();
-        
-        _def.ElementAdded -= OnElementAdded;
-        _def.ElementRemoved -= OnElementRemoved;
-        
-        Renderer = null;
-        _def = null!;
     }
 }

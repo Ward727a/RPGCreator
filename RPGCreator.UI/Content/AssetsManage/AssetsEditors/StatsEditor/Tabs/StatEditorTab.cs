@@ -82,24 +82,24 @@ public class StatEditorTab : UserControl
         _bodyPanel.Children.Add(inputStatPack);
         ToolTip.SetTip(inputStatPack, "The assets pack this stat belongs to.");
         
-        foreach (var pack in EngineCore.Instance.Managers.Assets.GetAssetsPacks())
-        {
-            _statPack.Items.Add(pack.Name);
-        }
-
-        if (StatDef.PackId.HasValue && StatDef.PackId.Value != Ulid.Empty)
-        {
-            var hasPack = EngineCore.Instance.Managers.Assets.TryGetAssetsPack(StatDef.PackId.Value, out var assetsPack);
-            if (hasPack)
-            {
-                _statPack.SelectedItem = assetsPack;
-            }
-        }
-        else
-        {
-            _statPack.SelectedIndex = 0;
-            StatDef.PackId = EngineCore.Instance.Managers.Assets.GetAssetsPacks()[0].Id;
-        }
+        // foreach (var pack in EngineCore.Instance.Managers.Assets.GetAssetsPacks())
+        // {
+        //     _statPack.Items.Add(pack.Name);
+        // }
+        //
+        // if (StatDef.PackId.HasValue && StatDef.PackId.Value != Ulid.Empty)
+        // {
+        //     var hasPack = EngineCore.Instance.Managers.Assets.TryGetAssetsPack(StatDef.PackId.Value, out var assetsPack);
+        //     if (hasPack)
+        //     {
+        //         _statPack.SelectedItem = assetsPack;
+        //     }
+        // }
+        // else
+        // {
+        //     _statPack.SelectedIndex = 0;
+        //     StatDef.PackId = EngineCore.Instance.Managers.Assets.GetAssetsPacks()[0].Id;
+        // }
         
         _statName = new TextBox
         {

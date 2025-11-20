@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 using RPGCreator.Core;
+using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Type.Assets.Skills;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEffectEditor.Tabs;
 using Serilog;
@@ -125,14 +126,16 @@ public class SkillsEffectEditorWindowControl : UserControl
             if (!newEffect.PackId.HasValue)
                 return;
             Log.Debug("Saving Skill Effect: {0} with {numberProperties} props and {numberInstructions} instrs in pack {packId}.", newEffect.DisplayName, newEffect.PropertyDescriptors.Count, newEffect.GetEvent().GetInstructions().Count, newEffect.PackId.ToString());
-            EngineCore.Instance.Managers.Assets.SkillEffectsRegistry.Register(newEffect);
             
-            if (EngineCore.Instance.Managers.Assets.TryGetAssetsPack(newEffect.PackId.Value, out var pack))
-            {
-                pack?.AddAsset(newEffect);
-                newEffect.Save();
-                pack?.Save();
-            }
+
+            EngineCore.Instance.Managers.Assets.RegisterAsset(newEffect);
+            //
+            // if (EngineCore.Instance.Managers.Assets.TryGetAssetsPack(newEffect.PackId.Value, out var pack))
+            // {
+            //     pack?.AddAsset(newEffect);
+            //     newEffect.Save();
+            //     pack?.Save();
+            // }
             
             
         };

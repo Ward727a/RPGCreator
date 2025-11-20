@@ -23,14 +23,8 @@
 // 
 #endregion
 using RPGCreator.Core.Managers.AssetsManager;
-using RPGCreator.Core.Managers.AssetsPackManager;
 using RPGCreator.Core.Managers.ProjectsManager;
 using RPGCreator.Core.Managers.RTP.BrushManagers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Serilog;
 
 namespace RPGCreator.Core
@@ -38,12 +32,14 @@ namespace RPGCreator.Core
     public class EngineManagers
     {
         public AssetsManager Assets { get; private set; }
+        public GameFactory GameFactory { get; private set; }
         public ProjectsManager Projects { get; private set; }
         public BrushManager Brush { get; private set; }
 
         internal EngineManagers()
         {
             Projects = new ProjectsManager();
+            GameFactory = new GameFactory();
             Assets = new AssetsManager();
             Brush = new BrushManager();
 

@@ -271,14 +271,14 @@ public class SkillEffectGeneralEditorControl : UserControl
         BodyPanel.Children.Add(inputEffectPack);
         ToolTip.SetTip(inputEffectPack, "The assets pack this effect belongs to.");
         
-        foreach (var pack in EngineCore.Instance.Managers.Assets.GetAssetsPacks())
-        {
-            _effectPack.Items.Add(new ComboBoxItem()
-            {
-                Content = pack.Name,
-                Tag = pack.Id
-            });
-        }
+        // foreach (var pack in EngineCore.Instance.Managers.Assets.GetAssetsPacks())
+        // {
+        //     _effectPack.Items.Add(new ComboBoxItem()
+        //     {
+        //         Content = pack.Name,
+        //         Tag = pack.Id
+        //     });
+        // }
         
         if(_effectPack.Items.Count > 0)
             _effectPack.SelectedIndex = 0;

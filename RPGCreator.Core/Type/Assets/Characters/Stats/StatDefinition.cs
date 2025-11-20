@@ -118,4 +118,6 @@ public class StatDefinition : IStatDef
             }
         }
     }
+
+    public bool IsDirty { get; set; }
 }

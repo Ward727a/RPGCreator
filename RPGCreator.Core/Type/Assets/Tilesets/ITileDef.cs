@@ -5,7 +5,7 @@ using Point = RPGCreator.Core.Type.Internal.Point;
 
 namespace RPGCreator.Core.Type.Assets.Tilesets;
 
-public interface ITileDef : ILayerElem
+public interface ITileDef : ILayerElem, IAssetDef
 {
     public Vector2 DefaultPosition { get; set; }
     public Point SizeInTileset { get; }

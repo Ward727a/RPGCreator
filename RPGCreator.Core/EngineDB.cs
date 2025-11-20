@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using LiteDB;
 using Serilog;
 
@@ -10,10 +11,16 @@ public class DataBaseMetaData()
     public string Name { get; set; } // DataBase Name
 }
 
-
-
 public class EngineDB
 {
+
+    static EngineDB()
+    {
+        BsonMapper.Global.RegisterType(
+            serialize: (ulid) => ulid.ToString(),
+            deserialize: (bson) => Ulid.Parse(bson.AsString)
+        );
+    }
     
     public class DatabaseFileData()
     {
@@ -21,6 +28,15 @@ public class EngineDB
         public string FilePath { get; set; } = string.Empty;
         public DateTime LastModified { get; set; }
         public Dictionary<string, string> MetaDatas { get; set; } = new Dictionary<string, string>();
+    }
+
+    public class AssetIndexRecord()
+    {
+        [BsonId]
+        public Ulid Id { get; set; }
+        public string RelativePath { get; set; } = string.Empty;
+        public string TypeName { get; set; } = string.Empty;
+        public DateTime LastIndexed { get; set; }
     }
     
     const string DbHashExtension = ".dbhash";
@@ -66,6 +82,13 @@ public class EngineDB
     }
 
     public enum EFileInsertStatus
+    {
+        UnexpectedError,
+        DbNotFound,
+        Success,
+    }
+    
+    public enum ESaveDbStatus
     {
         UnexpectedError,
         DbNotFound,
@@ -246,6 +269,33 @@ public class EngineDB
             return ECloseDbStatus.UnexpectedError;
         }
     }
+    
+    public static ESaveDbStatus SaveDB(Ulid dbId)
+    {
+        var db = GetDB(dbId);
+        if (db == null)
+        {
+            Logger.Error("Failed to save database with id {dbId}: Database not found", dbId);
+            return ESaveDbStatus.DbNotFound;
+        }
+        
+        db.Checkpoint();
+        return ESaveDbStatus.Success;
+    }
+    
+    public static DataBaseMetaData? GetDBMetaData(Ulid dbId)
+    {
+        var db = GetDB(dbId);
+        if (db == null)
+        {
+            Logger.Error("Failed to get metadata for database with id {dbId}: Database not found", dbId);
+            return null;
+        }
+        
+        var metadataCollection = db.GetCollection<DataBaseMetaData>("metadata");
+        var metadata = metadataCollection.Query().ToList().FirstOrDefault();
+        return metadata;
+    }
 
     public static EFileInsertStatus AddConfig(DatabaseFileData data)
     {
@@ -383,7 +433,7 @@ public class EngineDB
 
         try
         {
-            existingHash = File.ReadAllText(hashFilePath);
+            existingHash = new string(File.ReadAllText(hashFilePath).Where(c => !char.IsControl(c)).ToArray());
 
             // Compute current hash of database file
             using (var stream = File.OpenRead(dbFilePath))

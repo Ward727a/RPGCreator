@@ -34,6 +34,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Type.Assets.Tilesets;
 using Serilog;
 
@@ -156,7 +157,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                 Height = 256,
                 Width = 256,
                 ClipToBounds = true,
-                // Set the background to transparent to detect mouse events properly
+                // Set the background to transparent so we detect mouse events properly
                 Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromArgb(0, 0, 0, 0)),
             };
 
@@ -181,7 +182,10 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 
             RootTilesetCanvas.Children.Add(InnerTilesetCanvas);
 
-            EngineCore.Instance.Managers.Assets.TilesetRegistry.AssetRegistered += OnAssetAdded;
+            var tileSetRegistry = EngineCore.Instance.Managers.Assets.TryResolveRegistry("tilesets", out var registry) ?
+                registry as TilesetRegistry : null;
+            
+            tileSetRegistry.AssetRegistered += OnAssetAdded;
             EngineCore.Instance.Managers.Assets.Event.UpdatedAsset += (sender, e) =>
             {
                 if (e.Type == BaseAsset.TYPE.TILESETS)
@@ -190,7 +194,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                     RefreshComponent();
                 }
             };
-            EngineCore.Instance.Managers.Assets.TilesetRegistry.AssetUnregistered += (sender, e) =>
+            tileSetRegistry.AssetUnregistered += (sender, e) =>
             {
                 RefreshComponent();
             };
@@ -203,29 +207,44 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
             var current_selected = SelectBox.SelectedIndex;
             SelectBox.Items.Clear();
 
-#if DEBUG
+            #if DEBUG
             // VERY IMPORTANT: This code is only for testing purposes, it should not be used in production.
             // We check if the assets pack "TestPack" exists, if not we create it.
-            if (!EngineCore.Instance.Managers.Assets.HasAssetsPack("TestPack"))
+            // if (!EngineCore.Instance.Managers.Assets.HasAssetsPack("TestPack"))
+            // {
+            //     Log.Warning("Creating TestPack assets pack for testing purposes.");
+            //     EngineCore.Instance.Managers.Assets.CreateAssetsPack("TestPack", Core.Type.Assets.BaseAssetsPack.BaseAssetsPack.PACK_TYPE.PROJECT); 
+            // }
+            #endif
+
+            // Combine TilesetDef and AutoTilesetDef into the same array to display them together
+            var tilesetDefs = EngineCore.Instance.Managers.Assets.SearchAllPacks<TilesetDef>().ToList();
+            tilesetDefs.AddRange(EngineCore.Instance.Managers.Assets.SearchAllPacks<AutoTilesetDef>());
+
+            foreach (var tilesetData in tilesetDefs)
             {
-                Log.Warning("Creating TestPack assets pack for testing purposes.");
-                EngineCore.Instance.Managers.Assets.CreateAssetsPack("TestPack", Core.Type.Assets.BaseAssetsPack.BaseAssetsPack.PACK_TYPE.PROJECT); 
-            }
-#endif
-
-
-            if (EngineCore.Instance.Data.EditedProject == null)
-                return;
-
-            var project = EngineCore.Instance.Data.EditedProject;
-
-            foreach (var tilesetDef in EngineCore.Instance.Managers.Assets.TilesetRegistry.All())
-            {
-                var item = new TilesetItem(tilesetDef);
-                if (item.Error)
-                    return;
+                if (EngineCore.Instance.Managers.Assets.TryGetPack(tilesetData.packId, out var pack))
+                {
+                    var asset = pack.LoadAsset(tilesetData.id);
+                    
+                    if (asset == null)
+                    {
+                        Log.Warning("Tileset with ID {Id} in pack {PackName} could not be loaded.", tilesetData.id, pack.Name);
+                        continue;
+                    }
+                    
+                    if(asset is not ITilesetDef tilesetDef)
+                    {
+                        Log.Warning("Asset with ID {Id} in pack {PackName} is not a tileset definition.", tilesetData.id, pack.Name);
+                        continue;
+                    }
+                    
+                    var item = new TilesetItem(tilesetDef);
+                    if (item.Error)
+                        return;
+                    SelectBox.Items.Add(item);
+                }
                 
-                SelectBox.Items.Add(item);
             }
 
             // Check if we can still select the previous selected tileset, else select the first one

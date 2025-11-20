@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
 using RPGCreator.Core;
+using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Type;
 using RPGCreator.Core.Type.Assets.Skills;
 using RPGCreator.Core.Type.Internal;
@@ -447,22 +448,22 @@ public class SkillEffectTab : UserControl
                 PlaceholderText = "Select Stat"
             };
             panel.Children.Add(comboBox);
-            
-            // Populate the combo box with available stats from the Assets Manager
-            foreach (var statDef in EngineCore.Instance.Managers.Assets.StatsRegistry.All())
-            {
-                comboBox.Items.Add(new ComboBoxItem
-                {
-                    Content = statDef.Name,
-                    Tag = statDef.Unique
-                });
-                
-                // If this is the current value, select it
-                if (statDef.Unique.Equals(value))
-                {
-                    comboBox.SelectedItem = comboBox.Items[comboBox.Items.Count - 1];
-                }
-            }
+            //
+            // // Populate the combo box with available stats from the Assets Manager
+            // foreach (var statDef in EngineCore.Instance.Managers.Assets.StatsRegistry.All())
+            // {
+            //     comboBox.Items.Add(new ComboBoxItem
+            //     {
+            //         Content = statDef.Name,
+            //         Tag = statDef.Unique
+            //     });
+            //     
+            //     // If this is the current value, select it
+            //     if (statDef.Unique.Equals(value))
+            //     {
+            //         comboBox.SelectedItem = comboBox.Items[comboBox.Items.Count - 1];
+            //     }
+            // }
 
             comboBox.SelectionChanged += (s, e) =>
             {
@@ -598,7 +599,7 @@ public class SkillEffectTab : UserControl
 
     private void AddEffect(URN effectUrn)
     {
-        var effectDef = EngineCore.Instance.Managers.Assets.SkillEffectsRegistry.GetUrn(effectUrn);
+        var effectDef = EngineCore.Instance.Managers.Assets.TryResolveAsset(effectUrn, out ISkillEffect? effect) ? effect : null;
         if (effectDef != null)
         {
             var effectControl = new SkillEffectItemControl(effectDef);
@@ -635,7 +636,11 @@ public class SkillEffectTab : UserControl
     {
         _effectComboBox.Items.Clear();
 
-        foreach (var effect in EngineCore.Instance.Managers.Assets.SkillEffectsRegistry.All())
+        var skillEffectsRegistry = EngineCore.Instance.Managers.Assets.TryResolveRegistry("skill_effects", out var registry)
+            ? registry as SkillEffectsRegistry
+            : null;
+        
+        foreach (var effect in skillEffectsRegistry.All())
         {
             _effectComboBox.Items.Add(new ComboBoxItem()
             {

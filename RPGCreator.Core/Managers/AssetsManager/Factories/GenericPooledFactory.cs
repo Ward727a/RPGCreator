@@ -5,7 +5,9 @@ using Serilog;
 namespace RPGCreator.Core.Managers.AssetsManager.Factories;
 
 /// <summary>
-///
+/// A pooled factory is a factory that reuses instances from a pool to minimize allocations.<br/>
+/// It creates new instances only when the pool is empty, otherwise it rents instances from the pool.<br/>
+/// This is useful for types that are frequently created and destroyed, as it reduces the overhead of garbage collection.
 /// </summary>
 public class GenericPooledFactory<TInstance, TDef> : IAssetFactory<TInstance, TDef>
     where TInstance : class, IResettable<TDef>, ICleanable

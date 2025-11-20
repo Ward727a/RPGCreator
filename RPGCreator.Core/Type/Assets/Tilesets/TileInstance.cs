@@ -99,7 +99,7 @@ public class TileInstance : BaseDrawable, ITileInstance
         // If there were any disposable resources, they would be disposed here.
     }
 
-    public void ResetFrom(ITileDef def)
+    public void ResetFrom(ITileDef def, params object[] parameters)
     {
         if (def == null)
         {

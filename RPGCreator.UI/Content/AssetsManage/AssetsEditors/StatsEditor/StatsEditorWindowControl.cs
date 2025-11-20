@@ -91,7 +91,7 @@ public class StatsEditorWindowControl : UserControl
         saveButton.Click += (s, e) =>
         {
             Log.Information("Saving Stat Definition...");
-            AssetsManager.AssetMapping[typeof(IStatDef)].Invoke(StatDef);
+            // AssetsManager.AssetMapping[typeof(IStatDef)].Invoke(StatDef);
             
             EngineSerializer.Instance.Serialize(StatDef, out string data, false);
             
@@ -109,18 +109,18 @@ public class StatsEditorWindowControl : UserControl
             // Add the stat definition to the selected asset pack in the statdef
             if(StatDef.PackId.HasValue && StatDef.PackId != Ulid.Empty)
             {
-                var hasPack = EngineCore.Instance.Managers.Assets.TryGetAssetsPack(StatDef.PackId.Value, out var assetsPack);
-                if (hasPack != null)
-                {
-                    assetsPack.AddAsset(StatDef);
-                    assetsPack.Save();
-                    File.WriteAllText(StatDef.SavePath, data);
-                    Log.Information("Stat Definition added to the selected Assets Pack.");
-                }
-                else
-                {
-                    Log.Warning("Assets Pack with ID {PackId} not found. Stat Definition not added to any pack.", StatDef.PackId);
-                }
+                // var hasPack = EngineCore.Instance.Managers.Assets.TryGetAssetsPack(StatDef.PackId.Value, out var assetsPack);
+                // if (hasPack != null)
+                // {
+                //     assetsPack.AddAsset(StatDef);
+                //     assetsPack.Save();
+                //     File.WriteAllText(StatDef.SavePath, data);
+                //     Log.Information("Stat Definition added to the selected Assets Pack.");
+                // }
+                // else
+                // {
+                //     Log.Warning("Assets Pack with ID {PackId} not found. Stat Definition not added to any pack.", StatDef.PackId);
+                // }
             }
             else
             {

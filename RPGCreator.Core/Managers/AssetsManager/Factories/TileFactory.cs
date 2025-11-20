@@ -5,7 +5,7 @@ using RPGCreator.Core.Type.Internal;
 
 namespace RPGCreator.Core.Managers.AssetsManager.Factories;
 
-public class TileFactory
+public class TileFactory : IAssetFactory<TileInstance, TileDefinition>
 {
     private readonly Func<TileDefinition, TileInstance> Constructor;
     private readonly Func<AutotileDef, AutotileInstance> AutoConstructor;
@@ -56,6 +56,21 @@ public class TileFactory
         }
         return instance;
 
+    }
+
+    public ValueTask<TileInstance> CreateAsync(TileDefinition def, CancellationToken ct = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Refresh(TileDefinition def)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Release(TileDefinition def)
+    {
+        throw new NotImplementedException();
     }
 
     public AutotileInstance Create(AutotileDef def)

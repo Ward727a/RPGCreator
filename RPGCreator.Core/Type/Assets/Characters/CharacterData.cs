@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Type.Assets.Characters.Stats;
 using RPGCreator.Core.Type.Assets.Skills;
 using RPGCreator.Core.Type.Internal;
@@ -429,7 +430,12 @@ public class CharacterData : BaseAsset, ICharacter, ISerializable, IDeserializab
 
     public void RefreshStats()
     {
-        var stats = EngineCore.Instance.Managers.Assets.StatsRegistry.All();
+
+        EngineCore.Instance.Managers.Assets.TryResolveRegistry("stats", out var assetRegistry);
+
+        if (assetRegistry is not StatsRegistry statsRegistry) return;
+
+        var stats = statsRegistry.All();
 
         foreach (var statDef in stats)
         {

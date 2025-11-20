@@ -555,23 +555,24 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
         private void OnSaveButtonOnClick(object? s, RoutedEventArgs e)
         {
             var pack = AutoTilesetInstance.Pack;
+            pack.AddOrUpdateAsset(AutoTilesetInstance);
             // Check if the tileset already exists in the pack
-            if (pack != null)
-            {
-                if (pack.AssetsCache.Any(a => a.Value.Unique == AutoTilesetInstance.Unique))
-                {
-                    // If it exists, update the existing tileset
-                    pack.UpdateAsset(AutoTilesetInstance);
-                    AutoTilesetInstance.GetBitmap(true);
-                    Console.WriteLine($"Autotile Updated: {AutoTilesetInstance.Name}, Width: {AutoTilesetInstance.ImageWidth}, Height: {AutoTilesetInstance.ImageHeight}, Asset Pack: {AutoTilesetInstance.PackName}");
-                }
-                else
-                {
-                    // If it doesn't exist, add the new tileset to the pack
-                    pack.AddAsset(AutoTilesetInstance);
-                    Console.WriteLine($"Autotile Added: {AutoTilesetInstance.Name}, Width: {AutoTilesetInstance.ImageWidth}, Height: {AutoTilesetInstance.ImageHeight}, Asset Pack: {AutoTilesetInstance.PackName}");
-                }
-            }
+            // if (pack != null)
+            // {
+            //     if (pack.AssetsCache.Any(a => a.Value.Unique == AutoTilesetInstance.Unique))
+            //     {
+            //         // If it exists, update the existing tileset
+            //         pack.UpdateAsset(AutoTilesetInstance);
+            //         AutoTilesetInstance.GetBitmap(true);
+            //         Console.WriteLine($"Autotile Updated: {AutoTilesetInstance.Name}, Width: {AutoTilesetInstance.ImageWidth}, Height: {AutoTilesetInstance.ImageHeight}, Asset Pack: {AutoTilesetInstance.PackName}");
+            //     }
+            //     else
+            //     {
+            //         // If it doesn't exist, add the new tileset to the pack
+            //         pack.AddAsset(AutoTilesetInstance);
+            //         Console.WriteLine($"Autotile Added: {AutoTilesetInstance.Name}, Width: {AutoTilesetInstance.ImageWidth}, Height: {AutoTilesetInstance.ImageHeight}, Asset Pack: {AutoTilesetInstance.PackName}");
+            //     }
+            // }
 
             Console.WriteLine($"New Autotile Created: {AutoTilesetInstance.Name}, Width: {AutoTilesetInstance.ImageWidth}, Height: {AutoTilesetInstance.ImageHeight}, Asset Pack: {AutoTilesetInstance.PackName}");
 

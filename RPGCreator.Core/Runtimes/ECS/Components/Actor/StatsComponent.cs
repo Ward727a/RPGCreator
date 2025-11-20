@@ -1,3 +1,4 @@
+using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Runtimes.ECS;
 using RPGCreator.Core.Type.Assets.Characters.Stats;
 
@@ -14,7 +15,11 @@ public struct StatsComponent : IComponent
     {
         _stats = new List<StatInstance>();
 
-        var statDefs = EngineCore.Instance.Managers.Assets.StatsRegistry.All();
+        EngineCore.Instance.Managers.Assets.TryResolveRegistry("stats", out var assetRegistry);
+
+        if (assetRegistry is not StatsRegistry statsRegistry) return;
+
+        var statDefs = statsRegistry.All();
         
         foreach (var statDef in statDefs)
         {

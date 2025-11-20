@@ -87,14 +87,13 @@ namespace RPGCreator.Core.Type.Project
 
         public void Load()
         {
-            EngineCore.Instance.Managers.Assets.ClearAssetsPacks();
             EngineCore.Instance.Data.EditedProject = this;
 
             foreach (string packPath in AssetsPackPath)
             {
                 try
                 {
-                    EngineCore.Instance.Managers.Assets.LoadPack(packPath);
+                    EngineCore.Instance.Managers.Assets.AddPack(packPath);
                 }
                 catch (Exception ex)
                 {
@@ -108,7 +107,6 @@ namespace RPGCreator.Core.Type.Project
 
         public void Unload()
         {
-            EngineCore.Instance.Managers.Assets.ClearAssetsPacks();
             EngineCore.Instance.Data.EditedProject = null;
         }
 
@@ -125,16 +123,6 @@ namespace RPGCreator.Core.Type.Project
         public List<T> GetAssetsType<T>(BaseAsset.TYPE type) where T:BaseAsset
         {
             List<T> assets_found = [];
-
-            foreach (BaseAssetsPack pack in EngineCore.Instance.Managers.Assets.GetAssetsPacks())
-            {
-                if (pack.AssetsCache.Values.Any(x => x.Type == type))
-                {
-                    assets_found.AddRange(
-                        pack.AssetsCache.Values.Where(x => x.Type == type && x is T).Cast<T>().ToList()
-                        );
-                }
-            }
 
             return assets_found;
         }

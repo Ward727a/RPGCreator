@@ -167,4 +167,6 @@ public class AutoTilesetDef : ImageAsset, ITilesetDef
         TileHeight = tileHeight;
         AutotileGroups = autotileGroups;
     }
+
+    public bool IsDirty { get; set; }
 }

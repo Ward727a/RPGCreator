@@ -1,10 +1,11 @@
 using Microsoft.Xna.Framework;
 using RPGCreator.Core.Rendering.Batching;
+using RPGCreator.Core.Type.Assets;
 using RPGCreator.Core.Type.Internal;
 
 namespace RPGCreator.Core.Type.Map;
 
-public interface IMapDef : IHasUniqueId, ISerializable, IDeserializable
+public interface IMapDef : IHasUniqueId, ISerializable, IDeserializable, IAssetDef
 {
     event EventHandler<TileLayerDefinition> TileLayerAdded;
     event EventHandler<TileLayerDefinition> TileLayerRemoved;

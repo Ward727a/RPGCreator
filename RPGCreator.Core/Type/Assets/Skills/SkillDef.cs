@@ -89,7 +89,7 @@ public class SkillDef : ISkillDef
             foreach (var (statUrnStr, amount) in costDict)
             {
                 var statUrn = URN.Parse(statUrnStr);
-                var statDef = EngineCore.Instance.Managers.Assets.StatsRegistry.GetUrn(statUrn);
+                var statDef = EngineCore.Instance.Managers.Assets.TryResolveAsset(statUrn, out IStatDef? resolvedStatDef) ? resolvedStatDef : null;
                 if (statDef != null)
                 {
                     Cost[statDef] = amount;

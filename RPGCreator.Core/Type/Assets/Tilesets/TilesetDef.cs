@@ -90,4 +90,6 @@ public class TilesetDef : ImageAsset, ITilesetDef
         
         return GetSimpleBitmap();
     }
+
+    public bool IsDirty { get; set; }
 }

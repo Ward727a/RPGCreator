@@ -1,12 +1,13 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using RPGCreator.Core.Type.Assets;
 using RPGCreator.Core.Type.Interfaces.UIRelated;
 using RPGCreator.Core.Type.Internal;
 using RPGCreator.Core.Type.Internal.LayerRenderer;
 
 namespace RPGCreator.Core.Type.Map;
 
-public interface IMapLayerDef<TLayerElement> : IHasUniqueId, ISerializable, IDeserializable
+public interface IMapLayerDef<TLayerElement> : IHasUniqueId, ISerializable, IDeserializable, IAssetDef
 {
     event EventHandler<(Point, TLayerElement)>? ElementAdded;
     event EventHandler<(Point,TLayerElement?)>? ElementRemoved;
