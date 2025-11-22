@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -9,7 +10,9 @@ using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Media;
 using Avalonia.Styling;
 using RPGCreator.Core;
+using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Type;
+using RPGCreator.Core.Type.Assets.Animations;
 using RPGCreator.Core.Type.Assets.Characters;
 using RPGCreator.Core.Type.Windows;
 using RPGCreator.UI.Common;
@@ -18,25 +21,6 @@ using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;
 
-
-public class AnimationData
-{
-    public readonly string AnimationName;
-    public string ImagePath;
-    public int Fps;
-    public Size FrameSize = new Size(48, 64);
-    public int OrderIndex;
-    public int AnimationRow;
-    public bool IsDefault = false;
-
-    public AnimationData(int fps = 10, string animationName = "", int orderIndex = 0, string imagePath = "")
-    {
-        Fps = fps;
-        AnimationName = animationName;
-        OrderIndex = orderIndex;
-        ImagePath = imagePath;
-    }
-}
 
 
 public class CharacterDisplayTab : UserControl
@@ -47,9 +31,11 @@ public class CharacterDisplayTab : UserControl
 
     #region Properties
 
+    private AssetScope AssetScope;
+    
     public CharacterData Data;
     
-    private AnimationData? SelectedAnimationData = null;
+    private AnimationDef? SelectedAnimationData = null;
     
     private List<ListBoxItem> Grid4AnimationsExpanders = new List<ListBoxItem>();
     private List<ListBoxItem> Grid8AnimationsExpanders = new List<ListBoxItem>();
@@ -126,6 +112,7 @@ public class CharacterDisplayTab : UserControl
     #region Constructors
     public CharacterDisplayTab(CharacterData data)
     {
+        AssetScope = EngineCore.Instance.Managers.Assets.CreateAssetScope("CharacterDisplayTabScope");
         Data = data;
         Name = "Display";
         CreateComponents();
@@ -246,17 +233,46 @@ public class CharacterDisplayTab : UserControl
             
             existingAnimationNames.AddRange(AvailableAnimationsNames);
             
-            bulkImportDialog.Content = new BulkAnimationImportControl((importedAnimations) =>
+            bulkImportDialog.Content = new BulkAnimationImportControl((importedAnimations, bulkAssetScope) =>
             {
                 int orderIndex = AnimationList.Items.Count;
                 foreach (var anim in importedAnimations)
                 {
+                    var animName = anim.Key;
+                    var animDef = anim.Value;
+                    EngineCore.Instance.Managers.Assets.TryResolveAsset(animDef.SpriteSheetId, out SpritesheetDef? spritesheetDef);
+                    if (spritesheetDef == null)
+                    {
+                        Log.Error("Failed to resolve spritesheet with ID {SpriteSheetId} for animation {AnimName}", animDef.SpriteSheetId, animName);
+                        continue;
+                    }
+                    
+                    bulkAssetScope.TransferTo(AssetScope, animDef);
+                    bulkAssetScope.TransferTo(AssetScope, spritesheetDef);
+                    
+                    if(existingAnimationNames.Contains(animName))
+                    {
+                        // If it's already existing we need to get the ListBoxItem and update it
+                        foreach (ListBoxItem existingItem in AnimationList.Items.ToList())
+                        {
+                            if (existingItem.Content.ToString() == animName)
+                            {
+                                existingItem.Tag = animDef;
+                                break;
+                            }
+                        }
+                        continue;
+                    }
+                    
                     ListBoxItem item = new ListBoxItem();
-                    item.Content = anim.Value.AnimationName;
+                    item.Content = anim.Value.Name;
                     item.Tag = anim;
                     AnimationList.Items.Add(item);
                     orderIndex++;
                 }
+                
+                // Close the dialog
+                bulkImportDialog.Close();
             }, existingAnimationNames);
             
             
@@ -500,7 +516,12 @@ public class CharacterDisplayTab : UserControl
         {
             ListBoxItem item = new ListBoxItem();
             item.Content = basicAnimationsName;
-            item.Tag = new AnimationData(10, basicAnimationsName, orderIndex, ""){IsDefault = true};
+            item.Tag = new AnimationDef()
+            {
+                Fps = 10,
+                Name = basicAnimationsName,
+                Urn = "rpgc://animation/" + basicAnimationsName,
+            };
             Grid4AnimationsExpanders.Add(item);
             AnimationList.Items.Add(item);
             orderIndex++;
@@ -510,7 +531,12 @@ public class CharacterDisplayTab : UserControl
         {
             ListBoxItem item = new ListBoxItem();
             item.Content = freeMovementAnimationsName;
-            item.Tag = new AnimationData(10, freeMovementAnimationsName, orderIndex, ""){IsDefault = true};
+            item.Tag = new AnimationDef()
+            {
+                Fps = 10,
+                Name = freeMovementAnimationsName,
+                Urn = "rpgc://animation/" + freeMovementAnimationsName,
+            };
             Grid8AnimationsExpanders.Add(item);
             orderIndex++;
         }
@@ -566,22 +592,29 @@ public class CharacterDisplayTab : UserControl
         
         if(File.Exists(newPath))
         {
-            SelectedAnimationData.ImagePath = newPath;
-            AnimationPreviewer.AnimationPath = newPath;
+            var tempSpriteSheetDef = EngineCore.Instance.Managers.Assets.CreateTransientAsset<SpritesheetDef>();
+            tempSpriteSheetDef.SourceImage = new ImageDef(newPath);
+            tempSpriteSheetDef.FrameWidth = 48;
+            tempSpriteSheetDef.FrameHeight = 64;
+
+            SelectedAnimationData.FrameIndexes = tempSpriteSheetDef.GetAllRowIndexes();
+            SelectedAnimationData.SpriteSheetId = tempSpriteSheetDef.Unique;
+        
+            // AnimationPreviewer.AnimationDefinition = SelectedAnimationData;
         }
     }
 
     private void OnAnimationSelectedChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (AnimationList.SelectedItem is not ListBoxItem selectedItem) return;
-        if (selectedItem.Tag is not AnimationData animationData) return;
+        if (selectedItem.Tag is not AnimationDef animationData) return;
 
         SelectedAnimationData = animationData;
         AnimationPreviewer.Stop(false);
         AnimationPreviewer.ClearImage();
         AnimationPreviewer.UpdateFPS(animationData.Fps);
 
-        if (animationData.IsDefault)
+        if (BasicAnimationsNames.Contains(animationData.Name) || FreeMovementAnimationsNames.Contains(animationData.Name))
         {
             RemoveAnimationButton.IsEnabled = false;
         }
@@ -590,9 +623,7 @@ public class CharacterDisplayTab : UserControl
             RemoveAnimationButton.IsEnabled = true;
         }
 
-        if (string.IsNullOrEmpty(animationData.ImagePath)) return;
-        if(!File.Exists(animationData.ImagePath)) return;
-        AnimationPreviewer.AnimationPath = animationData.ImagePath;
+        AnimationPreviewer.AnimationDefinition = animationData;
         AnimationPreviewer.UpdateFrame(0);
         if(AutoPlayCheckBox.IsChecked.HasValue && AutoPlayCheckBox.IsChecked.Value)
             AnimationPreviewer.Play();

@@ -114,4 +114,5 @@ public class MapDefinition : IMapDef
     }
 
     public bool IsDirty { get; set; }
+    public bool IsTransient { get; set; } = false;
 }

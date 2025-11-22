@@ -1,5 +1,6 @@
 using RPGCreator.Core.Managers.AssetsManager.Factories;
 using RPGCreator.Core.Type.Assets;
+using RPGCreator.Core.Type.Assets.Animations;
 using RPGCreator.Core.Type.Assets.Characters.Stats;
 using RPGCreator.Core.Type.Assets.Tilesets;
 using RPGCreator.Core.Type.Map;
@@ -13,11 +14,13 @@ public class GameFactory
     {
         public Func<IAssetDef, object> Create { get; init; } = null!;
         public Func<IAssetDef, CancellationToken, ValueTask<object>> CreateAsync { get; init; } = null!;
+        public Action<object> ReleaseInstance { get; init; } = null!;
         public Action<IAssetDef> Refresh { get; init; } = null!;
         public Action<IAssetDef> Release { get; init; } = null!;
     }
     
-    private readonly Dictionary<System.Type, FactoryStrategy> _factoryStrategies = new();
+    private readonly Dictionary<System.Type, FactoryStrategy> _defFactoryStrategies = new();
+    private readonly Dictionary<System.Type, FactoryStrategy> _instStrategies = new();
     
     private readonly List<Action> _clearActions = new();
     
@@ -26,6 +29,7 @@ public class GameFactory
     public TilesetFactory TilesetFactory { get; } = new();
     public TileFactory TileFactory { get; } = new();
     public StatFactory StatFactory { get; } = new();
+    public AnimationFactory AnimationFactory { get; } = new();
 
     public GameFactory()
     {
@@ -36,6 +40,7 @@ public class GameFactory
         Register<AutoTilesetInstance, AutoTilesetDef>(TilesetFactory);
         Register<TileInstance, TileDefinition>(TileFactory);
         Register<StatInstance, IStatDef>(StatFactory);
+        Register<AnimationInstance, AnimationDef>(AnimationFactory);
     }
     
     public void Register<TInst, TDef>(IAssetFactory<TInst, TDef> factory) 
@@ -43,32 +48,31 @@ public class GameFactory
     where TDef : IAssetDef
     {
         var type = typeof(TDef);
-        if (_factoryStrategies.ContainsKey(type))
+        var instType = typeof(TInst);
+        if (_defFactoryStrategies.ContainsKey(type))
         {
             throw new InvalidOperationException($"Factory for type {type.Name} is already registered.");
         }
 
-        // 1. On crée la stratégie (les lambdas font le cast)
         var strategy = new FactoryStrategy
         {
-            // Create : On cast l'entrée (IAssetDef -> TDef) et on retourne object
             Create = (def) => factory.Create((TDef)def),
 
-            // CreateAsync : Attention, il faut await pour caster le résultat ValueTask<T> en object
             CreateAsync = async (def, ct) => await factory.CreateAsync((TDef)def, ct),
+            ReleaseInstance = (instance) => factory.Release((TInst)instance),
 
-            // Refresh & Release : On cast juste l'entrée
             Refresh = (def) => factory.Refresh((TDef)def),
             Release = (def) => factory.Release((TDef)def)
         };
         
-        _factoryStrategies[type] = strategy;
+        _defFactoryStrategies[type] = strategy;
+        _instStrategies[instType] = strategy;
 
         _clearActions.Add(factory.Clear);
     }
     public TInst CreateInstance<TInst>(IAssetDef def) where TInst : class
     {
-        if (_factoryStrategies.TryGetValue(def.GetType(), out var strategy))
+        if (_defFactoryStrategies.TryGetValue(def.GetType(), out var strategy))
         {
             return (TInst)strategy.Create(def);
         }
@@ -77,17 +81,29 @@ public class GameFactory
 
     public async ValueTask<TInst> CreateInstanceAsync<TInst>(IAssetDef def, CancellationToken ct = default) where TInst : class
     {
-        if (_factoryStrategies.TryGetValue(def.GetType(), out var strategy))
+        if (_defFactoryStrategies.TryGetValue(def.GetType(), out var strategy))
         {
             var result = await strategy.CreateAsync(def, ct);
             return (TInst)result;
         }
         throw new InvalidOperationException($"No factory registered for definition type {def.GetType().Name}");
     }
+    
+    public void ReleaseInstance<TInst>(TInst instance) where TInst : class
+    {
+        var instType = instance.GetType();
+
+        if (_instStrategies.TryGetValue(instType, out var strategy))
+        {
+            strategy.ReleaseInstance(instance);
+            return;
+        }
+        Log.Warning($"Tried to release instance of type {instance.GetType().Name} but no factory was found.");
+    }
 
     public void Release(IAssetDef def)
     {
-        if (_factoryStrategies.TryGetValue(def.GetType(), out var strategy))
+        if (_defFactoryStrategies.TryGetValue(def.GetType(), out var strategy))
         {
             strategy.Release(def);
             return;
@@ -97,7 +113,7 @@ public class GameFactory
 
     public void Refresh(IAssetDef def)
     {
-        if (_factoryStrategies.TryGetValue(def.GetType(), out var strategy))
+        if (_defFactoryStrategies.TryGetValue(def.GetType(), out var strategy))
         {
             strategy.Refresh(def);
         }

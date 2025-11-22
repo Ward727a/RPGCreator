@@ -52,7 +52,7 @@ public class GenericPooledFactory<TInstance, TDef> : IAssetFactory<TInstance, TD
         // Create a new instance if the pool is empty.
         return new ValueTask<TInstance>(Create(def));
     }
-    
+
     public virtual void Release(TInstance instance)
     {
         if (instance == null) throw new ArgumentNullException(nameof(instance));

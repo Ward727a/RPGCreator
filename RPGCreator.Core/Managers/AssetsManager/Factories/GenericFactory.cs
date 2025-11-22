@@ -53,6 +53,13 @@ public sealed class GenericFactory<TInstance, TDef> : IAssetFactory<TInstance, T
         // This factory does not support refreshing instances.
     }
 
+    public void Release(TInstance instance)
+    {
+        Log.Warning("Release (Instance) method can't be used with GenericFactory. This factory does not support releasing instances.");
+        Log.Warning("If you need to release instances, consider using a different factory (like GenericCachedFactory) that supports releasing instances.");
+        // This factory does not support releasing instances.
+    }
+
     public void Release(TDef def)
     {
         Log.Warning("Release method can't be used with GenericFactory. This factory does not support releasing instances.");

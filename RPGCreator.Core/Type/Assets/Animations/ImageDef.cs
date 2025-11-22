@@ -20,6 +20,7 @@ public class ImageDef : IHasUniqueId
     
     public event Action<string>? SpriteSheetPathChanged;
     
+    
     private string _spriteSheetPath = string.Empty;
     public string SpriteSheetPath
     {
@@ -40,7 +41,25 @@ public class ImageDef : IHasUniqueId
     public string Hash { get; private set; } = string.Empty;
     
     private UnifiedImage? _cachedImage;
-    public Size ImageSize { get; private set; }
+    private Size? _imageSize;
+
+    public Size ImageSize
+    {
+        get
+        {
+            if (_imageSize == null)
+            {
+                if (_cachedImage == null)
+                {
+                    _cachedImage = new UnifiedImage(SpriteSheetPath);
+                }
+                var bitmap = _cachedImage.UI;
+                _imageSize = new Size(bitmap.PixelSize.Width, bitmap.PixelSize.Height);
+            }
+            return _imageSize.Value;
+        }
+        private set => _imageSize = value;
+    }
     
     public ImageDef(string spriteSheetPath)
     {

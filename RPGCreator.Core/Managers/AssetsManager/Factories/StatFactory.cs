@@ -33,6 +33,18 @@ public class StatFactory : IAssetFactory<StatInstance, IStatDef>
         }
     }
 
+    public void Release(StatInstance instance)
+    {
+        if (_instances.ContainsValue(instance))
+        {
+            _instances.Remove(instance.StatDefinitionId);
+        }
+        else
+        {
+            throw new KeyNotFoundException($"Stat instance with unique ID {instance.RuntimeId} not found.");
+        }
+    }
+
     public void Release(IStatDef def)
     {
         if (_instances.ContainsKey(def.Unique))

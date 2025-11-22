@@ -45,6 +45,11 @@ public class TilesetFactory : IAssetFactory<TilesetInstance, TilesetDef>, IAsset
         }
     }
 
+    public void Release(TilesetInstance instance)
+    {
+        Release((TilesetDef)instance.Definition);
+    }
+
     public void Release(TilesetDef def)
     {
         if (_instances.ContainsKey(def.Unique))
@@ -92,6 +97,11 @@ public class TilesetFactory : IAssetFactory<TilesetInstance, TilesetDef>, IAsset
         {
             throw new KeyNotFoundException($"Tileset instance with unique ID {def.Unique} not found.");
         }
+    }
+
+    public void Release(AutoTilesetInstance instance)
+    {
+        Release((AutoTilesetDef)instance.Definition);
     }
 
     public void Release(AutoTilesetDef def)

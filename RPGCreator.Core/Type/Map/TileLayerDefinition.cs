@@ -184,4 +184,5 @@ public class TileLayerDefinition : IMapLayerDef<ITileDef>
     }
 
     public bool IsDirty { get; set; }
+    public bool IsTransient { get; set; } = false;
 }

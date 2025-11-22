@@ -180,4 +180,5 @@ public class AutotileDef : ITileDef, ISerializable, IDeserializable
     public Ulid Unique { get; }
     public URN Urn { get; }
     public bool IsDirty { get; set; }
+    public bool IsTransient { get; set; } = false;
 }

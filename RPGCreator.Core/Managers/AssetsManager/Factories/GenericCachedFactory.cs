@@ -85,6 +85,31 @@ public sealed class GenericCachedFactory<TInstance, TDef> : IAssetFactory<TInsta
         }
     }
 
+    public void Release(TInstance instance)
+    {
+        var entry = _instances.FirstOrDefault(kvp => EqualityComparer<TInstance>.Default.Equals(kvp.Value, instance));
+        if (!EqualityComparer<KeyValuePair<Ulid, TInstance>>.Default.Equals(entry, default))
+        {
+            switch (entry.Value)
+            {
+                // If the instance implements IDisposable, dispose it before removing it.
+                case IDisposable disposableInstance:
+                    disposableInstance.Dispose();
+                    break;
+                // If the instance implements IAsyncDisposable, dispose it asynchronously.
+                case IAsyncDisposable asyncDisposableInstance:
+                    asyncDisposableInstance.DisposeAsync().AsTask().Wait();
+                    break;
+            }
+
+            _instances.Remove(entry.Key);
+        }
+        else
+        {
+            throw new KeyNotFoundException("The provided instance was not found in the cache.");
+        }
+    }
+
     public void Release(TDef def)
     {
         if (_instances.ContainsKey(def.Unique))

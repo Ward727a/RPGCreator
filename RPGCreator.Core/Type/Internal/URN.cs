@@ -101,4 +101,7 @@ public readonly record struct URN
         Log.Error("URN parsing failed: expected \"namespace://module/name\" got {URN} ", urn);
         return Empty;
     }
+    
+    public static implicit operator string(URN urn) => urn.ToString();
+    public static implicit operator URN(string urn) => Parse(urn);
 }

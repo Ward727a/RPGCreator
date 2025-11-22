@@ -5,10 +5,19 @@ namespace RPGCreator.Core.Type.Assets.Animations;
 
 public class SpritesheetDef : IAssetDef
 {
+    
+    
     public Ulid Unique { get; }
     public URN Urn { get; }
     public bool IsDirty { get; set; }
-    
+    public bool IsTransient { get; set; } = false;
+
+    public SpritesheetDef()
+    {
+        Unique = Ulid.NewUlid();
+        Urn = new URN("rpgcreator", "spritesheet", Unique.ToString());
+    }
+
     private ImageDef _sourceImage;
 
     public ImageDef SourceImage
@@ -49,11 +58,22 @@ public class SpritesheetDef : IAssetDef
 
     public int Colums => SourceImage.ImageSize.Width / FrameWidth;
     
+    public List<int> GetAllRowIndexes(int row = 0)
+    {
+        var cols = Colums;
+        var indexes = new List<int>();
+        for (int i = 0; i < cols; i++)
+        {
+            indexes.Add(row * cols + i);
+        }
+        return indexes;
+    }
+    
     public PixelRect GetFrameRect(int index)
     {
         var cols = Colums;
         var x = (index % cols) * FrameWidth;
         var y = (index / cols) * FrameHeight;
-        return new PixelRect(x, y, FrameWidth, FrameHeight);
+        return new PixelRect(x, y, 42, 64);
     }
 }

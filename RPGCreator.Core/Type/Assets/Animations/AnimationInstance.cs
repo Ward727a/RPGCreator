@@ -36,6 +36,17 @@ public class AnimationInstance: IResettable<AnimationDef>, ICleanable
         {
             Log.Error($"Frame index {frame} is out of range. Total frames: {Definition.TotalFrames}");
             frame = Definition.TotalFrames - 1;
+            
+            if (frame < 0)
+            {
+                frame = 0;
+            }
+        }
+        
+        if(frame >= _frames.Length)
+        {
+            Log.Error("Frame index {0} exceeds cached frames length {1} for animation \"{2}\"", frame, _frames.Length, Definition.Urn);
+            return new CroppedBitmap(UnifiedImage.DefaultUI, new PixelRect(0, 0, 32, 32));
         }
         
         if(_frames[frame] != null)
@@ -47,7 +58,6 @@ public class AnimationInstance: IResettable<AnimationDef>, ICleanable
         _frames[frame] = (croppedBitmap);
         return croppedBitmap;
     }
-
 
     public void Clean()
     {

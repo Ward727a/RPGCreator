@@ -96,4 +96,5 @@ public class TileDefinition : ITileDef
     public Ulid Unique { get; }
     public URN Urn { get; }
     public bool IsDirty { get; set; }
+    public bool IsTransient { get; set; } = false;
 }

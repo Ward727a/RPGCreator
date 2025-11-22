@@ -145,7 +145,72 @@ namespace RPGCreator.Core.Managers.AssetsManager
             
             return newAsset;
         }
+
+        public AssetScope CreateAssetScope(string name = "Unnamed Asset Scope")
+        {
+            return new AssetScope(this, name);
+        }
         
+        public T CreateTransientAsset<T>(AssetScope? scope = null) where T : IAssetDef, new()
+        {
+            var newAsset = new T();
+            
+            newAsset.IsTransient = true;
+            
+            RegisterAsset(newAsset);
+
+            scope?.Track(newAsset);
+
+            Log.Information("Created transient asset of type {AssetType} with ID {AssetID}", typeof(T).FullName, newAsset.Unique);
+            
+            return newAsset;
+        }
+
+        public void DestroyTransientAsset<T>(T asset) where T : IAssetDef
+        {
+            if (!asset.IsTransient)
+            {
+                Log.Warning("Attempted to destroy a non-transient asset of type {AssetType} with ID {AssetID}",
+                    typeof(T).FullName, asset.Unique);
+                return;
+            }
+
+            if (TryResolveRegistry(asset.GetType(), out var assetRegistry))
+            {
+                assetRegistry.UnregisterUntyped(asset);
+                Log.Information("Destroyed transient asset of type {AssetType} with ID {AssetID}",
+                    typeof(T).FullName, asset.Unique);
+            }
+            else
+            {
+                Log.Warning("No registry found for asset type {AssetType}", typeof(T).FullName);
+            }
+        }
+
+        public void CommitAsset(IAssetDef asset, string packName, AssetScope? fromScope = null)
+        {
+            if (!asset.IsTransient)
+            {
+                Log.Warning("Attempted to commit a non-transient asset of type {AssetType} with ID {AssetID}",
+                    asset.GetType().FullName, asset.Unique);
+                return;
+            }
+            
+            fromScope?.Untrack(asset);
+            
+            if (TryGetPack(packName, out var pack))
+            {
+                asset.IsTransient = false;
+                pack.AddOrUpdateAsset(asset);
+                Log.Information("Committed transient asset of type {AssetType} with ID {AssetID} to pack {PackName}",
+                    asset.GetType().FullName, asset.Unique, packName);
+            }
+            else
+            {
+                Log.Warning("No assets pack found with name {PackName}", packName);
+            }
+        }
+
         #endregion
         
         public AssetsManager()

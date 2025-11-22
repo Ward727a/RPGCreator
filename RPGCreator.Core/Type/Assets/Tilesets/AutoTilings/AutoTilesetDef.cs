@@ -169,4 +169,5 @@ public class AutoTilesetDef : ImageAsset, ITilesetDef
     }
 
     public bool IsDirty { get; set; }
+    public bool IsTransient { get; set; } = false;
 }

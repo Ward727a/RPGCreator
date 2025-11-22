@@ -4,11 +4,14 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Styling;
+using RPGCreator.Core;
 using RPGCreator.Core.Common;
+using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Type;
 using RPGCreator.Core.Type.Assets.Animations;
 using RPGCreator.UI.Common;
@@ -23,7 +26,7 @@ public class BulkAnimationImportControl : UserControl
     #endregion
     
     #region Events
-    public Action<Dictionary<string, AnimationData>> OnImport;
+    public Action<Dictionary<string, AnimationDef>, AssetScope> OnImport;
     #endregion
     
     #region Properties
@@ -39,6 +42,8 @@ public class BulkAnimationImportControl : UserControl
     private Dictionary<string, ListBoxItem> _assignedAnimationsItems = new();
     private Dictionary<string, Dictionary<int, Bitmap>> _imageRowCache = new();
     private Dictionary<string, string> _imageCache = new();
+
+    private AssetScope AssetScope;
     
     #endregion
     
@@ -74,13 +79,14 @@ public class BulkAnimationImportControl : UserControl
     
     #region Constructors
 
-    public BulkAnimationImportControl(Action<Dictionary<string, AnimationData>> onImport, List<string> animationNames)
+    public BulkAnimationImportControl(Action<Dictionary<string, AnimationDef>, AssetScope> onImport, List<string> animationNames)
     {
         _animationNames = animationNames;
         OnImport = onImport;
         CreateComponents();
         RegisterEvents();
         Content = Body;
+        AssetScope = EngineCore.Instance.Managers.Assets.CreateAssetScope("BulkAnimationImportScope");
     }
     
     #endregion
@@ -280,14 +286,19 @@ public class BulkAnimationImportControl : UserControl
             {
                 foreach (var (rowIndex, animationName) in rowMap)
                 {
-                    var bitmap = GetOrCreateRowBitmap(imagePath, rowIndex);
-                    var animationData = new AnimationData();
-                    animationData.ImagePath = imagePath;
-                    // animationData.
-                    // animationsToImport[animationName] = animationData;
+                    var spritesheetDef = EngineCore.Instance.Managers.Assets.CreateTransientAsset<SpritesheetDef>(AssetScope);
+                    var imageDef = new ImageDef(imagePath);
+                    spritesheetDef.SourceImage = imageDef;
+                    spritesheetDef.FrameWidth = 48;
+                    spritesheetDef.FrameHeight = 64;
+                    
+                    var animationDef = EngineCore.Instance.Managers.Assets.CreateTransientAsset<AnimationDef>(AssetScope);
+                    animationDef.SpriteSheetId = spritesheetDef.Unique;
+                    animationDef.FrameIndexes = spritesheetDef.GetAllRowIndexes(rowIndex);
+                    animationsToImport[animationName] = animationDef;
                 }
             }
-            // OnImport?.Invoke(animationsToImport);
+            OnImport?.Invoke(animationsToImport, AssetScope);
         };
     }
 
@@ -314,44 +325,27 @@ public class BulkAnimationImportControl : UserControl
     private void LoadPreviewerForCurrentSelection()
     {
         if (string.IsNullOrWhiteSpace(_currentImagePath) || _selectedRow < 0) return;
-        var bitmap = GetOrCreateRowBitmap(_currentImagePath, _selectedRow);
-        string bitmapPath = "";
-        string bitmapHash = bitmap.GetHashCode().ToString();
-        if(_imageCache.ContainsKey(bitmapHash))
-        {
-            bitmapPath = _imageCache[bitmapHash];
-            if(System.IO.File.Exists(bitmapPath))
-            {
-                Log.Debug("Using cached image for previewer for image '{ImagePath}' row {RowIndex}", _currentImagePath, _selectedRow);
-            }
-            else
-            {
-                bitmapPath = System.IO.Path.GetTempFileName() + ".png";
-                using (var fs = System.IO.File.OpenWrite(bitmapPath))
-                {
-                    bitmap.Save(fs);
-                }
-                _imageCache[bitmapHash] = bitmapPath;
-                Log.Debug("Re-creating cached image for previewer for image '{ImagePath}' row {RowIndex} at {tempFilePath}", _currentImagePath, _selectedRow, bitmapPath);
-            }
-        }
-        else
-        {
-            // Save bitmap to a temporary file to be loaded by the previewer
-            bitmapPath = System.IO.Path.GetTempFileName() + ".png";
-            using (var fs = System.IO.File.OpenWrite(bitmapPath))
-            {
-                bitmap.Save(fs);
-            }
-            _imageCache[bitmapHash] = bitmapPath;
-            Log.Debug("Caching image for previewer for image '{ImagePath}' row {RowIndex} at {temppath}", _currentImagePath, _selectedRow, bitmapPath);
-        }
+        var imageDef = new ImageDef(_currentImagePath);
+        var spritesheetDef = EngineCore.Instance.Managers.Assets.CreateTransientAsset<SpritesheetDef>(AssetScope);
+        spritesheetDef.SourceImage = imageDef;
+        spritesheetDef.FrameWidth = 48;
+        spritesheetDef.FrameHeight = 64;
+        var animationDef = EngineCore.Instance.Managers.Assets.CreateTransientAsset<AnimationDef>(AssetScope);
+        animationDef.SpriteSheetId = spritesheetDef.Unique;
+        animationDef.FrameIndexes = spritesheetDef.GetAllRowIndexes(_selectedRow);
         
-        Log.Debug("Loading previewer for image '{ImagePath}' row {RowIndex}", _currentImagePath, _selectedRow);
-        Log.Debug("Temporary file found at '{TempFilePath}'", bitmapPath);
-        Previewer.AnimationPath = bitmapPath;
-        Previewer.FrameSize = new Size(42, 64);
+        // Previewer.AnimationPath = bitmapPath;
+        Previewer.Stop(false);
+        Previewer.ClearImage();
+        Previewer.AnimationDefinition = animationDef;
+        Previewer.UpdateFrame(0);
         Previewer.Play();
+    }
+
+    protected override void OnUnloaded(RoutedEventArgs e)
+    {
+        base.OnUnloaded(e);
+        AssetScope.Dispose();
     }
 
     #endregion

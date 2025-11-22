@@ -32,31 +32,32 @@ public class AnimationPreviewer : UserControl
     #endregion
     
     #region Properties
+    public AnimationInstance? AnimationInstance;
     
-    
-    private List<CroppedBitmap> _frames = new List<CroppedBitmap>();
-    public IReadOnlyList<CroppedBitmap> Frames => _frames;
-    
-    private bool IsFraming { get; set; } = false;
-    
-    private AnimationDef _animationDef = new AnimationDef();
-    public AnimationInstance? _animationInstance;
-    
-    private string _animationPath = string.Empty;
+    private AnimationDef? _animationDef;
 
-    public string AnimationPath
+    public AnimationDef? AnimationDefinition
     {
-        get => _animationPath;
+        get => _animationDef;
         set
         {
-            _animationPath = value;
-            // _animationDef.FrameSize = new Core.Type.Internal.Size(48, 64);
-            // _animationDef.AnimationPath = value;
-            _animationInstance ??= new AnimationInstance(_animationDef);
-            AnimationPathChanged?.Invoke(_animationPath);
+            if(value == null) return;
+            if(value == _animationDef) return;
+            if(_animationDef != null)
+                _animationDef.SpriteSheetIdChanged -= OnAnimationPathChanged;
+            value.SpriteSheetIdChanged += OnAnimationPathChanged;
+            _animationDef = value;
+            if(_animationDef.SpriteSheetId == Ulid.Empty)
+            {
+                Log.Error("[AnimationPreviewer] Animation definition has no associated spritesheet.");
+                return;
+            }
+            AnimationInstance =
+                EngineCore.Instance.Managers.GameFactory.CreateInstance<AnimationInstance>(_animationDef);
+            AnimationPathChanged?.Invoke(_animationDef.Urn.ToString());
         }
     }
-
+    
     public bool IsPlaying { get; private set; }
     public bool IsPaused { get; private set; }
     public int CurrentFrame { get; private set; }
@@ -79,7 +80,7 @@ public class AnimationPreviewer : UserControl
     
     public System.Timers.Timer? AnimationTimer { get; private set; }
     
-    public Size FrameSize { get; set; } = new Size(64, 64);
+    public Size FrameSize { get; set; } = new Size(42, 64);
     public Size AnimationImageSize { get; private set; }
 
     private Bitmap _animationImageSource;
@@ -223,7 +224,7 @@ public class AnimationPreviewer : UserControl
 
     public void Play()
     {
-        if(_animationPath == string.Empty) return;
+        if(AnimationInstance == null) return;
         if (IsPlaying) return;
         IsPlaying = true;
         IsPaused = false;
@@ -267,13 +268,14 @@ public class AnimationPreviewer : UserControl
 
     public void UpdateFrame(int frameIndex = -1)
     {
-        
         if(frameIndex == -1)
             frameIndex = CurrentFrame;
 
+        if(!IsValidAnimationInstance()) return;
+        
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
-            animationImage.Source = _animationInstance.GetFrame(frameIndex);
+            animationImage.Source = AnimationInstance.GetFrame(frameIndex);
         });
     }
 
@@ -289,19 +291,54 @@ public class AnimationPreviewer : UserControl
 
     #region Events Handlers
     
+    private void OnAnimationPathChanged(Ulid newSpriteSheetId)
+    {
+        if (AnimationInstance != null)
+        {
+            EngineCore.Instance.Managers.GameFactory.ReleaseInstance(AnimationInstance);
+        }
+        
+        AnimationInstance = EngineCore.Instance.Managers.GameFactory.CreateInstance<AnimationInstance>(_animationDef);
+        
+        Stop();
+        // Load animation from newSpriteSheetId and set TotalFrames accordingly
+        // Reset CurrentFrame to 0
+        CurrentFrame = 0;
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            // Update animationImage source here
+            animationImage.Source = AnimationInstance.GetFrame(0);
+        });
+        UpdateFrame(0);
+    }
+    
     private void OnAnimationPathChanged(string newPath)
     {
+        if (AnimationInstance != null)
+        {
+            EngineCore.Instance.Managers.GameFactory.ReleaseInstance(AnimationInstance);
+        }
+
+        AnimationInstance = EngineCore.Instance.Managers.GameFactory.CreateInstance<AnimationInstance>(_animationDef);
         Stop();
         // Load animation from newPath and set TotalFrames accordingly
         // Reset CurrentFrame to 0
         CurrentFrame = 0;
-        // Update animationImage source here
-        _animationImageSource = new Bitmap(newPath);
-        animationImage.Source = _animationImageSource; // Placeholder for actual image loading logic
-        AnimationImageSize = new Size(_animationImageSource.PixelSize.Width, _animationImageSource.PixelSize.Height);
-        TotalFrames = (int)(AnimationImageSize.Width / FrameSize.Width) * (int)(AnimationImageSize.Height / FrameSize.Height);
-        _frames.Clear();
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            // Update animationImage source here
+            animationImage.Source = AnimationInstance.GetFrame(0);
+        });
         UpdateFrame(0);
+    }
+    
+    #endregion
+    
+    #region Helpers
+
+    private bool IsValidAnimationInstance()
+    {
+        return AnimationInstance != null && _animationDef != null && _animationDef.TotalFrames > 0;
     }
     
     #endregion
