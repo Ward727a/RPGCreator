@@ -283,8 +283,10 @@ public class CharactersManageControl : UserControl
     {
         ViewPanel.Children.Clear();
         
-        foreach (var characterData in EngineCore.Instance.Data.EditedProject.GetAssetsType<CharacterData>(BaseAsset.TYPE.CHARACTER_DATA))
+        foreach (var assetData in EngineCore.Instance.Managers.Assets.SearchAllPacks<CharacterData>())
         {
+            if (!EngineCore.Instance.Managers.Assets.TryResolveAsset(assetData.AssetId, out CharacterData? characterData)) continue;
+            
             var item = new CharacterManageItem(characterData);
             item.OnSelected += (data) =>
             {
@@ -292,6 +294,7 @@ public class CharactersManageControl : UserControl
                 SelectedCharacterData = data;
             };
             ViewPanel.Children.Add(item);
+
         }
     }
     

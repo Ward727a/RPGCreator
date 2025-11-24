@@ -6,10 +6,11 @@ namespace RPGCreator.Core.Types.Assets.Actors;
 
 public abstract class BaseEntity : IHasUniqueId
 {
-    public Ulid Unique { get; } = Ulid.NewUlid();
+    public Ulid Unique { get; protected set; } = Ulid.NewUlid();
     public URN Urn => new("entity", Unique.ToString());
     
-    public CustomData Properties { get; } = new CustomData();
-    public List<BaseEntityFeature> Features { get; } = new List<BaseEntityFeature>();
+    public CustomData Properties { get; private set; } = new CustomData();
+    public List<BaseEntityFeature> Features { get; private set; } = new List<BaseEntityFeature>();
+    public List<string> Tags { get; private set; } = new List<string>();
     
 }

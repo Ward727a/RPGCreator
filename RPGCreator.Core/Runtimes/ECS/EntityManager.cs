@@ -10,7 +10,7 @@ public class EntityManager(ComponentManager componentManager)
     
     private int _nextEntityId = 0;
 
-    public IEntity CreateEntity()
+    public Entity CreateEntity()
     {
         var entity = _entityPool.Rent();
         entity.Id = _nextEntityId;
@@ -19,10 +19,10 @@ public class EntityManager(ComponentManager componentManager)
         return entity;
     }
     
-    public void DestroyEntity(IEntity entity)
+    public void DestroyEntity(Entity entity)
     {
         _componentManager.RemoveAllComponents(entity.Id, entity.ComponentBits);
-        _entityPool.Return((Entity)entity);
+        _entityPool.Return(entity);
     }
     
 }

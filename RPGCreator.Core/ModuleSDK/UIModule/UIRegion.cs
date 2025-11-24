@@ -11,12 +11,20 @@ public readonly struct UIRegion : IEquatable<UIRegion>
     
     #region Predefined Regions
     
+    // EDITOR
     public static UIRegion EditorMenuBar => new("EditorMenuBar");
     public static UIRegion EditorToolbar => new("EditorToolbar");
     public static UIRegion EditorLeftPanel => new("EditorLeftPanel");
-    public static UIRegion EditorLeftPanelBody => new("EditorLeftPanel.body");
+    public static UIRegion EditorLeftPanelComponents => new("EditorLeftPanel.Components");
+    public static UIRegion EditorLeftPanelNonePanel => new("EditorLeftPanel.NonePanel");
+    public static UIRegion EditorLeftPanelTilingPanel => new("EditorLeftPanel.TilingPanel");
+    public static UIRegion EditorLeftPanelEntitiesPanel => new("EditorLeftPanel.EntitiesPanel");
     public static UIRegion EditorRightPanel => new("EditorRightPanel");
     public static UIRegion EditorCenterPanel => new("EditorCenterPanel");
+    
+    // ASSETS MANAGER
+    public static UIRegion AssetsManager => new("AssetsManager");
+    public static UIRegion AssetsManagerMenu => new("AssetsManager.Menu");
     
     #endregion
 

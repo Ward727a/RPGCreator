@@ -42,7 +42,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Types.Editor.Context;
 using RPGCreator.Core.Types.Windows;
+using RPGCreator.UI.Content.Editor.LeftPanel;
 
 namespace RPGCreator.UI.Content.Editor
 {
@@ -275,9 +277,12 @@ namespace RPGCreator.UI.Content.Editor
                 Width = 300,
                 RowDefinitions = new RowDefinitions("*, 1, *"),
             };
-            ContentGrid.Children.Add(LeftPanel);
-            Grid.SetColumn(LeftPanel, 0);
-            Grid.SetRowSpan(LeftPanel, 2);
+            InEditorContext context = new InEditorContext();
+            var LeftPanel2 = new EditorLeftPanelControl(context);
+            
+            ContentGrid.Children.Add(LeftPanel2);
+            Grid.SetColumn(LeftPanel2, 0);
+            Grid.SetRowSpan(LeftPanel2, 2);
 
             var tabControl = new TabControl
             {

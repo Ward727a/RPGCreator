@@ -37,11 +37,10 @@ namespace RPGCreator.Core
 
         // This is the SHA256 checksum of the module DLL file to ensure integrity.
         // Those should be updated with each new module version. (even for small changes!)
-        private readonly List<string> CHECKSUM_INTERNAL_MODULES = new(
-            [
-                "37dd0521d9dc2796ba8c67020f8f596d9196aaeec68891f9517dc669c45ba691", // TestModule.dll
-                ]
-            );
+        private readonly List<string> CHECKSUM_INTERNAL_MODULES =
+        [ 
+            // "f3886692656072a8702c0d0faf32d956fefa6078f47087d4a5113b1927d5b6eb", // TestModule.dll - For now disabled so it doesn't load automatically
+        ];
 
         private readonly string MODULES_PATH = $"{AppContext.BaseDirectory}Assets/Modules/";
         

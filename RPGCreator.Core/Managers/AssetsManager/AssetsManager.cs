@@ -349,225 +349,44 @@ namespace RPGCreator.Core.Managers.AssetsManager
             return AssetsPacks.Values.ToList();
         }
 
-        public IEnumerable<(Ulid id, Ulid packId, string typeName, string path)> SearchAllPacks<T>()
+        public record PackSearchResult(Ulid AssetId, Ulid PackId, string TypeName, string Path)
+        {
+            /// <summary>
+            /// The unique identifier of the asset.
+            /// </summary>
+            public Ulid AssetId = AssetId;
+            /// <summary>
+            /// The type name of the asset.
+            /// </summary>
+            public string TypeName = TypeName;
+            /// <summary>
+            /// The relative path of the asset within the pack.
+            /// </summary>
+            public string Path = Path;
+            /// <summary>
+            /// The unique identifier of the pack containing the asset.
+            /// </summary>
+            public Ulid PackId = PackId;
+        }
+        
+        /// <summary>
+        /// Search all packs for assets of type T.
+        /// </summary>
+        /// <typeparam name="T"> Type of asset to search for.</typeparam>
+        /// <returns> <see cref="IEnumerable{t}"/> of <see cref="PackSearchResult"/> containing the found assets.</returns>
+        public IEnumerable<PackSearchResult> SearchAllPacks<T>()
         {
             var targetType = typeof(T);
             foreach (var pack in AssetsPacks.Values)
             {
                 foreach (var asset in pack.SearchIndex((record) => record.TypeName == targetType.FullName))
                 {
-                    yield return (asset.Id, pack.Id, asset.TypeName, asset.RelativePath);
+                    yield return new PackSearchResult(asset.Id, pack.Id, asset.TypeName, asset.RelativePath);
                 }
             }
         }
         
         #endregion
         
-        //
-        // public bool CreateAssetsPack(string packName, BaseAssetsPack.PACK_TYPE type)
-        // {
-        //     if (string.IsNullOrEmpty(packName))
-        //     {
-        //         throw new ArgumentException("Pack name cannot be null or empty.", nameof(packName));
-        //     }
-        //     if (AssetsPacksMapping.ContainsKey(packName)) // Need to check how to allow same name for different packs.
-        //     {
-        //         throw new InvalidOperationException($"Assets pack with name {packName} already exists.");
-        //     }
-        //
-        //     BaseAssetsPack pack = new()
-        //     {
-        //         Name = packName,
-        //         Type = type
-        //     };
-        //     pack.CreateXMLDocument();
-        //     RegisterPack(pack);
-        //
-        //     return true;
-        // }
-        //
-        // public bool HasAssetsPack(string pack_name)
-        // {
-        //     if (string.IsNullOrEmpty(pack_name))
-        //     {
-        //         throw new ArgumentException("Pack name cannot be null or empty.", nameof(pack_name));
-        //     }
-        //     return AssetsPacksMapping.ContainsKey(pack_name);
-        // }
-        //
-        // public List<string> GetAssetsPackNames()
-        // {
-        //     return AssetsPacksMapping.Keys.ToList();
-        // }
-        //
-        // /// <summary>
-        // /// This should not be used in other part than Core.<br/>
-        // /// Use the AssetsPackManager for this!
-        // /// </summary>
-        // /// <param name="pack"></param>
-        // public void RegisterPack(BaseAssetsPack pack, bool shouldSaveConfig = true, bool shouldSaveInProject = true)
-        // {
-        //     Event.OnUpdatingAsset();
-        //     var args = new AssetsManagerAddingPackArgs(pack);
-        //     Event.OnAddingPack(args);
-        //
-        //     if(args.Cancel)
-        //     {
-        //         return;
-        //     }
-        //
-        //     AssetsPacks[pack.Id] = pack;
-        //     AssetsPacksMapping[pack.Name] = pack.Id;
-        //     
-        //     foreach (var type in Enum.GetValues(typeof(BaseAsset.TYPE)))
-        //     {
-        //         if (pack.HasAssetOfType((BaseAsset.TYPE)type))
-        //         {
-        //             Event.OnUpdatedAsset(new AssetsManagerUpdatedAssetArgs((BaseAsset.TYPE)type, null));
-        //         }
-        //     }
-        //
-        //     if(shouldSaveInProject)
-        //         EngineCore.Instance.Data.EditedProject?.AssetsPackPath.Add(pack.ConfigPath);
-        //
-        //     if(shouldSaveConfig)
-        //         EngineCore.Instance.Data.EditedProject?.Save();
-        //
-        //     Event.OnAddedPack(args.ToAddedArgs());
-        // }
-        //
-        // public void LoadPack(string packPath)
-        // {
-        //
-        //     if(string.IsNullOrEmpty(packPath))
-        //     {
-        //         throw new ArgumentException("Pack path cannot be null or empty.", nameof(packPath));
-        //     }
-        //
-        //     if(!File.Exists(packPath))
-        //     {
-        //         throw new FileNotFoundException($"Assets pack file not found at path: {packPath}");
-        //     }
-        //
-        //     BaseAssetsPack pack = new(packPath);
-        //
-        //     if(pack.ErrorOnLoad)
-        //     {
-        //         throw new InvalidOperationException($"Failed to load assets pack from path: {packPath}.");
-        //     }
-        //
-        //     RegisterPack(pack, false, false);
-        // }
-        //
-        // public void UnregisterPack(Ulid packId, string pack_name = "")
-        // {
-        //     Event.OnUpdatingAsset();
-        //     var PreArgs = new AssetsManagerRemovingPackArgs(packId);
-        //     Event.OnRemovingPack(PreArgs);
-        //
-        //     if (PreArgs.Cancel)
-        //     {
-        //         return;
-        //     }
-        //
-        //     if (AssetsPacks.TryGetValue(PreArgs.PackID, out BaseAssetsPack? pack))
-        //     {
-        //         var PostArgs = PreArgs.ToPost(true);
-        //
-        //         foreach (var type in Enum.GetValues(typeof(BaseAsset.TYPE)))
-        //         {
-        //             if (pack.HasAssetOfType((BaseAsset.TYPE)type))
-        //             {
-        //                 Event.OnUpdatedAsset(new AssetsManagerUpdatedAssetArgs((BaseAsset.TYPE)type, null));
-        //             }
-        //         }
-        //
-        //         pack.Save();
-        //
-        //         if(string.IsNullOrEmpty(pack_name))
-        //         {
-        //             pack_name = pack.Name;
-        //         }
-        //
-        //         AssetsPacks.Remove(PreArgs.PackID);
-        //         AssetsPacksMapping.Remove(pack_name);
-        //
-        //         Event.OnRemovedPack(PostArgs);
-        //     }
-        //     else
-        //     {
-        //         AssetsManagerRemovedPackArgs PostArgs = PreArgs.ToPost(false).SetError(true);
-        //         Event.OnRemovedPack(PostArgs);
-        //     }
-        //     Event.OnUpdatedAsset();
-        // }
-        //
-        // /// <summary>
-        // /// This should not be used in other part than Core.<br/>
-        // /// Use the AssetsPackManager for this!
-        // /// </summary>
-        // /// <param name="pack"></param>
-        // public void UnregisterPack(string packName)
-        // {
-        //
-        //     if(string.IsNullOrEmpty(packName))
-        //     {
-        //         throw new ArgumentException("Pack name cannot be null or empty.", nameof(packName));
-        //     }
-        //
-        //     if(AssetsPacksMapping.TryGetValue(packName, out Ulid packId))
-        //     {
-        //         UnregisterPack(packId, packName);
-        //     }
-        //     else
-        //     {
-        //         throw new KeyNotFoundException($"No assets pack found with name: {packName}");
-        //     }
-        //
-        // }
-        //
-        // public void ClearAssetsPacks()
-        // {
-        //     var copyPacks = AssetsPacks.ToArray();
-        //     foreach (var pack in copyPacks)
-        //     {
-        //         UnregisterPack(pack.Key);
-        //     }
-        // }
-        //
-        // public BaseAssetsPack[] GetAssetsPacks()
-        // {
-        //     return [.. AssetsPacks.Values];
-        // }
-        //
-        // public bool TryGetAssetsPack(Ulid packId, out BaseAssetsPack? pack)
-        // {
-        //     return AssetsPacks.TryGetValue(packId, out pack);
-        // }
-        //
-        // public bool TryGetAssetsPack(string packName, out BaseAssetsPack? pack)
-        // {
-        //     if (AssetsPacksMapping.TryGetValue(packName, out Ulid packId))
-        //     {
-        //         return AssetsPacks.TryGetValue(packId, out pack);
-        //     }
-        //     else
-        //     {
-        //         pack = null;
-        //         return false;
-        //     }
-        // }
-        //
-        // public BaseAsset? GetCachedAsset(Ulid ulid)
-        // {
-        //     if (_cachedAssets.TryGetValue(ulid, out BaseAsset? asset))
-        //     {
-        //         return asset;
-        //     }
-        //     else
-        //     {
-        //         return null;
-        //     }
-        // }
     }
 }

@@ -31,6 +31,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Collections;
+using RPGCreator.Core.Contexts;
+// using RPGCreator.Core.Contexts;
+using RPGCreator.Core.ModuleSDK.Attributes;
+using RPGCreator.Core.ModuleSDK.UIModule;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor;
 using RPGCreator.UI.Content.AssetsManage.Components.Skills;
 using Serilog;
@@ -52,7 +56,7 @@ namespace RPGCreator.UI.Content.AssetsManage
 
         public static AssetsManageWindow Instance { get; private set; }
         
-        private ReadOnlyDictionary<string, Func<UserControl>> _AssetsMenuOptions = new(
+        private Dictionary<string, Func<UserControl>> _AssetsMenuOptions = new(
             new Dictionary<string, Func<UserControl>>
             {
                 ["Tilesets"] = () => new TilesetsManageControl(), // Tilesets / Auto-tiling system
@@ -91,6 +95,7 @@ namespace RPGCreator.UI.Content.AssetsManage
             Content = Body;
             LoadAssetsMenuOptions();
             Instance = this;
+            UIExtensionManager.ApplyExtensions(UIRegion.AssetsManager, this);
         }
 
         protected void CreateComponents()
@@ -111,7 +116,9 @@ namespace RPGCreator.UI.Content.AssetsManage
                 //Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.LightGray),
             };
             Body.Children.Add(MenuPanel);
-            
+            UIExtensionManager.ApplyExtensions(UIRegion.AssetsManagerMenu, MenuPanel, new AssetsManagerMenuContext(
+                RegisterAssetsMenuOption, 
+                RegisterAssetsMenuSeparator));
         }
 
         protected void LoadAssetsMenuOptions()
@@ -136,8 +143,49 @@ namespace RPGCreator.UI.Content.AssetsManage
                 button.Click += (s, e) => ShowAssetsPanel(option.Key);
                 MenuPanel.Children.Add(button);
             }
+            
+        }
+        
+        /// <summary>
+        /// Method to register a new assets menu option.
+        /// </summary>
+        /// <param name="key"> A unique key for the menu option. </param>
+        /// <param name="panelFactory"> A factory function that creates the UserControl panel for the menu option. </param>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentNullException"></exception>
+        [ExposeToPlugin("AssetsManager.Menu")]
+        public void RegisterAssetsMenuOption(string key, Func<UserControl> panelFactory)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentException("Key cannot be null or whitespace.", nameof(key));
+            }
+
+            if (panelFactory == null)
+            {
+                throw new ArgumentNullException(nameof(panelFactory), "Panel factory cannot be null.");
+            }
+
+            if (_AssetsMenuOptions.ContainsKey(key))
+            {
+                Log.Warning("Assets menu option with key '{key}' is already registered. Overwriting.", key);
+            }
+
+            _AssetsMenuOptions[key] = panelFactory;
+            Log.Debug("Registered assets menu option: {key}", key);
         }
 
+        /// <summary>
+        /// Method to register a separator in the assets menu.
+        /// </summary>
+        [ExposeToPlugin("AssetsManager.Menu")]
+        public void RegisterAssetsMenuSeparator()
+        {
+            var separatorKey = $"---{_AssetsMenuOptions.Count(kvp => kvp.Key.StartsWith("---"))}";
+            _AssetsMenuOptions[separatorKey] = null;
+            Log.Debug("Registered assets menu separator: {key}", separatorKey);
+        }
+        
         public void ShowAssetsPanel(string key)
         {
             if (_AssetsMenuOptions.TryGetValue(key, out var panel))

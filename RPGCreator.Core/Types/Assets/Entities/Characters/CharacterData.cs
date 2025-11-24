@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using RPGCreator.Core.Managers.AssetsManager.Registries;
+using RPGCreator.Core.Types.Assets.Actors;
 using RPGCreator.Core.Types.Assets.Characters.Stats;
 using RPGCreator.Core.Types.Assets.Skills;
 using RPGCreator.Core.Types.Internal;
@@ -358,7 +359,7 @@ public struct CharacterEquipSlot(string slotName, int slotIndex, string itemType
 /// <summary>
 /// This class represents a character in the game.
 /// </summary>
-public class CharacterData : BaseAsset, ICharacter, ISerializable, IDeserializable
+public class CharacterData : BaseEntity, ICharacter, ISerializable, IDeserializable
 {
     #region Events
 
@@ -394,6 +395,8 @@ public class CharacterData : BaseAsset, ICharacter, ISerializable, IDeserializab
     private int _maxLevel = 99;
     
     private Ulid _classId = Ulid.Empty;
+
+    public string Name { get; set; }
 
     [NotNull]
     public string? PortraitPath
@@ -480,7 +483,6 @@ public class CharacterData : BaseAsset, ICharacter, ISerializable, IDeserializab
     // Needed for serialization
     public CharacterData()
     {
-        Type = TYPE.CHARACTER_DATA;
     }
     
     public CharacterData(string name) : this()
@@ -574,4 +576,6 @@ public class CharacterData : BaseAsset, ICharacter, ISerializable, IDeserializab
     }
     
     #endregion
+
+    public string SavePath { get; set; }
 }

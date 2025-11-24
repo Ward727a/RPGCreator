@@ -223,19 +223,19 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 
             foreach (var tilesetData in tilesetDefs)
             {
-                if (EngineCore.Instance.Managers.Assets.TryGetPack(tilesetData.packId, out var pack))
+                if (EngineCore.Instance.Managers.Assets.TryGetPack(tilesetData.PackId, out var pack))
                 {
-                    var asset = pack.LoadAsset(tilesetData.id);
+                    var asset = pack.LoadAsset(tilesetData.AssetId);
                     
                     if (asset == null)
                     {
-                        Log.Warning("Tileset with ID {Id} in pack {PackName} could not be loaded.", tilesetData.id, pack.Name);
+                        Log.Warning("Tileset with ID {Id} in pack {PackName} could not be loaded.", tilesetData.AssetId, pack.Name);
                         continue;
                     }
                     
                     if(asset is not ITilesetDef tilesetDef)
                     {
-                        Log.Warning("Asset with ID {Id} in pack {PackName} is not a tileset definition.", tilesetData.id, pack.Name);
+                        Log.Warning("Asset with ID {Id} in pack {PackName} is not a tileset definition.", tilesetData.AssetId, pack.Name);
                         continue;
                     }
                     

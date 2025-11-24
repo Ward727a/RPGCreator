@@ -35,6 +35,8 @@ namespace RPGCreator.Core
         public GameFactory GameFactory { get; private set; }
         public ProjectsManager Projects { get; private set; }
         public BrushManager Brush { get; private set; }
+        
+        public FeaturesRulesManager FeaturesRules { get; private set; }
 
         internal EngineManagers()
         {
@@ -42,6 +44,7 @@ namespace RPGCreator.Core
             GameFactory = new GameFactory();
             Assets = new AssetsManager();
             Brush = new BrushManager();
+            FeaturesRules = new FeaturesRulesManager();
 
             EngineCore.Instance.Events.OnCoreManagersReady(new());
             

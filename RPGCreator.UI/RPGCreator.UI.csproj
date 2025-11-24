@@ -26,6 +26,16 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup>
+      <ProjectReference Include="..\RPGCreator.Generators\RPGCreator.Generators.csproj">
+          <OutputItemType>Analyzer</OutputItemType>
+          <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      </ProjectReference>
+  </ItemGroup>
+  
+  <ItemGroup>
+      <ProjectReference Include="..\RPGCreator.Core\RPGCreator.Core.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.6" />

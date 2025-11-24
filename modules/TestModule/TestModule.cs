@@ -1,4 +1,6 @@
-﻿using RPGCreator.Core.ModuleSDK;
+﻿using Avalonia.Controls;
+using RPGCreator.Core.ModuleSDK;
+using RPGCreator.Core.ModuleSDK.UIModule;
 using Serilog;
 
 namespace TestModule;
@@ -14,5 +16,26 @@ public class TestModule : IEngineModule
     {
         // Initialization code here
         Log.Information("Test Module initialized.");
+        
+        // Register a UI extension for the Assets Manager region.
+        //
+        // This will be called whenever the Assets Manager UI is created / opened or refreshed in the engine.
+        // This is a very powerful feature that allows you to customize and extend the engine's UI as you see fit.
+        //
+        // Some UIRegion also have specific context objects that are passed as the second parameter 'o' in the callback.
+        // More information about those context objects can be found in the documentation (Not yet available).
+        //
+        // You can even add your own custom regions in the engine's UI using the UIExtensionManager.RegisterRegion method.
+        // Just make sure to choose unique region names to avoid conflicts with other modules.
+        UIExtensionManager.RegisterExtension(UIRegion.AssetsManager, (control, o) =>
+        {
+            // Customize the control in the Assets Manager region
+            // For example, here we change the background color and edit the title
+            if (control is Window window)
+            {
+                window.Title = "Test Module";
+                window.Background = Avalonia.Media.Brushes.LightGray;
+            }
+        });
     }
 }
