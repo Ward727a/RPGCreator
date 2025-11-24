@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using RPGCreator.Core.Type.Internal;
+using RPGCreator.Core.Types.Internal;
 using Serilog;
 using Point = Avalonia.Point;
 

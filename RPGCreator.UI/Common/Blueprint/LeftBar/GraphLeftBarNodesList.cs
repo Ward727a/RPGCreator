@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Layout;
-using RPGCreator.Core.Type.Blueprint;
+using RPGCreator.Core.Types.Blueprint;
 
 namespace RPGCreator.UI.Common.Blueprint.LeftBar;
 

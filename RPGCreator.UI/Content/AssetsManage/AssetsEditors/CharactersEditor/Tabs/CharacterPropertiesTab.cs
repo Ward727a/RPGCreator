@@ -2,8 +2,8 @@ using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
-using RPGCreator.Core.Type.Assets.Characters;
-using RPGCreator.Core.Type;
+using RPGCreator.Core.Types.Assets.Characters;
+using RPGCreator.Core.Types;
 using Ursa.Controls;
 using NumericUpDown = Avalonia.Controls.NumericUpDown;
 

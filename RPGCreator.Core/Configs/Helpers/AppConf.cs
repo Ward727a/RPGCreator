@@ -99,19 +99,19 @@ namespace RPGCreator.Core.Configs.Helpers
             return info;
         }
 
-        public override void SetObjectData(DeserializationInfo info)
+        public override void SetObjectData(Serializer.DeserializationInfo info)
         {
             if (info == null)
             {
                 throw new ArgumentNullException(nameof(info), "SerializationInfo cannot be null.");
             }
 
-            info.TryGetValue("base_folder", out Paths.BaseFolder!, AppDomain.CurrentDomain.BaseDirectory, "Base folder not found or invalid (Set to current domain base directory by default).");
-            info.TryGetValue("appdata_folder", out Paths.AppDataFolder!, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), EngineData.AppName), "App data folder not found or invalid (Set to ApplicationData path by default).");
-            info.TryGetValue("assets_folder", out Paths.AssetsFolder!, string.Empty, "Assets folder not found or invalid (Set to empty string by default).");
-            info.TryGetValue("style_folder", out Paths.StyleFolder!, string.Empty, "Style folder not found or invalid (Set to empty string by default).");
-            info.TryGetValue("logs_folder", out Paths.LogsFolder!, string.Empty, "Logs folder not found or invalid (Set to empty string by default).");
-            info.TryGetValue("projects_folder", out Paths.ProjectsFolder!, string.Empty, "Projects folder not found or invalid (Set to empty string by default).");
+            info.TryGetValue("base_folder", out Paths.BaseFolder!, AppDomain.CurrentDomain.BaseDirectory);
+            info.TryGetValue("appdata_folder", out Paths.AppDataFolder!, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), EngineData.AppName));
+            info.TryGetValue("assets_folder", out Paths.AssetsFolder!, string.Empty);
+            info.TryGetValue("style_folder", out Paths.StyleFolder!, string.Empty);
+            info.TryGetValue("logs_folder", out Paths.LogsFolder!, string.Empty);
+            info.TryGetValue("projects_folder", out Paths.ProjectsFolder!, string.Empty);
             
             Paths.BaseFolder = FormatPath(Paths.BaseFolder);
             Paths.AppDataFolder = FormatPath(Paths.AppDataFolder);

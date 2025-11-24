@@ -23,8 +23,8 @@
 // 
 #endregion
 using RPGCreator.Core.Rendering.Batching;
-using RPGCreator.Core.Type.Internal;
-using RPGCreator.Core.Type.Map;
+using RPGCreator.Core.Types.Internal;
+using RPGCreator.Core.Types.Map;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,7 +37,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
     {
 
 
-        void Draw(SpriteBatchExtend sb, Point at, Type.Map.MapInstance mapInstance);
+        void Draw(SpriteBatchExtend sb, Point at, Types.Map.MapInstance mapInstance);
 
         protected static bool InBorder(Point at, MapInstance mapInstance)
         {

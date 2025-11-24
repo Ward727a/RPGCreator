@@ -1,9 +1,9 @@
 using System.Reflection;
 using RPGCreator.Core.Parser.Graph.NodesMaker;
 using RPGCreator.Core.Runtimes.Contents;
-using RPGCreator.Core.Type.Assets.Skills;
-using RPGCreator.Core.Type.Blueprint;
-using RPGCreator.Core.Type.Internal;
+using RPGCreator.Core.Types.Assets.Skills;
+using RPGCreator.Core.Types.Blueprint;
+using RPGCreator.Core.Types.Internal;
 using Serilog;
 
 namespace RPGCreator.Core.Managers.AssetsManager.Registries;

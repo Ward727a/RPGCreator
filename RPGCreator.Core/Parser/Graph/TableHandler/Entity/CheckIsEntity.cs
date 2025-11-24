@@ -1,4 +1,4 @@
-using RPGCreator.Core.Type.Blueprint.Nodes;
+using RPGCreator.Core.Types.Blueprint.Nodes;
 
 namespace RPGCreator.Core.Parser.Graph.TableHandler.Entity;
 

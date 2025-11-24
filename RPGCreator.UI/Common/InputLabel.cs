@@ -1,7 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Layout;
 
-namespace RPGCreator.Core.Type;
+namespace RPGCreator.Core.Types;
 
 public class InputLabel : UserControl
 {

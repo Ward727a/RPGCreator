@@ -32,7 +32,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RPGCreator.UI;
 
-namespace RPGCreator.Core.Type.Windows
+namespace RPGCreator.Core.Types.Windows
 {
     public class ConfirmDialog : Window
     {

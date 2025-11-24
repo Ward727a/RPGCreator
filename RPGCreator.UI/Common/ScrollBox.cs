@@ -6,7 +6,7 @@ using RPGCreator.UI;
 using ScrollViewer = Avalonia.Controls.ScrollViewer;
 using UserControl = Avalonia.Controls.UserControl;
 
-namespace RPGCreator.Core.Type;
+namespace RPGCreator.Core.Types;
 
 public class ScrollBox : UserControl
 {

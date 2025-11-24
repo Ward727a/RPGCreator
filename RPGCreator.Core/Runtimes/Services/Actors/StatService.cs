@@ -1,5 +1,5 @@
-using RPGCreator.Core.Type.Assets.Characters;
-using RPGCreator.Core.Type.Assets.Characters.Stats;
+using RPGCreator.Core.Types.Assets.Characters;
+using RPGCreator.Core.Types.Assets.Characters.Stats;
 
 namespace RPGCreator.Core.Runtimes.Services.Actors;
 

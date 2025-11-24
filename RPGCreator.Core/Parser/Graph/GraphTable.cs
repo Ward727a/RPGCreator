@@ -1,8 +1,8 @@
 using System.Reflection;
 using RPGCreator.Core.Parser.Graph.NodesMaker;
 using RPGCreator.Core.Parser.Graph.TableHandler;
-using RPGCreator.Core.Type.Blueprint;
-using RPGCreator.Core.Type.Blueprint.Nodes;
+using RPGCreator.Core.Types.Blueprint;
+using RPGCreator.Core.Types.Blueprint.Nodes;
 using Serilog;
 
 namespace RPGCreator.Core.Parser.Graph;

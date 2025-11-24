@@ -5,8 +5,8 @@ using Avalonia.Layout;
 using Avalonia.Media.Imaging;
 using Avalonia.VisualTree;
 using RPGCreator.Core;
-using RPGCreator.Core.Type.Assets;
-using RPGCreator.Core.Type.Assets.Characters;
+using RPGCreator.Core.Types.Assets;
+using RPGCreator.Core.Types.Assets.Characters;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor;
 
 namespace RPGCreator.UI.Content.AssetsManage.Components;

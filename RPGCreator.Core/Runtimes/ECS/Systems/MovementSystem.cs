@@ -1,6 +1,8 @@
 using Microsoft.Xna.Framework;
 using RPGCreator.Core.Runtimes.ECS.Components.Actor;
 using RPGCreator.Core.Runtimes.ECS.Components.Display;
+using RPGCreator.Core.Runtimes.ECS.Components.Display.Animation;
+using RPGCreator.Core.Types.Assets.Characters;
 using Serilog;
 using Vector2 = System.Numerics.Vector2;
 
@@ -11,7 +13,7 @@ public class MovementSystem : ISystem
     private readonly ILogger _logger = Log.ForContext<MovementSystem>();
     
     private readonly ComponentManager _componentManager;
-    public override int Priority { get; } = 0;
+    public override int Priority { get; } = 100;
     public override bool IsDrawingSystem { get; } = true;
 
     public MovementSystem(ComponentManager componentManager)
@@ -32,8 +34,15 @@ public class MovementSystem : ISystem
             ref var movement = ref _componentManager.GetComponent<MovementComponent>(entityId);
             ref var transform = ref _componentManager.GetComponent<TransformComponent>(entityId);
 
-            if (movement.IsMoving == false)
+            if (!movement.IsMoving || movement.TargetDirection == Vector2.Zero)
+            {
+                if (_componentManager.HasComponent<CharStateComponent>(entityId))
+                {
+                    ref var charState = ref _componentManager.GetComponent<CharStateComponent>(entityId);
+                    charState.CurrentState = "idle";
+                }
                 continue;
+            }
 
             switch (movement.Mode)
             {
@@ -44,6 +53,20 @@ public class MovementSystem : ISystem
                     HandleGridMovement(entityId, ref movement, ref transform, allowDiagonals: false);
                     break;
                 case MovementMode.Free:
+        
+                    if (_componentManager.HasComponent<CharStateComponent>(entityId))
+                    {
+                        ref var animState = ref _componentManager.GetComponent<CharStateComponent>(entityId);
+            
+                        animState.CurrentState = "walk";
+            
+                        var newDir = GetDirectionFromVector(movement.TargetDirection);
+            
+                        if (newDir != EDirection.None)
+                        {
+                            animState.CurrentDirection = newDir;
+                        }
+                    }
                     transform.Position += movement.TargetDirection * (float)deltaTime.ElapsedGameTime.TotalSeconds * movement.Speed;
                     break;
                 default:
@@ -70,8 +93,37 @@ public class MovementSystem : ISystem
         {
             dir = Vector2.Normalize(dir);
         }
+        
+        if (_componentManager.HasComponent<CharStateComponent>(entityId))
+        {
+            ref var animState = ref _componentManager.GetComponent<CharStateComponent>(entityId);
+            
+            animState.CurrentState = "walk";
+            
+            var newDir = GetDirectionFromVector(dir);
+            
+            if (newDir != EDirection.None)
+            {
+                animState.CurrentDirection = newDir;
+            }
+        }
 
         transform.Position += dir * movement.Speed;
         _logger.Debug("Entity {entityId} moved to position {position} using grid movement.", entityId, transform.Position);
+    }
+
+    private EDirection GetDirectionFromVector(Vector2 dir)
+    {
+        if(dir == Vector2.Zero)
+            return EDirection.None;
+        
+        if(Math.Abs(dir.X) > Math.Abs(dir.Y))
+        {
+            return dir.X > 0 ? EDirection.Right : EDirection.Left;
+        }
+        else
+        {
+            return dir.Y > 0 ? EDirection.Down : EDirection.Up;
+        }
     }
 }

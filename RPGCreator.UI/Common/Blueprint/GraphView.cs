@@ -6,8 +6,8 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.VisualTree;
-using RPGCreator.Core.Type;
-using RPGCreator.Core.Type.Blueprint;
+using RPGCreator.Core.Types;
+using RPGCreator.Core.Types.Blueprint;
 using Serilog;
 
 namespace RPGCreator.UI.Common.Blueprint;

@@ -25,7 +25,7 @@
 using Avalonia.Controls;
 using Avalonia.VisualTree;
 using RPGCreator.Core;
-using RPGCreator.Core.Type;
+using RPGCreator.Core.Types;
 using RPGCreator.UI.Content.Editor.LayersListComponents;
 using System;
 using System.Collections.Generic;

@@ -1,6 +1,6 @@
 using RPGCreator.Core.Parser.Graph.TableHandler;
-using RPGCreator.Core.Type.Blueprint.Nodes;
-using RPGCreator.Core.Type.Blueprint.Nodes.Debug;
+using RPGCreator.Core.Types.Blueprint.Nodes;
+using RPGCreator.Core.Types.Blueprint.Nodes.Debug;
 using Serilog;
 
 namespace RPGCreator.Core.Parser.Graph;

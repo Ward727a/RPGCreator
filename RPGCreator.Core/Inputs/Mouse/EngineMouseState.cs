@@ -25,7 +25,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended.Input;
-using RPGCreator.Core.Type.Map;
+using RPGCreator.Core.Types.Map;
 using System;
 using System.Collections.Generic;
 using System.Linq;

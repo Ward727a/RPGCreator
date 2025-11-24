@@ -31,7 +31,7 @@ using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.VisualTree;
 using RPGCreator.Core;
-using RPGCreator.Core.Type.Project;
+using RPGCreator.Core.Types.Project;
 using RPGCreator.UI.Content.Editor;
 using RPGCreator.UI.Content.ProjectCreator;
 using System;

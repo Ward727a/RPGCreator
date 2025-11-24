@@ -27,8 +27,8 @@ using RPGCreator.Core.Events;
 using RPGCreator.Core.Events.EventArgs;
 using RPGCreator.Core.Parser.Graph;
 using RPGCreator.Core.Scheduler;
-using RPGCreator.Core.Type.Assets.BaseAssetsPack;
-using RPGCreator.Core.Type.Blueprint;
+using RPGCreator.Core.Types.Assets.BaseAssetsPack;
+using RPGCreator.Core.Types.Blueprint;
 using Serilog;
 
 namespace RPGCreator.Core
@@ -89,7 +89,7 @@ namespace RPGCreator.Core
 
             Logger = new EngineLogger();
             Scheduler = new EngineScheduler();
-            Serializer = new EngineSerializer();
+            Serializer = EngineSerializer.Instance;
             Configs = new EngineConfigs();
             Data = new EngineData();
             Events = new EngineEvents();

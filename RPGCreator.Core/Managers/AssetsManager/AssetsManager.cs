@@ -28,10 +28,10 @@ using RPGCreator.Core.Managers.AssetsManager.EventsArgs;
 using RPGCreator.Core.Managers.AssetsManager.Factories;
 using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Managers.ProjectsManager.Events;
-using RPGCreator.Core.Type.Assets;
-using RPGCreator.Core.Type.Assets.BaseAssetsPack;
-using RPGCreator.Core.Type.Internal;
-using RPGCreator.Core.Type.Map;
+using RPGCreator.Core.Types.Assets;
+using RPGCreator.Core.Types.Assets.BaseAssetsPack;
+using RPGCreator.Core.Types.Internal;
+using RPGCreator.Core.Types.Map;
 using Serilog;
 
 namespace RPGCreator.Core.Managers.AssetsManager

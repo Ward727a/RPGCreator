@@ -23,7 +23,7 @@
 // 
 #endregion
 using RPGCreator.Core.Events.EventArgs;
-using RPGCreator.Core.Type.Assets.BaseAssetsPack;
+using RPGCreator.Core.Types.Assets.BaseAssetsPack;
 using System;
 using System.Collections.Generic;
 using System.Linq;

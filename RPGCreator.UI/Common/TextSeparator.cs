@@ -31,7 +31,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPGCreator.Core.Type
+namespace RPGCreator.Core.Types
 {
     public class TextSeparator : UserControl
     {

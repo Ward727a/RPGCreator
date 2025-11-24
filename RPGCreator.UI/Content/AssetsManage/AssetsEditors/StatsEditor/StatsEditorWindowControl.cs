@@ -3,8 +3,8 @@ using System.IO;
 using Avalonia.Controls;
 using RPGCreator.Core;
 using RPGCreator.Core.Managers.AssetsManager;
-using RPGCreator.Core.Type.Assets.BaseAssetsPack;
-using RPGCreator.Core.Type.Assets.Characters.Stats;
+using RPGCreator.Core.Types.Assets.BaseAssetsPack;
+using RPGCreator.Core.Types.Assets.Characters.Stats;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor.Tabs;
 using Serilog;
 
@@ -93,7 +93,7 @@ public class StatsEditorWindowControl : UserControl
             Log.Information("Saving Stat Definition...");
             // AssetsManager.AssetMapping[typeof(IStatDef)].Invoke(StatDef);
             
-            EngineSerializer.Instance.Serialize(StatDef, out string data, false);
+            EngineSerializer.Instance.Serialize(StatDef, out string data);
             
             // Default test path
             string defaultTestPAth = System.IO.Path.Combine(EngineCore.Instance.Data.EditedProject.Path, "Assets", "Stats");

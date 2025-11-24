@@ -6,12 +6,12 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using RPGCreator.Core;
 using RPGCreator.Core.Managers.AssetsManager.Registries;
-using RPGCreator.Core.Type;
-using RPGCreator.Core.Type.Assets.Skills;
-using RPGCreator.Core.Type.Internal;
+using RPGCreator.Core.Types;
+using RPGCreator.Core.Types.Assets.Skills;
+using RPGCreator.Core.Types.Internal;
 using Serilog;
 using Ursa.Controls;
-using Point = RPGCreator.Core.Type.Internal.Point;
+using Point = RPGCreator.Core.Types.Internal.Point;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEditor.Tabs;
 

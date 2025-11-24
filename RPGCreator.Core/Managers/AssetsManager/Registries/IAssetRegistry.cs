@@ -1,4 +1,4 @@
-using RPGCreator.Core.Type.Internal;
+using RPGCreator.Core.Types.Internal;
 
 namespace RPGCreator.Core.Managers.AssetsManager.Registries;
 

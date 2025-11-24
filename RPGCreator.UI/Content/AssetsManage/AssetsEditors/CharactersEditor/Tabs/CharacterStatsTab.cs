@@ -1,8 +1,8 @@
 using Avalonia.Controls;
 using Avalonia.Layout;
-using RPGCreator.Core.Type.Assets.Characters;
-using RPGCreator.Core.Type;
-using RPGCreator.Core.Type.Assets.Characters.Stats;
+using RPGCreator.Core.Types.Assets.Characters;
+using RPGCreator.Core.Types;
+using RPGCreator.Core.Types.Assets.Characters.Stats;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;

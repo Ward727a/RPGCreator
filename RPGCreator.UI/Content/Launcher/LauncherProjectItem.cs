@@ -24,7 +24,7 @@
 #endregion
 using Avalonia.Controls;
 using Avalonia.Media;
-using RPGCreator.Core.Type.Project;
+using RPGCreator.Core.Types.Project;
 using System;
 using System.Collections.Generic;
 using System.Linq;

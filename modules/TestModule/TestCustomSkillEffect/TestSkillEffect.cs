@@ -1,8 +1,8 @@
 using MonoGame.Extended.ECS;
 using RPGCreator.Core.Runtimes;
 using RPGCreator.Core.Runtimes.Contents;
-using RPGCreator.Core.Type.Assets.Skills;
-using RPGCreator.Core.Type.Internal;
+using RPGCreator.Core.Types.Assets.Skills;
+using RPGCreator.Core.Types.Internal;
 using Entity = RPGCreator.Core.Runtimes.ECS.Entity;
 
 namespace TestModule.TestCustomSkillEffect;

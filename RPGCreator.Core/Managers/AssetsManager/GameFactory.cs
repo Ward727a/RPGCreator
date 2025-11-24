@@ -1,9 +1,9 @@
 using RPGCreator.Core.Managers.AssetsManager.Factories;
-using RPGCreator.Core.Type.Assets;
-using RPGCreator.Core.Type.Assets.Animations;
-using RPGCreator.Core.Type.Assets.Characters.Stats;
-using RPGCreator.Core.Type.Assets.Tilesets;
-using RPGCreator.Core.Type.Map;
+using RPGCreator.Core.Types.Assets;
+using RPGCreator.Core.Types.Assets.Animations;
+using RPGCreator.Core.Types.Assets.Characters.Stats;
+using RPGCreator.Core.Types.Assets.Tilesets;
+using RPGCreator.Core.Types.Map;
 using Serilog;
 
 namespace RPGCreator.Core.Managers.AssetsManager;

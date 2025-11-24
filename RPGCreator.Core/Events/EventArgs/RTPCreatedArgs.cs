@@ -22,7 +22,7 @@
 // 
 // 
 #endregion
-using RPGCreator.Core.Type.RTP;
+using RPGCreator.Core.Types.RTP;
 using System;
 using System.Collections.Generic;
 using System.Linq;

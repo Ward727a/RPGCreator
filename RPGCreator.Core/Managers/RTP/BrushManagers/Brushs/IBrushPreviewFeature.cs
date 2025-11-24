@@ -23,7 +23,7 @@
 // 
 #endregion
 using RPGCreator.Core.Rendering.Batching;
-using RPGCreator.Core.Type.Internal;
+using RPGCreator.Core.Types.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +35,6 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
     public interface IBrushPreviewFeature
     {
         public bool IsPreviewEnabled { get; set; }
-        public void ShowPreview(SpriteBatchExtend sb, Point at, Type.Map.MapInstance mapDefinition);
+        public void ShowPreview(SpriteBatchExtend sb, Point at, Types.Map.MapInstance mapDefinition);
     }
 }

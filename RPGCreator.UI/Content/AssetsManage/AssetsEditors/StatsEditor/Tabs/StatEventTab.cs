@@ -5,12 +5,12 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using RPGCreator.Core;
-using RPGCreator.Core.Type.Assets.Characters.Stats;
-using RPGCreator.Core.Type.Blueprint;
-using RPGCreator.Core.Type.Blueprint.Nodes;
-using RPGCreator.Core.Type.Blueprint.Nodes.Debug;
-using RPGCreator.Core.Type.Blueprint.Nodes.Gets;
-using RPGCreator.Core.Type.Blueprint.Nodes.Math;
+using RPGCreator.Core.Types.Assets.Characters.Stats;
+using RPGCreator.Core.Types.Blueprint;
+using RPGCreator.Core.Types.Blueprint.Nodes;
+using RPGCreator.Core.Types.Blueprint.Nodes.Debug;
+using RPGCreator.Core.Types.Blueprint.Nodes.Gets;
+using RPGCreator.Core.Types.Blueprint.Nodes.Math;
 using RPGCreator.UI.Common.Blueprint;
 using Serilog;
 
@@ -108,7 +108,7 @@ public class StatEventTab : UserControl
             try
             {
                 Log.Information("Saving the graph...");
-                EngineSerializer.Instance.Serialize(_doc, out var data, false);
+                EngineSerializer.Instance.Serialize(_doc, out var data);
                 Log.Debug("Graph data: {Data}", data);
                 // Save to a test file for now.
                 File.WriteAllText("test_save_graph.xml", data);
@@ -137,7 +137,7 @@ public class StatEventTab : UserControl
                 if (File.Exists("test_save_graph.xml"))
                 {
                     var data = File.ReadAllText("test_save_graph.xml");
-                    EngineSerializer.Instance.Deserialize(data, out var obj, out var type);
+                    EngineSerializer.Instance.Deserialize<GraphDocument>(data, out var obj, out var type);
                     if (obj is GraphDocument doc)
                     {
                         _graph.SetDocument(doc);

@@ -21,8 +21,8 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 // 
 #endregion
-using RPGCreator.Core.Type.Project;
-using RPGCreator.Core.Type.Internal;
+using RPGCreator.Core.Types.Project;
+using RPGCreator.Core.Types.Internal;
 using static RPGCreator.Core.Configs.EngineConfigs;
 
 /*
@@ -80,7 +80,7 @@ namespace RPGCreator.Core.Configs.Helpers
 
         public void SaveProject(BaseProject project, bool force = false)
         {
-            EngineSerializer.Instance.Serialize(project, out string projectData, false);
+            EngineSerializer.Instance.Serialize(project, out string projectData);
 
             var link = ProjectLinks.Find(link => link.ProjectID == project.Id);
             if(link == null)
@@ -94,7 +94,7 @@ namespace RPGCreator.Core.Configs.Helpers
                 throw new InvalidOperationException("ConfigPath is not set. Cannot save project.");
             }
             
-            EngineSerializer.Instance.Serialize(this, out string configData, false);
+            EngineSerializer.Instance.Serialize(this, out string configData);
             
             // Save the configuration data to the config file
             File.WriteAllText(ConfigPath, configData);
@@ -122,14 +122,14 @@ namespace RPGCreator.Core.Configs.Helpers
             return info;
         }
 
-        public override void SetObjectData(DeserializationInfo info)
+        public override void SetObjectData(Serializer.DeserializationInfo info)
         {
             if (info == null)
             {
                 throw new ArgumentNullException(nameof(info), "SerializationInfo cannot be null.");
             }
 
-            info.TryGetList("projectLinks", out List<BaseProjectLink> projectLinks, [], "Project links not found or invalid (Set to empty list by default).");
+            info.TryGetList("projectLinks", out List<BaseProjectLink> projectLinks);
 
             ProjectLinks = projectLinks;
         }

@@ -8,7 +8,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using RPGCreator.Core;
 using RPGCreator.Core.Common;
-using RPGCreator.Core.Type.Assets.Animations;
+using RPGCreator.Core.Types.Assets.Animations;
 using Serilog;
 using Ursa.Controls;
 
@@ -275,7 +275,7 @@ public class AnimationPreviewer : UserControl
         
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
-            animationImage.Source = AnimationInstance.GetFrame(frameIndex);
+            animationImage.Source = AnimationInstance.GetFrame(frameIndex).UI;
         });
     }
 
@@ -307,7 +307,7 @@ public class AnimationPreviewer : UserControl
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
             // Update animationImage source here
-            animationImage.Source = AnimationInstance.GetFrame(0);
+            animationImage.Source = AnimationInstance.GetFrame(0).UI;
         });
         UpdateFrame(0);
     }
@@ -327,7 +327,7 @@ public class AnimationPreviewer : UserControl
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
             // Update animationImage source here
-            animationImage.Source = AnimationInstance.GetFrame(0);
+            animationImage.Source = AnimationInstance.GetFrame(0).UI;
         });
         UpdateFrame(0);
     }

@@ -3,8 +3,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
-using RPGCreator.Core.Type.Blueprint;
-using Point = RPGCreator.Core.Type.Internal.Point;
+using RPGCreator.Core.Types.Blueprint;
+using Point = RPGCreator.Core.Types.Internal.Point;
 
 namespace RPGCreator.UI.Common.Blueprint;
 

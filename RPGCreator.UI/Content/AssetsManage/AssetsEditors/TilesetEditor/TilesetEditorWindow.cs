@@ -23,13 +23,13 @@
 // 
 #endregion
 using Avalonia.Controls;
-using RPGCreator.Core.Type.Assets;
+using RPGCreator.Core.Types.Assets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RPGCreator.Core.Type.Assets.Tilesets;
+using RPGCreator.Core.Types.Assets.Tilesets;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
 {

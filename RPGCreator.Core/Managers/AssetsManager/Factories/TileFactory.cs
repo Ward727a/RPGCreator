@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Linq.Expressions;
-using RPGCreator.Core.Type.Assets.Tilesets;
-using RPGCreator.Core.Type.Internal;
+using RPGCreator.Core.Types.Assets.Tilesets;
+using RPGCreator.Core.Types.Internal;
 
 namespace RPGCreator.Core.Managers.AssetsManager.Factories;
 

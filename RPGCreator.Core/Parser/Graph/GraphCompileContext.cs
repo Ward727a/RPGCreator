@@ -1,6 +1,6 @@
 using System.Globalization;
-using RPGCreator.Core.Type.Blueprint;
-using RPGCreator.Core.Type.Blueprint.Nodes;
+using RPGCreator.Core.Types.Blueprint;
+using RPGCreator.Core.Types.Blueprint.Nodes;
 
 namespace RPGCreator.Core.Parser.Graph;
 

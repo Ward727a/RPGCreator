@@ -6,10 +6,10 @@ using Avalonia.Layout;
 using RPGCreator.Core;
 using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Managers.AssetsManager.Registries;
-using RPGCreator.Core.Type.Assets;
-using RPGCreator.Core.Type.Internal;
+using RPGCreator.Core.Types.Assets;
+using RPGCreator.Core.Types.Internal;
 
-namespace RPGCreator.Core.Type.Windows;
+namespace RPGCreator.Core.Types.Windows;
 
 public class AssetExplorerDialog : Window
 {

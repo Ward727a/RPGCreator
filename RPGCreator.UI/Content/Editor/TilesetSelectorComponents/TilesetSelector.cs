@@ -28,14 +28,14 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using RPGCreator.Core;
 using RPGCreator.Core.Managers.AssetsManager.EventsArgs;
-using RPGCreator.Core.Type.Assets;
+using RPGCreator.Core.Types.Assets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RPGCreator.Core.Managers.AssetsManager.Registries;
-using RPGCreator.Core.Type.Assets.Tilesets;
+using RPGCreator.Core.Types.Assets.Tilesets;
 using Serilog;
 
 namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents

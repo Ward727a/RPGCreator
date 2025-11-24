@@ -23,15 +23,15 @@
 // 
 #endregion
 using RPGCreator.Core.Rendering.Batching;
-using RPGCreator.Core.Type.Internal;
-using RPGCreator.Core.Type.Map;
+using RPGCreator.Core.Types.Internal;
+using RPGCreator.Core.Types.Map;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RPGCreator.Core.Managers.AssetsManager.Factories;
-using RPGCreator.Core.Type.Assets.Tilesets;
+using RPGCreator.Core.Types.Assets.Tilesets;
 
 namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
 {
@@ -46,7 +46,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
         private bool _isPreviewEnabled = true;
         public bool IsPreviewEnabled { get => _isPreviewEnabled; set => _isPreviewEnabled = value; }
 
-        public void Draw(SpriteBatchExtend sb, Point at, Type.Map.MapInstance mapInstance)
+        public void Draw(SpriteBatchExtend sb, Point at, Types.Map.MapInstance mapInstance)
         {
             if (mapInstance == null)
             {

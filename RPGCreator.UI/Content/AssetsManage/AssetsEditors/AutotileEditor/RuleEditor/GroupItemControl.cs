@@ -1,7 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Layout;
-using RPGCreator.Core.Type.Assets;
-using RPGCreator.Core.Type.Assets.Tilesets;
+using RPGCreator.Core.Types.Assets;
+using RPGCreator.Core.Types.Assets.Tilesets;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor.RuleEditor;
 

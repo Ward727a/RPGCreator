@@ -26,7 +26,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using RPGCreator.Core;
 using RPGCreator.Core.Managers.RTP.BrushManagers.Brushs;
-using RPGCreator.Core.Type;
+using RPGCreator.Core.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -104,7 +104,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
 
             DrawButton = new ToggleButton
             {
-                Content = "Draw",
+                Content = "Tiling",
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
                 CornerRadius = new(2, 0, 0, 2),
@@ -240,7 +240,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
 
             PlaceButton = new ToggleButton // Tool that allows placing entities on the map (like characters, doors, chests, etc.)
             {
-                Content = "Place",
+                Content = "Entities",
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
                 CornerRadius = new(2),

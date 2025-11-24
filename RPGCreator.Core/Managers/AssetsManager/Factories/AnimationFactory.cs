@@ -1,4 +1,4 @@
-using RPGCreator.Core.Type.Assets.Animations;
+using RPGCreator.Core.Types.Assets.Animations;
 
 namespace RPGCreator.Core.Managers.AssetsManager.Factories;
 

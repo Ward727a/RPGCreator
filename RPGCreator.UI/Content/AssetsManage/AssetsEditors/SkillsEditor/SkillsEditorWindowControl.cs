@@ -1,5 +1,5 @@
 using Avalonia.Controls;
-using RPGCreator.Core.Type.Assets.Skills;
+using RPGCreator.Core.Types.Assets.Skills;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEditor.Tabs;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor.Tabs;
 using Serilog;

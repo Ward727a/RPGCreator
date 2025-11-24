@@ -9,10 +9,10 @@ using AvaloniaEdit;
 using AvaloniaEdit.TextMate;
 using RPGCreator.Core;
 using RPGCreator.Core.Parser.PRATT;
-using RPGCreator.Core.Type.Assets.Characters.Stats;
-using RPGCreator.Core.Type;
-using RPGCreator.Core.Type.Assets.BaseAssetsPack;
-using RPGCreator.Core.Type.Windows;
+using RPGCreator.Core.Types.Assets.Characters.Stats;
+using RPGCreator.Core.Types;
+using RPGCreator.Core.Types.Assets.BaseAssetsPack;
+using RPGCreator.Core.Types.Windows;
 using Serilog;
 using TextMateSharp.Grammars;
 

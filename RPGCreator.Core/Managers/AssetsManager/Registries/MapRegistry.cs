@@ -1,5 +1,5 @@
-using RPGCreator.Core.Type.Internal;
-using RPGCreator.Core.Type.Map;
+using RPGCreator.Core.Types.Internal;
+using RPGCreator.Core.Types.Map;
 
 namespace RPGCreator.Core.Managers.AssetsManager.Registries;
 

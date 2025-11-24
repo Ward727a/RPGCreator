@@ -26,8 +26,8 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using RPGCreator.Core;
-using RPGCreator.Core.Type.Assets;
-using RPGCreator.Core.Type;
+using RPGCreator.Core.Types.Assets;
+using RPGCreator.Core.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,9 +35,9 @@ using Avalonia;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.VisualTree;
-using RPGCreator.Core.Type.Assets.Tilesets;
-using RPGCreator.Core.Type.Windows;
-using Point = RPGCreator.Core.Type.Internal.Point;
+using RPGCreator.Core.Types.Assets.Tilesets;
+using RPGCreator.Core.Types.Windows;
+using Point = RPGCreator.Core.Types.Internal.Point;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 {
@@ -917,7 +917,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
             CenterSubCanvas.Children.Remove(BaseTileCase);
             BaseTileCase = null;
         }
-        private void DrawBaseCase(Core.Type.Internal.Point? at)
+        private void DrawBaseCase(Core.Types.Internal.Point? at)
         {
             if (BaseTileCase == null)
             {
@@ -944,7 +944,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
             BasedOnTilesCases.Clear();
         }
 
-        private void AddBasedOnTileCase(Core.Type.Internal.Point? at)
+        private void AddBasedOnTileCase(Core.Types.Internal.Point? at)
         {
             var border = new Border()
             {
@@ -961,7 +961,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
             Canvas.SetTop(border, at.Value.Y * SelectedTileset.TileHeight);
         }
 
-        private void DrawSelectedTileCase(Core.Type.Internal.Point? at)
+        private void DrawSelectedTileCase(Core.Types.Internal.Point? at)
         {
             if (SelectedTileCase == null)
             {

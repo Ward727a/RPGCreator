@@ -28,15 +28,15 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using RPGCreator.Core;
-using RPGCreator.Core.Type.Assets;
-using RPGCreator.Core.Type;
+using RPGCreator.Core.Types.Assets;
+using RPGCreator.Core.Types;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RPGCreator.Core.Type.Assets.Tilesets;
+using RPGCreator.Core.Types.Assets.Tilesets;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor

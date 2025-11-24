@@ -1,5 +1,5 @@
 using System.Collections;
-using RPGCreator.Core.Type.Internal;
+using RPGCreator.Core.Types.Internal;
 
 namespace RPGCreator.Core.Runtimes.ECS;
 
@@ -216,5 +216,11 @@ public class ComponentManager(ECSEventBus eventBus)
                     remove(entityId);
             }
         }
+    }
+    
+    public bool HasComponent<T>(int entityId) where T : IComponent
+    {
+        var sparseSet = GetOrCreateSparseSet<T>();
+        return sparseSet.Contains(entityId);
     }
 }

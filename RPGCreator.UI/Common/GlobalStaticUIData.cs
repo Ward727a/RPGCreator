@@ -31,7 +31,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls.Diagnostics;
 using Avalonia.Controls.Primitives;
 
-namespace RPGCreator.Core.Type
+namespace RPGCreator.Core.Types
 {
     public static class GlobalStaticUIData
     {

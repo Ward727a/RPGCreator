@@ -1,7 +1,7 @@
 using Microsoft.Xna.Framework;
 using RPGCreator.Core.Runtimes.Services;
-using RPGCreator.Core.Type.Assets.Actors;
-using RPGCreator.Core.Type.Assets.Items;
+using RPGCreator.Core.Types.Assets.Actors;
+using RPGCreator.Core.Types.Assets.Items;
 
 namespace RPGCreator.Core.Runtimes.Context;
 

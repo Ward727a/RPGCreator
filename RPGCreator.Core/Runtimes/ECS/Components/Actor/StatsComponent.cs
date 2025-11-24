@@ -1,6 +1,6 @@
 using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Runtimes.ECS;
-using RPGCreator.Core.Type.Assets.Characters.Stats;
+using RPGCreator.Core.Types.Assets.Characters.Stats;
 
 namespace RPGCreator.Core.Runtimes.ECS.Components.Actor;
 

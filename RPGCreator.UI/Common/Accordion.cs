@@ -30,7 +30,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RPGCreator.UI;
 
-namespace RPGCreator.Core.Type
+namespace RPGCreator.Core.Types
 {
     public class Accordion : UserControl
     {

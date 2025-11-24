@@ -11,9 +11,9 @@ using AvaloniaEdit;
 using AvaloniaEdit.TextMate;
 using RPGCreator.Core;
 using RPGCreator.Core.Managers.AssetsManager;
-using RPGCreator.Core.Type;
-using RPGCreator.Core.Type.Assets.Characters.Stats;
-using RPGCreator.Core.Type.Assets.Skills;
+using RPGCreator.Core.Types;
+using RPGCreator.Core.Types.Assets.Characters.Stats;
+using RPGCreator.Core.Types.Assets.Skills;
 using Serilog;
 using TextMateSharp.Grammars;
 using Ursa.Controls;
@@ -463,7 +463,7 @@ public class SkillEditorTab : UserControl
             Log.Information("Skill '{SkillName}' saved.", SkillDef.Name);
             
             
-            EngineSerializer.Instance.Serialize(SkillDef, out string data, false);
+            EngineSerializer.Instance.Serialize(SkillDef, out string data);
             // Add the stat definition to the selected asset pack in the statdef
             if(SkillDef.PackId.HasValue && SkillDef.PackId != Ulid.Empty)
             {

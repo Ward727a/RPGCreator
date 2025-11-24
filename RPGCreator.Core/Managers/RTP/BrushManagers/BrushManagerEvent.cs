@@ -23,7 +23,7 @@
 // 
 #endregion
 using RPGCreator.Core.Managers.RTP.BrushManagers.Brushs;
-using RPGCreator.Core.Type.Internal;
+using RPGCreator.Core.Types.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;

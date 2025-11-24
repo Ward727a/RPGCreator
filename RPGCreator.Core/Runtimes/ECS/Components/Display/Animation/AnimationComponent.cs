@@ -1,8 +1,14 @@
+using RPGCreator.Core.Types.Assets.Animations;
+
 namespace RPGCreator.Core.Runtimes.ECS.Components.Display.Animation;
 
-public struct AnimationComponent : IComponent
+public struct AnimationComponent() : IComponent
 {
-    public string CurrentAnimation;
-    public double ElapsedTime;
-    public int CurrentFrame;
+    public AnimationInstance? Instance;
+    
+    public double ElapsedTime = 0.0;
+    public int CurrentFrame = 0;
+    
+    public bool IsPlaying = true;
+    public float SpeedMultiplier = 1.0f;
 }

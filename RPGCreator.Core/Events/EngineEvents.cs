@@ -32,7 +32,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Input;
 using Microsoft.Xna.Framework.Graphics;
-using RPGCreator.Core.Type.Assets.Animations;
+using RPGCreator.Core.Types.Assets.Animations;
 using Serilog;
 
 namespace RPGCreator.Core.Events

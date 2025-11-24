@@ -42,7 +42,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RPGCreator.Core.Type.Windows;
+using RPGCreator.Core.Types.Windows;
 
 namespace RPGCreator.UI.Content.Editor
 {
@@ -58,6 +58,8 @@ namespace RPGCreator.UI.Content.Editor
         private Avalonia.Point _LastTilePreviewPos;
 
         private bool _placingTile = false; // Flag to indicate if a tile is being placed
+        private Grid _mainGrid;
+        private Menu _menuBar;
 
         public EditorWindowControl()
         {
@@ -67,10 +69,14 @@ namespace RPGCreator.UI.Content.Editor
                 throw new InvalidOperationException("EditorGame is not initialized. Make sure to initialize the game before using this control.");
             }
 
-            // Initialize the control here if needed
-            // For example, you can set up bindings, styles, etc.
+            CreateComponents();
 
-            var MainGrid = new Grid
+            Content = _mainGrid;
+        }
+
+        private void CreateComponents()
+        {
+            _mainGrid = new Grid
             {
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
@@ -78,19 +84,19 @@ namespace RPGCreator.UI.Content.Editor
             };
 
             #region MenuBar
-            var menuBar = new Menu
+            _menuBar = new Menu
             {
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
             };
-            MainGrid.Children.Add(menuBar);
-            Grid.SetRow(menuBar, 0);
+            _mainGrid.Children.Add(_menuBar);
+            Grid.SetRow(_menuBar, 0);
 
             var fileMenuItem = new MenuItem
             {
                 Header = "File"
             };
-            menuBar.Items.Add(fileMenuItem);
+            _menuBar.Items.Add(fileMenuItem);
 
             var newFileMenuItem = new MenuItem
             {
@@ -162,7 +168,7 @@ namespace RPGCreator.UI.Content.Editor
             {
                 Header = "Edit"
             };
-            menuBar.Items.Add(editMenuItem);
+            _menuBar.Items.Add(editMenuItem);
             var openTestDialogMenuItem = new MenuItem
             {
                 Header = "Open Test Dialog"
@@ -207,7 +213,7 @@ namespace RPGCreator.UI.Content.Editor
             {
                 Header = "Assets"
             };
-            menuBar.Items.Add(assetsMenuItem);
+            _menuBar.Items.Add(assetsMenuItem);
             var addAssetMenuItem = new MenuItem
             {
                 Header = "Add..."
@@ -233,7 +239,7 @@ namespace RPGCreator.UI.Content.Editor
             {
                 Header = "Help"
             };
-            menuBar.Items.Add(helpMenuItem);
+            _menuBar.Items.Add(helpMenuItem);
             var aboutMenuItem = new MenuItem
             {
                 Header = "About"
@@ -258,7 +264,7 @@ namespace RPGCreator.UI.Content.Editor
                 ColumnDefinitions = new ColumnDefinitions("Auto, *, Auto"),
                 RowDefinitions = new RowDefinitions("*, Auto"),
             };
-            MainGrid.Children.Add(ContentGrid);
+            _mainGrid.Children.Add(ContentGrid);
             Grid.SetRow(ContentGrid, 1);
 
             #region LeftBar
@@ -371,7 +377,10 @@ namespace RPGCreator.UI.Content.Editor
                 Game = game,
             };
             monogameGrid.Children.Add(MonoGameScreen);
+        }
 
+        private void RegisterEvents()
+        {
             MonoGameScreen.PointerEntered += (s, e) =>
             {
                 game.CanUseMouse = true;
@@ -397,10 +406,9 @@ namespace RPGCreator.UI.Content.Editor
                 game.GraphicsDevice.PresentationParameters.BackBufferHeight = (int)MonoGameScreen.Bounds.Height;
                 game._graphics.ApplyChanges();
 
-                game.Window.Position = new Microsoft.Xna.Framework.Point((int)(_Host.Position.X + 8 + 300), (int)(position.Y + _Host.Position.Y + 1 + menuBar.Bounds.Height));
+                game.Window.Position = new Microsoft.Xna.Framework.Point((int)(_Host.Position.X + 8 + 300), (int)(position.Y + _Host.Position.Y + 1 + _menuBar.Bounds.Height));
             };
 
-            this.Content = MainGrid;
         }
 
         private void MonoGameScreenOnKeyDown(object? sender, KeyEventArgs e)
@@ -448,7 +456,7 @@ namespace RPGCreator.UI.Content.Editor
             {
                 var position = e.GetPosition(MonoGameScreen);
                 // Adjust the position to account for the MonoGameScreen's margin (12px)
-                EngineCore.Instance.Managers.Brush.ClickAt(new Core.Type.Internal.Point(position));
+                EngineCore.Instance.Managers.Brush.ClickAt(new Core.Types.Internal.Point(position));
                 _LastTilePlacePos = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position);
                 _placingTile = true; // Set the flag to indicate that a tile is being placed
             }
@@ -484,7 +492,7 @@ namespace RPGCreator.UI.Content.Editor
                 }
 
                 // Adjust the position to account for the MonoGameScreen's margin (12px)
-                EngineCore.Instance.Managers.Brush.ClickAt(new Core.Type.Internal.Point(position));
+                EngineCore.Instance.Managers.Brush.ClickAt(new Core.Types.Internal.Point(position));
             }
 
             {
@@ -504,7 +512,7 @@ namespace RPGCreator.UI.Content.Editor
                     return;
                 }
 
-                EngineCore.Instance.Managers.Brush.PreviewAt(new Core.Type.Internal.Point(position));
+                EngineCore.Instance.Managers.Brush.PreviewAt(new Core.Types.Internal.Point(position));
             }
 
         }

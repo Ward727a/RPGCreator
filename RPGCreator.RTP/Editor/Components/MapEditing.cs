@@ -4,7 +4,7 @@ using RPGCreator.Core;
 using RPGCreator.Core.Managers.RTP.BrushManagers;
 using RPGCreator.Core.Managers.RTP.BrushManagers.Brushs;
 using RPGCreator.Core.Rendering.Batching;
-using RPGCreator.Core.Type.Map;
+using RPGCreator.Core.Types.Map;
 using System;
 using System.Collections.Generic;
 using System.Linq;

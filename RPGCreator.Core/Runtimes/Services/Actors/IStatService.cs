@@ -1,8 +1,8 @@
-using RPGCreator.Core.Type.Assets.Actors;
-using RPGCreator.Core.Type.Assets.Characters;
-using RPGCreator.Core.Type.Assets.Characters.Stats;
-using RPGCreator.Core.Type.Assets.Items;
-using RPGCreator.Core.Type.Assets.Effect;
+using RPGCreator.Core.Types.Assets.Actors;
+using RPGCreator.Core.Types.Assets.Characters;
+using RPGCreator.Core.Types.Assets.Characters.Stats;
+using RPGCreator.Core.Types.Assets.Items;
+using RPGCreator.Core.Types.Assets.Effect;
 
 namespace RPGCreator.Core.Runtimes.Services.Actors;
 

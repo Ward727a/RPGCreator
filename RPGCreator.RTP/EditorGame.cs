@@ -6,9 +6,9 @@ using MonoGame.Extended.Graphics;
 using MonoGame.Extended.VectorDraw;
 using RPGCreator.Core;
 using RPGCreator.Core.Rendering.Batching;
-using RPGCreator.Core.Type.Assets;
-using RPGCreator.Core.Type.Map;
-using RPGCreator.Core.Type.RTP;
+using RPGCreator.Core.Types.Assets;
+using RPGCreator.Core.Types.Map;
+using RPGCreator.Core.Types.RTP;
 using RPGCreator.RTP.Editor.Components;
 using System;
 using System.Collections.Generic;
@@ -22,10 +22,11 @@ using RPGCreator.Core.Runtimes.ECS.Components.Actor;
 using RPGCreator.Core.Runtimes.ECS.Components.Display;
 using RPGCreator.Core.Runtimes.ECS.Components.Display.Animation;
 using RPGCreator.Core.Runtimes.ECS.Systems;
-using RPGCreator.Core.Type.Assets.Animations;
-using RPGCreator.Core.Type.Assets.Characters;
+using RPGCreator.Core.Types;
+using RPGCreator.Core.Types.Assets.Animations;
+using RPGCreator.Core.Types.Assets.Characters;
 using Serilog;
-using Size = RPGCreator.Core.Type.Internal.Size;
+using Size = RPGCreator.Core.Types.Internal.Size;
 
 namespace RPGCreator.MonoGame
 {
@@ -83,7 +84,7 @@ namespace RPGCreator.MonoGame
                 {
                     var entity = _playerEntity;
                     ref var movementComponent = ref entity.GetComponent<MovementComponent>();
-                    ref var stateComponent = ref entity.GetComponent<StateComponent>();
+                    ref var stateComponent = ref entity.GetComponent<CharStateComponent>();
 
                     switch (keyEventArgs.Key)
                     {
@@ -135,7 +136,7 @@ namespace RPGCreator.MonoGame
 
             _ecsWorld = new();
             _ecsWorld.AddSystem(new SpriteRenderSystem(_ecsWorld._componentManager, GraphicsDevice));
-            _ecsWorld.AddSystem(new AnimationSystem(_ecsWorld._componentManager));
+            _ecsWorld.AddSystem(new AnimationSystem(_ecsWorld._componentManager, GraphicsDevice));
             _ecsWorld.AddSystem(new MovementSystem(_ecsWorld._componentManager));
 
             // Test loop to create multiple entities with sprite and transform components and test the sprite rendering system.
@@ -185,18 +186,17 @@ namespace RPGCreator.MonoGame
 
                     ref var spriteComponent = ref entity.AddComponent<SpriteComponent>();
 
-                    spriteComponent.SpritePath = data.PortraitPath;
-                    spriteComponent.Size = new(48*2, 64*2);
-                    spriteComponent.IsAnimated = false;
+                    spriteComponent.Texture = new UnifiedImage(data.PortraitPath, GraphicsDevice).Game;
+                    spriteComponent.RenderSize = new(48*2, 64*2);
 
-                    if (_spritePlayerIdle != null)
-                    {
-                        spriteComponent.IsAnimated = true;
-                        spriteComponent.TextureAtlas = _spritePlayerIdle.TextureAtlas;
-                    }
+                    ref var charDataComponent = ref entity.AddComponent<CharDataComponent>();
+                    charDataComponent.CharacterData = data;
+                    
+                    ref var charStateComponent = ref entity.AddComponent<CharStateComponent>();
+                    charStateComponent.CurrentState = "idle";
+                    charStateComponent.CurrentDirection = EDirection.Down;
                     
                     ref var animationComponent = ref entity.AddComponent<AnimationComponent>();
-                    animationComponent.CurrentAnimation = "idle";
                     animationComponent.CurrentFrame = 0;
                     animationComponent.ElapsedTime = 0;
                     
@@ -205,17 +205,6 @@ namespace RPGCreator.MonoGame
                     movementComponent.Mode = MovementMode.Grid4;
                     movementComponent.Speed = 32f;
                     movementComponent.TargetDirection = new System.Numerics.Vector2(0, 0);
-                    
-                    ref var animationSetComponent = ref entity.AddComponent<AnimationSetComponent>();
-                    animationSetComponent.Animations = new ()
-                    {
-                        ["idle"] = _spritePlayerIdle,
-                        ["walk_down"] = _spritePlayerAtlas,
-                    };
-                    
-                    ref var stateComponent = ref entity.AddComponent<StateComponent>();
-                    stateComponent.CurrentState = "idle";
-                    stateComponent.PreviousState = "idle";
 
                     ref var transformComponent = ref entity.AddComponent<TransformComponent>();
 

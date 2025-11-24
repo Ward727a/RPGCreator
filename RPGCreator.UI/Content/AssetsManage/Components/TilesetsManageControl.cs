@@ -28,8 +28,8 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.VisualTree;
 using RPGCreator.Core;
-using RPGCreator.Core.Type.Assets;
-using RPGCreator.Core.Type;
+using RPGCreator.Core.Types.Assets;
+using RPGCreator.Core.Types;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor;
 using System;
@@ -37,7 +37,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RPGCreator.Core.Type.Assets.Tilesets;
+using RPGCreator.Core.Types.Assets.Tilesets;
 
 namespace RPGCreator.UI.Content.AssetsManage.Components
 {

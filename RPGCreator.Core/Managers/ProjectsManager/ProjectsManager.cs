@@ -24,9 +24,10 @@
 #endregion
 using RPGCreator.Core.Configs.Helpers;
 using RPGCreator.Core.Managers.ProjectsManager.Events;
-using RPGCreator.Core.Type.Project;
+using RPGCreator.Core.Types.Project;
 using System.Collections.ObjectModel;
-using RPGCreator.Core.Type.Internal;
+using RPGCreator.Core.Types.Assets.BaseAssetsPack;
+using RPGCreator.Core.Types.Internal;
 
 namespace RPGCreator.Core.Managers.ProjectsManager
 {
@@ -107,6 +108,14 @@ namespace RPGCreator.Core.Managers.ProjectsManager
             {
                 Path = project_path
             };
+            
+            // Create a new asset pack for the project
+            var assetsPack = new BaseAssetsPack(Path.Combine(newProject.Path, "assets_pack.pack"));
+            assetsPack.Name = $"{project_name} Assets Pack";
+            assetsPack.Description = $"Default assets pack for the project {project_name}";
+            assetsPack.Save();
+            
+            newProject.AssetsPackPath.Add(assetsPack.DbFilePath);
             
             ProjectsConf.Instance.SaveProject(newProject);
 

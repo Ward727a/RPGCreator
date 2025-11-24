@@ -41,11 +41,11 @@ namespace RPGCreator.Core.Configs
             // Load the default config file that should be inside the folder where the .exe is
             var t = AppDomain.CurrentDomain.BaseDirectory;
             LoadOrCreateConfig<AppConf>(
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App.conf.xml")
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App.conf")
             );
 
             LoadOrCreateConfig<ProjectsConf>(
-                Path.Combine(((AppConf)LoadedConfig[ConfigMap["AppConf"]]).Paths.ProjectsFolder, "Projects.conf.xml")
+                Path.Combine(((AppConf)LoadedConfig[ConfigMap["AppConf"]]).Paths.ProjectsFolder, "Projects.conf")
             );
             
             Log.Information($"EngineConfigs initialized.");
@@ -77,7 +77,7 @@ namespace RPGCreator.Core.Configs
             }
             
             var newConf = new T();
-            EngineSerializer.Instance.Serialize(newConf, out var data, false);
+            EngineSerializer.Instance.Serialize(newConf, out var data);
             if (string.IsNullOrEmpty(data))
             {
                 throw new InvalidOperationException($"Config at {configPath} is not valid.");
@@ -137,7 +137,7 @@ namespace RPGCreator.Core.Configs
             {
                 return false;
             }
-            EngineSerializer.Instance.Deserialize(data, out var o, out var t);
+            EngineSerializer.Instance.Deserialize<ConfHelper>(data, out var o, out var t);
 
             if (o == null || t == null)
                 return false;
@@ -309,7 +309,7 @@ namespace RPGCreator.Core.Configs
                 if (string.IsNullOrEmpty(path))
                     return;
                 
-                EngineSerializer.Instance.Serialize(this, out var data, false);
+                EngineSerializer.Instance.Serialize(this, out var data);
                 if (string.IsNullOrEmpty(data))
                     throw new InvalidOperationException("Data is null or empty. Cannot save config.");
                 try
@@ -332,7 +332,7 @@ namespace RPGCreator.Core.Configs
                 Save(ConfigPath);
             }
             public abstract SerializationInfo GetObjectData();
-            public abstract void SetObjectData(DeserializationInfo info);
+            public abstract void SetObjectData(Serializer.DeserializationInfo info);
         }
     }
 }

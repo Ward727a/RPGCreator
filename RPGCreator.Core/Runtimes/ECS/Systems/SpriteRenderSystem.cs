@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended.Graphics;
 using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Runtimes.ECS.Components.Display;
-using RPGCreator.Core.Type.Internal;
+using RPGCreator.Core.Types.Internal;
 using Serilog;
 using Vector2 = System.Numerics.Vector2;
 
@@ -25,7 +25,7 @@ public class SpriteRenderSystem : ISystem
         _spriteBatch = new SpriteBatchExtend(graphicsDevice);
     }
 
-    public override int Priority { get; } = 0;
+    public override int Priority { get; } = 400;
     public override bool IsDrawingSystem { get; } = true;
 
     public override void Initialize(IECSWorld iecsWorld)
@@ -42,37 +42,18 @@ public class SpriteRenderSystem : ISystem
         // #endif
         foreach (var (entityId, sprite) in _componentManager.GetAll<SpriteComponent>())
         {
-            Vector2 position = Vector2.Zero;
-
+            if (sprite.Texture == null)
+                continue;
+            
             var transform = _componentManager.GetComponent<TransformComponent>(entityId);
-            position = transform.Position;
-
-            if (sprite.IsAnimated)
-            {
-                if (sprite.TextureAtlas == null)
-                {
-                    Log.Warning($"Entity {entityId} has an animated sprite but no TextureAtlas assigned.");
-                    continue;
-                }
-                
-                Size spriteSize = sprite.Size;
-                
-                _spriteBatch.Draw(sprite.TextureAtlasRegion.Texture, new Rectangle((int)position.X, (int)position.Y, spriteSize.Width, spriteSize.Height), sprite.TextureAtlasRegion.Bounds, Color.White);
-            }
-            else
-            {
-
-                if (!_textureCache.TryGetValue(sprite.SpritePath, out var texture))
-                {
-                    texture = LoadTexture(sprite.SpritePath);
-                    _textureCache[sprite.SpritePath] = texture;
-                }
-
-                Size spriteSize = sprite.Size;
-
-                _spriteBatch.Draw(texture,
-                    new Rectangle((int)position.X, (int)position.Y, spriteSize.Width, spriteSize.Height), Color.White);
-            }
+            
+            var position = transform.Position;
+            
+            _spriteBatch.Draw(
+                sprite.Texture,
+                position,
+                sprite.SourceRectangle,
+                sprite.Color);
         }
         // #if DEBUG
         // sw.Stop();
@@ -80,11 +61,5 @@ public class SpriteRenderSystem : ISystem
         // #endif
 
         _spriteBatch.End();
-    }
-    
-    private Texture2D LoadTexture(string path)
-    {
-        using var stream = System.IO.File.OpenRead(path);
-        return Texture2D.FromStream(_graphicsDevice, stream);
     }
 }

@@ -1,5 +1,5 @@
 // ReSharper disable InconsistentNaming
-namespace RPGCreator.Core.Type.Blueprint.Nodes;
+namespace RPGCreator.Core.Types.Blueprint.Nodes;
 
 public enum EGraphOpCode
 {

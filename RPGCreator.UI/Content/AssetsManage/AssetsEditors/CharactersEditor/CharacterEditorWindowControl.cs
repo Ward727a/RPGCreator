@@ -3,7 +3,7 @@ using System.IO;
 using Avalonia;
 using Avalonia.Controls;
 using RPGCreator.Core;
-using RPGCreator.Core.Type.Assets.Characters;
+using RPGCreator.Core.Types.Assets.Characters;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;
 using Serilog;
 using Ursa.Controls;

@@ -57,6 +57,7 @@
   <ItemGroup>
     <Folder Include="Common\AnimEditor\" />
     <Folder Include="Content\AssetsManage\Components\Items\" />
+    <Folder Include="Content\Editor\RightPanel\" />
     <Folder Include="Content\Preferences\Components\General\" />
   </ItemGroup>
 

@@ -7,11 +7,11 @@ using Avalonia.Controls;
 using Avalonia.Layout;
 using RPGCreator.Core;
 using RPGCreator.Core.Parser.PRATT;
-using RPGCreator.Core.Type.Assets.BaseAssetsPack;
+using RPGCreator.Core.Types.Assets.BaseAssetsPack;
 using RPGCreator.UI;
 using Serilog;
 
-namespace RPGCreator.Core.Type.Windows;
+namespace RPGCreator.Core.Types.Windows;
 
 public class TestingDialog : Window
 {

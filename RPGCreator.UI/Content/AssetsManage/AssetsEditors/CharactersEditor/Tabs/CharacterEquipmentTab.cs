@@ -1,5 +1,5 @@
 using Avalonia.Controls;
-using RPGCreator.Core.Type.Assets.Characters;
+using RPGCreator.Core.Types.Assets.Characters;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor;
 

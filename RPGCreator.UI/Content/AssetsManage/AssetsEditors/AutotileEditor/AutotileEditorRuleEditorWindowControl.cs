@@ -9,10 +9,10 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using RPGCreator.Core;
-using RPGCreator.Core.Type.Assets;
-using RPGCreator.Core.Type.Assets.Tilesets;
-using RPGCreator.Core.Type.Internal.LayerRenderer;
-using RPGCreator.Core.Type.Map;
+using RPGCreator.Core.Types.Assets;
+using RPGCreator.Core.Types.Assets.Tilesets;
+using RPGCreator.Core.Types.Internal.LayerRenderer;
+using RPGCreator.Core.Types.Map;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor.RuleEditor;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor;
@@ -565,13 +565,13 @@ public class AutotileEditorRuleEditorWindowControl : UserControl
             Canvas.SetLeft(baseTileRect, tileX);
             Canvas.SetTop(baseTileRect, tileY);
             
-            if (_previewFakeLayer.TryGetElement(new Core.Type.Internal.Point(tileX, tileY), out var tile))
+            if (_previewFakeLayer.TryGetElement(new Core.Types.Internal.Point(tileX, tileY), out var tile))
             {
                 // Remove the existing tile at the clicked position
-                _previewFakeLayer.TryRemoveElement(new Core.Type.Internal.Point(tileX, tileY), out _);
+                _previewFakeLayer.TryRemoveElement(new Core.Types.Internal.Point(tileX, tileY), out _);
             }
             
-            _previewFakeLayer.AddElement(correspondingTile, new Core.Type.Internal.Point(tileX, tileY));
+            _previewFakeLayer.AddElement(correspondingTile, new Core.Types.Internal.Point(tileX, tileY));
 
             RefreshPreview();
             Console.WriteLine($"Base tile placed at position: col:{tileCol} row:{tileRow}");

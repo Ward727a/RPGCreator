@@ -8,12 +8,12 @@ using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
 using AvaloniaEdit.Utils;
-using RPGCreator.Core.Type;
-using RPGCreator.Core.Type.Blueprint;
-using RPGCreator.Core.Type.Blueprint.Nodes;
-using RPGCreator.Core.Type.Blueprint.Nodes.Debug;
+using RPGCreator.Core.Types;
+using RPGCreator.Core.Types.Blueprint;
+using RPGCreator.Core.Types.Blueprint.Nodes;
+using RPGCreator.Core.Types.Blueprint.Nodes.Debug;
 using Serilog;
-using Point = RPGCreator.Core.Type.Internal.Point;
+using Point = RPGCreator.Core.Types.Internal.Point;
 
 namespace RPGCreator.UI.Common.Blueprint;
 
