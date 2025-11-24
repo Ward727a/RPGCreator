@@ -26,7 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Runtimes\Factories\" />
     <Folder Include="Types\Blueprint\Nodes\Entity\Position\" />
     <Folder Include="Types\Blueprint\Nodes\Entity\Stats\" />
     <Folder Include="Types\Map\Interactable\BaseEventsArgs\" />

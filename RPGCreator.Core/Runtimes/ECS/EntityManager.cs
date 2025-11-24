@@ -7,11 +7,14 @@ public class EntityManager(ComponentManager componentManager)
 {
     ObjectPool<Entity> _entityPool = new(() => new Entity());
     private ComponentManager _componentManager { get; } = componentManager;
+    
+    private int _nextEntityId = 0;
 
     public IEntity CreateEntity()
     {
         var entity = _entityPool.Rent();
-        entity.Id = _entityPool.RentedCount - 1;
+        entity.Id = _nextEntityId;
+        _nextEntityId++;
         entity.SetManager(this, _componentManager);
         return entity;
     }
