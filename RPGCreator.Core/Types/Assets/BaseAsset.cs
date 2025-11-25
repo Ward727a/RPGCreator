@@ -107,8 +107,6 @@ namespace RPGCreator.Core.Types.Assets
             CHARACTER_DATA
         }
 
-        public Ulid Unique { get; protected set; }
-
         public string PackName;
         public string PackPath;
 
@@ -131,13 +129,11 @@ namespace RPGCreator.Core.Types.Assets
 
         public BaseAsset()
         {
-            Unique = Ulid.NewUlid();
             Name = "UNKNOWN";
             Type = TYPE.UNKNOWN;
         }
         public BaseAsset(string Name)
         {
-            Unique = Ulid.NewUlid();
             this.Name = Name;
         }
 
@@ -166,7 +162,6 @@ namespace RPGCreator.Core.Types.Assets
 
             T asset = new()
             {
-                Unique = unique,
                 Name = name,
                 AssetData = asset_elem,
                 Type = type,
@@ -185,34 +180,6 @@ namespace RPGCreator.Core.Types.Assets
             // TODO: Add the conversion from BaseAsset to Tileset
             // Need file path, dimension, image size, hardlink or softlink, etc...
             return asset;
-        }
-
-        public void Save()
-        {
-            if (this is ISerializable serializable)
-            {
-
-                if(string.IsNullOrEmpty(SavePath))
-                {
-
-                }
-
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"Saved asset {Name} of type {Type} with unique ID {Unique} to {SavePath}.");
-                Console.ResetColor();
-                return;
-            }
-
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"Couldn't save asset {Name} of type {Type} with unique ID {Unique} because this is not an ISerializable object!.");
-            Console.ResetColor();
-        }
-
-        protected void AddBaseSerialization(SerializationInfo info)
-        {
-            info.AddValue("unique", Unique);
-            info.AddValue("name", Name);
-            info.AddValue("type", Type);
         }
 
     }

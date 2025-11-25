@@ -144,7 +144,9 @@ public class AutoTilesetDef : ImageAsset, ITilesetDef
     public SerializationInfo GetObjectData()
     {
         SerializationInfo info = new SerializationInfo(typeof(AutoTilesetInstance));
-        AddBaseSerialization(info);
+        info.AddValue("unique", Unique);
+        info.AddValue("urn", Urn);
+        info.AddValue("name", Name);
         info.AddValue("TileWidth", TileWidth);
         info.AddValue("TileHeight", TileHeight);
         info.AddValue("AutotileGroups", AutotileGroups);

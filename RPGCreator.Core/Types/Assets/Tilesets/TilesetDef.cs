@@ -4,9 +4,11 @@ using SkiaSharp;
 
 namespace RPGCreator.Core.Types.Assets.Tilesets;
 
-public class TilesetDef : ImageAsset, ITilesetDef
+public class TilesetDef : ImageAsset, ITilesetDef,ISerializable, IDeserializable
 {
     public event Action? ImageChanged;
+
+    public Ulid Unique { get; private set; }
     public URN Urn { get; private set; }
     public int TileWidth { get; set; }
     public int TileHeight { get; set; }

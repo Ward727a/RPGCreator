@@ -34,9 +34,43 @@ public class EngineJsonConverter : JsonConverter
         var jsonObject = JObject.Load(reader);
 
         var typeToken = jsonObject["$type"];
-        var actualType = typeToken != null ? System.Type.GetType(typeToken.ToString()) : objectType;
+        System.Type? actualType = null;
+
+        if (typeToken != null)
+        {
+            string typeName = typeToken.ToString();
         
-        if (actualType == null) throw new Exception("Type not found");
+            // Exact match
+            actualType = System.Type.GetType(typeName);
+
+            // Loose match
+            if (actualType == null && typeName.Contains(","))
+            {
+                var parts = typeName.Split(',');
+                if (parts.Length >= 2)
+                {
+                    var looseTypeName = $"{parts[0].Trim()}, {parts[1].Trim()}";
+                    actualType = System.Type.GetType(looseTypeName);
+                }
+            }
+        
+            // Last resort: search by simple name across all loaded assemblies
+            if (actualType == null)
+            {
+                var parts = typeName.Split(',');
+                var simpleName = parts[0].Trim(); // Juste le nom de la classe avec namespace
+                foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    actualType = asm.GetType(simpleName);
+                    if (actualType != null) break;
+                }
+            }
+        }
+        
+        // Fallback
+        if (actualType == null) actualType = objectType;
+        
+        if (actualType == null) throw new Exception($"Type not found for: {typeToken}");
 
         var instance = (IDeserializable)Activator.CreateInstance(actualType)!;
 

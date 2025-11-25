@@ -1,9 +1,13 @@
 using RPGCreator.Core.Types.Assets.Actors;
+using RPGCreator.Core.Types.Internal;
 
 namespace RPGCreator.Core.Types.Assets.Items;
 
-public class ConsumableData : BaseAsset, IItemData
+public class ConsumableData : IItemData, IHasUniqueId
 {
+
+    public string Name;
+    
     public SerializationInfo GetObjectData()
     {
         throw new NotImplementedException();
@@ -36,6 +40,8 @@ public class ConsumableData : BaseAsset, IItemData
         
     }
 
+    public Ulid Unique { get; }
+    public URN Urn { get; }
     public string ItemName => Name;
     public string ItemDescription { get; set; }
     public string ItemIcon { get; set; }

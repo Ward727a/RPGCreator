@@ -18,6 +18,7 @@ public readonly struct UIRegion : IEquatable<UIRegion>
     public static UIRegion EditorLeftPanelComponents => new("EditorLeftPanel.Components");
     public static UIRegion EditorLeftPanelNonePanel => new("EditorLeftPanel.NonePanel");
     public static UIRegion EditorLeftPanelTilingPanel => new("EditorLeftPanel.TilingPanel");
+    public static UIRegion EditorLeftPanelTilingPanelTilesetItem => new("EditorLeftPanel.TilingPanel.TilesetItem");
     public static UIRegion EditorLeftPanelEntitiesPanel => new("EditorLeftPanel.EntitiesPanel");
     public static UIRegion EditorRightPanel => new("EditorRightPanel");
     public static UIRegion EditorCenterPanel => new("EditorCenterPanel");

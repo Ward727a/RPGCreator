@@ -38,7 +38,14 @@ namespace RPGCreator.Core.Managers.AssetsManager
 {
     public class AssetsManager
     {
-        private Dictionary<Ulid, BaseAsset> _cachedAssets = [];
+
+        private struct AssetLocation
+        {
+            public BaseAssetsPack Pack;
+            public string RelativePath;
+        }
+        
+        private Dictionary<Ulid, AssetLocation> _assetLocations = new();
 
         readonly Dictionary<Ulid, BaseAssetsPack> AssetsPacks = [];
         readonly Dictionary<string, Ulid> AssetsPacksMapping = [];
@@ -130,6 +137,27 @@ namespace RPGCreator.Core.Managers.AssetsManager
                         result = asset as T;
                         return result != null;
                     }
+                }
+            }
+
+            if (_assetLocations.TryGetValue(uniqueId, out AssetLocation location))
+            {
+                try
+                {
+                    object loadedObject = location.Pack.LoadAsset(uniqueId);
+
+                    RegisterAsset(loadedObject);
+
+                    if (loadedObject is T typedAsset)
+                    {
+                        result = typedAsset;
+                        return true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Failed to load asset with ID {AssetID} from pack {PackName}", uniqueId,
+                        location.Pack.Name);
                 }
             }
             return false;
@@ -248,6 +276,17 @@ namespace RPGCreator.Core.Managers.AssetsManager
                             // RegisterPack(pack, false, false);
                             AssetsPacks[pack.Id] = pack;
                             AssetsPacksMapping[pack.Name] = pack.Id;
+
+                            foreach (var record in pack.EnumerateIndexOnly())
+                            {
+                                _assetLocations[record.Id] = new AssetLocation
+                                {
+                                    Pack = pack,
+                                    RelativePath = record.RelativePath
+                                };
+                            }
+                            
+                            Log.Information("Loaded assets pack from path: {packPath}", packPath);
                         }
                         catch (Exception ex)
                         {
@@ -267,6 +306,8 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 }
                 AssetsPacks.Clear();
                 AssetsPacksMapping.Clear();
+                _assetLocations.Clear();
+                Log.Information("Unloaded all assets packs due to project unload.");
             };
             Log.Information("AssetsManager initialized.");
         }
@@ -379,7 +420,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             var targetType = typeof(T);
             foreach (var pack in AssetsPacks.Values)
             {
-                foreach (var asset in pack.SearchIndex((record) => record.TypeName == targetType.FullName))
+                foreach (var asset in pack.SearchIndexByType(targetType))
                 {
                     yield return new PackSearchResult(asset.Id, pack.Id, asset.TypeName, asset.RelativePath);
                 }

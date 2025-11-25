@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RPGCreator.Core.Types.Assets.Tilesets;
 using Serilog;
@@ -6,11 +7,15 @@ namespace RPGCreator.Core.Serializer;
 public sealed class DeserializationInfo
 {
     private readonly JObject _jsonData;
+    private readonly JsonSerializer _serializer;
 
-    public DeserializationInfo(JObject json)
+    public DeserializationInfo(JObject json, JsonSerializer serializer)
     {
         _jsonData = json;
+        _serializer = serializer;
     }
+    
+    public DeserializationInfo(JObject json) : this(json, JsonSerializer.CreateDefault()) {}
 
     private object? ConvertJTokenToType(JToken? token, System.Type targetType)
     {
@@ -33,25 +38,45 @@ public sealed class DeserializationInfo
     public bool TryGetValue<T>(string name, out T? value)
     {
         var token = _jsonData[name];
-        if (token != null)
+        if (token == null || token.Type == JTokenType.Null)
         {
-            value = token.ToObject<T>();
+            value = default;
+            return false;
+        }
+
+        try 
+        {
+            value = token.ToObject<T>(_serializer);
             return true;
         }
-        value = default;
-        return false;
+        catch (Exception ex)
+        {
+            Serilog.Log.Error($"Failed to convert JSON token '{name}' to type {typeof(T).Name}: {ex.Message}");
+            value = default;
+            return false;
+        }
     }
     
     public bool TryGetValue<T>(string name, out T value, T defaultValue)
     {
         var token = _jsonData[name];
-        if (token != null)
+        if (token == null || token.Type == JTokenType.Null)
         {
-            value = token.ToObject<T>();
+            value = default;
+            return false;
+        }
+
+        try 
+        {
+            value = token.ToObject<T>(_serializer);
             return true;
         }
-        value = defaultValue;
-        return false;
+        catch (Exception ex)
+        {
+            Serilog.Log.Error($"Failed to convert JSON token '{name}' to type {typeof(T).Name}: {ex.Message}");
+            value = default;
+            return false;
+        }
     }
 
     public bool TryGetList<T>(string name, out List<T>? value)

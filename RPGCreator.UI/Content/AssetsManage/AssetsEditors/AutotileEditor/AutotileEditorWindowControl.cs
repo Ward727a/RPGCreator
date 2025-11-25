@@ -378,7 +378,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
                         return;
 
                     SelectedTileset.GetBitmap();
-                    SelectedTileset.Save();
+                    // SelectedTileset.Save();
                 };
 
             }

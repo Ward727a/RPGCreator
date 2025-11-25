@@ -51,7 +51,10 @@ public class EngineSerializer
             TypeNameHandling = TypeNameHandling.Auto,
             Formatting = Formatting.Indented,
             NullValueHandling = NullValueHandling.Ignore,
-            Converters = { new EngineJsonConverter() },
+            Converters = { 
+                new EngineJsonConverter(),
+                new UlidJsonConverter() 
+            },
             PreserveReferencesHandling = PreserveReferencesHandling.Objects,
             DefaultValueHandling = DefaultValueHandling.Ignore
         };
@@ -70,6 +73,7 @@ public class EngineSerializer
     
     public void Deserialize<T>(string data, out T obj, out Type type)
     {
+        // TODO: Check how to determine the actual type BEFORE deserializing with Newtonsoft.Json, as otherwise we are deserializing an object of type 'Object' and not of the actual type.
         obj = JsonConvert.DeserializeObject<T>(data, _settings)!;
         type = obj!.GetType();
     }

@@ -55,7 +55,7 @@ public class EditorLeftPanelControl : UserControl
         AddComponent("entities", new EntitiesPanelControl(_context));
         
         // Show default component
-        ShowComponent("none");
+        ShowComponent("tiling");
         
         UIExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelComponents, _body, new EditorLeftPanelComponentsContext(
             AddComponent,

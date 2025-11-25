@@ -23,6 +23,7 @@
 // 
 #endregion
 
+using RPGCreator.Core.Serializer;
 using RPGCreator.Core.Types.Internal;
 using Serilog;
 
@@ -34,7 +35,7 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
      * =================
      * This class represents a pack of assets in RPG Creator.
      */
-    public class BaseAssetsPack : IDisposable
+    public class BaseAssetsPack : ISerializable, IDeserializable, IDisposable
     {
 
         public BaseAssetsPack()
@@ -118,7 +119,7 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
                 throw new FileNotFoundException("Asset file not found at path " + fullPath);
             }
 
-            object? loadedAsset = null;
+            IAssetDef? loadedAsset = null;
 
             try
             {
@@ -187,6 +188,23 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
 
                     yield return loadedAsset;
                 }
+            }
+        }
+
+        public IEnumerable<EngineDB.AssetIndexRecord> EnumerateIndexOnly()
+        {
+            var db = EngineDB.GetDB(_dbId);
+            if (db == null)
+            {
+                yield break;
+            }
+
+            var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
+            var allIndexed = indexCollection.FindAll();
+
+            foreach (var index in allIndexed)
+            {
+                yield return index;
             }
         }
 
@@ -274,6 +292,26 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
             }
         }
 
+        public IEnumerable<EngineDB.AssetIndexRecord> SearchIndexByType(Type type)
+        {
+            var db = EngineDB.GetDB(_dbId);
+            if (db == null)
+            {
+                yield break;
+            }
+            
+            var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
+
+            var validNames = Common.TypeUtil.GetInheritance(type);
+            
+            var allIndexed = indexCollection.Find(x => validNames.Contains(x.TypeName));
+            
+            foreach (var index in allIndexed)
+            {
+                yield return index;
+            }
+        }
+
         public void Dispose()
         {
             if (_dbId != Ulid.Empty)
@@ -294,6 +332,39 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
                 }
                 Log.Information("[Pack {PackName}] Database saved successfully.", Name);
             }
+        }
+
+        public SerializationInfo GetObjectData()
+        {
+            var info = new SerializationInfo(typeof(BaseAssetsPack));
+
+            info.AddValue(nameof(Id), Id)
+                .AddValue(nameof(Name), Name)
+                .AddValue(nameof(Description), Description)
+                .AddValue(nameof(DbFilePath), DbFilePath)
+                .AddValue(nameof(RootFolder), RootFolder);
+
+            return info;
+        }
+
+        public void SetObjectData(DeserializationInfo info)
+        {
+            if (info == null)
+            {
+                throw new ArgumentNullException(nameof(info), "DeserializationInfo cannot be null.");
+            }
+
+            info.TryGetValue(nameof(Id), out Ulid id, Ulid.NewUlid());
+            info.TryGetValue(nameof(Name), out string name, string.Empty);
+            info.TryGetValue(nameof(Description), out string? description, null);
+            info.TryGetValue(nameof(DbFilePath), out string dbFilePath, string.Empty);
+            info.TryGetValue(nameof(RootFolder), out string rootFolder, string.Empty);
+
+            Id = id;
+            Name = name;
+            Description = description;
+            DbFilePath = dbFilePath;
+            RootFolder = rootFolder;
         }
     }
 }
