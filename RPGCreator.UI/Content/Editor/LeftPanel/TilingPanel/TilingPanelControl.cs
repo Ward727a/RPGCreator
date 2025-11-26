@@ -8,6 +8,7 @@ using RPGCreator.Core;
 using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.ModuleSDK.UIModule;
+using RPGCreator.Core.Runtimes.Context;
 using RPGCreator.Core.Types.Assets;
 using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Editor.Context;
@@ -71,23 +72,27 @@ public class SetOptionItem : UserControl
 public class TilingPanelControl : UserControl
 {
     
-    private InEditorContext _context;
+    private MapEditorContext _context;
 
     private AssetScope _scope;
     
     #region Components
     
     private StackPanel? _body;
-    private Divider? _divider;
+    private Divider? _topDivider;
     private ComboBox? _setSelector;
+    private Expander? _tileOptionsExpander;
+    private StackPanel? _tileOptionsBody;
+    private Image? _previewImage;
     
     #endregion
     
-    public TilingPanelControl(InEditorContext ctx)
+    public TilingPanelControl(MapEditorContext ctx)
     {
         _scope = EngineCore.Instance.Managers.Assets.CreateAssetScope("TilingPanelControl");
         _context = ctx;
         CreateComponents();
+        RegisterEvents();
         Content = _body;
         UIExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelTilingPanel, this, _context);
     }
@@ -101,13 +106,13 @@ public class TilingPanelControl : UserControl
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
         };
         
-        _divider = new Divider
+        _topDivider = new Divider
         {
             Orientation =  Avalonia.Layout.Orientation.Horizontal,
             Margin = new Avalonia.Thickness(0, 5, 0, 5),
             Content = "Tiling Options"
         };
-        _body.Children.Add(_divider);
+        _body.Children.Add(_topDivider);
         
         _setSelector = new ComboBox
         {
@@ -117,6 +122,32 @@ public class TilingPanelControl : UserControl
             PlaceholderText = "Select Tileset..."
         };
         _body.Children.Add(_setSelector);
+        
+        _tileOptionsExpander = new Expander
+        {
+            Header = "Tile Options",
+            IsExpanded = false,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
+        };
+        _body.Children.Add(_tileOptionsExpander);
+        _tileOptionsBody = new StackPanel
+        {
+            Orientation = Avalonia.Layout.Orientation.Vertical,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
+        };
+        _tileOptionsExpander.Content = _tileOptionsBody;
+        
+        _previewImage = new Image
+        {
+            Width = 128,
+            Height = 128,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            Margin = new Avalonia.Thickness(0, 5, 0, 5),
+        };
+        _body.Children.Add(_previewImage);
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
@@ -134,10 +165,27 @@ public class TilingPanelControl : UserControl
 
     private void RegisterEvents()
     {
+        _setSelector.SelectionChanged += SetSelectorOnSelectionChanged;
     }
+
 
     public void AddTilesetOption(ITilesetDef definition)
     {
         _setSelector?.Items.Add(new SetOptionItem(definition));
     }
+    
+    #region EventsHandler
+    private void SetSelectorOnSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        
+        if (_setSelector?.SelectedItem is SetOptionItem selectedItem)
+        {
+            Log.Debug("[TilingPanel] Selected tileset: {0}", selectedItem.Name);
+            var def = _scope.Load<ITilesetDef>(selectedItem.AssetId);
+            if (_previewImage != null)
+                _previewImage.Source = def.GetBitmap();
+        }
+        
+    }
+    #endregion
 }

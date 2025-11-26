@@ -75,7 +75,10 @@ namespace RPGCreator.Generators
                 .Where(m => m.GetAttributes().Any(a => a.AttributeClass?.Name == "ExposeToPluginAttribute"));
             var properties = classSymbol.GetMembers().OfType<IPropertySymbol>()
                 .Where(p => p.GetAttributes().Any(a => a.AttributeClass?.Name == "ExposePropToPluginAttribute"));
+            var events = classSymbol.GetMembers().OfType<IEventSymbol>()
+                .Where(e => e.GetAttributes().Any(a => a.AttributeClass?.Name == "ExposeEventToPluginAttribute"));
 
+            // Combine all members
             var allMembers = methods.Select(m => new { 
                     Symbol = (ISymbol)m, 
                     Region = m.GetAttributes().First(a => a.AttributeClass.Name == "ExposeToPluginAttribute").ConstructorArguments[0].Value.ToString(),
@@ -85,7 +88,14 @@ namespace RPGCreator.Generators
                     Symbol = (ISymbol)p, 
                     Region = p.GetAttributes().First(a => a.AttributeClass.Name == "ExposePropToPluginAttribute").ConstructorArguments[0].Value.ToString(),
                     Type = "Property"
-                }));
+                })
+                .Concat(events.Select(e => new { 
+                    Symbol = (ISymbol)e, 
+                    Region = e.GetAttributes().First(a => a.AttributeClass.Name == "ExposeEventToPluginAttribute").ConstructorArguments[0].Value.ToString(),
+                    Type = "Event"
+            })));
+            
+            // Group by Region
             var groupedMembers = allMembers.GroupBy(x => x.Region);
 
             foreach (var group in groupedMembers)
@@ -147,14 +157,30 @@ namespace RPGCreator.Generators
                         sb.AppendLine($"        private readonly Action<{propType}> _set{prop.Name};");
                     }
                 }
-                // Make Constructors
-                sb.AppendLine($"        public {contextName}(");
-                var ctorParams = new List<string>();
+                
+                // Make Event Fields
+                foreach (var item in group.Where(x => x.Type == "Event"))
+                {
+                    var evt = (IEventSymbol)item.Symbol;
+                    var delegateType = evt.Type.ToString(); // ex: System.EventHandler
+            
+                    // On stocke les actions d'abonnement/désabonnement
+                    sb.AppendLine($"        private readonly Action<{delegateType}> _add{evt.Name};");
+                    sb.AppendLine($"        private readonly Action<{delegateType}> _remove{evt.Name};");
+                }
+
+                sb.AppendLine();
+                
+                // Make Config Class
+                sb.AppendLine($"        /// <summary>Configuration object to initialize the context.</summary>");
+                sb.AppendLine($"        public class Config");
+                sb.AppendLine("        {");
+                // A. Config pour Méthodes
                 foreach (var item in group.Where(x => x.Type == "Method"))
                 {
                     var method = (IMethodSymbol)item.Symbol;
                     var paramTypes = string.Join(", ", method.Parameters.Select(p => p.Type.ToString()));
-                    string actionType;
+                    string actionType = "";
                     if (method.ReturnsVoid)
                     {
                         if (method.Parameters.Length == 0)
@@ -177,38 +203,63 @@ namespace RPGCreator.Generators
                             actionType = $"Func<{paramTypes}, {method.ReturnType}>";
                         }
                     }
-                    ctorParams.Add($"            {actionType} {method.Name}Action");
+                    // On utilise 'required' (C# 11) ou juste public pour forcer l'assignation
+                    sb.AppendLine($"            public {actionType} {method.Name} {{ get; set; }} = null!;");
                 }
 
-                // Make Properties Functions
                 foreach (var item in group.Where(x => x.Type == "Property"))
                 {
                     var prop = (IPropertySymbol)item.Symbol;
                     var propType = prop.Type.ToString();
                     bool canSet = (bool)prop.GetAttributes().First(a => a.AttributeClass.Name == "ExposePropToPluginAttribute").ConstructorArguments[1].Value;
 
-                    ctorParams.Add($"            Func<{propType}> get{prop.Name}");
+                    sb.AppendLine($"            public Func<{propType}> Get{prop.Name} {{ get; set; }} = null!;");
                     if (canSet)
                     {
-                        ctorParams.Add($"            Action<{propType}> set{prop.Name}");
+                        sb.AppendLine($"            public Action<{propType}> Set{prop.Name} {{ get; set; }} = null!;");
                     }
                 }
-                sb.AppendLine(string.Join(",\n", ctorParams));
-                sb.AppendLine("        )");
+
+                foreach (var item in group.Where(x => x.Type == "Event"))
+                {
+                    var evt = (IEventSymbol)item.Symbol;
+                    var delegateType = evt.Type.ToString();
+                    sb.AppendLine($"            public Action<{delegateType}> Add{evt.Name} {{ get; set; }} = null!;");
+                    sb.AppendLine($"            public Action<{delegateType}> Remove{evt.Name} {{ get; set; }} = null!;");
+                }
+
+                sb.AppendLine("        }");
+                sb.AppendLine();
+                
+                // Make Constructors
+                sb.AppendLine($"        public {contextName}(Config config)");
                 sb.AppendLine("        {");
+                sb.AppendLine("            if (config == null) throw new ArgumentNullException(nameof(config));");
+                sb.AppendLine();
+                
+                // Assign Methods
                 foreach (var item in group.Where(x => x.Type == "Method"))
                 {
                     var method = (IMethodSymbol)item.Symbol;
-                    sb.AppendLine($"            _{method.Name} = {method.Name}Action;");
+                    sb.AppendLine($"            _{method.Name} = config.{method.Name};");
                 }
-                // Assign Property Fields
+
+                // Assign Properties
                 foreach (var item in group.Where(x => x.Type == "Property"))
                 {
                     var prop = (IPropertySymbol)item.Symbol;
                     bool canSet = (bool)prop.GetAttributes().First(a => a.AttributeClass.Name == "ExposePropToPluginAttribute").ConstructorArguments[1].Value;
 
-                    sb.AppendLine($"            _get{prop.Name} = get{prop.Name};");
-                    if (canSet) sb.AppendLine($"            _set{prop.Name} = set{prop.Name};");
+                    sb.AppendLine($"            _get{prop.Name} = config.Get{prop.Name};");
+                    if (canSet) sb.AppendLine($"            _set{prop.Name} = config.Set{prop.Name};");
+                }
+
+                // Assign Events
+                foreach (var item in group.Where(x => x.Type == "Event"))
+                {
+                    var evt = (IEventSymbol)item.Symbol;
+                    sb.AppendLine($"            _add{evt.Name} = config.Add{evt.Name};");
+                    sb.AppendLine($"            _remove{evt.Name} = config.Remove{evt.Name};");
                 }
 
                 sb.AppendLine("        }");
@@ -322,6 +373,21 @@ namespace RPGCreator.Generators
                         sb.AppendLine($"            set => _set{prop.Name}(value);");
                     }
                     sb.AppendLine("        }");
+                }
+                
+                // Make Events
+                foreach (var item in group.Where(x => x.Type == "Event"))
+                {
+                    var evt = (IEventSymbol)item.Symbol;
+                    var delegateType = evt.Type.ToString();
+
+                    // On génère un event proxy
+                    sb.AppendLine($"        public event {delegateType} {evt.Name}");
+                    sb.AppendLine("        {");
+                    sb.AppendLine($"            add => _add{evt.Name}(value);");
+                    sb.AppendLine($"            remove => _remove{evt.Name}(value);");
+                    sb.AppendLine("        }");
+                    sb.AppendLine();
                 }
                 
                 sb.AppendLine("    }"); // Class closure

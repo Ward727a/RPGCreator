@@ -42,6 +42,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Runtimes.Context;
 using RPGCreator.Core.Types.Editor.Context;
 using RPGCreator.Core.Types.Windows;
 using RPGCreator.UI.Content.Editor.LeftPanel;
@@ -52,6 +53,8 @@ namespace RPGCreator.UI.Content.Editor
     {
         private Window _Host => (Window)this.GetVisualRoot()!;
 
+        private MapEditorContext _mapEditorContext = new MapEditorContext();
+        
         private EditorGame? game = (EditorGame)EngineCore.Instance.Data.RTPGame;
         private AvaloniaInside.MonoGame.MonoGameControl MonoGameScreen;
 
@@ -277,8 +280,7 @@ namespace RPGCreator.UI.Content.Editor
                 Width = 300,
                 RowDefinitions = new RowDefinitions("*, 1, *"),
             };
-            InEditorContext context = new InEditorContext();
-            var LeftPanel2 = new EditorLeftPanelControl(context);
+            var LeftPanel2 = new EditorLeftPanelControl(_mapEditorContext);
             
             ContentGrid.Children.Add(LeftPanel2);
             Grid.SetColumn(LeftPanel2, 0);
@@ -461,9 +463,9 @@ namespace RPGCreator.UI.Content.Editor
             {
                 var position = e.GetPosition(MonoGameScreen);
                 // Adjust the position to account for the MonoGameScreen's margin (12px)
-                EngineCore.Instance.Managers.Brush.ClickAt(new Core.Types.Internal.Point(position));
-                _LastTilePlacePos = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position);
-                _placingTile = true; // Set the flag to indicate that a tile is being placed
+                EngineCore.Instance.Managers.Brush.ClickAt(new Core.Types.Internal.Point(position), _mapEditorContext);
+                _mapEditorContext.LastDrawAt = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position);
+                _mapEditorContext.IsDrawing = true; // Set the flag to indicate that a tile is being placed
             }
         }
 
@@ -471,8 +473,8 @@ namespace RPGCreator.UI.Content.Editor
         {
             if (e.GetCurrentPoint(MonoGameScreen).Properties.IsLeftButtonPressed && _placingTile)
             {
-                _placingTile = false; // Reset the flag when the tile placement is done
-                _LastTilePlacePos = new(-1, -1); // Reset the last tile position
+                _mapEditorContext.IsDrawing = false; // Reset the flag when the tile placement is done
+                _mapEditorContext.LastDrawAt = new(-1, -1); // Reset the last tile position
             }
         }
 
@@ -488,7 +490,7 @@ namespace RPGCreator.UI.Content.Editor
                 if(!normalizedCurrentPosition.IsEqualTo(_LastTilePlacePos))
                 {
                     // If the position has changed, update the last position
-                    _LastTilePlacePos = normalizedCurrentPosition;
+                    _mapEditorContext.LastDrawAt = normalizedCurrentPosition;
                 }
                 else
                 {
@@ -497,7 +499,7 @@ namespace RPGCreator.UI.Content.Editor
                 }
 
                 // Adjust the position to account for the MonoGameScreen's margin (12px)
-                EngineCore.Instance.Managers.Brush.ClickAt(new Core.Types.Internal.Point(position));
+                EngineCore.Instance.Managers.Brush.ClickAt(new Core.Types.Internal.Point(position), _mapEditorContext);
             }
 
             {
@@ -506,10 +508,10 @@ namespace RPGCreator.UI.Content.Editor
                 // Check if the mouse position has at least moved one tile from the last position
                 var normalizedCurrentPosition = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position);
 
-                if (!normalizedCurrentPosition.IsEqualTo(_LastTilePreviewPos))
+                if (!normalizedCurrentPosition.IsEqualTo(_mapEditorContext.LastDrawAt))
                 {
                     // If the position has changed, update the last position
-                    _LastTilePreviewPos = normalizedCurrentPosition;
+                    _mapEditorContext.LastDrawAt = normalizedCurrentPosition;
                 }
                 else
                 {

@@ -116,9 +116,14 @@ namespace RPGCreator.UI.Content.AssetsManage
                 //Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.LightGray),
             };
             Body.Children.Add(MenuPanel);
-            UIExtensionManager.ApplyExtensions(UIRegion.AssetsManagerMenu, MenuPanel, new AssetsManagerMenuContext(
-                RegisterAssetsMenuOption, 
-                RegisterAssetsMenuSeparator));
+            
+            var config = new AssetsManagerMenuContext.Config
+            {
+                RegisterAssetsMenuOption = RegisterAssetsMenuOption,
+                RegisterAssetsMenuSeparator = RegisterAssetsMenuSeparator,
+            };
+            
+            UIExtensionManager.ApplyExtensions(UIRegion.AssetsManagerMenu, MenuPanel, new AssetsManagerMenuContext(config));
         }
 
         protected void LoadAssetsMenuOptions()

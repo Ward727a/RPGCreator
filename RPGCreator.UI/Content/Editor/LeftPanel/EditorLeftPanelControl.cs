@@ -1,10 +1,13 @@
+using System;
 using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Layout;
 using RPGCreator.Core.Contexts;
 using RPGCreator.Core.ModuleSDK.Attributes;
 using RPGCreator.Core.ModuleSDK.UIModule;
+using RPGCreator.Core.Runtimes.Context;
 using RPGCreator.Core.Types.Editor.Context;
 using RPGCreator.UI.Content.Editor.LeftPanel.EntitiesPanel;
 using RPGCreator.UI.Content.Editor.LeftPanel.NonePanel;
@@ -17,29 +20,36 @@ public class EditorLeftPanelControl : UserControl
     
     #region Fields
 
-    private InEditorContext _context;
+    private MapEditorContext _context;
     
     #endregion
     
     #region Components
 
+    private ScrollViewer? _scrollViewer;
     private StackPanel? _body;
 
     private static Dictionary<string, Control> _components = new();
     
     #endregion
     
-    public EditorLeftPanelControl(InEditorContext ctx)
+    public EditorLeftPanelControl(MapEditorContext ctx)
     {
         _context = ctx;
         CreateComponents();
         RegisterEvents();
-        Content = _body;
+        Content = _scrollViewer;
         UIExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanel, this, _context);
     }
     
     private void CreateComponents()
     {
+        _scrollViewer = new ScrollViewer
+        {
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+        };
         _body = new StackPanel
         {
             Orientation = Orientation.Vertical,
@@ -48,6 +58,7 @@ public class EditorLeftPanelControl : UserControl
             Margin = new Thickness(10),
             MinWidth = 300,
         };
+        _scrollViewer.Content = _body;
         
         // Add basics components
         AddComponent("none", new NonePanelControl(_context));
@@ -57,12 +68,16 @@ public class EditorLeftPanelControl : UserControl
         // Show default component
         ShowComponent("tiling");
         
-        UIExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelComponents, _body, new EditorLeftPanelComponentsContext(
-            AddComponent,
-            RemoveComponent,
-            ShowComponent,
-            HideComponent
-        ));
+        
+        var config = new EditorLeftPanelComponentsContext.Config
+        {
+            AddComponent = AddComponent,
+            RemoveComponent = RemoveComponent,
+            ShowComponent = ShowComponent,
+            HideComponent = HideComponent
+        };
+        
+        UIExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelComponents, _body, new EditorLeftPanelComponentsContext(config));
     }
     
     [ExposeToPlugin("EditorLeftPanel.Components")]

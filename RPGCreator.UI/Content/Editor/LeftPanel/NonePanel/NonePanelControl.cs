@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using RPGCreator.Core.ModuleSDK.UIModule;
+using RPGCreator.Core.Runtimes.Context;
 using RPGCreator.Core.Types.Editor.Context;
 
 namespace RPGCreator.UI.Content.Editor.LeftPanel.NonePanel;
@@ -7,10 +8,10 @@ namespace RPGCreator.UI.Content.Editor.LeftPanel.NonePanel;
 public class NonePanelControl : UserControl
 {
 
-    private InEditorContext _context;
+    private MapEditorContext _context;
     private TextBlock textBlock;
     
-    public NonePanelControl(InEditorContext context)
+    public NonePanelControl(MapEditorContext context)
     {
         _context = context;
         CreateComponents();
