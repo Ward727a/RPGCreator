@@ -5,6 +5,7 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using AvaloniaEdit.Utils;
 using RPGCreator.Core;
+using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.ModuleSDK.UIModule;
 using RPGCreator.Core.Types.Assets;
@@ -33,27 +34,24 @@ public class SetOptionItem : UserControl
     {
         AssetId = definition.Unique;
         Name = definition.Name;
-        Height = 200;
-        Background = Brushes.AliceBlue;
         CreateComponents();
         if (_previewImage != null) _previewImage.Source = definition.GetBitmap();
         Content = _body;
         UIExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelTilingPanelTilesetItem, this);
     }
-
+    
     private void CreateComponents()
     {
         _body = new Grid
         {
-            ColumnDefinitions = new ColumnDefinitions("64, 10, *"),
+            ColumnDefinitions = new ColumnDefinitions("32, 10, *"),
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            Margin = new Avalonia.Thickness(5)
         };
         _previewImage = new Image
         {
-            Width = 64,
-            Height = 64,
+            Width = 32,
+            Height = 32,
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
         };
@@ -74,6 +72,8 @@ public class TilingPanelControl : UserControl
 {
     
     private InEditorContext _context;
+
+    private AssetScope _scope;
     
     #region Components
     
@@ -85,6 +85,7 @@ public class TilingPanelControl : UserControl
     
     public TilingPanelControl(InEditorContext ctx)
     {
+        _scope = EngineCore.Instance.Managers.Assets.CreateAssetScope("TilingPanelControl");
         _context = ctx;
         CreateComponents();
         Content = _body;
@@ -124,11 +125,9 @@ public class TilingPanelControl : UserControl
         var searchResults = EngineCore.Instance.Managers.Assets.SearchAllPacks<ITilesetDef>();
         foreach (var result in searchResults)
         {
-            if(EngineCore.Instance.Managers.Assets.TryResolveAsset(result.AssetId, out ITilesetDef? definition))
-            {
-                AddTilesetOption(definition);
-                Log.Debug("[TilingPanel] Added tileset option from search: {0}", definition.Name);
-            }
+            var def = _scope.Load<ITilesetDef>(result.AssetId);
+            AddTilesetOption(def);
+            Log.Debug("[TilingPanel] Added tileset option from search: {0}", def.Name);
         }
         base.OnLoaded(e);
     }

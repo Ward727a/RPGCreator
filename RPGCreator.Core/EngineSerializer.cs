@@ -1,10 +1,12 @@
 
 using System.Collections;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RPGCreator.Core.Serializer;
 using Serilog;
 
@@ -73,10 +75,67 @@ public class EngineSerializer
     
     public void Deserialize<T>(string data, out T obj, out Type type)
     {
+
+        var dataType = GetTypeFromJsonData(data);
+        if(dataType == null && typeof(T) == typeof(object))
+        {
+            Log.Warning("[EngineSerializer.Deserialize] Could not determine the type from JSON data.");
+            dataType = typeof(object);
+        }
+        
         // TODO: Check how to determine the actual type BEFORE deserializing with Newtonsoft.Json, as otherwise we are deserializing an object of type 'Object' and not of the actual type.
-        obj = JsonConvert.DeserializeObject<T>(data, _settings)!;
+        if(JsonConvert.DeserializeObject(data, dataType, _settings) is T deserializedObj)
+        {
+            Log.Information("[EngineSerializer.Deserialize] Successfully deserialized the object of type {type}.", dataType.Name);
+            obj = deserializedObj;
+        }
+        else
+        {
+            Log.Error("[EngineSerializer.Deserialize] Could not deserialize object of type {DataType}.", dataType?.FullName);
+            obj = default!;
+        }
         type = obj!.GetType();
     }
+    
+    #region Helpers
+
+    private static Type? GetTypeFromJsonData(string data)
+    {
+
+        if (string.IsNullOrWhiteSpace(data))
+        {
+            return null;
+        }
+
+        var jsonObject = JObject.Parse(data);
+        var typeToken = jsonObject["$type"];
+        
+        if (typeToken == null)
+        {
+            return null;
+        }
+        
+        string typeName = typeToken.ToString();
+        var type = Type.GetType(typeName);
+        
+        if (type == null && typeName.Contains(","))
+        {
+            var parts = typeName.Split(',');
+            if (parts.Length >= 2)
+            {
+                var looseTypeName = $"{parts[0].Trim()}, {parts[1].Trim()}";
+                type = Type.GetType(looseTypeName);
+            }
+        }
+
+        if (type == null)
+            return null;
+        
+        return type;
+
+    }
+    
+    #endregion
 }
 
 /// <summary>

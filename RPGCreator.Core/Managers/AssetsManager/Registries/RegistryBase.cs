@@ -7,6 +7,7 @@ public abstract class RegistryBase <T> : IAssetRegistry<T> where T : class, IHas
 {
     
     protected readonly Dictionary<Ulid, T> _assets = new();
+    private readonly Dictionary<Ulid, int> _refCounts = new();
     protected readonly Dictionary<URN, Ulid> _uniqueIds = new();
     
     public System.Type ManagedType => typeof(T);
@@ -66,6 +67,57 @@ public abstract class RegistryBase <T> : IAssetRegistry<T> where T : class, IHas
         return false;
     }
 
+    public bool TryRetainUntyped(Ulid id, out object? asset)
+    {
+        asset = null;
+        if (_assets.TryGetValue(id, out var typedAsset))
+        {
+            asset = typedAsset;
+            if (_refCounts.ContainsKey(id))
+            {
+                _refCounts[id]++;
+            }
+            else
+            {
+                _refCounts[id] = 1;
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    public void ReleaseUntyped(Ulid id)
+    {
+        if (!_refCounts.ContainsKey(id))
+        {
+            Log.Warning("[{ModuleName}] Attempted to release asset {Id} which is not tracked.", ModuleName, id);
+            return;
+        }
+
+        _refCounts[id]--;
+        int newCount = _refCounts[id];
+    
+        Log.Debug("[{ModuleName}] Released {Id}. New Count: {Count}", ModuleName, id, newCount);
+
+        if (newCount <= 0)
+        {
+            if (_assets.TryGetValue(id, out var asset))
+            {
+                if (asset is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                    Log.Debug("[{ModuleName}] Disposed asset {Id}", ModuleName, id);
+                }
+
+                Unregister(asset);
+            }
+
+            _refCounts.Remove(id);
+        
+            Log.Information("[{ModuleName}] Asset {Id} unloaded form RAM.", ModuleName, id);
+        }
+    }
+
     public event EventHandler<T>? AssetRegistered;
     public event EventHandler<T>? AssetUnregistered;
     public void Register(T asset, bool overwrite = false)
@@ -91,13 +143,18 @@ public abstract class RegistryBase <T> : IAssetRegistry<T> where T : class, IHas
 
         _assets[asset.Unique] = asset;
         _uniqueIds[asset.Urn] = asset.Unique;
+        
+        _refCounts[asset.Unique] = 1; 
+
         AssetRegistered?.Invoke(this, asset);
     }
 
     public void Unregister(T asset)
     {
-        if (_assets.Remove(asset.Unique) && _uniqueIds.Remove(asset.Urn))
+        if (_assets.Remove(asset.Unique))
         {
+            _uniqueIds.Remove(asset.Urn);
+            _refCounts.Remove(asset.Unique);
             AssetUnregistered?.Invoke(this, asset);
         }
     }

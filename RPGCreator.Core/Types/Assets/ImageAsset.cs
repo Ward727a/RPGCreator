@@ -50,7 +50,6 @@ namespace RPGCreator.Core.Types.Assets
     {
         public event EventHandler? ImageChanged;
 
-        public string Name;
         internal Image? _Image;
         protected string _ImagePathCached;
         protected Texture2D? _TextureCache;

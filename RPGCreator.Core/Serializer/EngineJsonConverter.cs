@@ -74,7 +74,7 @@ public class EngineJsonConverter : JsonConverter
 
         var instance = (IDeserializable)Activator.CreateInstance(actualType)!;
 
-        var info = new DeserializationInfo(jsonObject); 
+        var info = new DeserializationInfo(jsonObject, serializer); 
 
         instance.SetObjectData(info);
 

@@ -12,6 +12,8 @@ public class AssetScope : IDisposable
 {
 
     private readonly AssetsManager _manager;
+
+    private readonly HashSet<Ulid> _borrowedAssets;
     private readonly HashSet<IAssetDef> _scopes;
     
     public string Name { get; }
@@ -21,6 +23,7 @@ public class AssetScope : IDisposable
         Name = name;
         _manager = manager;
         _scopes = new HashSet<IAssetDef>();
+        _borrowedAssets = new HashSet<Ulid>();
     }
 
     internal void Track(IAssetDef asset)
@@ -50,5 +53,22 @@ public class AssetScope : IDisposable
             _manager.DestroyTransientAsset(asset);
         }
         _scopes.Clear();
+        
+        foreach (var id in _borrowedAssets)
+        {
+            _manager.ReleaseAsset(id);
+        }
+        _borrowedAssets.Clear();
+    }
+    
+    public T Load<T>(Ulid assetId) where T : class, IAssetDef
+    {
+        var asset = _manager.RetainAsset(assetId);
+        
+        if (!_borrowedAssets.Contains(assetId))
+        {
+            _borrowedAssets.Add(assetId);
+        }
+        return (T)asset;
     }
 }

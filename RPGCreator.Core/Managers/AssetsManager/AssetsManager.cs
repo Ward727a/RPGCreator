@@ -43,6 +43,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
         {
             public BaseAssetsPack Pack;
             public string RelativePath;
+            public string TypeName;
         }
         
         private Dictionary<Ulid, AssetLocation> _assetLocations = new();
@@ -108,6 +109,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             return false;
         }
         
+        [Obsolete("Use 'AssetScope.Load()' instead for better scope management.")]
         public bool TryResolveAsset<T>(URN urn, [NotNullWhen(true)] out T? result) where T : class, IHasUniqueId
         {
             result = null;
@@ -125,6 +127,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             return false;
         }
         
+        [Obsolete("Use 'AssetScope.Load()' instead for better scope management.", false)]
         public bool TryResolveAsset<T>(Ulid uniqueId, [NotNullWhen(true)] out T? result) where T : class, IHasUniqueId
         {
             result = null;
@@ -174,8 +177,12 @@ namespace RPGCreator.Core.Managers.AssetsManager
             return newAsset;
         }
 
-        public AssetScope CreateAssetScope(string name = "Unnamed Asset Scope")
+        public AssetScope CreateAssetScope(string? name = null)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                name = Ulid.NewUlid().ToString();
+            }
             return new AssetScope(this, name);
         }
         
@@ -238,7 +245,44 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 Log.Warning("No assets pack found with name {PackName}", packName);
             }
         }
+        internal object RetainAsset(Ulid id)
+        {
+            if (_assetLocations.TryGetValue(id, out var location))
+            {
+                
+                Type type = Type.GetType(location.TypeName)!;
+                
+                if (TryResolveRegistry(type, out var registry))
+                {
+                    if (registry.TryRetainUntyped(id, out var cachedAsset))
+                    {
+                        return cachedAsset!;
+                    }
 
+                    Log.Information($"Asset {id} not in RAM. Loading from Pack...");
+            
+                    var loadedAsset = location.Pack.LoadAsset(id);
+                    
+                    RegisterAsset(loadedAsset); 
+
+                    return loadedAsset;
+                }
+            }
+
+            throw new Exception($"Asset {id} not found anywhere (RAM or Disk).");
+        }
+
+        internal void ReleaseAsset(Ulid id)
+        {
+            if (_assetLocations.TryGetValue(id, out var location))
+            {
+                Type type = Type.GetType(location.TypeName)!;
+                if (TryResolveRegistry(type, out var registry))
+                {
+                    registry.ReleaseUntyped(id);
+                }
+            }
+        }
         #endregion
         
         public AssetsManager()
@@ -320,6 +364,18 @@ namespace RPGCreator.Core.Managers.AssetsManager
 
             AssetsPacks[pack.Id] = pack;
             AssetsPacksMapping[pack.Name] = pack.Id;
+
+            foreach (var record in pack.EnumerateIndexOnly())
+            {
+                _assetLocations[record.Id] = new AssetLocation
+                {
+                    Pack = pack,
+                    RelativePath = record.RelativePath,
+                    TypeName = record.TypeName
+                };
+            }
+                            
+            Log.Information("Loaded assets pack from path: {packPath}", pack.DbFilePath);
         }
 
         public void RegisterPack(BaseAssetsPack pack)

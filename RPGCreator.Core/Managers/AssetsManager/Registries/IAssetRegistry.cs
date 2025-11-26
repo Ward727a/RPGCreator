@@ -14,6 +14,9 @@ public interface IAssetRegistry
     
     bool TryResolveUrnUntyped(URN urn, out IHasUniqueId? asset);
     bool TryGetUntyped(Ulid unique, out IHasUniqueId? asset);
+    
+    bool TryRetainUntyped(Ulid id, out object? asset);
+    void ReleaseUntyped(Ulid id);
 }
 
 /// <summary>

@@ -285,7 +285,7 @@ namespace RPGCreator.UI.Content.Launcher
                 }
                 else
                 {
-                    Log.Error($"Project link with ID {projectLink.ProjectID} could not be resolved to a project.");
+                    Log.Error("Project link with Project ID {projectId}({path}) could not be resolved to a project.", projectLink.ProjectID, projectLink.ProjectConfigPath);
                 }
             }
         }

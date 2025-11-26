@@ -1,5 +1,6 @@
 using Avalonia.Media.Imaging;
 using RPGCreator.Core.Types.Internal;
+using Serilog;
 using SkiaSharp;
 
 namespace RPGCreator.Core.Types.Assets.Tilesets;
@@ -8,6 +9,7 @@ public class TilesetDef : ImageAsset, ITilesetDef,ISerializable, IDeserializable
 {
     public event Action? ImageChanged;
 
+    public string Name { get; set; } = "";
     public Ulid Unique { get; private set; }
     public URN Urn { get; private set; }
     public int TileWidth { get; set; }
@@ -61,9 +63,15 @@ public class TilesetDef : ImageAsset, ITilesetDef,ISerializable, IDeserializable
         Unique = unique;
         Name = name;
         Urn = urn;
+        if (Urn.IsEmpty)
+        {
+            Urn = new URN("tileset" , $"{name}@{Unique}");
+        }
         ImagePath = imagePath;
         TileWidth = tileWidth;
         TileHeight = tileHeight;
+        
+        Log.Debug("[TilesetDef] SetObjectData ({0}, {1})", Unique, Name);
     }
 
     public SKBitmap GetSKBitmap()

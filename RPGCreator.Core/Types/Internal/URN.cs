@@ -67,7 +67,7 @@ public readonly record struct URN
     public override string ToString() => $"{Namespace}://{Module}/{Name}";
 
     
-    public bool IsEmpty => string.IsNullOrEmpty(Namespace);
+    public bool IsEmpty => string.IsNullOrEmpty(Namespace) || string.IsNullOrEmpty(Module) || string.IsNullOrEmpty(Name);
     
     public void Deconstruct(out string @namespace, out string module, out string name)
     { @namespace = Namespace; module = Module; name = Name; }

@@ -53,6 +53,9 @@ namespace RPGCreator.Core.Configs
         
         public T? LoadOrCreateConfig<T>(string configPath) where T : ConfHelper, new()
         {
+            
+            Log.Information("[EngineConfig] Loading configuration at {0}", configPath);
+            
             if (LoadedConfig.ContainsKey(configPath))
             {
                 if (LoadedConfig[configPath] is T conf)

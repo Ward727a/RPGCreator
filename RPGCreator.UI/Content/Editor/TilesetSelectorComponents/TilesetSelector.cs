@@ -204,6 +204,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 
         public void RefreshComponent()
         {
+            return;
             var current_selected = SelectBox.SelectedIndex;
             SelectBox.Items.Clear();
 

@@ -23,6 +23,7 @@
 #endregion
 using RPGCreator.Core.Types.Project;
 using RPGCreator.Core.Types.Internal;
+using Serilog;
 using static RPGCreator.Core.Configs.EngineConfigs;
 
 /*
@@ -132,6 +133,8 @@ namespace RPGCreator.Core.Configs.Helpers
             info.TryGetList("projectLinks", out List<BaseProjectLink> projectLinks);
 
             ProjectLinks = projectLinks;
+
+            Log.Information("[ProjectLinks] Found {0} projects in conf {1}", projectLinks.Count, ConfigPath);
         }
     }
 }

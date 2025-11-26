@@ -111,30 +111,14 @@ namespace RPGCreator.Core.Types.Assets
         public string PackPath;
 
         public XElement AssetData;
-
-        private string _name = "UNKNOWN";
-        public string Name
-        {
-            get => _name;
-            set
-            {
-                if (_name != value)
-                {
-                    _name = value;
-                    NameChanged?.Invoke(this, value);
-                }
-            }
-        }
         public TYPE Type;
 
         public BaseAsset()
         {
-            Name = "UNKNOWN";
             Type = TYPE.UNKNOWN;
         }
         public BaseAsset(string Name)
         {
-            this.Name = Name;
         }
 
         public virtual void InitAsset()
@@ -162,7 +146,6 @@ namespace RPGCreator.Core.Types.Assets
 
             T asset = new()
             {
-                Name = name,
                 AssetData = asset_elem,
                 Type = type,
                 PackPath = asset_elem.Element("pack_path")?.Value ?? $"tilesets/{name}"

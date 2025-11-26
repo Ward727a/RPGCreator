@@ -1,6 +1,7 @@
 using RPGCreator.Core.Configs;
 using RPGCreator.Core.Configs.Helpers;
 using RPGCreator.Core.Types.Project;
+using Serilog;
 
 namespace RPGCreator.Core.Types.Internal;
 
@@ -42,11 +43,7 @@ public class BaseProjectLink : ISerializable, IDeserializable
         link.ProjectConfigPath = Path.Combine(project.Path ?? "", $"project.config.xml");
         return link;
     }
-    //
-    // public bool TrySave()
-    // {
-    //     var projectsConf = EngineCore.Instance.Configs.GetConfig<ProjectsConf>("projects");
-    // }
+    
     public SerializationInfo GetObjectData()
     {
         SerializationInfo info = new SerializationInfo(typeof(BaseProjectLink));
@@ -58,6 +55,8 @@ public class BaseProjectLink : ISerializable, IDeserializable
     public void SetObjectData(Serializer.DeserializationInfo info)
     {
         info.TryGetValue("id", out ProjectID);
-        info.TryGetValue("ProjectConfigPath", out ProjectConfigPath);
+        info.TryGetValue("project_config_path", out ProjectConfigPath);
+        
+        Log.Debug("[ProjectLink] SetObjectData ({0}, {1})", ProjectID, ProjectConfigPath);
     }
 }

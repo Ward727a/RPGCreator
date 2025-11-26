@@ -37,6 +37,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Types.Assets.Tilesets;
 
 namespace RPGCreator.UI.Content.AssetsManage.Components
@@ -516,6 +517,8 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
     public class TilesetsManageControl : UserControl
     {
 
+        private AssetScope _scope;
+
         #region Events
 
         public event Action? OnSelectedTilesetChanged;
@@ -584,6 +587,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
         public TilesetsManageControl()
         {
+            _scope = EngineCore.Instance.Managers.Assets.CreateAssetScope("tilesets_manage_control");
             CreateComponents();
             Content = Body;
         }
@@ -746,29 +750,49 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
         private void TilesetsManageControl_OnNeedRefresh()
         {
-            var tilesets = EngineCore.Instance.Data.EditedProject?.GetAssetsType<BaseAsset>(BaseAsset.TYPE.TILESETS) ?? new List<BaseAsset>();
             ViewPanel.Children.Clear();
-            foreach (var tileset in tilesets)
-            {
-                if(tileset is not ITilesetDef && tileset is not AutoTilesetDef)
-                {
-                    continue; // Skip if it's not a Tileset or AutoTileset
-                }
+            
+            var searchResults = EngineCore.Instance.Managers.Assets.SearchAllPacks<ITilesetDef>();
 
-                if (tileset is ITilesetDef tilesetInterface)
+            foreach (var result in searchResults)
+            {
+                var tilesetId = result.AssetId;
+
+                var tileset = _scope.Load<ITilesetDef>(tilesetId);
+                var item = new TilesetViewListItem(tileset);
+                item.OnSelected += () => { SelectedTilesetViewItem = item; };
+                item.OnDeselected += () =>
                 {
-                    var item = new TilesetViewListItem(tilesetInterface);
-                    item.OnSelected += () => { SelectedTilesetViewItem = item; };
-                    item.OnDeselected += () =>
+                    if (SelectedTilesetViewItem == item)
                     {
-                        if (SelectedTilesetViewItem == item)
-                        {
-                            SelectedTilesetViewItem = null;
-                        }
-                    };
-                    ViewPanel.Children.Add(item);
-                }
+                        SelectedTilesetViewItem = null;
+                    }
+                };
+                ViewPanel.Children.Add(item);
             }
+            
+            var tilesets = EngineCore.Instance.Data.EditedProject?.GetAssetsType<BaseAsset>(BaseAsset.TYPE.TILESETS) ?? new List<BaseAsset>();
+            // foreach (var tileset in tilesets)
+            // {
+            //     if(tileset is not ITilesetDef && tileset is not AutoTilesetDef)
+            //     {
+            //         continue; // Skip if it's not a Tileset or AutoTileset
+            //     }
+            //
+            //     if (tileset is ITilesetDef tilesetInterface)
+            //     {
+            //         var item = new TilesetViewListItem(tilesetInterface);
+            //         item.OnSelected += () => { SelectedTilesetViewItem = item; };
+            //         item.OnDeselected += () =>
+            //         {
+            //             if (SelectedTilesetViewItem == item)
+            //             {
+            //                 SelectedTilesetViewItem = null;
+            //             }
+            //         };
+            //         ViewPanel.Children.Add(item);
+            //     }
+            // }
         }
 
         private void CreateGridViewComponents(List<TilesetDef> tilesets)

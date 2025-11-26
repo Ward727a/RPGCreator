@@ -119,7 +119,7 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
                 throw new FileNotFoundException("Asset file not found at path " + fullPath);
             }
 
-            IAssetDef? loadedAsset = null;
+            object? loadedAsset = null;
 
             try
             {
