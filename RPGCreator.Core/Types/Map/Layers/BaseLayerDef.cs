@@ -1,64 +1,47 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using RPGCreator.Core.Serializer;
 using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Internal;
+using Serilog;
 
 namespace RPGCreator.Core.Types.Map;
 
-public class TileLayerDefinition : IMapLayerDef<ITileDef>
+public abstract class BaseLayerDef<TDef> : IMapLayerDef<TDef> where TDef : class, ILayerElem
 {
-    #region Events
-    public event EventHandler<(Point, ITileDef)>? ElementAdded;
-    public event EventHandler<(Point, ITileDef?)>? ElementRemoved;
-    #endregion
+    protected Dictionary<Point, TDef> _elements = new();
+    protected readonly HashSet<Point> _surroundingElementsToIgnore = new();
     
-    #region Properties
-    public Ulid Unique { get; private set; } = Ulid.NewUlid();
-    public URN Urn => new URN("map layer", $"{Name}@{Unique}");
+    public event EventHandler<(Point, TDef)>? ElementAdded;
+    public event EventHandler<(Point, TDef?)>? ElementRemoved;
+    public Ulid Unique { get; private set; }
+    public URN Urn { get; private set; }
     public string Name { get; set; }
     public int ZIndex { get; set; }
-    public bool VisibleByDefault { get; set; } = true;
-    /// <summary>
-    /// A private dictionary that holds the elements of the layer, where the key is the position of the element and the value is the element itself.<br/>
-    /// If you need to access the elements, use the <see cref="Elements"/> property instead, which returns a read-only dictionary.<br/>
-    /// If you need to add or remove elements, use the methods:<br/>
-    /// - <see cref="AddElement"/>,<br/>
-    /// - <see cref="TryAddElement"/>,<br/>
-    /// - <see cref="RemoveElement"/>,<br/>
-    /// - <see cref="TryRemoveElement(Point, out ITileDef?)"/>,<br/>
-    /// - <see cref="TryRemoveElement(ITileDef, out Point?)"/><br/>
-    /// This dictionary is serialized, and will be saved between sessions.
-    /// </summary>
-    private Dictionary<Point, ITileDef> _elements = new();
-    public ReadOnlyDictionary<Point, ITileDef> Elements => _elements.AsReadOnly();
-    
-    private readonly HashSet<Point> _surroundingElementsToIgnore = new();
-    #endregion
-
-    public TileLayerDefinition()
-    {
-    }
-    
-    public void AddElement(ITileDef element, Point location)
+    public bool VisibleByDefault { get; set; }
+    public ReadOnlyDictionary<Point, TDef> Elements => _elements.AsReadOnly();
+    public void AddElement(TDef element, Point location)
     {
         if (!_elements.TryAdd(location, element))
             return;
         
-        element.DefaultPosition = location;
+        Log.Debug("[Layer: {LayerName}] Added element at {Location}", Name, location);
+        
+        element.Position = location;
         ElementAdded?.Invoke(this, (location, element));
     }
 
-    public bool TryAddElement(ITileDef element, Point location)
+    public bool TryAddElement(TDef element, Point location)
     {
         if (!_elements.TryAdd(location, element))
             return false;
 
-        element.DefaultPosition = location;
+        element.Position = location;
         ElementAdded?.Invoke(this, (location, element));
         return true;
     }
 
-    public ITileDef? RemoveElement(Point location)
+    public TDef? RemoveElement(Point location)
     {
         if (!_elements.Remove(location, out var removedElement))
             return null;
@@ -67,18 +50,15 @@ public class TileLayerDefinition : IMapLayerDef<ITileDef>
         return removedElement;
     }
 
-    public bool TryRemoveElement(Point location, [NotNullWhen(true)] out ITileDef? removedElement)
+    public bool TryRemoveElement(Point location, [NotNullWhen(true)] out TDef? removedElement)
     {
         if (!_elements.Remove(location, out removedElement))
-        {
-            removedElement = null;
             return false;
-        }
         ElementRemoved?.Invoke(this, (location, removedElement));
         return true;
     }
 
-    public bool TryRemoveElement(ITileDef element, [NotNullWhen(true)] out Point? removedLocation)
+    public bool TryRemoveElement(TDef element, [NotNullWhen(true)] out Point? removedLocation)
     {
         foreach (var kvp in _elements)
         {
@@ -94,7 +74,7 @@ public class TileLayerDefinition : IMapLayerDef<ITileDef>
         return false;
     }
 
-    public ITileDef? GetElement(Point location)
+    public TDef? GetElement(Point location)
     {
         if (_elements.TryGetValue(location, out var element))
         {
@@ -103,7 +83,7 @@ public class TileLayerDefinition : IMapLayerDef<ITileDef>
         return null;
     }
 
-    public bool TryGetElement(Point location, [NotNullWhen(true)] out ITileDef? element)
+    public bool TryGetElement(Point location, [NotNullWhen(true)] out TDef? element)
     {
         if (_elements.TryGetValue(location, out element))
         {
@@ -118,9 +98,10 @@ public class TileLayerDefinition : IMapLayerDef<ITileDef>
         return _elements.ContainsKey(location);
     }
 
-    public Dictionary<Point, ITileDef> GetSurroundingElements(Point location, int radius = 1, int offset = 1)
+    public Dictionary<Point, TDef> GetSurroundingElements(Point location, int radius = 1, int offset = 1)
     {
-        Dictionary<Point,ITileDef> surroundingElements = new();
+        
+        Dictionary<Point,TDef> surroundingElements = new();
         // Check the 8 surrounding positions
         for (int x = -1; x <= 1; x++)
         {
@@ -130,7 +111,7 @@ public class TileLayerDefinition : IMapLayerDef<ITileDef>
                 int offsetX = x * offset;
                 int offsetY = y * offset;
                 Point surroundingPosition = new(location.X + offsetX, location.Y + offsetY);
-                if (Elements.TryGetValue(surroundingPosition, out ITileDef? element))
+                if (Elements.TryGetValue(surroundingPosition, out TDef? element))
                 {
                     if(_surroundingElementsToIgnore.Contains(surroundingPosition))
                     {
@@ -146,15 +127,13 @@ public class TileLayerDefinition : IMapLayerDef<ITileDef>
 
     public void ClearElements()
     {
-        
         _elements.Clear();
         ElementRemoved?.Invoke(this, (Point.Empty, null)); // Notify that all elements have been cleared
-        
     }
 
     public SerializationInfo GetObjectData()
     {
-        SerializationInfo info = new SerializationInfo(typeof(TileLayerDefinition));
+        SerializationInfo info = new SerializationInfo(typeof(BaseLayerDef<TDef>));
         info.AddValue(nameof(Unique), Unique);
         info.AddValue(nameof(Name), Name);
         info.AddValue(nameof(ZIndex), ZIndex);
@@ -174,7 +153,7 @@ public class TileLayerDefinition : IMapLayerDef<ITileDef>
         info.TryGetValue(nameof(Name), out string name, string.Empty);
         info.TryGetValue(nameof(ZIndex), out int zIndex, 0);
         info.TryGetValue(nameof(VisibleByDefault), out bool visibleByDefault, true);
-        info.TryGetValue(nameof(_elements), out Dictionary<Point, ITileDef> elements, new Dictionary<Point, ITileDef>());
+        info.TryGetValue(nameof(_elements), out Dictionary<Point, TDef> elements, new Dictionary<Point, TDef>());
 
         Unique = unique;
         Name = name;
@@ -184,5 +163,5 @@ public class TileLayerDefinition : IMapLayerDef<ITileDef>
     }
 
     public bool IsDirty { get; set; }
-    public bool IsTransient { get; set; } = false;
+    public bool IsTransient { get; set; }
 }

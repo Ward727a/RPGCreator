@@ -35,6 +35,7 @@ namespace RPGCreator.Core
         public GameFactory GameFactory { get; private set; }
         public ProjectsManager Projects { get; private set; }
         public BrushManager Brush { get; private set; }
+        public ImageCache ImageCache { get; private set; }
         
         public FeaturesRulesManager FeaturesRules { get; private set; }
 
@@ -44,6 +45,7 @@ namespace RPGCreator.Core
             GameFactory = new GameFactory();
             Assets = new AssetsManager();
             Brush = new BrushManager();
+            ImageCache = new ImageCache();
             FeaturesRules = new FeaturesRulesManager();
 
             EngineCore.Instance.Events.OnCoreManagersReady(new());

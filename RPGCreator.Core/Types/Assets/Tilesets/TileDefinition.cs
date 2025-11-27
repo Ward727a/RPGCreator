@@ -1,12 +1,12 @@
 using Microsoft.Xna.Framework;
 using RPGCreator.Core.Types.Internal;
 using Internal_Point = RPGCreator.Core.Types.Internal.Point;
-using Point = RPGCreator.Core.Types.Internal.Point;
 
 namespace RPGCreator.Core.Types.Assets.Tilesets;
 
 public class TileDefinition : ITileDef
 {
+    public Internal_Point Position { get; set; }
     public Vector2 DefaultPosition { get; set; }
     public Internal_Point SizeInTileset { get; private set; }
     public Internal_Point PositionInTileset { get; private set; }

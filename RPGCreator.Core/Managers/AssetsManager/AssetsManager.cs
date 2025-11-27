@@ -440,6 +440,16 @@ namespace RPGCreator.Core.Managers.AssetsManager
             }
             throw new KeyNotFoundException($"No assets pack found with ID: {packId}");
         }
+        
+        public void AddNewAssetLocation(Ulid assetId, BaseAssetsPack pack, string relativePath, string typeName)
+        {
+            _assetLocations[assetId] = new AssetLocation
+            {
+                Pack = pack,
+                RelativePath = relativePath,
+                TypeName = typeName
+            };
+        }
 
         public List<BaseAssetsPack> GetLoadedPacks()
         {

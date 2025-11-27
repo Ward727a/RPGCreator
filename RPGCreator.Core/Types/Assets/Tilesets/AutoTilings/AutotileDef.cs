@@ -8,6 +8,7 @@ namespace RPGCreator.Core.Types.Assets.Tilesets;
 
 public class AutotileDef : ITileDef, ISerializable, IDeserializable
 {
+    public Point Position { get; set; }
     public Vector2 DefaultPosition { get; set; }
     public Internal_Point SizeInTileset { get; set; }
     public Internal_Point PositionInTileset { get; set; }

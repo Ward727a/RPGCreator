@@ -32,6 +32,8 @@ using System.Text;
 using System.Threading.Tasks;
 using RPGCreator.Core.Managers.AssetsManager.Factories;
 using RPGCreator.Core.Types.Assets.Tilesets;
+using RPGCreator.Core.Types.Editor.Context;
+using Serilog;
 
 namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
 {
@@ -47,6 +49,12 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
 
         public int MinSize => 1;
 
+        public void Draw(Point clickPos, MapEditorContext context)
+        {
+            Log.Error("[EraserBrush] Draw not implemented yet.");
+        }
+
+        [Obsolete("Use Draw(Point, MapEditorContext) instead.",false)]
         public void Draw(SpriteBatchExtend sb, Point at, MapInstance mapInstance)
         {
             if (mapInstance == null)

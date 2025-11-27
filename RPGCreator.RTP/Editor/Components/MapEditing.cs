@@ -45,9 +45,9 @@ namespace RPGCreator.RTP.Editor.Components
 
         protected void RegisterEvents()
         {
-            EngineCore.Instance.Managers.Brush.Event.ClickedAt += Brush_ClickedAt;
-            EngineCore.Instance.Managers.Brush.Event.PreviewAt += Brush_PreviewAt;
-            EngineCore.Instance.Managers.Brush.Event.ClearPreview += Brush_ClearPreview;
+            // EngineCore.Instance.Managers.Brush.Event.ClickedAt += Brush_ClickedAt;
+            // EngineCore.Instance.Managers.Brush.Event.PreviewAt += Brush_PreviewAt;
+            // EngineCore.Instance.Managers.Brush.Event.ClearPreview += Brush_ClearPreview;
         }
 
         private void Brush_ClearPreview()
@@ -68,7 +68,7 @@ namespace RPGCreator.RTP.Editor.Components
                 return;
             }
 
-            e.brush.Draw(_sb, e.At, MapInstance);
+            // e.brush.Draw(_sb, e.At, MapInstance);
         }
 
         private void Brush_PreviewAt(object? sender, PreviewAtEventArgs e)

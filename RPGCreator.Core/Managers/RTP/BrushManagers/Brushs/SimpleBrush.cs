@@ -32,6 +32,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RPGCreator.Core.Managers.AssetsManager.Factories;
 using RPGCreator.Core.Types.Assets.Tilesets;
+using RPGCreator.Core.Types.Editor.Context;
 
 namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
 {
@@ -46,63 +47,42 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
         private bool _isPreviewEnabled = true;
         public bool IsPreviewEnabled { get => _isPreviewEnabled; set => _isPreviewEnabled = value; }
 
-        public void Draw(SpriteBatchExtend sb, Point at, Types.Map.MapInstance mapInstance)
+        public void Draw(Point clickPos, MapEditorContext context)
         {
-            if (mapInstance == null)
-            {
-                return;
-            }
+            var target = context.GetActivePaintTarget();
+// 2. Récupérer l'objet à peindre
+            // C'est le "SelectedObjectToPaint" dont on parlait (Tile ou Entity)
+            object objectToPaint = context.SelectedObjectToPaint;
 
-            var layer = EngineCore.Instance.Data.SelectedLayer;
+            if (target == null || objectToPaint == null) return;
 
-            if (layer == null)
-            {
-                return;
-            }
-
-            var tile = EngineCore.Instance.Data.SelectedTile;
-
-            if (tile == null)
-            {
-                return; // No tile selected, nothing to add
-            }
-
-            if (!IBrush.InBorder(at, mapInstance))
-            {
-                return; // Clicked outside the map border, do not add tile
-            }
-
-            // Manage the size of the brush, for example, if the size is 2, we will add a tile at (at.X, at.Y) and (at.X + tile.Width, at.Y + tile.Height) in a square pattern
-            // The center of the brush will be at the point 'at', and the tiles will be added around it based on the size of the brush.
+            // 3. Boucle de dessin (Logique de taille)
             if (Size > 1)
             {
-                // Calculate the range of tiles to add based on the brush size
-                for (int x = -Size / 2; x <= Size / 2; x++)
+                int halfSize = Size / 2;
+                for (int x = -halfSize; x <= halfSize; x++)
                 {
-                    for (int y = -Size / 2; y <= Size / 2; y++)
+                    for (int y = -halfSize; y <= halfSize; y++)
                     {
-                        Point tilePosition = new Point(at.X + x * tile.TilesetDef.TileWidth, at.Y + y * tile.TilesetDef.TileHeight);
-                        if (IBrush.InBorder(tilePosition, mapInstance))
+                        // Calcul de la position grille
+                        int gridX = clickPos.X + (x * target.GridWidth);
+                        int gridY = clickPos.Y + (y * target.GridHeight);
+                        var paintPos = new Point(gridX, gridY);
+
+                        if (target.IsValidPosition(paintPos))
                         {
-                            if (tile is AutotileInstance autotile)
-                            {
-                                layer.AddElement(autotile.AutotileGroupInstance.Definition.GetTileAt(layer, at) ?? tile, tilePosition);
-                                return;
-                            } 
-                            layer.AddElement(tile, tilePosition); // Add tile at the calculated position
+                            target.PaintAt(paintPos, objectToPaint);
                         }
                     }
                 }
             }
             else
             {
-                if (tile is AutotileInstance autotile)
+                // Taille 1
+                if (target.IsValidPosition(clickPos))
                 {
-                    layer.AddElement(autotile.AutotileGroupInstance.Definition.GetTileAt(layer, at) ?? tile, at);
-                    return;
+                    target.PaintAt(clickPos, objectToPaint);
                 }
-                // If size is 1, just add the tile at the specified point
-                layer.AddElement(tile, at);
             }
         }
 

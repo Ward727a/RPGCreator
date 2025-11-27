@@ -364,7 +364,6 @@ public class CharacterData : BaseEntity, ICharacter, ISerializable, IDeserializa
     #region Events
 
     public event EventHandler<string>? PortraitChanged;
-    public event EventHandler<string>? SpriteChanged;
     public event EventHandler<int>? LevelChanged;
     public event EventHandler<int>? MaxLevelChanged;
     public event EventHandler<int>? InitialLevelChanged;
@@ -377,7 +376,6 @@ public class CharacterData : BaseEntity, ICharacter, ISerializable, IDeserializa
     public URN Urn { get; }
     
     private string _portraitPath = string.Empty;
-    private string _spritePath = string.Empty;
     
     public Dictionary<string, DirectionalAnimationSet> AnimationsMapping { get; private set; }= new();
     
@@ -411,19 +409,6 @@ public class CharacterData : BaseEntity, ICharacter, ISerializable, IDeserializa
         }
     }
 
-    [NotNull]
-    public string? SpritePath 
-    {
-        get => _spritePath;
-        set
-        {
-            if (value == null) return;
-            if (_spritePath == value) return; // Avoid unnecessary updates
-            _spritePath = value;
-            SpriteChanged?.Invoke(this, value);
-        }
-    }
-    
     public int InitialLevel
     {
         get => _initialLevel;

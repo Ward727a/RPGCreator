@@ -12,6 +12,7 @@ using RPGCreator.Core.Types.Editor.Context;
 using RPGCreator.UI.Content.Editor.LeftPanel.EntitiesPanel;
 using RPGCreator.UI.Content.Editor.LeftPanel.NonePanel;
 using RPGCreator.UI.Content.Editor.LeftPanel.TilingPanel;
+using RPGCreator.UI.Content.Editor.Tabs;
 
 namespace RPGCreator.UI.Content.Editor.LeftPanel;
 
@@ -26,6 +27,7 @@ public class EditorLeftPanelControl : UserControl
     
     #region Components
 
+    private TabControl? _tabControl;
     private ScrollViewer? _scrollViewer;
     private StackPanel? _body;
 
@@ -38,18 +40,29 @@ public class EditorLeftPanelControl : UserControl
         _context = ctx;
         CreateComponents();
         RegisterEvents();
-        Content = _scrollViewer;
+        Content = _tabControl;
         UIExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanel, this, _context);
     }
     
     private void CreateComponents()
     {
+        _tabControl = new TabControl
+        {
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+        };
+        
         _scrollViewer = new ScrollViewer
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
         };
+        _tabControl.Items.Add(new TabItem()
+        {
+            Content = _scrollViewer,
+            Header = "Tool Properties"
+        });
         _body = new StackPanel
         {
             Orientation = Orientation.Vertical,
@@ -59,6 +72,18 @@ public class EditorLeftPanelControl : UserControl
             MinWidth = 300,
         };
         _scrollViewer.Content = _body;
+
+        _tabControl.Items.Add(new TabItem()
+        {
+            Content = new MapEditor(),
+            Header = "Map Editor"
+        });
+        _tabControl.Items.Add(new TabItem()
+        {
+            Content = new MapLevelTab(),
+            Header = "Map Levels"
+        });
+        
         
         // Add basics components
         AddComponent("none", new NonePanelControl(_context));

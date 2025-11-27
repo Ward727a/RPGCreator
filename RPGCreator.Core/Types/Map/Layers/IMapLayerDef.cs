@@ -108,7 +108,7 @@ public interface IMapLayerDef<TLayerElement> : IHasUniqueId, ISerializable, IDes
     /// <summary>
     /// Get all elements that are within a specified radius around a given location.<br/>
     /// This method will return a list of elements that are within the specified radius from the given location.<br/>
-    /// The radius is defined as the Manhattan distance from the location, meaning that it includes all elements that are within the specified number of tiles in any direction (up, down, left, right, up-right, up-left, down-right, and down-left).
+    /// The radius is defined as the middle distance from the location, meaning that it includes all elements that are within the specified number of tiles in any direction (up, down, left, right, up-right, up-left, down-right, and down-left).
     /// </summary>
     /// <param name="location">The location around which to search for surrounding elements.</param>
     /// <param name="radius">The radius within which to search for surrounding elements. Default is 1 tile.</param>

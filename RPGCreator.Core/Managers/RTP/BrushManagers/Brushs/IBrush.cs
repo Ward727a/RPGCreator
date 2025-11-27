@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Types.Editor.Context;
 
 namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
 {
@@ -37,7 +38,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
     {
 
 
-        void Draw(SpriteBatchExtend sb, Point at, Types.Map.MapInstance mapInstance);
+        void Draw(Point clickPos, MapEditorContext context);
 
         protected static bool InBorder(Point at, MapInstance mapInstance)
         {

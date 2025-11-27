@@ -53,7 +53,7 @@ namespace RPGCreator.UI.Content.Editor
     {
         private Window _Host => (Window)this.GetVisualRoot()!;
 
-        private MapEditorContext _mapEditorContext = new MapEditorContext();
+        private MapEditorContext _mapEditorContext = new();
         
         private EditorGame? game = (EditorGame)EngineCore.Instance.Data.RTPGame;
         private AvaloniaInside.MonoGame.MonoGameControl MonoGameScreen;

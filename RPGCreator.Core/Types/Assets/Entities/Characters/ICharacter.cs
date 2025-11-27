@@ -5,7 +5,6 @@ namespace RPGCreator.Core.Types.Assets.Characters;
 public interface ICharacter : IHasSavePath, IHasUniqueId
 {
     public event EventHandler<string>? PortraitChanged;
-    public event EventHandler<string>? SpriteChanged;
     public event EventHandler<int>? LevelChanged;
     public event EventHandler<int>? MaxLevelChanged;
     public event EventHandler<int>? InitialLevelChanged;
@@ -13,7 +12,6 @@ public interface ICharacter : IHasSavePath, IHasUniqueId
     
     public string Name { get; }
     public string PortraitPath { get; set; }
-    public string SpritePath { get; set; }
     public int InitialLevel { get; set; }
     public int CurrentLevel { get; set; }
     public int MaxLevel { get; set; }

@@ -30,6 +30,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RPGCreator.Core.Runtimes.Context;
+using RPGCreator.Core.Types.Editor.Context;
 using Serilog;
 
 namespace RPGCreator.Core.Managers.RTP.BrushManagers
@@ -84,9 +85,11 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
                 Log.Error("No brush type is currently selected. Please select a brush type before clicking.");
                 return;
             }
+
+            EngineCore.Instance.Data.EditorSettings.BrushType.Draw(at, context);
             
             
-            Event.OnClickedAt(at, EngineCore.Instance.Data.EditorSettings.BrushType);
+            // Event.OnClickedAt(at, EngineCore.Instance.Data.EditorSettings.BrushType);
         }
 
         public void PreviewAt(Point at)

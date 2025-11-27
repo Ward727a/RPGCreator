@@ -6,6 +6,9 @@ namespace RPGCreator.Core.Types.Assets.Actors;
 
 public abstract class BaseEntity : IHasUniqueId
 {
+    
+    public string SpritePath { get; set; } = string.Empty;
+    
     public Ulid Unique { get; protected set; } = Ulid.NewUlid();
     public URN Urn => new("entity", Unique.ToString());
     

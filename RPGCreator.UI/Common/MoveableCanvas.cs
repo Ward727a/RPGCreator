@@ -1,23 +1,77 @@
+using System;
 using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
+using Avalonia.Media;
 using RPGCreator.Core.Types.Internal;
 using Serilog;
 using Point = Avalonia.Point;
+using Size = Avalonia.Size;
 
 namespace RPGCreator.UI.Common;
+public class EditorGridLayer : Control
+{
+    // On peut binder ça ou le passer en propriété
+    public Point Offset { get; set; } = new Point(0, 0);
+    public Size GridCellSize { get; set; } = new Size(32, 32);
+    public bool ShowGrid { get; set; } = true;
+
+    // Stylos (Cached pour la perf)
+    private static readonly Pen _penBlack = new Pen(Brushes.Black, 1);
+    private static readonly Pen _penWhite = new Pen(Brushes.White, 1, new DashStyle(new[] { 2.0, 2.0 }, 0));
+
+    public EditorGridLayer()
+    {
+        // CRUCIAL : Permet de cliquer sur les tuiles à travers la grille
+        this.IsHitTestVisible = false; 
+    }
+
+    public override void Render(DrawingContext context)
+    {
+        base.Render(context);
+        if (!ShowGrid) return;
+        if (GridCellSize.Width <= 0 || GridCellSize.Height <= 0) return;
+
+        // On dessine sur toute la taille disponible de ce calque
+        double width = Bounds.Width;
+        double height = Bounds.Height;
+        double startX = Offset.X % GridCellSize.Width;
+        double startY = Offset.Y % GridCellSize.Height;
+        // X lines
+        for (double x = startX; x < width; x += GridCellSize.Width)
+        {
+            double snapX = Math.Floor(x) + 0.5;
+            context.DrawLine(_penBlack, new Point(snapX, 0), new Point(snapX, height));
+            context.DrawLine(_penWhite, new Point(snapX, 0), new Point(snapX, height));
+        }
+
+        // Y lines
+        for (double y = startY; y < height; y += GridCellSize.Height)
+        {
+            double snapY = Math.Floor(y) + 0.5;
+            context.DrawLine(_penBlack, new Point(0, snapY), new Point(width, snapY));
+            context.DrawLine(_penWhite, new Point(0, snapY), new Point(width, snapY));
+        }
+    }
+}
 
 public class MoveableCanvas : UserControl
 {
 
     public Canvas CanvasBody { get; private set; }
+    private EditorGridLayer _gridLayer;
     
     private Dictionary<Control, Point> _moveableElements = new();
     private Point _lastMousePosition = new Point(0, 0);
-    private Point _currentElementsPosition = new Point(0, 0);
+    public Point CurrentElementsPosition { get; private set; } = new Point(0, 0);
     
+    public bool LimitToContentSize { get; set; } = false;
     public bool LimitTo00Coordinates { get; set; } = true;
+    
+    public bool ShowGrid { get; set; } = false;
+    public Size GridCellSize { get; private set; } = new Size(32, 32);
     
     public MoveableCanvas()
     {
@@ -28,10 +82,27 @@ public class MoveableCanvas : UserControl
     
     public void AddMoveableElement(Control element)
     {
-        _moveableElements.Add(element, new Point(0, 0));
+        _moveableElements.Add(element, new Point(Canvas.GetLeft(element), Canvas.GetTop(element)));
         CanvasBody.Children.Add(element);
-        Canvas.SetLeft(element, _currentElementsPosition.X);
-        Canvas.SetTop(element, _currentElementsPosition.Y);
+        Canvas.SetLeft(element, CurrentElementsPosition.X);
+        Canvas.SetTop(element, CurrentElementsPosition.Y);
+    }
+    
+    public void UpdateOrigin(Control element)
+    {
+        if (_moveableElements.ContainsKey(element))
+        {
+            _moveableElements[element] = new Point(Canvas.GetLeft(element) - CurrentElementsPosition.X,
+                Canvas.GetTop(element) - CurrentElementsPosition.Y);
+        }
+    }
+    
+    public void SetGridCellSize(Size cellSize)
+    {
+        GridCellSize = cellSize;
+        _gridLayer.GridCellSize = GridCellSize;
+        _gridLayer.ShowGrid = ShowGrid;
+        _gridLayer.InvalidateVisual();
     }
     
     private void CreateComponents()
@@ -39,8 +110,17 @@ public class MoveableCanvas : UserControl
         CanvasBody = new Canvas()
         {
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            Background = Avalonia.Media.Brushes.Transparent
         };
+        
+        _gridLayer = new EditorGridLayer();
+        _gridLayer.Bind(WidthProperty, new Binding("Bounds.Width") { Source = this });
+        _gridLayer.Bind(HeightProperty, new Binding("Bounds.Height") { Source = this });
+        CanvasBody.Children.Add(_gridLayer);
+        _gridLayer.ZIndex = int.MaxValue;
+        _gridLayer.GridCellSize = GridCellSize;
+        _gridLayer.ShowGrid = ShowGrid;
     }
     
     private void RegisterEvents()
@@ -67,12 +147,24 @@ public class MoveableCanvas : UserControl
             var deltaY = position.Y - _lastMousePosition.Y;
 
             _lastMousePosition = position;
-            foreach (var element in _moveableElements)
+
+            if (_moveableElements.Count > 0)
             {
+                var biggestElementSize = new Size(0, 0);
+                foreach (var element in _moveableElements)
+                {
+                    var elementWidth = element.Key.Bounds.Width;
+                    var elementHeight = element.Key.Bounds.Height;
+                    if (elementWidth > biggestElementSize.Width)
+                        biggestElementSize = new Size(elementWidth, biggestElementSize.Height);
+                    if (elementHeight > biggestElementSize.Height)
+                        biggestElementSize = new Size(biggestElementSize.Width, elementHeight);
+                }
+                
                 if (position != null)
                 {
-                    var newX = deltaX + _currentElementsPosition.X;
-                    var newY = deltaY + _currentElementsPosition.Y;
+                    var newX = deltaX + CurrentElementsPosition.X;
+                    var newY = deltaY + CurrentElementsPosition.Y;
 
                     if (LimitTo00Coordinates)
                     {
@@ -80,12 +172,43 @@ public class MoveableCanvas : UserControl
                         newY = newY > 0 ? 0 : newY;
                     }
 
-                    Canvas.SetLeft(element.Key, newX);
-                    Canvas.SetTop(element.Key, newY);
-                    _currentElementsPosition = new Point(newX, newY);
+                    if (LimitToContentSize)
+                    {
+                        var elementWidth = biggestElementSize.Width;
+                        var elementHeight = biggestElementSize.Height;
+                        var canvasWidth = CanvasBody.Bounds.Width;
+                        var canvasHeight = CanvasBody.Bounds.Height;
+
+                        if (elementWidth > 0)
+                        {
+                            var minX = canvasWidth - elementWidth;
+                            var maxX = 0;
+                            if (newX < minX) newX = minX;
+                            if (newX > maxX) newX = maxX;
+                        }
+
+                        if (elementHeight > 0)
+                        {
+                            var minY = canvasHeight - elementHeight;
+                            var maxY = 0;
+                            if (newY < minY) newY = minY;
+                            if (newY > maxY) newY = maxY;
+                        }
+                    }
+
+                    CurrentElementsPosition = new Point(newX, newY);
                     Log.Debug("Element moved to X: {X}, Y: {Y}", newX, newY);
                 }
             }
+
+            foreach (var element in _moveableElements)
+            {
+                Canvas.SetLeft(element.Key, CurrentElementsPosition.X + element.Value.X);
+                Canvas.SetTop(element.Key, CurrentElementsPosition.Y + element.Value.Y);
+            }
+            
+            _gridLayer.Offset = CurrentElementsPosition;
+            _gridLayer.InvalidateVisual();
         }
     }
     

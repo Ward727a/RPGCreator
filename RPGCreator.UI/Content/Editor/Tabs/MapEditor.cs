@@ -63,7 +63,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
         // Constructor
 
-        private MapEditor()
+        public MapEditor()
         {
             BodyScroller = new ScrollViewer
             {

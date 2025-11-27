@@ -9,11 +9,10 @@ namespace RPGCreator.Core.Types.Assets.Tilesets;
 public interface ITileDef : ILayerElem, IAssetDef
 {
     public Vector2 DefaultPosition { get; set; }
-    public Internal_Point SizeInTileset { get; }
-    public Internal_Point PositionInTileset { get; } // Position in the tileset grid (row by column)
+    public Point SizeInTileset { get; }
+    public Point PositionInTileset { get; } // Position in the tileset grid (row by column)
     public ITilesetDef TilesetDef { get; } // The tileset this tile belongs to
     public Rectangle UV { get; }
-
 
     public void UpdateTileset(ITilesetDef newTilesetDefinition);
 

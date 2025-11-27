@@ -248,6 +248,9 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
 
             indexCollection.Upsert(record);
 
+            EngineCore.Instance.Managers.Assets.AddNewAssetLocation(idAsset.Unique, this, relativePath,
+                record.TypeName);
+
             Log.Information("[Pack {PackName}] Asset {AssetId} saved to path {FilePath} and indexed.", Name,
                 idAsset.Unique, fullPath);
         }

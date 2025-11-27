@@ -188,6 +188,11 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                     {
                         Name = newLayerName
                     };
+                    
+                    if(EngineCore.Instance.Data.EditedMap == null)
+                    {
+                        return;
+                    }
 
                     layer.ZIndex = EngineCore.Instance.Data.EditedMap.TileLayers.Count - 1; // Set ZIndex to the last index
                     // layer.ZIndexChanged += (value) =>

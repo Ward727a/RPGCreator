@@ -49,6 +49,7 @@ public class UnifiedImage : IDisposable
     #endregion
 
     private string _filePath = string.Empty;
+    public string FilePath => _filePath;
     private GraphicsDevice? GraphicsDevice { get; set; } = null;
 
     private Bitmap? _avaloniaImageCache = null!;

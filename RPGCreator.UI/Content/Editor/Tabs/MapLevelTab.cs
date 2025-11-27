@@ -489,7 +489,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
             }
         }
 
-        private MapLevelTab() : base()
+        public MapLevelTab() : base()
         {
             var cont = new Grid
             {
