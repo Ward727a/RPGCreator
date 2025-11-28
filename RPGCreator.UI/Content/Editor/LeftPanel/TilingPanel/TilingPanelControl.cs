@@ -259,24 +259,12 @@ public class TilingPanelControl : UserControl
             {
                 var def = _scope.Load<ITilesetDef>(selectedItem.AssetId);
                 
-                // TODO : Handle all of this better, maybe in a factory method in TileDefinition? Or inside ITileDef?
-                
                 var tilePositionInTileset = new Point( // Row and Column in tileset
-                    (int)(alignedX / cellSize.Width),
-                    (int)(alignedY / cellSize.Height)
-                );
-                var tilSizeInTileset = new Point(
-                    (int)(def.TileWidth),
-                    (int)(def.TileHeight)
-                );
-                var UV = new Rect(
-                    tilePositionInTileset.X * def.TileWidth,
-                    tilePositionInTileset.Y * def.TileHeight,
-                    tilSizeInTileset.Width,
-                    tilSizeInTileset.Height
+                    (int)((position.X + Math.Abs(_canvas.CurrentElementsPosition.X)) / cellSize.Width),
+                    (int)((position.Y + Math.Abs(_canvas.CurrentElementsPosition.Y)) / cellSize.Height)
                 );
                 
-                tileToPaint = new TileDefinition(new Vector2(0,0), tilSizeInTileset, tilePositionInTileset, def);
+                tileToPaint = def.GetTileAt(tilePositionInTileset.X, tilePositionInTileset.Y);
                 Log.Debug("[TilingPanel] Created tile definition at position {0} in tileset {1}", tilePositionInTileset, def.Name);
                 
                 _context.SelectedObjectToPaint = tileToPaint;
@@ -304,7 +292,6 @@ public class TilingPanelControl : UserControl
     {
         _setSelector.SelectionChanged += SetSelectorOnSelectionChanged;
     }
-
 
     public void AddTilesetOption(ITilesetDef definition)
     {

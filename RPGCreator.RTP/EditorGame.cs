@@ -67,9 +67,11 @@ namespace RPGCreator.MonoGame
 
             // Gum.Initialize(this);
 
-            EngineCore.Instance.Data.EditedMapChanged += (s, e) =>
+            EngineCore.Instance.Data.EditedMapChanged += (instance) =>
             {
-                _mapEditing.MapInstance = EngineCore.Instance.Managers.Assets.MapFactory.Create(EngineCore.Instance.Data.EditedMap);
+                if (instance == null)
+                    return;
+                _mapEditing.MapInstance = instance;
             };
 
             // var mainPanel = new Panel(Gum.Root);

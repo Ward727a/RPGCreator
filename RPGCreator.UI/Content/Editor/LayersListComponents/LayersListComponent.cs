@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Types.Editor.Context;
 
 namespace RPGCreator.UI.Content.Editor.LayersListComponents
 {
@@ -41,7 +42,8 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
     /// </summary>
     public class LayersListComponent : UserControl
     {
-
+        private MapEditorContext _context;
+        
         #region Components
 
         public StackPanel LayersBody { get; private set; }
@@ -52,8 +54,9 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
 
         #endregion
 
-        public LayersListComponent()
+        public LayersListComponent(MapEditorContext context)
         {
+            _context = context;
             CreateComponents();
             Content = Body;
         }
@@ -111,8 +114,8 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
         protected void RefreshComponents()
         {
             LayersList.Items.Clear();
-            if (EngineCore.Instance.Data.EditedMap == null) return;
-            foreach (var layer in EngineCore.Instance.Data.EditedMap.TileLayers.OrderBy(l=>l.ZIndex))
+            if (_context.Map == null) return;
+            foreach (var layer in _context.Map.TileLayers.OrderBy(l=>l.ZIndex))
             {
                 LayerItem layerItem = new LayerItem(layer);
                 LayersList.Items.Add(layerItem);
@@ -136,12 +139,12 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
 
         protected void RegisterEvents()
         {
-            EngineCore.Instance.Data.EditedMapChanged += OnMapChanged;
+            _context.MapChanged += OnMapChanged;
         }
 
         #region EventsHandlers
 
-        protected void OnMapChanged(object? sender, EventArgs e)
+        protected void OnMapChanged()
         {
             // Refresh the layers list when the map changes
             RefreshComponents();
@@ -189,18 +192,18 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                         Name = newLayerName
                     };
                     
-                    if(EngineCore.Instance.Data.EditedMap == null)
+                    if(_context.Map == null)
                     {
                         return;
                     }
 
-                    layer.ZIndex = EngineCore.Instance.Data.EditedMap.TileLayers.Count - 1; // Set ZIndex to the last index
+                    layer.ZIndex = _context.Map.TileLayers.Count - 1; // Set ZIndex to the last index
                     // layer.ZIndexChanged += (value) =>
                     // {
                     //     RefreshComponents();
                     // };
 
-                    EngineCore.Instance.Data.EditedMap?.AddLayer(layer);
+                    _context.Map?.AddLayer(layer);
 
                     LayerItem newLayerItem = new LayerItem(layer);
 
@@ -214,7 +217,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
 
                     SelectedLayerText.Text = $"Selected Layer: {newLayerName}";
 
-                    EngineCore.Instance.Data.SelectedLayer = layer;
+                    _context.SelectedLayer = layer;
 
                     popup.Close();
                 }
@@ -252,7 +255,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
         {
             if (LayersList.SelectedItem is not LayerItem layerItem) return;
             SelectedLayerText.Text = $"Selected Layer: {layerItem.Layer.Name}";
-            EngineCore.Instance.Data.SelectedLayer = layerItem.Layer;
+            _context.SelectedLayer = layerItem.Layer;
         }
 
         #endregion

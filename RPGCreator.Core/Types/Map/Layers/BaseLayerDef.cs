@@ -18,7 +18,7 @@ public abstract class BaseLayerDef<TDef> : IMapLayerDef<TDef> where TDef : class
     public URN Urn { get; private set; }
     public string Name { get; set; }
     public int ZIndex { get; set; }
-    public bool VisibleByDefault { get; set; }
+    public bool VisibleByDefault { get; set; } = true;
     public ReadOnlyDictionary<Point, TDef> Elements => _elements.AsReadOnly();
     public void AddElement(TDef element, Point location)
     {

@@ -22,16 +22,8 @@
 // 
 // 
 #endregion
-using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Types.Internal;
-using RPGCreator.Core.Types.Map;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RPGCreator.Core.Managers.AssetsManager.Factories;
-using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Editor.Context;
 
 namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
@@ -50,13 +42,11 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
         public void Draw(Point clickPos, MapEditorContext context)
         {
             var target = context.GetActivePaintTarget();
-// 2. Récupérer l'objet à peindre
-            // C'est le "SelectedObjectToPaint" dont on parlait (Tile ou Entity)
+            
             object objectToPaint = context.SelectedObjectToPaint;
 
             if (target == null || objectToPaint == null) return;
 
-            // 3. Boucle de dessin (Logique de taille)
             if (Size > 1)
             {
                 int halfSize = Size / 2;
@@ -64,7 +54,6 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
                 {
                     for (int y = -halfSize; y <= halfSize; y++)
                     {
-                        // Calcul de la position grille
                         int gridX = clickPos.X + (x * target.GridWidth);
                         int gridY = clickPos.Y + (y * target.GridHeight);
                         var paintPos = new Point(gridX, gridY);
@@ -78,7 +67,6 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
             }
             else
             {
-                // Taille 1
                 if (target.IsValidPosition(clickPos))
                 {
                     target.PaintAt(clickPos, objectToPaint);
@@ -88,41 +76,43 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
 
         public int GetBrushSize()
         {
-            return Size; // Return the current size of the brush
+            return Size; 
         }
 
         public void ResizeBrush(int newSize)
         {
-            Size = newSize; // Update the brush size
+            Size = newSize; 
         }
 
-        public void ShowPreview(SpriteBatchExtend sb, Point at, MapInstance mapInstance)
+        public void ShowPreview(Point at, MapEditorContext context)
         {
             if(!_isPreviewEnabled)
             {
                 return; // If preview is disabled, do not show anything
             }
 
-            if (mapInstance == null)
+            if (context.MapInstance == null)
             {
                 return;
             }
+            var instance = context.MapInstance;
 
-            var layer = mapInstance.PreviewLayer;
+            var layer = instance.PreviewLayer;
 
             if (layer == null)
             {
                 return;
             }
+            layer.InstancedElements.Clear();
 
-            var tile = EngineCore.Instance.Data.SelectedTile;
+            var tile = context.SelectedTile;
 
             if (tile == null)
             {
                 return; // No tile selected, nothing to add
             }
 
-            if (!IBrush.InBorder(at, mapInstance))
+            if (!IBrush.InBorder(at, instance))
             {
                 return; // Clicked outside the map border, do not add tile
             }
@@ -137,7 +127,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
                     for (int y = -Size / 2; y <= Size / 2; y++)
                     {
                         Point tilePosition = new Point(at.X + x * tile.TilesetDef.TileWidth, at.Y + y * tile.TilesetDef.TileHeight);
-                        if (IBrush.InBorder(tilePosition, mapInstance))
+                        if (IBrush.InBorder(tilePosition, instance))
                         {
                             var tileInstance = _tiles.Create(tile);
                             tileInstance.Position = tilePosition;

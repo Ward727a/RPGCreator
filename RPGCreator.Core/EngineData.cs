@@ -124,7 +124,17 @@ namespace RPGCreator.Core
             }
         }
 
-        public event EventHandler? EditedMapChanged;
+        public event Action<MapInstance?>? EditedMapChanged;
+        public void OnEditedMapChanged(MapInstance? mapInstance)
+        {
+            EditedMapChanged?.Invoke(mapInstance);
+        }
+        public event Action<MapInstance?>? EditedMapInstanceChanged;
+
+        public void OnEditedMapInstanceChanged(MapInstance? mapInstance)
+        {
+            EditedMapInstanceChanged?.Invoke(mapInstance);
+        }
         public event EventHandler<SelectedLayerChangedEventArgs>? SelectedLayerChanged;
         public event EventHandler<SelectedTileChangedEventArgs>? SelectedTileChanged;
 
@@ -161,7 +171,6 @@ namespace RPGCreator.Core
                 if (_editedMap != value)
                 {
                     _editedMap = value;
-                    EditedMapChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }

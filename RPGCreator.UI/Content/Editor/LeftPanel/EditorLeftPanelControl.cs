@@ -75,12 +75,12 @@ public class EditorLeftPanelControl : UserControl
 
         _tabControl.Items.Add(new TabItem()
         {
-            Content = new MapEditor(),
+            Content = new MapEditor(_context),
             Header = "Map Editor"
         });
         _tabControl.Items.Add(new TabItem()
         {
-            Content = new MapLevelTab(),
+            Content = new MapLevelTab(_context),
             Header = "Map Levels"
         });
         

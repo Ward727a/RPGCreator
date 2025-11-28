@@ -15,7 +15,7 @@ public class TileInstance : BaseDrawable, ITileInstance
     public TileInstance(ITileDef tileDef)
     {
         Definition = tileDef;
-        Position = tileDef.DefaultPosition;
+        Position = tileDef.Position;
     }
 
 

@@ -51,26 +51,20 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
         public void ClickAt(Point at, MapEditorContext context)
         {
 
-            if(!EngineCore.Instance.Data.EditorSettings.IsDrawing)
+            if(!context.IsDrawing)
             {
                 Log.Error("Drawing is not enabled. Please enable drawing in the toolbar before clicking.");
                 return;
             }
 
-            if (EngineCore.Instance.Data.EditedProject == null)
-            {
-                Log.Error("No project is currently loaded. Please load a project before clicking.");
-                return;
-            }
-
             // Convert the point to a valid position in the tile width and height
-            if (EngineCore.Instance.Data.SelectedTile == null)
+            if (context.SelectedTile == null)
             {
                 Log.Error("No tile is currently selected. Please select a tile before clicking.");
                 return;
             }
-            var tileWidth = EngineCore.Instance.Data.SelectedTile.TilesetDef.TileWidth;
-            var tileHeight = EngineCore.Instance.Data.SelectedTile.TilesetDef.TileHeight;
+            var tileWidth = context.SelectedTile.TilesetDef.TileWidth;
+            var tileHeight = context.SelectedTile.TilesetDef.TileHeight;
 
             int tileX = (at.X / tileWidth) * tileWidth;
             int tileY = (at.Y / tileHeight) * tileHeight;
@@ -80,21 +74,20 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
             // Handle the click at the specified point
             // This is where you would implement the logic for what happens when a brush is clicked at a specific point
             Log.Information($"Brush clicked at: {at}");
-            if(EngineCore.Instance.Data.EditorSettings.BrushType == null)
+            if(context.ActiveBrush == null)
             {
                 Log.Error("No brush type is currently selected. Please select a brush type before clicking.");
                 return;
             }
 
-            EngineCore.Instance.Data.EditorSettings.BrushType.Draw(at, context);
-            
+            context.ActiveBrush.Draw(at, context);
             
             // Event.OnClickedAt(at, EngineCore.Instance.Data.EditorSettings.BrushType);
         }
 
-        public void PreviewAt(Point at)
+        public void PreviewAt(Point at, MapEditorContext context)
         {
-            if (!EngineCore.Instance.Data.EditorSettings.IsDrawing)
+            if (!context.IsDrawing)
             {
                 //Console.ForegroundColor = ConsoleColor.Red;
                 //Console.WriteLine("Drawing is not enabled. Please enable drawing in the toolbar before clicking.");
@@ -102,24 +95,16 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
                 return;
             }
 
-            if (EngineCore.Instance.Data.EditedProject == null)
-            {
-                //Console.ForegroundColor = ConsoleColor.Red;
-                //Console.WriteLine("No project is currently loaded. Please load a project before clicking.");
-                //Console.ResetColor();
-                return;
-            }
-
             // Convert the point to a valid position in the tile width and height
-            if (EngineCore.Instance.Data.SelectedTile == null)
+            if (context.SelectedTile == null)
             {
                 //Console.ForegroundColor = ConsoleColor.Red;
                 //Console.WriteLine("No tile is currently selected. Please select a tile before clicking.");
                 //Console.ResetColor();
                 return;
             }
-            var tileWidth = EngineCore.Instance.Data.SelectedTile.TilesetDef.TileWidth;
-            var tileHeight = EngineCore.Instance.Data.SelectedTile.TilesetDef.TileHeight;
+            var tileWidth = context.SelectedTile.TilesetDef.TileWidth;
+            var tileHeight = context.SelectedTile.TilesetDef.TileHeight;
 
             int tileX = (at.X / tileWidth) * tileWidth;
             int tileY = (at.Y / tileHeight) * tileHeight;
@@ -129,7 +114,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
             // Handle the click at the specified point
             // This is where you would implement the logic for what happens when a brush is clicked at a specific point
             //Console.WriteLine($"Brush previewed at: {at}");
-            if (EngineCore.Instance.Data.EditorSettings.BrushType == null)
+            if (context.ActiveBrush == null)
             {
                 //Console.ForegroundColor = ConsoleColor.Red;
                 //Console.WriteLine("No brush type is currently selected. Please select a brush type before clicking.");
@@ -137,8 +122,9 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
                 return;
             }
 
-            if(EngineCore.Instance.Data.EditorSettings.BrushType is IBrushPreviewFeature previewBrush)
+            if(context.ActiveBrush is IBrushPreviewFeature previewBrush)
             {
+                previewBrush.ShowPreview(at, context);
                 Event.OnPreviewAt(at, previewBrush);
                 return;
             }
@@ -155,15 +141,15 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
             Event.OnClearPreview();
         }
 
-        public Point NormalizedPositionToTile(Point position)
+        public Point NormalizedPositionToTile(Point position, MapEditorContext context)
         {
-            if (EngineCore.Instance.Data.SelectedTile == null)
+            if (context.SelectedTile == null)
             {
                 Log.Error("No tile is currently selected. Please select a tile before clicking.");
                 return new Point(-1, -1);
             }
-            var tileWidth = EngineCore.Instance.Data.SelectedTile.TilesetDef.TileWidth;
-            var tileHeight = EngineCore.Instance.Data.SelectedTile.TilesetDef.TileHeight;
+            var tileWidth = context.SelectedTile.TilesetDef.TileWidth;
+            var tileHeight = context.SelectedTile.TilesetDef.TileHeight;
             int tileX = (position.X / tileWidth) * tileWidth;
             int tileY = (position.Y / tileHeight) * tileHeight;
             return new Point(tileX, tileY);

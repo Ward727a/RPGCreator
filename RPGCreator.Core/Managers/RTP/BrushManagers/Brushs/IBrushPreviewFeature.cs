@@ -29,12 +29,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Types.Editor.Context;
 
 namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
 {
     public interface IBrushPreviewFeature
     {
         public bool IsPreviewEnabled { get; set; }
-        public void ShowPreview(SpriteBatchExtend sb, Point at, Types.Map.MapInstance mapDefinition);
+        public void ShowPreview(Point at, MapEditorContext context);
     }
 }

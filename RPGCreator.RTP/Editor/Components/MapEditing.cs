@@ -74,6 +74,7 @@ namespace RPGCreator.RTP.Editor.Components
         private void Brush_PreviewAt(object? sender, PreviewAtEventArgs e)
         {
 
+            return;
             if(e.At.IsEqualTo(_LastPreviewAt) && _LastPreviewBrush == e.Brush)
             {
                 return; // No need to update the preview if the position and brush are the same
@@ -95,7 +96,6 @@ namespace RPGCreator.RTP.Editor.Components
                 return;
             }
 
-            e.Brush.ShowPreview(_sb, e.At, MapInstance);
             _LastPreviewAt = e.At;
             _LastPreviewBrush = e.Brush;
         }

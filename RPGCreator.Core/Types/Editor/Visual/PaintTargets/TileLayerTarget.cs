@@ -24,7 +24,7 @@ public class TileLayerTarget : IPaintTarget
     {
         if (_mapDef == null)
             return false;
-        return position is { X: >= 0, Y: >= 0 } && (position.X < _mapDef.Size.Width && position.Y < _mapDef.Size.Height);
+        return position is { X: >= 0, Y: >= 0 } && (position.X < _mapDef.Size.Width * GridWidth && position.Y < _mapDef.Size.Height * GridHeight);
     }
 
     public void PaintAt(Point position, object objectToPaint)

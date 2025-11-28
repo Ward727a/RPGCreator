@@ -28,11 +28,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Types.Editor.Context;
 
 namespace RPGCreator.UI.Content.Editor.Tabs
 {
     public interface ITab
     {
-        public abstract static TabItem CreateTab(Window host);
+        public abstract static TabItem CreateTab(Window host, MapEditorContext? context = null);
     }
 }

@@ -32,11 +32,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.Core.Types.Editor.Context;
 
 namespace RPGCreator.UI.Content.Editor.Toolbar
 {
     public class ToolbarControl : UserControl
     {
+        private MapEditorContext _context;
 
         #region StaticData
 
@@ -83,8 +85,9 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
 
         #endregion
 
-        public ToolbarControl()
+        public ToolbarControl(MapEditorContext context)
         {
+            _context = context;
             CreateComponents();
             LoadBrushes();
             Content = Body;
@@ -263,7 +266,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
                 {
                     // Logic to enable place mode
                     Console.WriteLine("Place mode enabled.");
-                    EngineCore.Instance.Data.EditorSettings.IsPlacing = true; // Set the placing mode in editor settings
+                    _context.IsPlacing = true; // Set the placing mode in editor settings
                     if (LastChecked != null && LastChecked != button)
                     {
                         LastChecked.IsChecked = false; // Uncheck the last checked button
@@ -273,7 +276,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
                 else
                 {
                     // Logic to disable place mode
-                    EngineCore.Instance.Data.EditorSettings.IsPlacing = false; // Set the placing mode in editor settings
+                    _context.IsPlacing = false; // Set the placing mode in editor settings
                     Console.WriteLine("Place mode disabled.");
                     if (LastChecked == button)
                     {
@@ -343,7 +346,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
                 {
                     // Logic to enable drawing mode
                     Console.WriteLine("Drawing mode enabled.");
-                    EngineCore.Instance.Data.EditorSettings.IsDrawing = true; // Set the drawing mode in editor settings
+                    _context.IsDrawing = true; // Set the drawing mode in editor settings
                     if (LastChecked != null && LastChecked != button)
                     {
                         LastChecked.IsChecked = false; // Uncheck the last checked button
@@ -353,7 +356,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
                 else
                 {
                     // Logic to disable drawing mode
-                    EngineCore.Instance.Data.EditorSettings.IsDrawing = false; // Set the drawing mode in editor settings
+                    _context.IsDrawing = false; // Set the drawing mode in editor settings
                     Console.WriteLine("Drawing mode disabled.");
                     if (LastChecked == button)
                     {
@@ -370,7 +373,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
                 if (_Brushes.TryGetValue(selectedBrush, out var brushData))
                 {
                     Console.WriteLine($"Selected brush: {brushData.Name}");
-                    EngineCore.Instance.Data.EditorSettings.BrushType = brushData.brush;
+                    _context.ActiveBrush = brushData.brush;
                     ReloadBrushAvailableFeatures(); // Reload features based on the selected brush
                 }
                 else

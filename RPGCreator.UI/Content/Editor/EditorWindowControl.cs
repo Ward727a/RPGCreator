@@ -75,7 +75,7 @@ namespace RPGCreator.UI.Content.Editor
             }
 
             CreateComponents();
-
+            RegisterEvents();
             Content = _mainGrid;
         }
 
@@ -294,8 +294,8 @@ namespace RPGCreator.UI.Content.Editor
             };
             LeftPanel.Children.Add(tabControl);
 
-            tabControl.Items.Add(MapLevelTab.CreateTab(_Host));
-            tabControl.Items.Add(MapEditor.CreateTab(_Host));
+            tabControl.Items.Add(MapLevelTab.CreateTab(_Host, null));
+            tabControl.Items.Add(MapEditor.CreateTab(_Host, _mapEditorContext));
 
             var separatorLeftPanel0 = new Separator
             {
@@ -363,7 +363,7 @@ namespace RPGCreator.UI.Content.Editor
             ContentGrid.Children.Add(CenterGrid);
             Grid.SetColumn(CenterGrid, 1);
 
-            var toolbar = new ToolbarControl();
+            var toolbar = new ToolbarControl(_mapEditorContext);
             CenterGrid.Children.Add(toolbar);
 
             // This is used to contain the MonoGame screen inside it's bounds.
@@ -464,7 +464,7 @@ namespace RPGCreator.UI.Content.Editor
                 var position = e.GetPosition(MonoGameScreen);
                 // Adjust the position to account for the MonoGameScreen's margin (12px)
                 EngineCore.Instance.Managers.Brush.ClickAt(new Core.Types.Internal.Point(position), _mapEditorContext);
-                _mapEditorContext.LastDrawAt = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position);
+                _mapEditorContext.LastDrawAt = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position, _mapEditorContext);
                 _mapEditorContext.IsDrawing = true; // Set the flag to indicate that a tile is being placed
             }
         }
@@ -485,7 +485,7 @@ namespace RPGCreator.UI.Content.Editor
                 var position = e.GetPosition(MonoGameScreen);
 
                 // Check if the mouse position has at least moved one tile from the last position
-                var normalizedCurrentPosition = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position);
+                var normalizedCurrentPosition = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position, _mapEditorContext);
 
                 if(!normalizedCurrentPosition.IsEqualTo(_LastTilePlacePos))
                 {
@@ -506,7 +506,7 @@ namespace RPGCreator.UI.Content.Editor
                 var position = e.GetPosition(MonoGameScreen);
 
                 // Check if the mouse position has at least moved one tile from the last position
-                var normalizedCurrentPosition = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position);
+                var normalizedCurrentPosition = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position, _mapEditorContext);
 
                 if (!normalizedCurrentPosition.IsEqualTo(_mapEditorContext.LastDrawAt))
                 {
@@ -519,7 +519,7 @@ namespace RPGCreator.UI.Content.Editor
                     return;
                 }
 
-                EngineCore.Instance.Managers.Brush.PreviewAt(new Core.Types.Internal.Point(position));
+                EngineCore.Instance.Managers.Brush.PreviewAt(position, _mapEditorContext);
             }
 
         }

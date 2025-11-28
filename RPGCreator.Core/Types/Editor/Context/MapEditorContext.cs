@@ -12,12 +12,14 @@ namespace RPGCreator.Core.Types.Editor.Context;
 
 public partial class MapEditorContext : ObservableObject
 {
-    public MapDefinition Map { get; }
+
+    public event Action? MapChanged;
     
     private IPaintTarget? _activePaintTargetCache;
     
     [ObservableProperty]
     private object? _selectedObjectToPaint;
+
 
     [ObservableProperty]
     private EditorMode _currentMode = EditorMode.Tiling;
@@ -28,8 +30,19 @@ public partial class MapEditorContext : ObservableObject
     partial void OnSelectedLayerChanged(object? value) => RefreshPaintTarget();
 
     [ObservableProperty]
-    private MapDefinition? _currentMapDef;
-    partial void OnCurrentMapDefChanged(MapDefinition? value) => RefreshPaintTarget();
+    private MapDefinition? _map;
+    partial void OnMapChanged(MapDefinition? value)
+    {
+        RefreshPaintTarget();
+        MapChanged?.Invoke();
+        MapInstance? instance = null;
+        if(value != null)
+            instance = EngineCore.Instance.Managers.Assets.MapFactory.Create(value);
+        MapInstance = instance;
+        EngineCore.Instance.Data.OnEditedMapChanged(instance);
+    }
+
+    public MapInstance? MapInstance { get; set; }
 
 
     public IPaintTarget? GetActivePaintTarget()
@@ -45,15 +58,15 @@ public partial class MapEditorContext : ObservableObject
     {
         _activePaintTargetCache = null;
 
-        if (CurrentMapDef == null) return;
+        if (Map == null) return;
 
         if (CurrentMode == EditorMode.Tiling && SelectedLayer is TileLayerDefinition tileLayerDefinition)
         {
-            _activePaintTargetCache = new TileLayerTarget(tileLayerDefinition, CurrentMapDef, 32, 32);
+            _activePaintTargetCache = new TileLayerTarget(tileLayerDefinition, Map, 32, 32);
         }
         else if (CurrentMode == EditorMode.Entities && SelectedLayer is EntitiesLayerDefinition entityLayerDefinition)
         {
-            _activePaintTargetCache = new EntityLayerTarget(entityLayerDefinition, CurrentMapDef, 32, 32);
+            _activePaintTargetCache = new EntityLayerTarget(entityLayerDefinition, Map, 32, 32);
         }
         
         Log.Debug("Paint Target Rebuilt");
