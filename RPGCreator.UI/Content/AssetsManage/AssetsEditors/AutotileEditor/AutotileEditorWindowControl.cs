@@ -35,6 +35,7 @@ using Avalonia;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.VisualTree;
+using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Windows;
 using Point = RPGCreator.Core.Types.Internal.Point;
@@ -54,6 +55,8 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
         private string TestSavedData;
 
         public event Action? AutotileSaved;
+        
+        private AssetScope _scope;
         
         public AutotileDef? SelectedAutotiling;
         public TilesetDef? SelectedTileset;
@@ -166,6 +169,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 
         public AutotileEditorWindowControl(AutoTilesetDef tilesetInstance)
         {
+            _scope = EngineCore.Instance.Managers.Assets.CreateAssetScope("autotile_editor_scope");
             AutoTilesetInstance = tilesetInstance;
             CreateComponents();
 
@@ -750,18 +754,21 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 
         private void RefreshTilesetSelectorList()
         {
-            EngineCore.Instance.Data.EditedProject?.GetAssetsType<TilesetDef>(BaseAsset.TYPE.TILESETS)
-                .ForEach(tileset =>
+            var searchResults = EngineCore.Instance.Managers.Assets.SearchAllPacks<TilesetDef>();
+
+            foreach (var result in searchResults)
+            {
+                var asset = _scope.Load<TilesetDef>(result.AssetId);
+                
+                var item = new AutotileTilesetItem(asset);
+                item.TilesetSelected += () =>
                 {
-                    var item = new AutotileTilesetItem(tileset);
-                    item.TilesetSelected += () =>
-                    {
-                        Console.WriteLine($"Tileset selected: {tileset.Name}");
-                        CenterTilesetImage.Source = tileset.GetBitmap();
-                        SelectedTileset = tileset;
-                    };
-                    TilesetSelectorPanel.Children.Add(item);
-                });
+                    Console.WriteLine($"Tileset selected: {asset.Name}");
+                    CenterTilesetImage.Source = asset.GetBitmap();
+                    SelectedTileset = asset;
+                };
+                TilesetSelectorPanel.Children.Add(item);
+            }
         }
 
         private void ClearProperties()

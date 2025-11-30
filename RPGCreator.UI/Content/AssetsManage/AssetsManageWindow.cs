@@ -35,6 +35,7 @@ using RPGCreator.Core.Contexts;
 // using RPGCreator.Core.Contexts;
 using RPGCreator.Core.ModuleSDK.Attributes;
 using RPGCreator.Core.ModuleSDK.UIModule;
+using RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutoLayerEditor;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor;
 using RPGCreator.UI.Content.AssetsManage.Components.Skills;
 using Serilog;
@@ -60,6 +61,7 @@ namespace RPGCreator.UI.Content.AssetsManage
             new Dictionary<string, Func<UserControl>>
             {
                 ["Tilesets"] = () => new TilesetsManageControl(), // Tilesets / Auto-tiling system
+                ["Auto-tiles"] = () => new AutoLayerEditorControl(), // Replace with actual assets panel
                 ["---0"] = null, // Separator
                 ["Characters"] = () => new CharactersManageControl(), // Replace with actual assets panel
                 ["Enemies"] = () => new UserControl(), // Replace with actual assets panel

@@ -824,9 +824,9 @@ public interface IDeserializable
 /// </summary>
 public sealed class SerializationInfo
 {
-    public Type ObjectType { get; }
-    public string AssemblyName { get; }
-    public string QualifiedName { get; }
+    public Type ObjectType { get; private set; }
+    public string AssemblyName { get;  private set; }
+    public string QualifiedName { get;  private set; }
 
     // On stocke directement l'objet (int, string, List<T>, ou ISerializable)
     // Json.NET se débrouillera pour sérialiser ce qu'il y a dedans.

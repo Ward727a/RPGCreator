@@ -27,6 +27,13 @@ public readonly struct UIRegion : IEquatable<UIRegion>
     public static UIRegion AssetsManager => new("AssetsManager");
     public static UIRegion AssetsManagerMenu => new("AssetsManager.Menu");
     
+    // AUTO LAYER EDITOR
+    public static UIRegion AutoLayerEditor => new("AutoLayerEditor");
+    public static UIRegion AutoLayerEditorIntRefList => new("AutoLayerEditor.IntRefList");
+    public static UIRegion AutoLayerEditorIntRefListItem => new("AutoLayerEditor.IntRefList.Item");
+    public static UIRegion AutoLayerEditorIntRefListMenu => new("AutoLayerEditor.IntRefList.Menu");
+    public static UIRegion AutoLayerEditorIntRefListCreateModal => new("AutoLayerEditor.IntRefList.CreateModal");
+    
     #endregion
 
     public override string ToString()

@@ -6,6 +6,7 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Media;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.UI.Common.CustomBrush;
 using Serilog;
 using Point = Avalonia.Point;
 using Size = Avalonia.Size;
@@ -72,7 +73,31 @@ public class MoveableCanvas : UserControl
     
     public bool ShowGrid { get; set; } = false;
     public Size GridCellSize { get; private set; } = new Size(32, 32);
+
+    private bool _showCheckboard = false;
+    public bool ShowCheckboard { get => _showCheckboard;
+        set
+        {
+            _showCheckboard = value;
+            CanvasBody.Background = _showCheckboard ? CheckerBoardBrush.CreateCheckerBoardBrush(new Color(50, 100, 100, 100), Colors.Transparent, _checkerboardSize) : Avalonia.Media.Brushes.Transparent;
+        } 
+    }
     
+    private double _checkerboardSize = 20;
+
+    public double CheckboardSize
+    {
+        get => _checkerboardSize;
+        set
+        {
+            _checkerboardSize = value;
+            if (ShowCheckboard)
+            {
+                CanvasBody.Background = CheckerBoardBrush.CreateCheckerBoardBrush(new Color(50, 100, 100, 100), Colors.Transparent, _checkerboardSize);
+            }
+        }
+    }
+
     public MoveableCanvas()
     {
         CreateComponents();
@@ -111,7 +136,7 @@ public class MoveableCanvas : UserControl
         {
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-            Background = Avalonia.Media.Brushes.Transparent
+            Background = ShowCheckboard ? CheckerBoardBrush.CreateCheckerBoardBrush(Colors.LightGray, Colors.Gray) :Avalonia.Media.Brushes.Transparent
         };
         
         _gridLayer = new EditorGridLayer();

@@ -86,8 +86,11 @@ namespace RPGCreator.Core.Types.Map
             // Initialize the map with the provided definition
             foreach (var layerDef in Definition.TileLayers)
             {
-                var layerInstance = EngineCore.Instance.Managers.Assets.TileLayerFactory.Create(layerDef);
-                TileLayers.Add(layerInstance);
+                if (layerDef is TileLayerDefinition tileLayerDef)
+                {
+                    var layerInstance = EngineCore.Instance.Managers.Assets.TileLayerFactory.Create(tileLayerDef);
+                    TileLayers.Add(layerInstance);
+                }
             }
             
             // Subscribe to events for layer management
@@ -95,7 +98,7 @@ namespace RPGCreator.Core.Types.Map
             Definition.TileLayerRemoved += OnTileLayerRemoved;
         }
 
-        private void OnTileLayerRemoved(object? sender, TileLayerDefinition e)
+        private void OnTileLayerRemoved(object? sender, BaseLayerDef e)
         {
             var layerToRemove = TileLayers.FirstOrDefault(l => l.Definition.Unique == e.Unique);
             if (layerToRemove != null)
@@ -109,15 +112,25 @@ namespace RPGCreator.Core.Types.Map
             }
         }
 
-        private void OnTileLayerAdded(object? sender, TileLayerDefinition e)
+        private void OnTileLayerAdded(object? sender, BaseLayerDef e)
         {
-            if (e == null)
+            switch (e)
             {
-                throw new ArgumentNullException(nameof(e), "Tile layer definition cannot be null.");
+                case null:
+                    throw new ArgumentNullException(nameof(e), "Tile layer definition cannot be null.");
+                case AutoLayerDefinition autoLayerDefinition:
+                {
+                    var newLayer = EngineCore.Instance.Managers.Assets.TileLayerFactory.Create(autoLayerDefinition.InternalTileLayer);
+                    TileLayers.Add(newLayer);
+                    return;
+                }
+                case TileLayerDefinition tileLayerDefinition:
+                {
+                    var newLayer = EngineCore.Instance.Managers.Assets.TileLayerFactory.Create(tileLayerDefinition);
+                    TileLayers.Add(newLayer);
+                    break;
+                }
             }
-
-            var newLayer = EngineCore.Instance.Managers.Assets.TileLayerFactory.Create(e);
-            TileLayers.Add(newLayer);
         }
 
         protected override void _Draw(SpriteBatchExtend? sb)

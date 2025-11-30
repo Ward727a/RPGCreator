@@ -6,17 +6,17 @@ namespace RPGCreator.Core.Types.Map;
 public class MapDefinition : IMapDef
 {
     private readonly List<IMapDef> _mapDefs = new List<IMapDef>();
-    private readonly List<TileLayerDefinition> _tileLayers = new List<TileLayerDefinition>();
+    private readonly List<BaseLayerDef> _tileLayers = new List<BaseLayerDef>();
     
-    public event EventHandler<TileLayerDefinition>? TileLayerAdded;
-    public event EventHandler<TileLayerDefinition>? TileLayerRemoved;
+    public event EventHandler<BaseLayerDef>? TileLayerAdded;
+    public event EventHandler<BaseLayerDef>? TileLayerRemoved;
     
     public Ulid Unique { get; private set; }
     public URN Urn => new URN("maps", $"{Name}@{Unique}");
     public string Name { get; set; }
     public string Description { get; set; }
     public IReadOnlyList<IMapDef> MapDefs => _mapDefs;
-    public IReadOnlyList<TileLayerDefinition> TileLayers => _tileLayers;
+    public IReadOnlyList<BaseLayerDef> TileLayers => _tileLayers;
     public Size Size { get; set; } = new Size(10, 20); // Default size, can be changed later
 
     public SGridParameter GridParameter { get; set; } = new()
@@ -55,7 +55,7 @@ public class MapDefinition : IMapDef
         return true;
     }
     
-    public bool AddLayer(TileLayerDefinition layer)
+    public bool AddLayer(BaseLayerDef layer)
     {
         if (layer == null || _tileLayers.Contains(layer))
             return false; // If the layer is null or already exists, we can't add it
@@ -64,7 +64,7 @@ public class MapDefinition : IMapDef
         TileLayerAdded?.Invoke(this, layer); // Notify subscribers that a new layer has been added
         return true;
     }
-    public bool RemoveLayer(TileLayerDefinition layer)
+    public bool RemoveLayer(BaseLayerDef layer)
     {
         if (layer == null || !_tileLayers.Contains(layer))
             return false; // If the layer is null or doesn't exist, we can't remove it

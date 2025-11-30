@@ -49,9 +49,9 @@ namespace RPGCreator.Core
     public class  SelectedLayerChangedEventArgs : EventArgs
     {
         
-        public TileLayerDefinition? OldLayer { get; }
-        public TileLayerDefinition? NewLayer { get; }
-        public SelectedLayerChangedEventArgs(TileLayerDefinition? oldLayer, TileLayerDefinition? newLayer)
+        public BaseLayerDef? OldLayer { get; }
+        public BaseLayerDef? NewLayer { get; }
+        public SelectedLayerChangedEventArgs(BaseLayerDef? oldLayer, BaseLayerDef? newLayer)
         {
             OldLayer = oldLayer;
             NewLayer = newLayer;
@@ -139,7 +139,7 @@ namespace RPGCreator.Core
         public event EventHandler<SelectedTileChangedEventArgs>? SelectedTileChanged;
 
         private MapDefinition? _editedMap;
-        private TileLayerDefinition? _selectedLayer;
+        private BaseLayerDef? _selectedLayer;
         private ITileDef? _selectedTile;
         public SEditorSettings EditorSettings { get; } = new SEditorSettings();
 
@@ -154,7 +154,7 @@ namespace RPGCreator.Core
         public static Version AppVersion => new(0, 1, 0);
 
         public BaseProject? EditedProject { get; internal set; }
-        public TileLayerDefinition? SelectedLayer { get => _selectedLayer; 
+        public BaseLayerDef? SelectedLayer { get => _selectedLayer; 
             set
             {
                 if (_selectedLayer != value)

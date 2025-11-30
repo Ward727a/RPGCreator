@@ -22,7 +22,12 @@ public class AutotileDef : ITileDef, ISerializable, IDeserializable
 
     public bool IsEqualTo(ITileDef other)
     {
-        throw new NotImplementedException();
+        if (other == null) return false;
+
+
+        return TilesetUnique == other.TilesetDef.Unique &&
+               SizeInTileset == other.SizeInTileset &&
+               PositionInTileset == other.PositionInTileset;
     }
 
     public bool RespectRules(TileLayerDefinition? layer, Internal_Point position)

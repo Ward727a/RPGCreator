@@ -6,6 +6,6 @@ using RPGCreator.Core.Types.Internal;
 
 namespace RPGCreator.Core.Types.Map;
 
-public class EntitiesLayerDefinition : BaseLayerDef<EditorEntityVisual>
+public class EntitiesLayerDefinition : LayerWithElements<EditorEntityVisual>
 {
 }

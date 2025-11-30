@@ -97,13 +97,13 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
             }
             var instance = context.MapInstance;
 
-            var layer = instance.PreviewLayer;
+            var layer = instance.PreviewLayer?.Definition;
 
             if (layer == null)
             {
                 return;
             }
-            layer.InstancedElements.Clear();
+            layer.ClearElements();
 
             var tile = context.SelectedTile;
 
@@ -129,9 +129,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
                         Point tilePosition = new Point(at.X + x * tile.TilesetDef.TileWidth, at.Y + y * tile.TilesetDef.TileHeight);
                         if (IBrush.InBorder(tilePosition, instance))
                         {
-                            var tileInstance = _tiles.Create(tile);
-                            tileInstance.Position = tilePosition;
-                            layer.InstancedElements.Add(tilePosition,tileInstance); // Add tile at the calculated position
+                            layer.AddElement(tile,tilePosition); // Add tile at the calculated position
                         }
                     }
                 }
@@ -139,9 +137,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
             else
             {
                 // If size is 1, just add the tile at the specified point
-                var tileInstance = _tiles.Create(tile);
-                tileInstance.Position = at;
-                layer.InstancedElements.Add(at, tileInstance);
+                layer.AddElement(tile,at); // Add tile at the calculated position
             }
         }
     }

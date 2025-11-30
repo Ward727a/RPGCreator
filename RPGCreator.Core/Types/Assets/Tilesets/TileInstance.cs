@@ -12,6 +12,11 @@ namespace RPGCreator.Core.Types.Assets.Tilesets;
 public class TileInstance : BaseDrawable, ITileInstance
 {
     public ITileDef Definition { get; private set; }
+
+    public TileInstance()
+    {
+    }
+
     public TileInstance(ITileDef tileDef)
     {
         Definition = tileDef;
@@ -108,6 +113,6 @@ public class TileInstance : BaseDrawable, ITileInstance
 
         // Reset the tile instance to the provided definition
         Definition = def;
-        Position = def.DefaultPosition;
+        Position = def.Position;
     }
 }

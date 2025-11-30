@@ -33,6 +33,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RPGCreator.Core.Types.Editor.Context;
+using Serilog;
 
 namespace RPGCreator.UI.Content.Editor.LayersListComponents
 {
@@ -175,6 +176,16 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
             };
             stackPanel.Children.Add(layerNameTextBox);
 
+            var layerType = new ComboBox()
+            {
+            };
+            
+            stackPanel.Children.Add(layerType);
+            layerType.Items.Add("Tile Layer");
+            layerType.Items.Add("Auto Layer");
+            layerType.SelectedIndex = 0;
+            
+
             var addButton = new Button
             {
                 Content = "Add Layer",
@@ -187,10 +198,34 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                 {
                     // Logic to add a new layer with the specified name
                     var newLayerName = layerNameTextBox.Text;
-                    TileLayerDefinition layer = new TileLayerDefinition()
+
+                    BaseLayerDef? layer = null;
+                    
+                    switch (layerType.SelectedIndex)
                     {
-                        Name = newLayerName
-                    };
+                        case 0:
+                            layer = new TileLayerDefinition()
+                            {
+                                Name = newLayerName
+                            };
+                            break;
+                        case 1:
+                            layer = new AutoLayerDefinition()
+                            {
+                                Name = newLayerName
+                            };
+                            break;
+                        default:
+                            Log.Error("[LayersListComponent] Unknown layer type index {LayerTypeIndex}", layerType.SelectedIndex);
+                            break;
+                    }
+
+                    if (layer == null)
+                    {
+                        Log.Error("[LayersListComponent] Failed to create layer of type index {LayerTypeIndex}", layerType.SelectedIndex);
+                        return;
+                    }
+                    
                     
                     if(_context.Map == null)
                     {

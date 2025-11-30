@@ -9,7 +9,7 @@ namespace RPGCreator.Core.Types.Map;
 public interface IMapLayerInstance<TLayerDefElement, TLayerInstanceElement>
 {
     Ulid RuntimeUnique { get; }
-    IMapLayerDef<TLayerDefElement> Definition { get; }
+    TileLayerDefinition Definition { get; }
     ILayerRenderer<TLayerDefElement, TLayerInstanceElement>? Renderer { get; }
     bool IsVisible { get; }
     bool IsSelected { get; set; }

@@ -55,9 +55,9 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
         public TextBlock LayerNameText { get; private set; }
 
         #endregion
-        public TileLayerDefinition Layer { get; private set; } = null!;
+        public BaseLayerDef Layer { get; private set; } = null!;
 
-        public LayerItem(TileLayerDefinition layer)
+        public LayerItem(BaseLayerDef layer)
         {
             Layer = layer ?? throw new ArgumentNullException(nameof(layer), "Layer cannot be null.");
             CreateComponents();
@@ -87,9 +87,24 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
             ToolTip.SetTip(ZIndexSelector, "Z-Index of the layer. This determines the rendering order of the layer.\nLayers with a higher Z-Index are rendered on top of layers with a lower Z-Index.");
             Body.Children.Add(ZIndexSelector);
 
+            string LayerTypeText;
+
+            switch (Layer)
+            {
+                case TileLayerDefinition:
+                    LayerTypeText = "[TL] ";
+                    break;
+                case AutoLayerDefinition:
+                    LayerTypeText = "[AL] ";
+                    break;
+                default:
+                    LayerTypeText = "[??] ";
+                    break;
+            }
+
             LayerNameText = new TextBlock
             {
-                Text = Layer.Name,
+                Text = $"{LayerTypeText} {Layer.Name}",
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
             };
@@ -122,7 +137,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
             var confirmation = new ConfirmDialog("Remove Layer", "Are you sure you want to remove this layer? This action cannot be undone.", "Remove", "Cancel");
             confirmation.Confirmed += () =>
             {
-                if (Layer != null && Layer is TileLayerDefinition mapLayer)
+                if (Layer != null && Layer is BaseLayerDef mapLayer)
                 {
                     // Remove the layer from the engine data
                     EngineCore.Instance.Data.EditedMap?.RemoveLayer(mapLayer);

@@ -1,29 +1,73 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using RPGCreator.Core.Serializer;
+using RPGCreator.Core.Types.Assets;
 using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Internal;
 using Serilog;
 
 namespace RPGCreator.Core.Types.Map;
 
-public abstract class BaseLayerDef<TDef> : IMapLayerDef<TDef> where TDef : class, ILayerElem
+
+public abstract class BaseLayerDef : IAssetDef
+{
+    public Ulid Unique { get; protected set; }
+    public URN Urn => new URN("layer", $"{Name}@{Unique}");
+    public bool IsDirty { get; set; }
+    public bool IsTransient { get; set; }
+
+    public string Name { get; set; } = "Layer";
+    public int ZIndex { get; set; } = 0;
+    public bool VisibleByDefault { get; set; } = true;
+    public float Opacity { get; set; } = 1.0f;
+
+    public BaseLayerDef()
+    {
+    }
+    // Pour la sérialisation polymorphique
+    public virtual SerializationInfo GetObjectData()
+    {
+        var info = new SerializationInfo(GetType());
+        info.AddValue(nameof(Unique), Unique);
+        info.AddValue(nameof(Name), Name);
+        info.AddValue(nameof(ZIndex), ZIndex);
+        info.AddValue(nameof(VisibleByDefault), VisibleByDefault);
+        info.AddValue(nameof(Opacity), Opacity);
+        return info;
+    }
+
+    public virtual void SetObjectData(DeserializationInfo info)
+    {
+        info.TryGetValue(nameof(Unique), out Ulid unique);
+        info.TryGetValue(nameof(Name), out string name);
+        info.TryGetValue(nameof(ZIndex), out int zIndex);
+        info.TryGetValue(nameof(VisibleByDefault), out bool visible);
+        info.TryGetValue(nameof(Opacity), out float opacity, 1.0f);
+
+        Unique = unique;
+        Name = name ?? "Layer";
+        ZIndex = zIndex;
+        VisibleByDefault = visible;
+        Opacity = opacity;
+    }
+}
+
+public abstract class LayerWithElements<TDef> : BaseLayerDef
+    where TDef : class, ILayerElem
 {
     protected Dictionary<Point, TDef> _elements = new();
     protected readonly HashSet<Point> _surroundingElementsToIgnore = new();
     
     public event EventHandler<(Point, TDef)>? ElementAdded;
     public event EventHandler<(Point, TDef?)>? ElementRemoved;
-    public Ulid Unique { get; private set; }
-    public URN Urn { get; private set; }
-    public string Name { get; set; }
-    public int ZIndex { get; set; }
-    public bool VisibleByDefault { get; set; } = true;
     public ReadOnlyDictionary<Point, TDef> Elements => _elements.AsReadOnly();
     public void AddElement(TDef element, Point location)
     {
         if (!_elements.TryAdd(location, element))
-            return;
+        {
+            RemoveElement(location);
+            _elements.Add(location, element);
+        }
         
         Log.Debug("[Layer: {LayerName}] Added element at {Location}", Name, location);
         
@@ -128,37 +172,21 @@ public abstract class BaseLayerDef<TDef> : IMapLayerDef<TDef> where TDef : class
     public void ClearElements()
     {
         _elements.Clear();
-        ElementRemoved?.Invoke(this, (Point.Empty, null)); // Notify that all elements have been cleared
+        ElementRemoved?.Invoke(this, (default, null)); // Notify that all elements have been cleared
     }
 
-    public SerializationInfo GetObjectData()
+    public override SerializationInfo GetObjectData()
     {
-        SerializationInfo info = new SerializationInfo(typeof(BaseLayerDef<TDef>));
-        info.AddValue(nameof(Unique), Unique);
-        info.AddValue(nameof(Name), Name);
-        info.AddValue(nameof(ZIndex), ZIndex);
-        info.AddValue(nameof(VisibleByDefault), VisibleByDefault);
+        SerializationInfo info = base.GetObjectData();
         info.AddValue(nameof(_elements), _elements);
         return info;
     }
 
     public void SetObjectData(Serializer.DeserializationInfo info)
     {
-        if (info == null)
-        {
-            throw new ArgumentNullException(nameof(info), "SerializationInfo cannot be null.");
-        }
-
-        info.TryGetValue(nameof(Unique), out Ulid unique, Ulid.Empty);
-        info.TryGetValue(nameof(Name), out string name, string.Empty);
-        info.TryGetValue(nameof(ZIndex), out int zIndex, 0);
-        info.TryGetValue(nameof(VisibleByDefault), out bool visibleByDefault, true);
+        base.SetObjectData(info);
         info.TryGetValue(nameof(_elements), out Dictionary<Point, TDef> elements, new Dictionary<Point, TDef>());
 
-        Unique = unique;
-        Name = name;
-        ZIndex = zIndex;
-        VisibleByDefault = visibleByDefault;
         _elements = elements;
     }
 

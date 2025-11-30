@@ -32,6 +32,8 @@ using RPGCreator.Core.Events.EventArgs;
 using RPGCreator.UI.Content.Launcher;
 using RPGCreator.UI.Styles;
 using System;
+using Projektanker.Icons.Avalonia;
+using Projektanker.Icons.Avalonia.MaterialDesign;
 
 namespace RPGCreator.UI;
 
@@ -53,7 +55,8 @@ public partial class App : Application
         // Line below is needed to remove Avalonia data validation.
         // Without this line you will get duplicate validations from both Avalonia and CT
         BindingPlugins.DataValidators.RemoveAt(0);
-
+        IconProvider.Current
+            .Register<MaterialDesignIconProvider>();
         if(!EngineCore.IsCoreReady)
         {
             EngineCore.Instance.Events.CoreReady += Events_CoreReady;

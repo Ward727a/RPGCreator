@@ -35,25 +35,17 @@ public class TileFactory : IAssetFactory<TileInstance, TileDefinition>
         var autoNewExpression = Expression.New(autoConstructorInfo, autoParam);
         AutoConstructor = Expression.Lambda<Func<AutotileDef, AutotileInstance>>(autoNewExpression, autoParam).Compile();
 
-        _tilePool = new ObjectPool<TileInstance>(null, maxTilePool);
-        _autoPool = new ObjectPool<AutotileInstance>(null, maxAutoTilePool);
+        _tilePool = new ObjectPool<TileInstance>(() => new TileInstance(), maxTilePool);
+        _autoPool = new ObjectPool<AutotileInstance>(()=> new AutotileInstance(), maxAutoTilePool);
         
     }
 
     public TileInstance Create(TileDefinition def)
     {
         TileInstance instance;
-        if (_tilePool.Count > 0)
-        {
-            // Rent an instance from the pool.
-            instance = _tilePool.Rent();
-            instance.ResetFrom(def);
-        }
-        else
-        {
-            // Create a new instance if the pool is empty.
-            instance = Constructor(def);
-        }
+        // Rent an instance from the pool.
+        instance = _tilePool.Rent();
+        instance.ResetFrom(def);
         return instance;
 
     }

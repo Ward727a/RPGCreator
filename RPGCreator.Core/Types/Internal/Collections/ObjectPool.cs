@@ -30,9 +30,16 @@ public class ObjectPool<T> where T : class, ICleanable
     public T Rent()
     {
         RentedCount++;
+        Log.Debug("ObjectPool Rent called. RentedCount is now {RentedCount}.", RentedCount);
         return _stack.Count > 0 ? _stack.Pop() :
             _factory != null ? _factory() :
             throw new InvalidOperationException("No factory method provided to create new instances.");
+    }
+    
+    internal void AddRented(int count)
+    {
+        RentedCount += count;
+        Log.Debug("ObjectPool AddRented called. RentedCount is now {RentedCount}.", RentedCount);
     }
 
     /// <summary>

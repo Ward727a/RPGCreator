@@ -38,7 +38,11 @@ namespace RPGCreator.Generators
             var classDeclaration = (ClassDeclarationSyntax)context.Node;
 
             var hasAttribute = classDeclaration.Members.OfType<MethodDeclarationSyntax>()
-                .Any(m => m.AttributeLists.Count > 0);
+                .Any(m => m.AttributeLists.Count > 0) ||
+                classDeclaration.Members.OfType<PropertyDeclarationSyntax>()
+                .Any(p => p.AttributeLists.Count > 0) ||
+                classDeclaration.Members.OfType<EventDeclarationSyntax>()
+                .Any(e => e.AttributeLists.Count > 0);
 
             if (!hasAttribute) return null;
 
@@ -46,8 +50,13 @@ namespace RPGCreator.Generators
             
             if (classSymbol is not INamedTypeSymbol namedSymbol) return null;
 
-            bool containsTargetAttribute = namedSymbol.GetMembers().OfType<IMethodSymbol>()
-                .Any(m => m.GetAttributes().Any(a => a.AttributeClass?.Name == "ExposeToPluginAttribute"));
+            bool containsTargetAttribute = 
+                namedSymbol.GetMembers().OfType<IMethodSymbol>()
+                .Any(m => m.GetAttributes().Any(a => a.AttributeClass?.Name is "ExposeToPluginAttribute")) ||
+                namedSymbol.GetMembers().OfType<IPropertySymbol>()
+                    .Any(p => p.GetAttributes().Any(a => a.AttributeClass?.Name is "ExposePropToPluginAttribute")) ||
+                namedSymbol.GetMembers().OfType<IEventSymbol>()
+                    .Any(e => e.GetAttributes().Any(a => a.AttributeClass?.Name is "ExposeEventToPluginAttribute"));
 
             return containsTargetAttribute ? namedSymbol : null;
         }

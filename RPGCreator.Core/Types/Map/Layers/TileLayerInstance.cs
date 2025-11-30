@@ -3,6 +3,7 @@ using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Internal.LayerRenderer;
+using Serilog;
 using Internal_Point = RPGCreator.Core.Types.Internal.Point;
 using Point = RPGCreator.Core.Types.Internal.Point;
 
@@ -11,7 +12,7 @@ namespace RPGCreator.Core.Types.Map;
 public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IResettable<TileLayerDefinition>, ICleanable
 {
     public Ulid RuntimeUnique { get; }
-    public IMapLayerDef<ITileDef> Definition => _def;
+    public TileLayerDefinition Definition => _def;
     public ILayerRenderer<ITileDef, ITileInstance>? Renderer { get; set; }
     private TileLayerDefinition _def;
     public bool IsVisible { get; }
@@ -42,11 +43,14 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
     }
     private void OnElementAdded(object? sender, (Internal_Point location, ITileDef def) e)
     {
-        InstancedElements.TryAdd
+        if(InstancedElements.TryAdd
             (
                 e.location,
                 EngineCore.Instance.Managers.Assets.TileFactory.Create(e.def)
-            );
+            ))
+            Log.Information("[TileLayerInstance: {LayerName}] Added tile instance at {Location}", _def.Name, e.location);
+        else
+            Log.Warning("[TileLayerInstance: {LayerName}] Failed to add tile instance at {Location} - already exists", _def.Name, e.location);
     }
 
     private void OnElementRemoved(object? sender, (Internal_Point, ITileDef?) e)

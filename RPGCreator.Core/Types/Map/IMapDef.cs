@@ -7,8 +7,8 @@ namespace RPGCreator.Core.Types.Map;
 
 public interface IMapDef : IHasUniqueId, ISerializable, IDeserializable, IAssetDef
 {
-    event EventHandler<TileLayerDefinition> TileLayerAdded;
-    event EventHandler<TileLayerDefinition> TileLayerRemoved;
+    event EventHandler<BaseLayerDef> TileLayerAdded;
+    event EventHandler<BaseLayerDef> TileLayerRemoved;
     /// <summary>
     /// Name of the map.
     /// </summary>
@@ -24,7 +24,7 @@ public interface IMapDef : IHasUniqueId, ISerializable, IDeserializable, IAssetD
     /// <summary>
     /// List of tile layers in the map, which can include background, foreground, and other layers.
     /// </summary>
-    public IReadOnlyList<TileLayerDefinition> TileLayers { get; }
+    public IReadOnlyList<BaseLayerDef> TileLayers { get; }
     /// <summary>
     /// Size of the map in tiles, represented as a width and height.
     /// </summary>
