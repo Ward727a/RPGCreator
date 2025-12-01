@@ -11,6 +11,7 @@ public class TileDefinition : ITileDef
     public Internal_Point SizeInTileset { get; private set; }
     public Internal_Point PositionInTileset { get; private set; }
     public Rectangle UV => new (new(PositionInTileset.X, PositionInTileset.Y), new(TilesetDef.TileWidth));
+    public TileFlip Flip { get; set; } = TileFlip.None;
     public ITilesetDef TilesetDef { get; private set; }
     
     public TileDefinition(Vector2 defaultPosition, Internal_Point sizeInTileset, Internal_Point positionInTileset, ITilesetDef tilesetDef)

@@ -31,6 +31,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RPGCreator.Core.Runtimes.Context;
 using RPGCreator.Core.Types.Editor.Context;
+using RPGCreator.Core.Types.Map;
 using Serilog;
 
 namespace RPGCreator.Core.Managers.RTP.BrushManagers
@@ -58,13 +59,13 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
             }
 
             // Convert the point to a valid position in the tile width and height
-            if (context.SelectedTile == null)
+            if (context.SelectedTile == null && context.SelectedIntGridData == null)
             {
                 Log.Error("No tile is currently selected. Please select a tile before clicking.");
                 return;
             }
-            var tileWidth = context.SelectedTile.TilesetDef.TileWidth;
-            var tileHeight = context.SelectedTile.TilesetDef.TileHeight;
+            var tileWidth = context.Map.GridParameter.CellWidth;
+            var tileHeight = context.Map.GridParameter.CellHeight;
 
             int tileX = (at.X / tileWidth) * tileWidth;
             int tileY = (at.Y / tileHeight) * tileHeight;

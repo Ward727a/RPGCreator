@@ -29,7 +29,7 @@ public struct PatternConstraint()
     public static PatternConstraint MustNotBeSame() => new(){Condition =  PatternCondition.MustNotBe, TargetValue =  0, IsRelative = true};
 }
 
-public struct TileData()
+public record struct TileData()
 {
     public Ulid UniqueId = Ulid.NewUlid();
     public Point TileSize;
@@ -42,7 +42,7 @@ public struct TileData()
         {
             TileSize = new Point(tileDef.SizeInTileset.X, tileDef.SizeInTileset.Y),
             TilePosition = new Point(tileDef.PositionInTileset.X, tileDef.PositionInTileset.Y),
-            TilesetId = tileDef.TilesetDef.Unique
+            TilesetId = tileDef.TilesetDef.Unique,
         };
     }
 }

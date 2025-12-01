@@ -6,23 +6,15 @@ using SkiaSharp;
 
 namespace RPGCreator.Core.Types.Assets.Tilesets;
 
-public class AutoTilesetDef : ImageAsset, ITilesetDef
+public sealed class AutoTilesetDef : ITilesetDef
 {
     public const int MaxTilesByRow = 8; // Maximum number of tiles in a row for the tileset family
     
     public event Action? ImageChanged;
-    public Ulid Unique { get; private set; }
-    public URN Urn => new URN("tileset", $"{Name}@{Unique.ToString()}");
+    public override URN Urn => new URN("tileset", $"{Name}@{Unique.ToString()}");
 
-    public string ImagePath { get; }
-    public string Name { get; set; }
-    public int ImageWidth { get; set; }
-    public int ImageHeight { get; set; }
-    public int TileWidth { get; set; }
-    public int TileHeight { get; set; }
-    public Bitmap? BitmapCache { get; }
     public List<AutotileGroupDef> AutotileGroups { get; set; } = new(); // List of autotilings for this tileset
-    public Texture2D GetTexture(GraphicsDevice graphicsDevice)
+    public override Texture2D GetTexture(GraphicsDevice graphicsDevice)
     {
         throw new NotImplementedException();
     }
@@ -40,12 +32,12 @@ public class AutoTilesetDef : ImageAsset, ITilesetDef
         ImageHeight = tileHeight * (AutotileGroups.Count / MaxTilesByRow + 1); // Height based on the number of tiles
     }
     
-    public Bitmap GetSimpleBitmap()
+    public override Bitmap GetSimpleBitmap()
     {
         throw new NotImplementedException();
     }
 
-    public ITileDef GetTileAt(int col, int row)
+    public override ITileDef GetTileAt(int col, int row)
     {
         // Check if the autotilings contain a tile at the specified row and column.
         return AutotileGroups
@@ -68,7 +60,7 @@ public class AutoTilesetDef : ImageAsset, ITilesetDef
         return _BitmapCache; // Return the Avalonia bitmap
     }
 
-    public SKBitmap GetSKBitmap()
+    public override SKBitmap GetSKBitmap()
     {
         SKBitmap combinedBitmap = new SKBitmap(
             TileWidth * MaxTilesByRow, // Width of the combined bitmap
@@ -141,7 +133,7 @@ public class AutoTilesetDef : ImageAsset, ITilesetDef
         return combinedBitmap;
     }
     
-    public SerializationInfo GetObjectData()
+    public override SerializationInfo GetObjectData()
     {
         SerializationInfo info = new SerializationInfo(typeof(AutoTilesetInstance));
         info.AddValue("unique", Unique);
@@ -153,7 +145,7 @@ public class AutoTilesetDef : ImageAsset, ITilesetDef
         return info;
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public override void SetObjectData(Serializer.DeserializationInfo info)
     {
         if (info == null)
         {

@@ -13,6 +13,7 @@ public class AutotileDef : ITileDef, ISerializable, IDeserializable
     public Internal_Point SizeInTileset { get; set; }
     public Internal_Point PositionInTileset { get; set; }
     public Rectangle UV => new (new(PositionInTileset.X * TilesetDef.TileWidth, PositionInTileset.Y * TilesetDef.TileHeight), new(TilesetDef.TileWidth));
+    public TileFlip Flip { get; set; } = TileFlip.None;
     public ITilesetDef TilesetDef { get; }
     public AutotileGroupDef? GroupDef { get; set; }
     public void UpdateTileset(ITilesetDef newTilesetDefinition)

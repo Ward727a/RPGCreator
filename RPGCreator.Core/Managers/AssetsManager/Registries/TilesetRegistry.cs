@@ -1,5 +1,7 @@
 using RPGCreator.Core.Types.Assets.Tilesets;
+using RPGCreator.Core.Types.Assets.Tilesets.IntGridTileset;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.Core.Types.Map;
 using Serilog;
 
 namespace RPGCreator.Core.Managers.AssetsManager.Registries;
@@ -15,6 +17,7 @@ public class TilesetRegistry : RegistryBase<ITilesetDef>
             yield return typeof(ITilesetDef);
             yield return typeof(TilesetDef);
             yield return typeof(AutoTilesetDef);
+            yield return typeof(IntGridTileset);
         }
     }
 }

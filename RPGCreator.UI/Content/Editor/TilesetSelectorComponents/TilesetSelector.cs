@@ -36,6 +36,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Types.Assets.Tilesets;
+using RPGCreator.Core.Types.Assets.Tilesets.IntGridTileset;
 using Serilog;
 
 namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
@@ -50,6 +51,8 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
         //public Button ResetRootTilesetPos { get; private set; }
         public Canvas InnerTilesetCanvas { get; private set; }
         public Border TileBorder { get; private set; }
+        
+        public ListBox IntGridListBox { get; private set; }
 
         public Point NewInnerPosition { get; private set; } = new Point(0, 0);
         public Point LastMousePosition { get; private set; } = new Point(0, 0);
@@ -167,6 +170,15 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 
             Body.Children.Add(RootTilesetCanvas);
             Grid.SetRow(RootTilesetCanvas, 1);
+            
+            IntGridListBox = new ListBox
+            {
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+                IsVisible = false
+            };
+            Body.Children.Add(IntGridListBox);
+            Grid.SetRow(IntGridListBox, 1);
 
             InnerTilesetCanvas = new Canvas
             {
@@ -268,6 +280,36 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
             if (SelectBox.SelectedItem is TilesetItem item)
             {
                 Console.WriteLine($"Selected Tileset: {item.TilesetDef.Name}");
+                var def = item.TilesetDef;
+
+                if (def is IntGridTileset intgrid)
+                {
+                    IntGridListBox.IsVisible = true;
+                    RootTilesetCanvas.IsVisible = false;
+
+                    foreach (var intRef in intgrid.IntRefs)
+                    {
+                        var listItem = new TextBlock
+                        {
+                            Text = $"Value: {intRef.Value} - Name: {intRef.Name}"
+                        };
+                        IntGridListBox.Items.Add(listItem);
+                    }
+
+                    if (intgrid.IntRefs.Count <= 0)
+                    {
+                        var noItem = new TextBlock
+                        {
+                            Text = $"No IntGrid references found in this tileset."
+                        };
+                        IntGridListBox.Items.Add(noItem);
+                    }
+                    
+                    return;
+                }
+                IntGridListBox.IsVisible = false;
+                RootTilesetCanvas.IsVisible = true;
+                
                 // You can add more logic here to handle the selected tileset
                 InnerTilesetCanvas.Children.Clear();
                 var tilesetImage = new Image

@@ -39,6 +39,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Types.Assets.Tilesets;
+using RPGCreator.Core.Types.Assets.Tilesets.IntGridTileset;
 
 namespace RPGCreator.UI.Content.AssetsManage.Components
 {
@@ -346,7 +347,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
             var iconImage = new Image
             {
-                Source = TilesetDef != null ? TilesetDef.GetBitmap() : Autotiles.GetBitmap(),
+                Source = TilesetDef != null ? TilesetDef.GetBitmap() : Autotiles?.GetBitmap() ?? UnifiedImage.DefaultUI,
                 Width = 50,
                 Height = 50,
                 Margin = new Avalonia.Thickness(5),
@@ -380,7 +381,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
             var imageSizeTextBlock = new TextBlock
             {
-                Text = TilesetDef != null ? $"{TilesetDef.GetBitmap().Size.Width}x{TilesetDef.GetBitmap().Size.Width}" : $"{Autotiles.GetBitmap().Size.Width}x{Autotiles.GetBitmap().Size.Width}",
+                Text = TilesetDef != null ? $"{TilesetDef.GetBitmap()?.Size.Width ?? 32}x{TilesetDef.GetBitmap()?.Size.Width ?? 32}" : $"{Autotiles?.GetBitmap().Size.Width ?? 32}x{Autotiles?.GetBitmap().Size.Width ?? 32}",
                 Width = 100,
                 TextWrapping = Avalonia.Media.TextWrapping.Wrap,
                 Margin = new Avalonia.Thickness(5),
@@ -708,7 +709,6 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
         private void CreateViewComponents()
         {
 
-            var tilesets = EngineCore.Instance.Data.EditedProject?.GetAssetsType<TilesetDef>(BaseAsset.TYPE.TILESETS) ?? new List<TilesetDef>();
 
             switch (Filters.ShowType)
             {
@@ -717,7 +717,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                     break;
 
                 case 1: // GridView
-                    CreateGridViewComponents(tilesets);
+                    // CreateGridViewComponents(tilesets);
                     break;
             }
         }
@@ -759,6 +759,8 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                 var tilesetId = result.AssetId;
 
                 var tileset = _scope.Load<ITilesetDef>(tilesetId);
+                if (tileset is IntGridTileset)
+                    continue;
                 var item = new TilesetViewListItem(tileset);
                 item.OnSelected += () => { SelectedTilesetViewItem = item; };
                 item.OnDeselected += () =>

@@ -52,7 +52,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                 Margin = new Avalonia.Thickness(5, 0, 0, 0),
             };
 
-            if(tilesetDef is not AutoTilesetInstance)
+            if(tilesetDef is not AutoTilesetDef)
             {
                 if(!File.Exists(tilesetDef.ImagePath ?? ""))
                 {

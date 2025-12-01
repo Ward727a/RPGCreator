@@ -15,7 +15,10 @@ using RPGCreator.Core.ModuleSDK.UIModule;
 using RPGCreator.Core.Runtimes.Context;
 using RPGCreator.Core.Types.Assets;
 using RPGCreator.Core.Types.Assets.Tilesets;
+using RPGCreator.Core.Types.Assets.Tilesets.IntGridTileset;
 using RPGCreator.Core.Types.Editor.Context;
+using RPGCreator.Core.Types.Editor.Visual.PaintTargets;
+using RPGCreator.Core.Types.Map;
 using RPGCreator.UI.Common;
 using Serilog;
 using Ursa.Controls;
@@ -137,6 +140,7 @@ public class SelectionCursorControl : Border
         }
     }
 
+
 public class TilingPanelControl : UserControl
 {
     
@@ -154,6 +158,8 @@ public class TilingPanelControl : UserControl
     private Image? _previewImage;
     private MoveableCanvas? _canvas;
     private SelectionCursorControl selectionCursor;
+        
+    public ListBox IntGridListBox { get; private set; }
     
     #endregion
     
@@ -221,6 +227,16 @@ public class TilingPanelControl : UserControl
         };
         _body.Children.Add(_canvas);
         
+        IntGridListBox = new ListBox
+        {
+            Width = 256,
+            Height = 256,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            Margin = new Avalonia.Thickness(0, 5, 0, 5),
+            IsVisible = false
+        };
+        _body.Children.Add(IntGridListBox);
+        
         _previewImage = new Image
         {
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
@@ -287,10 +303,18 @@ public class TilingPanelControl : UserControl
             Log.Debug("[TilingPanel] Added tileset option from search: {0}", def.Name);
         }
     }
-
+    
     private void RegisterEvents()
     {
         _setSelector.SelectionChanged += SetSelectorOnSelectionChanged;
+        IntGridListBox.SelectionChanged += (s, e) =>
+        {
+            if (IntGridListBox.SelectedItem is ListBoxItem selectedTextBlock)
+            {
+                Log.Debug("[TilingPanel] Selected IntGrid reference: {0}", selectedTextBlock.Content as string);
+                _context.SelectedObjectToPaint = selectedTextBlock.Tag as IntGridData;
+            }
+        };
     }
 
     public void AddTilesetOption(ITilesetDef definition)
@@ -311,6 +335,39 @@ public class TilingPanelControl : UserControl
         {
             Log.Debug("[TilingPanel] Selected tileset: {0}", selectedItem.Name);
             var def = _scope.Load<ITilesetDef>(selectedItem.AssetId);
+            if (def is IntGridTileset intgrid)
+            {
+                IntGridListBox.IsVisible = true;
+                _canvas.IsVisible = false;
+                IntGridListBox.Items.Clear();
+                foreach (var intRef in intgrid.IntRefs)
+                {
+                    var listItem = new ListBoxItem()
+                    {
+                        Content = $"Value: {intRef.Value} - Name: {intRef.Name}",
+                        Tag = new IntGridData()
+                        {
+                            IntGridRef = intRef,
+                            IntGridTileset = intgrid
+                        }
+                    };
+                    IntGridListBox.Items.Add(listItem);
+                }
+
+                if (intgrid.IntRefs.Count <= 0)
+                {
+                    var noItem = new TextBlock
+                    {
+                        Text = $"No IntGrid references found in this tileset."
+                    };
+                    IntGridListBox.Items.Add(noItem);
+                    IntGridListBox.IsEnabled = false;
+                }
+                    
+                return;
+            }
+            IntGridListBox.IsVisible = false;
+            _canvas.IsVisible = true;
             if (_previewImage != null)
                 _previewImage.Source = def.GetBitmap();
         }

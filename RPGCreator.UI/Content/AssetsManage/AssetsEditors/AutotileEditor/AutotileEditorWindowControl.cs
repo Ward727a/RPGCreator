@@ -578,7 +578,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
             //     }
             // }
 
-            Console.WriteLine($"New Autotile Created: {AutoTilesetInstance.Name}, Width: {AutoTilesetInstance.ImageWidth}, Height: {AutoTilesetInstance.ImageHeight}, Asset Pack: {AutoTilesetInstance.PackName}");
+            Console.WriteLine($"New Autotile Created: {AutoTilesetInstance.Name}, Width: {AutoTilesetInstance.ImageWidth}, Height: {AutoTilesetInstance.ImageHeight}, Asset Pack: {AutoTilesetInstance.Pack.Name}");
 
             AutotileSaved?.Invoke();
         }

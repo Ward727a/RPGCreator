@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
@@ -14,10 +15,12 @@ using Projektanker.Icons.Avalonia;
 using RPGCreator.Core;
 using RPGCreator.Core.Contexts;
 using RPGCreator.Core.Managers.AssetsManager;
+using RPGCreator.Core.Managers.CommandManager;
 using RPGCreator.Core.ModuleSDK.Attributes;
 using RPGCreator.Core.ModuleSDK.UIModule;
 using RPGCreator.Core.Types;
 using RPGCreator.Core.Types.Assets.Tilesets;
+using RPGCreator.Core.Types.Assets.Tilesets.IntGridTileset;
 using RPGCreator.Core.Types.Map;
 using RPGCreator.Core.Types.Map.AutoLayer;
 using RPGCreator.UI.Common.CustomBrush;
@@ -38,19 +41,23 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutoLayerEditor.Compo
 public class IntRefContext
 {
     public HashSet<IntGridValueRef> IntRefs { get; } = new();
+    
+    public Dictionary<int, List<AutoLayerRule>> RulesByIntRefValue { get; } = new();
 }
 
-public class IntRefListMenu : StackPanel
+public class IntRefListMenu : Grid
 {
     public Action? OnCreateIntRef;
+    public Action? OnSaveTileset;
     
     public Button? CreateButton;
+    public Button? SaveButton;
     
     public IntRefListMenu()
     {
-        Orientation = Avalonia.Layout.Orientation.Horizontal;
+        RowDefinitions = new RowDefinitions("Auto");
+        ColumnDefinitions = new ColumnDefinitions("*, 5, *");
         HorizontalAlignment = HorizontalAlignment.Stretch;
-        Width = 300;
         CreateComponents();
         RegisterEvents();
         UIExtensionManager.ApplyExtensions(UIRegion.AutoLayerEditorIntRefListMenu, this);
@@ -61,9 +68,16 @@ public class IntRefListMenu : StackPanel
         CreateButton = new Button()
         {
             Content = "Create Group",
-            Width = 300,
         };
         Children.Add(CreateButton);
+        
+        SaveButton = new Button()
+        {
+            Content = "Save",
+            HorizontalAlignment = HorizontalAlignment.Right,
+        };
+        Children.Add(SaveButton);
+        Grid.SetColumn(SaveButton, 2);
     }
     
     private void RegisterEvents()
@@ -71,6 +85,11 @@ public class IntRefListMenu : StackPanel
         if (CreateButton != null)
         {
             CreateButton.Click += (_, _) => OnCreateIntRef?.Invoke();
+        }
+        
+        if (SaveButton != null)
+        {
+            SaveButton.Click += (_, _) => OnSaveTileset?.Invoke();
         }
     }
 }
@@ -266,6 +285,9 @@ public class AutoLayerRuleSelectOutputTileModal : Window
     
     private void RegisterEvents()
     {
+        if (TilesetExplorer == null || ConfirmButton == null || CancelButton == null)
+            return;
+        
         TilesetExplorer.TileSelected += (tile) =>
         {
             _selectedTile = tile;
@@ -277,41 +299,139 @@ public class AutoLayerRuleSelectOutputTileModal : Window
         
         ConfirmButton.Click += (_, _) =>
         {
-            if (_selectedTile != null)
-            {
-                UnifiedImage? tilesetImage = null;
-                UnifiedCroppedImage? outputTile = null;
+            if (_selectedTile == null) return;
+            
+            UnifiedImage? tilesetImage = null;
+            UnifiedCroppedImage? outputTile = null;
 
-                var tileset = _selectedTile.TilesetDef;
-                tilesetImage = new UnifiedImage(tileset.ImagePath);
+            var tileset = _selectedTile.TilesetDef;
+            tilesetImage = new UnifiedImage(tileset.ImagePath);
                 
-                outputTile = new UnifiedCroppedImage(
-                    tilesetImage,
-                    new PixelRect(
-                        _selectedTile.PositionInTileset.X,
-                        _selectedTile.PositionInTileset.Y,
-                        _selectedTile.SizeInTileset.Width,
-                        _selectedTile.SizeInTileset.Height
-                    )
-                );
-                OnCreateOutputTileConfirmed?.Invoke(outputTile, _selectedTile);
-            }
+            outputTile = new UnifiedCroppedImage(
+                tilesetImage,
+                new PixelRect(
+                    _selectedTile.PositionInTileset.X,
+                    _selectedTile.PositionInTileset.Y,
+                    _selectedTile.SizeInTileset.Width,
+                    _selectedTile.SizeInTileset.Height
+                )
+            );
+            OnCreateOutputTileConfirmed?.Invoke(outputTile, _selectedTile);
         };
     }
 }
 
 public class AutoLayerRuleCreateModal : Window
 {
+    private class RemoveTileCmd : ICommand
+    {
+        Border _tileBorder;
+        TileData _tileData;
+        
+        AutoLayerRule _rule;
+        StackPanel? _outputTilesPanel;
+        
+        public RemoveTileCmd(Border tileBorder, TileData tileData, 
+            AutoLayerRuleCreateModal parent)
+        {
+            _tileBorder = tileBorder;
+            _tileData = tileData;
+            _rule = parent.Rule;
+            _outputTilesPanel = parent.OutputTilesPanel;
+        }
+        
+        public void Execute()
+        {
+            _rule.OutputTiles.Remove(_tileData);
+            _outputTilesPanel?.Children.Remove(_tileBorder);
+        }
 
+        public void Undo()
+        {
+            _rule.OutputTiles.Add(_tileData);
+            _outputTilesPanel?.Children.Add(_tileBorder);
+        }
+
+        public string Name { get; } = "Remove Output Tile";
+    }
+    
+    private class AddTileCmd : ICommand
+    {
+        Border _tileBorder;
+        TileData _tileData;
+        UnifiedCroppedImage _outputTile;
+        ITileDef _selectedTile;
+        
+        AutoLayerRule _rule;
+        StackPanel? _outputTilesPanel;
+        
+        Action<TileData, Border>? _requestRemoveTile;
+        
+        public AddTileCmd(
+            UnifiedCroppedImage outputTile, 
+            ITileDef selectedTile,
+            AutoLayerRuleCreateModal parent,
+            Action<TileData, Border> requestRemoveTile)
+        {
+            _outputTile = outputTile;
+            _selectedTile = selectedTile;
+            _rule = parent.Rule;
+            _outputTilesPanel = parent.OutputTilesPanel;
+            _tileData = TileData.FromTileDef(_selectedTile);
+            _requestRemoveTile = requestRemoveTile;
+        }
+        
+        public void Execute()
+        {
+            _tileBorder = new Border()
+            {
+                Width = 64,
+                Height = 64,
+                BorderBrush = Brushes.Gray,
+                Background = new SolidColorBrush(new Color(255, 22, 22, 26)),
+                BorderThickness = new Thickness(1),
+                Margin = new Thickness(5),
+                CornerRadius = new CornerRadius(4),
+                Cursor = new Cursor(StandardCursorType.Hand)
+            };
+                
+            var tileImage = new Image()
+            {
+                Source = _outputTile.UI,
+                Width = 56,
+                Height = 56,
+            };
+            _tileBorder.Child = tileImage;
+            RenderOptions.SetBitmapInterpolationMode(tileImage, BitmapInterpolationMode.None);
+            _outputTilesPanel?.Children.Add(_tileBorder);
+
+            _tileBorder.PointerPressed += (_, _) => _requestRemoveTile?.Invoke(_tileData, _tileBorder);
+            ToolTip.SetTip(_tileBorder, "Click to remove this tile from output tiles.");
+            
+            _rule.OutputTiles.Add(_tileData);
+        }
+
+        public void Undo()
+        {
+            _rule.OutputTiles.Remove(_tileData);
+            _outputTilesPanel?.Children.Remove(_tileBorder);
+        }
+        
+        public string Name { get; } = "Add Output Tile";
+    }
+    
+    public CommandManager CommandManager;
+    
     private event Action<IntGridValueRef?>? OnSelectRefChanged;
+    public event Action<AutoLayerRule>? OnCreateRuleConfirmed;
     
     public AutoLayerRule Rule { get; } = new AutoLayerRule();
     
     public int SelectedTilesetIndex { get; private set; } = -1;
     
-    public readonly IntGridValueRef FromRef;
     public IntRefContext Context { get; private init; }
-
+    
+    public readonly IntGridValueRef FromRef;
     private IntGridValueRef? _selectedRef = null;
     public IntGridValueRef? SelectedRef
     {
@@ -335,14 +455,22 @@ public class AutoLayerRuleCreateModal : Window
     public StackPanel? OutputTilesPanel;
     public WrapPanel? TargetGroupPanel;
     public Grid? ConditionsPanel;
+    public Grid? BottomGrid;
+    public StackPanel? ParemetersPanel;
+    public CheckBox? FlipXParameter;
+    public CheckBox? FlipYParameter;
+    public NumericIntUpDown? ChanceParameter;
     public StackPanel? ButtonsPanel;
     public Button? CreateRuleButton;
     public Button? CancelButton;
-    
+    public Button? TestUndoButton;
+    public Button? TestRedoButton;
+
     public AutoLayerRuleCreateModal(IntGridValueRef @ref, IntRefContext context)
     {
         FromRef = @ref;
         Context = context;
+        CommandManager = new CommandManager();
         CreateComponents();
         RegisterEvents();
         PopulateTargetGroupPanel();
@@ -468,15 +596,58 @@ public class AutoLayerRuleCreateModal : Window
         Grid.SetRow(ConditionsPanel, secondRow);
         Grid.SetColumn(ConditionsPanel, secondCol);
         
+        BottomGrid = new Grid()
+        {
+            ColumnDefinitions = new ColumnDefinitions("*, 5, Auto"),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
+        Body.Children.Add(BottomGrid);
+        Grid.SetRow(BottomGrid, thirdRow);
+        Grid.SetColumn(BottomGrid, firstCol);
+        Grid.SetColumnSpan(BottomGrid, 3);
+        
+        ParemetersPanel = new StackPanel()
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            Spacing = 5
+        };
+        BottomGrid.Children.Add(ParemetersPanel);
+        
+        FlipXParameter = new CheckBox()
+        {
+            Content = "Flip X",
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        ParemetersPanel.Children.Add(FlipXParameter);
+        
+        FlipYParameter = new CheckBox()
+        {
+            Content = "Flip Y",
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        ParemetersPanel.Children.Add(FlipYParameter);
+        
+        ChanceParameter = new NumericIntUpDown()
+        {
+            Minimum = 0,
+            Maximum = 100,
+            Value = 100,
+            NumberFormat = NumberFormatInfo.InvariantInfo,
+            InnerRightContent = "%",
+            InnerLeftContent = "Chance:",
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        ParemetersPanel.Children.Add(ChanceParameter);
+        
         ButtonsPanel = new StackPanel()
         {
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Right,
         };
-        Body.Children.Add(ButtonsPanel);
-        Grid.SetRow(ButtonsPanel, thirdRow);
-        Grid.SetColumn(ButtonsPanel, firstCol);
-        Grid.SetColumnSpan(ButtonsPanel, 3);
+        BottomGrid.Children.Add(ButtonsPanel);
+        Grid.SetColumn(ButtonsPanel, 2);
         
         CancelButton = new Button()
         {
@@ -491,50 +662,45 @@ public class AutoLayerRuleCreateModal : Window
             Margin = new Thickness(5, 0, 0, 0),
         };
         ButtonsPanel.Children.Add(CreateRuleButton);
+        
+        TestUndoButton = new Button()
+        {
+            Content = "Undo",
+            Margin = new Thickness(5, 0, 0, 0),
+        };
+        ButtonsPanel.Children.Add(TestUndoButton);
+        TestUndoButton.Click += (_, _) => CommandManager.UndoLastCommand();
+        TestRedoButton = new Button()
+        {
+            Content = "Redo",
+            Margin = new Thickness(5, 0, 0, 0),
+        };
+        ButtonsPanel.Children.Add(TestRedoButton);
+        TestRedoButton.Click += (_, _) => CommandManager.RedoLastCommand();
+        
     }
-
     private void RegisterEvents()
     {
+        if (OutputTilesButton == null || CreateRuleButton == null || CancelButton == null)
+            return;
+        
         OutputTilesButton.Click += (_, _) =>
         {
             var tileModal = new AutoLayerRuleSelectOutputTileModal(SelectedTilesetIndex);
             tileModal.OnCreateOutputTileConfirmed += (outputTile, selectedTile) =>
             {
-                if (outputTile != null)
-                {
-                    var tileBorder = new Border()
+                var cmd = new AddTileCmd(
+                    outputTile,
+                    selectedTile,
+                    this,
+                    (tileData, tileBorder) =>
                     {
-                        Width = 64,
-                        Height = 64,
-                        BorderBrush = Brushes.Gray,
-                        Background = new SolidColorBrush(new Color(255, 22, 22, 26)),
-                        BorderThickness = new Thickness(1),
-                        Margin = new Thickness(5),
-                        CornerRadius = new CornerRadius(4),
-                        Cursor = new Cursor(StandardCursorType.Hand)
-                    };
-                    
-                    var tileImage = new Image()
-                    {
-                        Source = outputTile.UI,
-                        Width = 56,
-                        Height = 56,
-                    };
-                    tileBorder.Child = tileImage;
-                    RenderOptions.SetBitmapInterpolationMode(tileImage, BitmapInterpolationMode.None);
-                    OutputTilesPanel?.Children.Add(tileBorder);
-
-                    var outputTileData = TileData.FromTileDef(selectedTile);
-                    
-                    tileBorder.PointerPressed += (_, _) =>
-                    {
-                        OutputTilesPanel?.Children.Remove(tileBorder);
-                        Rule.OutputTiles.RemoveAll(t => t.UniqueId == outputTileData.UniqueId);
-                    };
-                    ToolTip.SetTip(tileBorder, "Click to remove this tile from output tiles.");
-                    
-                    Rule.OutputTiles.Add(outputTileData);
-                }
+                        var removeCmd = new RemoveTileCmd(tileBorder, tileData, this);
+                        CommandManager.ExecuteCommand(removeCmd);
+                    }
+                );
+                CommandManager.ExecuteCommand(cmd);
+                
                 tileModal.Close();
                 NotificationManager?.Show(
                     new Notification("Tile Added", "The output tile has been added successfully."),
@@ -548,24 +714,20 @@ public class AutoLayerRuleCreateModal : Window
             {
                 SelectedTilesetIndex = index;
             };
-            
-            // tileModal.OnCreateOutputTileConfirmed += () =>
-            // {
-            //     var outputTile = tileModal.BakeOutputTile();
-            //     if (outputTile != null)
-            //     {
-            //         Rule.OutputTiles.Add(outputTile);
-            //         var tileText = new TextBlock()
-            //         {
-            //             Text = $"Tile ID: {outputTile.TileId}",
-            //             Margin = new Thickness(5),
-            //         };
-            //         OutputTilesPanel?.Children.Add(tileText);
-            //     }
-            //     tileModal.Close();
-            // };
-            // tileModal.OnCreateOutputTileCancelled += () => { tileModal.Close(); };
             tileModal.ShowDialog((Window?)this.GetVisualRoot()!);
+        };
+        
+        FlipXParameter.IsCheckedChanged += (_, _) =>
+        {
+            Rule.FlipX = FlipXParameter.IsChecked ?? false;
+        };
+        FlipYParameter.IsCheckedChanged += (_, _) =>
+        {
+            Rule.FlipY = FlipYParameter.IsChecked ?? false;
+        };
+        ChanceParameter.ValueChanged += (_, _) =>
+        {
+            Rule.Chance = ChanceParameter.Value ?? 100;
         };
 
         CreateRuleButton.Click += (_, _) =>
@@ -581,8 +743,18 @@ public class AutoLayerRuleCreateModal : Window
                 );
                 return;
             }
-
-            Close();
+            
+            OnCreateRuleConfirmed?.Invoke(Rule);
+        };
+        
+        CommandManager.StateChanged += () =>
+        {
+            TestUndoButton.IsEnabled = CommandManager.CanUndo;
+            ToolTip.SetTip(TestUndoButton, $"Undo: {CommandManager.GetUndoCommandName()}");
+            ToolTip.SetShowOnDisabled(TestUndoButton, true);
+            TestRedoButton.IsEnabled = CommandManager.CanRedo;
+            ToolTip.SetTip(TestRedoButton, $"Redo: {CommandManager.GetRedoCommandName()}");
+            ToolTip.SetShowOnDisabled(TestRedoButton, true);
         };
     }
 
@@ -635,6 +807,131 @@ public class AutoLayerRuleCreateModal : Window
             TargetGroupPanel?.Children.Add(button);
         }
 
+    }
+
+    private class SelectConditionPanel : ICommand
+    {
+        private readonly AutoLayerRuleCreateModal _parent;
+        private readonly Action _deselectAction;
+        private readonly Action<bool> _selectAction;
+        private readonly Action<int, int, PatternCondition, bool> _setPatternAction;
+        private int _index;
+        
+        private PatternCondition _initialCondition;
+        private int _initialTargetValue;
+        private bool _initialIsRelative;
+        
+        public SelectConditionPanel(
+            AutoLayerRuleCreateModal parent, 
+            Action deselectAction,
+            Action<bool> selectAction,
+            Action<int, int, PatternCondition, bool> setPatternAction,
+            int index)
+        {
+            _parent = parent;
+            _deselectAction = deselectAction;
+            _selectAction = selectAction;
+            _setPatternAction = setPatternAction;
+            _index = index;
+            _initialCondition = _parent.Rule.Pattern[_index].Condition;
+            _initialTargetValue = _parent.Rule.Pattern[_index].TargetValue;
+            _initialIsRelative = _parent.Rule.Pattern[_index].IsRelative;
+        }
+        
+        public void Execute()
+        {
+            var contraint = _parent.Rule.Pattern[_index];
+            switch (contraint.Condition)
+            {
+                case PatternCondition.DontCare:
+                    _setPatternAction(_index, _parent.SelectedRef?.Value ?? 0, PatternCondition.MustBe, false);
+                    _selectAction(true);
+                    break;
+                case PatternCondition.MustBe:
+                    _setPatternAction(_index, _parent.SelectedRef?.Value ?? 0, PatternCondition.MustNotBe, false);
+                    _selectAction(false);
+                    break;
+                default:
+                    _setPatternAction(_index, _parent.SelectedRef?.Value ?? 0, PatternCondition.DontCare, false);
+                    _deselectAction();
+                    break;
+            }
+        }
+
+        public void Undo()
+        {
+            _setPatternAction(_index, _initialTargetValue, _initialCondition, _initialIsRelative);
+            switch (_initialCondition)
+            {
+                case PatternCondition.DontCare:
+                    _deselectAction();
+                    break;
+                case PatternCondition.MustBe:
+                    _selectAction(true);
+                    break;
+                case PatternCondition.MustNotBe:
+                    _selectAction(false);
+                    break;
+            }
+        }
+
+        public string Name { get; } = "Select Condition";
+    }
+
+    private class DeselectConditionPanel : ICommand
+    {
+        private readonly AutoLayerRuleCreateModal _parent;
+        private readonly Action _deselectAction;
+        private readonly Action<bool> _selectAction;
+        private readonly Action<int, int, PatternCondition, bool> _setPatternAction;
+        private int _index;
+        
+        private PatternCondition _initialCondition;
+        private int _initialTargetValue;
+        private bool _initialIsRelative;
+        
+        public DeselectConditionPanel(
+            AutoLayerRuleCreateModal parent, 
+            Action deselectAction,
+            Action<bool> selectAction,
+            Action<int, int, PatternCondition, bool> setPatternAction,
+            int index)
+        {
+            _parent = parent;
+            _deselectAction = deselectAction;
+            _selectAction = selectAction;
+            _setPatternAction = setPatternAction;
+            _index = index;
+            _initialCondition = _parent.Rule.Pattern[_index].Condition;
+            _initialTargetValue = _parent.Rule.Pattern[_index].TargetValue;
+            _initialIsRelative = _parent.Rule.Pattern[_index].IsRelative;
+        }
+        
+        public void Execute()
+        {
+            var ruleData = _parent.Rule.Pattern[_index];
+            _setPatternAction(_index, ruleData.TargetValue, PatternCondition.DontCare, ruleData.IsRelative);
+            _deselectAction();
+        }
+
+        public void Undo()
+        {
+            _setPatternAction(_index, _initialTargetValue, _initialCondition, _initialIsRelative);
+            switch (_initialCondition)
+            {
+                case PatternCondition.DontCare:
+                    _deselectAction();
+                    break;
+                case PatternCondition.MustBe:
+                    _selectAction(true);
+                    break;
+                case PatternCondition.MustNotBe:
+                    _selectAction(false);
+                    break;
+            }
+        }
+
+        public string Name { get; } = "Deselect Condition Panel";
     }
     
     public void PopulateConditionsPanel()
@@ -722,30 +1019,27 @@ public class AutoLayerRuleCreateModal : Window
 
                     if (e.Properties.IsRightButtonPressed && border.Tag is int contraintId_)
                     {
-                        border.Tag = 0;
-                        DeselectBorder();
-                        SetPattern(contraintId_, SelectedRef?.Value ?? 0, PatternCondition.DontCare, false);
+                        var deselectCMD = new DeselectConditionPanel(
+                            this,
+                            DeselectBorder,
+                            SelectBorder,
+                            SetPattern,
+                            contraintId_
+                        );
+                        CommandManager.ExecuteCommand(deselectCMD);
                         return;
                     }
 
                     if (e.Properties.IsLeftButtonPressed && border.Tag is int contraintId)
                     {
-                        var contraint = Rule.Pattern[contraintId];
-                        switch (contraint.Condition)
-                        {
-                            case PatternCondition.DontCare:
-                                SetPattern(contraintId, SelectedRef?.Value ?? 0, PatternCondition.MustBe, false);
-                                SelectBorder(true);
-                                break;
-                            case PatternCondition.MustBe:
-                                SetPattern(contraintId, SelectedRef?.Value ?? 0, PatternCondition.MustNotBe, false);
-                                SelectBorder(false);
-                                break;
-                            default:
-                                SetPattern(contraintId, SelectedRef?.Value ?? 0, PatternCondition.DontCare, false);
-                                DeselectBorder();
-                                break;
-                        }
+                        var selectCMD = new SelectConditionPanel(
+                            this,
+                            DeselectBorder,
+                            SelectBorder,
+                            SetPattern,
+                            contraintId
+                        );
+                        CommandManager.ExecuteCommand(selectCMD);
                     }
                 };
                 OnSelectRefChanged += (selectedRef) =>
@@ -804,6 +1098,7 @@ public class IntRefListItemControl : UserControl
     public Button? EditButton;
     public Button? AddRuleButton;
     public Divider? Separator;
+    public StackPanel? RulesList;
     
     public IntRefListItemControl(IntGridValueRef intRef, IntRefContext context)
     {
@@ -896,6 +1191,12 @@ public class IntRefListItemControl : UserControl
         };
         Body.Children.Add(Separator);
         
+        RulesList = new StackPanel()
+        {
+            Orientation = Avalonia.Layout.Orientation.Vertical,
+        };
+        Body.Children.Add(RulesList);
+        
         Expander = new Expander()
         {
             Header = new StackPanel()
@@ -939,6 +1240,22 @@ public class IntRefListItemControl : UserControl
         AddRuleButton.Click += (_, _) =>
         {
             var ruleModal = new AutoLayerRuleCreateModal(IntRef,Context);
+            
+            ruleModal.OnCreateRuleConfirmed += (rule) =>
+            {
+                Log.Debug("[IntRefListItemControl] Created Rule for IntRef {IntRefName} : {@Rule}", IntRef.Name, rule);
+                
+                if(!Context.RulesByIntRefValue.TryGetValue(IntRef.Value, out List<AutoLayerRule>? value))
+                {
+                    value = new List<AutoLayerRule>();
+                    Context.RulesByIntRefValue[IntRef.Value] = value;
+                }
+
+                value.Add(rule);
+                ruleModal.Close();
+                RefreshDisplay();
+            };
+            
             ruleModal.ShowDialog((Window?)this.GetVisualRoot()!);
         };
     }
@@ -955,6 +1272,20 @@ public class IntRefListItemControl : UserControl
         {
             NameText.Text = IntRef.Name;
         }
+        
+        if(RulesList == null)
+            return;
+        
+        RulesList.Children.Clear();
+
+        if (Context.RulesByIntRefValue.TryGetValue(IntRef.Value, out List<AutoLayerRule>? rules))
+        {
+            foreach (var rule in rules)
+            {
+                var ruleItem = new IntRefRuleItemControl(rule, Context);
+                RulesList.Children.Add(ruleItem);
+            }
+        }
     }
 }
 
@@ -962,22 +1293,117 @@ public class IntRefRuleItemControl : UserControl
 {
     
     public AutoLayerRule Rule { get; }
+    public IntRefContext Context { get; private init; }
     
-    public IntRefRuleItemControl()
+    public Border? BodyBorder;
+    public Grid? Body;
+
+    public Grid? PreviewPatternCondition;
+    
+    public IntRefRuleItemControl(AutoLayerRule rule, IntRefContext context)
     {
+        Rule = rule;
+        Context = context;
+        CreateComponents();
+        RefreshPreviewPattern();
+        Content = BodyBorder;
+    }
+
+    private void CreateComponents()
+    {
+        BodyBorder = new Border()
+        {
+            BorderBrush = Brushes.Gray,
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(4),
+            Margin = new Thickness(0, 5, 0, 5),
+            Padding = new Thickness(5),
+        };
         
+        Body = new Grid()
+        {
+            RowDefinitions = new RowDefinitions("*"),
+            ColumnDefinitions = new ColumnDefinitions("Auto, 5, *"),
+        };
+        BodyBorder.Child = Body;
+        
+        PreviewPatternCondition = new Grid()
+        {
+            RowDefinitions = new RowDefinitions("5, 16, 5, 16, 5, 16, 5"),
+            ColumnDefinitions = new ColumnDefinitions("5, 16, 5, 16, 5, 16, 5"),
+            Height = (16 * 3) + (4 * 5),
+            Width = (16 * 3) + (4 * 5),
+            Background = CheckerBoardBrush.CreateCheckerBoardBrush(new Color(
+                5, 200, 200, 200
+            ), Colors.Transparent, 10),
+        };
+        Body.Children.Add(PreviewPatternCondition);
+        Grid.SetRow(PreviewPatternCondition, 0);
+        Grid.SetColumn(PreviewPatternCondition, 0);
+    }
+
+    public void RefreshPreviewPattern()
+    {
+        var index = 0;
+        PreviewPatternCondition.Children.Clear();
+        foreach (var constraint in Rule.Pattern)
+        {
+            
+            
+            var row = index / 3;
+            var col = index % 3;
+            
+            if(constraint.Condition == PatternCondition.DontCare)
+            {
+                var noneBorder = new Border()
+                {
+                    Width = 16,
+                    Height = 16,
+                    Background = HatchBrush.CreateHatchBrush(Colors.Gray, angle: -45, thickness: .1, spacing:3),
+                };
+                PreviewPatternCondition.Children.Add(noneBorder);
+                Grid.SetRow(noneBorder, row * 2 + 1);
+                Grid.SetColumn(noneBorder, col * 2 + 1);
+                index++;
+                continue;
+            }
+            
+            index++;
+            
+            var border = new Border()
+            {
+                Width = 16,
+                Height = 16,
+                Background = new SolidColorBrush(Context.IntRefs.FirstOrDefault(r => r.Value == constraint.TargetValue)?.Color ?? Colors.Transparent),
+                Child = new Icon()
+                {
+                    Value = constraint.Condition == PatternCondition.MustBe ? "mdi-check" : "mdi-close",
+                    FontSize = 12,
+                    Foreground = Brushes.White,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                }
+            };
+            PreviewPatternCondition.Children.Add(border);
+            Grid.SetRow(border, row * 2 + 1);
+            Grid.SetColumn(border, col * 2 + 1);
+        }
     }
 }
 
 public class IntRefListControl : UserControl
 {
     public Grid? Body;
+    
+    public IntGridTileset? selectedTileset = null;
 
     [ExposeEventToPlugin("AutoLayerEditor.IntRefList")]
     public event Action<IntGridValueRef>? AddedIntRef;
 
     [ExposeEventToPlugin("AutoLayerEditor.IntRefList")]
     public event Action<IntGridValueRef>? RemovedIntRef;
+
+    public event Action<IntRefContext>? OnCreateTileset;
     
     [ExposePropToPlugin("AutoLayerEditor.IntRefList")]
     public IntRefContext Context  { get; private init; }
@@ -1020,9 +1446,9 @@ public class IntRefListControl : UserControl
         
         Body = new Grid()
         {
-            RowDefinitions = new RowDefinitions("Auto, *"),
-            ColumnDefinitions = new ColumnDefinitions("300"),
-            Margin = new Thickness(5)
+            RowDefinitions = new RowDefinitions("Auto, 5, *, 5"),
+            ColumnDefinitions = new ColumnDefinitions("*"),
+            Margin = new Thickness(5, 5, 5, 20)
         };
         
         MenuPanel = new IntRefListMenu();
@@ -1033,10 +1459,9 @@ public class IntRefListControl : UserControl
         {
             VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
             HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled,
-            Margin = new Thickness(0, 5, 0, 0)
         };
         Body.Children.Add(ListViewer);
-        Grid.SetRow(ListViewer, 1);
+        Grid.SetRow(ListViewer, 2);
         
         ListBody = new StackPanel()
         {
@@ -1050,6 +1475,7 @@ public class IntRefListControl : UserControl
     private void RegisterEvents()
     {
         if(MenuPanel == null) return;
+
         
         MenuPanel.OnCreateIntRef += () =>
         {
@@ -1069,6 +1495,18 @@ public class IntRefListControl : UserControl
             };
             createModal.OnCreateIntRefCancelled += () => { createModal.Close(); };
             createModal.ShowDialog((Window?)this.GetVisualRoot()!);
+        };
+
+        MenuPanel.OnSaveTileset += () =>
+        {
+            OnCreateTileset?.Invoke(Context);
+            if(selectedTileset == null)
+            {
+                selectedTileset = EngineCore.Instance.Managers.Assets.CreateAsset<IntGridTileset>();
+            }
+            selectedTileset.Rules = Context.RulesByIntRefValue.Values.SelectMany(r => r).ToList();
+            selectedTileset.IntRefs = Context.IntRefs.ToList();
+            EngineCore.Instance.Managers.Assets.GetLoadedPacks()[0].AddOrUpdateAsset(selectedTileset);
         };
         
         AddedIntRef += (_) => RefreshList();
@@ -1133,6 +1571,30 @@ public class IntRefListControl : UserControl
     {
         Context.IntRefs.Remove(intRef);
         RemovedIntRef?.Invoke(intRef);
+    }
+
+    public void LoadIntRefsFromTileset(IntGridTileset tileset)
+    {
+        Context.IntRefs.Clear();
+        Context.RulesByIntRefValue.Clear();
+        
+        foreach (var intRef in tileset.IntRefs)
+        {
+            Context.IntRefs.Add(intRef);
+        }
+        
+        foreach (var rule in tileset.Rules)
+        {
+            if(!Context.RulesByIntRefValue.TryGetValue(rule.TargetIntGridValue, out List<AutoLayerRule>? value))
+            {
+                value = new List<AutoLayerRule>();
+                Context.RulesByIntRefValue[rule.TargetIntGridValue] = value;
+            }
+
+            value.Add(rule);
+        }
+        
+        RefreshList();
     }
 
 }

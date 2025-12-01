@@ -1,24 +1,21 @@
 using Avalonia.Media.Imaging;
+using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.Core.Types.Internal;
 using Serilog;
 using SkiaSharp;
 
 namespace RPGCreator.Core.Types.Assets.Tilesets;
 
-public class TilesetDef : ImageAsset, ITilesetDef,ISerializable, IDeserializable
+public sealed class TilesetDef : ITilesetDef,ISerializable, IDeserializable
 {
     public event Action? ImageChanged;
 
-    public string Name { get; set; } = "";
-    public Ulid Unique { get; private set; }
-    public URN Urn { get; private set; }
-    public int TileWidth { get; set; }
-    public int TileHeight { get; set; }
-    public Bitmap? BitmapCache => _BitmapCache;
+    public sealed override URN Urn => new URN("tileset", $"{Name}@{Unique}");
+    
+    private Texture2D ? _TextureCache;
 
     public TilesetDef()
     {
-        Type = TYPE.TILESETS;
     }
     
     public TilesetDef(string imagePath, string name, int tileWidth = 32, int tileHeight = 32)
@@ -29,10 +26,9 @@ public class TilesetDef : ImageAsset, ITilesetDef,ISerializable, IDeserializable
         ImagePath = imagePath;
         TileWidth = tileWidth;
         TileHeight = tileHeight;
-        Type = TYPE.TILESETS;
     }
     
-    public SerializationInfo GetObjectData()
+    public override SerializationInfo GetObjectData()
     {
         var info = new SerializationInfo(typeof(TilesetDef));
 
@@ -46,7 +42,7 @@ public class TilesetDef : ImageAsset, ITilesetDef,ISerializable, IDeserializable
         return info;
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public override void SetObjectData(Serializer.DeserializationInfo info)
     {
         if (info == null)
         {
@@ -74,17 +70,26 @@ public class TilesetDef : ImageAsset, ITilesetDef,ISerializable, IDeserializable
         Log.Debug("[TilesetDef] SetObjectData ({0}, {1})", Unique, Name);
     }
 
-    public SKBitmap GetSKBitmap()
+    public override SKBitmap GetSKBitmap()
     {
         return SKBitmap.Decode(ImagePath);
     }
 
-    public Bitmap GetSimpleBitmap()
+    public override Bitmap GetSimpleBitmap()
     {
         return new Bitmap(ImagePath);
     }
 
-    public ITileDef GetTileAt(int col, int row)
+    public override Texture2D GetTexture(GraphicsDevice graphicsDevice)
+    {
+        if(_TextureCache != null)
+            return _TextureCache;
+        using var stream = System.IO.File.OpenRead(ImagePath);
+        _TextureCache = Texture2D.FromStream(graphicsDevice, stream);
+        return _TextureCache;
+    }
+
+    public override ITileDef GetTileAt(int col, int row)
     {
         if (col < 0 || row < 0)
             throw new ArgumentOutOfRangeException("Column and row must be non-negative.");
@@ -100,7 +105,4 @@ public class TilesetDef : ImageAsset, ITilesetDef,ISerializable, IDeserializable
         
         return GetSimpleBitmap();
     }
-
-    public bool IsDirty { get; set; }
-    public bool IsTransient { get; set; } = false;
 }

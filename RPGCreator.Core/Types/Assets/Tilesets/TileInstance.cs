@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Media.Imaging;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Map;
@@ -45,7 +46,22 @@ public class TileInstance : BaseDrawable, ITileInstance
 
     protected override void _Draw(SpriteBatchExtend? sb)
     {
-        sb.Draw(Definition.TilesetDef.GetTexture(sb.GraphicsDevice), Position, Definition.UV, Color.White);
+
+        switch (Definition.Flip)
+        {
+            case TileFlip.None:
+                sb.Draw(Definition.TilesetDef.GetTexture(sb.GraphicsDevice), Position, Definition.UV, Color.White);
+                return;
+            case TileFlip.Horizontal:
+                sb.Draw(Definition.TilesetDef.GetTexture(sb.GraphicsDevice), Position, Definition.UV, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0f);
+                return;
+            case TileFlip.Vertical:
+                sb.Draw(Definition.TilesetDef.GetTexture(sb.GraphicsDevice), Position, Definition.UV, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.FlipVertically, 0f);
+                return;
+            case TileFlip.Both:
+                sb.Draw(Definition.TilesetDef.GetTexture(sb.GraphicsDevice), Position, Definition.UV, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically, 0f);
+                return;
+        }
     }
 
     protected override void _Update(GameTime gameTime)

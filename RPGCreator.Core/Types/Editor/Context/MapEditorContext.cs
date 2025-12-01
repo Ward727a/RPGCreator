@@ -44,7 +44,6 @@ public partial class MapEditorContext : ObservableObject
 
     public MapInstance? MapInstance { get; set; }
 
-
     public IPaintTarget? GetActivePaintTarget()
     {
         if (_activePaintTargetCache == null)
@@ -64,6 +63,10 @@ public partial class MapEditorContext : ObservableObject
         {
             _activePaintTargetCache = new TileLayerTarget(tileLayerDefinition, Map, 32, 32);
         }
+        else if (CurrentMode == EditorMode.Tiling && SelectedLayer is AutoLayerDefinition autoLayerDefinition)
+        {
+            _activePaintTargetCache = new IntGridLayerTarget(autoLayerDefinition, Map);
+        }
         else if (CurrentMode == EditorMode.Entities && SelectedLayer is EntitiesLayerDefinition entityLayerDefinition)
         {
             _activePaintTargetCache = new EntityLayerTarget(entityLayerDefinition, Map, 32, 32);
@@ -77,6 +80,7 @@ public partial class MapEditorContext : ObservableObject
     public Point LastDrawAt { get; set; } = new(-1, -1);
     public IBrush? ActiveBrush { get; set; }
     public ITileDef? SelectedTile => _selectedObjectToPaint as ITileDef;
+    public IntGridData? SelectedIntGridData => _selectedObjectToPaint as IntGridData;
     #endregion
 
     #region Placement State
