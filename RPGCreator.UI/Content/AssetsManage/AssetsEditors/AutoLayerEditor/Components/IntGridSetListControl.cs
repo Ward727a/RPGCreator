@@ -75,6 +75,106 @@ public class IntGridSetListItemControl : UserControl
     }
 }
 
+public class IntGridSetCreateModal : Window
+{
+    private AssetScope _scope;
+    public event Action? OnCancelled;
+    public event Action<IntGridTileset>? OnIntGridSetCreated;
+
+    public Grid? Body;
+    
+    public StackPanel? FormPanel;
+    public TextBox? NameTextBox;
+    
+    public StackPanel? ButtonsPanel;
+    public Button? CreateButton;
+    public Button? CancelButton;
+    
+    
+    public IntGridSetCreateModal()
+    {
+        Title = "Create New IntGrid Set";
+        Width = 400;
+        Height = 300;
+        CreateComponents();
+        RegisterEvents();
+        Content = Body;
+        
+        // Implement the modal UI and logic here
+    }
+    
+    private void CreateComponents()
+    {
+        Body = new Grid()
+        {
+            RowDefinitions = new RowDefinitions("*, auto"),
+            ColumnDefinitions = new ColumnDefinitions("*"),
+            Margin = new Avalonia.Thickness(10)
+        };
+        
+        FormPanel = new StackPanel()
+        {
+            Orientation = Avalonia.Layout.Orientation.Vertical,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            Spacing = 10
+        };
+        Body.Children.Add(FormPanel);
+        Grid.SetRow(FormPanel, 0);
+        
+        NameTextBox = new TextBox()
+        {
+            InnerLeftContent = "Name: ",
+            Watermark = "Enter IntGrid Set Name",
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+        };
+        
+        FormPanel.Children.Add(NameTextBox);
+        
+        ButtonsPanel = new StackPanel()
+        {
+            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+            Spacing = 10
+        };
+        Body.Children.Add(ButtonsPanel);
+        Grid.SetRow(ButtonsPanel, 1);
+        
+        CancelButton = new Button()
+        {
+            Content = "Cancel",
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right
+        };
+        ButtonsPanel.Children.Add(CancelButton);
+        
+        CreateButton = new Button()
+        {
+            Content = "Create",
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+        };
+        ButtonsPanel.Children.Add(CreateButton);
+    }
+    
+    private void RegisterEvents()
+    {
+        CancelButton.Click += OnCancelButtonClick;
+        CreateButton.Click += OnCreateButtonClick;
+        
+    }
+    private void OnCancelButtonClick(object? sender, RoutedEventArgs e)
+    {
+        OnCancelled?.Invoke();
+    }
+
+    private void OnCreateButtonClick(object? sender, RoutedEventArgs e)
+    {
+        // Implement creation logic here
+        Log.Debug("[IntGridSetCreateModal] Create button clicked.");
+        Close();
+    }
+
+}
+
 public class IntGridSetListControl : UserControl
 {
     
@@ -156,7 +256,14 @@ public class IntGridSetListControl : UserControl
     
     private void RegisterEvents()
     {
-        
+        AddTilesetButton.Click += OnAddTilesetButtonClick;
+    }
+    
+    private void OnAddTilesetButtonClick(object? sender, RoutedEventArgs e)
+    {
+        Log.Debug("[IntGridSetListControl] Add IntGrid Set button clicked.");
+        var createModal = new IntGridSetCreateModal();
+        createModal.ShowDialog((Window?)this.VisualRoot);
     }
     
     private void RefreshList()
