@@ -69,6 +69,7 @@ namespace RPGCreator.Core
         public EngineManagers Managers { get; private set; }
         public EngineModules Modules { get; private set; }
         public EngineSerializer Serializer { get; private set; }
+        public EngineIcons Icons { get; private set; }
 
         private EngineLogger Logger;
 
@@ -96,7 +97,10 @@ namespace RPGCreator.Core
             ServiceProvider = new EngineServiceProvider();
             Managers = new EngineManagers();
             Modules = new EngineModules();
-
+            #if DEBUG
+            // In debug mode, we load the engine icons for debug tools (like IconsExplorer).
+            Icons = new EngineIcons();
+            #endif
             Managers.Init();
             
             Log.Information("Starting scanning for blueprint opcodes handlers...");

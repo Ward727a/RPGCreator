@@ -6,6 +6,8 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using RPGCreator.Core;
 using RPGCreator.Core.Managers.AssetsManager;
+using RPGCreator.Core.Managers.AssetsManager.Registries;
+using RPGCreator.Core.Types.Assets.BaseAssetsPack;
 using RPGCreator.Core.Types.Assets.Tilesets.IntGridTileset;
 using Serilog;
 using Ursa.Controls;
@@ -77,14 +79,15 @@ public class IntGridSetListItemControl : UserControl
 
 public class IntGridSetCreateModal : Window
 {
-    private AssetScope _scope;
     public event Action? OnCancelled;
     public event Action<IntGridTileset>? OnIntGridSetCreated;
 
     public Grid? Body;
     
     public StackPanel? FormPanel;
+    
     public TextBox? NameTextBox;
+    public ComboBox? PackComboBox;
     
     public StackPanel? ButtonsPanel;
     public Button? CreateButton;
@@ -128,8 +131,14 @@ public class IntGridSetCreateModal : Window
             Watermark = "Enter IntGrid Set Name",
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
         };
-        
         FormPanel.Children.Add(NameTextBox);
+        
+        PackComboBox = new ComboBox()
+        {
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            PlaceholderText = "Select Asset Pack"
+        };
+        FormPanel.Children.Add(PackComboBox);
         
         ButtonsPanel = new StackPanel()
         {
@@ -161,6 +170,29 @@ public class IntGridSetCreateModal : Window
         CreateButton.Click += OnCreateButtonClick;
         
     }
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+        RefreshPacksList();
+    }
+    
+    private void RefreshPacksList()
+    {
+        PackComboBox.SelectedIndex = -1;
+        PackComboBox.Items.Clear();
+        var packs = EngineCore.Instance.Managers.Assets.GetLoadedPacks();
+
+        foreach (var pack in packs)
+        {
+            PackComboBox.Items.Add(new ComboBoxItem()
+            {
+                Content = pack.Name,
+                Tag = pack
+            });
+        }
+    }
+
     private void OnCancelButtonClick(object? sender, RoutedEventArgs e)
     {
         OnCancelled?.Invoke();
@@ -169,14 +201,39 @@ public class IntGridSetCreateModal : Window
     private void OnCreateButtonClick(object? sender, RoutedEventArgs e)
     {
         // Implement creation logic here
-        Log.Debug("[IntGridSetCreateModal] Create button clicked.");
-        Close();
+        var selectedPackItem = PackComboBox.SelectedItem as ComboBoxItem;
+        if (selectedPackItem == null)
+        {
+            Log.Warning("[IntGridSetCreateModal] No asset pack selected.");
+            return;
+        }
+        var selectedPack = selectedPackItem.Tag as BaseAssetsPack;
+        if (selectedPack == null)
+        {
+            Log.Warning("[IntGridSetCreateModal] Selected asset pack is invalid.");
+            return;
+        }
+        var intGridSetName = NameTextBox.Text.Trim();
+        if (string.IsNullOrWhiteSpace(intGridSetName))
+        {
+            Log.Warning("[IntGridSetCreateModal] IntGrid Set name is empty.");
+            return;
+        }
+        var newIntGridSet = EngineCore.Instance.Managers.Assets.CreateAsset<IntGridTileset>();
+        newIntGridSet.Name = intGridSetName;
+        newIntGridSet.Pack = selectedPack;
+        selectedPack.AddOrUpdateAsset(newIntGridSet);
+        Log.Information("[IntGridSetCreateModal] Created new IntGrid Set '{name}' in pack '{packName}'", intGridSetName, selectedPack.Name);
+        
+        OnIntGridSetCreated?.Invoke(newIntGridSet);
     }
 
 }
 
 public class IntGridSetListControl : UserControl
 {
+    
+    private IntGridTileset? _selectedTileset;
     
     public event Action<IntGridTileset>? OnTilesetSelected;
     
@@ -187,6 +244,8 @@ public class IntGridSetListControl : UserControl
     public StackPanel? ListBody { get; private set; }
     
     public StackPanel? MenuPanel { get; private set; }
+    public Button? RemoveTilesetButton { get; private set; }
+    public Button? EditTilesetButton { get; private set; }
     public Button? AddTilesetButton { get; private set; }
     
     public IntGridSetListControl(AssetScope? scope = null)
@@ -241,10 +300,28 @@ public class IntGridSetListControl : UserControl
         MenuPanel = new StackPanel()
         {
             Orientation = Avalonia.Layout.Orientation.Horizontal,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+            Width = double.NaN,
+            Spacing = 5
         };
         Body.Children.Add(MenuPanel);
         Grid.SetRow(MenuPanel, 0);
+        
+        RemoveTilesetButton = new Button()
+        {
+            Content = "Remove IntGrid Set",
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+            IsEnabled = false,
+        };
+        MenuPanel.Children.Add(RemoveTilesetButton);
+        
+        EditTilesetButton = new Button()
+        {
+            Content = "Edit IntGrid Set",
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+            IsEnabled = false,
+        };
+        MenuPanel.Children.Add(EditTilesetButton);
         
         AddTilesetButton = new Button()
         {
@@ -256,6 +333,36 @@ public class IntGridSetListControl : UserControl
     
     private void RegisterEvents()
     {
+        RemoveTilesetButton.Click += (s, e) =>
+        {
+            if (_selectedTileset == null) return;
+            Log.Debug("[IntGridSetListControl] Removing IntGrid Set: {name}", _selectedTileset.Name);
+            if (EngineCore.Instance.Managers.Assets.TryResolveRegistry(_selectedTileset.GetType(), out var registry))
+            {
+                if (!registry.HasAsset(_selectedTileset))
+                {
+                    Log.Error("[IntGridSetListControl] Failed to find IntGrid Set in registry: {name}", _selectedTileset.Name);
+                    return;
+                }
+                if(_selectedTileset.Pack == null)
+                {
+                    Log.Error("[IntGridSetListControl] IntGrid Set has no associated asset pack: {name}", _selectedTileset.Name);
+                    return;
+                }
+                // Remove from pack
+                _selectedTileset.Pack.RemoveAsset(_selectedTileset.Unique);
+                // Remove from registry
+                registry.UnregisterUntyped(_selectedTileset);
+                RefreshList();
+                RemoveTilesetButton.IsEnabled = false;
+                EditTilesetButton.IsEnabled = false;
+                _selectedTileset = null;
+            }
+            else
+            {
+                Log.Error("[IntGridSetListControl] Failed to resolve registry for IntGrid Set: {name}", _selectedTileset.Name);
+            }
+        };
         AddTilesetButton.Click += OnAddTilesetButtonClick;
     }
     
@@ -263,6 +370,20 @@ public class IntGridSetListControl : UserControl
     {
         Log.Debug("[IntGridSetListControl] Add IntGrid Set button clicked.");
         var createModal = new IntGridSetCreateModal();
+        
+        createModal.OnCancelled += () =>
+        {
+            Log.Debug("[IntGridSetListControl] IntGrid Set creation cancelled.");
+            createModal.Close();
+        };
+        
+        createModal.OnIntGridSetCreated += (newTileset) =>
+        {
+            Log.Debug("[IntGridSetListControl] New IntGrid Set created: {name}", newTileset.Name);
+            RefreshList();
+            createModal.Close();
+        };
+        
         createModal.ShowDialog((Window?)this.VisualRoot);
     }
     
@@ -282,6 +403,10 @@ public class IntGridSetListControl : UserControl
                 Log.Debug("[IntGridSetListControl] Selected IntGrid Set: {name}", selectedTileset.Name);
                 // Handle selection logic here
                 OnTilesetSelected?.Invoke(selectedTileset);
+                
+                RemoveTilesetButton.IsEnabled = true;
+                EditTilesetButton.IsEnabled = true;
+                _selectedTileset = selectedTileset;
             };
             ListBody.Children.Add(itemControl);
         }

@@ -9,6 +9,9 @@ public interface IAssetRegistry
     
     IEnumerable<System.Type> SupportedTypes { get; }
     
+    bool HasAsset(IHasUniqueId asset);
+    bool HasAsset(Ulid unique);
+    
     void RegisterUntyped(IHasUniqueId asset, bool overwrite = false);
     void UnregisterUntyped(IHasUniqueId asset);
     

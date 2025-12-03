@@ -417,9 +417,11 @@ namespace RPGCreator.Core.Managers.AssetsManager
             }
         }
         
-        public bool TryGetPack(string packName, [NotNullWhen(true)] out BaseAssetsPack? pack)
+        public bool TryGetPack(string? packName, [NotNullWhen(true)] out BaseAssetsPack? pack)
         {
             pack = null;
+            if(packName == null)
+                return false;
             if (AssetsPacksMapping.TryGetValue(packName, out Ulid packId))
             {
                 return AssetsPacks.TryGetValue(packId, out pack);

@@ -19,9 +19,7 @@ public class IntGridTileset : ITilesetDef
     
     public override SerializationInfo GetObjectData()
     {
-        var info = new SerializationInfo(GetType());
-        info.AddValue("Unique", Unique.ToString());
-        info.AddValue("Name", Name);
+        var info = base.GetObjectData();
         info.AddValue("Rules", Rules);
         info.AddValue("IntRefs", IntRefs);
         return info;
@@ -29,10 +27,7 @@ public class IntGridTileset : ITilesetDef
 
     public override void SetObjectData(DeserializationInfo info)
     {
-        info.TryGetValue("Unique", out string uniqueStr);
-        Unique = Ulid.Parse(uniqueStr);
-        info.TryGetValue("Name", out string name);
-        Name = name ?? "";
+        base.SetObjectData(info);
         info.TryGetValue("Rules", out List<AutoLayerRule> rules);
         Rules = rules ?? new();
         info.TryGetValue("IntRefs", out List<IntGridValueRef> intRefs);

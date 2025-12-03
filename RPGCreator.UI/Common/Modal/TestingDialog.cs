@@ -9,6 +9,7 @@ using RPGCreator.Core;
 using RPGCreator.Core.Parser.PRATT;
 using RPGCreator.Core.Types.Assets.BaseAssetsPack;
 using RPGCreator.UI;
+using RPGCreator.UI.Common;
 using Serilog;
 
 namespace RPGCreator.Core.Types.Windows;
@@ -63,6 +64,11 @@ public class TestingDialog : Window
                 }
             };
             textDialog.ShowDialog(instance);
+        }),
+        new("Open icons explorer", () =>
+        {
+            var iconsExplorer = new IconsExplorer();
+            iconsExplorer.ShowDialog(instance);
         })
     ];
     

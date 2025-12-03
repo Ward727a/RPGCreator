@@ -21,6 +21,20 @@ public abstract class RegistryBase <T> : IAssetRegistry<T> where T : class, IHas
         }
     }
 
+    public bool HasAsset(IHasUniqueId asset)
+    {
+        if (asset is T typedAsset)
+        {
+            return Contains(typedAsset.Unique);
+        }
+        return false;
+    }
+
+    public bool HasAsset(Ulid unique)
+    {
+        return Contains(unique);
+    }
+
 
     public void RegisterUntyped(IHasUniqueId asset, bool overwrite = false)
     {

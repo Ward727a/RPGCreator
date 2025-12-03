@@ -45,7 +45,7 @@ namespace RPGCreator.Core
         private readonly string MODULES_PATH = $"{AppContext.BaseDirectory}Assets/Modules/";
         
         internal EngineModules()
-        {
+        {                   
             
             Log.Information($"EngineModules initialized.");
 
