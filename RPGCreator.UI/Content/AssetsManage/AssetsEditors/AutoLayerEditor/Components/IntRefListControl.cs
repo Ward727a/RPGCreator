@@ -13,6 +13,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.VisualTree;
 using Projektanker.Icons.Avalonia;
 using RPGCreator.Core;
+using RPGCreator.Core.Common.Helpers;
 using RPGCreator.Core.Contexts;
 using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Managers.CommandManager;
@@ -96,18 +97,106 @@ public class IntRefListMenu : Grid
 
 public class IntRefListCreateModal : Window
 {
+
+    public class IntRefSelectDefaultTile : Window
+    {
+        private AssetScope _scope;
+        private ITileDef? _selectedTile = null;
+        
+        public Action<ITileDef?>? OnTileSelected;
+        
+        Grid? Body;
+        TilesetExplorer? TilesetExplorer;
+        StackPanel? ButtonsPanel;
+        Button? ConfirmButton;
+        Button? CancelButton;
+        public IntRefSelectDefaultTile()
+        {
+            
+            _scope = EngineCore.Instance.Managers.Assets.CreateAssetScope();
+            
+            Title = "Select Default Tile";
+            SizeToContent = SizeToContent.WidthAndHeight;
+            CanResize = false;
+            CanMaximize = false;
+            
+            CreateComponents();
+            RegisterEvents();
+            
+        }
+
+        private void CreateComponents()
+        {
+            Body = new Grid()
+            {
+                RowDefinitions = new RowDefinitions("Auto, *"),
+                ColumnDefinitions = new ColumnDefinitions("*"),
+                Margin = new Thickness(10),
+            };
+            Content = Body;
+            
+            TilesetExplorer = new TilesetExplorer(_scope, tilesetType: TilesetExplorer.TilesetType.NonAutotileOnly);
+            Body.Children.Add(TilesetExplorer);
+            Grid.SetRow(TilesetExplorer, 0);
+            
+            ButtonsPanel = new StackPanel()
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Right,
+            };
+            Body.Children.Add(ButtonsPanel);
+            Grid.SetRow(ButtonsPanel, 1);
+            ConfirmButton = new Button()
+            {
+                Content = "Confirm",
+                Margin = new Thickness(5, 0, 0, 0),
+            };
+            ButtonsPanel.Children.Add(ConfirmButton);
+            CancelButton = new Button()
+            {
+                Content = "Cancel",
+                Margin = new Thickness(5, 0, 0, 0),
+            };
+            ButtonsPanel.Children.Add(CancelButton);
+        }
+
+        private void RegisterEvents()
+        {
+            TilesetExplorer?.TileSelected += (tile) =>
+            {
+                _selectedTile = tile;
+            };
+            ConfirmButton?.Click += (_, _) =>
+            {
+                OnTileSelected?.Invoke(_selectedTile);
+            };
+        }
+
+        protected override void OnUnloaded(RoutedEventArgs e)
+        {
+            base.OnUnloaded(e);
+            _scope.Dispose();
+        }
+    }
+    
+    private readonly AssetScope _scope;
+    
     [ExposeEventToPlugin("AutoLayerEditor.IntRefList.CreateModal")]
     public event Action? OnCreateIntRefConfirmed;
     [ExposeEventToPlugin("AutoLayerEditor.IntRefList.CreateModal")]
     public event Action? OnCreateIntRefCancelled;
     
     public IntGridValueRef? FromRef;
+    public ITileDef? SelectedDefaultTile;
     public bool IsEdit => FromRef != null;
     
     public StackPanel? Body;
     
     public TextBox? NameInput;
     public ColorPicker? ColorInput;
+    public StackPanel? DefaultTilePanel;
+    public Button? SelectDefaultTileButton;
+    public Image? DefaultTileImage;
     
     public StackPanel? ButtonsPanel;
     public Button? ConfirmButton;
@@ -115,6 +204,7 @@ public class IntRefListCreateModal : Window
     
     public IntRefListCreateModal(IntGridValueRef? @ref = null) 
     {
+        _scope = EngineCore.Instance.Managers.Assets.CreateAssetScope();
         FromRef = @ref;
         if(IsEdit)
         {
@@ -169,6 +259,28 @@ public class IntRefListCreateModal : Window
             Margin = new Thickness(0, 0, 0, 10),
         };
         Body.Children.Add(ColorInput);
+
+        DefaultTilePanel = new StackPanel()
+        {
+            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            Margin = new Thickness(0, 0, 0, 10),
+        };
+        Body.Children.Add(DefaultTilePanel);
+        
+        SelectDefaultTileButton = new Button()
+        {
+            Content = "Select Default Tile",
+        };
+        DefaultTilePanel.Children.Add(SelectDefaultTileButton);
+        
+        DefaultTileImage = new Image()
+        {
+            Width = 32,
+            Height = 32,
+            Margin = new Thickness(10, 0, 0, 0),
+            Source = FromRef != null ? IntGridTilesetHelper.GetIntRefDefaultTileImage(FromRef, _scope)?.UI : UnifiedImage.DefaultUI,
+        };
+        DefaultTilePanel.Children.Add(DefaultTileImage);
         
         ButtonsPanel = new StackPanel()
         {
@@ -203,6 +315,39 @@ public class IntRefListCreateModal : Window
         {
             CancelButton.Click += (_, _) => OnCreateIntRefCancelled?.Invoke();
         }
+
+        if (SelectDefaultTileButton != null)
+        {
+            SelectDefaultTileButton.Click += (_, _) => 
+            {
+                var tileModal = new IntRefSelectDefaultTile();
+                tileModal.OnTileSelected += (tile) =>
+                {
+                    SelectedDefaultTile = tile;
+                    if (tile != null)
+                    {
+                        var tileset = tile.TilesetDef;
+                        var tilesetImage = new UnifiedImage(tileset.ImagePath);
+                        var croppedImage = new UnifiedCroppedImage(
+                            tilesetImage,
+                            new PixelRect(
+                                tile.PositionInTileset.X,
+                                tile.PositionInTileset.Y,
+                                tile.SizeInTileset.Width,
+                                tile.SizeInTileset.Height
+                            )
+                        );
+                        DefaultTileImage!.Source = croppedImage.UI;
+                    }
+                    else
+                    {
+                        DefaultTileImage!.Source = UnifiedImage.DefaultUI;
+                    }
+                    tileModal.Close();
+                };
+                tileModal.ShowDialog((Window?)this.GetVisualRoot()!);
+            };
+        }
     }
 
     [ExposeToPlugin("AutoLayerEditor.IntRefList.CreateModal")]
@@ -220,6 +365,11 @@ public class IntRefListCreateModal : Window
 
         intRef.Name = NameInput.Text;
         intRef.Color = ColorInput?.Color ?? Avalonia.Media.Colors.White;
+        
+        if (SelectedDefaultTile != null)
+        {
+            intRef.DefaultTileData = TileData.FromTileDef(SelectedDefaultTile);
+        }
         
         return intRef;
     }
@@ -1080,6 +1230,9 @@ public class AutoLayerRuleCreateModal : Window
 
 public class IntRefListItemControl : UserControl
 {
+
+    private AssetScope _scope;
+    
     [ExposePropToPlugin("AutoLayerEditor.IntRefList.Item")]
     public IntGridValueRef IntRef { get; }
 
@@ -1090,6 +1243,7 @@ public class IntRefListItemControl : UserControl
     public Icon? IconDisplay;
     public TextBlock? NameText;
     public Border? ColorDisplay;
+    public Image? DefaultTileImage;
     
     public StackPanel? Body;
 
@@ -1102,6 +1256,7 @@ public class IntRefListItemControl : UserControl
     
     public IntRefListItemControl(IntGridValueRef intRef, IntRefContext context)
     {
+        _scope = EngineCore.Instance.Managers.Assets.CreateAssetScope();
         Context = context;
         IntRef = intRef;
         CreateComponents();
@@ -1123,11 +1278,21 @@ public class IntRefListItemControl : UserControl
     {
         ColorDisplay = new Border()
         {
-            Width = 20,
-            Height = 20,
+            Width = 32,
+            Height = 32,
             Background = new Avalonia.Media.SolidColorBrush(IntRef.Color),
             Margin = new Thickness(0, 0, 10, 0),
         };
+        
+        DefaultTileImage = new Image()
+        {
+            Width = 30,
+            Height = 30,
+            Margin = new Thickness(2),
+            Source = IntGridTilesetHelper.GetIntRefDefaultTileImage(IntRef, _scope)?.UI,
+        };
+        RenderOptions.SetBitmapInterpolationMode(DefaultTileImage, BitmapInterpolationMode.None);
+        ColorDisplay.Child = DefaultTileImage;
 
         IconDisplay = new Icon()
         {
@@ -1504,6 +1669,13 @@ public class IntRefListControl : UserControl
             {
                 selectedTileset = EngineCore.Instance.Managers.Assets.CreateAsset<IntGridTileset>();
             }
+
+            if (Context.IntRefs.FirstOrDefault()?.DefaultTileData.TilesetId != Ulid.Empty)
+            {
+                selectedTileset.TileHeight = (int)Context.IntRefs.FirstOrDefault()?.DefaultTileData.TileSize.X;
+                selectedTileset.TileWidth = (int)Context.IntRefs.FirstOrDefault()?.DefaultTileData.TileSize.Y;
+            }
+
             selectedTileset.Rules = Context.RulesByIntRefValue.Values.SelectMany(r => r).ToList();
             selectedTileset.IntRefs = Context.IntRefs.ToList();
             EngineCore.Instance.Managers.Assets.GetLoadedPacks()[0].AddOrUpdateAsset(selectedTileset);
@@ -1577,6 +1749,7 @@ public class IntRefListControl : UserControl
     {
         Context.IntRefs.Clear();
         Context.RulesByIntRefValue.Clear();
+        selectedTileset = tileset;
         
         foreach (var intRef in tileset.IntRefs)
         {

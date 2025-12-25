@@ -4,6 +4,7 @@ using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using RPGCreator.Core.Serializer;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.Core.Types.Map.AutoLayer;
 
 namespace RPGCreator.Core.Types.Map;
 
@@ -135,4 +136,7 @@ public partial class IntGridValueRef : ObservableObject
     
     [ObservableProperty] 
     private string _iconPath;
+    
+    [ObservableProperty]
+    private TileData _defaultTileData;
 }

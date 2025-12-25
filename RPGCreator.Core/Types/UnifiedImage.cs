@@ -152,6 +152,11 @@ public class UnifiedImage : IDisposable
         _avaloniaImageCache?.Dispose();
         _monoGameTexture?.Dispose();
     }
+    
+    public UnifiedCroppedImage GetCroppedImage(PixelRect rect)
+    {
+        return new UnifiedCroppedImage(this, rect);
+    }
 
     public static implicit operator Texture2D(UnifiedImage unifiedImage)
     {

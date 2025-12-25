@@ -406,14 +406,28 @@ namespace RPGCreator.UI.Content.Editor
 
             game._events.RTPDraw += (s, e) =>
             {
-                // Update the game "window" position and size based on the MonoGameScreen's position and size.
-                var position = (MonoGameScreen.TransformToVisual(_Host)?.Transform(new Avalonia.Point(0, 0))).GetValueOrDefault();
+                var visualPosition = (MonoGameScreen.TransformToVisual(_Host)?.Transform(new Avalonia.Point(0, 0))).GetValueOrDefault();
+    
+                int newWidth = (int)MonoGameScreen.Bounds.Width;
+                int newHeight = (int)MonoGameScreen.Bounds.Height;
+                var newPos = new Microsoft.Xna.Framework.Point(
+                    (int)(_Host.Position.X + 8 + 300), 
+                    (int)(visualPosition.Y + _Host.Position.Y + 1 + _menuBar.Bounds.Height)
+                );
 
-                game.GraphicsDevice.PresentationParameters.BackBufferWidth = (int)MonoGameScreen.Bounds.Width;
-                game.GraphicsDevice.PresentationParameters.BackBufferHeight = (int)MonoGameScreen.Bounds.Height;
-                game._graphics.ApplyChanges();
+                if (game.GraphicsDevice.PresentationParameters.BackBufferWidth != newWidth || 
+                    game.GraphicsDevice.PresentationParameters.BackBufferHeight != newHeight)
+                {
+                    game.GraphicsDevice.PresentationParameters.BackBufferWidth = newWidth;
+                    game.GraphicsDevice.PresentationParameters.BackBufferHeight = newHeight;
+                    game._graphics.ApplyChanges();
+                }
 
-                game.Window.Position = new Microsoft.Xna.Framework.Point((int)(_Host.Position.X + 8 + 300), (int)(position.Y + _Host.Position.Y + 1 + _menuBar.Bounds.Height));
+                if (game.Window.Position != newPos)
+                {
+                    game.Window.Position = newPos;
+                }
+                
             };
 
         }

@@ -13,10 +13,18 @@ public class TilesetExplorer : UserControl
 {
     
     private int _baseSelectedIndex = -1;
+
+    public enum TilesetType
+    {
+        All,
+        AutotileOnly,
+        NonAutotileOnly
+    }
     
     public event Action<ITileDef?>? TileSelected;
     public event Action<int>? TilesetChanged;
     
+    private TilesetType _type;
     private Size _canvasSize = new Size(256, 256);
     
     private MoveableCanvas _canvas;
@@ -26,9 +34,10 @@ public class TilesetExplorer : UserControl
     private ComboBox _setSelector;
     private AssetScope _scope;
 
-    public TilesetExplorer(AssetScope scope, Panel? parentBody = null, Size? canvasSize = null, int baseSelectedIndex = -1)
+    public TilesetExplorer(AssetScope scope, Panel? parentBody = null, Size? canvasSize = null, int baseSelectedIndex = -1, TilesetType tilesetType = TilesetType.All)
     {
         _scope = scope ?? throw new ArgumentNullException(nameof(scope), "Asset scope cannot be null.");
+        _type = tilesetType;
         if(parentBody == null)
             _body = new StackPanel
             {
@@ -98,13 +107,13 @@ public class TilesetExplorer : UserControl
             e.Handled = true;
             
             var position = e.GetPosition(_canvas.CanvasBody);
-            Log.Debug("[TilingPanel] Canvas clicked at position: {0}", position);
+            Log.Debug("[TilesetExplorer] Canvas clicked at position: {0}", position);
             var cellSize = _canvas.GridCellSize;
             
             double alignedX = Math.Floor((position.X - (_canvas.CurrentElementsPosition.X % cellSize.Width)) / cellSize.Width) * cellSize.Width + (_canvas.CurrentElementsPosition.X % cellSize.Width);
             double alignedY = Math.Floor((position.Y - _canvas.CurrentElementsPosition.Y % cellSize.Height) / cellSize.Height) * cellSize.Height + (_canvas.CurrentElementsPosition.Y % cellSize.Height);
             
-            Log.Debug("[TilingPanel] Aligned position: {0}, {1}", alignedX, alignedY);
+            Log.Debug("[TilesetExplorer] Aligned position: {0}, {1}", alignedX, alignedY);
             Canvas.SetLeft(_selectionCursor, alignedX);
             Canvas.SetTop(_selectionCursor, alignedY);
             _canvas.UpdateOrigin(_selectionCursor);
@@ -120,7 +129,7 @@ public class TilesetExplorer : UserControl
                 );
                 
                 tileToPaint = def.GetTileAt(tilePositionInTileset.X, tilePositionInTileset.Y);
-                Log.Debug("[TilingPanel] Created tile definition at position {0} in tileset {1}", tilePositionInTileset, def.Name);
+                Log.Debug("[TilesetExplorer] Created tile definition at position {0} in tileset {1}", tilePositionInTileset, def.Name);
                 
                 TileSelected?.Invoke(tileToPaint);
             }
@@ -138,6 +147,12 @@ public class TilesetExplorer : UserControl
         foreach (var result in searchResults)
         {
             var def = _scope.Load<ITilesetDef>(result.AssetId);
+            
+            if (_type == TilesetType.AutotileOnly && def is TilesetDef)
+                continue;
+            if (_type == TilesetType.NonAutotileOnly && def is not TilesetDef)
+                continue;
+            
             AddTilesetOption(def);
             Log.Debug("[TilingPanel] Added tileset option from search: {0}", def.Name);
         }
