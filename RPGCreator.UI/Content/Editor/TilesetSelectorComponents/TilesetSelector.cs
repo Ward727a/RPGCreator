@@ -35,8 +35,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RPGCreator.Core.Managers.AssetsManager.Registries;
-using RPGCreator.Core.Types.Assets.Tilesets;
-using RPGCreator.Core.Types.Assets.Tilesets.IntGridTileset;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using Serilog;
 
 namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents

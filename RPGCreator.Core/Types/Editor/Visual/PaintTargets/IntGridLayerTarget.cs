@@ -1,7 +1,7 @@
-using RPGCreator.Core.Types.Assets.Tilesets.IntGridTileset;
 using RPGCreator.Core.Types.Editor.Interfaces;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 
 namespace RPGCreator.Core.Types.Editor.Visual.PaintTargets;
 

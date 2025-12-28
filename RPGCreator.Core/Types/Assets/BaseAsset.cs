@@ -30,6 +30,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK.Types.Internals;
 using static RPGCreator.Core.Types.Assets.AssetCategoryAttribute;
 using static RPGCreator.Core.Types.Assets.BaseAsset;
 

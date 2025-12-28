@@ -12,28 +12,26 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.VisualTree;
 using Projektanker.Icons.Avalonia;
-using RPGCreator.Core;
-using RPGCreator.Core.Common.Helpers;
 using RPGCreator.Core.Contexts;
-using RPGCreator.Core.Managers.AssetsManager;
-using RPGCreator.Core.Managers.CommandManager;
 using RPGCreator.Core.ModuleSDK.Attributes;
-using RPGCreator.Core.ModuleSDK.UIModule;
-using RPGCreator.Core.Types;
-using RPGCreator.Core.Types.Assets.Tilesets;
-using RPGCreator.Core.Types.Assets.Tilesets.IntGridTileset;
 using RPGCreator.Core.Types.Map;
-using RPGCreator.Core.Types.Map.AutoLayer;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
+using RPGCreator.SDK.Commands;
+using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Modules.UIModule;
+using RPGCreator.SDK.Types.Collections;
+using RPGCreator.SDK.Types.Records;
+using RPGCreator.UI.Common;
 using RPGCreator.UI.Common.CustomBrush;
 using RPGCreator.UI.Common.TilesetsCommonComponents;
-using RPGCreator.UI.Content.Editor.LeftPanel.TilingPanel;
-using RPGCreator.UI.Content.Editor.TilesetSelectorComponents;
-using Semi.Avalonia;
-using Serilog;
 using Ursa.Controls;
 using Notification = Ursa.Controls.Notification;
-using Size = RPGCreator.Core.Types.Internal.Size;
 using WindowNotificationManager = Ursa.Controls.WindowNotificationManager;
+using RPGCreator.UI.Extensions;
+using Size = System.Drawing.Size;
 
 // ReSharper disable MemberCanBePrivate.Global
 
@@ -100,7 +98,7 @@ public class IntRefListCreateModal : Window
 
     public class IntRefSelectDefaultTile : Window
     {
-        private AssetScope _scope;
+        private IAssetScope _scope;
         private ITileDef? _selectedTile = null;
         
         public Action<ITileDef?>? OnTileSelected;
@@ -113,7 +111,7 @@ public class IntRefListCreateModal : Window
         public IntRefSelectDefaultTile()
         {
             
-            _scope = EngineCore.Instance.Managers.Assets.CreateAssetScope();
+            _scope = EngineServices.AssetsManager.CreateAssetScope();
             
             Title = "Select Default Tile";
             SizeToContent = SizeToContent.WidthAndHeight;
@@ -179,7 +177,7 @@ public class IntRefListCreateModal : Window
         }
     }
     
-    private readonly AssetScope _scope;
+    private readonly IAssetScope _scope;
     
     [ExposeEventToPlugin("AutoLayerEditor.IntRefList.CreateModal")]
     public event Action? OnCreateIntRefConfirmed;
@@ -204,7 +202,7 @@ public class IntRefListCreateModal : Window
     
     public IntRefListCreateModal(IntGridValueRef? @ref = null) 
     {
-        _scope = EngineCore.Instance.Managers.Assets.CreateAssetScope();
+        _scope = EngineServices.AssetsManager.CreateAssetScope();
         FromRef = @ref;
         if(IsEdit)
         {
@@ -253,7 +251,7 @@ public class IntRefListCreateModal : Window
         
         ColorInput = new ColorPicker()
         {
-            Color = FromRef?.Color ?? Avalonia.Media.Colors.White,
+            Color = FromRef?.Color.ToAvalonia() ?? Avalonia.Media.Colors.White,
             ColorModel = ColorModel.Rgba,
             Palette = new MaterialHalfColorPalette(),
             Margin = new Thickness(0, 0, 0, 10),
@@ -278,9 +276,43 @@ public class IntRefListCreateModal : Window
             Width = 32,
             Height = 32,
             Margin = new Thickness(10, 0, 0, 0),
-            Source = FromRef != null ? IntGridTilesetHelper.GetIntRefDefaultTileImage(FromRef, _scope)?.UI : UnifiedImage.DefaultUI,
         };
         DefaultTilePanel.Children.Add(DefaultTileImage);
+        
+        if(FromRef == null || FromRef.DefaultTileData.TilesetId == Ulid.Empty)
+        {
+            DefaultTileImage.Source = EditorAssets.FallbackImage;
+        }
+        else
+        {
+            // Dans ton composant UI
+            var tileset = _scope.Load<ITilesetDef>(FromRef.DefaultTileData.TilesetId);
+
+            if (tileset != null)
+            {
+                // 1. On récupère la bitmap brute via le service (qui est déjà dans ton UI/Core)
+                var bitmap = EngineServices.ResourcesService.Load<Bitmap>(tileset.ImagePath);
+
+                if (bitmap != null)
+                {
+                    // 2. On utilise les données de TileData pour créer le rectangle de découpe
+                    var rect = new PixelRect(
+                        FromRef.DefaultTileData.TilePosition.X,
+                        FromRef.DefaultTileData.TilePosition.Y,
+                        tileset.TileWidth,
+                        tileset.TileHeight
+                    );
+
+                    // 3. On applique la source (Avalonia gère le découpage via CroppedBitmap)
+                    DefaultTileImage.Source = new CroppedBitmap(bitmap, rect);
+                }
+                else
+                {
+                    // Fallback image si le chargement échoue
+                    DefaultTileImage.Source = EditorAssets.FallbackImage;
+                }
+            }
+        }
         
         ButtonsPanel = new StackPanel()
         {
@@ -327,8 +359,8 @@ public class IntRefListCreateModal : Window
                     if (tile != null)
                     {
                         var tileset = tile.TilesetDef;
-                        var tilesetImage = new UnifiedImage(tileset.ImagePath);
-                        var croppedImage = new UnifiedCroppedImage(
+                        var tilesetImage = EngineServices.ResourcesService.Load<Bitmap>(tileset.ImagePath);
+                        var croppedImage = new CroppedBitmap(
                             tilesetImage,
                             new PixelRect(
                                 tile.PositionInTileset.X,
@@ -337,11 +369,11 @@ public class IntRefListCreateModal : Window
                                 tile.SizeInTileset.Height
                             )
                         );
-                        DefaultTileImage!.Source = croppedImage.UI;
+                        DefaultTileImage!.Source = croppedImage;
                     }
                     else
                     {
-                        DefaultTileImage!.Source = UnifiedImage.DefaultUI;
+                        DefaultTileImage!.Source = EditorAssets.FallbackImage;
                     }
                     tileModal.Close();
                 };
@@ -364,7 +396,7 @@ public class IntRefListCreateModal : Window
             intRef = new IntGridValueRef();
 
         intRef.Name = NameInput.Text;
-        intRef.Color = ColorInput?.Color ?? Avalonia.Media.Colors.White;
+        intRef.Color.FromAvalonia(ColorInput?.Color ?? Avalonia.Media.Colors.White);
         
         if (SelectedDefaultTile != null)
         {
@@ -378,7 +410,7 @@ public class IntRefListCreateModal : Window
 public class AutoLayerRuleSelectOutputTileModal : Window
 {
     
-    public event Action<UnifiedCroppedImage, ITileDef>? OnCreateOutputTileConfirmed;
+    public event Action<CroppedBitmap, ITileDef>? OnCreateOutputTileConfirmed;
     public event Action<int>? OnSelectTilesetChanged; 
     
     private ITileDef? _selectedTile = null;
@@ -389,7 +421,7 @@ public class AutoLayerRuleSelectOutputTileModal : Window
     public Button? ConfirmButton;
     public Button? CancelButton;
 
-    private AssetScope _scope = EngineCore.Instance.Managers.Assets.CreateAssetScope();
+    private IAssetScope _scope = EngineServices.AssetsManager.CreateAssetScope();
     
     public AutoLayerRuleSelectOutputTileModal(int baseTilesetIndex = -1)
     {
@@ -451,13 +483,16 @@ public class AutoLayerRuleSelectOutputTileModal : Window
         {
             if (_selectedTile == null) return;
             
-            UnifiedImage? tilesetImage = null;
-            UnifiedCroppedImage? outputTile = null;
+            Bitmap? tilesetImage = null;
+            CroppedBitmap? outputTile = null;
 
             var tileset = _selectedTile.TilesetDef;
-            tilesetImage = new UnifiedImage(tileset.ImagePath);
+            tilesetImage = EngineServices.ResourcesService.Load<Bitmap>(tileset.ImagePath);
+            
+            if (tilesetImage == null)
+                return;
                 
-            outputTile = new UnifiedCroppedImage(
+            outputTile = new CroppedBitmap(
                 tilesetImage,
                 new PixelRect(
                     _selectedTile.PositionInTileset.X,
@@ -509,7 +544,7 @@ public class AutoLayerRuleCreateModal : Window
     {
         Border _tileBorder;
         TileData _tileData;
-        UnifiedCroppedImage _outputTile;
+        CroppedBitmap _outputTile;
         ITileDef _selectedTile;
         
         AutoLayerRule _rule;
@@ -518,7 +553,7 @@ public class AutoLayerRuleCreateModal : Window
         Action<TileData, Border>? _requestRemoveTile;
         
         public AddTileCmd(
-            UnifiedCroppedImage outputTile, 
+            CroppedBitmap outputTile, 
             ITileDef selectedTile,
             AutoLayerRuleCreateModal parent,
             Action<TileData, Border> requestRemoveTile)
@@ -547,7 +582,7 @@ public class AutoLayerRuleCreateModal : Window
                 
             var tileImage = new Image()
             {
-                Source = _outputTile.UI,
+                Source = _outputTile,
                 Width = 56,
                 Height = 56,
             };
@@ -922,7 +957,7 @@ public class AutoLayerRuleCreateModal : Window
             var button = new Border()
             {
                 Child = text,
-                Background = new SolidColorBrush(intRef.Color),
+                Background = new SolidColorBrush(intRef.Color.ToAvalonia()),
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Stretch,
                 Cursor = new Cursor(StandardCursorType.Hand)
@@ -1104,7 +1139,7 @@ public class AutoLayerRuleCreateModal : Window
                     var centerBorder = new Border()
                     {
                         Child = text,
-                        Background = new SolidColorBrush(FromRef.Color),
+                        Background = new SolidColorBrush(FromRef.Color.ToAvalonia()),
                         Margin = new Thickness(2),
                         Cursor = new Cursor(StandardCursorType.No)
                     };
@@ -1112,7 +1147,7 @@ public class AutoLayerRuleCreateModal : Window
                     Grid.SetRow(centerBorder, (i) * 2 +1);
                     Grid.SetColumn(centerBorder, (j) * 2 +1);
                     
-                    text.Foreground = new SolidColorBrush(FromRef.Color.GetAutoContrastingColor());
+                    text.Foreground = new SolidColorBrush(FromRef.Color.ToAvalonia().GetAutoContrastingColor());
                     SetPattern(index, FromRef.Value, PatternCondition.MustBe, true);
                     index++;
                     continue;
@@ -1138,7 +1173,7 @@ public class AutoLayerRuleCreateModal : Window
                 {
                     if (SelectedRef != null)
                     {
-                        border.Background = new SolidColorBrush(SelectedRef.Color);
+                        border.Background = new SolidColorBrush(SelectedRef.Color.ToAvalonia());
                         var icon = new Icon()
                         {
                             Value = leftClick ? "mdi-check" : "mdi-close",
@@ -1148,7 +1183,7 @@ public class AutoLayerRuleCreateModal : Window
                             VerticalAlignment = VerticalAlignment.Center,
                         };
                         border.Child = icon;
-                        icon.Foreground = new SolidColorBrush(SelectedRef.Color.GetAutoContrastingColor());
+                        icon.Foreground = new SolidColorBrush(SelectedRef.Color.ToAvalonia().GetAutoContrastingColor());
                     }
                     else
                     {
@@ -1231,7 +1266,7 @@ public class AutoLayerRuleCreateModal : Window
 public class IntRefListItemControl : UserControl
 {
 
-    private AssetScope _scope;
+    private IAssetScope _scope;
     
     [ExposePropToPlugin("AutoLayerEditor.IntRefList.Item")]
     public IntGridValueRef IntRef { get; }
@@ -1256,14 +1291,13 @@ public class IntRefListItemControl : UserControl
     
     public IntRefListItemControl(IntGridValueRef intRef, IntRefContext context)
     {
-        _scope = EngineCore.Instance.Managers.Assets.CreateAssetScope();
+        _scope = EngineServices.AssetsManager.CreateAssetScope();
         Context = context;
         IntRef = intRef;
         CreateComponents();
         RegisterEvents();
         Content = Expander;
         RefreshDisplay();
-        IntRef.PropertyChanged += (_, _) => RefreshDisplay();
         
         AutoLayerEditorIntRefListItemContext.Config config = new()
             {
@@ -1280,7 +1314,7 @@ public class IntRefListItemControl : UserControl
         {
             Width = 32,
             Height = 32,
-            Background = new Avalonia.Media.SolidColorBrush(IntRef.Color),
+            Background = new Avalonia.Media.SolidColorBrush(IntRef.Color.ToAvalonia()),
             Margin = new Thickness(0, 0, 10, 0),
         };
         
@@ -1289,10 +1323,44 @@ public class IntRefListItemControl : UserControl
             Width = 30,
             Height = 30,
             Margin = new Thickness(2),
-            Source = IntGridTilesetHelper.GetIntRefDefaultTileImage(IntRef, _scope)?.UI,
         };
         RenderOptions.SetBitmapInterpolationMode(DefaultTileImage, BitmapInterpolationMode.None);
         ColorDisplay.Child = DefaultTileImage;
+        
+        if(IntRef.DefaultTileData.TilesetId == Ulid.Empty)
+        {
+            DefaultTileImage.Source = EditorAssets.FallbackImage;
+        }
+        else
+        {
+            // Dans ton composant UI
+            var tileset = _scope.Load<ITilesetDef>(IntRef.DefaultTileData.TilesetId);
+
+            if (tileset != null)
+            {
+                // 1. On récupère la bitmap brute via le service (qui est déjà dans ton UI/Core)
+                var bitmap = EngineServices.ResourcesService.Load<Bitmap>(tileset.ImagePath);
+
+                if (bitmap != null)
+                {
+                    // 2. On utilise les données de TileData pour créer le rectangle de découpe
+                    var rect = new PixelRect(
+                        IntRef.DefaultTileData.TilePosition.X,
+                        IntRef.DefaultTileData.TilePosition.Y,
+                        tileset.TileWidth,
+                        tileset.TileHeight
+                    );
+
+                    // 3. On applique la source (Avalonia gère le découpage via CroppedBitmap)
+                    DefaultTileImage.Source = new CroppedBitmap(bitmap, rect);
+                }
+                else
+                {
+                    // Fallback image si le chargement échoue
+                    DefaultTileImage.Source = EditorAssets.FallbackImage;
+                }
+            }
+        }
 
         IconDisplay = new Icon()
         {
@@ -1408,7 +1476,7 @@ public class IntRefListItemControl : UserControl
             
             ruleModal.OnCreateRuleConfirmed += (rule) =>
             {
-                Log.Debug("[IntRefListItemControl] Created Rule for IntRef {IntRefName} : {@Rule}", IntRef.Name, rule);
+                Logger.Debug("[IntRefListItemControl] Created Rule for IntRef {IntRefName} : {@Rule}", IntRef.Name, rule);
                 
                 if(!Context.RulesByIntRefValue.TryGetValue(IntRef.Value, out List<AutoLayerRule>? value))
                 {
@@ -1430,7 +1498,7 @@ public class IntRefListItemControl : UserControl
     {
         if (ColorDisplay != null)
         {
-            ColorDisplay.Background = new Avalonia.Media.SolidColorBrush(IntRef.Color);
+            ColorDisplay.Background = new Avalonia.Media.SolidColorBrush(IntRef.Color.ToAvalonia());
         }
         
         if (NameText != null)
@@ -1539,7 +1607,8 @@ public class IntRefRuleItemControl : UserControl
             {
                 Width = 16,
                 Height = 16,
-                Background = new SolidColorBrush(Context.IntRefs.FirstOrDefault(r => r.Value == constraint.TargetValue)?.Color ?? Colors.Transparent),
+                Background = new SolidColorBrush(
+                    Context.IntRefs.FirstOrDefault(r => r.Value == constraint.TargetValue)?.Color.ToAvalonia() ?? Colors.Transparent),
                 Child = new Icon()
                 {
                     Value = constraint.Condition == PatternCondition.MustBe ? "mdi-check" : "mdi-close",
@@ -1653,7 +1722,7 @@ public class IntRefListControl : UserControl
                 if (intRef != null)
                 {
                     AddIntRef(intRef);
-                    Log.Debug("[IntRefListControl] Created IntRef: {IntRefName}", intRef.Name);
+                    Logger.Debug("[IntRefListControl] Created IntRef: {IntRefName}", intRef.Name);
                 }
 
                 createModal.Close();
@@ -1667,7 +1736,7 @@ public class IntRefListControl : UserControl
             OnCreateTileset?.Invoke(Context);
             if(selectedTileset == null)
             {
-                selectedTileset = EngineCore.Instance.Managers.Assets.CreateAsset<IntGridTileset>();
+                selectedTileset = EngineServices.AssetsManager.CreateAsset<IntGridTileset>();
             }
 
             if (Context.IntRefs.FirstOrDefault()?.DefaultTileData.TilesetId != Ulid.Empty)
@@ -1678,7 +1747,7 @@ public class IntRefListControl : UserControl
 
             selectedTileset.Rules = Context.RulesByIntRefValue.Values.SelectMany(r => r).ToList();
             selectedTileset.IntRefs = Context.IntRefs.ToList();
-            EngineCore.Instance.Managers.Assets.GetLoadedPacks()[0].AddOrUpdateAsset(selectedTileset);
+            EngineServices.AssetsManager.GetLoadedPacks()[0].AddOrUpdateAsset(selectedTileset);
         };
         
         AddedIntRef += (_) => RefreshList();
@@ -1732,10 +1801,7 @@ public class IntRefListControl : UserControl
         intRef.Value = _nextIntRefId++;
         Context.IntRefs.Add(intRef);
         AddedIntRef?.Invoke(intRef);
-        intRef.PropertyChanged += (_, _) =>
-        {
-            RefreshList();
-        };
+        
     }
     
     [ExposeToPlugin("AutoLayerEditor.IntRefList")]

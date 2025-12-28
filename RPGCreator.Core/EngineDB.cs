@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using LiteDB;
+using RPGCreator.SDK.Types.Interfaces;
 using Serilog;
 
 namespace RPGCreator.Core;
@@ -30,7 +31,7 @@ public class EngineDB
         public Dictionary<string, string> MetaDatas { get; set; } = new Dictionary<string, string>();
     }
 
-    public class AssetIndexRecord()
+    public class AssetIndexRecord() : IAssetIndexRecord
     {
         [BsonId]
         public Ulid Id { get; set; }
@@ -433,7 +434,7 @@ public class EngineDB
 
         try
         {
-            existingHash = new string(File.ReadAllText(hashFilePath).Where(c => !char.IsControl(c)).ToArray());
+            existingHash = new string(File.ReadAllText(hashFilePath).Where(c => !char.IsControl(c)).ToArray()).ToLowerInvariant();
 
             // Compute current hash of database file
             using (var stream = File.OpenRead(dbFilePath))

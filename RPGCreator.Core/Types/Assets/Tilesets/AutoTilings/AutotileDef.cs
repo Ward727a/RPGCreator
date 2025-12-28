@@ -1,6 +1,10 @@
 using Microsoft.Xna.Framework;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types;
 using Internal_Point = RPGCreator.Core.Types.Internal.Point;
 using Point = RPGCreator.Core.Types.Internal.Point;
 
@@ -167,7 +171,7 @@ public class AutotileDef : ITileDef, ISerializable, IDeserializable
             .AddValue(nameof(Tags), Tags);
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         ArgumentNullException.ThrowIfNull(info);
 

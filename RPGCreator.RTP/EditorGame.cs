@@ -7,7 +7,6 @@ using MonoGame.Extended.VectorDraw;
 using RPGCreator.Core;
 using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Types.Assets;
-using RPGCreator.Core.Types.Map;
 using RPGCreator.Core.Types.RTP;
 using RPGCreator.RTP.Editor.Components;
 using System;
@@ -15,16 +14,21 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Avalonia.Input;
+using RPGCreator.Core.ECS;
+using RPGCreator.Core.ECS.Components.Display;
+using RPGCreator.Core.ECS.Components.Display.Animation;
+using RPGCreator.Core.ECS.Systems;
 using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Runtimes;
 using RPGCreator.Core.Runtimes.ECS;
 using RPGCreator.Core.Runtimes.ECS.Components.Actor;
 using RPGCreator.Core.Runtimes.ECS.Components.Display;
-using RPGCreator.Core.Runtimes.ECS.Components.Display.Animation;
-using RPGCreator.Core.Runtimes.ECS.Systems;
 using RPGCreator.Core.Types;
-using RPGCreator.Core.Types.Assets.Animations;
 using RPGCreator.Core.Types.Assets.Characters;
+using RPGCreator.SDK.Assets.Definitions.Animations;
+using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.ECS.Components;
+using RPGCreator.SDK.ECS.Entities;
 using Serilog;
 using Size = RPGCreator.Core.Types.Internal.Size;
 
@@ -137,9 +141,9 @@ namespace RPGCreator.MonoGame
             _mapEditing = new(_spriteBatch);
 
             _ecsWorld = new();
-            _ecsWorld.AddSystem(new SpriteRenderSystem(_ecsWorld._componentManager, GraphicsDevice));
-            _ecsWorld.AddSystem(new AnimationSystem(_ecsWorld._componentManager, GraphicsDevice));
-            _ecsWorld.AddSystem(new MovementSystem(_ecsWorld._componentManager));
+            _ecsWorld.AddSystem(new SpriteRenderSystem(_ecsWorld.ComponentManager, GraphicsDevice));
+            _ecsWorld.AddSystem(new AnimationSystem(_ecsWorld.ComponentManager, GraphicsDevice));
+            _ecsWorld.AddSystem(new MovementSystem(_ecsWorld.ComponentManager));
 
             // Test loop to create multiple entities with sprite and transform components and test the sprite rendering system.
             // Very basic test - Result for now : 10k entities with simple sprites renders, no movement at ~60 FPS => 3-4ms per frame.

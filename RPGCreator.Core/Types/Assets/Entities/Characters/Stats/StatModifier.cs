@@ -1,3 +1,6 @@
+using RPGCreator.SDK;
+using RPGCreator.SDK.Serializer;
+
 namespace RPGCreator.Core.Types.Assets.Characters.Stats;
 
 public class StatModifier : IStatModifier
@@ -20,7 +23,7 @@ public class StatModifier : IStatModifier
         return info;
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         ArgumentNullException.ThrowIfNull(info);
         

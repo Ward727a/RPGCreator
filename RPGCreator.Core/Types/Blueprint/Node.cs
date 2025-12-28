@@ -1,5 +1,7 @@
 using RPGCreator.Core.Parser.Graph;
 using RPGCreator.Core.Types.Blueprint.Nodes;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Serializer;
 using Serilog;
 
 namespace RPGCreator.Core.Types.Blueprint;
@@ -144,7 +146,7 @@ public abstract class Node : ISerializable, IDeserializable
         return info;
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue(nameof(Id), out var id, string.Empty);
         Id = id;

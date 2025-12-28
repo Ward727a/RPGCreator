@@ -1,5 +1,11 @@
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types;
+using RPGCreator.SDK.Types.Interfaces;
+using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.Core.Types.Assets.Tilesets;
 
@@ -110,7 +116,7 @@ public class AutotileGroupDef : IHasUniqueId, ISerializable, IDeserializable
         return info;
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         if(info == null) 
             throw new ArgumentNullException(nameof(info), "Deserialization info cannot be null.");

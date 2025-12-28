@@ -1,5 +1,9 @@
 using Microsoft.Xna.Framework;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types;
 using Internal_Point = RPGCreator.Core.Types.Internal.Point;
 
 namespace RPGCreator.Core.Types.Assets.Tilesets;
@@ -62,7 +66,7 @@ public class TileDefinition : ITileDef
         return info;
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         if (info == null)
         {

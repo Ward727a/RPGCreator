@@ -19,7 +19,7 @@ public class SE_GetTargets : Node
             AllowManualInput = false,
             Kind = PortKind.Object,
             Type = EPortType.Array,
-            ObjectInternalType = typeof(Runtimes.ECS.Entity)
+            ObjectInternalType = typeof(SDK.ECS.Entities.Entity)
         });
     }
     

@@ -31,7 +31,7 @@
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.3" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RPGCreator.Core\RPGCreator.Core.csproj" />
+    <ProjectReference Include="..\RPGCreator.SDK\RPGCreator.SDK.csproj" />
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
     <Message Text="Restoring dotnet tools" Importance="High" />

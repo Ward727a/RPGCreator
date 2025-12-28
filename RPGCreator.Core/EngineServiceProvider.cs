@@ -4,7 +4,7 @@ using IServiceProvider = RPGCreator.Core.Runtimes.Services.Core.IServiceProvider
 
 namespace RPGCreator.Core;
 
-public class EngineServiceProvider : IServiceProvider
+internal class EngineServiceProvider : IServiceProvider
 {
     private readonly Dictionary<System.Type, IRuntimeService> _services;
 

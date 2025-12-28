@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using SkiaSharp;
 using Point = RPGCreator.Core.Types.Internal.Point;
 

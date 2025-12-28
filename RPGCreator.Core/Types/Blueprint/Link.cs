@@ -1,3 +1,6 @@
+using RPGCreator.SDK;
+using RPGCreator.SDK.Serializer;
+
 namespace RPGCreator.Core.Types.Blueprint;
 
 public sealed class Link : ISerializable, IDeserializable
@@ -31,7 +34,7 @@ public sealed class Link : ISerializable, IDeserializable
         return info;
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue(nameof(FromNodeId), out var fromNodeId, string.Empty);
         FromNodeId = fromNodeId;

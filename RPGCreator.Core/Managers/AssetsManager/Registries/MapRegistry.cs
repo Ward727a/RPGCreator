@@ -1,5 +1,6 @@
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.SDK.Assets.Definitions.Maps;
 
 namespace RPGCreator.Core.Managers.AssetsManager.Registries;
 

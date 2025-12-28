@@ -26,9 +26,20 @@ using RPGCreator.Core.Configs;
 using RPGCreator.Core.Events;
 using RPGCreator.Core.Events.EventArgs;
 using RPGCreator.Core.Parser.Graph;
+using RPGCreator.Core.Resources;
 using RPGCreator.Core.Scheduler;
+using RPGCreator.Core.Types.Assets;
 using RPGCreator.Core.Types.Assets.BaseAssetsPack;
+using RPGCreator.Core.Types.Assets.Characters;
+using RPGCreator.Core.Types.Assets.Characters.Stats;
+using RPGCreator.Core.Types.Assets.Entities.Characters.Stats;
+using RPGCreator.Core.Types.Assets.Items;
+using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Blueprint;
+using RPGCreator.Core.Types.Map;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets;
+using RPGCreator.SDK.Assets.Definitions.Maps;
 using Serilog;
 
 namespace RPGCreator.Core
@@ -52,7 +63,7 @@ namespace RPGCreator.Core
         
         // Suppressing this error, this should never happen. And if it happen, then it should cause a fatal crash!
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-        static public EngineCore Instance { get; private set; }
+        static internal EngineCore Instance { get; private set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
         static public bool HasInstance => Instance != null;
@@ -61,17 +72,15 @@ namespace RPGCreator.Core
         static public bool IsUIReady { get; private set; } = false;
         static public bool IsRTPReady { get; private set; } = false;
 
-        public EngineScheduler Scheduler { get; private set; }
-        public EngineConfigs Configs { get; private set; }
-        public EngineData Data { get; private set; }
-        public EngineEvents Events { get; private set; }
-        public EngineServiceProvider ServiceProvider { get; private set; }
-        public EngineManagers Managers { get; private set; }
-        public EngineModules Modules { get; private set; }
-        public EngineSerializer Serializer { get; private set; }
-        public EngineIcons Icons { get; private set; }
-
-        private EngineLogger Logger;
+        internal EngineScheduler Scheduler { get; private set; }
+        internal EngineConfigs Configs { get; private set; }
+        internal EngineData Data { get; private set; }
+        internal EngineEvents Events { get; private set; }
+        internal EngineServiceProvider ServiceProvider { get; private set; }
+        internal EngineManagers Managers { get; private set; }
+        internal EngineModules Modules { get; private set; }
+        internal EngineSerializer Serializer { get; private set; }
+        internal EngineIcons Icons { get; private set; }
 
         public static bool ManagersReady = false;
         public static bool ModulesReady = false;
@@ -88,9 +97,8 @@ namespace RPGCreator.Core
             }
             Instance = this;
 
-            Logger = new EngineLogger();
             Scheduler = new EngineScheduler();
-            Serializer = EngineSerializer.Instance;
+            Serializer = new EngineSerializer();
             Configs = new EngineConfigs();
             Data = new EngineData();
             Events = new EngineEvents();
@@ -101,6 +109,25 @@ namespace RPGCreator.Core
             // In debug mode, we load the engine icons for debug tools (like IconsExplorer).
             Icons = new EngineIcons();
             #endif
+            
+            EngineServices.SerializerService = Serializer;
+            var typeMapping = new AssetsTypeMapping();
+            
+            typeMapping.RegisterMapping(AssetTypeKeys.Character, typeof(CharacterData));
+            typeMapping.RegisterMapping(AssetTypeKeys.Item, typeof(IItemData));
+            typeMapping.RegisterMapping(AssetTypeKeys.Stat, typeof(StatDefinition));
+            typeMapping.RegisterMapping(AssetTypeKeys.Map, typeof(MapDefinition));
+            typeMapping.RegisterMapping(AssetTypeKeys.Tileset, typeof(TilesetDef));
+            typeMapping.RegisterMapping(AssetTypeKeys.AutoTileset, typeof(AutoTilesetDef));
+            
+            EngineServices.AssetTypeRegistry = typeMapping;
+            
+            EngineResourcesService resService = new EngineResourcesService();
+            
+            resService.RegisterLoader<Avalonia.Media.Imaging.Bitmap>(new AvaloniaBitmapLoader());
+            
+            EngineServices.ResourcesService = resService;
+            
             Managers.Init();
             
             Log.Information("Starting scanning for blueprint opcodes handlers...");

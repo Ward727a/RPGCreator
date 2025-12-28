@@ -4,13 +4,15 @@ using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Types;
 using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Types.Collections;
 
 namespace RPGCreator.Core.Common.Helpers;
 
 public static class IntGridTilesetHelper
 {
     
-    public static ITilesetDef? GetIntRefTilesetDef(IntGridValueRef intRef, AssetScope scope)
+    public static ITilesetDef? GetIntRefTilesetDef(IntGridValueRef intRef, IAssetScope scope)
     {
         var tilesetUlid = intRef.DefaultTileData.TilesetId;
 
@@ -22,7 +24,7 @@ public static class IntGridTilesetHelper
         return scope.Load<ITilesetDef>(tilesetUlid);
     }
     
-    private static bool TryGetIntRefTilesetDef(IntGridValueRef intRef, AssetScope scope, [NotNullWhen(true)]out ITilesetDef? tileset)
+    private static bool TryGetIntRefTilesetDef(IntGridValueRef intRef, IAssetScope scope, [NotNullWhen(true)]out ITilesetDef? tileset)
     {
         var tilesetUlid = intRef.DefaultTileData.TilesetId;
 
@@ -36,7 +38,7 @@ public static class IntGridTilesetHelper
         return tileset != null;
     }
     
-    public static UnifiedCroppedImage? GetIntRefDefaultTileImage(IntGridValueRef intRef, AssetScope scope)
+    public static UnifiedCroppedImage? GetIntRefDefaultTileImage(IntGridValueRef intRef, IAssetScope scope)
     {
         if (!TryGetIntRefTilesetDef(intRef, scope, out var tileset))
         {
@@ -60,7 +62,7 @@ public static class IntGridTilesetHelper
         return tilesetImage.GetCroppedImage(rect);
     }
     
-    public static ITileDef? GetIntRefDefaultTileDef(IntGridValueRef intRef, AssetScope scope)
+    public static ITileDef? GetIntRefDefaultTileDef(IntGridValueRef intRef, IAssetScope scope)
     {
         if (!TryGetIntRefTilesetDef(intRef, scope, out var tileset))
         {

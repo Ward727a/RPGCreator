@@ -18,7 +18,7 @@ public class SE_GetCaster : Node
             Name = "Caster",
             AllowManualInput = false,
             Kind = PortKind.Object,
-            ObjectInternalType = typeof(Runtimes.ECS.Entity)
+            ObjectInternalType = typeof(SDK.ECS.Entities.Entity)
         });
     }
     

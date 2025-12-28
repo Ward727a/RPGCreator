@@ -28,10 +28,12 @@ using RPGCreator.Core.Types.Project;
 using System.Collections.ObjectModel;
 using RPGCreator.Core.Types.Assets.BaseAssetsPack;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.Core.Managers.ProjectsManager
 {
-    public class ProjectsManager
+    public class ProjectsManager : IProjectsManager
     {
 
         public readonly ProjectsManagerEvent Events;
@@ -41,59 +43,7 @@ namespace RPGCreator.Core.Managers.ProjectsManager
             Events = new ProjectsManagerEvent();
         }
 
-        public void LoadProject(Ulid projectId)
-        {
-            if (EngineCore.Instance.Data.EditedProject != null)
-            {
-                UnloadProject();
-            }
-
-            var PreArgs = new ProjectsManagerLoadingProjectArgs(projectId);
-
-            Events.OnLoadingProject(PreArgs);
-
-            ProjectsConf projectsConf = ProjectsConf.Instance;
-
-            if (!projectsConf.TryGetProject(projectId, out var project))
-            {
-                Events.OnLoadedProject(PreArgs.ToPost(null).SetError(true, "Project not found"));
-                return;
-            }
-
-            EngineCore.Instance.Data.EditedProject = project;
-            project.Load();
-
-
-
-            Events.OnLoadedProject(PreArgs.ToPost(EngineCore.Instance.Data.EditedProject));
-        }
-
-        public void UnloadProject()
-        {
-
-            var PreArgs = new ProjectsManagerUnloadingProjectArgs();
-
-            Events.OnUnloadingProject(PreArgs);
-
-            if(PreArgs.Cancel)
-                return;
-
-            if (EngineCore.Instance.Data.EditedProject == null)
-            {
-                Events.OnUnloadedProject(PreArgs.ToPost().SetError(true, "No project loaded"));
-                return;
-            }
-            // TODO: Unload the project here
-
-            EngineCore.Instance.Data.EditedProject.Unload();
-            EngineCore.Instance.Data.EditedProject = null;
-
-            Events.OnUnloadedProject(PreArgs.ToPost());
-
-            //EngineCore.Instance.Events.OnEngineUnloadProject(new());
-        }
-
-        public BaseProject? CreateProject(string project_name, string project_path)
+        public IBaseProject? CreateProject(string project_name, string project_path)
         {
             if (string.IsNullOrWhiteSpace(project_name))
             {
@@ -122,9 +72,26 @@ namespace RPGCreator.Core.Managers.ProjectsManager
             return newProject;
         }
 
-        public List<BaseProjectLink> GetProjectsList()
+        public List<IBaseProjectLink> GetAllProjects()
         {
             return ProjectsConf.Instance.ProjectLinks;
+        }
+        
+        public bool TryGetProject(string configPath, out IBaseProject? project)
+        {
+            project = null;
+            if (File.Exists(configPath))
+            {
+                EngineServices.SerializerService.Deserialize<BaseProject>(File.ReadAllText(configPath), out var _projectObject, out System.Type? objectType);
+
+                if (objectType == null)
+                    return false;
+            
+                project = _projectObject;
+        
+                return true;
+            }
+            return false;
         }
 
     }

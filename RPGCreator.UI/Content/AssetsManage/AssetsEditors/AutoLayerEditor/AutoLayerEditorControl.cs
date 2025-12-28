@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
-using RPGCreator.Core.Types.Assets.Tilesets.IntGridTileset;
+using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutoLayerEditor.Components;
 using Ursa.Controls;
 

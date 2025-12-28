@@ -1,5 +1,10 @@
 using RPGCreator.Core.Types.Assets.Actors;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types;
+using RPGCreator.SDK.Types.Interfaces;
+using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.Core.Types.Assets.Items;
 
@@ -13,7 +18,7 @@ public class ConsumableData : IItemData, IHasUniqueId
         throw new NotImplementedException();
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         throw new NotImplementedException();
     }

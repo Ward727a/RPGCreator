@@ -1,5 +1,8 @@
 using RPGCreator.Core.Types.Assets;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Types.Collections;
+using RPGCreator.SDK.Types.Interfaces;
 using Serilog;
 
 namespace RPGCreator.Core.Managers.AssetsManager;
@@ -8,7 +11,7 @@ namespace RPGCreator.Core.Managers.AssetsManager;
 /// A scope for managing the lifecycle of transient assets.
 /// When the scope is disposed, all tracked transient assets are destroyed.
 /// </summary>
-public class AssetScope : IDisposable
+internal class AssetScope : IAssetScope
 {
 
     private readonly AssetsManager _manager;
@@ -26,23 +29,23 @@ public class AssetScope : IDisposable
         _borrowedAssets = new HashSet<Ulid>();
     }
 
-    internal void Track(IAssetDef asset)
+    public void Track(IAssetDef asset)
     {
         _scopes.Add(asset);
     }
-    
-    internal void Untrack(IAssetDef asset)
+
+    public void Untrack(IAssetDef asset)
     {
         _scopes.Remove(asset);
     }
     
-    public void TransferTo(AssetScope targetScope, IAssetDef asset)
+    public void TransferTo(IAssetScope targetScope, IAssetDef asset)
     {
         if (!_scopes.Contains(asset)) return;
         Untrack(asset);
         targetScope.Track(asset);
         
-        Log.Debug("Transferred asset {0} from scope {1} to scope {2}", asset.Urn, Name, targetScope.Name);
+        Logger.Debug("Transferred asset {0} from scope {1} to scope {2}", asset.Urn, Name, targetScope.Name);
     }
     
     public void Dispose()
@@ -60,7 +63,7 @@ public class AssetScope : IDisposable
         }
         _borrowedAssets.Clear();
     }
-    
+
     public T Load<T>(Ulid assetId) where T : class, IAssetDef
     {
         var asset = _manager.RetainAsset(assetId);

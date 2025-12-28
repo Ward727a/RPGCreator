@@ -4,6 +4,9 @@ using Avalonia.Media.Imaging;
 using RPGCreator.Core.Types.Assets;
 using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.Core.Types.Internal.LayerRenderer;
 

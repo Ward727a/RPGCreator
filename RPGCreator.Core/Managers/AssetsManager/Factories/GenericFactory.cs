@@ -1,6 +1,8 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK.Types.Interfaces;
+using RPGCreator.SDK.Types.Internals;
 using Serilog;
 
 namespace RPGCreator.Core.Managers.AssetsManager.Factories;

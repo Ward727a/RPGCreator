@@ -2,6 +2,9 @@ using RPGCreator.Core.Runtimes.ECS;
 using RPGCreator.Core.Runtimes.ECS.Components.Actor;
 using RPGCreator.Core.Types.Assets.Skills;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.ECS.Entities;
+using RPGCreator.SDK.Types;
 using Serilog;
 
 namespace RPGCreator.Core.Runtimes.Contents.SkillEffects;

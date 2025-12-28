@@ -34,7 +34,7 @@ using Avalonia.Collections;
 using RPGCreator.Core.Contexts;
 // using RPGCreator.Core.Contexts;
 using RPGCreator.Core.ModuleSDK.Attributes;
-using RPGCreator.Core.ModuleSDK.UIModule;
+using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutoLayerEditor;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor;
 using RPGCreator.UI.Content.AssetsManage.Components.Skills;

@@ -23,8 +23,11 @@
 // 
 #endregion
 
-using RPGCreator.Core.Serializer;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types.Interfaces;
+using RPGCreator.SDK.Types.Internals;
 using Serilog;
 
 namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
@@ -35,88 +38,133 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
      * =================
      * This class represents a pack of assets in RPG Creator.
      */
-    public class BaseAssetsPack : ISerializable, IDeserializable, IDisposable
+    public class BaseAssetsPack : IAssetsPack, ISerializable, IDeserializable, IDisposable
     {
 
-        public BaseAssetsPack()
+    public BaseAssetsPack()
+    {
+    }
+
+    public Ulid Id { get; set; } = Ulid.NewUlid();
+    public string Name { get; set; }
+    public string? Description { get; set; }
+
+    public string DbFilePath { get; private set; }
+    public string RootFolder { get; private set; }
+
+    private Ulid _dbId = Ulid.Empty;
+    private const string INDEX_COLLECTION = "asset_index";
+
+    public BaseAssetsPack(string dbPath)
+    {
+        DbFilePath = dbPath;
+        var dbName = Path.GetFileNameWithoutExtension(dbPath);
+        RootFolder = Path.Combine(Path.GetDirectoryName(dbPath) ?? string.Empty, $"assets_{dbName}");
+
+        if (string.Equals(RootFolder, $"assets_{dbName}", StringComparison.OrdinalIgnoreCase))
         {
+            throw new IOException("Invalid database path. Root folder cannot be 'assets' directly.");
         }
 
-        public Ulid Id = Ulid.NewUlid();
-        public string Name;
-        public string? Description;
+        LoadIndex();
+    }
 
-        public string DbFilePath { get; private set; }
-        public string RootFolder { get; private set; }
+    private void LoadIndex()
+    {
+        _dbId = EngineDB.OpenDB(DbFilePath);
 
-        private Ulid _dbId = Ulid.Empty;
-        private const string INDEX_COLLECTION = "asset_index";
-
-        public BaseAssetsPack(string dbPath)
+        if (_dbId == Ulid.Empty)
         {
-            DbFilePath = dbPath;
-            var dbName = Path.GetFileNameWithoutExtension(dbPath);
-            RootFolder = Path.Combine(Path.GetDirectoryName(dbPath) ?? string.Empty, $"assets_{dbName}");
-            
-            if(string.Equals(RootFolder, $"assets_{dbName}", StringComparison.OrdinalIgnoreCase))
-            {
-                throw new IOException("Invalid database path. Root folder cannot be 'assets' directly.");
-            }
-            
-            LoadIndex();
+            throw new IOException("Failed to open database at path " + DbFilePath);
         }
 
-        private void LoadIndex()
+        var meta = EngineDB.GetDBMetaData(_dbId);
+
+        if (meta != null)
         {
-            _dbId = EngineDB.OpenDB(DbFilePath);
-
-            if (_dbId == Ulid.Empty)
-            {
-                throw new IOException("Failed to open database at path " + DbFilePath);
-            }
-
-            var meta = EngineDB.GetDBMetaData(_dbId);
-
-            if (meta != null)
-            {
-                this.Id = meta.ObjectId;
-                this.Name = meta.Name;
-            }
-            
-            var db = EngineDB.GetDB(_dbId);
-            if (db == null)
-            {
-                throw new IOException("Failed to get database instance for DB ID " + _dbId);
-            }
-            
-            var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
-            if (indexCollection == null)
-            {
-                throw new IOException("Failed to get or create index collection in database.");
-            }
+            this.Id = meta.ObjectId;
+            this.Name = meta.Name;
         }
 
-        public object LoadAsset(Ulid assetId)
+        var db = EngineDB.GetDB(_dbId);
+        if (db == null)
         {
-            var db = EngineDB.GetDB(_dbId);
-            if (db == null)
-            {
-                throw new IOException("Database not found for DB ID " + _dbId);
-            }
+            throw new IOException("Failed to get database instance for DB ID " + _dbId);
+        }
 
-            var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
-            var index = indexCollection.FindById(assetId.ToString());
+        var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
+        if (indexCollection == null)
+        {
+            throw new IOException("Failed to get or create index collection in database.");
+        }
+    }
 
-            if (index == null)
-            {
-                throw new KeyNotFoundException("Asset ID " + assetId + " not found in index.");
-            }
+    public object LoadAsset(Ulid assetId)
+    {
+        var db = EngineDB.GetDB(_dbId);
+        if (db == null)
+        {
+            throw new IOException("Database not found for DB ID " + _dbId);
+        }
 
+        var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
+        var index = indexCollection.FindById(assetId.ToString());
+
+        if (index == null)
+        {
+            throw new KeyNotFoundException("Asset ID " + assetId + " not found in index.");
+        }
+
+        string fullPath = Path.Combine(RootFolder, index.RelativePath);
+
+        if (!File.Exists(fullPath))
+        {
+            throw new FileNotFoundException("Asset file not found at path " + fullPath);
+        }
+
+        object? loadedAsset = null;
+
+        try
+        {
+            string fileContent = File.ReadAllText(fullPath);
+            EngineServices.SerializerService.Deserialize(fileContent, out loadedAsset, out System.Type? _);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "[Pack {PackName}] Failed to deserialize asset at path {FilePath}.", Name, fullPath);
+            throw;
+        }
+
+        if (loadedAsset is IHasUniqueId idAsset && idAsset.Unique != index.Id)
+        {
+            Log.Warning(
+                "[Pack {PackName}] Loaded asset ID {LoadedId} does not match index ID {IndexId} for file at path {FilePath}.",
+                Name, idAsset.Unique, index.Id, fullPath);
+        }
+
+        return loadedAsset ?? throw new InvalidOperationException("Failed to load asset from file " + fullPath);
+    }
+
+    public IEnumerable<object> EnumerateAssets()
+    {
+        var db = EngineDB.GetDB(_dbId);
+        if (db == null)
+        {
+            yield break;
+        }
+
+        var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
+        var allIndexed = indexCollection.FindAll();
+
+        foreach (var index in allIndexed)
+        {
             string fullPath = Path.Combine(RootFolder, index.RelativePath);
 
             if (!File.Exists(fullPath))
             {
-                throw new FileNotFoundException("Asset file not found at path " + fullPath);
+                Log.Warning("[Pack {PackName}] Index points to missing file at path {FilePath}. Skipping.", Name,
+                    fullPath);
+                continue;
             }
 
             object? loadedAsset = null;
@@ -124,250 +172,206 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
             try
             {
                 string fileContent = File.ReadAllText(fullPath);
-                EngineSerializer.Instance.Deserialize(fileContent, out loadedAsset, out System.Type? _);
+                EngineServices.SerializerService.Deserialize(fileContent, out loadedAsset, out System.Type? _);
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "[Pack {PackName}] Failed to deserialize asset at path {FilePath}.", Name, fullPath);
-                throw;
+                continue;
             }
 
-            if (loadedAsset is IHasUniqueId idAsset && idAsset.Unique != index.Id)
+            if (loadedAsset != null)
             {
-                Log.Warning(
-                    "[Pack {PackName}] Loaded asset ID {LoadedId} does not match index ID {IndexId} for file at path {FilePath}.",
-                    Name, idAsset.Unique, index.Id, fullPath);
-            }
-
-            return loadedAsset ?? throw new InvalidOperationException("Failed to load asset from file " + fullPath);
-        }
-        
-        public IEnumerable<object> EnumerateAssets()
-        {
-            var db = EngineDB.GetDB(_dbId);
-            if (db == null)
-            {
-                yield break;
-            }
-
-            var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
-            var allIndexed = indexCollection.FindAll();
-
-            foreach (var index in allIndexed)
-            {
-                string fullPath = Path.Combine(RootFolder, index.RelativePath);
-
-                if (!File.Exists(fullPath))
+                if (loadedAsset is IHasUniqueId idAsset && idAsset.Unique != index.Id)
                 {
-                    Log.Warning("[Pack {PackName}] Index points to missing file at path {FilePath}. Skipping.", Name,
-                        fullPath);
-                    continue;
+                    Log.Warning(
+                        "[Pack {PackName}] Loaded asset ID {LoadedId} does not match index ID {IndexId} for file at path {FilePath}.",
+                        Name, idAsset.Unique, index.Id, fullPath);
                 }
 
-                object? loadedAsset = null;
-
-                try
-                {
-                    string fileContent = File.ReadAllText(fullPath);
-                    EngineSerializer.Instance.Deserialize(fileContent, out loadedAsset, out System.Type? _);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "[Pack {PackName}] Failed to deserialize asset at path {FilePath}.", Name, fullPath);
-                    continue;
-                }
-
-                if (loadedAsset != null)
-                {
-                    if (loadedAsset is IHasUniqueId idAsset && idAsset.Unique != index.Id)
-                    {
-                        Log.Warning(
-                            "[Pack {PackName}] Loaded asset ID {LoadedId} does not match index ID {IndexId} for file at path {FilePath}.",
-                            Name, idAsset.Unique, index.Id, fullPath);
-                    }
-
-                    yield return loadedAsset;
-                }
+                yield return loadedAsset;
             }
         }
+    }
 
-        public IEnumerable<EngineDB.AssetIndexRecord> EnumerateIndexOnly()
+    public IEnumerable<EngineDB.AssetIndexRecord> EnumerateIndexOnly()
+    {
+        var db = EngineDB.GetDB(_dbId);
+        if (db == null)
         {
-            var db = EngineDB.GetDB(_dbId);
-            if (db == null)
-            {
-                yield break;
-            }
-
-            var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
-            var allIndexed = indexCollection.FindAll();
-
-            foreach (var index in allIndexed)
-            {
-                yield return index;
-            }
+            yield break;
         }
 
-        public void AddOrUpdateAsset(object asset, string relativeFolderPath = "")
+        var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
+        var allIndexed = indexCollection.FindAll();
+
+        foreach (var index in allIndexed)
         {
-            if (asset is not IHasUniqueId idAsset) return;
-            if (asset is not IHasSavePath savePathAsset) return;
-            if (asset is not ISerializable serializableAsset) return;
-            
-            var db = EngineDB.GetDB(_dbId);
-            if (db == null) return;
-
-            if (string.IsNullOrEmpty(savePathAsset.SavePath))
-            {
-                Log.Warning("[Pack {PackName}] Asset {AssetId} has no save path defined. Generating one.", Name,
-                    idAsset.Unique);
-                savePathAsset.SavePath = $"{idAsset.Unique}.asset";
-                
-                Log.Warning("[Pack {PackName}] Asset {AssetId} generated save path: {SavePath}.", Name,
-                    idAsset.Unique, savePathAsset.SavePath);
-            }
-
-            string fileName = Path.GetFileName(savePathAsset.SavePath);
-            string relativePath = Path.Combine(relativeFolderPath, fileName);
-            string fullPath = Path.Combine(RootFolder, relativePath);
-
-            Directory.CreateDirectory(Path.GetDirectoryName(fullPath) ?? string.Empty);
-
-            EngineSerializer.Instance.Serialize(serializableAsset, out string serializedData);
-            File.WriteAllText(fullPath, serializedData);
-
-            var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
-
-            var record = new EngineDB.AssetIndexRecord()
-            {
-                Id = idAsset.Unique,
-                RelativePath = relativePath,
-                TypeName = asset.GetType().FullName ?? "Unknown",
-                LastIndexed = DateTime.UtcNow,
-            };
-
-            indexCollection.Upsert(record);
-
-            EngineCore.Instance.Managers.Assets.AddNewAssetLocation(idAsset.Unique, this, relativePath,
-                record.TypeName);
-
-            Log.Information("[Pack {PackName}] Asset {AssetId} saved to path {FilePath} and indexed.", Name,
-                idAsset.Unique, fullPath);
+            yield return index;
         }
+    }
 
-        public void RemoveAsset(Ulid assetId)
+    public void AddOrUpdateAsset(object asset, string relativeFolderPath = "")
+    {
+        if (asset is not IHasUniqueId idAsset) return;
+        if (asset is not IHasSavePath savePathAsset) return;
+        if (asset is not ISerializable serializableAsset) return;
+
+        var db = EngineDB.GetDB(_dbId);
+        if (db == null) return;
+
+        if (string.IsNullOrEmpty(savePathAsset.SavePath))
         {
-            var db = EngineDB.GetDB(_dbId);
-            if (db == null) return;
+            Log.Warning("[Pack {PackName}] Asset {AssetId} has no save path defined. Generating one.", Name,
+                idAsset.Unique);
+            savePathAsset.SavePath = $"{idAsset.Unique}.asset";
 
-            var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
-            var record = indexCollection.FindById(assetId.ToString());
-
-            if (record != null)
-            {
-                string fullPath = Path.Combine(RootFolder, record.RelativePath);
-
-                if (File.Exists(fullPath))
-                {
-                    File.Delete(fullPath);
-                    Log.Information("[Pack {PackName}] Asset file at path {FilePath} deleted.", Name, fullPath);
-                }
-
-                indexCollection.Delete(assetId.ToString());
-                Log.Information("[Pack {PackName}] Asset {AssetId} removed from index.", Name, assetId);
-            }
+            Log.Warning("[Pack {PackName}] Asset {AssetId} generated save path: {SavePath}.", Name,
+                idAsset.Unique, savePathAsset.SavePath);
         }
-        
-        public IEnumerable<EngineDB.AssetIndexRecord> SearchIndex(Func<EngineDB.AssetIndexRecord, bool> predicate)
+
+        string fileName = Path.GetFileName(savePathAsset.SavePath);
+        string relativePath = Path.Combine(relativeFolderPath, fileName);
+        string fullPath = Path.Combine(RootFolder, relativePath);
+
+        Directory.CreateDirectory(Path.GetDirectoryName(fullPath) ?? string.Empty);
+
+        EngineServices.SerializerService.Serialize(serializableAsset, out string serializedData);
+        File.WriteAllText(fullPath, serializedData);
+
+        var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
+
+        var record = new EngineDB.AssetIndexRecord()
         {
-            var db = EngineDB.GetDB(_dbId);
-            if (db == null)
-            {
-                yield break;
-            }
+            Id = idAsset.Unique,
+            RelativePath = relativePath,
+            TypeName = asset.GetType().FullName ?? "Unknown",
+            LastIndexed = DateTime.UtcNow,
+        };
 
-            var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
-            var allIndexed = indexCollection.FindAll();
+        indexCollection.Upsert(record);
 
-            foreach (var index in allIndexed.Where(predicate))
-            {
-                yield return index;
-            }
-        }
+        EngineCore.Instance.Managers.Assets.AddNewAssetLocation(idAsset.Unique, this, relativePath,
+            record.TypeName);
 
-        public IEnumerable<EngineDB.AssetIndexRecord> SearchIndexByType(Type type)
+        Log.Information("[Pack {PackName}] Asset {AssetId} saved to path {FilePath} and indexed.", Name,
+            idAsset.Unique, fullPath);
+    }
+
+    public void RemoveAsset(Ulid assetId)
+    {
+        var db = EngineDB.GetDB(_dbId);
+        if (db == null) return;
+
+        var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
+        var record = indexCollection.FindById(assetId.ToString());
+
+        if (record != null)
         {
-            var db = EngineDB.GetDB(_dbId);
-            if (db == null)
-            {
-                yield break;
-            }
-            
-            var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
+            string fullPath = Path.Combine(RootFolder, record.RelativePath);
 
-            var validNames = Common.TypeUtil.GetInheritance(type);
-            
-            var allIndexed = indexCollection.Find(x => validNames.Contains(x.TypeName));
-            
-            foreach (var index in allIndexed)
+            if (File.Exists(fullPath))
             {
-                yield return index;
+                File.Delete(fullPath);
+                Log.Information("[Pack {PackName}] Asset file at path {FilePath} deleted.", Name, fullPath);
             }
+
+            indexCollection.Delete(assetId.ToString());
+            Log.Information("[Pack {PackName}] Asset {AssetId} removed from index.", Name, assetId);
         }
+    }
 
-        public void Dispose()
+    public IEnumerable<IAssetIndexRecord> SearchIndex(Func<IAssetIndexRecord, bool> predicate)
+    {
+        var db = EngineDB.GetDB(_dbId);
+        if (db == null)
         {
-            if (_dbId != Ulid.Empty)
-            {
-                EngineDB.CloseDB(_dbId);
-                _dbId = Ulid.Empty;
-            }
+            yield break;
         }
 
-        public void Save()
+        var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
+        var allIndexed = indexCollection.FindAll();
+
+        foreach (var index in allIndexed.Where(predicate))
         {
-            if (_dbId != Ulid.Empty)
-            {
-                if (EngineDB.SaveDB(_dbId) is EngineDB.ESaveDbStatus status && status != EngineDB.ESaveDbStatus.Success)
-                {
-                    Log.Error("[Pack {PackName}] Failed to save database. Status: {Status}", Name, status);
-                    return;
-                }
-                Log.Information("[Pack {PackName}] Database saved successfully.", Name);
-            }
+            yield return index;
         }
+    }
 
-        public SerializationInfo GetObjectData()
+    public IEnumerable<IAssetIndexRecord> SearchIndexByType(Type type)
+    {
+        var db = EngineDB.GetDB(_dbId);
+        if (db == null)
         {
-            var info = new SerializationInfo(typeof(BaseAssetsPack));
-
-            info.AddValue(nameof(Id), Id)
-                .AddValue(nameof(Name), Name)
-                .AddValue(nameof(Description), Description)
-                .AddValue(nameof(DbFilePath), DbFilePath)
-                .AddValue(nameof(RootFolder), RootFolder);
-
-            return info;
+            yield break;
         }
 
-        public void SetObjectData(DeserializationInfo info)
+        var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
+
+        var validNames = Common.TypeUtil.GetInheritance(type);
+
+        var allIndexed = indexCollection.Find(x => validNames.Contains(x.TypeName));
+
+        foreach (var index in allIndexed)
         {
-            if (info == null)
+            yield return index;
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_dbId != Ulid.Empty)
+        {
+            EngineDB.CloseDB(_dbId);
+            _dbId = Ulid.Empty;
+        }
+    }
+
+    public void Save()
+    {
+        if (_dbId != Ulid.Empty)
+        {
+            if (EngineDB.SaveDB(_dbId) is EngineDB.ESaveDbStatus status && status != EngineDB.ESaveDbStatus.Success)
             {
-                throw new ArgumentNullException(nameof(info), "DeserializationInfo cannot be null.");
+                Log.Error("[Pack {PackName}] Failed to save database. Status: {Status}", Name, status);
+                return;
             }
 
-            info.TryGetValue(nameof(Id), out Ulid id, Ulid.NewUlid());
-            info.TryGetValue(nameof(Name), out string name, string.Empty);
-            info.TryGetValue(nameof(Description), out string? description, null);
-            info.TryGetValue(nameof(DbFilePath), out string dbFilePath, string.Empty);
-            info.TryGetValue(nameof(RootFolder), out string rootFolder, string.Empty);
-
-            Id = id;
-            Name = name;
-            Description = description;
-            DbFilePath = dbFilePath;
-            RootFolder = rootFolder;
+            Log.Information("[Pack {PackName}] Database saved successfully.", Name);
         }
+    }
+
+    public SerializationInfo GetObjectData()
+    {
+        var info = new SerializationInfo(typeof(BaseAssetsPack));
+
+        info.AddValue(nameof(Id), Id)
+            .AddValue(nameof(Name), Name)
+            .AddValue(nameof(Description), Description)
+            .AddValue(nameof(DbFilePath), DbFilePath)
+            .AddValue(nameof(RootFolder), RootFolder);
+
+        return info;
+    }
+
+    public void SetObjectData(DeserializationInfo info)
+    {
+        if (info == null)
+        {
+            throw new ArgumentNullException(nameof(info), "DeserializationInfo cannot be null.");
+        }
+
+        info.TryGetValue(nameof(Id), out Ulid id, Ulid.NewUlid());
+        info.TryGetValue(nameof(Name), out string name, string.Empty);
+        info.TryGetValue(nameof(Description), out string? description, null);
+        info.TryGetValue(nameof(DbFilePath), out string dbFilePath, string.Empty);
+        info.TryGetValue(nameof(RootFolder), out string rootFolder, string.Empty);
+
+        Id = id;
+        Name = name;
+        Description = description;
+        DbFilePath = dbFilePath;
+        RootFolder = rootFolder;
+    }
     }
 }

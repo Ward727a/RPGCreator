@@ -2,6 +2,8 @@ using System.Diagnostics;
 using System.Linq.Expressions;
 using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.Core.Managers.AssetsManager.Factories;
 

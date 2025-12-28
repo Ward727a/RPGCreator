@@ -33,6 +33,8 @@ using System.Threading.Tasks;
 using RPGCreator.Core.Types.Assets.BaseAssetsPack;
 using RPGCreator.Core.Types.Assets.Characters.Stats;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Serializer;
 
 namespace RPGCreator.Core.Types.Project
 {
@@ -72,7 +74,7 @@ namespace RPGCreator.Core.Types.Project
             return info;
         }
 
-        public void SetObjectData(Serializer.DeserializationInfo info)
+        public void SetObjectData(DeserializationInfo info)
         {
             if (info == null) throw new ArgumentNullException(nameof(info));
 

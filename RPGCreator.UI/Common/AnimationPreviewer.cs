@@ -1,18 +1,65 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using RPGCreator.Core;
-using RPGCreator.Core.Common;
-using RPGCreator.Core.Types.Assets.Animations;
-using Serilog;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Animations;
+using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Types.Collections;
+using RPGCreator.SDK.Types.Internals;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Common;
+
+public class AvaloniaAnimationDrawer : IDrawer<AnimationInstance>, IDisposable
+{
+
+    private Image _targetImage;
+    private IAssetScope _assetScope;
+    private SpritesheetDef? _cachedSpritesheet;
+    
+    public AvaloniaAnimationDrawer(Image targetImage)
+    {
+        _targetImage = targetImage;
+        _assetScope = EngineServices.AssetsManager.CreateAssetScope();
+    }
+    
+    public void Draw(IRenderContext context, AnimationInstance animation)
+    {
+        if(_cachedSpritesheet == null || _cachedSpritesheet.Unique != animation.Definition.SpriteSheetId)
+        {
+            _cachedSpritesheet = _assetScope.Load<SpritesheetDef>(animation.Definition.SpriteSheetId);
+            
+            if (_cachedSpritesheet == null)
+            {
+                Logger.Error("[AvaloniaAnimationDrawer] Failed to load spritesheet with ID: " + animation.Definition.SpriteSheetId);
+                return;
+            }
+        }
+        var bitmap = EngineServices.ResourcesService.Load<Bitmap>(_cachedSpritesheet.ImagePath);
+
+        if (bitmap == null)
+        {
+            Logger.Error("[AvaloniaAnimationDrawer] Failed to load spritesheet image at path: " + _cachedSpritesheet.ImagePath);
+            return;
+        }
+
+        var rect = _cachedSpritesheet.GetFrameRect(animation.GetCurrentSpritesheetIndex());
+        
+        var croppedBitmap = new CroppedBitmap(bitmap, new PixelRect(rect.X, rect.Y, rect.Width, rect.Height));
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            _targetImage.Source = croppedBitmap;
+        });
+    }
+
+    public void Dispose()
+    {
+        _assetScope.Dispose();
+    }
+}
 
 public class AnimationPreviewer : UserControl
 {
@@ -41,20 +88,17 @@ public class AnimationPreviewer : UserControl
         get => _animationDef;
         set
         {
-            if(value == null) return;
-            if(value == _animationDef) return;
-            if(_animationDef != null)
-                _animationDef.SpriteSheetIdChanged -= OnAnimationPathChanged;
-            value.SpriteSheetIdChanged += OnAnimationPathChanged;
+            if(value == null || value == _animationDef) return;
             _animationDef = value;
-            if(_animationDef.SpriteSheetId == Ulid.Empty)
+
+            if (_animationDef.SpriteSheetId == Ulid.Empty)
             {
-                Log.Error("[AnimationPreviewer] Animation definition has no associated spritesheet.");
                 return;
             }
-            AnimationInstance =
-                EngineCore.Instance.Managers.GameFactory.CreateInstance<AnimationInstance>(_animationDef);
-            AnimationPathChanged?.Invoke(_animationDef.Urn.ToString());
+
+            AnimationInstance = EngineServices.GameFactory.CreateInstance<AnimationInstance>(_animationDef);
+            
+            UpdateFrame(0);
         }
     }
     
@@ -98,6 +142,8 @@ public class AnimationPreviewer : UserControl
     private NumericIntUpDown FPSSpeedUpDown { get; set; }
     #endregion
     
+    private readonly AvaloniaAnimationDrawer _drawer;
+    
     #region Constructors
     public AnimationPreviewer()
     {
@@ -105,7 +151,12 @@ public class AnimationPreviewer : UserControl
         CreateComponents();
         AnimationTimer = new System.Timers.Timer(FrameDuration);
         RegisterEvents();
+
+        if (animationImage != null) _drawer = new AvaloniaAnimationDrawer(animationImage);
         
+        if(_drawer == null)
+            throw new Exception("Failed to create AvaloniaAnimationDrawer for AnimationPreviewer.");
+
         Content = bodyBorder;
     }
     #endregion
@@ -273,10 +324,7 @@ public class AnimationPreviewer : UserControl
 
         if(!IsValidAnimationInstance()) return;
         
-        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-        {
-            animationImage.Source = AnimationInstance.GetFrame(frameIndex).UI;
-        });
+        AnimationInstance?.Draw(null, _drawer);
     }
 
     public void ClearImage()
@@ -295,20 +343,15 @@ public class AnimationPreviewer : UserControl
     {
         if (AnimationInstance != null)
         {
-            EngineCore.Instance.Managers.GameFactory.ReleaseInstance(AnimationInstance);
+            EngineServices.GameFactory.ReleaseInstance(AnimationInstance);
         }
         
-        AnimationInstance = EngineCore.Instance.Managers.GameFactory.CreateInstance<AnimationInstance>(_animationDef);
+        AnimationInstance = EngineServices.GameFactory.CreateInstance<AnimationInstance>(_animationDef);
         
         Stop();
         // Load animation from newSpriteSheetId and set TotalFrames accordingly
         // Reset CurrentFrame to 0
         CurrentFrame = 0;
-        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-        {
-            // Update animationImage source here
-            animationImage.Source = AnimationInstance.GetFrame(0).UI;
-        });
         UpdateFrame(0);
     }
     
@@ -316,19 +359,14 @@ public class AnimationPreviewer : UserControl
     {
         if (AnimationInstance != null)
         {
-            EngineCore.Instance.Managers.GameFactory.ReleaseInstance(AnimationInstance);
+            EngineServices.GameFactory.ReleaseInstance(AnimationInstance);
         }
 
-        AnimationInstance = EngineCore.Instance.Managers.GameFactory.CreateInstance<AnimationInstance>(_animationDef);
+        AnimationInstance = EngineServices.GameFactory.CreateInstance<AnimationInstance>(_animationDef);
         Stop();
         // Load animation from newPath and set TotalFrames accordingly
         // Reset CurrentFrame to 0
         CurrentFrame = 0;
-        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-        {
-            // Update animationImage source here
-            animationImage.Source = AnimationInstance.GetFrame(0).UI;
-        });
         UpdateFrame(0);
     }
     

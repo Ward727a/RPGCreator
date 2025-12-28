@@ -1,8 +1,9 @@
 using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Types.Assets.Tilesets;
-using RPGCreator.Core.Types.Assets.Tilesets.IntGridTileset;
 using RPGCreator.Core.Types.Internal;
-using RPGCreator.Core.Types.Map.AutoLayer;
+using RPGCreator.Core.Types.Map.Layers.AutoLayer;
+using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 
 namespace RPGCreator.Core.Types.Map;
 

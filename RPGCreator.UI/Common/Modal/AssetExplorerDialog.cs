@@ -3,11 +3,10 @@ using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
-using RPGCreator.Core;
-using RPGCreator.Core.Managers.AssetsManager;
-using RPGCreator.Core.Managers.AssetsManager.Registries;
-using RPGCreator.Core.Types.Assets;
-using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Types.Collections;
+using RPGCreator.SDK.Types.Interfaces;
+using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.Core.Types.Windows;
 
@@ -21,7 +20,7 @@ public class AssetExplorerDialog : Window
     
     #region Properties
 
-    private AssetsManager _assets = EngineCore.Instance.Managers.Assets;
+    private IAssetsManager _assets = EngineServices.AssetsManager;
     public List<IHasUniqueId> AssetsList { get; private set; } = new List<IHasUniqueId>();
     #endregion
     
@@ -166,7 +165,7 @@ public class AssetExplorerDialog : Window
         {
             var assetButton = new Button
             {
-                Content = $"{AssetsTypeMapping.GetAssetType(asset.GetType()).Key} : {asset.Urn.Name.Split('@').First()}",
+                Content = $"{EngineServices.AssetTypeRegistry.GetKey(asset.GetType())} : {asset.Urn.Name.Split('@').First()}",
                 Margin = new Avalonia.Thickness(5),
                 HorizontalAlignment = HorizontalAlignment.Stretch
             };

@@ -24,7 +24,7 @@
 #endregion
 using Avalonia.Controls;
 using System.IO;
-using RPGCreator.Core.Types.Assets.Tilesets;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
 
 namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 {

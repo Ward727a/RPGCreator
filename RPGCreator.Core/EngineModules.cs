@@ -25,13 +25,33 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
 using RPGCreator.Core.Common;
+using RPGCreator.SDK;
 using Serilog;
 
 namespace RPGCreator.Core
 {
+
+    public class ModuleContext : AssemblyLoadContext
+    {
+        private readonly AssemblyDependencyResolver _resolver;
+
+        public ModuleContext(string modulePath) : base(isCollectible: true)
+        {
+            _resolver = new AssemblyDependencyResolver(modulePath);
+        }
+
+        protected override Assembly? Load(AssemblyName assemblyName)
+        {
+            string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
+            return assemblyPath != null ? LoadFromAssemblyPath(assemblyPath) : null;
+        }
+    }
+    
     public class EngineModules
     {
 
@@ -65,12 +85,14 @@ namespace RPGCreator.Core
                         var hashString = ShaUtil.ComputeSha256(file);
                         if (CHECKSUM_INTERNAL_MODULES.Contains(hashString))
                         {
-                            var assembly = System.Reflection.Assembly.LoadFrom(file);
+                            var context = new ModuleContext(file);
+                            var assembly = context.LoadFromAssemblyPath(file);
+                            
                             var types = assembly.GetTypes().Where(t =>
-                                typeof(ModuleSDK.IEngineModule).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
+                                typeof(IEngineModule).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
                             foreach (var type in types)
                             {
-                                var module = (ModuleSDK.IEngineModule)Activator.CreateInstance(type)!;
+                                var module = (IEngineModule)Activator.CreateInstance(type)!;
                                 module.Initialize();
                                 Log.Information(
                                     $"Module '{module.Name}' v{module.Version} by {module.Author} initialized.");

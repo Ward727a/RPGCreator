@@ -9,6 +9,7 @@ using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Types;
 using RPGCreator.Core.Types.Assets.Skills;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK.Types;
 using Serilog;
 using Ursa.Controls;
 using Point = RPGCreator.Core.Types.Internal.Point;

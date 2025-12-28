@@ -1,9 +1,13 @@
 using RPGCreator.Core.Parser.Graph;
 using RPGCreator.Core.Parser.PRATT;
+using RPGCreator.Core.Types.Assets.Characters.Stats;
 using RPGCreator.Core.Types.Blueprint;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types;
 
-namespace RPGCreator.Core.Types.Assets.Characters.Stats;
+namespace RPGCreator.Core.Types.Assets.Entities.Characters.Stats;
 
 public class StatDefinition : IStatDef
 {
@@ -68,7 +72,7 @@ public class StatDefinition : IStatDef
             .AddValue(nameof(_statGraphEvents), _statGraphEvents.ToDictionary(kv => kv.Key, kv => kv.Value.DocumentPath));
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         ArgumentNullException.ThrowIfNull(info);
 
@@ -97,7 +101,7 @@ public class StatDefinition : IStatDef
         foreach (var kv in statGraphEventsPaths)
         {
             var graphDocumentData = File.ReadAllText(kv.Value);
-            EngineSerializer.Instance.Deserialize(graphDocumentData, out GraphDocument o, out var type);
+            EngineServices.SerializerService.Deserialize(graphDocumentData, out GraphDocument o, out var type);
 
             if (o is GraphDocument graphDocument)
             {

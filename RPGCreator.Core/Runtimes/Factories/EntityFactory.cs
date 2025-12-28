@@ -1,11 +1,12 @@
 using System.Numerics;
-using RPGCreator.Core.Runtimes.ECS;
 using RPGCreator.Core.Runtimes.ECS.Components.Display;
-using RPGCreator.Core.Types.Assets.Actors;
+using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.ECS.Entities;
+using RPGCreator.SDK.ECS.Services;
 
 namespace RPGCreator.Core.Runtimes.Factories;
 
-public class EntityFactory
+public class EntityFactory : IEntityFactory
 {
     
     private readonly EntityManager _entityManager;

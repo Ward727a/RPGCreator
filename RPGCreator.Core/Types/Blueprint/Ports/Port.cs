@@ -1,3 +1,6 @@
+using RPGCreator.SDK;
+using RPGCreator.SDK.Serializer;
+
 namespace RPGCreator.Core.Types.Blueprint;
 
 public class Port : ISerializable, IDeserializable
@@ -38,7 +41,7 @@ public class Port : ISerializable, IDeserializable
         return info;
     }
 
-    public virtual void SetObjectData(Serializer.DeserializationInfo info)
+    public virtual void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue(nameof(Id), out var id, string.Empty);
         Id = id;

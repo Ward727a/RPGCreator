@@ -1,7 +1,7 @@
 ﻿using Avalonia.Controls;
-using RPGCreator.Core.ModuleSDK;
-using RPGCreator.Core.ModuleSDK.UIModule;
-using Serilog;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Modules.UIModule;
 
 namespace TestModule;
 
@@ -15,7 +15,7 @@ public class TestModule : IEngineModule
     public void Initialize()
     {
         // Initialization code here
-        Log.Information("Test Module initialized.");
+        Logger.Information("Test Module initialized.");
         
         // Register a UI extension for the Assets Manager region.
         //

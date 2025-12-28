@@ -33,11 +33,14 @@ using System.Text;
 using System.Threading.Tasks;
 using RPGCreator.Core.Types.Assets;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types.Interfaces;
 using Serilog;
 
 namespace RPGCreator.Core.Types.Project
 {
-    public partial class BaseProject : ObservableObject, ISerializable, IDeserializable
+    public partial class BaseProject : IBaseProject, ISerializable, IDeserializable
     {
         public event Action? OnProjectLoaded;
         
@@ -52,12 +55,9 @@ namespace RPGCreator.Core.Types.Project
         public bool IsForcedLock { get; set; } = false; // If true, the project cannot be opened in the editor, due to bug or other issues.
         public string? Copyright { get; set; } = "";
         public List<string> Authors { get; set; } = [];
-        public List<string> AssetsPackPath = [];
+        public List<string> AssetsPackPath { get; set; } = [];
 
-        [ObservableProperty]
         private MapInstance? _EditMap = null;
-
-        public bool EditingMap => EditMap != null;
 
         public ProjectGameData GameData;
 
@@ -146,7 +146,7 @@ namespace RPGCreator.Core.Types.Project
             return info;
         }
 
-        public void SetObjectData(Serializer.DeserializationInfo info)
+        public void SetObjectData(DeserializationInfo info)
         {
             if (info == null)
             {

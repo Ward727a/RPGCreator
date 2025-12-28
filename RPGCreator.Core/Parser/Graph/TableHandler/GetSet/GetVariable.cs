@@ -10,7 +10,7 @@ public sealed class GetVariable : IGraphInstrHandler
         var from = interpreter.ParsePathOperand(instr.Operands[0]);
         var to = interpreter.ParseRegisterOperand(instr.Operands[1]);
 
-        env.SetVariable("skill_effect.caster", new Runtimes.ECS.Entity()); // TEST ONLY
+        env.SetVariable("skill_effect.caster", new SDK.ECS.Entities.Entity()); // TEST ONLY
         env.SetRegister(to, env.GetVariable(from));
     }
 

@@ -1,22 +1,21 @@
 using System;
 using System.Collections.Generic;
-using Avalonia;
+using System.Drawing;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Media;
-using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK.Logging;
 using RPGCreator.UI.Common.CustomBrush;
-using Serilog;
+using Color = Avalonia.Media.Color;
 using Point = Avalonia.Point;
-using Size = Avalonia.Size;
 
 namespace RPGCreator.UI.Common;
 public class EditorGridLayer : Control
 {
     // On peut binder ça ou le passer en propriété
     public Point Offset { get; set; } = new Point(0, 0);
-    public Size GridCellSize { get; set; } = new Size(32, 32);
+    public Size GridCellSize { get; set; } = new (32, 32);
     public bool ShowGrid { get; set; } = true;
 
     // Stylos (Cached pour la perf)
@@ -25,7 +24,6 @@ public class EditorGridLayer : Control
 
     public EditorGridLayer()
     {
-        // CRUCIAL : Permet de cliquer sur les tuiles à travers la grille
         this.IsHitTestVisible = false; 
     }
 
@@ -35,7 +33,6 @@ public class EditorGridLayer : Control
         if (!ShowGrid) return;
         if (GridCellSize.Width <= 0 || GridCellSize.Height <= 0) return;
 
-        // On dessine sur toute la taille disponible de ce calque
         double width = Bounds.Width;
         double height = Bounds.Height;
         double startX = Offset.X % GridCellSize.Width;
@@ -72,7 +69,7 @@ public class MoveableCanvas : UserControl
     public bool LimitTo00Coordinates { get; set; } = true;
     
     public bool ShowGrid { get; set; } = false;
-    public Size GridCellSize { get; private set; } = new Size(32, 32);
+    public System.Drawing.Size GridCellSize { get; private set; } = new (32, 32);
 
     private bool _showCheckboard = false;
     public bool ShowCheckboard { get => _showCheckboard;
@@ -122,7 +119,7 @@ public class MoveableCanvas : UserControl
         }
     }
     
-    public void SetGridCellSize(Size cellSize)
+    public void SetGridCellSize(System.Drawing.Size cellSize)
     {
         GridCellSize = cellSize;
         _gridLayer.GridCellSize = GridCellSize;
@@ -181,9 +178,9 @@ public class MoveableCanvas : UserControl
                     var elementWidth = element.Key.Bounds.Width;
                     var elementHeight = element.Key.Bounds.Height;
                     if (elementWidth > biggestElementSize.Width)
-                        biggestElementSize = new Size(elementWidth, biggestElementSize.Height);
+                        biggestElementSize = biggestElementSize with { Width = (int)elementWidth };
                     if (elementHeight > biggestElementSize.Height)
-                        biggestElementSize = new Size(biggestElementSize.Width, elementHeight);
+                        biggestElementSize = biggestElementSize with { Height = (int)elementHeight };
                 }
                 
                 if (position != null)
@@ -222,7 +219,7 @@ public class MoveableCanvas : UserControl
                     }
 
                     CurrentElementsPosition = new Point(newX, newY);
-                    Log.Debug("Element moved to X: {X}, Y: {Y}", newX, newY);
+                    Logger.Debug("Element moved to X: {X}, Y: {Y}", newX, newY);
                 }
             }
 

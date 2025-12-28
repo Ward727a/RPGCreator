@@ -3,6 +3,12 @@ using RPGCreator.Core.Runtimes;
 using RPGCreator.Core.Runtimes.ECS;
 using RPGCreator.Core.Types.Blueprint;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK;
+using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.ECS.Entities;
+using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types;
+using RPGCreator.SDK.Types.Internals;
 using Serilog;
 
 namespace RPGCreator.Core.Types.Assets.Skills;
@@ -148,7 +154,7 @@ public class GraphSkillEffect : ISkillEffect, IHasSavePath, ISerializable, IDese
             .AddValue(nameof(GraphEvent), graphEventPath);
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue(nameof(Unique), out Ulid unique, Ulid.NewUlid());
         info.TryGetValue(nameof(DisplayName), out string displayName, string.Empty);

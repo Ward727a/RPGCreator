@@ -23,14 +23,15 @@
 // 
 #endregion
 using RPGCreator.Core.Managers.AssetsManager;
-using RPGCreator.Core.Managers.CommandManager;
 using RPGCreator.Core.Managers.ProjectsManager;
 using RPGCreator.Core.Managers.RTP.BrushManagers;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Commands;
 using Serilog;
 
 namespace RPGCreator.Core
 {
-    public class EngineManagers
+    internal class EngineManagers
     {
         public AssetsManager Assets { get; private set; }
         public GameFactory GameFactory { get; private set; }
@@ -50,6 +51,9 @@ namespace RPGCreator.Core
             ImageCache = new ImageCache();
             FeaturesRules = new FeaturesRulesManager();
             Commands = new CommandManager();
+            
+            EngineServices.AssetsManager = Assets;
+            EngineServices.GameFactory = GameFactory;
 
             EngineCore.Instance.Events.OnCoreManagersReady(new());
             

@@ -5,11 +5,11 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using RPGCreator.Core;
-using RPGCreator.Core.Managers.AssetsManager;
-using RPGCreator.Core.Managers.AssetsManager.Registries;
-using RPGCreator.Core.Types.Assets.BaseAssetsPack;
-using RPGCreator.Core.Types.Assets.Tilesets.IntGridTileset;
-using Serilog;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
+using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Types.Collections;
+using RPGCreator.SDK.Types.Interfaces;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutoLayerEditor.Components;
@@ -181,7 +181,7 @@ public class IntGridSetCreateModal : Window
     {
         PackComboBox.SelectedIndex = -1;
         PackComboBox.Items.Clear();
-        var packs = EngineCore.Instance.Managers.Assets.GetLoadedPacks();
+        var packs = EngineServices.AssetsManager.GetLoadedPacks();
 
         foreach (var pack in packs)
         {
@@ -204,26 +204,26 @@ public class IntGridSetCreateModal : Window
         var selectedPackItem = PackComboBox.SelectedItem as ComboBoxItem;
         if (selectedPackItem == null)
         {
-            Log.Warning("[IntGridSetCreateModal] No asset pack selected.");
+            Logger.Warning("[IntGridSetCreateModal] No asset pack selected.");
             return;
         }
-        var selectedPack = selectedPackItem.Tag as BaseAssetsPack;
+        var selectedPack = selectedPackItem.Tag as IAssetsPack;
         if (selectedPack == null)
         {
-            Log.Warning("[IntGridSetCreateModal] Selected asset pack is invalid.");
+            Logger.Warning("[IntGridSetCreateModal] Selected asset pack is invalid.");
             return;
         }
         var intGridSetName = NameTextBox.Text.Trim();
         if (string.IsNullOrWhiteSpace(intGridSetName))
         {
-            Log.Warning("[IntGridSetCreateModal] IntGrid Set name is empty.");
+            Logger.Warning("[IntGridSetCreateModal] IntGrid Set name is empty.");
             return;
         }
-        var newIntGridSet = EngineCore.Instance.Managers.Assets.CreateAsset<IntGridTileset>();
+        var newIntGridSet = EngineServices.AssetsManager.CreateAsset<IntGridTileset>();
         newIntGridSet.Name = intGridSetName;
         newIntGridSet.Pack = selectedPack;
         selectedPack.AddOrUpdateAsset(newIntGridSet);
-        Log.Information("[IntGridSetCreateModal] Created new IntGrid Set '{name}' in pack '{packName}'", intGridSetName, selectedPack.Name);
+        Logger.Information("[IntGridSetCreateModal] Created new IntGrid Set '{name}' in pack '{packName}'", intGridSetName, selectedPack.Name);
         
         OnIntGridSetCreated?.Invoke(newIntGridSet);
     }
@@ -237,7 +237,7 @@ public class IntGridSetListControl : UserControl
     
     public event Action<IntGridTileset>? OnTilesetSelected;
     
-    private AssetScope _scope;
+    private IAssetScope _scope;
     
     public Grid? Body { get; private set; }
     public ScrollViewer? ListScroller { get; private set; }
@@ -248,11 +248,11 @@ public class IntGridSetListControl : UserControl
     public Button? EditTilesetButton { get; private set; }
     public Button? AddTilesetButton { get; private set; }
     
-    public IntGridSetListControl(AssetScope? scope = null)
+    public IntGridSetListControl(IAssetScope? scope = null)
     {
         
         if(scope == null)
-            _scope = EngineCore.Instance.Managers.Assets.CreateAssetScope();
+            _scope = EngineServices.AssetsManager.CreateAssetScope();
         else
             _scope = scope;
         
@@ -336,17 +336,17 @@ public class IntGridSetListControl : UserControl
         RemoveTilesetButton.Click += (s, e) =>
         {
             if (_selectedTileset == null) return;
-            Log.Debug("[IntGridSetListControl] Removing IntGrid Set: {name}", _selectedTileset.Name);
-            if (EngineCore.Instance.Managers.Assets.TryResolveRegistry(_selectedTileset.GetType(), out var registry))
+            Logger.Debug("[IntGridSetListControl] Removing IntGrid Set: {name}", _selectedTileset.Name);
+            if (EngineServices.AssetsManager.TryResolveRegistry(_selectedTileset.GetType(), out var registry))
             {
                 if (!registry.HasAsset(_selectedTileset))
                 {
-                    Log.Error("[IntGridSetListControl] Failed to find IntGrid Set in registry: {name}", _selectedTileset.Name);
+                    Logger.Error("[IntGridSetListControl] Failed to find IntGrid Set in registry: {name}", _selectedTileset.Name);
                     return;
                 }
                 if(_selectedTileset.Pack == null)
                 {
-                    Log.Error("[IntGridSetListControl] IntGrid Set has no associated asset pack: {name}", _selectedTileset.Name);
+                    Logger.Error("[IntGridSetListControl] IntGrid Set has no associated asset pack: {name}", _selectedTileset.Name);
                     return;
                 }
                 // Remove from pack
@@ -360,7 +360,7 @@ public class IntGridSetListControl : UserControl
             }
             else
             {
-                Log.Error("[IntGridSetListControl] Failed to resolve registry for IntGrid Set: {name}", _selectedTileset.Name);
+                Logger.Error("[IntGridSetListControl] Failed to resolve registry for IntGrid Set: {name}", _selectedTileset.Name);
             }
         };
         AddTilesetButton.Click += OnAddTilesetButtonClick;
@@ -368,18 +368,18 @@ public class IntGridSetListControl : UserControl
     
     private void OnAddTilesetButtonClick(object? sender, RoutedEventArgs e)
     {
-        Log.Debug("[IntGridSetListControl] Add IntGrid Set button clicked.");
+        Logger.Debug("[IntGridSetListControl] Add IntGrid Set button clicked.");
         var createModal = new IntGridSetCreateModal();
         
         createModal.OnCancelled += () =>
         {
-            Log.Debug("[IntGridSetListControl] IntGrid Set creation cancelled.");
+            Logger.Debug("[IntGridSetListControl] IntGrid Set creation cancelled.");
             createModal.Close();
         };
         
         createModal.OnIntGridSetCreated += (newTileset) =>
         {
-            Log.Debug("[IntGridSetListControl] New IntGrid Set created: {name}", newTileset.Name);
+            Logger.Debug("[IntGridSetListControl] New IntGrid Set created: {name}", newTileset.Name);
             RefreshList();
             createModal.Close();
         };
@@ -391,7 +391,7 @@ public class IntGridSetListControl : UserControl
     {
         ListBody!.Children.Clear();
         
-        var searchResults = EngineCore.Instance.Managers.Assets.SearchAllPacks<IntGridTileset>();
+        var searchResults = EngineServices.AssetsManager.SearchAllPacks<IntGridTileset>();
         
         foreach (var result in searchResults)
         {
@@ -400,7 +400,7 @@ public class IntGridSetListControl : UserControl
             var itemControl = new IntGridSetListItemControl(tileset);
             itemControl.OnSelected += (selectedTileset) =>
             {
-                Log.Debug("[IntGridSetListControl] Selected IntGrid Set: {name}", selectedTileset.Name);
+                Logger.Debug("[IntGridSetListControl] Selected IntGrid Set: {name}", selectedTileset.Name);
                 // Handle selection logic here
                 OnTilesetSelected?.Invoke(selectedTileset);
                 

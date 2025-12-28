@@ -18,26 +18,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\RPGCreator.Core\RPGCreator.Core.csproj">
-          <Private>false</Private>
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>compile;runtime</IncludeAssets>
-      </ProjectReference>
-      <ProjectReference Include="..\..\RPGCreator.Desktop\RPGCreator.Desktop.csproj">
-          <Private>false</Private>
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>none</IncludeAssets>
-      </ProjectReference>
-      <ProjectReference Include="..\..\RPGCreator.RTP\RPGCreator.RTP.csproj">
-          <Private>false</Private>
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>none</IncludeAssets>
-      </ProjectReference>
-      <ProjectReference Include="..\..\RPGCreator.UI\RPGCreator.UI.csproj">
-          <Private>false</Private>
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>none</IncludeAssets>
-      </ProjectReference>
+      <ProjectReference Include="..\..\RPGCreator.SDK\RPGCreator.SDK.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Avalonia" Version="11.3.6" />
     </ItemGroup>
 
 </Project>

@@ -5,12 +5,11 @@ using System.IO;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
-using RPGCreator.Core;
-using RPGCreator.Core.Parser.PRATT;
-using RPGCreator.Core.Types.Assets.BaseAssetsPack;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Types.Interfaces;
 using RPGCreator.UI;
 using RPGCreator.UI.Common;
-using Serilog;
 
 namespace RPGCreator.Core.Types.Windows;
 
@@ -28,7 +27,7 @@ public class TestingDialog : Window
     [
         new("Test Save pack", () =>
         {
-            var pack = EngineCore.Instance.Managers.Assets.GetLoadedPacks()[0];
+            var pack = EngineServices.AssetsManager.GetLoadedPacks()[0];
             if (pack == null)
             {
                 Console.WriteLine("No assets pack found to test saving.");
@@ -39,24 +38,24 @@ public class TestingDialog : Window
         }),
         new("Close Pack", () =>
         {
-            var pack = EngineCore.Instance.Managers.Assets.GetLoadedPacks()[0];
+            var pack = EngineServices.AssetsManager.GetLoadedPacks()[0];
             if (pack == null)
             {
                 Console.WriteLine("No assets pack found to test closing.");
                 return;
             }
             Console.WriteLine($"Testing close for pack: {pack.Name}");
-            EngineCore.Instance.Managers.Assets.UnregisterPack(pack.Id);
+            EngineServices.AssetsManager.UnregisterPack(pack.Id);
         }),
         new("Test Load pack", () =>
         {
             var textDialog = new TextInputDialog("Enter the path to the pack to load:");
             textDialog.Confirmed += (path) =>
             {
-                EngineSerializer.Instance.Deserialize(File.ReadAllText(path), out object? pack, out System.Type? type);
-                if (type == typeof(BaseAssetsPack))
+                EngineServices.SerializerService.Deserialize(File.ReadAllText(path), out object? pack, out System.Type? type);
+                if (type == typeof(IAssetsPack))
                 {
-                    Console.WriteLine($"Pack loaded successfully: {((BaseAssetsPack)pack).Name}");
+                    Console.WriteLine($"Pack loaded successfully: {((IAssetsPack)pack).Name}");
                 }
                 else
                 {
@@ -153,36 +152,36 @@ public class TestingDialog : Window
             VerticalAlignment = VerticalAlignment.Center,
             Margin = App.style.Margin
         };
-        buttonTestFormula.Click += (sender, args) =>
-        {
-            if (string.IsNullOrEmpty(testFormula.Text))
-            {
-                Log.Error("Test formula is empty, please enter a valid formula to test.");
-                return;
-            }
-            try
-            {
-                PrattCompiler compiler = new PrattCompiler();
-                var result = compiler.Compile(testFormula.Text);
-                if (result != null)
-                {
-                    var value = result.Eval(
-                        new PrattEvaluationEnvironment()
-                        {
-                            Variables = new ReadOnlyDictionary<string, double>(
-                                new Dictionary<string, double>()
-                                {
-                                    ["testVar"] = 20.0
-                                })
-                        });
-                    Log.Debug($"PrattCompiledFormula: {value}");
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Error("Got error while testing formula: {Message}", e.Message);
-            }
-        };
+        // buttonTestFormula.Click += (sender, args) =>
+        // {
+        //     if (string.IsNullOrEmpty(testFormula.Text))
+        //     {
+        //         Logger.Error("Test formula is empty, please enter a valid formula to test.");
+        //         return;
+        //     }
+        //     try
+        //     {
+        //         PrattCompiler compiler = new PrattCompiler();
+        //         var result = compiler.Compile(testFormula.Text);
+        //         if (result != null)
+        //         {
+        //             var value = result.Eval(
+        //                 new PrattEvaluationEnvironment()
+        //                 {
+        //                     Variables = new ReadOnlyDictionary<string, double>(
+        //                         new Dictionary<string, double>()
+        //                         {
+        //                             ["testVar"] = 20.0
+        //                         })
+        //                 });
+        //             Log.Debug($"PrattCompiledFormula: {value}");
+        //         }
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         Log.Error("Got error while testing formula: {Message}", e.Message);
+        //     }
+        // };
         contentPanel.Children.Add(buttonTestFormula);
         
         #endif

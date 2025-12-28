@@ -3,7 +3,8 @@ using RPGCreator.Core.Runtimes;
 using RPGCreator.Core.Runtimes.Contents;
 using RPGCreator.Core.Types.Assets.Skills;
 using RPGCreator.Core.Types.Internal;
-using Entity = RPGCreator.Core.Runtimes.ECS.Entity;
+using RPGCreator.SDK.Types;
+using Entity = RPGCreator.SDK.ECS.Entities.Entity;
 
 namespace TestModule.TestCustomSkillEffect;
 

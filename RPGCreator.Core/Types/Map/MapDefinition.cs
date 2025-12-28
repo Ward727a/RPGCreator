@@ -1,5 +1,9 @@
 using Microsoft.Xna.Framework;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types;
 
 namespace RPGCreator.Core.Types.Map;
 
@@ -89,7 +93,7 @@ public class MapDefinition : IMapDef
     
     // public void AddLayer(TileLayer layer)
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         ArgumentNullException.ThrowIfNull(info);
 

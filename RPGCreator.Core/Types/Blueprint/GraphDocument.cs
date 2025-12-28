@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using RPGCreator.Core;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Serializer;
 using Serilog;
 
 namespace RPGCreator.Core.Types.Blueprint;
@@ -89,7 +91,7 @@ public sealed class GraphDocument : ISerializable, IDeserializable
         public double Y;
         public List<PortData> Inputs;
         public List<PortData> Outputs;
-        public void SetObjectData(Serializer.DeserializationInfo info)
+        public void SetObjectData(DeserializationInfo info)
         { 
             info.TryGetValue(nameof(Fullpath), out string fullpath, string.Empty);
             info.TryGetValue(nameof(Id), out string id, string.Empty);
@@ -133,7 +135,7 @@ public sealed class GraphDocument : ISerializable, IDeserializable
         public string Id;
         public string Name;
         public object? Value;
-        public void SetObjectData(Serializer.DeserializationInfo info)
+        public void SetObjectData(DeserializationInfo info)
         {
             info.TryGetValue(nameof(Id), out string id, string.Empty);
             info.TryGetValue(nameof(Name), out string name, string.Empty);
@@ -165,7 +167,7 @@ public sealed class GraphDocument : ISerializable, IDeserializable
         return info;
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         // Clear existing nodes and links before deserializing
         foreach (var link in Links)

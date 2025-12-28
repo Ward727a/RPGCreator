@@ -10,9 +10,6 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using RPGCreator.Core;
 using RPGCreator.Core.Types.Assets;
-using RPGCreator.Core.Types.Assets.Tilesets;
-using RPGCreator.Core.Types.Internal.LayerRenderer;
-using RPGCreator.Core.Types.Map;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor.RuleEditor;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor;

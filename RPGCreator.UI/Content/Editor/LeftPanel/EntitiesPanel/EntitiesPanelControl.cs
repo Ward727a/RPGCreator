@@ -1,7 +1,7 @@
 using Avalonia.Controls;
-using RPGCreator.Core.ModuleSDK.UIModule;
 using RPGCreator.Core.Runtimes.Context;
 using RPGCreator.Core.Types.Editor.Context;
+using RPGCreator.SDK.Modules.UIModule;
 
 namespace RPGCreator.UI.Content.Editor.LeftPanel.EntitiesPanel;
 

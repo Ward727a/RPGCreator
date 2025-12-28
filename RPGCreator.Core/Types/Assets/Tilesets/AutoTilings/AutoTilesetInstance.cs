@@ -1,5 +1,6 @@
 using Avalonia.Media.Imaging;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using Serilog;
 using SkiaSharp;
 

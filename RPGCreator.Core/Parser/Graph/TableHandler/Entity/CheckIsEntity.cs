@@ -10,7 +10,7 @@ public sealed class CheckIsEntity : IGraphInstrHandler
         var obj = interpreter.EvalRegisterOperand<object?>(instr.Operands[0]);
         var to = interpreter.ParseRegisterOperand(instr.Operands[1]);
 
-        env.SetRegister(to, obj is Runtimes.ECS.Entity);
+        env.SetRegister(to, obj is SDK.ECS.Entities.Entity);
     }
 
     public EGraphOperandKind[] Signature { get; } = 

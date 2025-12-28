@@ -23,6 +23,9 @@
 #endregion
 using RPGCreator.Core.Types.Project;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types.Interfaces;
 using Serilog;
 using static RPGCreator.Core.Configs.EngineConfigs;
 
@@ -46,7 +49,7 @@ namespace RPGCreator.Core.Configs.Helpers
         public override string ConfigName { get; set; } = "ProjectsConf";
         public static ProjectsConf Instance { get; private set; }
 
-        public List<BaseProjectLink> ProjectLinks { get; private set; } = [];
+        public List<IBaseProjectLink> ProjectLinks { get; private set; } = [];
 
         public ProjectsConf() : base()
         {
@@ -65,11 +68,11 @@ namespace RPGCreator.Core.Configs.Helpers
             ProjectLinks.Add(link);
         }
         
-        public bool TryGetProject(Ulid projectId, out BaseProject? project)
+        public bool TryGetProject(Ulid projectId, out IBaseProject? project)
         {
             project = null;
             var link = ProjectLinks.FirstOrDefault(l => l.ProjectID == projectId);
-            if (link != null && link.TryGetProject(out project))
+            if (link != null && EngineCore.Instance.Managers.Projects.TryGetProject(link.ProjectConfigPath, out project))
             {
                 return true;
             }
@@ -81,7 +84,7 @@ namespace RPGCreator.Core.Configs.Helpers
 
         public void SaveProject(BaseProject project, bool force = false)
         {
-            EngineSerializer.Instance.Serialize(project, out string projectData);
+            EngineServices.SerializerService.Serialize(project, out string projectData);
 
             var link = ProjectLinks.Find(link => link.ProjectID == project.Id);
             if(link == null)
@@ -95,7 +98,7 @@ namespace RPGCreator.Core.Configs.Helpers
                 throw new InvalidOperationException("ConfigPath is not set. Cannot save project.");
             }
             
-            EngineSerializer.Instance.Serialize(this, out string configData);
+            EngineServices.SerializerService.Serialize(this, out string configData);
             
             // Save the configuration data to the config file
             File.WriteAllText(ConfigPath, configData);
@@ -123,14 +126,14 @@ namespace RPGCreator.Core.Configs.Helpers
             return info;
         }
 
-        public override void SetObjectData(Serializer.DeserializationInfo info)
+        public override void SetObjectData(DeserializationInfo info)
         {
             if (info == null)
             {
                 throw new ArgumentNullException(nameof(info), "SerializationInfo cannot be null.");
             }
 
-            info.TryGetList("projectLinks", out List<BaseProjectLink> projectLinks);
+            info.TryGetList("projectLinks", out List<IBaseProjectLink> projectLinks);
 
             ProjectLinks = projectLinks;
 

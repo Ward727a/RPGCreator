@@ -3,6 +3,7 @@ using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using Serilog;
 using Point = RPGCreator.Core.Types.Internal.Point;
 

@@ -4,11 +4,14 @@ using RPGCreator.Core.Types.Assets.Animations;
 using RPGCreator.Core.Types.Assets.Characters.Stats;
 using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Animations;
+using RPGCreator.SDK.Types.Interfaces;
 using Serilog;
 
 namespace RPGCreator.Core.Managers.AssetsManager;
 
-public class GameFactory
+public class GameFactory : IGameFactory
 {
     private class FactoryStrategy
     {

@@ -30,6 +30,8 @@ using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Map;
 using RPGCreator.Core.Types.Project;
 using RPGCreator.Core.Types.RTP;
+using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using Serilog;
 
 namespace RPGCreator.Core

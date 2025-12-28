@@ -35,6 +35,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RPGCreator.Core.Types.Assets.Characters;
 using RPGCreator.Core.Types.Assets.Actors;
+using RPGCreator.SDK.Assets.Definitions.Maps;
 using Point = RPGCreator.Core.Types.Internal.Point;
 using Size = RPGCreator.Core.Types.Internal.Size;
 

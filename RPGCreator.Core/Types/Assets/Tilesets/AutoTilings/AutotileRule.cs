@@ -1,3 +1,6 @@
+using RPGCreator.SDK;
+using RPGCreator.SDK.Serializer;
+
 namespace RPGCreator.Core.Types.Assets.Tilesets;
 
 public enum ERulePos
@@ -42,7 +45,7 @@ public class AutotileRule : ISerializable, IDeserializable
         return info;
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue("ID", out Ulid unique);
         info.TryGetValue("Name", out Name);

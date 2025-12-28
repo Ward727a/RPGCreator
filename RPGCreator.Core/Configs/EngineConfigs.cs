@@ -24,6 +24,8 @@
 #endregion
 using RPGCreator.Core.Configs.EventsArgs;
 using RPGCreator.Core.Configs.Helpers;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Serializer;
 using Serilog;
 
 namespace RPGCreator.Core.Configs
@@ -80,7 +82,7 @@ namespace RPGCreator.Core.Configs
             }
             
             var newConf = new T();
-            EngineSerializer.Instance.Serialize(newConf, out var data);
+            EngineServices.SerializerService.Serialize(newConf, out var data);
             if (string.IsNullOrEmpty(data))
             {
                 throw new InvalidOperationException($"Config at {configPath} is not valid.");
@@ -140,7 +142,7 @@ namespace RPGCreator.Core.Configs
             {
                 return false;
             }
-            EngineSerializer.Instance.Deserialize<ConfHelper>(data, out var o, out var t);
+            EngineServices.SerializerService.Deserialize<ConfHelper>(data, out var o, out var t);
 
             if (o == null || t == null)
                 return false;
@@ -312,7 +314,7 @@ namespace RPGCreator.Core.Configs
                 if (string.IsNullOrEmpty(path))
                     return;
                 
-                EngineSerializer.Instance.Serialize(this, out var data);
+                EngineServices.SerializerService.Serialize(this, out var data);
                 if (string.IsNullOrEmpty(data))
                     throw new InvalidOperationException("Data is null or empty. Cannot save config.");
                 try
@@ -335,7 +337,7 @@ namespace RPGCreator.Core.Configs
                 Save(ConfigPath);
             }
             public abstract SerializationInfo GetObjectData();
-            public abstract void SetObjectData(Serializer.DeserializationInfo info);
+            public abstract void SetObjectData(DeserializationInfo info);
         }
     }
 }

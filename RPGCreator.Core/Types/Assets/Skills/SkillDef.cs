@@ -1,6 +1,9 @@
 using RPGCreator.Core.Parser.PRATT;
 using RPGCreator.Core.Types.Assets.Characters.Stats;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types;
 
 namespace RPGCreator.Core.Types.Assets.Skills;
 
@@ -62,7 +65,7 @@ public class SkillDef : ISkillDef
         return info;
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue("SavePath", out string? savePath);
         SavePath = savePath ?? string.Empty;

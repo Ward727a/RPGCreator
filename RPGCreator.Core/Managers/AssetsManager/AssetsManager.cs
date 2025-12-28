@@ -24,31 +24,35 @@
 #endregion
 
 using System.Diagnostics.CodeAnalysis;
-using RPGCreator.Core.Managers.AssetsManager.EventsArgs;
 using RPGCreator.Core.Managers.AssetsManager.Factories;
 using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Managers.ProjectsManager.Events;
-using RPGCreator.Core.Types.Assets;
 using RPGCreator.Core.Types.Assets.BaseAssetsPack;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Types;
+using RPGCreator.SDK.Types.Collections;
+using RPGCreator.SDK.Types.Interfaces;
+using RPGCreator.SDK.Types.Internals;
+using RPGCreator.SDK.Types.Records;
 using Serilog;
 
 namespace RPGCreator.Core.Managers.AssetsManager
 {
-    public class AssetsManager
+    internal class AssetsManager : IAssetsManager
     {
 
         private struct AssetLocation
         {
-            public BaseAssetsPack Pack;
+            public IAssetsPack Pack;
             public string RelativePath;
             public string TypeName;
         }
         
         private Dictionary<Ulid, AssetLocation> _assetLocations = new();
 
-        readonly Dictionary<Ulid, BaseAssetsPack> AssetsPacks = [];
+        readonly Dictionary<Ulid, IAssetsPack> AssetsPacks = [];
         readonly Dictionary<string, Ulid> AssetsPacksMapping = [];
 
         public AssetsManagerEvent Event;
@@ -177,7 +181,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             return newAsset;
         }
 
-        public AssetScope CreateAssetScope(string? name = null)
+        public IAssetScope CreateAssetScope(string? name = null)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -378,7 +382,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             Log.Information("Loaded assets pack from path: {packPath}", pack.DbFilePath);
         }
 
-        public void RegisterPack(BaseAssetsPack pack)
+        public void RegisterPack(IAssetsPack pack)
         {
             if (AssetsPacks.ContainsKey(pack.Id))
             {
@@ -402,7 +406,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
         
         public void UnregisterPack(Ulid packId)
         {
-            if (AssetsPacks.TryGetValue(packId, out BaseAssetsPack? pack))
+            if (AssetsPacks.TryGetValue(packId, out IAssetsPack? pack))
             {
                 AssetsPacks.Remove(packId);
                 AssetsPacksMapping.Remove(pack.Name);
@@ -417,7 +421,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             }
         }
         
-        public bool TryGetPack(string? packName, [NotNullWhen(true)] out BaseAssetsPack? pack)
+        public bool TryGetPack(string? packName, [NotNullWhen(true)] out IAssetsPack? pack)
         {
             pack = null;
             if(packName == null)
@@ -429,21 +433,22 @@ namespace RPGCreator.Core.Managers.AssetsManager
             return false;
         }
         
-        public bool TryGetPack(Ulid packId, [NotNullWhen(true)] out BaseAssetsPack? pack)
+        public bool TryGetPack(Ulid packId, [NotNullWhen(true)] out IAssetsPack? pack)
         {
             return AssetsPacks.TryGetValue(packId, out pack);
         }
 
-        public BaseAssetsPack GetPack(Ulid packId)
+        public IAssetsPack GetPack(Ulid packId)
         {
-            if (AssetsPacks.TryGetValue(packId, out BaseAssetsPack? pack))
+            if (AssetsPacks.TryGetValue(packId, out IAssetsPack? pack))
             {
                 return pack;
             }
             throw new KeyNotFoundException($"No assets pack found with ID: {packId}");
         }
-        
-        public void AddNewAssetLocation(Ulid assetId, BaseAssetsPack pack, string relativePath, string typeName)
+
+
+        public void AddNewAssetLocation(Ulid assetId, IAssetsPack pack, string relativePath, string typeName)
         {
             _assetLocations[assetId] = new AssetLocation
             {
@@ -453,30 +458,11 @@ namespace RPGCreator.Core.Managers.AssetsManager
             };
         }
 
-        public List<BaseAssetsPack> GetLoadedPacks()
+        public List<IAssetsPack> GetLoadedPacks()
         {
             return AssetsPacks.Values.ToList();
         }
 
-        public record PackSearchResult(Ulid AssetId, Ulid PackId, string TypeName, string Path)
-        {
-            /// <summary>
-            /// The unique identifier of the asset.
-            /// </summary>
-            public Ulid AssetId = AssetId;
-            /// <summary>
-            /// The type name of the asset.
-            /// </summary>
-            public string TypeName = TypeName;
-            /// <summary>
-            /// The relative path of the asset within the pack.
-            /// </summary>
-            public string Path = Path;
-            /// <summary>
-            /// The unique identifier of the pack containing the asset.
-            /// </summary>
-            public Ulid PackId = PackId;
-        }
         
         /// <summary>
         /// Search all packs for assets of type T.
@@ -496,6 +482,5 @@ namespace RPGCreator.Core.Managers.AssetsManager
         }
         
         #endregion
-        
     }
 }

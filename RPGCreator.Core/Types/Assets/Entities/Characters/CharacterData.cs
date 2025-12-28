@@ -1,9 +1,16 @@
 using System.Diagnostics.CodeAnalysis;
+using RPGCreator.Core.ECS.Systems;
 using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Types.Assets.Actors;
 using RPGCreator.Core.Types.Assets.Characters.Stats;
+using RPGCreator.Core.Types.Assets.Entities.Characters.Stats;
 using RPGCreator.Core.Types.Assets.Skills;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK;
+using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.ECS.Components;
+using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types;
 
 namespace RPGCreator.Core.Types.Assets.Characters;
 
@@ -100,7 +107,7 @@ public class CharacterStats(IStatDef def) : ISerializable, IDeserializable
         throw new NotImplementedException();
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         throw new NotImplementedException();
     }
@@ -123,7 +130,7 @@ public class CharacterSkill(ISkillDef def) : ISerializable, IDeserializable
         throw new NotImplementedException();
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         throw new NotImplementedException();
     }
@@ -162,7 +169,7 @@ public struct CharacterFeatures() : ISerializable, IDeserializable
             .AddValue("CanTriggerEvents", CanTriggerEvents);
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         if (info == null)
         {
@@ -196,19 +203,6 @@ public struct CharacterFeatures() : ISerializable, IDeserializable
 #endregion
 
 
-public enum EDirection
-{
-    None = -1,
-    Down = 0,
-    Left = 1,
-    Right = 2,
-    Up = 3,
-    DownLeft = 4,
-    DownRight = 5,
-    UpLeft = 6,
-    UpRight = 7
-}
-
 public class DirectionalAnimationSet : ISerializable, IDeserializable
 {
     /// <summary>
@@ -237,7 +231,7 @@ public class DirectionalAnimationSet : ISerializable, IDeserializable
             .AddValue("Animations", Animations);
     }
     
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         if (info == null)
         {
@@ -290,7 +284,7 @@ public struct CharacterRolePlayInfo() : ISerializable, IDeserializable
             .AddValue("Alignment", Alignment);
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         if (info == null)
         {
@@ -337,7 +331,7 @@ public struct CharacterEquipSlot(string slotName, int slotIndex, string itemType
             .AddValue("ItemType", ItemType);
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         if (info == null)
         {
@@ -526,7 +520,7 @@ public class CharacterData : BaseEntity, ICharacter, ISerializable, IDeserializa
             .AddValue("RolePlayInfo", RolePlayInfo);
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         if (info == null)
         {

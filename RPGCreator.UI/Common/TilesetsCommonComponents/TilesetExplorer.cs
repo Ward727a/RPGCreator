@@ -1,11 +1,12 @@
 using System;
+using System.Drawing;
 using Avalonia.Controls;
-using RPGCreator.Core;
-using RPGCreator.Core.Managers.AssetsManager;
-using RPGCreator.Core.Types.Assets.Tilesets;
-using RPGCreator.Core.Types.Internal;
+using Avalonia.Media.Imaging;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Types.Collections;
 using RPGCreator.UI.Content.Editor.LeftPanel.TilingPanel;
-using Serilog;
 
 namespace RPGCreator.UI.Common.TilesetsCommonComponents;
 
@@ -32,9 +33,9 @@ public class TilesetExplorer : UserControl
     private Panel _body;
     private SelectionCursorControl _selectionCursor;
     private ComboBox _setSelector;
-    private AssetScope _scope;
+    private IAssetScope _scope;
 
-    public TilesetExplorer(AssetScope scope, Panel? parentBody = null, Size? canvasSize = null, int baseSelectedIndex = -1, TilesetType tilesetType = TilesetType.All)
+    public TilesetExplorer(IAssetScope scope, Panel? parentBody = null, Size? canvasSize = null, int baseSelectedIndex = -1, TilesetType tilesetType = TilesetType.All)
     {
         _scope = scope ?? throw new ArgumentNullException(nameof(scope), "Asset scope cannot be null.");
         _type = tilesetType;
@@ -107,13 +108,13 @@ public class TilesetExplorer : UserControl
             e.Handled = true;
             
             var position = e.GetPosition(_canvas.CanvasBody);
-            Log.Debug("[TilesetExplorer] Canvas clicked at position: {0}", position);
+            Logger.Debug("[TilesetExplorer] Canvas clicked at position: {0}", position);
             var cellSize = _canvas.GridCellSize;
             
             double alignedX = Math.Floor((position.X - (_canvas.CurrentElementsPosition.X % cellSize.Width)) / cellSize.Width) * cellSize.Width + (_canvas.CurrentElementsPosition.X % cellSize.Width);
             double alignedY = Math.Floor((position.Y - _canvas.CurrentElementsPosition.Y % cellSize.Height) / cellSize.Height) * cellSize.Height + (_canvas.CurrentElementsPosition.Y % cellSize.Height);
             
-            Log.Debug("[TilesetExplorer] Aligned position: {0}, {1}", alignedX, alignedY);
+            Logger.Debug("[TilesetExplorer] Aligned position: {0}, {1}", alignedX, alignedY);
             Canvas.SetLeft(_selectionCursor, alignedX);
             Canvas.SetTop(_selectionCursor, alignedY);
             _canvas.UpdateOrigin(_selectionCursor);
@@ -127,9 +128,11 @@ public class TilesetExplorer : UserControl
                     (int)((position.X + Math.Abs(_canvas.CurrentElementsPosition.X)) / cellSize.Width),
                     (int)((position.Y + Math.Abs(_canvas.CurrentElementsPosition.Y)) / cellSize.Height)
                 );
+
+                var tilesetInstance = EngineServices.GameFactory.CreateInstance<ITilesetInstance>(def);
                 
-                tileToPaint = def.GetTileAt(tilePositionInTileset.X, tilePositionInTileset.Y);
-                Log.Debug("[TilesetExplorer] Created tile definition at position {0} in tileset {1}", tilePositionInTileset, def.Name);
+                tileToPaint = tilesetInstance.GetTileAt(tilePositionInTileset.X, tilePositionInTileset.Y);
+                Logger.Debug("[TilesetExplorer] Created tile definition at position {0} in tileset {1}", tilePositionInTileset, def.Name);
                 
                 TileSelected?.Invoke(tileToPaint);
             }
@@ -142,19 +145,21 @@ public class TilesetExplorer : UserControl
         
         _canvas.SetGridCellSize(new Size(32, 32));
         ClearTilesetOptions();
-        Log.Debug("[TilingPanel] Loading tileset options...");
-        var searchResults = EngineCore.Instance.Managers.Assets.SearchAllPacks<ITilesetDef>();
+        Logger.Debug("[TilingPanel] Loading tileset options...");
+        var searchResults = EngineServices.AssetsManager.SearchAllPacks<ITilesetDef>();
         foreach (var result in searchResults)
         {
             var def = _scope.Load<ITilesetDef>(result.AssetId);
+
+            bool canAutotile = def is IAutotileDef;
             
-            if (_type == TilesetType.AutotileOnly && def is TilesetDef)
+            if (_type == TilesetType.AutotileOnly && canAutotile)
                 continue;
-            if (_type == TilesetType.NonAutotileOnly && def is not TilesetDef)
+            if (_type == TilesetType.NonAutotileOnly && !canAutotile)
                 continue;
             
             AddTilesetOption(def);
-            Log.Debug("[TilingPanel] Added tileset option from search: {0}", def.Name);
+            Logger.Debug("[TilingPanel] Added tileset option from search: {0}", def.Name);
         }
         if(_baseSelectedIndex >= 0)
             _setSelector.SelectedIndex = _baseSelectedIndex;
@@ -182,10 +187,10 @@ public class TilesetExplorer : UserControl
         
         if (_setSelector?.SelectedItem is SetOptionItem selectedItem)
         {
-            Log.Debug("[TilingPanel] Selected tileset: {0}", selectedItem.Name);
+            Logger.Debug("[TilingPanel] Selected tileset: {0}", selectedItem.Name);
             var def = _scope.Load<ITilesetDef>(selectedItem.AssetId);
             if (_previewImage != null)
-                _previewImage.Source = def.GetBitmap();
+                _previewImage.Source = EngineServices.ResourcesService.Load<Bitmap>(def.ImagePath);
         }
         
     }

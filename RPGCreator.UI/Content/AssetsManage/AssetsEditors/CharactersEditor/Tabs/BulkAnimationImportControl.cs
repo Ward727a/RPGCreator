@@ -13,7 +13,7 @@ using RPGCreator.Core;
 using RPGCreator.Core.Common;
 using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Types;
-using RPGCreator.Core.Types.Assets.Animations;
+using RPGCreator.SDK.Assets.Definitions.Animations;
 using RPGCreator.UI.Common;
 using Serilog;
 using Ursa.Controls;

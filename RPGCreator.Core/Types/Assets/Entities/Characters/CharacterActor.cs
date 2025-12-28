@@ -3,6 +3,8 @@ using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Types.Assets.Actors;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Serializer;
 using Serilog;
 using Internal_Point = RPGCreator.Core.Types.Internal.Point;
 using Point = RPGCreator.Core.Types.Internal.Point;
@@ -131,7 +133,7 @@ public class CharacterActor : ISerializable, IDeserializable, IMoveableActor, II
         throw new NotImplementedException();
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         throw new NotImplementedException();
     }

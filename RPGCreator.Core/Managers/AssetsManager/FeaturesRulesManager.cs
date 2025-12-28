@@ -1,4 +1,4 @@
-using RPGCreator.Core.ModuleSDK.ECS;
+using RPGCreator.SDK.ECS.Features;
 
 namespace RPGCreator.Core.Managers.AssetsManager;
 

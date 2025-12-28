@@ -6,6 +6,7 @@ using RPGCreator.Core.Types.Editor.Visual;
 using RPGCreator.Core.Types.Editor.Visual.PaintTargets;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using Serilog;
 
 namespace RPGCreator.Core.Types.Editor.Context;

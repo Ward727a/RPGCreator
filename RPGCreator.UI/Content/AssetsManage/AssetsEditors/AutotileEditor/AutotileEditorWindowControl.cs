@@ -36,7 +36,6 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.VisualTree;
 using RPGCreator.Core.Managers.AssetsManager;
-using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Windows;
 using Point = RPGCreator.Core.Types.Internal.Point;
 

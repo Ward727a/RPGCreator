@@ -29,7 +29,6 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using RPGCreator.Core;
-using RPGCreator.Core.Types.Map;
 using RPGCreator.Core.Types;
 using RPGCreator.Core.Types.Windows;
 using System;

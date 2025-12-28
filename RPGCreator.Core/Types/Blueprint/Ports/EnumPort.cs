@@ -1,3 +1,5 @@
+using RPGCreator.SDK;
+using RPGCreator.SDK.Serializer;
 using Serilog;
 
 namespace RPGCreator.Core.Types.Blueprint;
@@ -49,7 +51,7 @@ public class EnumPort : Port
         return info;
     }
     
-    public override void SetObjectData(Serializer.DeserializationInfo info)
+    public override void SetObjectData(DeserializationInfo info)
     {
         base.SetObjectData(info);
         info.TryGetValue(nameof(EnumType), out System.Type enumType, typeof(Enum));

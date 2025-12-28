@@ -1,6 +1,10 @@
 using Avalonia.Media.Imaging;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types;
 using Serilog;
 using SkiaSharp;
 
@@ -42,7 +46,7 @@ public sealed class TilesetDef : ITilesetDef,ISerializable, IDeserializable
         return info;
     }
 
-    public override void SetObjectData(Serializer.DeserializationInfo info)
+    public override void SetObjectData(DeserializationInfo info)
     {
         if (info == null)
         {
@@ -70,39 +74,4 @@ public sealed class TilesetDef : ITilesetDef,ISerializable, IDeserializable
         Log.Debug("[TilesetDef] SetObjectData ({0}, {1})", Unique, Name);
     }
 
-    public override SKBitmap GetSKBitmap()
-    {
-        return SKBitmap.Decode(ImagePath);
-    }
-
-    public override Bitmap GetSimpleBitmap()
-    {
-        return new Bitmap(ImagePath);
-    }
-
-    public override Texture2D GetTexture(GraphicsDevice graphicsDevice)
-    {
-        if(_TextureCache != null)
-            return _TextureCache;
-        using var stream = System.IO.File.OpenRead(ImagePath);
-        _TextureCache = Texture2D.FromStream(graphicsDevice, stream);
-        return _TextureCache;
-    }
-
-    public override ITileDef GetTileAt(int col, int row)
-    {
-        if (col < 0 || row < 0)
-            throw new ArgumentOutOfRangeException("Column and row must be non-negative.");
-
-        var positionInTileset = new Point(col * TileWidth, row * TileHeight);
-        return new TileDefinition(new Point(TileWidth, TileHeight), positionInTileset, this);
-    }
-
-    public override Bitmap GetBitmap(bool forceReload = false)
-    {
-        if(BitmapCache != null)
-            return BitmapCache;
-        
-        return GetSimpleBitmap();
-    }
 }

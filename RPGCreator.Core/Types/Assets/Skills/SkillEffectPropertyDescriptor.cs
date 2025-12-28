@@ -1,4 +1,7 @@
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types;
 
 namespace RPGCreator.Core.Types.Assets.Skills;
 
@@ -79,7 +82,7 @@ public record SkillEffectPropertyDescriptor : ISerializable, IDeserializable
         
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue(nameof(Name), out string name, string.Empty);
         info.TryGetValue(nameof(Type), out EffectPropertyType type, EffectPropertyType.None);

@@ -30,7 +30,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Layout;
-using RPGCreator.Core.Types.Assets.Tilesets;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor
 {

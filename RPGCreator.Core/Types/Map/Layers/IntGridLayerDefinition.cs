@@ -1,10 +1,11 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
-using Avalonia.Media;
-using CommunityToolkit.Mvvm.ComponentModel;
 using RPGCreator.Core.Serializer;
 using RPGCreator.Core.Types.Internal;
-using RPGCreator.Core.Types.Map.AutoLayer;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types;
 
 namespace RPGCreator.Core.Types.Map;
 
@@ -121,22 +122,4 @@ public class IntGridLayerDefinition : IMapLayerDef<int>
 
     public bool IsDirty { get; set; }
     public bool IsTransient { get; set; }
-}
-
-public partial class IntGridValueRef : ObservableObject
-{
-    [ObservableProperty] 
-    private int _value;
-
-    [ObservableProperty] 
-    private string _name;
-    
-    [ObservableProperty] 
-    private Color _color;
-    
-    [ObservableProperty] 
-    private string _iconPath;
-    
-    [ObservableProperty]
-    private TileData _defaultTileData;
 }

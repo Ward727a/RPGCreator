@@ -1,40 +1,22 @@
 using RPGCreator.Core.Configs;
 using RPGCreator.Core.Configs.Helpers;
 using RPGCreator.Core.Types.Project;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types.Interfaces;
 using Serilog;
 
 namespace RPGCreator.Core.Types.Internal;
 
-public class BaseProjectLink : ISerializable, IDeserializable
+public class BaseProjectLink : IBaseProjectLink, ISerializable, IDeserializable
 {
-    public Ulid ProjectID = Ulid.NewUlid();
-    public string ProjectConfigPath = string.Empty;
+    public Ulid ProjectID { get; set; } = Ulid.NewUlid();
+    public string ProjectConfigPath { get; set; } = string.Empty;
 
     public BaseProjectLink()
     {
     }
     
-    public bool TryGetProject(out BaseProject? project)
-    {
-        project = null;
-        if (File.Exists(ProjectConfigPath))
-        {
-            EngineSerializer.Instance.Deserialize<BaseProject>(File.ReadAllText(ProjectConfigPath), out var _projectObject, out System.Type? objectType);
-
-            if (objectType == null)
-                return false;
-            
-            if(objectType == typeof(BaseProject))
-                project = (BaseProject)_projectObject;
-            else if (objectType.IsSubclassOf(typeof(BaseProject)))
-                project = (BaseProject)_projectObject;
-            else
-                return false;
-            
-            return true;
-        }
-        return false;
-    }
 
     public static BaseProjectLink CreateLinkFromProject(BaseProject project)
     {
@@ -52,10 +34,13 @@ public class BaseProjectLink : ISerializable, IDeserializable
         return info;
     }
 
-    public void SetObjectData(Serializer.DeserializationInfo info)
+    public void SetObjectData(DeserializationInfo info)
     {
-        info.TryGetValue("id", out ProjectID);
-        info.TryGetValue("project_config_path", out ProjectConfigPath);
+        info.TryGetValue("id", out Ulid _ProjectID);
+        info.TryGetValue("project_config_path", out string _ProjectConfigPath);
+        
+        ProjectID = _ProjectID;
+        ProjectConfigPath = _ProjectConfigPath;
         
         Log.Debug("[ProjectLink] SetObjectData ({0}, {1})", ProjectID, ProjectConfigPath);
     }

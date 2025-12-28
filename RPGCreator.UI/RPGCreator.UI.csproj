@@ -12,6 +12,8 @@
     <AvaloniaResource Include="Assets\**">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AvaloniaResource>
+    <AvaloniaResource Remove="Common\Blueprint\**" />
+    <AvaloniaResource Remove="Content\AssetsManage\AssetsEditors\AutotileEditor\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,10 +33,6 @@
           <OutputItemType>Analyzer</OutputItemType>
           <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       </ProjectReference>
-  </ItemGroup>
-  
-  <ItemGroup>
-      <ProjectReference Include="..\RPGCreator.Core\RPGCreator.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -64,6 +62,8 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Remove="Common\Blueprint\**" />
+    <Compile Remove="Content\AssetsManage\AssetsEditors\AutotileEditor\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -75,7 +75,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RPGCreator.Core\RPGCreator.Core.csproj" />
     <ProjectReference Include="..\RPGCreator.RTP\RPGCreator.RTP.csproj" />
   </ItemGroup>
 
@@ -84,6 +83,8 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Remove="Common\Blueprint\**" />
+    <EmbeddedResource Remove="Content\AssetsManage\AssetsEditors\AutotileEditor\**" />
   </ItemGroup>
 	<ItemGroup>
 	  <Compile Update="Resources.Designer.cs">
@@ -110,6 +111,18 @@
 	  <UpToDateCheckInput Remove="OldUI\Views\LauncherView.axaml" />
 	  <UpToDateCheckInput Remove="OldUI\Views\LauncherWindow.axaml" />
 	  <UpToDateCheckInput Remove="OldUI\Views\Modals\ErrorDialog.axaml" />
+	</ItemGroup>
+	<ItemGroup>
+	  <AvaloniaXaml Remove="Common\Blueprint\**" />
+	  <AvaloniaXaml Remove="Content\AssetsManage\AssetsEditors\AutotileEditor\**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <AdditionalFiles Remove="Common\Blueprint\**" />
+	  <AdditionalFiles Remove="Content\AssetsManage\AssetsEditors\AutotileEditor\**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Remove="Common\Blueprint\**" />
+	  <None Remove="Content\AssetsManage\AssetsEditors\AutotileEditor\**" />
 	</ItemGroup>
 
     <Target Name="CopyAssets" AfterTargets="Build">

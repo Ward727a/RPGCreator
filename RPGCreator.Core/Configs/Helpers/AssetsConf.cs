@@ -27,6 +27,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Serializer;
 using static RPGCreator.Core.Configs.EngineConfigs;
 
 namespace RPGCreator.Core.Configs.Helpers
@@ -45,7 +47,7 @@ namespace RPGCreator.Core.Configs.Helpers
             throw new NotImplementedException();
         }
 
-        public override void SetObjectData(Serializer.DeserializationInfo info)
+        public override void SetObjectData(DeserializationInfo info)
         {
             throw new NotImplementedException();
         }

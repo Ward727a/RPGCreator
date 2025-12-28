@@ -1,6 +1,10 @@
 using Avalonia.Media.Imaging;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types;
 using Serilog;
 using SkiaSharp;
 
@@ -145,7 +149,7 @@ public sealed class AutoTilesetDef : ITilesetDef
         return info;
     }
 
-    public override void SetObjectData(Serializer.DeserializationInfo info)
+    public override void SetObjectData(DeserializationInfo info)
     {
         if (info == null)
         {

@@ -1,8 +1,12 @@
 using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Types.Collections;
 
-namespace RPGCreator.Core.Types.Map.AutoLayer;
+namespace RPGCreator.Core.Types.Map.Layers.AutoLayer;
 
 public class AutoTileSolver
 {
@@ -18,14 +22,13 @@ public class AutoTileSolver
         Point position,
         IntGridLayerDefinition intLayer,
         List<AutoLayerRule> rules,
-        AssetsManager assets,
+        IAssetsManager assets,
         int GridSize = 32)
     {
         int centerValue = intLayer.GetValue(position);
         
         if(centerValue == int.MinValue) // No tile present
             return null;
-
         
         List<PatternMatch> matchedRules = new();
         
@@ -50,12 +53,46 @@ public class AutoTileSolver
 
         if (matchedRules.Count > 0)
         {
-            // Pick the best match (highest score)
-            var bestMatch = matchedRules.OrderByDescending(m => m.Score).First();
-            return PickTile(bestMatch.Rule, position, assets, null, bestMatch.FlipX, bestMatch.FlipY);
+            int maxScore = matchedRules.Max(m => m.Score);
+            var bestCandidates = matchedRules.Where(m => m.Score == maxScore).ToList();
+
+            if (bestCandidates.Count == 1)
+            {
+                var match = bestCandidates[0];
+                return PickTile(match.Rule, position, assets, null, match.FlipX, match.FlipY);
+            }
+
+            var random = new Random(GetSeed(position, intLayer.ZIndex));
+    
+            double totalWeight = bestCandidates.Sum(m => m.Rule.Chance);
+            double randomValue = random.NextDouble() * totalWeight;
+    
+            foreach (var match in bestCandidates)
+            {
+                randomValue -= match.Rule.Chance;
+                if (randomValue <= 0)
+                {
+                    return PickTile(match.Rule, position, assets, null, match.FlipX, match.FlipY);
+                }
+            }
+    
+            var fallback = bestCandidates.Last();
+            return PickTile(fallback.Rule, position, assets, null, fallback.FlipX, fallback.FlipY);
         }
         
         return null;
+    }
+    
+    private static int GetSeed(Point pos, int layerIndex = 0)
+    {
+        int hash = 17;
+        unchecked 
+        {
+            hash = hash * 23 + pos.X.GetHashCode();
+            hash = hash * 73856093 + pos.Y.GetHashCode();
+            hash = hash * 19349663 + layerIndex.GetHashCode(); 
+        }
+        return hash;
     }
 
     private static bool MatchesPattern(Point position, IntGridLayerDefinition layer, AutoLayerRule rule,
@@ -165,11 +202,11 @@ public class AutoTileSolver
         return true;
     }
     
-    private static ITileDef? PickTile(AutoLayerRule rule, Point position, AssetsManager assets, AssetScope? scope = null, bool flipX = false, bool flipY = false)
+    private static ITileDef? PickTile(AutoLayerRule rule, Point position, IAssetsManager assets, IAssetScope? scope = null, bool flipX = false, bool flipY = false)
     {
 
         if (scope == null)
-            scope = EngineCore.Instance.Managers.Assets.CreateAssetScope();
+            scope = EngineServices.AssetsManager.CreateAssetScope();
         
         if (rule.OutputTiles.Count == 0)
             return null;
