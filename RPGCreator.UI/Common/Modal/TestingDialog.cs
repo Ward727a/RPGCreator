@@ -64,11 +64,11 @@ public class TestingDialog : Window
             };
             textDialog.ShowDialog(instance);
         }),
-        new("Open icons explorer", () =>
-        {
-            var iconsExplorer = new IconsExplorer();
-            iconsExplorer.ShowDialog(instance);
-        })
+        // new("Open icons explorer", () =>
+        // {
+        //     var iconsExplorer = new IconsExplorer();
+        //     iconsExplorer.ShowDialog(instance);
+        // })
     ];
     
     /// <summary>

@@ -14,7 +14,7 @@ public record struct TileData()
     {
         return new TileData
         {
-            TileSize = new Point(tileDef.SizeInTileset.X, tileDef.SizeInTileset.Y),
+            TileSize = new Point(tileDef.SizeInTileset.Width, tileDef.SizeInTileset.Height),
             TilePosition = new Point(tileDef.PositionInTileset.X, tileDef.PositionInTileset.Y),
             TilesetId = tileDef.TilesetDef.Unique,
         };

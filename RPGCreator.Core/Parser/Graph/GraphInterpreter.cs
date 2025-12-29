@@ -1,14 +1,16 @@
 using RPGCreator.Core.Parser.Graph.TableHandler;
 using RPGCreator.Core.Types.Blueprint.Nodes;
 using RPGCreator.Core.Types.Blueprint.Nodes.Debug;
+using RPGCreator.SDK.Graph;
+using RPGCreator.SDK.Types.Internals;
 using Serilog;
 
 namespace RPGCreator.Core.Parser.Graph;
 
-public sealed class GraphInterpreter
+public sealed class GraphInterpreter : IResettable<GraphInterpreter>
 {
-    private readonly IList<GraphLabeledInstr> _program;
-    private readonly GraphEvalEnvironment _env;
+    private IList<GraphLabeledInstr> _program;
+    private GraphEvalEnvironment _env;
     private Dictionary<string, Object?> GlobalsVariables => GraphEvalEnvironment.GlobalsVariables;
 
     public GraphInterpreter(IList<GraphLabeledInstr> program, GraphEvalEnvironment env)
@@ -310,5 +312,13 @@ public sealed class GraphInterpreter
         }
 
         return default;
+    }
+
+    public void Reset(params object[] parameters)
+    {
+        if (parameters.Length != 2)
+            throw new ArgumentException("Invalid number of parameters for resetting GraphInterpreter. Expected 2 parameters: IList<GraphLabeledInstr> program, GraphEvalEnvironment env.");
+        _program = (IList<GraphLabeledInstr>)parameters[0]!;
+        _env = (GraphEvalEnvironment)parameters[1]!;
     }
 }

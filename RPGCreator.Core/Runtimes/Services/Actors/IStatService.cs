@@ -3,6 +3,7 @@ using RPGCreator.Core.Types.Assets.Characters;
 using RPGCreator.Core.Types.Assets.Characters.Stats;
 using RPGCreator.Core.Types.Assets.Items;
 using RPGCreator.Core.Types.Assets.Effect;
+using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 
 namespace RPGCreator.Core.Runtimes.Services.Actors;
 

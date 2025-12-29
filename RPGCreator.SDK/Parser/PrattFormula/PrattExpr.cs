@@ -1,4 +1,4 @@
-namespace RPGCreator.Core.Parser.PRATT;
+namespace RPGCreator.SDK.Parser.PrattFormula;
 
 public abstract record PrattExpr
 {

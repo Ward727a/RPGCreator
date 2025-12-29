@@ -1,6 +1,7 @@
 using Avalonia.Input;
 using RPGCreator.Core.Types.Assets.Characters.Stats;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.Core.Managers.AssetsManager.Factories;

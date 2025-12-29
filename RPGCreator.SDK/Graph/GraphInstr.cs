@@ -1,6 +1,4 @@
-using RPGCreator.Core.Types.Blueprint.Nodes;
-
-namespace RPGCreator.Core.Parser.Graph;
+namespace RPGCreator.SDK.Graph;
 
 public readonly struct GraphOperands
 {

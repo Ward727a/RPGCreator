@@ -5,6 +5,7 @@ using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Types;
 using RPGCreator.Core.Types.Assets.Characters;
 using RPGCreator.Core.Types.Assets.Skills;
+using RPGCreator.SDK.Assets.Definitions.Characters;
 using Serilog;
 using SixLabors.ImageSharp.Drawing.Processing;
 using Ursa.Controls;

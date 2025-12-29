@@ -1,5 +1,6 @@
 using RPGCreator.Core.Parser.Graph;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 
 namespace RPGCreator.Core.Types.Assets.Characters.Stats;
 

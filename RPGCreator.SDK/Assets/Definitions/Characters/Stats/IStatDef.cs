@@ -1,13 +1,12 @@
-using RPGCreator.Core.Parser.Graph;
-using RPGCreator.Core.Parser.PRATT;
-using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK.Graph;
+using RPGCreator.SDK.Parser.PrattFormula;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types.Interfaces;
 using RPGCreator.SDK.Types.Internals;
 
-namespace RPGCreator.Core.Types.Assets.Characters.Stats;
+namespace RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 
-public interface IStatDef : ISerializable, IDeserializable, IHasUniqueId, IHasSavePath, IAssetDef
+public interface IStatDef : ISerializable, IDeserializable, IHasSavePath, IAssetDef
 {
     public const string OnValueChangedEvent = "OnValueChanged";
     /// <summary>
@@ -66,7 +65,7 @@ public interface IStatDef : ISerializable, IDeserializable, IHasUniqueId, IHasSa
     /// For example, a derived stat like "Attack Power" could be calculated as a formula based on the character's strength and agility stats.<br/>
     /// like "AttackPower = (Strength * 1.5) + (Agility * 0.5)" or similar expressions.
     /// </summary>
-    public PrattCompiledFormula? StatCompiledFormula { get; set; }
+    public IPrattFormula? StatCompiledFormula { get; set; }
 
     /// <summary>
     /// The non-compiled formula used to calculate the stat value, if applicable (<see cref="StatTypeKind"/> == <see cref="EStatTypeKind"/>.<see cref="EStatTypeKind.Derived"/>).<br/>
@@ -76,8 +75,8 @@ public interface IStatDef : ISerializable, IDeserializable, IHasUniqueId, IHasSa
     /// </summary>
     public string StatNonCompiledFormula { get; set; }
 
-    public abstract void AddEvent(string eventName, GraphDocumentCompiled eventDocumentCompiled);
-    public abstract bool TryGetEvent(string eventName, out GraphDocumentCompiled? eventCompiled);
+    public abstract void AddEvent(string eventName, IGraphScript eventDocumentCompiled);
+    public abstract bool TryGetEvent(string eventName, out IGraphScript? eventCompiled);
 
-    public abstract Dictionary<string, GraphDocumentCompiled> GetAllEvents();
+    public abstract Dictionary<string, IGraphScript> GetAllEvents();
 }

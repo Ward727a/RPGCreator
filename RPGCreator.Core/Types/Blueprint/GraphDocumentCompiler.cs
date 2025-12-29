@@ -1,6 +1,7 @@
 using RPGCreator.Core.Common;
 using RPGCreator.Core.Parser.Graph;
 using RPGCreator.Core.Types.Blueprint.Nodes;
+using RPGCreator.SDK.Graph;
 using Serilog;
 
 namespace RPGCreator.Core.Types.Blueprint;

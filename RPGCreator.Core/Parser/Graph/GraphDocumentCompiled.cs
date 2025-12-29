@@ -1,8 +1,9 @@
+using RPGCreator.SDK.Graph;
 using Serilog;
 
 namespace RPGCreator.Core.Parser.Graph;
 
-public class GraphDocumentCompiled(List<GraphLabeledInstr> instructions, Dictionary<string, (System.Type, object)>? variables = null)
+public class GraphDocumentCompiled(List<GraphLabeledInstr> instructions, Dictionary<string, (System.Type, object)>? variables = null) : IGraphScript
 {
     public string DocumentPath { get; set; } = string.Empty;
     List<GraphLabeledInstr> Instructions { get; } = instructions;

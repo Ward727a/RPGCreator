@@ -5,7 +5,7 @@ using Avalonia.VisualTree;
 using RPGCreator.Core;
 using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Types;
-using RPGCreator.Core.Types.Assets.Characters.Stats;
+using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 using Serilog;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor;

@@ -2,6 +2,7 @@ using RPGCreator.Core.Parser.Graph;
 using RPGCreator.Core.Parser.Graph.NodesMaker;
 using RPGCreator.Core.Types.Blueprint;
 using RPGCreator.Core.Types.Blueprint.Nodes;
+using RPGCreator.SDK.Graph;
 
 namespace RPGCreator.Core.Types.Blueprint.Nodes.Gets;
 

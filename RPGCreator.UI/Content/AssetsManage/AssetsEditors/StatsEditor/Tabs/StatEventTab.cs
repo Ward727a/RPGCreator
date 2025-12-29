@@ -5,12 +5,11 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using RPGCreator.Core;
-using RPGCreator.Core.Types.Assets.Characters.Stats;
 using RPGCreator.Core.Types.Blueprint;
-using RPGCreator.Core.Types.Blueprint.Nodes;
 using RPGCreator.Core.Types.Blueprint.Nodes.Debug;
 using RPGCreator.Core.Types.Blueprint.Nodes.Gets;
 using RPGCreator.Core.Types.Blueprint.Nodes.Math;
+using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 using RPGCreator.UI.Common.Blueprint;
 using Serilog;
 

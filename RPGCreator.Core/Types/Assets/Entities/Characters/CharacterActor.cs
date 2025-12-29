@@ -4,6 +4,7 @@ using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Types.Assets.Actors;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.SDK.Serializer;
 using Serilog;
 using Internal_Point = RPGCreator.Core.Types.Internal.Point;

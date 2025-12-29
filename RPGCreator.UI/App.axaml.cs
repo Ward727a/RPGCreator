@@ -28,7 +28,6 @@ using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using RPGCreator.Core;
-using RPGCreator.Core.Events.EventArgs;
 using RPGCreator.UI.Content.Launcher;
 using RPGCreator.UI.Styles;
 using System;

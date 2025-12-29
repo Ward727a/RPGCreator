@@ -4,8 +4,8 @@ using Avalonia.Controls;
 using RPGCreator.Core;
 using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Types.Assets.BaseAssetsPack;
-using RPGCreator.Core.Types.Assets.Characters.Stats;
 using RPGCreator.Core.Types.Assets.Entities.Characters.Stats;
+using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor.Tabs;
 using Serilog;
 

@@ -1,4 +1,4 @@
-namespace RPGCreator.Core.Types.Assets.Characters.Stats;
+namespace RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 
 public enum EStatModifierMode
 {

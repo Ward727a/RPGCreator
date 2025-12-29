@@ -1,6 +1,7 @@
 using RPGCreator.Core.Parser.Graph;
 using RPGCreator.Core.Types.Blueprint.Nodes;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Serializer;
 using Serilog;
 

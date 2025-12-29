@@ -6,6 +6,7 @@ using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Map;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Animations;
+using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 using RPGCreator.SDK.Types.Interfaces;
 using Serilog;
 

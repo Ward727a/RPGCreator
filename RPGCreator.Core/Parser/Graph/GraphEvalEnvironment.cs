@@ -1,6 +1,9 @@
+using System.Runtime.InteropServices;
+using RPGCreator.SDK.Graph;
+
 namespace RPGCreator.Core.Parser.Graph;
 
-public sealed class GraphEvalEnvironment
+public sealed class GraphEvalEnvironment : IGraphEnv
 {
 
     public struct RegisterValue

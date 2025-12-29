@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using RPGCreator.Core;
 using RPGCreator.Core.Types.Assets.Characters;
+using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;
 using Serilog;
 using Ursa.Controls;

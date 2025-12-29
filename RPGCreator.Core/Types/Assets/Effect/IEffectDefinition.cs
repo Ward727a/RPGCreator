@@ -1,5 +1,6 @@
 using RPGCreator.Core.Runtimes.Services.Actors;
 using RPGCreator.Core.Types.Assets.Characters.Stats;
+using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 using RPGCreator.SDK.Serializer;
 
 namespace RPGCreator.Core.Types.Assets.Effect;

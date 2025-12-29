@@ -26,6 +26,7 @@ using RPGCreator.Core.Configs;
 using RPGCreator.Core.Events;
 using RPGCreator.Core.Events.EventArgs;
 using RPGCreator.Core.Parser.Graph;
+using RPGCreator.Core.Parser.PRATT;
 using RPGCreator.Core.Resources;
 using RPGCreator.Core.Scheduler;
 using RPGCreator.Core.Types.Assets;
@@ -39,6 +40,7 @@ using RPGCreator.Core.Types.Blueprint;
 using RPGCreator.Core.Types.Map;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
+using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using Serilog;
 
@@ -110,6 +112,8 @@ namespace RPGCreator.Core
             Icons = new EngineIcons();
             #endif
             
+            EngineServices.GraphRunnerService = new GraphRunnerService();
+            EngineServices.PrattFormulaService = new PrattFormulaService();
             EngineServices.SerializerService = Serializer;
             var typeMapping = new AssetsTypeMapping();
             

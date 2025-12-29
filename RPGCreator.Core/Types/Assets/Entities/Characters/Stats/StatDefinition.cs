@@ -1,9 +1,8 @@
-using RPGCreator.Core.Parser.Graph;
-using RPGCreator.Core.Parser.PRATT;
-using RPGCreator.Core.Types.Assets.Characters.Stats;
 using RPGCreator.Core.Types.Blueprint;
-using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
+using RPGCreator.SDK.Graph;
+using RPGCreator.SDK.Parser.PrattFormula;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
@@ -40,20 +39,22 @@ public class StatDefinition : IStatDef
         IsVisible = true;
     }
     
-    public PrattCompiledFormula? StatCompiledFormula { get; set; }
+    public IPrattFormula? StatCompiledFormula { get; set; }
     public string StatNonCompiledFormula { get; set; } = string.Empty;
-    private readonly Dictionary<string, GraphDocumentCompiled> _statGraphEvents = new();
-    public void AddEvent(string eventName, GraphDocumentCompiled eventDocumentCompiled)
+    private readonly Dictionary<string, IGraphScript> _statGraphEvents = new();
+
+    public void AddEvent(string eventName, IGraphScript eventDocumentCompiled)
     {
         _statGraphEvents[eventName] = eventDocumentCompiled;
     }
-    public bool TryGetEvent(string eventName, out GraphDocumentCompiled? eventCompiled)
+
+    public bool TryGetEvent(string eventName, out IGraphScript? eventCompiled)
     {
         return _statGraphEvents.TryGetValue(eventName, out eventCompiled);
     }
-    public Dictionary<string, GraphDocumentCompiled> GetAllEvents()
+    public Dictionary<string, IGraphScript> GetAllEvents()
     {
-        return new Dictionary<string, GraphDocumentCompiled>(_statGraphEvents);
+        return new Dictionary<string, IGraphScript>(_statGraphEvents);
     }
 
     public SerializationInfo GetObjectData()

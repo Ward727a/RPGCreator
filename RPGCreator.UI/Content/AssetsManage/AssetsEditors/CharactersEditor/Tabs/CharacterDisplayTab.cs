@@ -16,6 +16,7 @@ using RPGCreator.Core.Types;
 using RPGCreator.Core.Types.Assets.Characters;
 using RPGCreator.Core.Types.Windows;
 using RPGCreator.SDK.Assets.Definitions.Animations;
+using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.UI.Common;
 using Serilog;
 using Ursa.Controls;

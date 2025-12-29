@@ -1,4 +1,4 @@
-namespace RPGCreator.Core.Parser.Graph;
+namespace RPGCreator.SDK.Graph;
 
 [Flags]
 public enum EGraphOperandKind

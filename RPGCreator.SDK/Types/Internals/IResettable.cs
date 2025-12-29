@@ -6,5 +6,11 @@ public interface IResettable<in TDef>
     // Resets the instance's state based on the provided definition.
     // We can also give it a list of parameters to customize the reset process.
     // </summary>
-    void ResetFrom(TDef def, params object[] parameters);
+    void ResetFrom(TDef def, params object[] parameters)
+    {
+    }
+    
+    void Reset(params object[] parameters)
+    {
+    }
 }

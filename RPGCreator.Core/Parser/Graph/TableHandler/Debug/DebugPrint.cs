@@ -1,5 +1,6 @@
 using RPGCreator.Core.Types.Blueprint.Nodes;
 using RPGCreator.Core.Types.Blueprint.Nodes.Debug;
+using RPGCreator.SDK.Graph;
 using Serilog;
 
 namespace RPGCreator.Core.Parser.Graph.TableHandler.Debug;

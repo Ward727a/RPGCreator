@@ -1,18 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
-using RPGCreator.Core.ECS.Systems;
-using RPGCreator.Core.Managers.AssetsManager.Registries;
-using RPGCreator.Core.Types.Assets.Actors;
-using RPGCreator.Core.Types.Assets.Characters.Stats;
-using RPGCreator.Core.Types.Assets.Entities.Characters.Stats;
-using RPGCreator.Core.Types.Assets.Skills;
-using RPGCreator.Core.Types.Internal;
-using RPGCreator.SDK;
+using RPGCreator.Core.Types.Assets.Characters;
+using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
-namespace RPGCreator.Core.Types.Assets.Characters;
+namespace RPGCreator.SDK.Assets.Definitions.Characters;
 
 #region Should be moved to a more appropriate location
 

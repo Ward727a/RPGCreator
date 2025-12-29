@@ -8,11 +8,10 @@ using Avalonia.Media;
 using AvaloniaEdit;
 using AvaloniaEdit.TextMate;
 using RPGCreator.Core;
-using RPGCreator.Core.Parser.PRATT;
-using RPGCreator.Core.Types.Assets.Characters.Stats;
 using RPGCreator.Core.Types;
 using RPGCreator.Core.Types.Assets.BaseAssetsPack;
 using RPGCreator.Core.Types.Windows;
+using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 using Serilog;
 using TextMateSharp.Grammars;
 

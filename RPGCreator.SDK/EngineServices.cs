@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK.Assets;
+using RPGCreator.SDK.Graph;
+using RPGCreator.SDK.Parser.PrattFormula;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
@@ -65,4 +67,7 @@ public static class EngineServices
     public static ISerializerService SerializerService { get; set; } = null!;
     public static IAssetTypeRegistry AssetTypeRegistry { get; set; } = null!;
     public static IResourceService ResourcesService { get; set; } = null!;
+    public static IProjectsManager ProjectsManager { get; set; } = null!;
+    public static IGraphRunnerService GraphRunnerService { get; set; } = null!;
+    public static IPrattFormulaService PrattFormulaService { get; set; } = null!;
 }

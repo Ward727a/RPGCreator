@@ -54,6 +54,7 @@ namespace RPGCreator.Core
             
             EngineServices.AssetsManager = Assets;
             EngineServices.GameFactory = GameFactory;
+            EngineServices.ProjectsManager = Projects;
 
             EngineCore.Instance.Events.OnCoreManagersReady(new());
             

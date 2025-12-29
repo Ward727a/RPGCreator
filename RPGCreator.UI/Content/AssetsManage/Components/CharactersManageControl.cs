@@ -7,6 +7,7 @@ using Avalonia.VisualTree;
 using RPGCreator.Core;
 using RPGCreator.Core.Types.Assets;
 using RPGCreator.Core.Types.Assets.Characters;
+using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor;
 
 namespace RPGCreator.UI.Content.AssetsManage.Components;
