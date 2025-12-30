@@ -635,9 +635,9 @@ public class SkillEffectTab : UserControl
     {
         _effectComboBox.Items.Clear();
 
-        EngineServices.AssetsManager.GetAssets<ISkillEffect>();
+        var skillEffects = EngineServices.AssetsManager.GetAssets<ISkillEffect>();
         
-        foreach (var effect in skillEffectsRegistry.All())
+        foreach (var effect in skillEffects)
         {
             _effectComboBox.Items.Add(new ComboBoxItem()
             {

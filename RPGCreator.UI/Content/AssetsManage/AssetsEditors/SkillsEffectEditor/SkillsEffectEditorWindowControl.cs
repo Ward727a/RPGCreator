@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
-using RPGCreator.Core;
-using RPGCreator.Core.Managers.AssetsManager.Registries;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Skills;
+using RPGCreator.SDK.Logging;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEffectEditor.Tabs;
-using Serilog;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEffectEditor;
 
@@ -113,7 +113,7 @@ public class SkillsEffectEditorWindowControl : UserControl
 
             if(generalTabContent == null || effectTabContent == null)
             {
-                Log.Error("SkillEffectEditor: Unable to save, general or effect tab content is null.");
+                Logger.Error("SkillEffectEditor: Unable to save, general or effect tab content is null.");
                 return;
             }
             
@@ -124,17 +124,10 @@ public class SkillsEffectEditorWindowControl : UserControl
 
             if (!newEffect.PackId.HasValue)
                 return;
-            Log.Debug("Saving Skill Effect: {0} with {numberProperties} props and {numberInstructions} instrs in pack {packId}.", newEffect.DisplayName, newEffect.PropertyDescriptors.Count, newEffect.GetEvent().GetInstructions().Count, newEffect.PackId.ToString());
+            Logger.Debug("Saving Skill Effect: {0} with {numberProperties} props and {numberInstructions} instrs in pack {packId}.", newEffect.DisplayName, newEffect.PropertyDescriptors.Count, newEffect.GetEvent().GetInstructions().Count, newEffect.PackId.ToString());
             
 
-            EngineCore.Instance.Managers.Assets.RegisterAsset(newEffect);
-            //
-            // if (EngineCore.Instance.Managers.Assets.TryGetAssetsPack(newEffect.PackId.Value, out var pack))
-            // {
-            //     pack?.AddAsset(newEffect);
-            //     newEffect.Save();
-            //     pack?.Save();
-            // }
+            EngineServices.AssetsManager.RegisterAsset(newEffect);
             
             
         };

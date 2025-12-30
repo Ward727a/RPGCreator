@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using RPGCreator.Core.Types.Blueprint;
 
 namespace RPGCreator.SDK.Graph;
 
@@ -10,4 +11,6 @@ public interface IGraphService
 
     public void InvalidateCache(string scriptPath);
     public void ClearCache();
+    
+    IGraphScript? Compile(GraphDocument document);
 }

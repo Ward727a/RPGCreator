@@ -1,13 +1,11 @@
 using System;
 using Avalonia.Controls;
-using RPGCreator.Core;
-using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Types;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.SDK.Assets.Definitions.Skills;
-using Serilog;
-using SixLabors.ImageSharp.Drawing.Processing;
-using Ursa.Controls;
+using RPGCreator.SDK.Extensions;
+using RPGCreator.SDK.Logging;
 using Brushes = Avalonia.Media.Brushes;
 using NumericUpDown = Avalonia.Controls.NumericUpDown;
 
@@ -296,7 +294,7 @@ public class CharacterSkillsTab : UserControl
 
     private void RegisterEvents()
     {
-        Log.Debug("Registering Character Skills Tab Events...");
+        Logger.Debug("Registering Character Skills Tab Events...");
         AddSkillButton.Click += (_, _) =>
         {
             if (SkillComboBox.SelectedItem is ComboBoxItem selectedItem)
@@ -305,13 +303,13 @@ public class CharacterSkillsTab : UserControl
 
                 if (!itemTag.HasValue)
                 {
-                    Log.Error("No skill selected to add.");
+                    Logger.Error("No skill selected to add.");
                     return;
                 }
 
                 var skillUnique = itemTag.Value;
                 
-                var skillDef = EngineCore.Instance.Managers.Assets.TryResolveAsset(skillUnique, out ISkillDef? result) ? result : null;
+                var skillDef = EngineServices.AssetsManager.TryResolveAsset(skillUnique, out ISkillDef? result) ? result : null;
                 if (skillDef != null && !Data.Skills.ContainsKey(skillUnique))
                 {
                     var skillData = new CharacterSkill(skillDef);
@@ -324,12 +322,12 @@ public class CharacterSkillsTab : UserControl
     
     private void RefreshSkills()
     {
-        Log.Debug("Refreshing Skills List...");
+        Logger.Debug("Refreshing Skills List...");
         SkillComboBox.Items.Clear();
 
-        var skillRegistry = EngineCore.Instance.Managers.Assets.TryResolveRegistry("skills", out var registry) ? registry as SkillsRegistry: null;
+        var skills = EngineServices.AssetsManager.GetAssets<ISkillDef>();
         
-        foreach (var skillDef in skillRegistry.All())
+        foreach (var skillDef in skills)
         {
             SkillComboBox.Items.Add(
                 new ComboBoxItem()
@@ -344,11 +342,11 @@ public class CharacterSkillsTab : UserControl
 
     private void RefreshSkillData()
     {
-        Log.Debug("Refreshing Character Skills Data...");
+        Logger.Debug("Refreshing Character Skills Data...");
         SkillsListPanel.Children.Clear();
         foreach (var skillEntry in Data.Skills)
         {
-            var skillDef = EngineCore.Instance.Managers.Assets.TryResolveAsset(skillEntry.Key, out ISkillDef? result) ? result : null;
+            var skillDef = EngineServices.AssetsManager.TryResolveAsset(skillEntry.Key, out ISkillDef? result) ? result : null;
             if (skillDef != null)
             {
                 SkillsListPanel.Children.Add(new CharaSkillItem(skillDef, skillEntry.Value));

@@ -97,4 +97,9 @@ internal class GraphService : IGraphService
         _scriptCache.Clear();
         Logger.Info("GraphRunnerService.ClearCache: All cached scripts have been cleared.");
     }
+
+    public IGraphScript? Compile(GraphDocument document)
+    {
+        return GraphDocumentCompiler.Compile(document);
+    }
 }

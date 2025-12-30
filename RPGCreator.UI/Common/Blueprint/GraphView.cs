@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
@@ -6,9 +5,9 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.VisualTree;
-using RPGCreator.Core.Types;
 using RPGCreator.Core.Types.Blueprint;
-using Serilog;
+using RPGCreator.SDK.Graph;
+using RPGCreator.SDK.Logging;
 
 namespace RPGCreator.UI.Common.Blueprint;
 
@@ -103,7 +102,7 @@ public sealed class GraphView : Control
                 {
                     _view = Matrix.CreateTranslation(delta.X, delta.Y) * _view;
                     InvalidateArrange();
-                    Log.Debug("GraphView.OnPointerMove: View moved by {Delta}", delta);
+                    Logger.Debug("GraphView.OnPointerMove: View moved by {Delta}", delta);
                     e.Handled = true;
                 }
             }
@@ -115,7 +114,7 @@ public sealed class GraphView : Control
         if (e.GetCurrentPoint(_hitbox).Properties.IsRightButtonPressed)
         {
             _rightClicking = true;
-            Log.Information("GraphView.OnPointerDown: Right click detected, clearing link state.");
+            Logger.Information("GraphView.OnPointerDown: Right click detected, clearing link state.");
             e.Handled = true;
         }
         return;
@@ -330,7 +329,7 @@ public sealed class GraphView : Control
     
     private void OnWheel(object? s, PointerWheelEventArgs e)
     {
-        Log.Debug("GraphView.OnWheel: {Delta}", e.Delta);
+        Logger.Debug("GraphView.OnWheel: {Delta}", e.Delta);
         var p = e.GetPosition(_hitbox);
         var f = e.Delta.Y > 0 ? 1.1 : 1/1.1;
         // _view = Matrix.CreateTranslation(-p.X, -p.Y) * _view;
@@ -338,7 +337,7 @@ public sealed class GraphView : Control
         // Max zoom out to 0.1, max zoom in to 5
         if (_view.M11 * f < 0.1 || _view.M11 * f > 5)
         {
-            Log.Debug("GraphView.OnWheel: Zoom limit reached, ignoring.");
+            Logger.Debug("GraphView.OnWheel: Zoom limit reached, ignoring.");
             return;
         }
         _view = Matrix.CreateScale(f, f) * _view;
@@ -377,7 +376,7 @@ public sealed class GraphView : Control
             _rightClicking = false;
             // Right click released, and wasn't moving the view, We need to show the context menu
             var pos = e.GetPosition(_overlay);
-            Log.Information("GraphView.OnPointerUp: Right click released at {Position}, showing context menu.", pos);
+            Logger.Information("GraphView.OnPointerUp: Right click released at {Position}, showing context menu.", pos);
             var menu = new GraphViewCtxMenu(_doc);
             
             var newPos = pos;

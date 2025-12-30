@@ -1,10 +1,13 @@
 using System.Collections.Generic;
 using Avalonia.Controls;
-using RPGCreator.Core.Types.Blueprint;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Skills;
+using RPGCreator.SDK.Graph;
+using RPGCreator.SDK.Graph.Nodes;
+using RPGCreator.SDK.Logging;
 using RPGCreator.UI.Common.Blueprint;
-using Serilog;
 
-namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEffectEditor;
+namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEffectEditor.Tabs;
 
 public class SkillEffectEffectEditorControl : UserControl
 {
@@ -18,7 +21,7 @@ public class SkillEffectEffectEditorControl : UserControl
     
     #region Properties
     
-    public GraphDocumentCompiled CompiledDocument => GraphDocumentCompiler.Compile(_doc);
+    public IGraphScript? CompiledDocument => EngineServices.GraphService.Compile(_doc);
     
     private List<SkillEffectPropertyDescriptor> _effectProperties;
     private GraphDocument _doc = new();
@@ -81,8 +84,12 @@ public class SkillEffectEffectEditorControl : UserControl
         Grid.SetRow(Graph, 0);
         
         // We move the start and end nodes so it's not hidden by the variables panel
-        _doc.AddNode(new NodeStart(){Y = 300});
-        _doc.AddNode(new NodeEnd() { Y=300, X = 500 });
+        var startNode = GraphNodeRegistry.GetNode("System|Start").Clone();
+        _doc.AddNode(startNode);
+        _doc.MoveNode(startNode.Id, 0, 300);
+        var endNode = GraphNodeRegistry.GetNode("System|End").Clone();
+        _doc.AddNode(endNode);
+        _doc.MoveNode(endNode.Id, 500, 300);
         
         Graph.SetDocument(_doc);
     }
@@ -95,17 +102,17 @@ public class SkillEffectEffectEditorControl : UserControl
     private void RefreshGraphVariables()
     {
         _doc.ClearGraphVariables();
-        Log.Debug("Refreshing graph variables...");
+        Logger.Debug("Refreshing graph variables...");
         foreach (var propertyDescriptor in _effectProperties)
         {
 
             var propertyPath = $"skill_effect.props.{propertyDescriptor.Name}";
             
             _doc.AddGraphVariable(propertyPath, typeof(SkillEffectPropertyDescriptor), propertyDescriptor);
-            Log.Debug("Added graph variable: {PropertyPath}", propertyPath);
+            Logger.Debug("Added graph variable: {PropertyPath}", propertyPath);
         }
         
-        Log.Debug("Total graph variables: {Count} from {Count2} total descriptors.", _doc.GraphVariables.Count, _effectProperties.Count);
+        Logger.Debug("Total graph variables: {Count} from {Count2} total descriptors.", _doc.GraphVariables.Count, _effectProperties.Count);
     }
     
     #endregion

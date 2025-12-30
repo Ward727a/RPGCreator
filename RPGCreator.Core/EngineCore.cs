@@ -38,6 +38,7 @@ using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
+using RPGCreator.SDK.Graph.Nodes;
 using Serilog;
 
 namespace RPGCreator.Core

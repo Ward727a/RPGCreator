@@ -4,7 +4,9 @@ using Avalonia.Controls;
 using RPGCreator.Core;
 using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Types.Assets.BaseAssetsPack;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
+using RPGCreator.SDK.Logging;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor.Tabs;
 using Serilog;
 
@@ -90,10 +92,10 @@ public class StatsEditorWindowControl : UserControl
         };
         saveButton.Click += (s, e) =>
         {
-            Log.Information("Saving Stat Definition...");
+            Logger.Information("Saving Stat Definition...");
             // AssetsManager.AssetMapping[typeof(IStatDef)].Invoke(StatDef);
             
-            EngineSerializer.Instance.Serialize(StatDef, out string data);
+            EngineServices.SerializerService.Serialize(StatDef, out string data);
             
             // Default test path
             string defaultTestPAth = System.IO.Path.Combine(EngineCore.Instance.Data.EditedProject.Path, "Assets", "Stats");
@@ -124,11 +126,11 @@ public class StatsEditorWindowControl : UserControl
             }
             else
             {
-                Log.Warning("No Assets Pack selected for this Stat Definition. It won't be part of any pack.");
+                Logger.Warning("No Assets Pack selected for this Stat Definition. It won't be part of any pack.");
             }
             
-            Log.Debug("Stat Definition saved at {Path} with data: {Data}", defaultTestPAth, data);
-            Log.Information("Stat Definition saved.");
+            Logger.Debug("Stat Definition saved at {Path} with data: {Data}", defaultTestPAth, data);
+            Logger.Information("Stat Definition saved.");
         };
         buttonsPanel.Children.Add(saveButton);
     }

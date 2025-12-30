@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using RPGCreator.Core.Types.Blueprint;
+using RPGCreator.SDK.Graph;
+using RPGCreator.SDK.Graph.Nodes;
 
 namespace RPGCreator.UI.Common.Blueprint.LeftBar;
 

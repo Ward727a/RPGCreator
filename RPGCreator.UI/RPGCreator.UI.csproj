@@ -12,7 +12,6 @@
     <AvaloniaResource Include="Assets\**">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AvaloniaResource>
-    <AvaloniaResource Remove="Common\Blueprint\**" />
     <AvaloniaResource Remove="Content\AssetsManage\AssetsEditors\AutotileEditor\**" />
   </ItemGroup>
 
@@ -62,7 +61,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Remove="Common\Blueprint\**" />
     <Compile Remove="Content\AssetsManage\AssetsEditors\AutotileEditor\**" />
   </ItemGroup>
 
@@ -83,7 +81,6 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Remove="Common\Blueprint\**" />
     <EmbeddedResource Remove="Content\AssetsManage\AssetsEditors\AutotileEditor\**" />
   </ItemGroup>
 	<ItemGroup>
@@ -113,15 +110,12 @@
 	  <UpToDateCheckInput Remove="OldUI\Views\Modals\ErrorDialog.axaml" />
 	</ItemGroup>
 	<ItemGroup>
-	  <AvaloniaXaml Remove="Common\Blueprint\**" />
 	  <AvaloniaXaml Remove="Content\AssetsManage\AssetsEditors\AutotileEditor\**" />
 	</ItemGroup>
 	<ItemGroup>
-	  <AdditionalFiles Remove="Common\Blueprint\**" />
 	  <AdditionalFiles Remove="Content\AssetsManage\AssetsEditors\AutotileEditor\**" />
 	</ItemGroup>
 	<ItemGroup>
-	  <None Remove="Common\Blueprint\**" />
 	  <None Remove="Content\AssetsManage\AssetsEditors\AutotileEditor\**" />
 	</ItemGroup>
 

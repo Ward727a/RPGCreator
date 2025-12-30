@@ -1,6 +1,6 @@
 using RPGCreator.Core.Parser.Graph;
-using RPGCreator.Core.Parser.Graph.NodesMaker;
 using RPGCreator.SDK.Graph;
+using RPGCreator.SDK.Graph.Nodes;
 
 namespace RPGCreator.Core.Types.Blueprint.Nodes.Entity;
 

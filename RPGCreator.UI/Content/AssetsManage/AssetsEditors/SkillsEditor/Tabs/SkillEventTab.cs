@@ -3,13 +3,12 @@ using System.IO;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
-using RPGCreator.Core;
-using RPGCreator.Core.Types.Blueprint;
-using RPGCreator.Core.Types.Blueprint.Nodes.Debug;
-using RPGCreator.Core.Types.Blueprint.Nodes.Math;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Skills;
+using RPGCreator.SDK.Graph;
+using RPGCreator.SDK.Graph.Nodes;
+using RPGCreator.SDK.Logging;
 using RPGCreator.UI.Common.Blueprint;
-using Serilog;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEditor.Tabs;
 
@@ -80,13 +79,13 @@ public class SkillEventTab : UserControl
         {
             try
             {
-                Log.Information("Compiling the graph...");
+                Logger.Information("Compiling the graph...");
                 _doc.Compile();
-                Log.Information("Graph compiled & tested successfully.");
+                Logger.Information("Graph compiled & tested successfully.");
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error while compiling the graph");
+                Logger.Error($"Error while compiling the graph {ex.Message}");
             }
         };
         _topMenu.Children.Add(_compileAndRunButton);
@@ -99,18 +98,15 @@ public class SkillEventTab : UserControl
         {
             try
             {
-                Log.Information("Saving the graph...");
-                EngineSerializer.Instance.Serialize(_doc, out var data);
-                Log.Debug("Graph data: {Data}", data);
-                // Save to a test file for now.
-                File.WriteAllText("test_save_graph.xml", data);
-                Log.Information("Graph saved successfully.");
+                Logger.Information("Saving the graph...");
+                _doc.Save("test_save_graph.xml");
+                Logger.Information("Graph saved successfully.");
                 
                 _doc.SavePath = "test_save_graph.xml";
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error while saving the graph");
+                Logger.Error($"Error while compiling the graph {ex.Message}");
             }
         };
         _topMenu.Children.Add(_saveGraphButton);
@@ -123,30 +119,14 @@ public class SkillEventTab : UserControl
         {
             try
             {
-                Log.Information("Loading the graph...");
-                if (File.Exists("test_save_graph.xml"))
-                {
-                    var data = File.ReadAllText("test_save_graph.xml");
-                    EngineSerializer.Instance.Deserialize<GraphDocument>(data, out var obj, out var type);
-                    if (obj is GraphDocument doc)
-                    {
-                        _graph.SetDocument(doc);
-                        _doc = doc; // Update the current document reference
-                        Log.Information("Graph loaded successfully.");
-                    }
-                    else
-                    {
-                        Log.Error("Loaded object is not a GraphDocument.");
-                    }
-                }
-                else
-                {
-                    Log.Error("Graph file 'test_save_graph.xml' does not exist.");
-                }
+                Logger.Information("Loading the graph...");
+                _doc = GraphDocument.Load("test_save_graph.xml");
+                _graph.SetDocument(_doc);
+                Logger.Information("Graph loaded successfully.");
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error while loading the graph");
+                Logger.Error($"Error while compiling the graph {ex.Message}");
             }
         };
         _topMenu.Children.Add(_testLoadGraphButton);
@@ -159,27 +139,27 @@ public class SkillEventTab : UserControl
         {
             try
             {
-                Log.Information("Compiling the graph...");
+                Logger.Information("Compiling the graph...");
                 // _doc.Compile();
                 _doc.Save("test.json");
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error while compiling the graph");
+                Logger.Error($"Error while compiling the graph {ex.Message}");
             }
         };
         grid.Children.Add(testbutton);
         Grid.SetRow(testbutton, 0);
-        
-        _doc.AddNode(new NodeEnd());
 
-        _doc.AddNode(new NodeMathMultiply());
-        _doc.AddNode(new NodeStart());
-        // _doc.AddNode(new GetPlayerName());
-        // _doc.AddNode(new NodePrint());
-        // _doc.AddNode(new GetPlayerName());
-        
-        _doc.AddNode(new NodePrint());
+        try
+        {
+            _doc.AddNode(GraphNodeRegistry.GetNode("System|End").Clone());
+            _doc.AddNode(GraphNodeRegistry.GetNode("System|Start").Clone());
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("Error while adding default nodes to the graph document: " + ex.Message);
+        }
 
         _graph.SetDocument(_doc);
     }

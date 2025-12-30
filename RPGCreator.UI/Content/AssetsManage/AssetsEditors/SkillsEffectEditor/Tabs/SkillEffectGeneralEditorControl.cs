@@ -5,6 +5,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using RPGCreator.Core;
 using RPGCreator.Core.Types;
+using RPGCreator.SDK.Assets.Definitions.Skills;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEffectEditor.Tabs;
 

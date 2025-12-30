@@ -9,13 +9,12 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Styling;
-using RPGCreator.Core;
-using RPGCreator.Core.Common;
-using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Types;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Animations;
+using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Types.Collections;
 using RPGCreator.UI.Common;
-using Serilog;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;
@@ -26,7 +25,7 @@ public class BulkAnimationImportControl : UserControl
     #endregion
     
     #region Events
-    public Action<Dictionary<string, AnimationDef>, AssetScope> OnImport;
+    public Action<Dictionary<string, AnimationDef>, IAssetScope> OnImport;
     #endregion
     
     #region Properties
@@ -43,7 +42,7 @@ public class BulkAnimationImportControl : UserControl
     private Dictionary<string, Dictionary<int, Bitmap>> _imageRowCache = new();
     private Dictionary<string, string> _imageCache = new();
 
-    private AssetScope AssetScope;
+    private IAssetScope AssetScope;
     
     #endregion
     
@@ -79,14 +78,14 @@ public class BulkAnimationImportControl : UserControl
     
     #region Constructors
 
-    public BulkAnimationImportControl(Action<Dictionary<string, AnimationDef>, AssetScope> onImport, List<string> animationNames)
+    public BulkAnimationImportControl(Action<Dictionary<string, AnimationDef>, IAssetScope> onImport, List<string> animationNames)
     {
         _animationNames = animationNames;
         OnImport = onImport;
         CreateComponents();
         RegisterEvents();
         Content = Body;
-        AssetScope = EngineCore.Instance.Managers.Assets.CreateAssetScope("BulkAnimationImportScope");
+        AssetScope = EngineServices.AssetsManager.CreateAssetScope("BulkAnimationImportScope");
     }
     
     #endregion
@@ -286,13 +285,12 @@ public class BulkAnimationImportControl : UserControl
             {
                 foreach (var (rowIndex, animationName) in rowMap)
                 {
-                    var spritesheetDef = EngineCore.Instance.Managers.Assets.CreateTransientAsset<SpritesheetDef>(AssetScope);
-                    var imageDef = new ImageDef(imagePath);
-                    spritesheetDef.SourceImage = imageDef;
+                    var spritesheetDef = EngineServices.AssetsManager.CreateTransientAsset<SpritesheetDef>(AssetScope);
+                    spritesheetDef.ImagePath = imagePath;
                     spritesheetDef.FrameWidth = 48;
                     spritesheetDef.FrameHeight = 64;
                     
-                    var animationDef = EngineCore.Instance.Managers.Assets.CreateTransientAsset<AnimationDef>(AssetScope);
+                    var animationDef = EngineServices.AssetsManager.CreateTransientAsset<AnimationDef>(AssetScope);
                     animationDef.SpriteSheetId = spritesheetDef.Unique;
                     animationDef.FrameIndexes = spritesheetDef.GetAllRowIndexes(rowIndex);
                     animationsToImport[animationName] = animationDef;
@@ -325,12 +323,11 @@ public class BulkAnimationImportControl : UserControl
     private void LoadPreviewerForCurrentSelection()
     {
         if (string.IsNullOrWhiteSpace(_currentImagePath) || _selectedRow < 0) return;
-        var imageDef = new ImageDef(_currentImagePath);
-        var spritesheetDef = EngineCore.Instance.Managers.Assets.CreateTransientAsset<SpritesheetDef>(AssetScope);
-        spritesheetDef.SourceImage = imageDef;
+        var spritesheetDef = EngineServices.AssetsManager.CreateTransientAsset<SpritesheetDef>(AssetScope);
+        spritesheetDef.ImagePath = _currentImagePath;
         spritesheetDef.FrameWidth = 48;
         spritesheetDef.FrameHeight = 64;
-        var animationDef = EngineCore.Instance.Managers.Assets.CreateTransientAsset<AnimationDef>(AssetScope);
+        var animationDef = EngineServices.AssetsManager.CreateTransientAsset<AnimationDef>(AssetScope);
         animationDef.SpriteSheetId = spritesheetDef.Unique;
         animationDef.FrameIndexes = spritesheetDef.GetAllRowIndexes(_selectedRow);
         
@@ -376,7 +373,7 @@ public class BulkAnimationImportControl : UserControl
 
         if (_usedAnimationNames.Contains(_selectedAnimationName))
         {
-            Log.Error("Animation name '{AnimationName}' is already assigned to another row.", _selectedAnimationName);
+            Logger.Error("Animation name '{AnimationName}' is already assigned to another row.", _selectedAnimationName);
             // Animation name already used, ignore selection
             return;
         }

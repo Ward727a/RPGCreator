@@ -2,11 +2,12 @@ using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 using RPGCreator.SDK.Parser.PrattFormula;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
+using RPGCreator.SDK.Types.Interfaces;
 using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.SDK.Assets.Definitions.Skills;
 
-public interface ISkillDef : IHasSavePath, IHasUniqueId, ISerializable, IDeserializable
+public interface ISkillDef : IAssetDef, IHasSavePath, ISerializable, IDeserializable
 {
     public Ulid? PackId { get; set; }
     public string Name { get; }

@@ -1,8 +1,4 @@
-using System.Reflection;
-using RPGCreator.Core.Parser.Graph.NodesMaker;
-using Serilog;
-
-namespace RPGCreator.Core.Types.Blueprint;
+namespace RPGCreator.SDK.Graph.Nodes;
 
 public static class GraphNodeRegistry
 {
@@ -65,14 +61,12 @@ public static class GraphNodeRegistry
             {
                 var part = parts[i];
 
-                // Dernière partie → on place la valeur
                 if (i == parts.Length - 1)
                 {
                     current[part] = kvp.Value!;
                 }
                 else
                 {
-                    // Si la clé existe déjà, on descend dedans
                     if (!current.TryGetValue(part, out var next))
                     {
                         next = new Dictionary<string, object>();
@@ -104,45 +98,6 @@ public static class GraphNodeRegistry
             throw new InvalidOperationException($"Node with path {path} is already registered!");
 
         Nodes.Add(path, node);
-    }
-    
-    public static void AnalyzeNodes()
-    {
-        if (AlreadyAnalyzed)
-        {
-            Log.Warning("GraphNodeRegistry: already been analyzed. Skipping re-analysis.");
-            return;
-        }
-
-        Log.Information("GraphNodeRegistry: analyzing nodes...");
-        
-        var asm = Assembly.GetExecutingAssembly();
-
-        AlreadyAnalyzed = true;
-        
-        var nodeTypes = asm.GetTypes()
-            .Where(t => t is { IsClass: true, IsAbstract: false } && typeof(Node).IsAssignableFrom(t))
-            .Where(t => t.GetCustomAttribute<GraphNodeAttribute>() != null)
-            .ToArray();
-        
-        Log.Information("GraphNodeRegistry: Found {Count} node candidates in assembly {AssemblyName}.",
-            nodeTypes.Length, asm.GetName().Name);
-
-        foreach (var type in nodeTypes)
-        {
-            var nodeObject = Activator.CreateInstance(type);
-            if (nodeObject is not Node node)
-            {
-                Log.Error("GraphNodeRegistry: Type {TypeName} is not a valid Node (Should inherit of {Node}).", type.FullName, typeof(Node));
-                continue;
-            }
-            RegisterNode(node);
-            Log.Information("GraphNodeRegistry: Registered node {NodeName} with path {NodePath}.",
-                node.DisplayName, CreateNodePath(node.Path, node.DisplayName));
-        }
-        Log.Information("GraphNodeRegistry: Added {Count} nodes.", Nodes.Count);
-        
-        Log.Information("GraphNodeRegistry: Analysis completed.");
     }
     
     private static string CreateNodePath(string path, string nodeName)

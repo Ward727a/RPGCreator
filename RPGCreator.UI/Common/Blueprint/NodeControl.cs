@@ -10,10 +10,10 @@ using Avalonia.Media;
 using AvaloniaEdit.Utils;
 using RPGCreator.Core.Types;
 using RPGCreator.Core.Types.Blueprint;
-using RPGCreator.Core.Types.Blueprint.Nodes;
-using RPGCreator.Core.Types.Blueprint.Nodes.Debug;
-using Serilog;
-using Point = RPGCreator.Core.Types.Internal.Point;
+using RPGCreator.SDK.Graph;
+using RPGCreator.SDK.Graph.Ports;
+using RPGCreator.SDK.Logging;
+using RPGCreator.UI.Extensions;
 
 namespace RPGCreator.UI.Common.Blueprint;
 
@@ -177,7 +177,7 @@ public sealed class NodeControl : Control
             // Get the position relative to the parent visual
             if (_hitboxBorder is not Visual parentVisual)
             {
-                Log.Error("NodeControl parent is not a Visual, cannot start drag.");
+                Logger.Error("NodeControl parent is not a Visual, cannot start drag.");
                 return;
             }
             
@@ -215,7 +215,7 @@ public sealed class NodeControl : Control
 
             if (_hitboxBorder is not Visual parentVisual)
             {
-                Log.Error("NodeControl parent is not a Visual, cannot start drag.");
+                Logger.Error("NodeControl parent is not a Visual, cannot start drag.");
                 return;
             }
             var pScreen = e.GetPosition(_hitboxBorder);
@@ -272,7 +272,7 @@ public class PortControl : Control
         var name = new FormattedText(Def.Name, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, Typeface.Default, 12, Brushes.White);
         var x = !_isOutput ? 16 : (Bounds.Width - name.Width - 16);
         ctx.DrawText(name, new Point(x, (Bounds.Height - name.Height)/2));
-        var color = new SolidColorBrush(Def.Kind.GetColor());
+        var color = new SolidColorBrush(Def.Kind.GetColor().ToAvalonia());
         if (Def.Type == EPortType.Array)
         {
             // Draw a square for array ports
@@ -308,7 +308,7 @@ public sealed class PortTextInputControl : PortControl, IPortInput
         Height = 22;
         if (Width - 100 <= 0)
         {
-            Log.Error("(Internal error) PortControl width cannot be less or equal than 0, resetting to 100.");
+            Logger.Error("(Internal error) PortControl width cannot be less or equal than 0, resetting to 100.");
             Width = 100;
             return;
         }
@@ -380,13 +380,13 @@ public sealed class PortTextInputControl : PortControl, IPortInput
         _inputPanel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
         this.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));  
         if(def.Kind == PortKind.Exec)
-            Log.Error("PortNumInputControl should not be Exec type, but got: {Def}", def.Kind);
+            Logger.Error("PortNumInputControl should not be Exec type, but got: {Def}", def.Kind);
     }
 
     public override void Render(DrawingContext ctx)
     {
         var r = new Rect(Bounds.Size);
-        var color = new SolidColorBrush(Def.Kind.GetColor());
+        var color = new SolidColorBrush(Def.Kind.GetColor().ToAvalonia());
 
         var cx = _isOutput ? r.Right : r.Left;
         var cy = r.Center.Y;
@@ -452,13 +452,13 @@ public sealed class PortNumInputControl : PortControl, IPortInput
         this.LogicalChildren.Add(_inputBox);
         
         if(def.Kind == PortKind.Exec)
-            Log.Error("PortNumInputControl should not be Exec type, but got: {Def}", def.Kind);
+            Logger.Error("PortNumInputControl should not be Exec type, but got: {Def}", def.Kind);
     }
 
     public override void Render(DrawingContext ctx)
     {
         var r = new Rect(Bounds.Size);
-        var color = new SolidColorBrush(Def.Kind.GetColor());
+        var color = new SolidColorBrush(Def.Kind.GetColor().ToAvalonia());
 
         var cx = _isOutput ? r.Right : r.Left;
         var cy = r.Center.Y;
@@ -538,13 +538,13 @@ public sealed class PortBoolInputControl : PortControl, IPortInput
         _inputPanel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
         this.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));  
         if(def.Kind == PortKind.Exec)
-            Log.Error("PortNumInputControl should not be Exec type, but got: {Def}", def.Kind);
+            Logger.Error("PortNumInputControl should not be Exec type, but got: {Def}", def.Kind);
     }
 
     public override void Render(DrawingContext ctx)
     {
         var r = new Rect(Bounds.Size);
-        var color = new SolidColorBrush(Def.Kind.GetColor());
+        var color = new SolidColorBrush(Def.Kind.GetColor().ToAvalonia());
 
         var cx = _isOutput ? r.Right : r.Left;
         var cy = r.Center.Y;
@@ -565,7 +565,7 @@ public sealed class PortEnumInputControl : PortControl, IPortInput
         Height = 22;
         if (Width - 100 <= 0)
         {
-            Log.Error("(Internal error) PortControl width cannot be less or equal than 0, resetting to 100.");
+            Logger.Error("(Internal error) PortControl width cannot be less or equal than 0, resetting to 100.");
             Width = 100;
             return;
         }
@@ -646,7 +646,7 @@ public sealed class PortEnumInputControl : PortControl, IPortInput
         }
         else
         {
-            Log.Error("PortEnumInputControl should be an EnumPort, but got: {Def}", def.Kind);
+            Logger.Error("PortEnumInputControl should be an EnumPort, but got: {Def}", def.Kind);
         }
         _inputPanel.Children.Add(_inputBox);
         Grid.SetColumn(_inputBox, 2);
@@ -654,13 +654,13 @@ public sealed class PortEnumInputControl : PortControl, IPortInput
         _inputPanel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
         this.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));  
         if(def.Kind == PortKind.Exec)
-            Log.Error("PortNumInputControl should not be Exec type, but got: {Def}", def.Kind);
+            Logger.Error("PortNumInputControl should not be Exec type, but got: {Def}", def.Kind);
     }
 
     public override void Render(DrawingContext ctx)
     {
         var r = new Rect(Bounds.Size);
-        var color = new SolidColorBrush(Def.Kind.GetColor());
+        var color = new SolidColorBrush(Def.Kind.GetColor().ToAvalonia());
 
         var cx = _isOutput ? r.Right : r.Left;
         var cy = r.Center.Y;

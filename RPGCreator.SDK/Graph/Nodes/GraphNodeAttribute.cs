@@ -1,6 +1,4 @@
-using RPGCreator.Core.Types.Blueprint.Nodes;
-
-namespace RPGCreator.Core.Parser.Graph.NodesMaker;
+namespace RPGCreator.SDK.Graph.Nodes;
 
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class GraphNodeAttribute() : Attribute

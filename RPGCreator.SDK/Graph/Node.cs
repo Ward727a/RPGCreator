@@ -1,11 +1,8 @@
-using RPGCreator.Core.Parser.Graph;
-using RPGCreator.Core.Types.Blueprint.Nodes;
-using RPGCreator.SDK;
-using RPGCreator.SDK.Graph;
+using RPGCreator.Core.Types.Blueprint;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
-using Serilog;
 
-namespace RPGCreator.Core.Types.Blueprint;
+namespace RPGCreator.SDK.Graph;
 
 public abstract class Node : ISerializable, IDeserializable
 {
@@ -36,7 +33,7 @@ public abstract class Node : ISerializable, IDeserializable
             }
             else
             {
-                Log.Warning("Input port {PortName} not found in node data for node {NodeId}.", input.Name, Id);
+                Logger.Warning("Input port {PortName} not found in node data for node {NodeId}.", input.Name, Id);
             }
         }
         // Check if there are any inputs that were not found in the data
@@ -44,7 +41,7 @@ public abstract class Node : ISerializable, IDeserializable
         {
             if (!AddedInputs.Contains(input.Name))
             {
-                Log.Warning("Input port {PortName} not found in node inputs for node {NodeId}.", input.Name, Id);
+                Logger.Warning("Input port {PortName} not found in node inputs for node {NodeId}.", input.Name, Id);
             }
         }
         
@@ -59,7 +56,7 @@ public abstract class Node : ISerializable, IDeserializable
             }
             else
             {
-                Log.Warning("Output port {PortName} not found in node data for node {NodeId}.", output.Name, Id);
+                Logger.Warning("Output port {PortName} not found in node data for node {NodeId}.", output.Name, Id);
             }
         }
     }

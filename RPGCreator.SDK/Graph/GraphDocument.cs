@@ -1,13 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using RPGCreator.Core;
-using RPGCreator.SDK;
+using RPGCreator.Core.Types.Blueprint;
+using RPGCreator.SDK.Graph.Nodes;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
-using Serilog;
 
-namespace RPGCreator.Core.Types.Blueprint;
+namespace RPGCreator.SDK.Graph;
 
 public sealed class GraphDocument : ISerializable, IDeserializable
 {
@@ -51,22 +48,22 @@ public sealed class GraphDocument : ISerializable, IDeserializable
 
     public void Compile()
     {
-        new GraphDocumentCompiler(this).Format();
+        EngineServices.GraphService.Compile(this);
     }
 
     public void Save(string toFile)
     {
-        EngineCore.Instance.Serializer.Serialize(this, out var serializedData);
+        EngineServices.SerializerService.Serialize(this, out var serializedData);
         File.WriteAllText(toFile, serializedData, Encoding.UTF8);
         SavePath = toFile;
-        Log.Information("GraphDocument saved to {toFile}", toFile);
+        Logger.Information("GraphDocument saved to {toFile}", toFile);
     }
     
     public static GraphDocument Load(string fromFile)
     {
         var serializedData = File.ReadAllText(fromFile, Encoding.UTF8);
-        EngineCore.Instance.Serializer.Deserialize<GraphDocument>(serializedData, out var obj, out var type);
-        if (obj is GraphDocument doc)
+        EngineServices.SerializerService.Deserialize<GraphDocument>(serializedData, out var obj, out var type);
+        if (obj is { } doc)
         {
             doc.SavePath = fromFile;
             return doc;

@@ -4,7 +4,8 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using RPGCreator.Core.Types.Blueprint;
-using Point = RPGCreator.Core.Types.Internal.Point;
+using RPGCreator.SDK.Graph.Ports;
+using RPGCreator.UI.Extensions;
 
 namespace RPGCreator.UI.Common.Blueprint;
 
@@ -61,8 +62,8 @@ public class LinkControl : Control
             EndPoint   = new RelativePoint(p3, RelativeUnit.Absolute),
             GradientStops = new GradientStops
             {
-                new GradientStop(_sourceKind.GetColor(), 0),
-                new GradientStop(_targetKind.GetColor(),  .7),
+                new GradientStop(_sourceKind.GetColor().ToAvalonia(), 0),
+                new GradientStop(_targetKind.GetColor().ToAvalonia(),  .7),
             }
         };
         

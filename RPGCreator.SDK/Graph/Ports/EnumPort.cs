@@ -1,8 +1,8 @@
-using RPGCreator.SDK;
+using RPGCreator.Core.Types.Blueprint;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
-using Serilog;
 
-namespace RPGCreator.Core.Types.Blueprint;
+namespace RPGCreator.SDK.Graph.Ports;
 
 public class EnumPort : Port
 {
@@ -28,7 +28,7 @@ public class EnumPort : Port
         }
         else
         {
-            Log.Error("The value '{Value}' is not a valid value for the enum type '{EnumType}'.", data.Value, EnumType.Name);
+            Logger.Error("The value '{Value}' is not a valid value for the enum type '{EnumType}'.", data.Value, EnumType.Name);
             Value = Enum.GetValues(EnumType).GetValue(0); // Default to the first value of the enum
         }
     }
@@ -65,7 +65,7 @@ public class EnumPort : Port
         }
         else
         {
-            Log.Error("The value '{Value}' is not a valid value for the enum type '{EnumType}'.", value_string, enumType.Name);
+            Logger.Error("The value '{Value}' is not a valid value for the enum type '{EnumType}'.", value_string, enumType.Name);
             Value = Enum.GetValues(enumType).GetValue(0); // Default to the first value of the enum
         }
     }

@@ -119,4 +119,6 @@ public class SkillDef : ISkillDef
         Urn = new URN("skill", $"{Name}@{Unique}");
     }
 
+    public bool IsDirty { get; set; }
+    public bool IsTransient { get; set; }
 }
