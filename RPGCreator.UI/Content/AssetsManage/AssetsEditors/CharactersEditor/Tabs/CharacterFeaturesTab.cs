@@ -1,5 +1,4 @@
 using Avalonia.Controls;
-using RPGCreator.Core.Types.Assets.Characters;
 using RPGCreator.SDK.Assets.Definitions.Characters;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;

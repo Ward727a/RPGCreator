@@ -759,7 +759,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                 var tilesetId = result.AssetId;
 
                 var tileset = _scope.Load<ITilesetDef>(tilesetId);
-                if (tileset is IntGridTileset)
+                if (tileset is IntGridTilesetDef)
                     continue;
                 var item = new TilesetViewListItem(tileset);
                 item.OnSelected += () => { SelectedTilesetViewItem = item; };

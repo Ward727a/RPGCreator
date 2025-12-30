@@ -17,16 +17,16 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutoLayerEditor.Compo
 public class IntGridSetListItemControl : UserControl
 {
     
-    public event Action<IntGridTileset>? OnSelected;
+    public event Action<IntGridTilesetDef>? OnSelected;
     
-    public IntGridTileset TilesetDef { get; private set; }
+    public IntGridTilesetDef TilesetDefDef { get; private set; }
     public Grid? Body { get; private set; }
     
     public TextBlock? SetLabel { get; private set; }
     
-    public IntGridSetListItemControl(IntGridTileset tilesetDef)
+    public IntGridSetListItemControl(IntGridTilesetDef tilesetDefDef)
     {
-        TilesetDef = tilesetDef;
+        TilesetDefDef = tilesetDefDef;
         CreateComponents();
         this.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
         this.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch;
@@ -48,7 +48,7 @@ public class IntGridSetListItemControl : UserControl
         };
         SetLabel = new TextBlock()
         {
-            Text = string.IsNullOrWhiteSpace(TilesetDef.Name) ? "Unnamed IntGrid Set" : TilesetDef.Name,
+            Text = string.IsNullOrWhiteSpace(TilesetDefDef.Name) ? "Unnamed IntGrid Set" : TilesetDefDef.Name,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
             Margin = new Avalonia.Thickness(5),
         };
@@ -73,14 +73,14 @@ public class IntGridSetListItemControl : UserControl
 
     private void OnBodyPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        OnSelected?.Invoke(TilesetDef);
+        OnSelected?.Invoke(TilesetDefDef);
     }
 }
 
 public class IntGridSetCreateModal : Window
 {
     public event Action? OnCancelled;
-    public event Action<IntGridTileset>? OnIntGridSetCreated;
+    public event Action<IntGridTilesetDef>? OnIntGridSetCreated;
 
     public Grid? Body;
     
@@ -219,7 +219,7 @@ public class IntGridSetCreateModal : Window
             Logger.Warning("[IntGridSetCreateModal] IntGrid Set name is empty.");
             return;
         }
-        var newIntGridSet = EngineServices.AssetsManager.CreateAsset<IntGridTileset>();
+        var newIntGridSet = EngineServices.AssetsManager.CreateAsset<IntGridTilesetDef>();
         newIntGridSet.Name = intGridSetName;
         newIntGridSet.Pack = selectedPack;
         selectedPack.AddOrUpdateAsset(newIntGridSet);
@@ -233,9 +233,9 @@ public class IntGridSetCreateModal : Window
 public class IntGridSetListControl : UserControl
 {
     
-    private IntGridTileset? _selectedTileset;
+    private IntGridTilesetDef? _selectedTileset;
     
-    public event Action<IntGridTileset>? OnTilesetSelected;
+    public event Action<IntGridTilesetDef>? OnTilesetSelected;
     
     private IAssetScope _scope;
     
@@ -391,11 +391,11 @@ public class IntGridSetListControl : UserControl
     {
         ListBody!.Children.Clear();
         
-        var searchResults = EngineServices.AssetsManager.SearchAllPacks<IntGridTileset>();
+        var searchResults = EngineServices.AssetsManager.SearchAllPacks<IntGridTilesetDef>();
         
         foreach (var result in searchResults)
         {
-            var tileset = _scope.Load<IntGridTileset>(result.AssetId);
+            var tileset = _scope.Load<IntGridTilesetDef>(result.AssetId);
             
             var itemControl = new IntGridSetListItemControl(tileset);
             itemControl.OnSelected += (selectedTileset) =>

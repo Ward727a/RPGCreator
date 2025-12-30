@@ -1,8 +1,7 @@
 using Avalonia.Controls;
-using RPGCreator.Core.Types.Assets.Skills;
+using RPGCreator.SDK.Assets.Definitions.Skills;
+using RPGCreator.SDK.Logging;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEditor.Tabs;
-using RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor.Tabs;
-using Serilog;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEditor;
 
@@ -97,7 +96,7 @@ public class SkillsEditorWindowControl : UserControl
         };
         saveButton.Click += (s, e) =>
         {
-            Log.Information("Saving Skill Definition...");
+            Logger.Information("Saving Skill Definition...");
         };
         buttonsPanel.Children.Add(saveButton);
     }

@@ -1,4 +1,4 @@
-namespace RPGCreator.Core.Types.Assets.Skills;
+namespace RPGCreator.SDK.Assets.Definitions.Skills;
 
 public enum ESkillTargetType
 {

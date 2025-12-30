@@ -1,18 +1,13 @@
-using RPGCreator.Core.Runtimes;
-using RPGCreator.Core.Runtimes.ECS;
-using RPGCreator.Core.Types.Assets.Actors;
-using RPGCreator.Core.Types.Internal;
-using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.Types.Interfaces;
 using RPGCreator.SDK.Types.Internals;
 
-namespace RPGCreator.Core.Types.Assets.Skills;
+namespace RPGCreator.SDK.Assets.Definitions.Skills;
 
 /// <summary>
 /// Native C# implementation of a skill effect.
 /// </summary>
-public interface ISkillEffect : IHasUniqueId, ICloneable
+public interface ISkillEffect : IAssetDef, ICloneable
 {
     public string DisplayName { get; }
     /// <summary>

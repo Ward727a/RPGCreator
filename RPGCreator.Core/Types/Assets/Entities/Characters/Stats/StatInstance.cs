@@ -1,5 +1,6 @@
 using RPGCreator.Core.Parser.Graph;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 
 namespace RPGCreator.Core.Types.Assets.Characters.Stats;
@@ -50,7 +51,7 @@ public sealed class StatInstance : IReloadable<IStatDef>
     {
         if(StatDefinition.TryGetEvent(eventName, out var eventCompiled) && eventCompiled != null)
         {
-            return eventCompiled.Run(env);
+            return EngineServices.GraphService.Run(eventCompiled, env);
         }
         return false;
     }

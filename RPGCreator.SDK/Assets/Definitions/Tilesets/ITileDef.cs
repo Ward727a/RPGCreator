@@ -1,6 +1,6 @@
-using System.Drawing;
 using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets;
@@ -18,9 +18,9 @@ public interface ITileDef : ILayerElem, IAssetDef
 {
     public Vector2 DefaultPosition { get; set; }
     public Size SizeInTileset { get; }
-    public Point PositionInTileset { get; } // Position in the tileset grid (row by column)
+    public Vector2 PositionInTileset { get; } // Position in the tileset grid (row by column)
     public ITilesetDef TilesetDef { get; } // The tileset this tile belongs to
-    public Rectangle UV { get; }
+    public Rect UV { get; }
     public TileFlip Flip { get; set; }
 
     public void UpdateTileset(ITilesetDef newTilesetDefinition);

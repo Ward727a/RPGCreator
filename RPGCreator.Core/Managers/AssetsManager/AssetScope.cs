@@ -74,4 +74,13 @@ internal class AssetScope : IAssetScope
         }
         return (T)asset;
     }
+    
+    public void Unload<T>(T asset) where T : class, IAssetDef
+    {
+        if (_borrowedAssets.Contains(asset.Unique))
+        {
+            _manager.ReleaseAsset(asset.Unique);
+            _borrowedAssets.Remove(asset.Unique);
+        }
+    }
 }

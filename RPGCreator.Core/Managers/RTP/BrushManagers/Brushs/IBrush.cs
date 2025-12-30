@@ -22,14 +22,8 @@
 // 
 // 
 #endregion
-using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Map;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RPGCreator.Core.Types.Editor.Context;
 
 namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
@@ -48,8 +42,8 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
             }
 
             int cellSize = mapInstance.Definition.GridParameter.CellWidth;
-            int horizontalCells = mapInstance.Definition.Size.Width;
-            int verticalCells = mapInstance.Definition.Size.Height;
+            float horizontalCells = mapInstance.Definition.Size.Width;
+            float verticalCells = mapInstance.Definition.Size.Height;
 
             // Check if the point is within the bounds of the map
             if (at.X < 0 || at.Y < 0 || at.X >= horizontalCells * cellSize || at.Y >= verticalCells * cellSize)

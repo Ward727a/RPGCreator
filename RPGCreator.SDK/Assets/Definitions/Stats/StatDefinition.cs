@@ -1,12 +1,10 @@
-using RPGCreator.Core.Types.Blueprint;
-using RPGCreator.SDK;
-using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 using RPGCreator.SDK.Graph;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Parser.PrattFormula;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
-namespace RPGCreator.Core.Types.Assets.Entities.Characters.Stats;
+namespace RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 
 public class StatDefinition : IStatDef
 {
@@ -101,14 +99,13 @@ public class StatDefinition : IStatDef
         _statGraphEvents.Clear();
         foreach (var kv in statGraphEventsPaths)
         {
-            var graphDocumentData = File.ReadAllText(kv.Value);
-            EngineServices.SerializerService.Deserialize(graphDocumentData, out GraphDocument o, out var type);
-
-            if (o is GraphDocument graphDocument)
+            if(EngineServices.GraphService.TryLoadScript(kv.Value, out var script))
             {
-                graphDocument.SavePath = kv.Value;
-                var graphDocumentCompiled = GraphDocumentCompiler.Compile(graphDocument);
-                _statGraphEvents[kv.Key] = graphDocumentCompiled;
+                _statGraphEvents[kv.Key] = script;
+            }
+            else
+            {
+                Logger.Error("[StatDefinition] Failed to load graph script for event '{EventName}' at path '{DocumentPath}'.", kv.Key, kv.Value);
             }
         }
     }

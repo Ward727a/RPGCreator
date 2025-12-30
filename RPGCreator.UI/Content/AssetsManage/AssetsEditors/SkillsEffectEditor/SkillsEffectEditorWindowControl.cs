@@ -3,7 +3,6 @@ using Avalonia;
 using Avalonia.Controls;
 using RPGCreator.Core;
 using RPGCreator.Core.Managers.AssetsManager.Registries;
-using RPGCreator.Core.Types.Assets.Skills;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEffectEditor.Tabs;
 using Serilog;
 

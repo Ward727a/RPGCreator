@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 
 namespace RPGCreator.SDK.Types.Records;
@@ -6,16 +7,16 @@ namespace RPGCreator.SDK.Types.Records;
 public record struct TileData()
 {
     public Ulid UniqueId = Ulid.NewUlid();
-    public Point TileSize;
-    public Point TilePosition;
+    public Vector2 TileSize;
+    public Vector2 TilePosition;
     public Ulid TilesetId;
     
     public static TileData FromTileDef(ITileDef tileDef)
     {
         return new TileData
         {
-            TileSize = new Point(tileDef.SizeInTileset.Width, tileDef.SizeInTileset.Height),
-            TilePosition = new Point(tileDef.PositionInTileset.X, tileDef.PositionInTileset.Y),
+            TileSize = new Vector2(tileDef.SizeInTileset.Width, tileDef.SizeInTileset.Height),
+            TilePosition = new Vector2(tileDef.PositionInTileset.X, tileDef.PositionInTileset.Y),
             TilesetId = tileDef.TilesetDef.Unique,
         };
     }

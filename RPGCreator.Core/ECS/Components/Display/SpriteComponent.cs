@@ -1,7 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.Types;
 
 namespace RPGCreator.Core.ECS.Components.Display;
 

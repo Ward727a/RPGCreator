@@ -4,7 +4,6 @@ using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using RPGCreator.Core;
 using RPGCreator.Core.Types;
-using RPGCreator.Core.Types.Assets.Skills;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEditor;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor;
 using RPGCreator.UI.Content.AssetsManage.Components.Skills.Tabs;

@@ -56,7 +56,7 @@ public class AutoLayerEditorControl : UserControl
         _intGridSetListControl.OnTilesetSelected += OnTilesetSelected;
     }
 
-    private void OnTilesetSelected(IntGridTileset obj)
+    private void OnTilesetSelected(IntGridTilesetDef obj)
     {
         _intRefListControl.LoadIntRefsFromTileset(obj);
         _intRefListControl.MenuPanel.IsEnabled = true;

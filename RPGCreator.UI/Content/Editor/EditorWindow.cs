@@ -34,6 +34,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.RTP;
 
 namespace RPGCreator.UI.Content.Editor
 {
@@ -44,7 +45,7 @@ namespace RPGCreator.UI.Content.Editor
 
         private EditorWindow() : base()
         {
-            new RPGCreator.MonoGame.EditorGame();
+            new EditorGame();
             Closing += OnClosing;
             Opened += OnOpening;
 

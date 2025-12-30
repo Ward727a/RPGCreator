@@ -7,6 +7,7 @@ public class EngineResourcesService : IResourceService
 {
     private Dictionary<Type, IResourceLoader> _resourceLoaders;
     private Dictionary<string, object> _resourceCache;
+    private Dictionary<string, int> _resourceReferenceCounts;
     
     public T? Load<T>(string path) where T : class
     {

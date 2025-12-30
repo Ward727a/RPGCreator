@@ -1,13 +1,10 @@
-using RPGCreator.Core.Parser.PRATT;
-using RPGCreator.Core.Types.Assets.Characters.Stats;
-using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
+using RPGCreator.SDK.Parser.PrattFormula;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
-using RPGCreator.SDK.Types.Interfaces;
 using RPGCreator.SDK.Types.Internals;
 
-namespace RPGCreator.Core.Types.Assets.Skills;
+namespace RPGCreator.SDK.Assets.Definitions.Skills;
 
 public interface ISkillDef : IHasSavePath, IHasUniqueId, ISerializable, IDeserializable
 {
@@ -21,7 +18,7 @@ public interface ISkillDef : IHasSavePath, IHasUniqueId, ISerializable, IDeseria
     public float Range { get; set; } // Number of units the skill can reach from the original target
     public List<URN> EffectsURN { get; set; } // List of URNs of the effects to apply when the skill is used
     
-    public PrattCompiledFormula? SkillScalingFormula { get; set; }
+    public IPrattFormula? SkillScalingFormula { get; set; }
     public string SkillNonCompiledFormula { get; set; }
     
     public void SetName(string name);

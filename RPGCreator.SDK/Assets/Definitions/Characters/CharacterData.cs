@@ -1,8 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
-using RPGCreator.Core.Types.Assets.Characters;
 using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
+using RPGCreator.SDK.Assets.Definitions.Skills;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;
+using RPGCreator.SDK.Extensions;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
@@ -95,15 +96,33 @@ public class CharacterStats(IStatDef def) : ISerializable, IDeserializable
             CurrentValue = newDef.DefaultValue;
         }
     }
-    
     public SerializationInfo GetObjectData()
     {
-        throw new NotImplementedException();
+        return new SerializationInfo(typeof(CharacterStats))
+            .AddValue("StatDefId", StatDef.Unique)
+            .AddValue("CurrentValue", CurrentValue)
+            .AddValue("MaxValue", MaxValue)
+            .AddValue("MinValue", MinValue);
     }
 
     public void SetObjectData(DeserializationInfo info)
     {
-        throw new NotImplementedException();
+        info.TryGetValue("CurrentValue", out float current, 0);
+        info.TryGetValue("MaxValue", out float max, 0);
+        info.TryGetValue("MinValue", out float min, 0);
+        
+        CurrentValue = current;
+        MaxValue = max;
+        MinValue = min;
+
+        info.TryGetValue("StatDefId", out Ulid statId, Ulid.Empty);
+        if (statId != Ulid.Empty)
+        {
+            if (EngineServices.AssetsManager.TryResolveAsset<IStatDef>(statId, out var def))
+            {
+                StatDef = def;
+            }
+        }
     }
 }
 
@@ -121,12 +140,31 @@ public class CharacterSkill(ISkillDef def) : ISerializable, IDeserializable
 
     public SerializationInfo GetObjectData()
     {
-        throw new NotImplementedException();
+        return new SerializationInfo(typeof(CharacterSkill))
+            .AddValue("SkillDefId", SkillDef.Unique)
+            .AddValue("SkillLevel", SkillLevel)
+            .AddValue("HasMaxLevel", HasMaxLevel)
+            .AddValue("MaxSkillLevel", MaxSkillLevel);
     }
 
     public void SetObjectData(DeserializationInfo info)
     {
-        throw new NotImplementedException();
+        info.TryGetValue("SkillLevel", out int level, 1);
+        info.TryGetValue("HasMaxLevel", out bool hasMax, false);
+        info.TryGetValue("MaxSkillLevel", out int maxLevel, 1);
+        
+        SkillLevel = level;
+        HasMaxLevel = hasMax;
+        MaxSkillLevel = maxLevel;
+
+        info.TryGetValue("SkillDefId", out Ulid skillId, Ulid.Empty);
+        if (skillId != Ulid.Empty)
+        {
+            if (EngineServices.AssetsManager.TryResolveAsset<ISkillDef>(skillId, out var def))
+            {
+                SkillDef = def;
+            }
+        }
     }
 }
 
@@ -472,13 +510,9 @@ public class CharacterData : BaseEntity, ICharacter, ISerializable, IDeserializa
     public void RefreshStats()
     {
 
-        EngineCore.Instance.Managers.Assets.TryResolveRegistry("stats", out var assetRegistry);
+        var allStats = EngineServices.AssetsManager.GetAssets<IStatDef>();
 
-        if (assetRegistry is not StatsRegistry statsRegistry) return;
-
-        var stats = statsRegistry.All();
-
-        foreach (var statDef in stats)
+        foreach (var statDef in allStats)
         {
             if (!Stats.ContainsKey(statDef.Unique))
             {

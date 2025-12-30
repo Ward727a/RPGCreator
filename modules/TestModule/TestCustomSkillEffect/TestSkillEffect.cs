@@ -1,8 +1,8 @@
 using MonoGame.Extended.ECS;
 using RPGCreator.Core.Runtimes;
 using RPGCreator.Core.Runtimes.Contents;
-using RPGCreator.Core.Types.Assets.Skills;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK.Assets.Definitions.Skills;
 using RPGCreator.SDK.Types;
 using Entity = RPGCreator.SDK.ECS.Entities.Entity;
 
@@ -73,4 +73,7 @@ public class TestSkillEffect : ISkillEffect
             Properties = new Dictionary<string, object>(Properties),
         };
     }
+
+    public bool IsDirty { get; set; }
+    public bool IsTransient { get; set; }
 }

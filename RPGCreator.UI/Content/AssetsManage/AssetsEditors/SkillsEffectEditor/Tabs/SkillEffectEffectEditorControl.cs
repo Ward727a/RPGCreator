@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Avalonia.Controls;
-using RPGCreator.Core.Types.Assets.Skills;
 using RPGCreator.Core.Types.Blueprint;
 using RPGCreator.UI.Common.Blueprint;
 using Serilog;

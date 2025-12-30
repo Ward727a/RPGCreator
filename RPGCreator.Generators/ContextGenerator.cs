@@ -73,7 +73,7 @@ namespace RPGCreator.Generators
         private static string GenerateContextClasses(INamedTypeSymbol classSymbol)
         {
             var sb = new StringBuilder();
-            var baseNamespace = "RPGCreator.Core.Contexts";
+            var baseNamespace = "RPGCreator.SDK.Contexts";
 
             sb.AppendLine("using System;");
             sb.AppendLine("using Avalonia.Controls;");

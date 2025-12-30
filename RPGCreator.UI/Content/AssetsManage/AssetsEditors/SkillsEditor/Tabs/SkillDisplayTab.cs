@@ -1,5 +1,5 @@
 using Avalonia.Controls;
-using RPGCreator.Core.Types.Assets.Skills;
+using RPGCreator.SDK.Assets.Definitions.Skills;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEditor.Tabs;
 /// <summary>

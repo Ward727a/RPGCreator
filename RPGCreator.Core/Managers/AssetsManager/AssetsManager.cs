@@ -30,7 +30,9 @@ using RPGCreator.Core.Managers.ProjectsManager.Events;
 using RPGCreator.Core.Types.Assets.BaseAssetsPack;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.Core.Types.Map.Layers;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
 using RPGCreator.SDK.Types.Interfaces;
@@ -190,7 +192,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             return new AssetScope(this, name);
         }
         
-        public T CreateTransientAsset<T>(AssetScope? scope = null) where T : IAssetDef, new()
+        public T CreateTransientAsset<T>(IAssetScope? scope = null) where T : IAssetDef, new()
         {
             var newAsset = new T();
             

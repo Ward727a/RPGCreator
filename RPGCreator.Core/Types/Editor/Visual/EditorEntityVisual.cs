@@ -1,3 +1,4 @@
+using System.Numerics;
 using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Types.Assets.Actors;
@@ -19,7 +20,7 @@ public class EditorEntityVisual : ILayerElem, IDisposable
     /// <summary>
     /// Position of the entity on the map editor grid.
     /// </summary>
-    public Point Position { get; set; }
+    public Vector2 Position { get; set; }
 
     public UnifiedImage? PreviewImage { get; private set; }
 

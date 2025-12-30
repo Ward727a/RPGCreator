@@ -1,7 +1,7 @@
 using RPGCreator.Core.Runtimes.ECS;
 using RPGCreator.Core.Runtimes.ECS.Components.Actor;
-using RPGCreator.Core.Types.Assets.Skills;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK.Assets.Definitions.Skills;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.Types;
@@ -79,4 +79,7 @@ public class SetStatEffect : ISkillEffect
             Properties = new Dictionary<string, object>(Properties),
         };
     }
+
+    public bool IsDirty { get; set; }
+    public bool IsTransient { get; set; }
 }

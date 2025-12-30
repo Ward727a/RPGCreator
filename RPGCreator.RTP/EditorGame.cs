@@ -1,49 +1,26 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using MonoGame.Extended;
-using MonoGame.Extended.Graphics;
-using MonoGame.Extended.VectorDraw;
-using RPGCreator.Core;
-using RPGCreator.Core.Rendering.Batching;
-using RPGCreator.Core.Types.Assets;
-using RPGCreator.Core.Types.RTP;
 using RPGCreator.RTP.Editor.Components;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using Avalonia.Input;
-using RPGCreator.Core.ECS;
-using RPGCreator.Core.ECS.Components.Display;
-using RPGCreator.Core.ECS.Components.Display.Animation;
-using RPGCreator.Core.ECS.Systems;
-using RPGCreator.Core.Managers.AssetsManager.Registries;
-using RPGCreator.Core.Runtimes;
-using RPGCreator.Core.Runtimes.ECS;
-using RPGCreator.Core.Runtimes.ECS.Components.Actor;
-using RPGCreator.Core.Runtimes.ECS.Components.Display;
-using RPGCreator.Core.Types;
-using RPGCreator.Core.Types.Assets.Characters;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions.Animations;
 using RPGCreator.SDK.ECS;
-using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Entities;
-using Serilog;
-using Size = RPGCreator.Core.Types.Internal.Size;
 
-namespace RPGCreator.MonoGame
+namespace RPGCreator.RTP
 {
-    public class EditorGame : RTP_Game
+    public class EditorGame : Game
     {
         public bool CanUseMouse = false;
 
         //private bool CanUseMouse => IsActive && InsideEditorBox;
 
         public GraphicsDeviceManager _graphics;
-        private SpriteBatchExtend _spriteBatch;
 
-        private ECSWorld _ecsWorld;
+        private IECSWorld _ecsWorld;
 
         private MapEditing _mapEditing;
         
@@ -55,95 +32,93 @@ namespace RPGCreator.MonoGame
 
         // GumService Gum => GumService.Default;
 
+        public class Texture2DLoader(GraphicsDevice graphicsDevice) : IResourceLoader
+        {
+            public object Load(string path)
+            {
+                return Texture2D.FromFile(graphicsDevice, path);
+            }
+        }
+
         public EditorGame()
         {
-            EngineCore.Instance.Events.OnRTPCreating(new());
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-
-            EngineCore.Instance.Events.OnRTPCreated(new(this));
+            
+            EngineServices.ResourcesService.RegisterLoader<Texture2D>(new Texture2DLoader(GraphicsDevice));
         }
 
         protected override void Initialize()
         {
-            _events.OnRTPInitializing(new());
+            base.Initialize();
 
             // Gum.Initialize(this);
-
-            EngineCore.Instance.Data.EditedMapChanged += (instance) =>
-            {
-                if (instance == null)
-                    return;
-                _mapEditing.MapInstance = instance;
-            };
+            //
+            // EngineCore.Instance.Data.EditedMapChanged += (instance) =>
+            // {
+            //     if (instance == null)
+            //         return;
+            //     _mapEditing.MapInstance = instance;
+            // };
 
             // var mainPanel = new Panel(Gum.Root);
 
-            base.Initialize();
-
-            EngineCore.Instance.Events.RTPKeyPressed += (sender, keyEventArgs) =>
-            {
-
-                // manage arrows key to move the only entity we have for now.
-                if (SpawnedCharacters.Count != 0)
-                {
-                    var entity = _playerEntity;
-                    ref var movementComponent = ref entity.GetComponent<MovementComponent>();
-                    ref var stateComponent = ref entity.GetComponent<CharStateComponent>();
-
-                    switch (keyEventArgs.Key)
-                    {
-                        case Key.Up:
-                            movementComponent.TargetDirection = new System.Numerics.Vector2(0, -1);
-                            movementComponent.IsMoving = true;
-                            stateComponent.CurrentState = "walk_up"; // Temporary, we only have walk_down animation for now.
-                            break;
-                        case Key.Down:
-                            movementComponent.TargetDirection = new System.Numerics.Vector2(0, 1);
-                            movementComponent.IsMoving = true;
-                            stateComponent.CurrentState = "walk_down"; // Temporary, we only have walk_down animation for now.
-                            break;
-                        case Key.Left:
-                            movementComponent.TargetDirection = new System.Numerics.Vector2(-1, 0);
-                            movementComponent.IsMoving = true;
-                            stateComponent.CurrentState = "walk_left"; // Temporary, we only have walk_down animation for now.
-                            break;
-                        case Key.Right:
-                            movementComponent.TargetDirection = new System.Numerics.Vector2(1, 0);
-                            movementComponent.IsMoving = true;
-                            stateComponent.CurrentState = "walk_right"; // Temporary, we only have walk_down animation for now.
-                            break;
-                        default:
-                            movementComponent.IsMoving = false;
-                            movementComponent.TargetDirection = new System.Numerics.Vector2(0, 0);
-                            stateComponent.CurrentState = "idle";
-                            break;
-                    }
-                }
-            };
-
-            EngineCore.Instance.Events.DEBUG_RTPAnimationAtlasGenerated += (s, e) =>
-            {
-                _spritePlayerAtlas = e.Item1;
-                _spritePlayerIdle = e.Item2;
-            };
-
-            _events.OnRTPInitialized(new());
+            //
+            // EngineCore.Instance.Events.RTPKeyPressed += (sender, keyEventArgs) =>
+            // {
+            //
+            //     // manage arrows key to move the only entity we have for now.
+            //     if (SpawnedCharacters.Count != 0)
+            //     {
+            //         var entity = _playerEntity;
+            //         ref var movementComponent = ref entity.GetComponent<MovementComponent>();
+            //         ref var stateComponent = ref entity.GetComponent<CharStateComponent>();
+            //
+            //         switch (keyEventArgs.Key)
+            //         {
+            //             case Key.Up:
+            //                 movementComponent.TargetDirection = new System.Numerics.Vector2(0, -1);
+            //                 movementComponent.IsMoving = true;
+            //                 stateComponent.CurrentState = "walk_up"; // Temporary, we only have walk_down animation for now.
+            //                 break;
+            //             case Key.Down:
+            //                 movementComponent.TargetDirection = new System.Numerics.Vector2(0, 1);
+            //                 movementComponent.IsMoving = true;
+            //                 stateComponent.CurrentState = "walk_down"; // Temporary, we only have walk_down animation for now.
+            //                 break;
+            //             case Key.Left:
+            //                 movementComponent.TargetDirection = new System.Numerics.Vector2(-1, 0);
+            //                 movementComponent.IsMoving = true;
+            //                 stateComponent.CurrentState = "walk_left"; // Temporary, we only have walk_down animation for now.
+            //                 break;
+            //             case Key.Right:
+            //                 movementComponent.TargetDirection = new System.Numerics.Vector2(1, 0);
+            //                 movementComponent.IsMoving = true;
+            //                 stateComponent.CurrentState = "walk_right"; // Temporary, we only have walk_down animation for now.
+            //                 break;
+            //             default:
+            //                 movementComponent.IsMoving = false;
+            //                 movementComponent.TargetDirection = new System.Numerics.Vector2(0, 0);
+            //                 stateComponent.CurrentState = "idle";
+            //                 break;
+            //         }
+            //     }
+            // };
+            //
+            // EngineCore.Instance.Events.DEBUG_RTPAnimationAtlasGenerated += (s, e) =>
+            // {
+            //     _spritePlayerAtlas = e.Item1;
+            //     _spritePlayerIdle = e.Item2;
+            // };
         }
 
         protected override void LoadContent()
         {
-            _events.OnRTPLoadingContent(new());
 
-            //GraphicsDevice.Reset();
-            _spriteBatch = new(GraphicsDevice);
-            _mapEditing = new(_spriteBatch);
-
-            _ecsWorld = new();
-            _ecsWorld.AddSystem(new SpriteRenderSystem(_ecsWorld.ComponentManager, GraphicsDevice));
-            _ecsWorld.AddSystem(new AnimationSystem(_ecsWorld.ComponentManager, GraphicsDevice));
-            _ecsWorld.AddSystem(new MovementSystem(_ecsWorld.ComponentManager));
+            GraphicsDevice.Reset();
+            // _spriteBatch = new(GraphicsDevice);
+            // _mapEditing = new(_spriteBatch);
 
             // Test loop to create multiple entities with sprite and transform components and test the sprite rendering system.
             // Very basic test - Result for now : 10k entities with simple sprites renders, no movement at ~60 FPS => 3-4ms per frame.
@@ -165,7 +140,6 @@ namespace RPGCreator.MonoGame
             
             //CurrentMap = new(_spriteBatch) { game = this };
 
-            _events.OnRTPLoadedContent(new());
             //backgroundTexture = new Texture2D(GraphicsDevice, 1, 1);
             //backgroundTexture.SetData(new[] { new Color(new Vector4(1, 1, 1, .3f)) });
             // TODO: use this.Content to load your game content here
@@ -175,51 +149,50 @@ namespace RPGCreator.MonoGame
         {
             // GraphicalUiElement.CanvasHeight = (_graphics.PreferredBackBufferHeight);
             // GraphicalUiElement.CanvasWidth = (_graphics.PreferredBackBufferWidth);
-            _events.OnRTPUpdate(new(gameTime));
 
             _mapEditing.Update(gameTime);
             // Gum.Update(gameTime);
-            _ecsWorld.Update(gameTime);
-
-            var _registry = EngineCore.Instance.Managers.Assets.TryResolveRegistry("characters", out var registry) ? registry as CharacterRegistry
-                : null;
-            
-            foreach (var data in _registry.All()) 
-            {
-                if(!SpawnedCharacters.Contains(data.Unique))
-                {
-                    var entity = _ecsWorld.CreateEntity();
-
-                    ref var spriteComponent = ref entity.AddComponent<SpriteComponent>();
-
-                    spriteComponent.Texture = new UnifiedImage(data.PortraitPath, GraphicsDevice).Game;
-                    spriteComponent.RenderSize = new(48*2, 64*2);
-
-                    ref var charDataComponent = ref entity.AddComponent<CharDataComponent>();
-                    charDataComponent.CharacterData = data;
-                    
-                    ref var charStateComponent = ref entity.AddComponent<CharStateComponent>();
-                    charStateComponent.CurrentState = "idle";
-                    charStateComponent.CurrentDirection = EDirection.Down;
-                    
-                    ref var animationComponent = ref entity.AddComponent<AnimationComponent>();
-                    animationComponent.CurrentFrame = 0;
-                    animationComponent.ElapsedTime = 0;
-                    
-                    ref var movementComponent = ref entity.AddComponent<MovementComponent>();
-                    movementComponent.IsMoving = false;
-                    movementComponent.Mode = MovementMode.Grid4;
-                    movementComponent.Speed = 32f;
-                    movementComponent.TargetDirection = new System.Numerics.Vector2(0, 0);
-
-                    ref var transformComponent = ref entity.AddComponent<TransformComponent>();
-
-                    transformComponent.Y = 32*3;
-                    transformComponent.X = 32*2;
-                    _playerEntity = entity;
-                    SpawnedCharacters.Add(data.Unique);
-                }
-            }
+            _ecsWorld.Update(gameTime.ElapsedGameTime);
+            //
+            // var _registry = EngineCore.Instance.Managers.Assets.TryResolveRegistry("characters", out var registry) ? registry as CharacterRegistry
+            //     : null;
+            //
+            // foreach (var data in _registry.All()) 
+            // {
+            //     if(!SpawnedCharacters.Contains(data.Unique))
+            //     {
+            //         var entity = _ecsWorld.CreateEntity();
+            //
+            //         ref var spriteComponent = ref entity.AddComponent<SpriteComponent>();
+            //
+            //         spriteComponent.Texture = new UnifiedImage(data.PortraitPath, GraphicsDevice).Game;
+            //         spriteComponent.RenderSize = new(48*2, 64*2);
+            //
+            //         ref var charDataComponent = ref entity.AddComponent<CharDataComponent>();
+            //         charDataComponent.CharacterData = data;
+            //         
+            //         ref var charStateComponent = ref entity.AddComponent<CharStateComponent>();
+            //         charStateComponent.CurrentState = "idle";
+            //         charStateComponent.CurrentDirection = EDirection.Down;
+            //         
+            //         ref var animationComponent = ref entity.AddComponent<AnimationComponent>();
+            //         animationComponent.CurrentFrame = 0;
+            //         animationComponent.ElapsedTime = 0;
+            //         
+            //         ref var movementComponent = ref entity.AddComponent<MovementComponent>();
+            //         movementComponent.IsMoving = false;
+            //         movementComponent.Mode = MovementMode.Grid4;
+            //         movementComponent.Speed = 32f;
+            //         movementComponent.TargetDirection = new System.Numerics.Vector2(0, 0);
+            //
+            //         ref var transformComponent = ref entity.AddComponent<TransformComponent>();
+            //
+            //         transformComponent.Y = 32*3;
+            //         transformComponent.X = 32*2;
+            //         _playerEntity = entity;
+            //         SpawnedCharacters.Add(data.Unique);
+            //     }
+            // }
 
             if (CanUseMouse)
             {
@@ -280,11 +253,10 @@ namespace RPGCreator.MonoGame
 
         protected override void Draw(GameTime gameTime)
         {
-            _events.OnRTPDraw(new(gameTime));
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             _mapEditing.Draw();
-            _ecsWorld.Draw(gameTime);
+            _ecsWorld.Draw(gameTime.ElapsedGameTime);
             
             //_spriteBatch.Begin();
 

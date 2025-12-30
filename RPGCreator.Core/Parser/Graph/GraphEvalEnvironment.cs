@@ -164,7 +164,7 @@ public sealed class GraphEvalEnvironment : IGraphEnv
         throw new KeyNotFoundException($"Variable '{name}' not found.");
     }
 
-    static public void AddVM(string path, object? value)
+    public static void AddVM(string path, object? value)
     {
         if (IsMultiPath(path))
         {
@@ -176,7 +176,7 @@ public sealed class GraphEvalEnvironment : IGraphEnv
         }
     }
 
-    static public void AddVMs(params (string path, object? value)[] values)
+    public static void AddVMs(params (string path, object? value)[] values)
     {
         foreach (var value in values)
         {

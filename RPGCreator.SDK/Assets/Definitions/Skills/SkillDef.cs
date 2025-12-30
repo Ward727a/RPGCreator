@@ -1,12 +1,10 @@
-using RPGCreator.Core.Parser.PRATT;
-using RPGCreator.Core.Types.Assets.Characters.Stats;
-using RPGCreator.Core.Types.Internal;
-using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
+using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Parser.PrattFormula;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
-namespace RPGCreator.Core.Types.Assets.Skills;
+namespace RPGCreator.SDK.Assets.Definitions.Skills;
 
 public class SkillDef : ISkillDef
 {
@@ -22,7 +20,7 @@ public class SkillDef : ISkillDef
     public ESkillTargetType TargetType { get; set; }
     public float Range { get; set; }
     public List<URN> EffectsURN { get; set; } = new();
-    public PrattCompiledFormula? SkillScalingFormula { get; set; }
+    public IPrattFormula? SkillScalingFormula { get; set; }
     public string SkillNonCompiledFormula { get; set; } = string.Empty;
     
     public SkillDef()
@@ -86,17 +84,19 @@ public class SkillDef : ISkillDef
         Description = description ?? string.Empty;
         info.TryGetValue("IconPath", out string? iconPath);
         IconPath = iconPath ?? string.Empty;
-        info.TryGetDictionary("Cost", out Dictionary<string, float> costDict);
+        info.TryGetDictionary("Cost", out Dictionary<string, float>? costDict);
         if (costDict != null)
         {
             Cost.Clear();
             foreach (var (statUrnStr, amount) in costDict)
             {
                 var statUrn = URN.Parse(statUrnStr);
-                var statDef = EngineCore.Instance.Managers.Assets.TryResolveAsset(statUrn, out IStatDef? resolvedStatDef) ? resolvedStatDef : null;
-                if (statDef != null)
+                if(EngineServices.AssetsManager.TryResolveAsset(statUrn, out IStatDef? resolvedStatDef))
                 {
-                    Cost[statDef] = amount;
+                    Cost[resolvedStatDef] = amount;
+                } else
+                {
+                    Logger.Warning("[SkillDef] Failed to resolve StatDef for Cost with URN: " + statUrnStr);
                 }
             }
         }
@@ -108,7 +108,14 @@ public class SkillDef : ISkillDef
         Range = range;
         info.TryGetValue("SkillNonCompiledFormula", out string? skillNonCompiledFormula);
         SkillNonCompiledFormula = skillNonCompiledFormula ?? string.Empty;
-        // Note: We do not deserialize the compiled formula, as it can be recompiled from the non-compiled formula.
+
+        if (!string.IsNullOrEmpty(SkillNonCompiledFormula))
+        {
+            if(EngineServices.PrattFormulaService.TryCompile(SkillNonCompiledFormula, out IPrattFormula? compiledFormula))
+            {
+                SkillScalingFormula = compiledFormula;
+            }
+        }
         Urn = new URN("skill", $"{Name}@{Unique}");
     }
 

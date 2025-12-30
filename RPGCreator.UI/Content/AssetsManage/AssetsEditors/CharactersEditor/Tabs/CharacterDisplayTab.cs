@@ -4,21 +4,19 @@ using System.IO;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
-using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Media;
 using Avalonia.Styling;
-using RPGCreator.Core;
-using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Types;
-using RPGCreator.Core.Types.Assets.Characters;
 using RPGCreator.Core.Types.Windows;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Animations;
 using RPGCreator.SDK.Assets.Definitions.Characters;
+using RPGCreator.SDK.ECS.Components;
+using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Types.Collections;
 using RPGCreator.UI.Common;
-using Serilog;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;
@@ -38,7 +36,7 @@ public class CharacterDisplayTab : UserControl
     
     private Button? CurrentDirectionButton = null;
     
-    private AssetScope AssetScope;
+    private IAssetScope AssetScope;
     
     public CharacterData Data;
     
@@ -107,7 +105,7 @@ public class CharacterDisplayTab : UserControl
     #region Constructors
     public CharacterDisplayTab(CharacterData data)
     {
-        AssetScope = EngineCore.Instance.Managers.Assets.CreateAssetScope("CharacterDisplayTabScope");
+        AssetScope = EngineServices.AssetsManager.CreateAssetScope("CharacterDisplayTabScope");
 
         foreach (var animName in BasicAnimationsNames)
         {
@@ -236,10 +234,10 @@ public class CharacterDisplayTab : UserControl
                 {
                     var animName = anim.Key;
                     var animDef = anim.Value;
-                    EngineCore.Instance.Managers.Assets.TryResolveAsset(animDef.SpriteSheetId, out SpritesheetDef? spritesheetDef);
+                    EngineServices.AssetsManager.TryResolveAsset(animDef.SpriteSheetId, out SpritesheetDef? spritesheetDef);
                     if (spritesheetDef == null)
                     {
-                        Log.Error("Failed to resolve spritesheet with ID {SpriteSheetId} for animation {AnimName}", animDef.SpriteSheetId, animName);
+                        Logger.Error("Failed to resolve spritesheet with ID {SpriteSheetId} for animation {AnimName}", animDef.SpriteSheetId, animName);
                         continue;
                     }
                     
@@ -607,15 +605,15 @@ public class CharacterDisplayTab : UserControl
         Ulid animationId = directionalAnimationsSet.GetAnimation(CurrentAnimationDirection);
         if (animationId == Ulid.Empty)
         {
-            SelectedAnimationData = EngineCore.Instance.Managers.Assets.CreateTransientAsset<AnimationDef>();
+            SelectedAnimationData = EngineServices.AssetsManager.CreateTransientAsset<AnimationDef>();
             SelectedAnimationData.Name = CurrentAnimationName;
             directionalAnimationsSet.SetAnimation(CurrentAnimationDirection, SelectedAnimationData.Unique);
         }
         else
         {
-            if (!EngineCore.Instance.Managers.Assets.TryResolveAsset<AnimationDef>(animationId, out var animationData))
+            if (!EngineServices.AssetsManager.TryResolveAsset<AnimationDef>(animationId, out var animationData))
             {
-                Log.Error("Failed to resolve animation with ID {AnimationId}", animationId);
+                Logger.Error("Failed to resolve animation with ID {AnimationId}", animationId);
                 return;
             }
             SelectedAnimationData = animationData;
@@ -668,12 +666,12 @@ public class CharacterDisplayTab : UserControl
         
         if(File.Exists(newPath))
         {
-            var tempSpriteSheetDef = EngineCore.Instance.Managers.Assets.CreateTransientAsset<SpritesheetDef>();
-            tempSpriteSheetDef.SourceImage = new ImageDef(newPath);
+            var tempSpriteSheetDef = EngineServices.AssetsManager.CreateTransientAsset<SpritesheetDef>();
+            tempSpriteSheetDef.ImagePath = (newPath);
             tempSpriteSheetDef.FrameWidth = 48;
             tempSpriteSheetDef.FrameHeight = 64;
 
-            SelectedAnimationData.FrameIndexes = tempSpriteSheetDef.GetAllRowIndexes();
+            SelectedAnimationData.FrameIndexes = tempSpriteSheetDef.GetAllRowIndexes(0);
             SelectedAnimationData.SpriteSheetId = tempSpriteSheetDef.Unique;
         
             AnimationPreviewer.AnimationDefinition = SelectedAnimationData;
@@ -696,15 +694,15 @@ public class CharacterDisplayTab : UserControl
         Ulid animationId = directionalAnimationSet.GetAnimation(CurrentAnimationDirection);
         if (animationId == Ulid.Empty)
         {
-            SelectedAnimationData = EngineCore.Instance.Managers.Assets.CreateTransientAsset<AnimationDef>();
+            SelectedAnimationData = EngineServices.AssetsManager.CreateTransientAsset<AnimationDef>();
             SelectedAnimationData.Name = animationName;
             directionalAnimationSet.SetAnimation(CurrentAnimationDirection, SelectedAnimationData.Unique);
         }
         else
         {
-            if (!EngineCore.Instance.Managers.Assets.TryResolveAsset<AnimationDef>(animationId, out var animationData))
+            if (!EngineServices.AssetsManager.TryResolveAsset<AnimationDef>(animationId, out var animationData))
             {
-                Log.Error("Failed to resolve animation with ID {AnimationId}", animationId);
+                Logger.Error("Failed to resolve animation with ID {AnimationId}", animationId);
                 return;
             }
             SelectedAnimationData = animationData;

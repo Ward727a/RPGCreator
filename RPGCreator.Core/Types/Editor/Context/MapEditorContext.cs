@@ -1,11 +1,11 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using RPGCreator.Core.Managers.RTP.BrushManagers.Brushs;
-using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Editor.Interfaces;
 using RPGCreator.Core.Types.Editor.Visual;
 using RPGCreator.Core.Types.Editor.Visual.PaintTargets;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using Serilog;
 

@@ -4,9 +4,11 @@ using RPGCreator.Core.Types.Assets.Animations;
 using RPGCreator.Core.Types.Assets.Characters.Stats;
 using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.Core.Types.Map.Layers;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Animations;
 using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
+using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Types.Interfaces;
 using Serilog;
 
@@ -41,7 +43,6 @@ public class GameFactory : IGameFactory
         Register<TileLayerInstance, TileLayerDefinition>(TileLayerFactory);
         Register<MapInstance, MapDefinition>(MapFactory);
         Register<TilesetInstance, TilesetDef>(TilesetFactory);
-        Register<AutoTilesetInstance, AutoTilesetDef>(TilesetFactory);
         Register<TileInstance, TileDefinition>(TileFactory);
         Register<StatInstance, IStatDef>(StatFactory);
         Register<AnimationInstance, AnimationDef>(AnimationFactory);

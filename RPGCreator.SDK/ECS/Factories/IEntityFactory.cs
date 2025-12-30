@@ -1,8 +1,7 @@
 ﻿using System.Numerics;
-using RPGCreator.Core.Runtimes.ECS;
 using RPGCreator.SDK.ECS.Entities;
 
-namespace RPGCreator.SDK.ECS.Services;
+namespace RPGCreator.SDK.ECS.Factories;
 
 public interface IEntityFactory
 {

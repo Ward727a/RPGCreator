@@ -1,7 +1,6 @@
-using RPGCreator.Core.Parser.PRATT;
-using RPGCreator.Core.Types.Assets.Characters.Stats;
+using RPGCreator.SDK.Parser.PrattFormula;
 
-namespace RPGCreator.Core.Types.Assets.Skills;
+namespace RPGCreator.SDK.Assets.Definitions.Skills;
 
 public interface ISkillBuffDef : ISkillDef
 {
@@ -14,7 +13,7 @@ public interface ISkillBuffDef : ISkillDef
     /// <summary>
     /// Ulid => Stat unique identifier
     /// </summary>
-    Dictionary<Ulid, PrattCompiledFormula> StatModifiers { get; set; } // Stat modifiers applied by the buff
+    Dictionary<Ulid, IPrattFormula> StatModifiers { get; set; } // Stat modifiers applied by the buff
     Dictionary<Ulid, string> StatNonCompiledFormulas { get; set; } // Non-compiled formulas for stat modifiers
     
     float TickInterval { get; set; } // Interval in seconds/turn for periodic effects (0 for instant effects, 1 for every second/turn, 2 for every 2 seconds/turns, etc.)

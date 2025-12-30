@@ -1,20 +1,17 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Avalonia.VisualTree;
 using AvaloniaEdit;
 using AvaloniaEdit.TextMate;
-using RPGCreator.Core;
-using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Types;
-using RPGCreator.Core.Types.Assets.Skills;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
-using Serilog;
+using RPGCreator.SDK.Assets.Definitions.Skills;
+using RPGCreator.SDK.Logging;
 using TextMateSharp.Grammars;
 using Ursa.Controls;
 
@@ -460,10 +457,10 @@ public class SkillEditorTab : UserControl
 
             //AssetsManager.AssetMapping[typeof(ISkillDef)](SkillDef);
 
-            Log.Information("Skill '{SkillName}' saved.", SkillDef.Name);
+            Logger.Information("Skill '{SkillName}' saved.", SkillDef.Name);
             
             
-            EngineSerializer.Instance.Serialize(SkillDef, out string data);
+            EngineServices.SerializerService.Serialize(SkillDef, out string data);
             // Add the stat definition to the selected asset pack in the statdef
             if(SkillDef.PackId.HasValue && SkillDef.PackId != Ulid.Empty)
             {
@@ -482,7 +479,7 @@ public class SkillEditorTab : UserControl
             }
             else
             {
-                Log.Warning("No Assets Pack selected for this Stat Definition. It won't be part of any pack.");
+                Logger.Warning("No Assets Pack selected for this Stat Definition. It won't be part of any pack.");
             }
         };
         _bodyPanel.Children.Add(saveButton);

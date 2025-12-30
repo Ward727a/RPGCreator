@@ -282,7 +282,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                 Console.WriteLine($"Selected Tileset: {item.TilesetDef.Name}");
                 var def = item.TilesetDef;
 
-                if (def is IntGridTileset intgrid)
+                if (def is IntGridTilesetDef intgrid)
                 {
                     IntGridListBox.IsVisible = true;
                     RootTilesetCanvas.IsVisible = false;

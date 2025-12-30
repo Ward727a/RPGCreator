@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using RPGCreator.SDK.Types.Records;
 
-namespace RPGCreator.Core.Types.Map;
+namespace RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 
 public partial class IntGridValueRef
 {

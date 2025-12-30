@@ -1,8 +1,9 @@
-using System.Drawing;
+
+using System.Numerics;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps;
 
 public interface ILayerElem
 {
-    Point Position { get; set; }
+    Vector2 Position { get; set; }
 }

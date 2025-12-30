@@ -1,9 +1,8 @@
-using RPGCreator.Core.Types.Internal;
-using RPGCreator.SDK;
+using System.Numerics;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
-namespace RPGCreator.Core.Types.Assets.Skills;
+namespace RPGCreator.SDK.Assets.Definitions.Skills;
 
 public enum EffectPropertyType
 {
@@ -35,7 +34,7 @@ public static class EffectPropertyTypeExtensions
             EffectPropertyType.Number => typeof(float),
             EffectPropertyType.Text => typeof(string),
             EffectPropertyType.Boolean => typeof(bool),
-            EffectPropertyType.Vector2 => typeof(Point),
+            EffectPropertyType.Vector2 => typeof(Vector2),
             EffectPropertyType.SkillReference => typeof(URN),
             EffectPropertyType.ItemReference => typeof(URN),
             EffectPropertyType.StatReference => typeof(URN),
@@ -54,7 +53,7 @@ public static class EffectPropertyTypeExtensions
             EffectPropertyType.Number => 0f,
             EffectPropertyType.Text => string.Empty,
             EffectPropertyType.Boolean => false,
-            EffectPropertyType.Vector2 => new Point(0, 0),
+            EffectPropertyType.Vector2 => Vector2.Zero,
             EffectPropertyType.SkillReference => URN.Empty,
             EffectPropertyType.ItemReference => URN.Empty,
             EffectPropertyType.StatReference => URN.Empty,

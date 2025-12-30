@@ -1,2 +1,4 @@
-﻿using var game = new RPGCreator.MonoGame.EditorGame();
+﻿using RPGCreator.RTP;
+
+using var game = new EditorGame();
 game.Run();

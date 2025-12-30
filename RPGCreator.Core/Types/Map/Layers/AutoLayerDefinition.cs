@@ -1,5 +1,4 @@
-using RPGCreator.Core.Managers.AssetsManager;
-using RPGCreator.Core.Types.Assets.Tilesets;
+using System.Numerics;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Map.Layers.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps;
@@ -13,15 +12,15 @@ public class AutoLayerDefinition : BaseLayerDef
     public TileLayerDefinition InternalTileLayer { get; private set; } = new();
     
     public Ulid IntGridSetUnique { get; set; }
-    public IntGridTileset? IntGridSet { get; set; }
+    public IntGridTilesetDef? IntGridSet { get; set; }
 
-    public void BakeRegion(Point center, int radius = 0)
+    public void BakeRegion(Vector2 center, float radius = 0)
     {
-        for (int x = center.X - radius; x <= center.X + radius; x++)
+        for (var x = center.X - radius; x <= center.X + radius; x++)
         {
-            for (int y = center.Y - radius; y <= center.Y + radius; y++)
+            for (var y = center.Y - radius; y <= center.Y + radius; y++)
             {
-                var position = new Point(x, y);
+                var position = new Vector2(x, y);
                 var newTile = AutoTileSolver.Resolve(position, SourceIntGrid, IntGridSet.Rules, EngineCore.Instance.Managers.Assets);
                 
                 if (newTile != null)

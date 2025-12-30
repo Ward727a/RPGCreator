@@ -1,9 +1,6 @@
-using RPGCreator.Core.Types.Internal;
-using RPGCreator.SDK.Assets.Definitions.Characters;
-using RPGCreator.SDK.Types.Interfaces;
 using RPGCreator.SDK.Types.Internals;
 
-namespace RPGCreator.Core.Types.Assets.Characters;
+namespace RPGCreator.SDK.Assets.Definitions.Characters;
 
 public interface ICharacter : IHasSavePath, IHasUniqueId
 {

@@ -17,8 +17,7 @@ public class TilesetRegistry : RegistryBase<ITilesetDef>
         {
             yield return typeof(ITilesetDef);
             yield return typeof(TilesetDef);
-            yield return typeof(AutoTilesetDef);
-            yield return typeof(IntGridTileset);
+            yield return typeof(IntGridTilesetDef);
         }
     }
 }

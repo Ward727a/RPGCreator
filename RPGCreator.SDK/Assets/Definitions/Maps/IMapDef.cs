@@ -2,6 +2,7 @@ using System.Drawing;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types.Interfaces;
 using RPGCreator.SDK.Types.Internals;
+using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps;
 

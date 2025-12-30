@@ -4,15 +4,13 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
-using RPGCreator.Core;
-using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Types;
-using RPGCreator.Core.Types.Assets.Skills;
-using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Skills;
+using RPGCreator.SDK.Extensions;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types;
-using Serilog;
 using Ursa.Controls;
-using Point = RPGCreator.Core.Types.Internal.Point;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEditor.Tabs;
 
@@ -157,7 +155,7 @@ public class SkillEffectTab : UserControl
                     {
                         value = 0f;
                         _skillEffect.Properties[name] = value;
-                        Log.Warning("SkillEffectItemControl: Property '{Name}' expected to be of type 'float', but got '{Type}'. Setting to 0f.", name, value.GetType());
+                        Logger.Warning("SkillEffectItemControl: Property '{Name}' expected to be of type 'float', but got '{Type}'. Setting to 0f.", name, value.GetType());
                     }
                     
                     return CreateNumberPropertyControl(name, value);
@@ -169,7 +167,7 @@ public class SkillEffectTab : UserControl
                     {
                         value = string.Empty;
                         _skillEffect.Properties[name] = value;
-                        Log.Warning("SkillEffectItemControl: Property '{Name}' expected to be of type 'string', but got '{Type}'. Setting to empty string.", name, value.GetType());
+                        Logger.Warning("SkillEffectItemControl: Property '{Name}' expected to be of type 'string', but got '{Type}'. Setting to empty string.", name, value.GetType());
                     }
 
                     return CreateTextPropertyControl(name, value);
@@ -181,7 +179,7 @@ public class SkillEffectTab : UserControl
                     {
                         value = false;
                         _skillEffect.Properties[name] = value;
-                        Log.Warning("SkillEffectItemControl: Property '{Name}' expected to be of type 'bool', but got '{Type}'. Setting to false.", name, value.GetType());
+                        Logger.Warning("SkillEffectItemControl: Property '{Name}' expected to be of type 'bool', but got '{Type}'. Setting to false.", name, value.GetType());
                     }
 
                     return CreateBoolPropertyControl(name, value);
@@ -191,9 +189,9 @@ public class SkillEffectTab : UserControl
                     // Check that the value is a Point, if not, set it to Point.Empty
                     if (value is not Point)
                     {
-                        value = Point.Empty;
+                        value = default(Point);
                         _skillEffect.Properties[name] = value;
-                        Log.Warning("SkillEffectItemControl: Property '{Name}' expected to be of type 'Point', but got '{Type}'. Setting to Point.Zero.", name, value.GetType());
+                        Logger.Warning("SkillEffectItemControl: Property '{Name}' expected to be of type 'Point', but got '{Type}'. Setting to Point.Zero.", name, value.GetType());
                     }
 
                     return CreatePointPropertyControl(name, value);
@@ -206,7 +204,7 @@ public class SkillEffectTab : UserControl
                     {
                         value = Ulid.Empty;
                         _skillEffect.Properties[name] = value;
-                        Log.Warning("SkillEffectItemControl: Property '{Name}' expected to be of type 'Ulid', but got '{Type}'. Setting to Ulid.Empty.", name, value.GetType());
+                        Logger.Warning("SkillEffectItemControl: Property '{Name}' expected to be of type 'Ulid', but got '{Type}'. Setting to Ulid.Empty.", name, value.GetType());
                     }
                     
                     return CreateStatRefPropertyControl(name, value);
@@ -228,16 +226,16 @@ public class SkillEffectTab : UserControl
                         }
                         catch (Exception ex)
                         {
-                            Log.Error(ex, "SkillEffectItemControl: Error invoking custom property control method '{MethodName}' for property '{Name}'.", methodName, name);
+                            Logger.Error("SkillEffectItemControl: Error invoking custom property control method '{MethodName}' for property '{Name}'. {ex}", methodName, name, ex.Message);
                             return null;
                         }
                     }
-                    Log.Error("SkillEffectItemControl: Custom property control method '{MethodName}' not found for property '{Name}'.", methodName, name);
+                    Logger.Error("SkillEffectItemControl: Custom property control method '{MethodName}' not found for property '{Name}'.", methodName, name);
                     return null;
                 }
                 default:
                 {
-                    Log.Error("SkillEffectItemControl: Unsupported property type '{Type}' for property '{Name}'.", type, name);
+                    Logger.Error("SkillEffectItemControl: Unsupported property type '{Type}' for property '{Name}'.", type, name);
                     return null;
                 }
             }
@@ -379,7 +377,7 @@ public class SkillEffectTab : UserControl
             {
                 Minimum = float.MinValue,
                 Maximum = float.MaxValue,
-                Value = ((Point)value).X,
+                Value = (int)((Point)value).X,
                 Width = 80
             };
             panel.Children.Add(xBox);
@@ -395,7 +393,7 @@ public class SkillEffectTab : UserControl
             {
                 Minimum = float.MinValue,
                 Maximum = float.MaxValue,
-                Value = ((Point)value).Y,
+                Value = (int)((Point)value).Y,
                 Width = 80
             };
             panel.Children.Add(yBox);
@@ -600,7 +598,7 @@ public class SkillEffectTab : UserControl
 
     private void AddEffect(URN effectUrn)
     {
-        var effectDef = EngineCore.Instance.Managers.Assets.TryResolveAsset(effectUrn, out ISkillEffect? effect) ? effect : null;
+        var effectDef = EngineServices.AssetsManager.TryResolveAsset(effectUrn, out ISkillEffect? effect) ? effect : null;
         if (effectDef != null)
         {
             var effectControl = new SkillEffectItemControl(effectDef);
@@ -609,7 +607,7 @@ public class SkillEffectTab : UserControl
         }
         else
         {
-            Log.Warning("SkillEffectTab: Effect with URN '{Urn}' not found in registry.", effectUrn);
+            Logger.Warning("SkillEffectTab: Effect with URN '{Urn}' not found in registry.", effectUrn);
         }
     }
     
@@ -637,9 +635,7 @@ public class SkillEffectTab : UserControl
     {
         _effectComboBox.Items.Clear();
 
-        var skillEffectsRegistry = EngineCore.Instance.Managers.Assets.TryResolveRegistry("skill_effects", out var registry)
-            ? registry as SkillEffectsRegistry
-            : null;
+        EngineServices.AssetsManager.GetAssets<ISkillEffect>();
         
         foreach (var effect in skillEffectsRegistry.All())
         {

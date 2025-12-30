@@ -1,5 +1,5 @@
 
-using System.Drawing;
+using System.Numerics;
 using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps;
@@ -12,7 +12,7 @@ public interface IMapLayerInstance<TLayerDefElement, TLayerInstanceElement>
     bool IsVisible { get; }
     bool IsSelected { get; set; }
     
-    public Dictionary<Point, TLayerInstanceElement> InstancedElements { get; }
+    public Dictionary<Vector2, TLayerInstanceElement> InstancedElements { get; }
 
     public void Draw(IRenderContext context, ILayerRenderer<TLayerDefElement, TLayerInstanceElement> renderer)
     {

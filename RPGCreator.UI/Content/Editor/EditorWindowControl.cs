@@ -30,7 +30,6 @@ using Avalonia.Media;
 using Avalonia.VisualTree;
 using Microsoft.Xna.Framework;
 using RPGCreator.Core;
-using RPGCreator.MonoGame;
 using RPGCreator.UI.Content.AssetsManage;
 using RPGCreator.UI.Content.Editor.Tabs;
 using RPGCreator.UI.Content.Editor.TilesetSelectorComponents;
@@ -45,6 +44,7 @@ using System.Threading.Tasks;
 using RPGCreator.Core.Runtimes.Context;
 using RPGCreator.Core.Types.Editor.Context;
 using RPGCreator.Core.Types.Windows;
+using RPGCreator.RTP;
 using RPGCreator.UI.Content.Editor.LeftPanel;
 
 namespace RPGCreator.UI.Content.Editor

@@ -1,16 +1,11 @@
-using Microsoft.Xna.Framework;
+using System.Numerics;
 using RPGCreator.Core.Rendering.Batching;
-using RPGCreator.Core.Types.Assets.Tilesets;
-using RPGCreator.Core.Types.Internal;
-using RPGCreator.Core.Types.Internal.LayerRenderer;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Types.Internals;
 using Serilog;
-using Internal_Point = RPGCreator.Core.Types.Internal.Point;
-using Point = RPGCreator.Core.Types.Internal.Point;
 
-namespace RPGCreator.Core.Types.Map;
+namespace RPGCreator.Core.Types.Map.Layers;
 
 public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IResettable<TileLayerDefinition>, ICleanable
 {
@@ -26,7 +21,7 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
     /// If you need those to be saved, you should check the <see cref="TileLayerDefinition._elements"/> instead.<br/>
     /// Check <see cref="TileLayerDefinition"/> for more information on how to add or remove elements from the layer definition.
     /// </summary>
-    public Dictionary<Internal_Point, ITileInstance> InstancedElements { get; } = new();
+    public Dictionary<Vector2, ITileInstance> InstancedElements { get; } = new();
     
     public TileLayerInstance(TileLayerDefinition definition)
     {
@@ -44,7 +39,7 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
         _def.ElementAdded += OnElementAdded;
         _def.ElementRemoved += OnElementRemoved;
     }
-    private void OnElementAdded(object? sender, (Internal_Point location, ITileDef def) e)
+    private void OnElementAdded(object? sender, (Vector2 location, ITileDef def) e)
     {
         if(InstancedElements.TryAdd
             (
@@ -56,7 +51,7 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
             Log.Warning("[TileLayerInstance: {LayerName}] Failed to add tile instance at {Location} - already exists", _def.Name, e.location);
     }
 
-    private void OnElementRemoved(object? sender, (Internal_Point, ITileDef?) e)
+    private void OnElementRemoved(object? sender, (Vector2, ITileDef?) e)
     {
         if (e.Item1 == default && e.Item2 == null)
         {
@@ -90,7 +85,7 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
         }
     }
 
-    public void Update(GameTime gameTime)
+    public void Update(TimeSpan gameTime)
     {
         foreach (var tile in InstancedElements.Values)
         {

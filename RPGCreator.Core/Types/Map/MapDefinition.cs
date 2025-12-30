@@ -1,9 +1,8 @@
-using Microsoft.Xna.Framework;
-using RPGCreator.Core.Types.Internal;
-using RPGCreator.SDK;
+using System.Drawing;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
+using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.Core.Types.Map;
 

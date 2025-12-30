@@ -1,8 +1,6 @@
-using Avalonia.Media.Imaging;
+using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
-using SkiaSharp;
-using Internal_Point = RPGCreator.Core.Types.Internal.Point;
-using Point = RPGCreator.Core.Types.Internal.Point;
+using RPGCreator.SDK.Types;
 
 namespace RPGCreator.Core.Types.Assets.Tilesets;
 
@@ -43,8 +41,8 @@ public class TilesetInstance : ITilesetInstance
     
     public ITileDef? GetTileAt(int row, int column)
     {
-        var uv = new Internal_Point(row * TileWidth, column * TileHeight);
-        var position = new Internal_Point(row, column);
+        var uv = new Size(row * TileWidth, column * TileHeight);
+        var position = new Vector2(row, column);
         
         return new TileDefinition(
             uv,
@@ -59,8 +57,8 @@ public class TilesetInstance : ITilesetInstance
         return row >= 0 && column >= 0 && row < (Definition.ImageWidth / TileWidth) && column < (Definition.ImageHeight / TileHeight);
     }
     
-    public bool HasTile(Internal_Point rowColumn)
+    public bool HasTile(Vector2 rowColumn)
     {
-        return HasTile(rowColumn.X, rowColumn.Y);
+        return HasTile((int)rowColumn.X, (int)rowColumn.Y);
     }
 }

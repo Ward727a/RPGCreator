@@ -9,7 +9,7 @@ namespace RPGCreator.Core.Types.Editor.Visual.PaintTargets;
 public class IntGridData
 {
     public IntGridValueRef IntGridRef { get; set; }
-    public IntGridTileset IntGridTileset { get; set; }
+    public IntGridTilesetDef IntGridTilesetDef { get; set; }
 }
 
 public class IntGridLayerTarget : IPaintTarget
@@ -36,7 +36,7 @@ public class IntGridLayerTarget : IPaintTarget
     {
         if (objectToPaint is IntGridData gridData)
         {
-            LayerDef.IntGridSet ??= gridData.IntGridTileset;
+            LayerDef.IntGridSet ??= gridData.IntGridTilesetDef;
             LayerDef.SourceIntGrid.AddElement(gridData.IntGridRef.Value, position);
             LayerDef.BakeRegion(position);
         }

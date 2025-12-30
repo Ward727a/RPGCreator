@@ -10,4 +10,5 @@ public interface IAssetScope : IDisposable
     void Untrack(IAssetDef asset);
     void TransferTo(IAssetScope targetScope, IAssetDef asset);
     T Load<T>(Ulid assetId) where T : class, IAssetDef;
+    void Unload<T>(T asset) where T : class, IAssetDef;
 }

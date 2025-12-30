@@ -2,9 +2,13 @@ using Avalonia;
 using Avalonia.Media.Imaging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using RPGCreator.Core.CSharp.Extensions;
 using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.Core.Types.Map.Layers;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using SkiaSharp;
 using Point = RPGCreator.Core.Types.Internal.Point;
@@ -13,6 +17,7 @@ namespace RPGCreator.Core.Types.Assets.Tilesets;
 
 public class TileInstance : BaseDrawable, ITileInstance
 {
+    public System.Numerics.Vector2 Position { get; set; }
     public ITileDef Definition { get; private set; }
 
     public TileInstance()
@@ -26,7 +31,7 @@ public class TileInstance : BaseDrawable, ITileInstance
     }
 
 
-    public ITileInstance? GetDrawableTile(TileLayerDefinition? layer = null, Microsoft.Xna.Framework.Point? position = null)
+    public ITileInstance? GetDrawableTile(TileLayerDefinition? layer = null, System.Drawing.Point? position = null)
     {
         return GetCopy();
     }
@@ -35,6 +40,11 @@ public class TileInstance : BaseDrawable, ITileInstance
     {
 
         return new TileInstance(Definition);
+    }
+
+    public void Update(TimeSpan deltaTime)
+    {
+        throw new NotImplementedException();
     }
 
     public bool IsEqualTo(ITileInstance other)
@@ -47,20 +57,20 @@ public class TileInstance : BaseDrawable, ITileInstance
 
     protected override void _Draw(SpriteBatchExtend? sb)
     {
-
+        var texture = EngineServices.ResourcesService.Load<Texture2D>(Definition.TilesetDef.ImagePath);
         switch (Definition.Flip)
         {
             case TileFlip.None:
-                sb.Draw(Definition.TilesetDef.GetTexture(sb.GraphicsDevice), Position, Definition.UV, Color.White);
+                sb.Draw(texture, Position, Definition.UV.ToRectangle(), Color.White);
                 return;
             case TileFlip.Horizontal:
-                sb.Draw(Definition.TilesetDef.GetTexture(sb.GraphicsDevice), Position, Definition.UV, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0f);
+                sb.Draw(texture, Position, Definition.UV.ToRectangle(), Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0f);
                 return;
             case TileFlip.Vertical:
-                sb.Draw(Definition.TilesetDef.GetTexture(sb.GraphicsDevice), Position, Definition.UV, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.FlipVertically, 0f);
+                sb.Draw(texture, Position, Definition.UV.ToRectangle(), Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.FlipVertically, 0f);
                 return;
             case TileFlip.Both:
-                sb.Draw(Definition.TilesetDef.GetTexture(sb.GraphicsDevice), Position, Definition.UV, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically, 0f);
+                sb.Draw(texture, Position, Definition.UV.ToRectangle(), Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically, 0f);
                 return;
         }
     }
@@ -79,13 +89,13 @@ public class TileInstance : BaseDrawable, ITileInstance
     {
         var imageToCrop = SKBitmap.Decode(Definition.TilesetDef.ImagePath);
         
-        var cropRegion = new SKRectI(
-            Definition.SizeInTileset.X,
-            Definition.SizeInTileset.Y,
-            Definition.SizeInTileset.X + Definition.TilesetDef.TileWidth,
-            Definition.SizeInTileset.Y + Definition.TilesetDef.TileHeight
+        var cropRegion = new SKRect(
+            Definition.SizeInTileset.Width,
+            Definition.SizeInTileset.Height,
+            Definition.SizeInTileset.Width + Definition.TilesetDef.TileWidth,
+            Definition.SizeInTileset.Height + Definition.TilesetDef.TileHeight
         );
-        var drawRegion = new SKRectI(
+        var drawRegion = new SKRect(
             0,
             0,
             Definition.TilesetDef.TileWidth,
@@ -105,10 +115,10 @@ public class TileInstance : BaseDrawable, ITileInstance
         var tilesetBitmap = new Bitmap(Definition.TilesetDef.ImagePath);
         
         var cropRegion = new PixelRect(
-            Definition.SizeInTileset.X,
-            Definition.SizeInTileset.Y,
-            Definition.SizeInTileset.X + Definition.TilesetDef.TileWidth,
-            Definition.SizeInTileset.Y + Definition.TilesetDef.TileHeight
+            (int)Definition.SizeInTileset.Width,
+            (int)Definition.SizeInTileset.Height,
+            (int)Definition.SizeInTileset.Width + Definition.TilesetDef.TileWidth,
+            (int)Definition.SizeInTileset.Height + Definition.TilesetDef.TileHeight
         );
 
         var croppedBitmap = new CroppedBitmap(tilesetBitmap, cropRegion);

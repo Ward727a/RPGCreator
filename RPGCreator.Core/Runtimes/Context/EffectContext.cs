@@ -24,8 +24,9 @@ public sealed class EffectContext : IEffectContext
         Source = source;
     }
     
-    public TService Resolve<TService>() where TService : IRuntimeService
+    public TService? Resolve<TService>() where TService : IRuntimeService
     {
-        return EngineCore.Instance.ServiceProvider.GetService<TService>();
+        // return EngineCore.Instance.ServiceProvider.GetService<TService>();
+        return default;
     }
 }

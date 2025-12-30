@@ -1,7 +1,7 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Input;
-using RPGCreator.Core.Types.Assets.Skills;
+using RPGCreator.SDK.Assets.Definitions.Skills;
 
 namespace RPGCreator.UI.Content.AssetsManage.Components.Skills.Tabs;
 

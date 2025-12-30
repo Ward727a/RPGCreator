@@ -22,33 +22,14 @@
 // 
 // 
 #endregion
-using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Xna.Framework;
-using MonoGame.Extended;
 using RPGCreator.Core.Rendering.Batching;
-using RPGCreator.Core.Types.Internal;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RPGCreator.Core.Types.Assets.Characters;
 using RPGCreator.Core.Types.Assets.Actors;
+using RPGCreator.Core.Types.Map.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps;
-using Point = RPGCreator.Core.Types.Internal.Point;
-using Size = RPGCreator.Core.Types.Internal.Size;
 
 namespace RPGCreator.Core.Types.Map
 {
-
-    public struct GRID_PARAMETER
-    {
-        public int CellWidth;
-        public int CellHeight;
-
-        public Color CellBorderColor;
-    }
 
     public partial class MapInstance : BaseDrawable
     {

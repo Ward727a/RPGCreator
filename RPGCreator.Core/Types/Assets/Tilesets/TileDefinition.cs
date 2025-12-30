@@ -1,31 +1,28 @@
-using Microsoft.Xna.Framework;
-using RPGCreator.Core.Types.Internal;
-using RPGCreator.SDK;
+using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
-using Internal_Point = RPGCreator.Core.Types.Internal.Point;
 
 namespace RPGCreator.Core.Types.Assets.Tilesets;
 
 public class TileDefinition : ITileDef
 {
-    public Internal_Point Position { get; set; }
+    public Vector2 Position { get; set; }
     public Vector2 DefaultPosition { get; set; }
-    public Internal_Point SizeInTileset { get; private set; }
-    public Internal_Point PositionInTileset { get; private set; }
-    public Rectangle UV => new (new(PositionInTileset.X, PositionInTileset.Y), new(TilesetDef.TileWidth));
+    public Size SizeInTileset { get; private set; }
+    public Vector2 PositionInTileset { get; private set; }
+    public Rect UV => new (new(PositionInTileset.X, PositionInTileset.Y), new(TilesetDef.TileWidth, TilesetDef.TileHeight));
     public TileFlip Flip { get; set; } = TileFlip.None;
     public ITilesetDef TilesetDef { get; private set; }
     
-    public TileDefinition(Vector2 defaultPosition, Internal_Point sizeInTileset, Internal_Point positionInTileset, ITilesetDef tilesetDef)
+    public TileDefinition(Vector2 defaultPosition, Size sizeInTileset, Vector2 positionInTileset, ITilesetDef tilesetDef)
     {
         DefaultPosition = defaultPosition;
         SizeInTileset = sizeInTileset;
         PositionInTileset = positionInTileset;
         TilesetDef = tilesetDef;
     }
-    public TileDefinition(Internal_Point sizeInTileset, Internal_Point positionInTileset, ITilesetDef tilesetDef)
+    public TileDefinition(Size sizeInTileset, Vector2 positionInTileset, ITilesetDef tilesetDef)
     {
         SizeInTileset = sizeInTileset;
         PositionInTileset = positionInTileset;
@@ -51,8 +48,8 @@ public class TileDefinition : ITileDef
         }
 
         return DefaultPosition == other.DefaultPosition &&
-               SizeInTileset.IsEqualTo(other.SizeInTileset) &&
-               PositionInTileset.IsEqualTo(other.PositionInTileset) &&
+               SizeInTileset.Equals(other.SizeInTileset) &&
+               PositionInTileset.Equals(other.PositionInTileset) &&
                TilesetDef.Unique == other.TilesetDef.Unique;
     }
 
@@ -74,8 +71,8 @@ public class TileDefinition : ITileDef
         }
 
         info.TryGetValue("DefaultPosition", out Vector2 defaultPosition, Vector2.Zero);
-        info.TryGetValue("SizeInTileset", out Internal_Point sizeInTileset, new Internal_Point(32, 32));
-        info.TryGetValue("PositionInTileset", out Internal_Point positionInTileset, new Internal_Point(0, 0));
+        info.TryGetValue("SizeInTileset", out Size sizeInTileset, new Size(32, 32));
+        info.TryGetValue("PositionInTileset", out Vector2 positionInTileset, Vector2.Zero);
         info.TryGetValue("Tileset", out Ulid tilesetUnique, Ulid.Empty);
 
         DefaultPosition = defaultPosition;

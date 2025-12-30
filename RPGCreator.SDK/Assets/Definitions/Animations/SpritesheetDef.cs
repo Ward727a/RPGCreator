@@ -1,4 +1,3 @@
-using System.Drawing;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Interfaces;
@@ -30,12 +29,12 @@ public class SpritesheetDef : IAssetDef, ISerializable, IDeserializable
         Urn = new URN("rpgcreator", "spritesheet", Unique.ToString());
     }
 
-    public Rectangle GetFrameRect(int index)
+    public Rect GetFrameRect(int index)
     {
         int cols = Columns;
         int x = (index % cols) * FrameWidth;
         int y = (index / cols) * FrameHeight;
-        return new Rectangle(x, y, FrameWidth, FrameHeight);
+        return new Rect(x, y, FrameWidth, FrameHeight);
     }
     
     public List<int> GetAllRowIndexes(int row)

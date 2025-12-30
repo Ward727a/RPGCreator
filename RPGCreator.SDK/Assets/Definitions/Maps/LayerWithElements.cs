@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
@@ -10,13 +11,13 @@ namespace RPGCreator.SDK.Assets.Definitions.Maps;
 public abstract class LayerWithElements<TDef> : BaseLayerDef
     where TDef : class, ILayerElem
 {
-    protected Dictionary<Point, TDef> _elements = new();
-    protected readonly HashSet<Point> _surroundingElementsToIgnore = new();
+    protected Dictionary<Vector2, TDef> _elements = new();
+    protected readonly HashSet<Vector2> _surroundingElementsToIgnore = new();
     
-    public event EventHandler<(Point, TDef)>? ElementAdded;
-    public event EventHandler<(Point, TDef?)>? ElementRemoved;
-    public ReadOnlyDictionary<Point, TDef> Elements => _elements.AsReadOnly();
-    public void AddElement(TDef element, Point location)
+    public event EventHandler<(Vector2, TDef)>? ElementAdded;
+    public event EventHandler<(Vector2, TDef?)>? ElementRemoved;
+    public ReadOnlyDictionary<Vector2, TDef> Elements => _elements.AsReadOnly();
+    public void AddElement(TDef element, Vector2 location)
     {
         if (!_elements.TryAdd(location, element))
         {
@@ -30,7 +31,7 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
         ElementAdded?.Invoke(this, (location, element));
     }
 
-    public bool TryAddElement(TDef element, Point location)
+    public bool TryAddElement(TDef element, Vector2 location)
     {
         if (!_elements.TryAdd(location, element))
             return false;
@@ -40,7 +41,7 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
         return true;
     }
 
-    public TDef? RemoveElement(Point location)
+    public TDef? RemoveElement(Vector2 location)
     {
         if (!_elements.Remove(location, out var removedElement))
             return null;
@@ -49,7 +50,7 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
         return removedElement;
     }
 
-    public bool TryRemoveElement(Point location, [NotNullWhen(true)] out TDef? removedElement)
+    public bool TryRemoveElement(Vector2 location, [NotNullWhen(true)] out TDef? removedElement)
     {
         if (!_elements.Remove(location, out removedElement))
             return false;
@@ -57,7 +58,7 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
         return true;
     }
 
-    public bool TryRemoveElement(TDef element, [NotNullWhen(true)] out Point? removedLocation)
+    public bool TryRemoveElement(TDef element, [NotNullWhen(true)] out Vector2? removedLocation)
     {
         foreach (var kvp in _elements)
         {
@@ -73,7 +74,7 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
         return false;
     }
 
-    public TDef? GetElement(Point location)
+    public TDef? GetElement(Vector2 location)
     {
         if (_elements.TryGetValue(location, out var element))
         {
@@ -82,7 +83,7 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
         return null;
     }
 
-    public bool TryGetElement(Point location, [NotNullWhen(true)] out TDef? element)
+    public bool TryGetElement(Vector2 location, [NotNullWhen(true)] out TDef? element)
     {
         if (_elements.TryGetValue(location, out element))
         {
@@ -92,24 +93,24 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
         return false;
     }
 
-    public bool HasElement(Point location)
+    public bool HasElement(Vector2 location)
     {
         return _elements.ContainsKey(location);
     }
 
-    public Dictionary<Point, TDef> GetSurroundingElements(Point location, int radius = 1, int offset = 1)
+    public Dictionary<Vector2, TDef> GetSurroundingElements(Vector2 location, int radius = 1, int offset = 1)
     {
         
-        Dictionary<Point,TDef> surroundingElements = new();
+        Dictionary<Vector2,TDef> surroundingElements = new();
         // Check the 8 surrounding positions
-        for (int x = -1; x <= 1; x++)
+        for (float x = -1; x <= 1; x++)
         {
-            for (int y = -1; y <= 1; y++)
+            for (float y = -1; y <= 1; y++)
             {
                 if (x == 0 && y == 0) continue; // Skip the center position
-                int offsetX = x * offset;
-                int offsetY = y * offset;
-                Point surroundingPosition = new(location.X + offsetX, location.Y + offsetY);
+                float offsetX = x * offset;
+                float offsetY = y * offset;
+                Vector2 surroundingPosition = new(location.X + offsetX, location.Y + offsetY);
                 if (Elements.TryGetValue(surroundingPosition, out TDef? element))
                 {
                     if(_surroundingElementsToIgnore.Contains(surroundingPosition))
@@ -140,7 +141,7 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
     public void SetObjectData(DeserializationInfo info)
     {
         base.SetObjectData(info);
-        info.TryGetValue(nameof(_elements), out Dictionary<Point, TDef> elements, new Dictionary<Point, TDef>());
+        info.TryGetValue(nameof(_elements), out Dictionary<Vector2, TDef> elements, new Dictionary<Vector2, TDef>());
 
         _elements = elements;
     }

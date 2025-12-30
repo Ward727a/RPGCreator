@@ -334,7 +334,7 @@ public class TilingPanelControl : UserControl
         {
             Log.Debug("[TilingPanel] Selected tileset: {0}", selectedItem.Name);
             var def = _scope.Load<ITilesetDef>(selectedItem.AssetId);
-            if (def is IntGridTileset intgrid)
+            if (def is IntGridTilesetDef intgrid)
             {
                 IntGridListBox.IsVisible = true;
                 _canvas.IsVisible = false;

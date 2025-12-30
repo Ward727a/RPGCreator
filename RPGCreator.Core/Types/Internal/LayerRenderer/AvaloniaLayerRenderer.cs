@@ -4,8 +4,10 @@ using Avalonia.Media.Imaging;
 using RPGCreator.Core.Types.Assets;
 using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Types.Collections;
 using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.Core.Types.Internal.LayerRenderer;
@@ -18,6 +20,7 @@ namespace RPGCreator.Core.Types.Internal.LayerRenderer;
 public class AvaloniaLayerRenderer : ILayerRenderer<ITileDef, ITileInstance>
 {
     private readonly Canvas _drawingCanvas;
+    private IAssetScope _scope;
     
     /// <summary>
     /// Create a new instance of <see cref="AvaloniaLayerRenderer"/>.
@@ -25,10 +28,11 @@ public class AvaloniaLayerRenderer : ILayerRenderer<ITileDef, ITileInstance>
     /// <param name="drawingCanvas">The canvas where the layer will be drawn</param>
     public AvaloniaLayerRenderer(Canvas drawingCanvas)
     {
+        _scope = EngineServices.AssetsManager.CreateAssetScope();
         _drawingCanvas = drawingCanvas;
     }
 
-    public void Draw(IMapLayerInstance<ITileDef, ITileInstance> tileLayer)
+    public void Draw(IRenderContext renderContext, IMapLayerInstance<ITileDef, ITileInstance> tileLayer)
     {
         _drawingCanvas.Children.Clear(); // Clear the canvas before drawing
 
@@ -36,10 +40,14 @@ public class AvaloniaLayerRenderer : ILayerRenderer<ITileDef, ITileInstance>
         {
             var tile = element.Value;
             var position = element.Key;
+
+            var tilesetDefBitmap = EngineServices.ResourcesService.Load<Bitmap>(tile.Definition.TilesetDef.ImagePath);
             
-            var croppedBitmap = new CroppedBitmap(tile.Definition.TilesetDef.GetSimpleBitmap(), new PixelRect(
-                tile.Definition.PositionInTileset.X * tile.Definition.SizeInTileset.Width,
-                tile.Definition.PositionInTileset.Y * tile.Definition.SizeInTileset.Height,
+            if(tilesetDefBitmap == null)
+                continue;
+            var croppedBitmap = new CroppedBitmap(tilesetDefBitmap, new PixelRect(
+                (int)(tile.Definition.PositionInTileset.X * tile.Definition.SizeInTileset.Width),
+                (int)(tile.Definition.PositionInTileset.Y * tile.Definition.SizeInTileset.Height),
                 tile.Definition.TilesetDef.TileWidth,
                 tile.Definition.TilesetDef.TileHeight
             ));

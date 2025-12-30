@@ -4,10 +4,10 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using RPGCreator.Core;
-using RPGCreator.Core.Types.Assets.Skills;
 using RPGCreator.Core.Types.Blueprint;
 using RPGCreator.Core.Types.Blueprint.Nodes.Debug;
 using RPGCreator.Core.Types.Blueprint.Nodes.Math;
+using RPGCreator.SDK.Assets.Definitions.Skills;
 using RPGCreator.UI.Common.Blueprint;
 using Serilog;
 

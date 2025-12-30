@@ -2,7 +2,6 @@ using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
-using RPGCreator.Core.Types.Assets.Characters;
 using RPGCreator.Core.Types;
 using RPGCreator.SDK.Assets.Definitions.Characters;
 using Ursa.Controls;

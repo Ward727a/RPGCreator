@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Numerics;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Interfaces;
@@ -10,21 +11,21 @@ namespace RPGCreator.SDK.Assets.Definitions.Maps;
 
 public interface IMapLayerDef<TLayerElement> : IHasUniqueId, ISerializable, IDeserializable, IAssetDef
 {
-    event EventHandler<(Point, TLayerElement)>? ElementAdded;
-    event EventHandler<(Point,TLayerElement?)>? ElementRemoved;
+    event EventHandler<(Vector2, TLayerElement)>? ElementAdded;
+    event EventHandler<(Vector2,TLayerElement?)>? ElementRemoved;
     Ulid Unique { get; }
     URN Urn { get; }
     string Name { get; set; }
     int ZIndex { get; }
     bool VisibleByDefault { get; set; }
-    ReadOnlyDictionary<Point, TLayerElement> Elements { get; }
+    ReadOnlyDictionary<Vector2, TLayerElement> Elements { get; }
 
     /// <summary>
     /// Add a new element of type <see cref="TLayerElement"/> to the layer at the specified location.
     /// </summary>
     /// <param name="element">An element of type <see cref="TLayerElement"/> to add.</param>
     /// <param name="location">The location where the element should be added.</param>
-    public void AddElement(TLayerElement element, Point location);
+    public void AddElement(TLayerElement element, Vector2 location);
     /// <summary>
     /// Try to add a new element of type <see cref="TLayerElement"/> to the layer at the specified location.<br/>
     /// This method will return false if the element could not be added, for example, if the location is already occupied by another element.<br/>
@@ -35,7 +36,7 @@ public interface IMapLayerDef<TLayerElement> : IHasUniqueId, ISerializable, IDes
     /// <returns>
     /// True if the element was successfully added; otherwise, false.
     /// </returns>
-    public bool TryAddElement(TLayerElement element, Point location);
+    public bool TryAddElement(TLayerElement element, Vector2 location);
     /// <summary>
     /// Remove an element of type <see cref="TLayerElement"/> from the layer at the specified location.<br/>
     /// This method will trigger the <see cref="ElementRemoved"/> event with the location and the removed element.<br/>
@@ -45,7 +46,7 @@ public interface IMapLayerDef<TLayerElement> : IHasUniqueId, ISerializable, IDes
     /// <returns>
     /// The removed element if it exists at the specified location; otherwise, null.
     /// </returns>
-    public TLayerElement? RemoveElement(Point location);
+    public TLayerElement? RemoveElement(Vector2 location);
     /// <summary>
     /// Try to remove an element of type <see cref="TLayerElement"/> from the layer at the specified location.<br/>
     /// This method will return false if the element could not be removed, for example, if the location does not contain an element.<br/>
@@ -56,7 +57,7 @@ public interface IMapLayerDef<TLayerElement> : IHasUniqueId, ISerializable, IDes
     /// <returns>
     /// True if the element was successfully removed; otherwise, false.
     /// </returns>
-    public bool TryRemoveElement(Point location,[NotNullWhen(true)] out TLayerElement? removedElement);
+    public bool TryRemoveElement(Vector2 location,[NotNullWhen(true)] out TLayerElement? removedElement);
     /// <summary>
     /// Try to remove a specific element of type <see cref="TLayerElement"/> from the layer.<br/>
     /// This method will return false if the element could not be removed, for example, if the element does not exist in the layer.<br/>
@@ -74,7 +75,7 @@ public interface IMapLayerDef<TLayerElement> : IHasUniqueId, ISerializable, IDes
     /// Therefore, it is recommended to use this method only when you have a reference to the element you want to remove, rather than its location.<br/>
     /// If you need to remove an element by its location, use the <see cref="TryRemoveElement(Point, out TLayerElement?)"/> method instead.
     /// </remarks>
-    public bool TryRemoveElement(TLayerElement element, [NotNullWhen(true)] out Point? removedLocation);
+    public bool TryRemoveElement(TLayerElement element, [NotNullWhen(true)] out Vector2? removedLocation);
     /// <summary>
     /// Retrieve an element of type <see cref="TLayerElement"/> at the specified location.<br/>
     /// If the location does not contain an element, it will return null.
@@ -83,7 +84,7 @@ public interface IMapLayerDef<TLayerElement> : IHasUniqueId, ISerializable, IDes
     /// <returns>
     /// The element if it exists at the specified location; otherwise, null.
     /// </returns>
-    public TLayerElement? GetElement(Point location);
+    public TLayerElement? GetElement(Vector2 location);
     /// <summary>
     /// Try to retrieve an element of type <see cref="TLayerElement"/> at the specified location.<br/>
     /// This method will return false if the element does not exist at the specified location.<br/>
@@ -95,7 +96,7 @@ public interface IMapLayerDef<TLayerElement> : IHasUniqueId, ISerializable, IDes
     /// <returns>
     /// True if the element was found; otherwise, false.
     /// </returns>
-    public bool TryGetElement(Point location, [NotNullWhen(true)] out TLayerElement? element);
+    public bool TryGetElement(Vector2 location, [NotNullWhen(true)] out TLayerElement? element);
     /// <summary>
     /// Check if the layer contains an element at the specified location.<br/>
     /// This method will return true if there is an element of type <see cref="TLayerElement"/> at the specified location.<br/>
@@ -105,7 +106,7 @@ public interface IMapLayerDef<TLayerElement> : IHasUniqueId, ISerializable, IDes
     /// <returns>
     /// True if there is an element at the specified location; otherwise, false.
     /// </returns>
-    public bool HasElement(Point location);
+    public bool HasElement(Vector2 location);
     /// <summary>
     /// Get all elements that are within a specified radius around a given location.<br/>
     /// This method will return a list of elements that are within the specified radius from the given location.<br/>
@@ -119,7 +120,7 @@ public interface IMapLayerDef<TLayerElement> : IHasUniqueId, ISerializable, IDes
     /// The dictionary will contain all elements that are within the specified radius from the given location.<br/>
     /// If no elements are found within the specified radius, an empty dictionary will be returned.
     /// </returns>
-    public Dictionary<Point, TLayerElement> GetSurroundingElements(Point location, int radius = 1, int offset = 1);
+    public Dictionary<Vector2, TLayerElement> GetSurroundingElements(Vector2 location, int radius = 1, int offset = 1);
 
     public void ClearElements();
 }

@@ -1,7 +1,7 @@
 using RPGCreator.Core.Runtimes.Factories;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Entities;
-using RPGCreator.SDK.ECS.Services;
+using RPGCreator.SDK.ECS.Factories;
 using RPGCreator.SDK.ECS.Systems;
 using Serilog;
 using Vector2 = System.Numerics.Vector2;

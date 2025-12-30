@@ -41,6 +41,8 @@ public interface IAssetsManager
     public bool TryResolveAsset<T>(URN urn, [NotNullWhen(true)] out T? result) where T : class, IHasUniqueId;
     public bool TryResolveAsset<T>(Ulid uniqueId, [NotNullWhen(true)] out T? result) where T : class, IHasUniqueId;
     public T CreateAsset<T>() where T : IAssetDef, new();
+    public T CreateTransientAsset<T>(IAssetScope? scope = null) where T : IAssetDef, new();
+    public void DestroyTransientAsset<T>(T asset) where T : IAssetDef;
     public IAssetScope CreateAssetScope(string? name = null);
     public void AddPack(string dbPath);
     public void RegisterPack(IAssetsPack pack);
@@ -68,6 +70,6 @@ public static class EngineServices
     public static IAssetTypeRegistry AssetTypeRegistry { get; set; } = null!;
     public static IResourceService ResourcesService { get; set; } = null!;
     public static IProjectsManager ProjectsManager { get; set; } = null!;
-    public static IGraphRunnerService GraphRunnerService { get; set; } = null!;
+    public static IGraphService GraphService { get; set; } = null!;
     public static IPrattFormulaService PrattFormulaService { get; set; } = null!;
 }

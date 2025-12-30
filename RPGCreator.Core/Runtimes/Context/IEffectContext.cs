@@ -11,5 +11,5 @@ public interface IEffectContext
     object? Source { get; }
     Random Rng { get; }
     GameTime GameTime { get; }
-    TService Resolve<TService>() where TService : IRuntimeService;
+    TService? Resolve<TService>() where TService : IRuntimeService;
 }

@@ -14,7 +14,6 @@ using Avalonia.VisualTree;
 using Projektanker.Icons.Avalonia;
 using RPGCreator.Core.Contexts;
 using RPGCreator.Core.ModuleSDK.Attributes;
-using RPGCreator.Core.Types.Map;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
@@ -297,8 +296,8 @@ public class IntRefListCreateModal : Window
                 {
                     // 2. On utilise les données de TileData pour créer le rectangle de découpe
                     var rect = new PixelRect(
-                        FromRef.DefaultTileData.TilePosition.X,
-                        FromRef.DefaultTileData.TilePosition.Y,
+                        (int)FromRef.DefaultTileData.TilePosition.X,
+                        (int)FromRef.DefaultTileData.TilePosition.Y,
                         tileset.TileWidth,
                         tileset.TileHeight
                     );
@@ -363,10 +362,10 @@ public class IntRefListCreateModal : Window
                         var croppedImage = new CroppedBitmap(
                             tilesetImage,
                             new PixelRect(
-                                tile.PositionInTileset.X,
-                                tile.PositionInTileset.Y,
-                                tile.SizeInTileset.Width,
-                                tile.SizeInTileset.Height
+                                (int)tile.PositionInTileset.X,
+                                (int)tile.PositionInTileset.Y,
+                                (int)tile.SizeInTileset.Width,
+                                (int)tile.SizeInTileset.Height
                             )
                         );
                         DefaultTileImage!.Source = croppedImage;
@@ -495,10 +494,10 @@ public class AutoLayerRuleSelectOutputTileModal : Window
             outputTile = new CroppedBitmap(
                 tilesetImage,
                 new PixelRect(
-                    _selectedTile.PositionInTileset.X,
-                    _selectedTile.PositionInTileset.Y,
-                    _selectedTile.SizeInTileset.Width,
-                    _selectedTile.SizeInTileset.Height
+                    (int)_selectedTile.PositionInTileset.X,
+                    (int)_selectedTile.PositionInTileset.Y,
+                    (int)_selectedTile.SizeInTileset.Width,
+                    (int)_selectedTile.SizeInTileset.Height
                 )
             );
             OnCreateOutputTileConfirmed?.Invoke(outputTile, _selectedTile);
@@ -1345,8 +1344,8 @@ public class IntRefListItemControl : UserControl
                 {
                     // 2. On utilise les données de TileData pour créer le rectangle de découpe
                     var rect = new PixelRect(
-                        IntRef.DefaultTileData.TilePosition.X,
-                        IntRef.DefaultTileData.TilePosition.Y,
+                        (int)IntRef.DefaultTileData.TilePosition.X,
+                        (int)IntRef.DefaultTileData.TilePosition.Y,
                         tileset.TileWidth,
                         tileset.TileHeight
                     );
@@ -1629,7 +1628,7 @@ public class IntRefListControl : UserControl
 {
     public Grid? Body;
     
-    public IntGridTileset? selectedTileset = null;
+    public IntGridTilesetDef? selectedTileset = null;
 
     [ExposeEventToPlugin("AutoLayerEditor.IntRefList")]
     public event Action<IntGridValueRef>? AddedIntRef;
@@ -1736,7 +1735,7 @@ public class IntRefListControl : UserControl
             OnCreateTileset?.Invoke(Context);
             if(selectedTileset == null)
             {
-                selectedTileset = EngineServices.AssetsManager.CreateAsset<IntGridTileset>();
+                selectedTileset = EngineServices.AssetsManager.CreateAsset<IntGridTilesetDef>();
             }
 
             if (Context.IntRefs.FirstOrDefault()?.DefaultTileData.TilesetId != Ulid.Empty)
@@ -1811,18 +1810,18 @@ public class IntRefListControl : UserControl
         RemovedIntRef?.Invoke(intRef);
     }
 
-    public void LoadIntRefsFromTileset(IntGridTileset tileset)
+    public void LoadIntRefsFromTileset(IntGridTilesetDef tilesetDef)
     {
         Context.IntRefs.Clear();
         Context.RulesByIntRefValue.Clear();
-        selectedTileset = tileset;
+        selectedTileset = tilesetDef;
         
-        foreach (var intRef in tileset.IntRefs)
+        foreach (var intRef in tilesetDef.IntRefs)
         {
             Context.IntRefs.Add(intRef);
         }
         
-        foreach (var rule in tileset.Rules)
+        foreach (var rule in tilesetDef.Rules)
         {
             if(!Context.RulesByIntRefValue.TryGetValue(rule.TargetIntGridValue, out List<AutoLayerRule>? value))
             {

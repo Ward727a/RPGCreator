@@ -2,11 +2,10 @@ using System.Collections.Generic;
 using System.IO;
 using Avalonia;
 using Avalonia.Controls;
-using RPGCreator.Core;
-using RPGCreator.Core.Types.Assets.Characters;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Characters;
+using RPGCreator.SDK.Logging;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;
-using Serilog;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor;
@@ -231,10 +230,10 @@ public class CharacterEditorWindowControl : UserControl
     
     private void OnSaveButtonClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        Log.Information("Character '{characterName}' saved.", Data.Name);
+        Logger.Information("Character '{characterName}' saved.", Data.Name);
         
-        Log.Debug("Character Data: {@characterData}", Data);
-        EngineCore.Instance.Managers.Assets.RegisterAsset(Data);
+        Logger.Debug("Character Data: {@characterData}", Data);
+        EngineServices.AssetsManager.RegisterAsset(Data);
     }
     #endregion
     

@@ -48,7 +48,7 @@ public class AvaloniaAnimationDrawer : IDrawer<AnimationInstance>, IDisposable
 
         var rect = _cachedSpritesheet.GetFrameRect(animation.GetCurrentSpritesheetIndex());
         
-        var croppedBitmap = new CroppedBitmap(bitmap, new PixelRect(rect.X, rect.Y, rect.Width, rect.Height));
+        var croppedBitmap = new CroppedBitmap(bitmap, new PixelRect((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height));
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
             _targetImage.Source = croppedBitmap;

@@ -29,11 +29,6 @@ using RPGCreator.Core.Parser.Graph;
 using RPGCreator.Core.Parser.PRATT;
 using RPGCreator.Core.Resources;
 using RPGCreator.Core.Scheduler;
-using RPGCreator.Core.Types.Assets;
-using RPGCreator.Core.Types.Assets.BaseAssetsPack;
-using RPGCreator.Core.Types.Assets.Characters;
-using RPGCreator.Core.Types.Assets.Characters.Stats;
-using RPGCreator.Core.Types.Assets.Entities.Characters.Stats;
 using RPGCreator.Core.Types.Assets.Items;
 using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Blueprint;
@@ -41,7 +36,8 @@ using RPGCreator.Core.Types.Map;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions.Characters;
-using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
+using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using Serilog;
 
 namespace RPGCreator.Core
@@ -78,7 +74,6 @@ namespace RPGCreator.Core
         internal EngineConfigs Configs { get; private set; }
         internal EngineData Data { get; private set; }
         internal EngineEvents Events { get; private set; }
-        internal EngineServiceProvider ServiceProvider { get; private set; }
         internal EngineManagers Managers { get; private set; }
         internal EngineModules Modules { get; private set; }
         internal EngineSerializer Serializer { get; private set; }
@@ -104,7 +99,6 @@ namespace RPGCreator.Core
             Configs = new EngineConfigs();
             Data = new EngineData();
             Events = new EngineEvents();
-            ServiceProvider = new EngineServiceProvider();
             Managers = new EngineManagers();
             Modules = new EngineModules();
             #if DEBUG
@@ -112,7 +106,7 @@ namespace RPGCreator.Core
             Icons = new EngineIcons();
             #endif
             
-            EngineServices.GraphRunnerService = new GraphRunnerService();
+            EngineServices.GraphService = new GraphService();
             EngineServices.PrattFormulaService = new PrattFormulaService();
             EngineServices.SerializerService = Serializer;
             var typeMapping = new AssetsTypeMapping();
@@ -122,7 +116,7 @@ namespace RPGCreator.Core
             typeMapping.RegisterMapping(AssetTypeKeys.Stat, typeof(StatDefinition));
             typeMapping.RegisterMapping(AssetTypeKeys.Map, typeof(MapDefinition));
             typeMapping.RegisterMapping(AssetTypeKeys.Tileset, typeof(TilesetDef));
-            typeMapping.RegisterMapping(AssetTypeKeys.AutoTileset, typeof(AutoTilesetDef));
+            typeMapping.RegisterMapping(AssetTypeKeys.AutoTileset, typeof(IntGridTilesetDef));
             
             EngineServices.AssetTypeRegistry = typeMapping;
             
