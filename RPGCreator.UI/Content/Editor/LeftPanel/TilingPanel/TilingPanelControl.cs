@@ -1,27 +1,19 @@
 using System;
-using System.Linq;
 using Avalonia;
 using Avalonia.Animation;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using Avalonia.Styling;
-using AvaloniaEdit.Utils;
-using Microsoft.Xna.Framework;
-using RPGCreator.Core;
-using RPGCreator.Core.Managers.AssetsManager;
-using RPGCreator.Core.Managers.AssetsManager.Registries;
-using RPGCreator.Core.Runtimes.Context;
-using RPGCreator.Core.Types.Assets;
-using RPGCreator.Core.Types.Editor.Context;
-using RPGCreator.Core.Types.Editor.Visual.PaintTargets;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
+using RPGCreator.SDK.Types.Collections;
 using RPGCreator.UI.Common;
-using Serilog;
 using Ursa.Controls;
-using Point = RPGCreator.Core.Types.Internal.Point;
+using Size = System.Drawing.Size;
 
 namespace RPGCreator.UI.Content.Editor.LeftPanel.TilingPanel;
 
@@ -39,12 +31,13 @@ public class SetOptionItem : UserControl
     
     #endregion
     
-    public SetOptionItem(ITilesetDef definition)
+    public SetOptionItem(BaseTilesetDef definition)
     {
         AssetId = definition.Unique;
         Name = definition.Name;
         CreateComponents();
-        if (_previewImage != null) _previewImage.Source = definition.GetBitmap();
+        if (_previewImage != null)
+            _previewImage.Source = EngineServices.ResourcesService.Load<Bitmap>(definition.ImagePath);
         Content = _body;
         UIExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelTilingPanelTilesetItem, this);
     }
@@ -142,10 +135,7 @@ public class SelectionCursorControl : Border
 
 public class TilingPanelControl : UserControl
 {
-    
-    private MapEditorContext _context;
-
-    private AssetScope _scope;
+    private IAssetScope _scope;
     
     #region Components
     
@@ -162,14 +152,13 @@ public class TilingPanelControl : UserControl
     
     #endregion
     
-    public TilingPanelControl(MapEditorContext ctx)
+    public TilingPanelControl()
     {
-        _scope = EngineCore.Instance.Managers.Assets.CreateAssetScope("TilingPanelControl");
-        _context = ctx;
+        _scope = EngineServices.AssetsManager.CreateAssetScope("TilingPanelControl");
         CreateComponents();
         RegisterEvents();
         Content = _body;
-        UIExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelTilingPanel, this, _context);
+        UIExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelTilingPanel, this);
     }
     
     private void CreateComponents()
@@ -258,13 +247,13 @@ public class TilingPanelControl : UserControl
             e.Handled = true;
             
             var position = e.GetPosition(_canvas.CanvasBody);
-            Log.Debug("[TilingPanel] Canvas clicked at position: {0}", position);
+            Logger.Debug("[TilingPanel] Canvas clicked at position: {0}", position);
             var cellSize = _canvas.GridCellSize;
             
             double alignedX = Math.Floor((position.X - (_canvas.CurrentElementsPosition.X % cellSize.Width)) / cellSize.Width) * cellSize.Width + (_canvas.CurrentElementsPosition.X % cellSize.Width);
             double alignedY = Math.Floor((position.Y - _canvas.CurrentElementsPosition.Y % cellSize.Height) / cellSize.Height) * cellSize.Height + (_canvas.CurrentElementsPosition.Y % cellSize.Height);
             
-            Log.Debug("[TilingPanel] Aligned position: {0}, {1}", alignedX, alignedY);
+            Logger.Debug("[TilingPanel] Aligned position: {0}, {1}", alignedX, alignedY);
             Canvas.SetLeft(selectionCursor, alignedX);
             Canvas.SetTop(selectionCursor, alignedY);
             _canvas.UpdateOrigin(selectionCursor);
@@ -272,17 +261,18 @@ public class TilingPanelControl : UserControl
             ITileDef? tileToPaint = null;
             if (_setSelector?.SelectedItem is SetOptionItem selectedItem)
             {
-                var def = _scope.Load<ITilesetDef>(selectedItem.AssetId);
+                var def = _scope.Load<BaseTilesetDef>(selectedItem.AssetId);
                 
                 var tilePositionInTileset = new Point( // Row and Column in tileset
                     (int)((position.X + Math.Abs(_canvas.CurrentElementsPosition.X)) / cellSize.Width),
                     (int)((position.Y + Math.Abs(_canvas.CurrentElementsPosition.Y)) / cellSize.Height)
                 );
+
+                var tileset = EngineServices.GameFactory.CreateInstance<ITilesetInstance>(def);
+                tileToPaint = tileset.GetTileAt((int)tilePositionInTileset.X, (int)tilePositionInTileset.Y);
+                Logger.Debug("[TilingPanel] Created tile definition at position {0} in tileset {1}", tilePositionInTileset, def.Name);
                 
-                tileToPaint = def.GetTileAt(tilePositionInTileset.X, tilePositionInTileset.Y);
-                Log.Debug("[TilingPanel] Created tile definition at position {0} in tileset {1}", tilePositionInTileset, def.Name);
-                
-                _context.SelectedObjectToPaint = tileToPaint;
+                EngineState.BrushState.CurrentObjectToPaint = tileToPaint;
             }
         };
     }
@@ -293,13 +283,13 @@ public class TilingPanelControl : UserControl
         
         _canvas.SetGridCellSize(new Size(32, 32));
         ClearTilesetOptions();
-        Log.Debug("[TilingPanel] Loading tileset options...");
-        var searchResults = EngineCore.Instance.Managers.Assets.SearchAllPacks<ITilesetDef>();
+        Logger.Debug("[TilingPanel] Loading tileset options...");
+        var searchResults = EngineServices.AssetsManager.SearchAllPacks<BaseTilesetDef>();
         foreach (var result in searchResults)
         {
-            var def = _scope.Load<ITilesetDef>(result.AssetId);
+            var def = _scope.Load<BaseTilesetDef>(result.AssetId);
             AddTilesetOption(def);
-            Log.Debug("[TilingPanel] Added tileset option from search: {0}", def.Name);
+            Logger.Debug("[TilingPanel] Added tileset option from search: {0}", def.Name);
         }
     }
     
@@ -310,13 +300,13 @@ public class TilingPanelControl : UserControl
         {
             if (IntGridListBox.SelectedItem is ListBoxItem selectedTextBlock)
             {
-                Log.Debug("[TilingPanel] Selected IntGrid reference: {0}", selectedTextBlock.Content as string);
-                _context.SelectedObjectToPaint = selectedTextBlock.Tag as IntGridData;
+                Logger.Debug("[TilingPanel] Selected IntGrid reference: {0}", selectedTextBlock.Content as string);
+                EngineState.BrushState.CurrentObjectToPaint = selectedTextBlock.Tag as IntGridData;
             }
         };
     }
 
-    public void AddTilesetOption(ITilesetDef definition)
+    public void AddTilesetOption(BaseTilesetDef definition)
     {
         _setSelector?.Items.Add(new SetOptionItem(definition));
     }
@@ -332,8 +322,8 @@ public class TilingPanelControl : UserControl
         
         if (_setSelector?.SelectedItem is SetOptionItem selectedItem)
         {
-            Log.Debug("[TilingPanel] Selected tileset: {0}", selectedItem.Name);
-            var def = _scope.Load<ITilesetDef>(selectedItem.AssetId);
+            Logger.Debug("[TilingPanel] Selected tileset: {0}", selectedItem.Name);
+            var def = _scope.Load<BaseTilesetDef>(selectedItem.AssetId);
             if (def is IntGridTilesetDef intgrid)
             {
                 IntGridListBox.IsVisible = true;
@@ -347,7 +337,7 @@ public class TilingPanelControl : UserControl
                         Tag = new IntGridData()
                         {
                             IntGridRef = intRef,
-                            IntGridTileset = intgrid
+                            IntGridTilesetDef = intgrid
                         }
                     };
                     IntGridListBox.Items.Add(listItem);
@@ -368,7 +358,7 @@ public class TilingPanelControl : UserControl
             IntGridListBox.IsVisible = false;
             _canvas.IsVisible = true;
             if (_previewImage != null)
-                _previewImage.Source = def.GetBitmap();
+                _previewImage.Source = EngineServices.ResourcesService.Load<Bitmap>(def.ImagePath);
         }
         
     }

@@ -1,13 +1,14 @@
 using Microsoft.Xna.Framework;
 using RPGCreator.Core.Runtimes.Services;
 using RPGCreator.Core.Types.Assets.Actors;
+using RPGCreator.Core.Types.Assets.Entities;
 using RPGCreator.Core.Types.Assets.Items;
 
 namespace RPGCreator.Core.Runtimes.Context;
 
 public interface IEffectContext
 {
-    IActor Target { get; }
+    Actor Target { get; }
     object? Source { get; }
     Random Rng { get; }
     GameTime GameTime { get; }

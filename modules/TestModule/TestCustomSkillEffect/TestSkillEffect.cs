@@ -1,8 +1,6 @@
-using MonoGame.Extended.ECS;
-using RPGCreator.Core.Runtimes;
-using RPGCreator.Core.Runtimes.Contents;
-using RPGCreator.Core.Types.Internal;
+using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Skills;
+using RPGCreator.SDK.Modules.Attributes;
 using RPGCreator.SDK.Types;
 using Entity = RPGCreator.SDK.ECS.Entities.Entity;
 
@@ -27,7 +25,7 @@ public class TestSkillEffect : ISkillEffect
             "TestBoolean", false
         },
         {
-            "TestVector2/Point", Point.Empty
+            "TestVector2/Point", Vector2.Zero
         }
     };
 
@@ -56,7 +54,7 @@ public class TestSkillEffect : ISkillEffect
             {
                 Name = "TestVector2/Point",
                 Type = EffectPropertyType.Vector2,
-                DefaultValue = Point.Empty
+                DefaultValue = Vector2.Zero
             }
         };
 

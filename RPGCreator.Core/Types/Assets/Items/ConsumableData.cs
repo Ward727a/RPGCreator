@@ -1,4 +1,5 @@
 using RPGCreator.Core.Types.Assets.Actors;
+using RPGCreator.Core.Types.Assets.Entities;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Serializer;
@@ -40,7 +41,7 @@ public class ConsumableData : IItemData, IHasUniqueId
         IsDroppable = true;
     }
 
-    public void Use(IActor actor)
+    public void Use(Actor actor)
     {
         
     }

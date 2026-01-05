@@ -6,6 +6,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types.Interfaces;
 using RPGCreator.UI;

@@ -25,14 +25,14 @@ public class ECSWorld : IECSWorld
         EntityFactory = new EntityFactory(EntityManager);
     }
 
-    public Entity SpawnEntity(BaseEntity entity)
+    public Entity SpawnEntity(IEntityDefinition entityDefinition)
     {
-        return EntityFactory.SpawnEntity(entity, Vector2.Zero);
+        return EntityFactory.SpawnEntity(entityDefinition, Vector2.Zero);
     }
     
-    public Entity SpawnEntity(BaseEntity entity, Vector2 position)
+    public Entity SpawnEntity(IEntityDefinition entityDefinition, Vector2 position)
     {
-        return EntityFactory.SpawnEntity(entity, position);
+        return EntityFactory.SpawnEntity(entityDefinition, position);
     }
     
     public Entity CreateEntity()

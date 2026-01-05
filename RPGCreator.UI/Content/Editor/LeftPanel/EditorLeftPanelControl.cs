@@ -4,10 +4,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Layout;
-using RPGCreator.Core.Contexts;
-using RPGCreator.Core.ModuleSDK.Attributes;
-using RPGCreator.Core.Runtimes.Context;
-using RPGCreator.Core.Types.Editor.Context;
+using RPGCreator.SDK.Contexts;
+using RPGCreator.SDK.Modules.Attributes;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.UI.Content.Editor.LeftPanel.EntitiesPanel;
 using RPGCreator.UI.Content.Editor.LeftPanel.NonePanel;
@@ -19,12 +17,6 @@ namespace RPGCreator.UI.Content.Editor.LeftPanel;
 public class EditorLeftPanelControl : UserControl
 {
     
-    #region Fields
-
-    private MapEditorContext _context;
-    
-    #endregion
-    
     #region Components
 
     private TabControl? _tabControl;
@@ -35,13 +27,12 @@ public class EditorLeftPanelControl : UserControl
     
     #endregion
     
-    public EditorLeftPanelControl(MapEditorContext ctx)
+    public EditorLeftPanelControl()
     {
-        _context = ctx;
         CreateComponents();
         RegisterEvents();
         Content = _tabControl;
-        UIExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanel, this, _context);
+        UIExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanel, this);
     }
     
     private void CreateComponents()
@@ -75,20 +66,20 @@ public class EditorLeftPanelControl : UserControl
 
         _tabControl.Items.Add(new TabItem()
         {
-            Content = new MapEditor(_context),
+            Content = new MapEditor(),
             Header = "Map Editor"
         });
         _tabControl.Items.Add(new TabItem()
         {
-            Content = new MapLevelTab(_context),
+            Content = new MapLevelTab(),
             Header = "Map Levels"
         });
         
         
         // Add basics components
-        AddComponent("none", new NonePanelControl(_context));
-        AddComponent("tiling", new TilingPanelControl(_context));
-        AddComponent("entities", new EntitiesPanelControl(_context));
+        AddComponent("none", new NonePanelControl());
+        AddComponent("tiling", new TilingPanelControl());
+        AddComponent("entities", new EntitiesPanelControl());
         
         // Show default component
         ShowComponent("tiling");

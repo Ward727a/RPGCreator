@@ -7,7 +7,7 @@ using Serilog;
 
 namespace RPGCreator.Core.Managers.AssetsManager.Registries;
 
-public class TilesetRegistry : RegistryBase<ITilesetDef>
+public class TilesetRegistry : RegistryBase<BaseTilesetDef>
 {
     public override string ModuleName => "tilesets";
     
@@ -15,7 +15,7 @@ public class TilesetRegistry : RegistryBase<ITilesetDef>
     {
         get
         {
-            yield return typeof(ITilesetDef);
+            yield return typeof(BaseTilesetDef);
             yield return typeof(TilesetDef);
             yield return typeof(IntGridTilesetDef);
         }

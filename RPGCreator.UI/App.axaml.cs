@@ -46,7 +46,6 @@ public partial class App : Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
-        EngineCore.StartCore();
     }
 
     public override void OnFrameworkInitializationCompleted()
@@ -56,11 +55,6 @@ public partial class App : Application
         BindingPlugins.DataValidators.RemoveAt(0);
         IconProvider.Current
             .Register<MaterialDesignIconProvider>();
-        if(!EngineCore.IsCoreReady)
-        {
-            EngineCore.Instance.Events.CoreReady += Events_CoreReady;
-            return;
-        }
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -71,30 +65,11 @@ public partial class App : Application
             singleViewPlatform.MainView ??= new LauncherWindowControl();;
         }
 
-        EngineCore.Instance.Events.OnUIReady(new());
-
-        var EngineTimer = new DispatcherTimer
-        {
-            Interval = TimeSpan.FromMilliseconds(16)
-        };
-
-        EngineTimer.Tick += (sender, e) =>
-        {
-            EngineCore.Instance.Update();
-        };
-
-        EngineTimer.Start();
-
         base.OnFrameworkInitializationCompleted();
         this.AttachDevTools(new()
         {
             StartupScreenIndex = 1,
         });
-    }
-
-    private void Events_CoreReady(object? sender, CoreReadyArgs e)
-    {
-        OnFrameworkInitializationCompleted();
     }
 
 }

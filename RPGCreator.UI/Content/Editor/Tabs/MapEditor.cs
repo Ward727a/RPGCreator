@@ -23,23 +23,15 @@
 // 
 #endregion
 using Avalonia.Controls;
-using Avalonia.VisualTree;
-using RPGCreator.Core;
 using RPGCreator.Core.Types;
+using RPGCreator.SDK;
 using RPGCreator.UI.Content.Editor.LayersListComponents;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RPGCreator.Core.Types.Editor.Context;
 
 namespace RPGCreator.UI.Content.Editor.Tabs
 {
     public class MapEditor : UserControl, ITab
     {
 
-        private MapEditorContext _context;
         
         public ScrollViewer BodyScroller { get; private set; }
         public Grid Body { get; private set; }
@@ -67,9 +59,8 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
         // Constructor
 
-        public MapEditor(MapEditorContext context)
+        public MapEditor()
         {
-            _context = context;
             BodyScroller = new ScrollViewer
             {
             };
@@ -107,7 +98,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
             #region LayersSection
 
-            BodyContent.Children.Add(new LayersListComponent(_context));
+            BodyContent.Children.Add(new LayersListComponent());
 
             #endregion
 
@@ -170,7 +161,13 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
         protected void RegisterEvents()
         {
-            _context.MapChanged += Data_EditedMapChanged;
+            EngineState.EditorState.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(IEditorState.CurrentMap))
+                {
+                    Data_EditedMapChanged();
+                }
+            };
         }
 
         private void Data_EditedMapChanged()
@@ -180,16 +177,17 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
         public void RefreshMapProperties()
         {
-            if(_context.Map == null)
+            if(EngineState.EditorState.CurrentMap == null)
                 return;
-            MapNameText.Text = $"Map Name: {_context.Map.Name}";
-            MapSizeText.Text = $"Map Size: {_context.Map.Size.Width}x{_context.Map.Size.Height}";
-            MapDescriptionText.Text = $"Map Description: {_context.Map.Description}";
+            var map = EngineState.EditorState.CurrentMap;
+            MapNameText.Text = $"Map Name: {map.Name}";
+            MapSizeText.Text = $"Map Size: {map.Size.Width}x{map.Size.Height}";
+            MapDescriptionText.Text = $"Map Description: {map.Description}";
             MapEntitiesNumberText.Text = $"Entities: 0 (not working yet)";
-            MapLayersNumberText.Text = $"Layers: {_context.Map.TileLayers.Count}";
+            MapLayersNumberText.Text = $"Layers: {map.TileLayers.Count}";
         }
 
-        public static TabItem CreateTab(Window host, MapEditorContext context)
+        public static TabItem CreateTab(Window host)
         {
             // Need to do this to avoid create "multiple" instances...
             // In fact, even if we don't create multiple instances, it still crashes the application due to creating "multiple" instances of the same control.
@@ -197,7 +195,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
             var tab = new TabItem
             {
                 Header = "Map Editor",
-                Content = new MapEditor(context)
+                Content = new MapEditor()
             };
 
             return tab;

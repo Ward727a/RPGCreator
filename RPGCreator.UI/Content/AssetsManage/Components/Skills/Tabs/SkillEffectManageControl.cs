@@ -2,13 +2,12 @@ using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
-using RPGCreator.Core;
-using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Types;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Skills;
-using RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEditor;
+using RPGCreator.SDK.Extensions;
+using RPGCreator.SDK.Logging;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEffectEditor;
-using Serilog;
 
 namespace RPGCreator.UI.Content.AssetsManage.Components.Skills.Tabs;
 
@@ -162,19 +161,17 @@ public class SkillEffectManageControl : UserControl
     }
     private void ReloadContent()
     {
-        Log.Debug("Reloading Skills Effect Manager content...");
+        Logger.Debug("Reloading Skills Effect Manager content...");
         MainContent.Children.Clear();
-        var skillEffectsRegistry = EngineCore.Instance.Managers.Assets.TryResolveRegistry("skill_effects", out var registry)
-            ? registry as SkillEffectsRegistry
-            : null;
+        var allSkillEffects = EngineServices.AssetsManager.GetAssets<ISkillEffect>();
 
         
-        foreach (var skillDef in skillEffectsRegistry.All())
+        foreach (var skillDef in allSkillEffects)
         {
             var itemControl = new SkillEffectManageItemControl(skillDef);
             itemControl.ItemSelected += OnItemSelected;
             MainContent.Children.Add(itemControl);
-            Log.Debug("Added skill effect item: {skillName}", skillDef.DisplayName);
+            Logger.Debug("Added skill effect item: {skillName}", skillDef.DisplayName);
         }
     }
     
@@ -183,28 +180,28 @@ public class SkillEffectManageControl : UserControl
     #region Events Handlers
     private void OnSearchButtonClicked(object? sender, RoutedEventArgs e)
     {
-        Log.Debug("Search button clicked. Search term: {searchTerm}", SearchBar.Text);
+        Logger.Debug("Search button clicked. Search term: {searchTerm}", SearchBar.Text);
     }
     
     private void OnAddButtonClicked(object? sender, RoutedEventArgs e)
     {
-        Log.Debug("Add button clicked. Opening new skill effect editor.");
+        Logger.Debug("Add button clicked. Opening new skill effect editor.");
         var newSkillEffectEditor = new SkillsEffectEditorWindowControl();
         var host = ((AssetsManageWindow)this.GetVisualRoot()!);
         host?.OpenCustom(newSkillEffectEditor);
     }
     private void OnDeleteButtonClicked(object? sender, RoutedEventArgs e)
     {
-        Log.Debug("Delete button clicked.");
+        Logger.Debug("Delete button clicked.");
     }
 
     private void OnEditButtonClicked(object? sender, RoutedEventArgs e)
     {
-        Log.Debug("Edit button clicked.");
+        Logger.Debug("Edit button clicked.");
     }
     private void OnItemSelected(object? sender, EventArgs e)
     {
-        Log.Debug("Skill Effect {name} selected.", ((SkillEffectManageItemControl)sender).SkillEffect.DisplayName);
+        Logger.Debug("Skill Effect {name} selected.", ((SkillEffectManageItemControl)sender).SkillEffect.DisplayName);
         SelectedSkillEffect = ((SkillEffectManageItemControl)sender).SkillEffect;
     }
     #endregion

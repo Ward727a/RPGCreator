@@ -1,4 +1,5 @@
 ﻿using RPGCreator.SDK.Assets;
+using RPGCreator.SDK.Resources;
 
 namespace RPGCreator.Core.Resources;
 

@@ -23,17 +23,7 @@
 // 
 #endregion
 using Avalonia.Controls;
-using Avalonia.Interactivity;
-using Microsoft.Xna.Framework;
-using RPGCreator.Core;
-using Semi.Avalonia;
-using Semi.Avalonia.Tokens.Palette;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using RPGCreator.RTP;
 
 namespace RPGCreator.UI.Content.Editor
@@ -81,14 +71,12 @@ namespace RPGCreator.UI.Content.Editor
             e.Cancel = true; // Prevent the window from closing
 
             // TODO: Add cleanup and save logic here
-            EngineCore.Instance.Events.OnUIEditorClosed(new());
 
             Closing -= OnClosing; // Unsubscribe from the event to avoid looping issues
             Close(); // Close the window programmatically
         }
         private void OnOpening(object? sender, EventArgs e)
         {
-            EngineCore.Instance.Events.OnUIEditorOpened(new());
         }
         #endregion
     }

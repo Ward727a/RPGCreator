@@ -24,15 +24,13 @@
 #endregion
 using Avalonia.Controls;
 using Avalonia.VisualTree;
-using RPGCreator.Core;
 using RPGCreator.Core.Types;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RPGCreator.Core.Types.Editor.Context;
-using Serilog;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
+using RPGCreator.SDK.Logging;
 
 namespace RPGCreator.UI.Content.Editor.LayersListComponents
 {
@@ -42,8 +40,6 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
     /// </summary>
     public class LayersListComponent : UserControl
     {
-        private MapEditorContext _context;
-        
         #region Components
 
         public StackPanel LayersBody { get; private set; }
@@ -54,9 +50,8 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
 
         #endregion
 
-        public LayersListComponent(MapEditorContext context)
+        public LayersListComponent()
         {
-            _context = context;
             CreateComponents();
             Content = Body;
         }
@@ -114,8 +109,8 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
         protected void RefreshComponents()
         {
             LayersList.Items.Clear();
-            if (_context.Map == null) return;
-            foreach (var layer in _context.Map.TileLayers.OrderBy(l=>l.ZIndex))
+            if (EngineState.EditorState.CurrentMap == null) return;
+            foreach (var layer in EngineState.EditorState.CurrentMap.TileLayers.OrderBy(l=>l.ZIndex))
             {
                 LayerItem layerItem = new LayerItem(layer);
                 LayersList.Items.Add(layerItem);
@@ -128,18 +123,24 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
             {
                 LayersList.SelectedIndex = 0;
                 SelectedLayerText.Text = $"Selected Layer: {((LayerItem)LayersList.SelectedItem).Layer.Name}";
-                EngineCore.Instance.Data.SelectedLayer = ((LayerItem)LayersList.SelectedItem).Layer;
+                EngineState.EditorState.CurrentLayer = ((LayerItem)LayersList.SelectedItem).Layer;
             }
             else
             {
                 SelectedLayerText.Text = "Selected Layer: None";
-                EngineCore.Instance.Data.SelectedLayer = null;
+                EngineState.EditorState.CurrentLayer = null;
             }
         }
 
         protected void RegisterEvents()
         {
-            _context.MapChanged += OnMapChanged;
+            EngineState.EditorState.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(IEditorState.CurrentMap))
+                {
+                    OnMapChanged();
+                }
+            };
         }
 
         #region EventsHandlers
@@ -215,29 +216,29 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                             };
                             break;
                         default:
-                            Log.Error("[LayersListComponent] Unknown layer type index {LayerTypeIndex}", layerType.SelectedIndex);
+                            Logger.Error("[LayersListComponent] Unknown layer type index {LayerTypeIndex}", layerType.SelectedIndex);
                             break;
                     }
 
                     if (layer == null)
                     {
-                        Log.Error("[LayersListComponent] Failed to create layer of type index {LayerTypeIndex}", layerType.SelectedIndex);
+                        Logger.Error("[LayersListComponent] Failed to create layer of type index {LayerTypeIndex}", layerType.SelectedIndex);
                         return;
                     }
                     
                     
-                    if(_context.Map == null)
+                    if(EngineState.EditorState.CurrentMap == null)
                     {
                         return;
                     }
 
-                    layer.ZIndex = _context.Map.TileLayers.Count - 1; // Set ZIndex to the last index
+                    layer.ZIndex = EngineState.EditorState.CurrentMap.TileLayers.Count - 1; // Set ZIndex to the last index
                     // layer.ZIndexChanged += (value) =>
                     // {
                     //     RefreshComponents();
                     // };
 
-                    _context.Map?.AddLayer(layer);
+                    EngineState.EditorState.CurrentMap?.AddLayer(layer);
 
                     LayerItem newLayerItem = new LayerItem(layer);
 
@@ -251,7 +252,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
 
                     SelectedLayerText.Text = $"Selected Layer: {newLayerName}";
 
-                    _context.SelectedLayer = layer;
+                    EngineState.EditorState.CurrentLayer = layer;
 
                     popup.Close();
                 }
@@ -289,7 +290,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
         {
             if (LayersList.SelectedItem is not LayerItem layerItem) return;
             SelectedLayerText.Text = $"Selected Layer: {layerItem.Layer.Name}";
-            _context.SelectedLayer = layerItem.Layer;
+            EngineState.EditorState.CurrentLayer = layerItem.Layer;
         }
 
         #endregion

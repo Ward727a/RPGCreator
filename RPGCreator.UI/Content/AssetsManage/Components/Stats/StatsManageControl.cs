@@ -2,11 +2,11 @@ using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
-using RPGCreator.Core;
-using RPGCreator.Core.Managers.AssetsManager.Registries;
 using RPGCreator.Core.Types;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
-using Serilog;
+using RPGCreator.SDK.Extensions;
+using RPGCreator.SDK.Logging;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor;
 
@@ -166,19 +166,17 @@ public class StatsManageControl : UserControl
 
     public void ReloadContent()
     {
-        Log.Debug("Reloading Stats Editor content.");
+        Logger.Debug("Reloading Stats Editor content.");
         
         MainContent.Children.Clear();
-        
-        var skillEffectsRegistry = EngineCore.Instance.Managers.Assets.TryResolveRegistry("stats", out var registry)
-            ? registry as StatsRegistry
-            : null;
-        foreach (var statDef in skillEffectsRegistry.All())
+
+        var statDefs = EngineServices.AssetsManager.GetAssets<IStatDef>();
+        foreach (var statDef in statDefs)
         {
             var itemControl = new StatsManageItemControl(statDef);
             itemControl.ItemSelected += OnItemSelected;
             MainContent.Children.Add(itemControl);
-            Log.Debug("Added stat item: {statName}", statDef.Name);
+            Logger.Debug("Added stat item: {statName}", statDef.Name);
         }
     }
 
@@ -188,25 +186,29 @@ public class StatsManageControl : UserControl
 
     private void OnSearchButtonClicked(object? sender, RoutedEventArgs e)
     {
-        Log.Debug("Search button clicked. Search term: {searchTerm}", SearchBar.Text);
+        Logger.Debug("Search button clicked. Search term: {searchTerm}", SearchBar.Text);
     }
     
     private void OnAddButtonClicked(object? sender, RoutedEventArgs e)
     {
-        Log.Debug("Add button clicked. Opening new stat editor.");
+        Logger.Debug("Add button clicked. Opening new stat editor.");
         var newStatEditor = new StatsEditorWindowControl(null);
         var host = ((AssetsManageWindow)this.GetVisualRoot()!);
         host?.OpenCustom(newStatEditor);
     }
     private void OnDeleteButtonClicked(object? sender, RoutedEventArgs e)
     {
-        Log.Debug("Delete button clicked.");
+        Logger.Debug("Delete button clicked.");
     }
 
     private void OnEditButtonClicked(object? sender, RoutedEventArgs e)
     {
-        if(SelectedStat != null)
-        Log.Debug("Edit button clicked.");
+        if(SelectedStat == null) 
+        {
+            Logger.Warning("No stat selected for editing.");
+            return;
+        }
+        Logger.Debug("Edit button clicked.");
         var newStatEditor = new StatsEditorWindowControl(SelectedStat);
         var host = ((AssetsManageWindow)this.GetVisualRoot()!);
         host?.OpenCustom(newStatEditor);
@@ -214,7 +216,7 @@ public class StatsManageControl : UserControl
 
     private void OnItemSelected(object? sender, EventArgs e)
     {
-        Log.Debug("Stat {name} selected.", ((StatsManageItemControl)sender).StatDef.Name);
+        Logger.Debug("Stat {name} selected.", ((StatsManageItemControl)sender).StatDef.Name);
         SelectedStat = ((StatsManageItemControl)sender).StatDef;
     }
     

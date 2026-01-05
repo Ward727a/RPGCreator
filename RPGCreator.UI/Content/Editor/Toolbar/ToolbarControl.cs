@@ -24,29 +24,22 @@
 #endregion
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
-using RPGCreator.Core;
-using RPGCreator.Core.Managers.RTP.BrushManagers.Brushs;
 using RPGCreator.Core.Types;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RPGCreator.Core.Types.Editor.Context;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Editor.Brushes;
 
 namespace RPGCreator.UI.Content.Editor.Toolbar
 {
     public class ToolbarControl : UserControl
     {
-        private MapEditorContext _context;
 
         #region StaticData
 
-        public record BrushType(string Name, string IconPath, IBrush brush);
+        public record BrushType(string Name, string IconPath, IBrushInfo brush);
         private Dictionary<string, BrushType> _Brushes = new()
         {
-            ["Simple Brush"] = new ("Simple Brush", "", new SimpleBrush()),
-            ["Eraser Brush"] = new ("Eraser Brush", "", new EraserBrush()),
             // Add more brushes as needed
         };
 
@@ -85,9 +78,8 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
 
         #endregion
 
-        public ToolbarControl(MapEditorContext context)
+        public ToolbarControl()
         {
-            _context = context;
             CreateComponents();
             LoadBrushes();
             Content = Body;
@@ -190,7 +182,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
             BrushSizeSelector.ValueChanged += (s, e) => 
             {
                 // Handle brush size change
-                if (EngineCore.Instance.Data.EditorSettings.BrushType is IBrushResizeFeature brush)
+                if (EngineState.BrushState.CurrentBrush is IBrushResizeFeature brush)
                 {
                     brush.ResizeBrush((int)BrushSizeSelector.Value);
                     Console.WriteLine($"Brush size changed to: {BrushSizeSelector.Value}");
@@ -223,7 +215,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
             BrushPreviewCheckBox.IsCheckedChanged += (s, e) =>
             {
                 // Handle brush preview toggle
-                if (EngineCore.Instance.Data.EditorSettings.BrushType is IBrushPreviewFeature brush)
+                if (EngineState.BrushState.CurrentBrush is IBrushPreviewFeature brush)
                 {
                     brush.IsPreviewEnabled = BrushPreviewCheckBox.IsChecked == true;
                     Console.WriteLine($"Brush preview enabled: {brush.IsPreviewEnabled}");
@@ -266,7 +258,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
                 {
                     // Logic to enable place mode
                     Console.WriteLine("Place mode enabled.");
-                    _context.IsPlacing = true; // Set the placing mode in editor settings
+                    EngineState.EditorState.InPlacingMode = true; // Set the placing mode in editor settings
                     if (LastChecked != null && LastChecked != button)
                     {
                         LastChecked.IsChecked = false; // Uncheck the last checked button
@@ -276,7 +268,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
                 else
                 {
                     // Logic to disable place mode
-                    _context.IsPlacing = false; // Set the placing mode in editor settings
+                    EngineState.EditorState.InPlacingMode = false; // Set the placing mode in editor settings
                     Console.WriteLine("Place mode disabled.");
                     if (LastChecked == button)
                     {
@@ -304,7 +296,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
 
         private void ReloadBrushAvailableFeatures()
         {
-            if(EngineCore.Instance.Data.EditorSettings.BrushType is IBrushResizeFeature brushResizeFeature)
+            if(EngineState.BrushState.CurrentBrush is IBrushResizeFeature brushResizeFeature)
             {
                 // If the current brush supports resizing, enable the brush size panel
                 BrushSizePanel.IsVisible = true;
@@ -320,7 +312,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
                 BrushSizePanel.IsVisible = false;
             }
 
-            if (EngineCore.Instance.Data.EditorSettings.BrushType is IBrushPreviewFeature brushPreviewFeature)
+            if (EngineState.BrushState.CurrentBrush is IBrushPreviewFeature brushPreviewFeature)
             {
                 // If the current brush supports preview, enable the brush preview checkbox
                 BrushPreviewPanel.IsVisible = true;
@@ -346,7 +338,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
                 {
                     // Logic to enable drawing mode
                     Console.WriteLine("Drawing mode enabled.");
-                    _context.IsDrawing = true; // Set the drawing mode in editor settings
+                    EngineState.EditorState.InDrawingMode = true; // Set the drawing mode in editor settings
                     if (LastChecked != null && LastChecked != button)
                     {
                         LastChecked.IsChecked = false; // Uncheck the last checked button
@@ -356,7 +348,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
                 else
                 {
                     // Logic to disable drawing mode
-                    _context.IsDrawing = false; // Set the drawing mode in editor settings
+                    EngineState.EditorState.InDrawingMode = false; // Set the drawing mode in editor settings
                     Console.WriteLine("Drawing mode disabled.");
                     if (LastChecked == button)
                     {
@@ -373,7 +365,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
                 if (_Brushes.TryGetValue(selectedBrush, out var brushData))
                 {
                     Console.WriteLine($"Selected brush: {brushData.Name}");
-                    _context.ActiveBrush = brushData.brush;
+                    EngineState.BrushState.CurrentBrush = brushData.brush;
                     ReloadBrushAvailableFeatures(); // Reload features based on the selected brush
                 }
                 else

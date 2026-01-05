@@ -5,22 +5,25 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using RPGCreator.RTP.Editor.Components;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions.Animations;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Entities;
+using RPGCreator.SDK.Resources;
 
 namespace RPGCreator.RTP
 {
     public class EditorGame : Game
     {
+        public event Action OnDraw;
+        public event Action OnUpdate;
+        
         public bool CanUseMouse = false;
 
         //private bool CanUseMouse => IsActive && InsideEditorBox;
 
         public GraphicsDeviceManager _graphics;
 
-        private IECSWorld _ecsWorld;
+        private IECSWorld _ecsWorld = EngineServices.ECS.CreateWorld();
 
         private MapEditing _mapEditing;
         
@@ -29,6 +32,7 @@ namespace RPGCreator.RTP
 
         private AnimationInstance? _spritePlayerAtlas = null;
         private AnimationInstance? _spritePlayerIdle = null;
+        private SpriteBatch _spriteBatch;
 
         // GumService Gum => GumService.Default;
 
@@ -42,6 +46,7 @@ namespace RPGCreator.RTP
 
         public EditorGame()
         {
+            EngineServices.GameProvider = new EngineGameProvider(this);
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
@@ -117,8 +122,8 @@ namespace RPGCreator.RTP
         {
 
             GraphicsDevice.Reset();
-            // _spriteBatch = new(GraphicsDevice);
-            // _mapEditing = new(_spriteBatch);
+            _spriteBatch = new SpriteBatch(GraphicsDevice);
+            _mapEditing = new(_spriteBatch);
 
             // Test loop to create multiple entities with sprite and transform components and test the sprite rendering system.
             // Very basic test - Result for now : 10k entities with simple sprites renders, no movement at ~60 FPS => 3-4ms per frame.
@@ -147,6 +152,7 @@ namespace RPGCreator.RTP
 
         protected override void Update(GameTime gameTime)
         {
+            OnUpdate?.Invoke();
             // GraphicalUiElement.CanvasHeight = (_graphics.PreferredBackBufferHeight);
             // GraphicalUiElement.CanvasWidth = (_graphics.PreferredBackBufferWidth);
 
@@ -253,6 +259,7 @@ namespace RPGCreator.RTP
 
         protected override void Draw(GameTime gameTime)
         {
+            OnDraw?.Invoke();
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             _mapEditing.Draw();

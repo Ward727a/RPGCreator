@@ -1,3 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
+using RPGCreator.SDK.Logging;
+
 namespace RPGCreator.SDK.Serializer;
 public sealed class DeserializationInfo
 {
@@ -17,6 +20,7 @@ public sealed class DeserializationInfo
         }
         catch (Exception ex)
         {
+            Logger.Critical("Failed to read value '{0}': {1}", name, ex);
             value = default;
             return false;
         }
@@ -41,7 +45,7 @@ public sealed class DeserializationInfo
         }
     }
 
-    public bool TryGetList<T>(string name, out List<T>? value)
+    public bool TryGetList<T>(string name, [NotNullWhen(true)]out List<T>? value)
     {
         return TryGetValue(name, out value);
     }

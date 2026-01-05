@@ -32,18 +32,15 @@ using RPGCreator.Core;
 using RPGCreator.Core.Types;
 using RPGCreator.Core.Types.Windows;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RPGCreator.Core.Types.Editor.Context;
+using CommunityToolkit.Diagnostics;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Maps;
 
 namespace RPGCreator.UI.Content.Editor.Tabs
 {
     public class MapLevelTab : UserControl, ITab
     {
 
-        private MapEditorContext _context;
         private ScrollViewer _Scroller;
         private StackPanel _MapList;
 
@@ -90,9 +87,8 @@ namespace RPGCreator.UI.Content.Editor.Tabs
             public string MapName { get; set; } = "New Map";
             public int MapId { get; set; } = 0;
             public MapDefinition MapDef;
-            private MapEditorContext _context;
 
-            public MapItem(MapDefinition mapDef, MapEditorContext ctx) : this(mapDef.Name, ctx)
+            public MapItem(MapDefinition mapDef) : this(mapDef.Name)
             {
                 MapDef = mapDef;
 
@@ -104,15 +100,13 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
             }
 
-            public MapItem(string MapName, MapEditorContext ctx) : this(ctx)
+            public MapItem(string MapName) : this()
             {
                 this.MapName = MapName;
-                InitUI();
             }
 
-            public MapItem(MapEditorContext ctx)
+            public MapItem()
             {
-                _context = ctx;
                 InitUI();
             }
 
@@ -123,7 +117,10 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch;
                 Margin = App.style.Margin;
                 MapDef = new(MapName);
-                EngineCore.Instance.Data.EditedProject.GameData.Maps.Add(MapDef);
+                
+                Guard.IsNotNull(EngineState.ProjectState.CurrentProject, "CurrentProject");
+                
+                EngineState.ProjectState.CurrentProject.GameData.Maps.Add(MapDef);
 
                 var header = new TextBlock
                 {
@@ -147,7 +144,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                             return; // If the double click is not on the MapItem itself, do nothing
                         e.Handled = true; // Mark the event as handled to prevent further processing
 
-                        _context.Map = MapDef; // Set the edited map to the current map
+                        EngineState.EditorState.CurrentMap = MapDef; // Set the edited map to the current map
 
                         // Open the map editor
                         Console.ForegroundColor = ConsoleColor.Green;
@@ -175,7 +172,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                         openMapItem.Click += (s, e) =>
                         {
 
-                            _context.Map = MapDef; // Set the edited map to the current map
+                            EngineState.EditorState.CurrentMap = MapDef; // Set the edited map to the current map
                             // Open the map editor
                             Console.ForegroundColor = ConsoleColor.Green;
                             Console.WriteLine($"Opening map editor for map: {MapName}");
@@ -341,7 +338,10 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                     // Logic to remove the map
                     var parent = this.Parent as StackPanel;
                     parent?.Children.Remove(this);
-                    EngineCore.Instance.Data.EditedProject.GameData.Maps.Remove(MapDef); // Remove the map from the project data
+                    
+                    Guard.IsNotNull(EngineState.ProjectState.CurrentProject, "CurrentProject");
+                    
+                    EngineState.ProjectState.CurrentProject.GameData.Maps.Remove(MapDef); // Remove the map from the project data
                 };
 
                 confirmDialog.ShowDialog(EditorWindow.Instance);
@@ -492,9 +492,8 @@ namespace RPGCreator.UI.Content.Editor.Tabs
             }
         }
 
-        public MapLevelTab(MapEditorContext ctx) : base()
+        public MapLevelTab()
         {
-            _context = ctx;
             var cont = new Grid
             {
                 Margin = App.style.Margin,
@@ -541,7 +540,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
             cont.Children.Add(_Scroller);
             Grid.SetRow(_Scroller, 1);
 
-            var textMapTest = new MapItem(_context);
+            var textMapTest = new MapItem();
             _MapList.Children.Add(textMapTest);
 
             cont.PointerPressed += (s, e) =>
@@ -605,7 +604,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
             addButton.Click += (s, e) =>
             {
 
-                var map = new MapItem(mapNameInput.Text ?? "New Map", _context);
+                var map = new MapItem(mapNameInput.Text ?? "New Map");
                 _MapList.Children.Add(map);
 
                 popup.Close();
@@ -615,7 +614,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                 if (e.Key == Avalonia.Input.Key.Enter)
                 {
 
-                    var map = new MapItem(mapNameInput.Text ?? "New Map", _context);
+                    var map = new MapItem(mapNameInput.Text ?? "New Map");
                     _MapList.Children.Add(map);
 
                     popup.Close();
@@ -631,7 +630,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
             popup.ShowDialog(EditorWindow.Instance);
         }
-        public static TabItem CreateTab(Window host, MapEditorContext? ctx = null)
+        public static TabItem CreateTab(Window host)
         {
             // Need to do this to avoid create "multiple" instances...
             // In fact, even if we don't create multiple instances, it still crashes the application due to creating "multiple" instances of the same control.
@@ -641,7 +640,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                 Header = "Map/Level"
             };
 
-            tab.Content = new MapLevelTab(ctx);
+            tab.Content = new MapLevelTab();
 
             return tab;
         }

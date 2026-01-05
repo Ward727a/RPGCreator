@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.SDK.Editor.Brushes;
 
 namespace RPGCreator.Core.Managers.RTP.BrushManagers
 {

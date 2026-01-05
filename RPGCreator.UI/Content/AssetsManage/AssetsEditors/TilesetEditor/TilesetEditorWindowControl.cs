@@ -27,15 +27,12 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using RPGCreator.Core;
-using RPGCreator.Core.Types.Assets;
 using RPGCreator.Core.Types;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
@@ -47,7 +44,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
 
         private bool _FromWindow;
         public Grid Body { get; private set; }
-        public TilesetDef TilesetDefinition { get; private set; }
+        public BaseTilesetDef TilesetDefinition { get; private set; }
 
         public Grid ImageContainer { get; private set; }
         public Image ImagePreview { get; private set; }
@@ -64,7 +61,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
         public TextSeparator ExamplesTilesLabel { get; private set; }
         public Grid ExamplesTilesGrid { get; private set; }
 
-        public TilesetEditorWindowControl(TilesetDef tilesetDefinition, bool FromWindow = false)
+        public TilesetEditorWindowControl(BaseTilesetDef tilesetDefinition, bool FromWindow = false)
         {
             TilesetDefinition = tilesetDefinition ?? throw new ArgumentNullException(nameof(tilesetDefinition), "Tileset cannot be null");
             CreateComponents();
@@ -145,7 +142,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             {
                 ImagePick.SelectedPathsText = TilesetDefinition.ImagePath;
                 ImagePick.SelectedPaths.Append(TilesetDefinition.ImagePath);
-                ImagePreview.Source = TilesetDefinition.GetBitmap();
+                ImagePreview.Source = EngineServices.ResourcesService.Load<Bitmap>(TilesetDefinition.ImagePath);
             }
 
             MainPanel.Children.Add(ImagePick);
@@ -211,7 +208,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             var index = 0;
             var currentPack = -1;
             // Populate the ComboBox with available asset packs
-            foreach (var pack in EngineCore.Instance.Managers.Assets.GetLoadedPacks())
+            foreach (var pack in EngineServices.AssetsManager.GetLoadedPacks())
             {
                 AssetPackChoice.Items.Add(pack.Name);
                 if (TilesetDefinition.PackName != null && TilesetDefinition.PackName == pack.Name)
@@ -363,7 +360,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             TilesetDefinition.ImagePath = ImagePick.SelectedPaths[0];
             TilesetDefinition.PackName = AssetPackChoice.SelectedItem as string;
             
-            if (EngineCore.Instance.Managers.Assets.TryGetPack(TilesetDefinition.PackName, out var pack))
+            if (EngineServices.AssetsManager.TryGetPack(TilesetDefinition.PackName, out var pack))
             {
                 
                 pack.AddOrUpdateAsset(TilesetDefinition);
@@ -374,7 +371,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
                 throw new Exception("Couldn't get the pack from the pack name... INTERNAL ERROR!");
             }
             
-            EngineCore.Instance.Managers.Assets.RegisterAsset(TilesetDefinition);
+            EngineServices.AssetsManager.RegisterAsset(TilesetDefinition);
 
             TilesetSaved?.Invoke();
         }

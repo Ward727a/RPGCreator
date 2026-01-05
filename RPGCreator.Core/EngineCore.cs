@@ -23,6 +23,7 @@
 // 
 #endregion
 using RPGCreator.Core.Configs;
+using RPGCreator.Core.ECS;
 using RPGCreator.Core.Events;
 using RPGCreator.Core.Events.EventArgs;
 using RPGCreator.Core.Parser.Graph;
@@ -32,14 +33,21 @@ using RPGCreator.Core.Scheduler;
 using RPGCreator.Core.Types.Assets.Items;
 using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Blueprint;
+using RPGCreator.Core.Types.Editor.Context;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.Core.Types.Map.Layers.AutoLayer;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
+using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using RPGCreator.SDK.Graph.Nodes;
+using RPGCreator.SDK.Logging;
 using Serilog;
+
+using SDKAutoTileSolver = RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer.AutoTileSolver;
 
 namespace RPGCreator.Core
 {
@@ -73,7 +81,6 @@ namespace RPGCreator.Core
 
         internal EngineScheduler Scheduler { get; private set; }
         internal EngineConfigs Configs { get; private set; }
-        internal EngineData Data { get; private set; }
         internal EngineEvents Events { get; private set; }
         internal EngineManagers Managers { get; private set; }
         internal EngineModules Modules { get; private set; }
@@ -93,23 +100,13 @@ namespace RPGCreator.Core
             {
                 throw new Exception("Engine core has already been initialized, it should happen only once.");
             }
-            Instance = this;
 
-            Scheduler = new EngineScheduler();
-            Serializer = new EngineSerializer();
-            Configs = new EngineConfigs();
-            Data = new EngineData();
-            Events = new EngineEvents();
-            Managers = new EngineManagers();
-            Modules = new EngineModules();
-            #if DEBUG
-            // In debug mode, we load the engine icons for debug tools (like IconsExplorer).
-            Icons = new EngineIcons();
-            #endif
+            Logger.Implementation = new EngineLogger();
             
-            EngineServices.GraphService = new GraphService();
-            EngineServices.PrattFormulaService = new PrattFormulaService();
-            EngineServices.SerializerService = Serializer;
+            EngineState.EditorState = new EditorState();
+            EngineState.ProjectState = new ProjectState();
+            EngineState.BrushState = new BrushState();
+            
             var typeMapping = new AssetsTypeMapping();
             
             typeMapping.RegisterMapping(AssetTypeKeys.Character, typeof(CharacterData));
@@ -127,6 +124,27 @@ namespace RPGCreator.Core
             
             EngineServices.ResourcesService = resService;
             
+            Instance = this;
+
+            Scheduler = new EngineScheduler();
+            Serializer = new EngineSerializer();
+            EngineServices.SerializerService = Serializer;
+            Configs = new EngineConfigs();
+            Events = new EngineEvents();
+            Managers = new EngineManagers();
+            Modules = new EngineModules();
+            #if DEBUG
+            // In debug mode, we load the engine icons for debug tools (like IconsExplorer).
+            Icons = new EngineIcons();
+            #endif
+            
+            EngineServices.GraphService = new GraphService();
+            EngineServices.PrattFormulaService = new PrattFormulaService();
+            EngineServices.GraphNodeScanner = new GraphNodeScanner();
+            EngineServices.ECS = new ECSService();
+
+            SDKAutoTileSolver.Service = new AutoTileSolver();
+            
             Managers.Init();
             
             Log.Information("Starting scanning for blueprint opcodes handlers...");
@@ -142,7 +160,7 @@ namespace RPGCreator.Core
             
             // Scan the assemblies for all graph nodes
             // This will register all the nodes in the graph node registry.
-            GraphNodeRegistry.AnalyzeNodes();
+            EngineServices.GraphNodeScanner.ScanCurrentAssembly();
             Log.Information("Graph nodes scanning completed.");
             Log.Information("Found {Count} nodes.", GraphNodeRegistry.GetAllNodes().Count);
             
@@ -157,6 +175,8 @@ namespace RPGCreator.Core
             Log.Information("EngineCore initialized at {Time}.", DateTime.Now);
 
             // Managers.Projects.CreateProject("test project new config", "C:\\Users\\Ward\\Desktop\\Test");
+            
+            MapEditorContext.Initialize();
 
         }
 
@@ -171,11 +191,6 @@ namespace RPGCreator.Core
             Events.UIReady += (sender, args) =>
             {
                 IsUIReady = true;
-            };
-
-            Events.RTPCreated += (sender, args) =>
-            {
-                Data.RTPGame = args.RTP;
             };
 
             Events.UIEditorOpened += (sender, args) =>

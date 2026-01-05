@@ -1,6 +1,4 @@
 using Avalonia.Controls;
-using RPGCreator.Core.Runtimes.Context;
-using RPGCreator.Core.Types.Editor.Context;
 using RPGCreator.SDK.Modules.UIModule;
 
 namespace RPGCreator.UI.Content.Editor.LeftPanel.NonePanel;
@@ -8,15 +6,13 @@ namespace RPGCreator.UI.Content.Editor.LeftPanel.NonePanel;
 public class NonePanelControl : UserControl
 {
 
-    private MapEditorContext _context;
     private TextBlock textBlock;
     
-    public NonePanelControl(MapEditorContext context)
+    public NonePanelControl()
     {
-        _context = context;
         CreateComponents();
         Content = textBlock;
-        UIExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelNonePanel, this, _context);
+        UIExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelNonePanel, this);
     }
 
     private void CreateComponents()

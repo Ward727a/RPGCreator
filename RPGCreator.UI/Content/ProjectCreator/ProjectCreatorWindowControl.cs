@@ -26,14 +26,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
-using CommunityToolkit.Mvvm.Input;
-using RPGCreator.Core;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
+using RPGCreator.SDK;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.ProjectCreator
@@ -163,7 +157,7 @@ namespace RPGCreator.UI.Content.ProjectCreator
                 return;
             }
 
-            var project = EngineCore.Instance.Managers.Projects.CreateProject(_ProjectName, _ProjectPath);
+            var project = EngineServices.ProjectsManager.CreateProject(_ProjectName, _ProjectPath);
             if(project == null)
             {
                 Console.ForegroundColor = ConsoleColor.Red;

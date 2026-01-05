@@ -1,22 +1,12 @@
-using Avalonia.Media.Imaging;
-using Microsoft.Xna.Framework.Graphics;
-using RPGCreator.Core.Types.Internal;
-using RPGCreator.SDK;
-using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
-using Serilog;
-using SkiaSharp;
 
-namespace RPGCreator.Core.Types.Assets.Tilesets;
+namespace RPGCreator.SDK.Assets.Definitions.Tilesets;
 
-public sealed class TilesetDef : ITilesetDef,ISerializable, IDeserializable
+public sealed class TilesetDef : BaseTilesetDef
 {
-    public event Action? ImageChanged;
-
-    public sealed override URN Urn => new URN("tileset", $"{Name}@{Unique}");
-    
-    private Texture2D ? _TextureCache;
+    public override URN Urn => new URN("tileset", $"{Name}@{Unique}");
 
     public TilesetDef()
     {
@@ -71,7 +61,7 @@ public sealed class TilesetDef : ITilesetDef,ISerializable, IDeserializable
         TileWidth = tileWidth;
         TileHeight = tileHeight;
         
-        Log.Debug("[TilesetDef] SetObjectData ({0}, {1})", Unique, Name);
+        Logger.Debug("[TilesetDef] SetObjectData ({0}, {1})", Unique, Name);
     }
 
 }

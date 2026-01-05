@@ -4,6 +4,7 @@ using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK.Assets.Definitions.Skills;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Entities;
+using RPGCreator.SDK.Modules.Attributes;
 using RPGCreator.SDK.Types;
 using Serilog;
 

@@ -24,14 +24,14 @@
 #endregion
 
 using System.Diagnostics.CodeAnalysis;
+using CommunityToolkit.Diagnostics;
 using RPGCreator.Core.Managers.AssetsManager.Factories;
 using RPGCreator.Core.Managers.AssetsManager.Registries;
-using RPGCreator.Core.Managers.ProjectsManager.Events;
 using RPGCreator.Core.Types.Assets.BaseAssetsPack;
-using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Map;
 using RPGCreator.Core.Types.Map.Layers;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
@@ -69,7 +69,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
         #region Factories
         
         public GenericPooledFactory<TileLayerInstance, TileLayerDefinition> TileLayerFactory = new();
-        public GenericCachedFactory<MapInstance, MapDefinition> MapFactory = new();
+        public GenericCachedFactory<MapInstance, IMapDef> MapFactory = new();
         public TilesetFactory TilesetFactory { get; } = new();
         public TileFactory TileFactory { get; } = new();
         public StatFactory StatFactory { get; } = new();
@@ -77,6 +77,9 @@ namespace RPGCreator.Core.Managers.AssetsManager
         #endregion
         
         #region RegistryHelpers
+
+        public event Action<IAssetDef>? OnAssetRegistered;
+        public event Action<IAssetDef>? OnAssetUnregistered;
 
         public void RegisterRegistry(IAssetRegistry registry)
         {
@@ -94,7 +97,23 @@ namespace RPGCreator.Core.Managers.AssetsManager
             if (TryResolveRegistry(type, out var assetRegistry))
             {
                 assetRegistry.RegisterUntyped((IHasUniqueId)asset, true);
+                Guard.IsAssignableToType(asset, typeof(IAssetDef));
+                OnAssetRegistered?.Invoke((IAssetDef)asset);
                 Log.Information("Registered asset of type {AssetType} in registry {RegistryName}", type.FullName, assetRegistry.ModuleName);
+                return;
+            }
+            Log.Warning("No registry found for asset type {AssetType}", type.FullName);
+        }
+        
+        public void UnregisterAsset(object asset)
+        {
+            var type = asset.GetType();
+            if (TryResolveRegistry(type, out var assetRegistry))
+            {
+                assetRegistry.UnregisterUntyped((IHasUniqueId)asset);
+                Guard.IsAssignableToType(asset, typeof(IAssetDef));
+                OnAssetUnregistered?.Invoke((IAssetDef)asset);
+                Log.Information("Unregistered asset of type {AssetType} from registry {RegistryName}", type.FullName, assetRegistry.ModuleName);
                 return;
             }
             Log.Warning("No registry found for asset type {AssetType}", type.FullName);
@@ -216,16 +235,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 return;
             }
 
-            if (TryResolveRegistry(asset.GetType(), out var assetRegistry))
-            {
-                assetRegistry.UnregisterUntyped(asset);
-                Log.Information("Destroyed transient asset of type {AssetType} with ID {AssetID}",
-                    typeof(T).FullName, asset.Unique);
-            }
-            else
-            {
-                Log.Warning("No registry found for asset type {AssetType}", typeof(T).FullName);
-            }
+            UnregisterAsset(asset);
         }
 
         public void CommitAsset(IAssetDef asset, string packName, AssetScope? fromScope = null)
@@ -313,51 +323,55 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 skillEffectsRegistry.ReloadData();
             }
             
-            EngineCore.Instance.Managers.Projects.Events.LoadedProject += (object? sender, ProjectsManagerLoadedProjectArgs e) =>
+            EngineState.ProjectState.PropertyChanged += (object? sender, System.ComponentModel.PropertyChangedEventArgs e) =>
             {
-                if (e.LoadedProject != null && !e.HasError)
+                if (e.PropertyName == nameof(IProjectState.CurrentProject))
                 {
-                    foreach (string packPath in e.LoadedProject.AssetsPackPath)
+                    if (EngineState.ProjectState.CurrentProject == null)
                     {
-                        try
+                        var copyPacks = AssetsPacks.ToArray();
+                        foreach (var pack in copyPacks)
                         {
-                            BaseAssetsPack pack = new(packPath);
-
-                            // RegisterPack(pack, false, false);
-                            AssetsPacks[pack.Id] = pack;
-                            AssetsPacksMapping[pack.Name] = pack.Id;
-
-                            foreach (var record in pack.EnumerateIndexOnly())
-                            {
-                                _assetLocations[record.Id] = new AssetLocation
-                                {
-                                    Pack = pack,
-                                    RelativePath = record.RelativePath
-                                };
-                            }
-                            
-                            Log.Information("Loaded assets pack from path: {packPath}", packPath);
+                            pack.Value.Dispose();
                         }
-                        catch (Exception ex)
+                        AssetsPacks.Clear();
+                        AssetsPacksMapping.Clear();
+                        _assetLocations.Clear();
+                        Log.Information("Unloaded all assets packs due to project change.");
+                    }
+                    else
+                    {
+                        var loadedProject = EngineState.ProjectState.CurrentProject;
+                        // Loading handled in LoadedProject event
+                        foreach (string packPath in loadedProject.AssetsPackPath)
                         {
-                            Log.Error(ex, "Failed to load assets pack from path: {packPath}", packPath);
-                            return;
+                            try
+                            {
+                                BaseAssetsPack pack = new(packPath);
+
+                                // RegisterPack(pack, false, false);
+                                AssetsPacks[pack.Id] = pack;
+                                AssetsPacksMapping[pack.Name] = pack.Id;
+
+                                foreach (var record in pack.EnumerateIndexOnly())
+                                {
+                                    _assetLocations[record.Id] = new AssetLocation
+                                    {
+                                        Pack = pack,
+                                        RelativePath = record.RelativePath
+                                    };
+                                }
+                            
+                                Log.Information("Loaded assets pack from path: {packPath}", packPath);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Error(ex, "Failed to load assets pack from path: {packPath}", packPath);
+                                return;
+                            }
                         }
                     }
                 }
-            };
-
-            EngineCore.Instance.Managers.Projects.Events.UnloadedProject += (object? sender, ProjectsManagerUnloadedProjectArgs e) =>
-            {
-                var copyPacks = AssetsPacks.ToArray();
-                foreach (var pack in copyPacks)
-                {
-                    pack.Value.Dispose();
-                }
-                AssetsPacks.Clear();
-                AssetsPacksMapping.Clear();
-                _assetLocations.Clear();
-                Log.Information("Unloaded all assets packs due to project unload.");
             };
             Log.Information("AssetsManager initialized.");
         }

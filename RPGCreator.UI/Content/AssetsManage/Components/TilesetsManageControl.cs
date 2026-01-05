@@ -27,19 +27,17 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.VisualTree;
-using RPGCreator.Core;
-using RPGCreator.Core.Types.Assets;
 using RPGCreator.Core.Types;
-using RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutotileEditor;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RPGCreator.Core.Managers.AssetsManager;
+using Avalonia.Media.Imaging;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
+using RPGCreator.SDK.Extensions;
+using RPGCreator.SDK.Types.Collections;
+using RPGCreator.UI.Common;
 
 namespace RPGCreator.UI.Content.AssetsManage.Components
 {
@@ -191,7 +189,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                 VerticalAlignment = VerticalAlignment.Center,
             };
 
-            EngineCore.Instance.Managers.Assets.GetLoadedPacks().ForEach(pack =>
+            EngineServices.AssetsManager.GetLoadedPacks().ForEach(pack =>
             {
                 assetPackSelector.Items.Add(pack.Name);
             });
@@ -294,8 +292,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
     public interface ITilesetViewItem
     {
-        public ITilesetDef? TilesetDef { get; }
-        public AutoTilesetDef? Autotiles { get; }
+        public BaseTilesetDef? TilesetDef { get; }
         public void Select();
         public void Deselect();
     }
@@ -304,23 +301,14 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
     {
         public event Action? OnSelected;
         public event Action? OnDeselected;
-        public ITilesetDef? TilesetDef { get; private set; }
-        public AutoTilesetDef? Autotiles { get; private set; }
+        public BaseTilesetDef? TilesetDef { get; private set; }
         public bool IsSelected { get; private set; } = false;
 
         public Grid Body { get; private set; }
 
-        public TilesetViewListItem(ITilesetDef tilesetDef)
+        public TilesetViewListItem(BaseTilesetDef tilesetDef)
         {
             TilesetDef = tilesetDef;
-            CreateComponents();
-            RegisterEvents();
-            Content = Body;
-        }
-        
-        public TilesetViewListItem(AutoTilesetDef autotiles)
-        {
-            Autotiles = autotiles;
             CreateComponents();
             RegisterEvents();
             Content = Body;
@@ -347,7 +335,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
             var iconImage = new Image
             {
-                Source = TilesetDef != null ? TilesetDef.GetBitmap() : Autotiles?.GetBitmap() ?? UnifiedImage.DefaultUI,
+                Source = TilesetDef != null ? EngineServices.ResourcesService.Load<Bitmap>(TilesetDef.ImagePath) : EditorAssets.FallbackImage,
                 Width = 50,
                 Height = 50,
                 Margin = new Avalonia.Thickness(5),
@@ -362,7 +350,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
             var nameTextBlock = new TextBlock
             {
-                Text = TilesetDef != null ? TilesetDef.Name : Autotiles.Name,
+                Text = TilesetDef != null ? TilesetDef.Name : "None",
                 MinWidth = 250,
                 TextWrapping = Avalonia.Media.TextWrapping.Wrap,
                 Margin = new Avalonia.Thickness(5),
@@ -373,7 +361,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
             };
             Body.Children.Add(nameTextBlock);
             Grid.SetColumn(nameTextBlock, 2);
-            ToolTip.SetTip(nameTextBlock, TilesetDef != null? TilesetDef.Name : Autotiles.Name);
+            ToolTip.SetTip(nameTextBlock, TilesetDef != null? TilesetDef.Name : "No tileset found!");
 
             sep = new VSeparator();
             Body.Children.Add(sep);
@@ -381,7 +369,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
             var imageSizeTextBlock = new TextBlock
             {
-                Text = TilesetDef != null ? $"{TilesetDef.GetBitmap()?.Size.Width ?? 32}x{TilesetDef.GetBitmap()?.Size.Width ?? 32}" : $"{Autotiles?.GetBitmap().Size.Width ?? 32}x{Autotiles?.GetBitmap().Size.Width ?? 32}",
+                Text = TilesetDef != null ? $"{TilesetDef.ImageWidth}x{TilesetDef.ImageHeight}" : "No Tileset Found",
                 Width = 100,
                 TextWrapping = Avalonia.Media.TextWrapping.Wrap,
                 Margin = new Avalonia.Thickness(5),
@@ -400,7 +388,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
             var tileSizeTextBlock = new TextBlock
             {
-                Text = TilesetDef != null ? $"{TilesetDef.TileWidth}x{TilesetDef.TileHeight}" : $"{Autotiles.ImageWidth}x{Autotiles.ImageHeight}",
+                Text = TilesetDef != null ? $"{TilesetDef.TileWidth}x{TilesetDef.TileHeight}" : "No Tileset Found",
                 Width = 80,
                 TextWrapping = Avalonia.Media.TextWrapping.Wrap,
                 Margin = new Avalonia.Thickness(5),
@@ -418,7 +406,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
             Grid.SetColumn(sep, 7);
             var imagePathTextBlock = new TextBlock
             {
-                Text = TilesetDef != null ? TilesetDef.ImagePath : Autotiles.ImagePath,
+                Text = TilesetDef != null ? TilesetDef.ImagePath : "No Tileset Found",
                 MinWidth = 200,
                 MaxWidth = 400,
                 TextWrapping = Avalonia.Media.TextWrapping.Wrap,
@@ -462,7 +450,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                 };
                 editMenuItem.Click += (s, args) =>
                 {
-                    Console.WriteLine($"Editing Tileset: {(TilesetDef != null ? TilesetDef.Name : Autotiles.Name)}");
+                    Console.WriteLine($"Editing Tileset: {(TilesetDef != null ? TilesetDef.Name : "No Tileset Found")}");
                 };
                 contextMenu.Items.Add(editMenuItem);
 
@@ -479,14 +467,14 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
             {
                 if (IsSelected)
                 {
-                    Console.WriteLine($"Deselected Tileset: {(TilesetDef != null ? TilesetDef.Name : Autotiles.Name)}");
+                    Console.WriteLine($"Deselected Tileset: {(TilesetDef != null ? TilesetDef.Name : "No Tileset Found")}");
                     Body.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Transparent);
                     IsSelected = false;
                     OnDeselected?.Invoke();
                 }
                 else
                 {
-                    Console.WriteLine($"Selected Tileset: {(TilesetDef != null ? TilesetDef.Name : Autotiles.Name)}");
+                    Console.WriteLine($"Selected Tileset: {(TilesetDef != null ? TilesetDef.Name : "No Tileset Found")}");
                     Body.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromArgb(50, 0, 0, 0));
                     IsSelected = true;
                     OnSelected?.Invoke();
@@ -498,7 +486,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
         {
             if (!IsSelected)
             {
-                Console.WriteLine($"Selected Tileset: {(TilesetDef != null ? TilesetDef.Name : Autotiles.Name)}");
+                Console.WriteLine($"Selected Tileset: {(TilesetDef != null ? TilesetDef.Name : "No Tileset Found")}");
                 Body.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromArgb(50, 0, 0, 0));
                 IsSelected = true;
             }
@@ -508,7 +496,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
         {
             if (IsSelected)
             {
-                Console.WriteLine($"Deselected Tileset: {(TilesetDef != null ? TilesetDef.Name : Autotiles.Name)}");
+                Console.WriteLine($"Deselected Tileset: {(TilesetDef != null ? TilesetDef.Name : "No Tileset Found")}");
                 Body.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Transparent);
                 IsSelected = false;
             }
@@ -518,7 +506,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
     public class TilesetsManageControl : UserControl
     {
 
-        private AssetScope _scope;
+        private IAssetScope _scope;
 
         #region Events
 
@@ -588,7 +576,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
         public TilesetsManageControl()
         {
-            _scope = EngineCore.Instance.Managers.Assets.CreateAssetScope("tilesets_manage_control");
+            _scope = EngineServices.AssetsManager.CreateAssetScope("tilesets_manage_control");
             CreateComponents();
             Content = Body;
         }
@@ -752,13 +740,13 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
         {
             ViewPanel.Children.Clear();
             
-            var searchResults = EngineCore.Instance.Managers.Assets.SearchAllPacks<ITilesetDef>();
+            var searchResults = EngineServices.AssetsManager.SearchAllPacks<BaseTilesetDef>();
 
             foreach (var result in searchResults)
             {
                 var tilesetId = result.AssetId;
 
-                var tileset = _scope.Load<ITilesetDef>(tilesetId);
+                var tileset = _scope.Load<BaseTilesetDef>(tilesetId);
                 if (tileset is IntGridTilesetDef)
                     continue;
                 var item = new TilesetViewListItem(tileset);
@@ -772,32 +760,9 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                 };
                 ViewPanel.Children.Add(item);
             }
-            
-            var tilesets = EngineCore.Instance.Data.EditedProject?.GetAssetsType<BaseAsset>(BaseAsset.TYPE.TILESETS) ?? new List<BaseAsset>();
-            // foreach (var tileset in tilesets)
-            // {
-            //     if(tileset is not ITilesetDef && tileset is not AutoTilesetDef)
-            //     {
-            //         continue; // Skip if it's not a Tileset or AutoTileset
-            //     }
-            //
-            //     if (tileset is ITilesetDef tilesetInterface)
-            //     {
-            //         var item = new TilesetViewListItem(tilesetInterface);
-            //         item.OnSelected += () => { SelectedTilesetViewItem = item; };
-            //         item.OnDeselected += () =>
-            //         {
-            //             if (SelectedTilesetViewItem == item)
-            //             {
-            //                 SelectedTilesetViewItem = null;
-            //             }
-            //         };
-            //         ViewPanel.Children.Add(item);
-            //     }
-            // }
         }
 
-        private void CreateGridViewComponents(List<TilesetDef> tilesets)
+        private void CreateGridViewComponents(List<BaseTilesetDef> tilesets)
         {
 
         }
@@ -887,20 +852,6 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
                         host_.OpenCustom(editor_control);
                     }
-                    else if(args.TilesetType == 1) // Autotile
-                    {
-                        var autotile = new AutoTilesetDef(args.Name, args.TileWidth, args.TileHeight);
-                        // autotile.Pack = EngineCore.Instance.Managers.Assets.GetAssetsPacks().FirstOrDefault(p => p.Name == args.AssetPack) ?? EngineCore.Instance.Managers.Assets.GetAssetsPacks().FirstOrDefault();
-                        var editor_control = new AutotileEditorWindowControl(autotile);
-                        var host_ = ((AssetsManageWindow)this.GetVisualRoot()!);
-                        editor_control.AutotileSaved += () =>
-                        {
-                            host_.ShowAssetsPanel("Tilesets");
-                            TilesetsManageControl_OnNeedRefresh();
-                        };
-                        
-                        host_.OpenCustom(editor_control);
-                    }
                 };
                 
 
@@ -919,9 +870,9 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                     return;
                 }
 
-                if (SelectedTilesetViewItem.TilesetDef == null && SelectedTilesetViewItem.Autotiles == null)
+                if (SelectedTilesetViewItem.TilesetDef == null)
                 {
-                    Console.WriteLine("Selected item is not a tileset or autotile.");
+                    Console.WriteLine("Selected item is not a tileset.");
                     return;
                 }
                 
@@ -940,24 +891,9 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
                     Console.WriteLine("Edit Tileset button clicked.");
                 }
-                else if(SelectedTilesetViewItem.TilesetDef is AutoTilesetDef autotiles)
-                {
-                    AutotileEditorWindowControl editor_control =
-                        new AutotileEditorWindowControl(autotiles);
-
-                    var host_ = ((AssetsManageWindow)this.GetVisualRoot()!);
-                    editor_control.AutotileSaved += () =>
-                    {
-                        host_.ShowAssetsPanel("Tilesets");
-                        TilesetsManageControl_OnNeedRefresh();
-                    };
-                    host_.OpenCustom(editor_control);
-
-                    Console.WriteLine("Edit Autotile button clicked.");
-                }
                 else
                 {
-                    Console.WriteLine("Selected item is neither a tileset nor an autotile.");
+                    Console.WriteLine("Selected item is not a tileset.");
                 }
             };
 

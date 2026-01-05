@@ -34,6 +34,7 @@ using System.Threading.Tasks;
 using RPGCreator.Core.Types.Assets;
 using RPGCreator.Core.Types.Map;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Projects;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types.Interfaces;
 using Serilog;
@@ -59,7 +60,7 @@ namespace RPGCreator.Core.Types.Project
 
         private MapInstance? _EditMap = null;
 
-        public ProjectGameData GameData;
+        public ProjectGameData GameData { get; set; }
 
         public ProjectEvent Event;
 
@@ -71,6 +72,7 @@ namespace RPGCreator.Core.Types.Project
         public BaseProject()
         {
             Event = new ProjectEvent();
+            GameData = new ProjectGameData(this);
         }
         
         public BaseProject(string name)
@@ -87,7 +89,7 @@ namespace RPGCreator.Core.Types.Project
 
         public void Load()
         {
-            EngineCore.Instance.Data.EditedProject = this;
+            EngineState.ProjectState.CurrentProject = this;
 
             foreach (string packPath in AssetsPackPath)
             {
@@ -107,7 +109,7 @@ namespace RPGCreator.Core.Types.Project
 
         public void Unload()
         {
-            EngineCore.Instance.Data.EditedProject = null;
+            EngineState.ProjectState.CurrentProject = null;
         }
 
         public void Save()

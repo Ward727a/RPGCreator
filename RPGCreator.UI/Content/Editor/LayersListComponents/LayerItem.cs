@@ -22,18 +22,14 @@
 // 
 // 
 #endregion
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.VisualTree;
-using RPGCreator.Core;
 using RPGCreator.Core.Types;
 using RPGCreator.Core.Types.Windows;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 
 namespace RPGCreator.UI.Content.Editor.LayersListComponents
 {
@@ -139,7 +135,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                 if (Layer != null && Layer is BaseLayerDef mapLayer)
                 {
                     // Remove the layer from the engine data
-                    EngineCore.Instance.Data.EditedMap?.RemoveLayer(mapLayer);
+                    EngineState.EditorState.CurrentMap?.RemoveLayer(mapLayer);
                     LayerRemoved?.Invoke();
                 }
             };

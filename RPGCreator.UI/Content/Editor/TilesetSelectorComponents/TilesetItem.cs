@@ -23,7 +23,8 @@
 // 
 #endregion
 using Avalonia.Controls;
-using System.IO;
+using Avalonia.Media.Imaging;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 
 namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
@@ -34,9 +35,9 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
         public StackPanel Body { get; private set; }
         public TextBlock NameTextBlock { get; private set; }
         public Image TilesetImage { get; private set; }
-        public ITilesetDef TilesetDef { get; private set; }
+        public BaseTilesetDef TilesetDef { get; private set; }
 
-        public TilesetItem(ITilesetDef tilesetDef)
+        public TilesetItem(BaseTilesetDef tilesetDef)
         {
             Body = new StackPanel
             {
@@ -52,26 +53,16 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                 Margin = new Avalonia.Thickness(5, 0, 0, 0),
             };
 
-            if(tilesetDef is not AutoTilesetDef)
-            {
-                if(!File.Exists(tilesetDef.ImagePath ?? ""))
-                {
-                    Error = true;
-                    return; // If the file doesn't exist, we can skip loading the image.
-                }
-            }
-
-
             TilesetImage = new Image
             {
-                Source = tilesetDef.GetBitmap(),
+                Source = EngineServices.ResourcesService.Load<Bitmap>(tilesetDef.ImagePath),
                 Width = 32,
                 Height = 32,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
             };
             tilesetDef.ImageChanged += () =>
             {
-                TilesetImage.Source = tilesetDef.GetBitmap();
+                TilesetImage.Source = EngineServices.ResourcesService.Load<Bitmap>(tilesetDef.ImagePath);
             };
 
             TilesetDef = tilesetDef;

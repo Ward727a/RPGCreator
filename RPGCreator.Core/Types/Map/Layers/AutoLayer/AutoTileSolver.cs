@@ -1,3 +1,4 @@
+using System.Numerics;
 using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Internal;
@@ -8,7 +9,7 @@ using RPGCreator.SDK.Types.Collections;
 
 namespace RPGCreator.Core.Types.Map.Layers.AutoLayer;
 
-public class AutoTileSolver
+public class AutoTileSolver : IAutoTileSolver
 {
     private class PatternMatch()
     {
@@ -18,11 +19,10 @@ public class AutoTileSolver
         public bool FlipY { get; set; }
     }
     
-    public static ITileDef? Resolve(
-        Point position,
+    public ITileDef? Resolve(
+        Vector2 position,
         IntGridLayerDefinition intLayer,
         List<AutoLayerRule> rules,
-        IAssetsManager assets,
         int GridSize = 32)
     {
         int centerValue = intLayer.GetValue(position);
@@ -59,7 +59,7 @@ public class AutoTileSolver
             if (bestCandidates.Count == 1)
             {
                 var match = bestCandidates[0];
-                return PickTile(match.Rule, position, assets, null, match.FlipX, match.FlipY);
+                return PickTile(match.Rule, position, null, match.FlipX, match.FlipY);
             }
 
             var random = new Random(GetSeed(position, intLayer.ZIndex));
@@ -72,18 +72,18 @@ public class AutoTileSolver
                 randomValue -= match.Rule.Chance;
                 if (randomValue <= 0)
                 {
-                    return PickTile(match.Rule, position, assets, null, match.FlipX, match.FlipY);
+                    return PickTile(match.Rule, position, null, match.FlipX, match.FlipY);
                 }
             }
     
             var fallback = bestCandidates.Last();
-            return PickTile(fallback.Rule, position, assets, null, fallback.FlipX, fallback.FlipY);
+            return PickTile(fallback.Rule, position, null, fallback.FlipX, fallback.FlipY);
         }
         
         return null;
     }
     
-    private static int GetSeed(Point pos, int layerIndex = 0)
+    private static int GetSeed(Vector2 pos, int layerIndex = 0)
     {
         int hash = 17;
         unchecked 
@@ -95,7 +95,7 @@ public class AutoTileSolver
         return hash;
     }
 
-    private static bool MatchesPattern(Point position, IntGridLayerDefinition layer, AutoLayerRule rule,
+    private static bool MatchesPattern(Vector2 position, IntGridLayerDefinition layer, AutoLayerRule rule,
         int centerValue, out int score, int GridSize = 32)
     {
         var pattern = rule.Pattern;
@@ -132,7 +132,7 @@ public class AutoTileSolver
         return true;
     }
     
-    private static bool MatchesXFlippedPattern(Point position, IntGridLayerDefinition layer, AutoLayerRule rule,
+    private static bool MatchesXFlippedPattern(Vector2 position, IntGridLayerDefinition layer, AutoLayerRule rule,
         int centerValue, int GridSize = 32)
     {
         var pattern = rule.Pattern;
@@ -167,7 +167,7 @@ public class AutoTileSolver
         return true;
     }
     
-    private static bool MatchesYFlippedPattern(Point position, IntGridLayerDefinition layer, AutoLayerRule rule,
+    private static bool MatchesYFlippedPattern(Vector2 position, IntGridLayerDefinition layer, AutoLayerRule rule,
         int centerValue, int GridSize = 32)
     {
         var pattern = rule.Pattern;
@@ -202,7 +202,7 @@ public class AutoTileSolver
         return true;
     }
     
-    private static ITileDef? PickTile(AutoLayerRule rule, Point position, IAssetsManager assets, IAssetScope? scope = null, bool flipX = false, bool flipY = false)
+    private static ITileDef? PickTile(AutoLayerRule rule, Vector2 position, IAssetScope? scope = null, bool flipX = false, bool flipY = false)
     {
 
         if (scope == null)
@@ -211,13 +211,15 @@ public class AutoTileSolver
         if (rule.OutputTiles.Count == 0)
             return null;
 
-        int seed = position.X * 73856093 ^ position.Y * 19349663;
+        int seed = (int)Math.Floor(position.X) * 73856093 ^ (int)Math.Floor(position.Y) * 19349663;
         int index = Math.Abs(seed) % rule.OutputTiles.Count;
         
         var tileData = rule.OutputTiles[index];
 
-        var tileset = scope.Load<ITilesetDef>(tileData.TilesetId);
-        var tile = tileset.GetTileAt((int)(tileData.TilePosition.X / tileset.TileWidth), (int)(tileData.TilePosition.Y / tileset.TileHeight));
+        var tilesetDef = scope.Load<BaseTilesetDef>(tileData.TilesetId);
+        // Instantiate the tileset
+        var tileset = EngineServices.GameFactory.CreateInstance<ITilesetInstance>(tilesetDef);
+        var tile = tileset.GetTileAt((int)(tileData.TilePosition.X / tilesetDef.TileWidth), (int)(tileData.TilePosition.Y / tilesetDef.TileHeight));
 
         if (!flipX && !flipY)
             return tile;

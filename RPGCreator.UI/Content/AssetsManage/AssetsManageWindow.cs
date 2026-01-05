@@ -26,19 +26,14 @@ using Avalonia.Controls;
 using RPGCreator.UI.Content.AssetsManage.Components;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Avalonia.Collections;
-using RPGCreator.Core.Contexts;
-// using RPGCreator.Core.Contexts;
-using RPGCreator.Core.ModuleSDK.Attributes;
+using RPGCreator.SDK.Contexts;
+using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Modules.Attributes;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutoLayerEditor;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor;
 using RPGCreator.UI.Content.AssetsManage.Components.Skills;
-using Serilog;
 
 namespace RPGCreator.UI.Content.AssetsManage
 {
@@ -175,11 +170,11 @@ namespace RPGCreator.UI.Content.AssetsManage
 
             if (_AssetsMenuOptions.ContainsKey(key))
             {
-                Log.Warning("Assets menu option with key '{key}' is already registered. Overwriting.", key);
+                Logger.Warning("Assets menu option with key '{key}' is already registered. Overwriting.", key);
             }
 
             _AssetsMenuOptions[key] = panelFactory;
-            Log.Debug("Registered assets menu option: {key}", key);
+            Logger.Debug("Registered assets menu option: {key}", key);
         }
 
         /// <summary>
@@ -190,14 +185,14 @@ namespace RPGCreator.UI.Content.AssetsManage
         {
             var separatorKey = $"---{_AssetsMenuOptions.Count(kvp => kvp.Key.StartsWith("---"))}";
             _AssetsMenuOptions[separatorKey] = null;
-            Log.Debug("Registered assets menu separator: {key}", separatorKey);
+            Logger.Debug("Registered assets menu separator: {key}", separatorKey);
         }
         
         public void ShowAssetsPanel(string key)
         {
             if (_AssetsMenuOptions.TryGetValue(key, out var panel))
             {
-                Log.Debug("Showing assets panel: {key}", key);
+                Logger.Debug("Showing assets panel: {key}", key);
                 if (AssetsPanel != null)
                 {
                     Body.Children.Remove(AssetsPanel);
@@ -208,7 +203,7 @@ namespace RPGCreator.UI.Content.AssetsManage
             }
             else
             {
-                Log.Debug("Assets panel not found: {key}", key);
+                Logger.Debug("Assets panel not found: {key}", key);
             }
         }
 

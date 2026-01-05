@@ -84,6 +84,31 @@ internal class GraphService : IGraphService
         return false;
     }
 
+    public bool TryLoadDocument(string scriptPath, [NotNullWhen(true)] out GraphDocument? document)
+    {
+        document = null;
+
+        if (!File.Exists(scriptPath)) return false;
+
+        try
+        {
+            var json = File.ReadAllText(scriptPath);
+
+            EngineCore.Instance.Serializer.Deserialize<GraphDocument>(json, out var graphDocument);
+
+            if (graphDocument != null)
+            {
+                document = graphDocument;
+                return true;
+            }
+        }
+        catch
+        {
+            Logger.Error("GraphRunnerService.TryLoadDocument: Failed to load or deserialize graph document at path " + scriptPath);
+        }
+        return false;
+    }
+
     public void InvalidateCache(string scriptPath)
     {
         if (_scriptCache.Remove(scriptPath))
@@ -98,7 +123,7 @@ internal class GraphService : IGraphService
         Logger.Info("GraphRunnerService.ClearCache: All cached scripts have been cleared.");
     }
 
-    public IGraphScript? Compile(GraphDocument document)
+    public IGraphScript Compile(GraphDocument document)
     {
         return GraphDocumentCompiler.Compile(document);
     }

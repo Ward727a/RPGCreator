@@ -1,16 +1,11 @@
 using RPGCreator.Core.Types.Editor.Interfaces;
 using RPGCreator.Core.Types.Internal;
-using RPGCreator.Core.Types.Map;
+using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 
 namespace RPGCreator.Core.Types.Editor.Visual.PaintTargets;
 
-
-public class IntGridData
-{
-    public IntGridValueRef IntGridRef { get; set; }
-    public IntGridTilesetDef IntGridTilesetDef { get; set; }
-}
 
 public class IntGridLayerTarget : IPaintTarget
 {
@@ -18,9 +13,9 @@ public class IntGridLayerTarget : IPaintTarget
     public int GridHeight { get; } = 32;
     
     public AutoLayerDefinition LayerDef { get; }
-    public MapDefinition? MapDef { get; }
+    public IMapDef? MapDef { get; }
     
-    public IntGridLayerTarget(AutoLayerDefinition layerDef, MapDefinition? mapDef)
+    public IntGridLayerTarget(AutoLayerDefinition layerDef, IMapDef? mapDef)
     {
         LayerDef = layerDef;
         MapDef = mapDef;

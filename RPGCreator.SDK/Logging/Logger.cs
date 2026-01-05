@@ -5,6 +5,11 @@ public static class Logger
     // ReSharper disable once MemberCanBePrivate.Global
     public static ILoggerImplementation? Implementation { get; set; } = new DefaultLogger();
     
+    public static void Trace(string message, params object[] args)
+    {
+        Implementation?.Write(LogLevel.Trace, message, args);
+    }
+    
     public static void Info(string message, params object[] args)
     {
         Implementation?.Write(LogLevel.Info, message, args);

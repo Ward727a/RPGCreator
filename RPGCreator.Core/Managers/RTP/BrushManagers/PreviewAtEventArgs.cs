@@ -24,6 +24,7 @@
 #endregion
 using RPGCreator.Core.Managers.RTP.BrushManagers.Brushs;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK.Editor.Brushes;
 
 namespace RPGCreator.Core.Managers.RTP.BrushManagers
 {

@@ -22,16 +22,11 @@
 // 
 // 
 #endregion
-using RPGCreator.Core.Events.EventArgs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace RPGCreator.Core.Managers.ProjectsManager.Events
+namespace RPGCreator.SDK.Editor.Brushes
 {
-    public class ProjectsManagerDeletedProjectArgs : BasePostEventArgs<ProjectsManagerDeletedProjectArgs>
+    public interface IBrushPreviewFeature
     {
+        public bool IsPreviewEnabled { get; set; }
     }
 }

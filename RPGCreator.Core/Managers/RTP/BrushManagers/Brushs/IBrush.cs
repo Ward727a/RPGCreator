@@ -22,19 +22,20 @@
 // 
 // 
 #endregion
+
+using System.Numerics;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Map;
 using RPGCreator.Core.Types.Editor.Context;
+using RPGCreator.SDK.Editor.Brushes;
 
 namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
 {
-    public interface IBrush
+    public interface IBrush : IBrushInfo
     {
+        void Draw(Vector2 clickPos);
 
-
-        void Draw(Point clickPos, MapEditorContext context);
-
-        protected static bool InBorder(Point at, MapInstance mapInstance)
+        protected static bool InBorder(Vector2 at, MapInstance mapInstance)
         {
             if (mapInstance == null)
             {

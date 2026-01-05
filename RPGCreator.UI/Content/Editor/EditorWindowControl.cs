@@ -26,25 +26,19 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Media;
 using Avalonia.VisualTree;
-using Microsoft.Xna.Framework;
-using RPGCreator.Core;
 using RPGCreator.UI.Content.AssetsManage;
 using RPGCreator.UI.Content.Editor.Tabs;
 using RPGCreator.UI.Content.Editor.TilesetSelectorComponents;
 using RPGCreator.UI.Content.Editor.Toolbar;
 using RPGCreator.UI.Content.Preferences;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RPGCreator.Core.Runtimes.Context;
-using RPGCreator.Core.Types.Editor.Context;
+using System.Numerics;
 using RPGCreator.Core.Types.Windows;
 using RPGCreator.RTP;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Logging;
 using RPGCreator.UI.Content.Editor.LeftPanel;
 
 namespace RPGCreator.UI.Content.Editor
@@ -53,14 +47,12 @@ namespace RPGCreator.UI.Content.Editor
     {
         private Window _Host => (Window)this.GetVisualRoot()!;
 
-        private MapEditorContext _mapEditorContext = new();
-        
-        private EditorGame? game = (EditorGame)EngineCore.Instance.Data.RTPGame;
+        private EditorGame? game = (EditorGame)EngineServices.GameProvider.GameInstance;
         private AvaloniaInside.MonoGame.MonoGameControl MonoGameScreen;
 
         private TilesetSelector tilesetSelector;
-        private Avalonia.Point _LastTilePlacePos;
-        private Avalonia.Point _LastTilePreviewPos;
+        private Vector2 _LastTilePlacePos;
+        private Vector2 _LastTilePreviewPos;
 
         private bool _placingTile = false; // Flag to indicate if a tile is being placed
         private Grid _mainGrid;
@@ -119,7 +111,12 @@ namespace RPGCreator.UI.Content.Editor
             openProjectFolderMenuItem.Click += (_, _) =>
             {
                 // Open the project folder in the file explorer
-                var projectPath = EngineCore.Instance.Data.EditedProject.Path;
+                if(EngineState.ProjectState.CurrentProject == null)
+                {
+                    Logger.Error("No project is currently loaded.");
+                    return;
+                }
+                var projectPath = EngineState.ProjectState.CurrentProject.Path;
                 if (!string.IsNullOrEmpty(projectPath))
                 {
                     Process.Start(new ProcessStartInfo
@@ -130,7 +127,7 @@ namespace RPGCreator.UI.Content.Editor
                 }
                 else
                 {
-                    Console.WriteLine("Project path is not set.");
+                    Logger.Error("Project path is not set.");
                 }
             };
             openFileMenuItem.Items.Add(openProjectFolderMenuItem);
@@ -156,7 +153,12 @@ namespace RPGCreator.UI.Content.Editor
                         Console.WriteLine("Project saved successfully.");
                     }
                 });
-                EngineCore.Instance.Data.EditedProject.Save();
+                if(EngineState.ProjectState.CurrentProject == null)
+                {
+                    Logger.Error("No project is currently loaded.");
+                    return;
+                }
+                EngineState.ProjectState.CurrentProject.Save();
             };
             var closeFileMenuItem = new MenuItem
             {
@@ -280,7 +282,7 @@ namespace RPGCreator.UI.Content.Editor
                 Width = 300,
                 RowDefinitions = new RowDefinitions("*, 1, *"),
             };
-            var LeftPanel2 = new EditorLeftPanelControl(_mapEditorContext);
+            var LeftPanel2 = new EditorLeftPanelControl();
             
             ContentGrid.Children.Add(LeftPanel2);
             Grid.SetColumn(LeftPanel2, 0);
@@ -294,8 +296,8 @@ namespace RPGCreator.UI.Content.Editor
             };
             LeftPanel.Children.Add(tabControl);
 
-            tabControl.Items.Add(MapLevelTab.CreateTab(_Host, null));
-            tabControl.Items.Add(MapEditor.CreateTab(_Host, _mapEditorContext));
+            tabControl.Items.Add(MapLevelTab.CreateTab(_Host));
+            tabControl.Items.Add(MapEditor.CreateTab(_Host));
 
             var separatorLeftPanel0 = new Separator
             {
@@ -363,7 +365,7 @@ namespace RPGCreator.UI.Content.Editor
             ContentGrid.Children.Add(CenterGrid);
             Grid.SetColumn(CenterGrid, 1);
 
-            var toolbar = new ToolbarControl(_mapEditorContext);
+            var toolbar = new ToolbarControl();
             CenterGrid.Children.Add(toolbar);
 
             // This is used to contain the MonoGame screen inside it's bounds.
@@ -404,7 +406,7 @@ namespace RPGCreator.UI.Content.Editor
             MonoGameScreen.PointerExited += MonoGameScreen_PointerExited;
             MonoGameScreen.KeyDown += MonoGameScreenOnKeyDown;
 
-            game._events.RTPDraw += (s, e) =>
+            game.OnDraw += () =>
             {
                 var visualPosition = (MonoGameScreen.TransformToVisual(_Host)?.Transform(new Avalonia.Point(0, 0))).GetValueOrDefault();
     
@@ -434,12 +436,12 @@ namespace RPGCreator.UI.Content.Editor
 
         private void MonoGameScreenOnKeyDown(object? sender, KeyEventArgs e)
         {
-            EngineCore.Instance.Events.OnRTPKeyPressed(e);
+            // EngineCore.Instance.Events.OnRTPKeyPressed(e);
         }
 
         private void MonoGameScreen_PointerExited(object? sender, PointerEventArgs e)
         {
-            EngineCore.Instance.Managers.Brush.ClearPreview(); // Clear the preview when the mouse exits the MonoGame screen
+            EngineServices.BrushManager.ClearPreview(); // Clear the preview when the mouse exits the MonoGame screen
         }
 
         private void ManageAssetsMenuItem_Click(object? sender, RoutedEventArgs e)
@@ -475,11 +477,12 @@ namespace RPGCreator.UI.Content.Editor
         {
             if (e.GetCurrentPoint(MonoGameScreen).Properties.IsLeftButtonPressed)
             {
-                var position = e.GetPosition(MonoGameScreen);
+                var mgPosition = e.GetPosition(MonoGameScreen);
+                var position = new Vector2((float)mgPosition.X, (float)mgPosition.Y);
                 // Adjust the position to account for the MonoGameScreen's margin (12px)
-                EngineCore.Instance.Managers.Brush.ClickAt(new Core.Types.Internal.Point(position), _mapEditorContext);
-                _mapEditorContext.LastDrawAt = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position, _mapEditorContext);
-                _mapEditorContext.IsDrawing = true; // Set the flag to indicate that a tile is being placed
+                EngineServices.BrushManager.ClickAt(new Vector2(position.X, position.Y));
+                EngineState.BrushState.LastDrawAt = EngineServices.BrushManager.NormalizedPositionToTile(position);
+                EngineState.BrushState.IsDrawing = true; // Set the flag to indicate that a tile is being placed
             }
         }
 
@@ -487,24 +490,25 @@ namespace RPGCreator.UI.Content.Editor
         {
             if (e.GetCurrentPoint(MonoGameScreen).Properties.IsLeftButtonPressed && _placingTile)
             {
-                _mapEditorContext.IsDrawing = false; // Reset the flag when the tile placement is done
-                _mapEditorContext.LastDrawAt = new(-1, -1); // Reset the last tile position
+                EngineState.BrushState.IsDrawing = false; // Reset the flag when the tile placement is done
+                EngineState.BrushState.LastDrawAt = new(-1, -1); // Reset the last tile position
             }
         }
 
         private void MonoGameScreen_PointerMoved(object? sender, PointerEventArgs e)
         {
+            var mgPosition = e.GetPosition(MonoGameScreen);
+            var position = new Vector2((float)mgPosition.X, (float)mgPosition.Y);
             if (_placingTile && e.GetCurrentPoint(MonoGameScreen).Properties.IsLeftButtonPressed)
             {
-                var position = e.GetPosition(MonoGameScreen);
 
                 // Check if the mouse position has at least moved one tile from the last position
-                var normalizedCurrentPosition = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position, _mapEditorContext);
+                var normalizedCurrentPosition = EngineServices.BrushManager.NormalizedPositionToTile(position);
 
-                if(!normalizedCurrentPosition.IsEqualTo(_LastTilePlacePos))
+                if(normalizedCurrentPosition != (_LastTilePlacePos))
                 {
                     // If the position has changed, update the last position
-                    _mapEditorContext.LastDrawAt = normalizedCurrentPosition;
+                    EngineState.BrushState.LastDrawAt = normalizedCurrentPosition;
                 }
                 else
                 {
@@ -513,19 +517,17 @@ namespace RPGCreator.UI.Content.Editor
                 }
 
                 // Adjust the position to account for the MonoGameScreen's margin (12px)
-                EngineCore.Instance.Managers.Brush.ClickAt(new Core.Types.Internal.Point(position), _mapEditorContext);
+                EngineServices.BrushManager.ClickAt(position);
             }
-
+            
             {
-                var position = e.GetPosition(MonoGameScreen);
-
                 // Check if the mouse position has at least moved one tile from the last position
-                var normalizedCurrentPosition = EngineCore.Instance.Managers.Brush.NormalizedPositionToTile(position, _mapEditorContext);
+                var normalizedCurrentPosition = EngineServices.BrushManager.NormalizedPositionToTile(position);
 
-                if (!normalizedCurrentPosition.IsEqualTo(_mapEditorContext.LastDrawAt))
+                if (normalizedCurrentPosition != (EngineState.BrushState.LastDrawAt))
                 {
                     // If the position has changed, update the last position
-                    _mapEditorContext.LastDrawAt = normalizedCurrentPosition;
+                    EngineState.BrushState.LastDrawAt = normalizedCurrentPosition;
                 }
                 else
                 {
@@ -533,7 +535,7 @@ namespace RPGCreator.UI.Content.Editor
                     return;
                 }
 
-                EngineCore.Instance.Managers.Brush.PreviewAt(position, _mapEditorContext);
+                EngineServices.BrushManager.PreviewAt(position);
             }
 
         }

@@ -1,9 +1,8 @@
 using System.Numerics;
-using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
-namespace RPGCreator.Core.Types.Assets.Tilesets;
+namespace RPGCreator.SDK.Assets.Definitions.Tilesets;
 
 public class TileDefinition : ITileDef
 {
@@ -13,16 +12,16 @@ public class TileDefinition : ITileDef
     public Vector2 PositionInTileset { get; private set; }
     public Rect UV => new (new(PositionInTileset.X, PositionInTileset.Y), new(TilesetDef.TileWidth, TilesetDef.TileHeight));
     public TileFlip Flip { get; set; } = TileFlip.None;
-    public ITilesetDef TilesetDef { get; private set; }
+    public BaseTilesetDef TilesetDef { get; private set; }
     
-    public TileDefinition(Vector2 defaultPosition, Size sizeInTileset, Vector2 positionInTileset, ITilesetDef tilesetDef)
+    public TileDefinition(Vector2 defaultPosition, Size sizeInTileset, Vector2 positionInTileset, BaseTilesetDef tilesetDef)
     {
         DefaultPosition = defaultPosition;
         SizeInTileset = sizeInTileset;
         PositionInTileset = positionInTileset;
         TilesetDef = tilesetDef;
     }
-    public TileDefinition(Size sizeInTileset, Vector2 positionInTileset, ITilesetDef tilesetDef)
+    public TileDefinition(Size sizeInTileset, Vector2 positionInTileset, BaseTilesetDef tilesetDef)
     {
         SizeInTileset = sizeInTileset;
         PositionInTileset = positionInTileset;
@@ -30,7 +29,7 @@ public class TileDefinition : ITileDef
         DefaultPosition = Vector2.Zero; // Default position
     }
     
-    public void UpdateTileset(ITilesetDef newTilesetDefinition)
+    public void UpdateTileset(BaseTilesetDef newTilesetDefinition)
     {
         if (newTilesetDefinition == null)
         {
@@ -55,7 +54,7 @@ public class TileDefinition : ITileDef
 
     public SerializationInfo GetObjectData()
     {
-        SerializationInfo info = new SerializationInfo(typeof(TileInstance));
+        SerializationInfo info = new SerializationInfo(typeof(TileDefinition));
         info.AddValue("DefaultPosition", DefaultPosition);
         info.AddValue("SizeInTileset", SizeInTileset);
         info.AddValue("PositionInTileset", PositionInTileset);
@@ -78,22 +77,6 @@ public class TileDefinition : ITileDef
         DefaultPosition = defaultPosition;
         SizeInTileset = sizeInTileset;
         PositionInTileset = positionInTileset;
-
-        void OnEditedProjectLoaded()
-        {
-            var tileset = EngineCore.Instance.Managers.Assets.TryResolveAsset<TilesetDef>(tilesetUnique, out var result) ? result : null;
-            
-            if (tileset == null)
-            {
-                throw new Exception($"Tileset with unique ID {tilesetUnique} not found in the project.");
-            }
-
-            TilesetDef = tileset;
-            
-            EngineCore.Instance.Data.EditedProject.OnProjectLoaded -= OnEditedProjectLoaded; // Unsubscribe from the event to avoid memory leaks
-        }
-
-        EngineCore.Instance.Data.EditedProject.OnProjectLoaded += OnEditedProjectLoaded;
     }
 
     public Ulid Unique { get; }

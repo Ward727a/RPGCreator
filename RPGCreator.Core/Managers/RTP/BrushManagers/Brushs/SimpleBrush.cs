@@ -22,13 +22,17 @@
 // 
 // 
 #endregion
+
+using System.Numerics;
+using CommunityToolkit.Diagnostics;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Managers.AssetsManager.Factories;
 using RPGCreator.Core.Types.Editor.Context;
+using RPGCreator.SDK.Editor.Brushes;
 
 namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
 {
-    public class SimpleBrush : IBrush, IBrushResizeFeature, IBrushPreviewFeature
+    public class SimpleBrush : IBrush, IBrushResizeFeature, IBrushPreview
     {
         private TileFactory _tiles => EngineCore.Instance.Managers.Assets.TileFactory;
         int Size { get; set; } = 1; // Default size of the brush
@@ -39,13 +43,13 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
         private bool _isPreviewEnabled = true;
         public bool IsPreviewEnabled { get => _isPreviewEnabled; set => _isPreviewEnabled = value; }
 
-        public void Draw(Point clickPos, MapEditorContext context)
+        public void Draw(Vector2 clickPos)
         {
-            var target = context.GetActivePaintTarget();
-            
-            object objectToPaint = context.SelectedObjectToPaint;
+            var target = MapEditorContext.GetActivePaintTarget();
+            Guard.IsNotNull(target, nameof(target));
+            object? objectToPaint = MapEditorContext.SelectedObjectToPaint;
 
-            if (target == null || objectToPaint == null) return;
+            if (objectToPaint == null) return;
 
             if (Size > 1)
             {
@@ -54,9 +58,9 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
                 {
                     for (int y = -halfSize; y <= halfSize; y++)
                     {
-                        int gridX = clickPos.X + (x * target.GridWidth);
-                        int gridY = clickPos.Y + (y * target.GridHeight);
-                        var paintPos = new Point(gridX, gridY);
+                        float gridX = clickPos.X + (x * target.GridWidth);
+                        float gridY = clickPos.Y + (y * target.GridHeight);
+                        var paintPos = new Vector2(gridX, gridY);
 
                         if (target.IsValidPosition(paintPos))
                         {
@@ -84,18 +88,18 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
             Size = newSize; 
         }
 
-        public void ShowPreview(Point at, MapEditorContext context)
+        public void ShowPreview(Vector2 at)
         {
             if(!_isPreviewEnabled)
             {
                 return; // If preview is disabled, do not show anything
             }
 
-            if (context.MapInstance == null)
+            if (MapEditorContext.MapInstance == null)
             {
                 return;
             }
-            var instance = context.MapInstance;
+            var instance = MapEditorContext.MapInstance;
 
             var layer = instance.PreviewLayer?.Definition;
 
@@ -105,7 +109,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
             }
             layer.ClearElements();
 
-            var tile = context.SelectedTile;
+            var tile = MapEditorContext.SelectedTile;
 
             if (tile == null)
             {
@@ -126,7 +130,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
                 {
                     for (int y = -Size / 2; y <= Size / 2; y++)
                     {
-                        Point tilePosition = new Point(at.X + x * tile.TilesetDef.TileWidth, at.Y + y * tile.TilesetDef.TileHeight);
+                        Vector2 tilePosition = new Vector2(at.X + x * tile.TilesetDef.TileWidth, at.Y + y * tile.TilesetDef.TileHeight);
                         if (IBrush.InBorder(tilePosition, instance))
                         {
                             layer.AddElement(tile,tilePosition); // Add tile at the calculated position
@@ -140,5 +144,8 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
                 layer.AddElement(tile,at); // Add tile at the calculated position
             }
         }
+
+        public string Name => "Simple Brush";
+        public string Description => "A simple brush that paints single tiles or larger areas based on brush size.";
     }
 }

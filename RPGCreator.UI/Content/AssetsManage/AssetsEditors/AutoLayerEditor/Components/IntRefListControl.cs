@@ -12,14 +12,14 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.VisualTree;
 using Projektanker.Icons.Avalonia;
-using RPGCreator.Core.Contexts;
-using RPGCreator.Core.ModuleSDK.Attributes;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using RPGCreator.SDK.Commands;
+using RPGCreator.SDK.Contexts;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Modules.Attributes;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types.Collections;
 using RPGCreator.SDK.Types.Records;
@@ -284,17 +284,14 @@ public class IntRefListCreateModal : Window
         }
         else
         {
-            // Dans ton composant UI
-            var tileset = _scope.Load<ITilesetDef>(FromRef.DefaultTileData.TilesetId);
+            var tileset = _scope.Load<BaseTilesetDef>(FromRef.DefaultTileData.TilesetId);
 
             if (tileset != null)
             {
-                // 1. On récupère la bitmap brute via le service (qui est déjà dans ton UI/Core)
                 var bitmap = EngineServices.ResourcesService.Load<Bitmap>(tileset.ImagePath);
 
                 if (bitmap != null)
                 {
-                    // 2. On utilise les données de TileData pour créer le rectangle de découpe
                     var rect = new PixelRect(
                         (int)FromRef.DefaultTileData.TilePosition.X,
                         (int)FromRef.DefaultTileData.TilePosition.Y,
@@ -302,7 +299,6 @@ public class IntRefListCreateModal : Window
                         tileset.TileHeight
                     );
 
-                    // 3. On applique la source (Avalonia gère le découpage via CroppedBitmap)
                     DefaultTileImage.Source = new CroppedBitmap(bitmap, rect);
                 }
                 else
@@ -1332,17 +1328,14 @@ public class IntRefListItemControl : UserControl
         }
         else
         {
-            // Dans ton composant UI
-            var tileset = _scope.Load<ITilesetDef>(IntRef.DefaultTileData.TilesetId);
+            var tileset = _scope.Load<BaseTilesetDef>(IntRef.DefaultTileData.TilesetId);
 
             if (tileset != null)
             {
-                // 1. On récupère la bitmap brute via le service (qui est déjà dans ton UI/Core)
                 var bitmap = EngineServices.ResourcesService.Load<Bitmap>(tileset.ImagePath);
 
                 if (bitmap != null)
                 {
-                    // 2. On utilise les données de TileData pour créer le rectangle de découpe
                     var rect = new PixelRect(
                         (int)IntRef.DefaultTileData.TilePosition.X,
                         (int)IntRef.DefaultTileData.TilePosition.Y,
@@ -1350,7 +1343,6 @@ public class IntRefListItemControl : UserControl
                         tileset.TileHeight
                     );
 
-                    // 3. On applique la source (Avalonia gère le découpage via CroppedBitmap)
                     DefaultTileImage.Source = new CroppedBitmap(bitmap, rect);
                 }
                 else

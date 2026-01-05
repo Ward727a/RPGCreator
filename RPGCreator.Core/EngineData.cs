@@ -22,171 +22,40 @@
 // 
 // 
 #endregion
-using Avalonia.Controls;
-using Microsoft.Xna.Framework;
-using RPGCreator.Core.Managers.RTP.BrushManagers.Brushs;
-using RPGCreator.Core.Types.Assets;
-using RPGCreator.Core.Types.Assets.Tilesets;
-using RPGCreator.Core.Types.Map;
-using RPGCreator.Core.Types.Project;
-using RPGCreator.Core.Types.RTP;
+
+using System.Numerics;
+using CommunityToolkit.Mvvm.ComponentModel;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
-using Serilog;
+using RPGCreator.SDK.Editor.Brushes;
+using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.Core
 {
-
-    public class SelectedTileChangedEventArgs : EventArgs
+    public partial class EditorState : ObservableObject, IEditorState
     {
-        public ITileDef? OldTile { get; }
-        public ITileDef? NewTile { get; }
-        public SelectedTileChangedEventArgs(ITileDef? oldTile, ITileDef? newTile)
-        {
-            OldTile = oldTile;
-            NewTile = newTile;
-        }
+        public bool InPlacingMode { get; set; } = false;
+        public bool InDrawingMode { get; set; } = false;
+        public bool ShowCollisionLayer { get; set; } = false;
+        public bool ShowEntityLayer { get; set; } = false;
+        public MapDefinition? CurrentMap { get; set; } = null;
+        public BaseLayerDef? CurrentLayer { get; set; } = null;
+        public ITileDef? CurrentTile { get; set; } = null;
+    }
+    
+    public partial class BrushState : ObservableObject, IBrushState
+    {
+        public IBrushInfo? CurrentBrush { get; set; } = null;
+        public BrushMode CurrentMode { get; set; } = BrushMode.Tiling;
+        public object? CurrentObjectToPaint { get; set; }
+        public bool IsPlacing { get; set; } = false;
+        public bool IsDrawing { get; set; } = false;
+        public Vector2 LastDrawAt { get; set; } = Vector2.Zero;
     }
 
-    public class  SelectedLayerChangedEventArgs : EventArgs
+    public partial class ProjectState : ObservableObject, IProjectState
     {
-        
-        public BaseLayerDef? OldLayer { get; }
-        public BaseLayerDef? NewLayer { get; }
-        public SelectedLayerChangedEventArgs(BaseLayerDef? oldLayer, BaseLayerDef? newLayer)
-        {
-            OldLayer = oldLayer;
-            NewLayer = newLayer;
-        }
-
-    }
-
-    public class EngineData
-    {
-        public class SEditorSettings()
-        {
-
-            public event Action? IsPlacingChanged;
-            private bool _isPlacing = false;
-            public bool IsPlacing { get => _isPlacing; set
-                {
-                    if (_isPlacing != value)
-                    {
-                        _isPlacing = value;
-                        IsPlacingChanged?.Invoke();
-                    }
-                }
-            }
-
-            public event Action? IsDrawingChanged;
-            private bool _isDrawing = false;
-            public bool IsDrawing { get => _isDrawing; set
-                {
-                    if (_isDrawing != value)
-                    {
-                        _isDrawing = value;
-                        IsDrawingChanged?.Invoke();
-                    }
-                }
-            }
-
-            public event Action? ShowCollisionChanged;
-            private bool _showCollisionLayer = true;
-            public bool ShowCollisionLayer { get => _showCollisionLayer; set
-                {
-                    if (_showCollisionLayer != value)
-                    {
-                        _showCollisionLayer = value;
-                        ShowCollisionChanged?.Invoke();
-                    }
-                }
-            }
-            public event Action? ShowEntityChanged;
-            private bool _showEntityLayer = true;
-            public bool ShowEntityLayer { get => _showEntityLayer; set
-                {
-                    if (_showEntityLayer != value)
-                    {
-                        _showEntityLayer = value;
-                        ShowEntityChanged?.Invoke();
-                    }
-                }
-            }
-
-            public event Action? BrushTypeChanged;
-            private IBrush? _brushType = null;
-            public IBrush? BrushType { get => _brushType; set
-                {
-                    if (_brushType != value)
-                    {
-                        _brushType = value;
-                        BrushTypeChanged?.Invoke();
-                    }
-                }
-            }
-        }
-
-        public event Action<MapInstance?>? EditedMapChanged;
-        public void OnEditedMapChanged(MapInstance? mapInstance)
-        {
-            EditedMapChanged?.Invoke(mapInstance);
-        }
-        public event Action<MapInstance?>? EditedMapInstanceChanged;
-
-        public void OnEditedMapInstanceChanged(MapInstance? mapInstance)
-        {
-            EditedMapInstanceChanged?.Invoke(mapInstance);
-        }
-        public event EventHandler<SelectedLayerChangedEventArgs>? SelectedLayerChanged;
-        public event EventHandler<SelectedTileChangedEventArgs>? SelectedTileChanged;
-
-        private MapDefinition? _editedMap;
-        private BaseLayerDef? _selectedLayer;
-        private ITileDef? _selectedTile;
-        public SEditorSettings EditorSettings { get; } = new SEditorSettings();
-
-        internal EngineData()
-        {
-            
-            Log.Information($"EngineData initialized.");
-            
-        }
-
-        public static string AppName => "RPG Creator";
-        public static Version AppVersion => new(0, 1, 0);
-
-        public BaseProject? EditedProject { get; internal set; }
-        public BaseLayerDef? SelectedLayer { get => _selectedLayer; 
-            set
-            {
-                if (_selectedLayer != value)
-                {
-                    var oldLayer = _selectedLayer;
-                    _selectedLayer = value;
-                    SelectedLayerChanged?.Invoke(this, new SelectedLayerChangedEventArgs(oldLayer, _selectedLayer));
-                }
-            }
-        }
-        public MapDefinition? EditedMap { get => _editedMap; 
-            set
-            {
-                if (_editedMap != value)
-                {
-                    _editedMap = value;
-                }
-            }
-        }
-        public ITileDef? SelectedTile { get => _selectedTile; 
-            set
-            {
-                if (_selectedTile != value)
-                {
-                    var oldTile = _selectedTile;
-                    _selectedTile = value;
-                    SelectedTileChanged?.Invoke(this, new SelectedTileChangedEventArgs(oldTile, _selectedTile));
-                }
-            }
-        }
-        public Game? RTPGame { get; internal set; }
+        public IBaseProject? CurrentProject { get; set; } = null;
     }
 }

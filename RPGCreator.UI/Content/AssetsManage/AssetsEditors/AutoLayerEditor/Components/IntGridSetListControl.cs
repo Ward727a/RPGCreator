@@ -6,6 +6,7 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using RPGCreator.Core;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types.Collections;

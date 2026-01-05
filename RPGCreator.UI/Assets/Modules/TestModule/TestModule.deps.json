@@ -7,6 +7,10 @@
   "targets": {
     ".NETCoreApp,Version=v8.0": {
       "TestModule/1.0.0": {
+        "dependencies": {
+          "Avalonia": "11.3.6",
+          "RPGCreator.SDK": "1.0.0"
+        },
         "runtime": {
           "TestModule.dll": {}
         }
@@ -63,39 +67,6 @@
           }
         }
       },
-      "Avalonia.AvaloniaEdit/11.3.0": {
-        "dependencies": {
-          "Avalonia": "11.3.6"
-        },
-        "runtime": {
-          "lib/net6.0/AvaloniaEdit.dll": {
-            "assemblyVersion": "11.3.0.0",
-            "fileVersion": "11.3.0.0"
-          }
-        }
-      },
-      "Avalonia.Controls.DataGrid/11.3.6": {
-        "dependencies": {
-          "Avalonia": "11.3.6"
-        },
-        "runtime": {
-          "lib/net8.0/Avalonia.Controls.DataGrid.dll": {
-            "assemblyVersion": "11.3.6.0",
-            "fileVersion": "11.3.6.0"
-          }
-        }
-      },
-      "Avalonia.Markup.Xaml.Loader/11.3.6": {
-        "dependencies": {
-          "Avalonia": "11.3.6"
-        },
-        "runtime": {
-          "lib/net8.0/Avalonia.Markup.Xaml.Loader.dll": {
-            "assemblyVersion": "11.3.6.0",
-            "fileVersion": "11.3.6.0"
-          }
-        }
-      },
       "Avalonia.Remote.Protocol/11.3.6": {
         "runtime": {
           "lib/net8.0/Avalonia.Remote.Protocol.dll": {
@@ -104,31 +75,19 @@
           }
         }
       },
-      "AvaloniaEdit.TextMate/11.3.0": {
-        "dependencies": {
-          "Avalonia": "11.3.6",
-          "Avalonia.AvaloniaEdit": "11.3.0",
-          "TextMateSharp": "1.0.65",
-          "TextMateSharp.Grammars": "1.0.65"
-        },
+      "CommunityToolkit.Diagnostics/8.4.0": {
         "runtime": {
-          "lib/net6.0/AvaloniaEdit.TextMate.dll": {
-            "assemblyVersion": "11.3.0.0",
-            "fileVersion": "11.3.0.0"
+          "lib/net8.0/CommunityToolkit.Diagnostics.dll": {
+            "assemblyVersion": "8.4.0.0",
+            "fileVersion": "8.4.0.1"
           }
         }
       },
-      "AvaloniaInside.MonoGame/1.0.1": {
-        "dependencies": {
-          "Avalonia": "11.3.6",
-          "MonoGame.Framework.DesktopGL": "3.8.3"
-        }
-      },
-      "BitMiracle.LibTiff.NET/2.4.649": {
+      "CommunityToolkit.HighPerformance/8.4.0": {
         "runtime": {
-          "lib/netstandard2.0/BitMiracle.LibTiff.NET.dll": {
-            "assemblyVersion": "2.4.649.0",
-            "fileVersion": "2.4.649.0"
+          "lib/net8.0/CommunityToolkit.HighPerformance.dll": {
+            "assemblyVersion": "8.4.0.0",
+            "fileVersion": "8.4.0.1"
           }
         }
       },
@@ -140,36 +99,6 @@
           }
         }
       },
-      "IronSoftware.Drawing.Abstractions/2025.2.6": {
-        "runtime": {
-          "lib/netstandard2.0/IronSoftware.Drawing.Abstractions.dll": {
-            "assemblyVersion": "2025.2.0.6",
-            "fileVersion": "2025.2.0.6"
-          }
-        }
-      },
-      "IronSoftware.System.Drawing/2025.3.6": {
-        "dependencies": {
-          "BitMiracle.LibTiff.NET": "2.4.649",
-          "IronSoftware.Drawing.Abstractions": "2025.2.6",
-          "SixLabors.ImageSharp": "3.1.7",
-          "SixLabors.ImageSharp.Drawing": "2.1.5"
-        },
-        "runtime": {
-          "lib/net60/IronSoftware.Drawing.Common.dll": {
-            "assemblyVersion": "2025.3.0.6",
-            "fileVersion": "2025.3.0.6"
-          }
-        }
-      },
-      "LiteDB/5.0.21": {
-        "runtime": {
-          "lib/netstandard2.0/LiteDB.dll": {
-            "assemblyVersion": "5.0.21.0",
-            "fileVersion": "5.0.21.0"
-          }
-        }
-      },
       "MicroCom.Runtime/0.11.0": {
         "runtime": {
           "lib/net5.0/MicroCom.Runtime.dll": {
@@ -178,153 +107,25 @@
           }
         }
       },
-      "Microsoft.Extensions.DependencyInjection/9.0.4": {
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.4"
-        },
-        "runtime": {
-          "lib/net8.0/Microsoft.Extensions.DependencyInjection.dll": {
-            "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.425.16305"
-          }
-        }
-      },
-      "Microsoft.Extensions.DependencyInjection.Abstractions/9.0.4": {
-        "runtime": {
-          "lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
-            "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.425.16305"
-          }
-        }
-      },
-      "MonoGame.Extended/4.0.4": {
-        "runtime": {
-          "lib/net8.0/MonoGame.Extended.dll": {
-            "assemblyVersion": "4.0.4.0",
-            "fileVersion": "4.0.4.0"
-          }
-        }
-      },
-      "MonoGame.Framework.DesktopGL/3.8.3": {
-        "dependencies": {
-          "NVorbis": "0.10.4"
-        },
-        "runtime": {
-          "lib/net8.0/MonoGame.Framework.dll": {
-            "assemblyVersion": "3.8.3.0",
-            "fileVersion": "3.8.3.0"
-          }
-        }
-      },
-      "Newtonsoft.Json/13.0.4": {
-        "runtime": {
-          "lib/net6.0/Newtonsoft.Json.dll": {
-            "assemblyVersion": "13.0.0.0",
-            "fileVersion": "13.0.4.30916"
-          }
-        }
-      },
-      "NVorbis/0.10.4": {
-        "runtime": {
-          "lib/netstandard2.0/NVorbis.dll": {
-            "assemblyVersion": "0.10.4.0",
-            "fileVersion": "0.10.4.0"
-          }
-        }
-      },
-      "Onigwrap/1.0.6": {
-        "runtime": {
-          "lib/netstandard2.0/Onigwrap.dll": {
-            "assemblyVersion": "1.0.6.0",
-            "fileVersion": "1.0.6.0"
-          }
-        }
-      },
-      "Serilog/4.3.1-dev-02373": {
-        "runtime": {
-          "lib/net8.0/Serilog.dll": {
-            "assemblyVersion": "4.3.0.0",
-            "fileVersion": "4.3.0.0"
-          }
-        }
-      },
-      "Serilog.Sinks.Console/6.0.1-dev-00953": {
-        "dependencies": {
-          "Serilog": "4.3.1-dev-02373"
-        },
-        "runtime": {
-          "lib/net8.0/Serilog.Sinks.Console.dll": {
-            "assemblyVersion": "6.0.1.0",
-            "fileVersion": "6.0.1.0"
-          }
-        }
-      },
-      "Serilog.Sinks.File/7.0.0": {
-        "dependencies": {
-          "Serilog": "4.3.1-dev-02373"
-        },
-        "runtime": {
-          "lib/net8.0/Serilog.Sinks.File.dll": {
-            "assemblyVersion": "7.0.0.0",
-            "fileVersion": "7.0.0.0"
-          }
-        }
-      },
-      "SixLabors.Fonts/2.0.8": {
-        "runtime": {
-          "lib/net6.0/SixLabors.Fonts.dll": {
-            "assemblyVersion": "2.0.0.0",
-            "fileVersion": "2.0.8.0"
-          }
-        }
-      },
-      "SixLabors.ImageSharp/3.1.7": {
-        "runtime": {
-          "lib/net6.0/SixLabors.ImageSharp.dll": {
-            "assemblyVersion": "3.0.0.0",
-            "fileVersion": "3.1.7.0"
-          }
-        }
-      },
-      "SixLabors.ImageSharp.Drawing/2.1.5": {
-        "dependencies": {
-          "SixLabors.Fonts": "2.0.8",
-          "SixLabors.ImageSharp": "3.1.7"
-        },
-        "runtime": {
-          "lib/net6.0/SixLabors.ImageSharp.Drawing.dll": {
-            "assemblyVersion": "2.0.0.0",
-            "fileVersion": "2.1.5.0"
-          }
-        }
-      },
-      "TextMateSharp/1.0.65": {
-        "dependencies": {
-          "Onigwrap": "1.0.6"
-        },
-        "runtime": {
-          "lib/netstandard2.0/TextMateSharp.dll": {
-            "assemblyVersion": "1.0.65.0",
-            "fileVersion": "1.0.65.0"
-          }
-        }
-      },
-      "TextMateSharp.Grammars/1.0.65": {
-        "dependencies": {
-          "TextMateSharp": "1.0.65"
-        },
-        "runtime": {
-          "lib/netstandard2.0/TextMateSharp.Grammars.dll": {
-            "assemblyVersion": "1.0.65.0",
-            "fileVersion": "1.0.65.0"
-          }
-        }
-      },
       "Ulid/1.3.4": {
         "runtime": {
           "lib/net8.0/Ulid.dll": {
             "assemblyVersion": "1.3.4.0",
             "fileVersion": "1.3.4.0"
+          }
+        }
+      },
+      "RPGCreator.SDK/1.0.0": {
+        "dependencies": {
+          "CommunityToolkit.Diagnostics": "8.4.0",
+          "CommunityToolkit.HighPerformance": "8.4.0",
+          "CommunityToolkit.Mvvm": "8.4.0",
+          "Ulid": "1.3.4"
+        },
+        "runtime": {
+          "RPGCreator.SDK.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
           }
         }
       }
@@ -343,27 +144,6 @@
       "path": "avalonia/11.3.6",
       "hashPath": "avalonia.11.3.6.nupkg.sha512"
     },
-    "Avalonia.AvaloniaEdit/11.3.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-9M/jJb4DPqQmKtNMZn6+vpqlf+ZGMtK8vEBpPVP3De1xRCu1hv4ZAtoA8hY6bYj2hgv/luete3ixoOsEQ++YJQ==",
-      "path": "avalonia.avaloniaedit/11.3.0",
-      "hashPath": "avalonia.avaloniaedit.11.3.0.nupkg.sha512"
-    },
-    "Avalonia.Controls.DataGrid/11.3.6": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-+zKAPaJOatN9o65v8fSAwZeDsBdIIBz+6lDfAwYaCUzlBw15aFGI57fGYyf4titVajjUi3ljhuzUgDTEo0mTww==",
-      "path": "avalonia.controls.datagrid/11.3.6",
-      "hashPath": "avalonia.controls.datagrid.11.3.6.nupkg.sha512"
-    },
-    "Avalonia.Markup.Xaml.Loader/11.3.6": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-3RbUvCCF88WGc+q3LgM4KieKPthL1EWK+9DbyorTNKdebDHQe3E0iBj9CHvSpBxGR0hFm6Pn1j16W+yvMhXU5Q==",
-      "path": "avalonia.markup.xaml.loader/11.3.6",
-      "hashPath": "avalonia.markup.xaml.loader.11.3.6.nupkg.sha512"
-    },
     "Avalonia.Remote.Protocol/11.3.6": {
       "type": "package",
       "serviceable": true,
@@ -371,26 +151,19 @@
       "path": "avalonia.remote.protocol/11.3.6",
       "hashPath": "avalonia.remote.protocol.11.3.6.nupkg.sha512"
     },
-    "AvaloniaEdit.TextMate/11.3.0": {
+    "CommunityToolkit.Diagnostics/8.4.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-9yDE7JUGZxWLo5eqhd6FXMHgj4EH2NOQxL030Vja6SBYX5wiLR8Pk67A8DtIabb0tpvEEDPWBBasN70OhjUiwg==",
-      "path": "avaloniaedit.textmate/11.3.0",
-      "hashPath": "avaloniaedit.textmate.11.3.0.nupkg.sha512"
+      "sha512": "sha512-/9Nuy8EWo0ZYQsjn3h4OGxjCWVYXl3TV3fvv29f8IVqplXgXGRzIpbtHEHGOfykh+TPbzUclzIfMCBzmgblKDA==",
+      "path": "communitytoolkit.diagnostics/8.4.0",
+      "hashPath": "communitytoolkit.diagnostics.8.4.0.nupkg.sha512"
     },
-    "AvaloniaInside.MonoGame/1.0.1": {
+    "CommunityToolkit.HighPerformance/8.4.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-dLLexHaTIz81rcPv9UzTIXTyf1UPEHJHoxR6K5ynA/nJdXe3iHDIVl7dZ4EbeQtNgMAw/QZsoS3LhH5dTR1/SQ==",
-      "path": "avaloniainside.monogame/1.0.1",
-      "hashPath": "avaloniainside.monogame.1.0.1.nupkg.sha512"
-    },
-    "BitMiracle.LibTiff.NET/2.4.649": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-XCEdfCphKo0UAvSg1h/OzOFWtjkIGnPMAziYkNqV7NVrqb/tZJTBxJhxIEX7gpvQwg8GIRYt133SUncfkKfjLA==",
-      "path": "bitmiracle.libtiff.net/2.4.649",
-      "hashPath": "bitmiracle.libtiff.net.2.4.649.nupkg.sha512"
+      "sha512": "sha512-flxspiBs0G/0GMp7IK2J2ijV9bTG6hEwFc/z6ekHqB6nwRJ4Ry2yLdx+TkbCUYFCl4XhABkAwomeKbT6zM2Zlg==",
+      "path": "communitytoolkit.highperformance/8.4.0",
+      "hashPath": "communitytoolkit.highperformance.8.4.0.nupkg.sha512"
     },
     "CommunityToolkit.Mvvm/8.4.0": {
       "type": "package",
@@ -399,27 +172,6 @@
       "path": "communitytoolkit.mvvm/8.4.0",
       "hashPath": "communitytoolkit.mvvm.8.4.0.nupkg.sha512"
     },
-    "IronSoftware.Drawing.Abstractions/2025.2.6": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-6L/kv2P33osXU30WLY0i3TVPjSBRGh63GuFiPknixBbpg5C63v+Pe2u/FFPTT7Mr3ElGDYFYf2axQ7gDpmtptQ==",
-      "path": "ironsoftware.drawing.abstractions/2025.2.6",
-      "hashPath": "ironsoftware.drawing.abstractions.2025.2.6.nupkg.sha512"
-    },
-    "IronSoftware.System.Drawing/2025.3.6": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-YFODJtR9mUrrCOjpTX9hiFC5Me3FYY/W1snrxs/ZsZVuc0YYZeZYYE0hMpZ2sfB5720gumlH/unNFvNGG8B5Lw==",
-      "path": "ironsoftware.system.drawing/2025.3.6",
-      "hashPath": "ironsoftware.system.drawing.2025.3.6.nupkg.sha512"
-    },
-    "LiteDB/5.0.21": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-ykJ7ffFl7P9YQKR/PLci6zupiLrsSCNkOTiw6OtzntH7d2kCYp5L1+3a/pksKgTEHcJBoPXFtg7VZSGVBseN9w==",
-      "path": "litedb/5.0.21",
-      "hashPath": "litedb.5.0.21.nupkg.sha512"
-    },
     "MicroCom.Runtime/0.11.0": {
       "type": "package",
       "serviceable": true,
@@ -427,117 +179,17 @@
       "path": "microcom.runtime/0.11.0",
       "hashPath": "microcom.runtime.0.11.0.nupkg.sha512"
     },
-    "Microsoft.Extensions.DependencyInjection/9.0.4": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-f2MTUaS2EQ3lX4325ytPAISZqgBfXmY0WvgD80ji6Z20AoDNiCESxsqo6mFRwHJD/jfVKRw9FsW6+86gNre3ug==",
-      "path": "microsoft.extensions.dependencyinjection/9.0.4",
-      "hashPath": "microsoft.extensions.dependencyinjection.9.0.4.nupkg.sha512"
-    },
-    "Microsoft.Extensions.DependencyInjection.Abstractions/9.0.4": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-UI0TQPVkS78bFdjkTodmkH0Fe8lXv9LnhGFKgKrsgUJ5a5FVdFRcgjIkBVLbGgdRhxWirxH/8IXUtEyYJx6GQg==",
-      "path": "microsoft.extensions.dependencyinjection.abstractions/9.0.4",
-      "hashPath": "microsoft.extensions.dependencyinjection.abstractions.9.0.4.nupkg.sha512"
-    },
-    "MonoGame.Extended/4.0.4": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-4CXSHzChnp72GXZo/RoK+iKL7nm1X1XI6uer/osbSjyT+YGhXwnta6+P5+ZnwNp+NyeZtYuN+q/9L98pJgYCHQ==",
-      "path": "monogame.extended/4.0.4",
-      "hashPath": "monogame.extended.4.0.4.nupkg.sha512"
-    },
-    "MonoGame.Framework.DesktopGL/3.8.3": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-cuyMJrK6fHD13J3gqkSx5yF3agbI9E9sXtynhq6IDmUnvi43PTfbLEH04MStDzJJ3OPGaKDW1zcxqA/G8GwOUw==",
-      "path": "monogame.framework.desktopgl/3.8.3",
-      "hashPath": "monogame.framework.desktopgl.3.8.3.nupkg.sha512"
-    },
-    "Newtonsoft.Json/13.0.4": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-pdgNNMai3zv51W5aq268sujXUyx7SNdE2bj1wZcWjAQrKMFZV260lbqYop1d2GM67JI1huLRwxo9ZqnfF/lC6A==",
-      "path": "newtonsoft.json/13.0.4",
-      "hashPath": "newtonsoft.json.13.0.4.nupkg.sha512"
-    },
-    "NVorbis/0.10.4": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-WYnil3DhQHzjCY0dM9I2B3r1vWip90AOuQd25KE4NrjPQBg0tBJFluRLm5YPnO5ZLDmwrfosY8jCQGQRmWI/Pg==",
-      "path": "nvorbis/0.10.4",
-      "hashPath": "nvorbis.0.10.4.nupkg.sha512"
-    },
-    "Onigwrap/1.0.6": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-nqmemnwPFmcLPINSEUsbj/jdZ+vhaRMG3E7G/4yGwFEzWusfCgucutMsIKxRXLo0buon35uZeXadnnT6r8fuqQ==",
-      "path": "onigwrap/1.0.6",
-      "hashPath": "onigwrap.1.0.6.nupkg.sha512"
-    },
-    "Serilog/4.3.1-dev-02373": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-f0HNPaleOox5++8zqxAdi9afnUUkoznLOmd0ur/UnLbzl8bIaPyyBGOpbIJmC1kz2vHfkQ0fXh6KXMdlz7bcLQ==",
-      "path": "serilog/4.3.1-dev-02373",
-      "hashPath": "serilog.4.3.1-dev-02373.nupkg.sha512"
-    },
-    "Serilog.Sinks.Console/6.0.1-dev-00953": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-Goi2B0Je0X0NvWYUi0SiU9MJNF2957Kfjmc6VPZ2hNl6Lmj9he6laxmDuQU/c0fBdAFnNiEUPPcHd/NJVyfbkA==",
-      "path": "serilog.sinks.console/6.0.1-dev-00953",
-      "hashPath": "serilog.sinks.console.6.0.1-dev-00953.nupkg.sha512"
-    },
-    "Serilog.Sinks.File/7.0.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-fKL7mXv7qaiNBUC71ssvn/dU0k9t0o45+qm2XgKAlSt19xF+ijjxyA3R6HmCgfKEKwfcfkwWjayuQtRueZFkYw==",
-      "path": "serilog.sinks.file/7.0.0",
-      "hashPath": "serilog.sinks.file.7.0.0.nupkg.sha512"
-    },
-    "SixLabors.Fonts/2.0.8": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-psTLKJVKaD8PKm+Bz/mSSNo4m0VCTYoJ97TF/ynxEWkn4sFUipI0rzE2V/KBtfU0TOn/gF/+1XBOEvusGZZMhA==",
-      "path": "sixlabors.fonts/2.0.8",
-      "hashPath": "sixlabors.fonts.2.0.8.nupkg.sha512"
-    },
-    "SixLabors.ImageSharp/3.1.7": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-9fIOOAsyLFid6qKypM2Iy0Z3Q9yoanV8VoYAHtI2sYGMNKzhvRTjgFDHonIiVe+ANtxIxM6SuqUzj0r91nItpA==",
-      "path": "sixlabors.imagesharp/3.1.7",
-      "hashPath": "sixlabors.imagesharp.3.1.7.nupkg.sha512"
-    },
-    "SixLabors.ImageSharp.Drawing/2.1.5": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-cER1JfvshYDmTxw+gUy/x5e1xoNWhrD6s3AFf8rRUx9hWSXYdOFreQfUrM/QooMj0rF7+hkVtvGnV3EdMx4dxA==",
-      "path": "sixlabors.imagesharp.drawing/2.1.5",
-      "hashPath": "sixlabors.imagesharp.drawing.2.1.5.nupkg.sha512"
-    },
-    "TextMateSharp/1.0.65": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-vwIPl5efIkYtVp+rewrn81Pjs3Vz0RbKJcjDjuRK/YUKsSMEADm4zVFnIWRrGe8LbM0ATpphwMr3G62PBOTrHA==",
-      "path": "textmatesharp/1.0.65",
-      "hashPath": "textmatesharp.1.0.65.nupkg.sha512"
-    },
-    "TextMateSharp.Grammars/1.0.65": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-ga+Uz5iyb75nuQY9hmALiWdeMkFZknJKrIvVDCrI3iZ0Ff9+tk0CqRKr0/KVR/Gg7MEY21cCtMYUbkBVczdwBA==",
-      "path": "textmatesharp.grammars/1.0.65",
-      "hashPath": "textmatesharp.grammars.1.0.65.nupkg.sha512"
-    },
     "Ulid/1.3.4": {
       "type": "package",
       "serviceable": true,
       "sha512": "sha512-6IaGquwjjfW+BoHSV844y12Uy2kxbboYNmsibxr2lotcSPAA3LKy1CKcAQ8JOdAdL4xMoDNXA1oxG41w7fbr6Q==",
       "path": "ulid/1.3.4",
       "hashPath": "ulid.1.3.4.nupkg.sha512"
+    },
+    "RPGCreator.SDK/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
     }
   }
 }

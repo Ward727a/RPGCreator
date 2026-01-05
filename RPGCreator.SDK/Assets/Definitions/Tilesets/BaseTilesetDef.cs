@@ -6,7 +6,7 @@ using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets;
 
-public abstract class ITilesetDef : ISerializable, IDeserializable, IAssetDef, IHasSavePath
+public abstract class BaseTilesetDef : ISerializable, IDeserializable, IAssetDef, IHasSavePath
 {
     
     public event Action? ImageChanged;

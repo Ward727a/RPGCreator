@@ -22,21 +22,13 @@
 // 
 // 
 #endregion
-using CommunityToolkit.Mvvm.ComponentModel;
-using RPGCreator.Core.Types.Assets;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RPGCreator.Core.Types.Assets.BaseAssetsPack;
-using RPGCreator.Core.Types.Assets.Characters.Stats;
-using RPGCreator.Core.Types.Map;
-using RPGCreator.SDK;
-using RPGCreator.SDK.Serializer;
 
-namespace RPGCreator.Core.Types.Project
+using System.Collections.ObjectModel;
+using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types.Interfaces;
+
+namespace RPGCreator.SDK.Projects
 {
     /// <summary>
     /// This class should contains all the data related to the game.<br/>
@@ -51,16 +43,15 @@ namespace RPGCreator.Core.Types.Project
     public partial class ProjectGameData : ISerializable, IDeserializable
     {
 
-        private BaseProject Project;
+        private IBaseProject Project;
 
         public ObservableCollection<MapDefinition> Maps = [];
-        public string GamePackPath;
 
         public ProjectGameData()
         {
         }
 
-        public ProjectGameData(BaseProject project)
+        public ProjectGameData(IBaseProject project)
         {
             Project = project;
         }
@@ -69,7 +60,6 @@ namespace RPGCreator.Core.Types.Project
         {
             SerializationInfo info = new SerializationInfo(typeof(ProjectGameData));
             info.AddValue(nameof(Maps), Maps);
-            info.AddValue(nameof(GamePackPath), GamePackPath);
             // Add other properties as needed
             return info;
         }

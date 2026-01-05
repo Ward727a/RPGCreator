@@ -1,5 +1,6 @@
 using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Types.Interfaces;
 using Serilog;
@@ -8,11 +9,15 @@ namespace RPGCreator.Core.Managers.AssetsManager.Factories;
 
 public class TilesetFactory : IAssetFactory<TilesetInstance, TilesetDef>
 {
-    private readonly Dictionary<Ulid, ITilesetInstance> _instances = [];
+    private readonly Dictionary<Ulid, TilesetInstance> _instances = [];
 
     public TilesetInstance Create(TilesetDef def)
     {
-        var instance = new TilesetInstance(def);
+        if (_instances.TryGetValue(def.Unique, out var instance))
+        {
+            return instance;
+        }
+        instance = new TilesetInstance(def);
         _instances[def.Unique] = instance;
         return instance;
     }
@@ -26,7 +31,7 @@ public class TilesetFactory : IAssetFactory<TilesetInstance, TilesetDef>
     {
         if (_instances.TryGetValue(def.Unique, out var instance))
         {
-            if (instance is IReloadable<ITilesetDef> reloadableInstance)
+            if (instance is IReloadable<BaseTilesetDef> reloadableInstance)
             {
                 reloadableInstance.Reload(def);
             }

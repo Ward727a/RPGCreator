@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 
 namespace RPGCreator.RTP.Editor.Components
@@ -7,7 +8,7 @@ namespace RPGCreator.RTP.Editor.Components
     {
         public bool ShowGridInFront { get; set; } = false;
         // public MapInstance? MapInstance;
-        // private SpriteBatchExtend _sb;
+        private SpriteBatch _sb;
 
         public Point _LastPreviewAt;
         // public IBrushPreviewFeature? _LastPreviewBrush;
@@ -17,21 +18,13 @@ namespace RPGCreator.RTP.Editor.Components
 
             RegisterEvents();
         }
-        //
-        // public MapEditing(SpriteBatchExtend spriteBatchExtend) : this()
-        // {
-        //     _sb = spriteBatchExtend;
-        //     // Initialize components related to map editing
-        //     // This could include setting up layers, properties, and other map-related functionalities
-        // }
-        //
-        // public MapEditing(MapInstance mapInstance, SpriteBatchExtend spriteBatchExtend) : this()
-        // {
-        //     _sb = spriteBatchExtend;
-        //     MapInstance = mapInstance;
-        //     // Initialize components related to the provided map
-        //     // This could include setting up layers, properties, and other map-related functionalities
-        // }
+        
+        public MapEditing(SpriteBatch spriteBatchExtend) : this()
+        {
+            _sb = spriteBatchExtend;
+            // Initialize components related to map editing
+            // This could include setting up layers, properties, and other map-related functionalities
+        }
 
         protected void RegisterEvents()
         {

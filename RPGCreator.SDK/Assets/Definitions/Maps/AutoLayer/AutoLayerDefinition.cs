@@ -1,10 +1,8 @@
 using System.Numerics;
-using RPGCreator.Core.Types.Internal;
-using RPGCreator.Core.Types.Map.Layers.AutoLayer;
-using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.Core.Types.Map;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 
-namespace RPGCreator.Core.Types.Map;
+namespace RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 
 public class AutoLayerDefinition : BaseLayerDef
 {
@@ -21,7 +19,7 @@ public class AutoLayerDefinition : BaseLayerDef
             for (var y = center.Y - radius; y <= center.Y + radius; y++)
             {
                 var position = new Vector2(x, y);
-                var newTile = AutoTileSolver.Resolve(position, SourceIntGrid, IntGridSet.Rules, EngineCore.Instance.Managers.Assets);
+                var newTile = AutoTileSolver.Resolve(position, SourceIntGrid, IntGridSet.Rules);
                 
                 if (newTile != null)
                 {
@@ -38,10 +36,10 @@ public class AutoLayerDefinition : BaseLayerDef
     
     protected class BakeContext
     {
-        private HashSet<Point> PositionsAlreadyChecked { get; } = new();
-        private Queue<Point> PositionsToCheck { get; } = new();
+        private HashSet<Vector2> PositionsAlreadyChecked { get; } = new();
+        private Queue<Vector2> PositionsToCheck { get; } = new();
         
-        public void AddPositionsToCheck(IEnumerable<Point> positions)
+        public void AddPositionsToCheck(IEnumerable<Vector2> positions)
         {
             foreach (var pos in positions)
             {
@@ -52,7 +50,7 @@ public class AutoLayerDefinition : BaseLayerDef
             }
         }
         
-        public void AddPositionChecked(Point position)
+        public void AddPositionChecked(Vector2 position)
         {
             PositionsAlreadyChecked.Add(position);
         }
@@ -62,14 +60,14 @@ public class AutoLayerDefinition : BaseLayerDef
             return PositionsToCheck.Count > 0;
         }
         
-        public Point DequeuePosition()
+        public Vector2 DequeuePosition()
         {
             var pos = PositionsToCheck.Dequeue();
             PositionsAlreadyChecked.Add(pos);
             return pos;
         }
         
-        public IEnumerable<Point>  Positions
+        public IEnumerable<Vector2>  Positions
         {
             get
             {
@@ -87,7 +85,7 @@ public class AutoLayerDefinition : BaseLayerDef
         foreach (var position in context.Positions)
         {
             var currentTile = InternalTileLayer.GetElement(position);
-            var newTile = AutoTileSolver.Resolve(position, SourceIntGrid, IntGridSet.Rules, EngineCore.Instance.Managers.Assets);
+            var newTile = AutoTileSolver.Resolve(position, SourceIntGrid, IntGridSet.Rules);
 
             if (newTile != null)
             {
@@ -113,14 +111,14 @@ public class AutoLayerDefinition : BaseLayerDef
         }
     }
     
-    protected BakeContext CheckAround(Point center, BakeContext? context = null, int GridSize = 32)
+    protected BakeContext CheckAround(Vector2 center, BakeContext? context = null, int GridSize = 32)
     {
         if(context == null)
         {
             context = new BakeContext();
         }
         
-        List<Point> positionsToBake = new();
+        List<Vector2> positionsToBake = new();
         context.AddPositionChecked(center);
         
         for (int x = -1; x <= 1; x++)
@@ -129,7 +127,7 @@ public class AutoLayerDefinition : BaseLayerDef
             {
                 if (x == 0 && y == 0) continue; // Skip center
                 
-                var checkPos = new Point(center.X + (x * GridSize), center.Y + (y * GridSize));
+                var checkPos = new Vector2(center.X + (x * GridSize), center.Y + (y * GridSize));
                 
                 if(SourceIntGrid.HasElement(checkPos))
                     positionsToBake.Add(checkPos);

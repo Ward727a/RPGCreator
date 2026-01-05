@@ -1,20 +1,21 @@
 using Microsoft.Xna.Framework;
 using RPGCreator.Core.Runtimes.Services;
 using RPGCreator.Core.Types.Assets.Actors;
+using RPGCreator.Core.Types.Assets.Entities;
 using RPGCreator.Core.Types.Assets.Items;
 
 namespace RPGCreator.Core.Runtimes.Context;
 
 public sealed class EffectContext : IEffectContext
 {
-    public IActor Target { get; }
+    public Actor Target { get; }
     public object? Source { get; }
     public Random Rng { get; } = new Random();
     public GameTime GameTime { get; }
 
     public EffectContext
     (
-        IActor target,
+        Actor target,
         GameTime gameTime,
         object? source = null
     )

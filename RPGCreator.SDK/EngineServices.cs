@@ -1,8 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK.Assets;
+using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Parser.PrattFormula;
+using RPGCreator.SDK.Projects;
+using RPGCreator.SDK.Resources;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
@@ -34,6 +38,8 @@ public interface IGameFactory
 
 public interface IAssetsManager
 {
+    event Action<IAssetDef>? OnAssetRegistered;
+    event Action<IAssetDef>? OnAssetUnregistered;
     public void RegisterRegistry(IAssetRegistry registry);
     public void RegisterAsset(object asset);
     public bool TryResolveRegistry(string ModuleName, [NotNullWhen(true)] out IAssetRegistry? registry);
@@ -57,19 +63,48 @@ public interface IAssetsManager
 
 public interface IProjectsManager
 {
-    List<IBaseProjectLink> GetAllProjects();
+    List<BaseProjectLink> GetAllProjects();
     public IBaseProject? CreateProject(string projectName, string projectPath);
     public bool TryGetProject(string configPath, out IBaseProject? project);
+    public void OpenProject(IBaseProject project);
+    public void CloseCurrentProject();
+}
+
+public interface IECSService
+{
+    public IECSWorld CreateWorld();
+}
+
+public interface IBrushManager
+{
+    public void ClickAt(Vector2 at);
+    public void PreviewAt(Vector2 at);
+    public void ClearPreview();
+    public Vector2 NormalizedPositionToTile(Vector2 position);
+}
+
+public interface IGameProvider
+{
+    /// <summary>
+    /// The current game instance.
+    /// Normally this is the MonoGame Game class instance.
+    /// But to keep the SDK decoupled from MonoGame, this is typed as object.
+    /// </summary>
+    object GameInstance { get; }
 }
 
 public static class EngineServices
 {
     public static IGameFactory GameFactory { get; set; } = null!;
     public static IAssetsManager AssetsManager { get; set; } = null!;
+    public static IBrushManager BrushManager { get; set; } = null!;
     public static ISerializerService SerializerService { get; set; } = null!;
     public static IAssetTypeRegistry AssetTypeRegistry { get; set; } = null!;
     public static IResourceService ResourcesService { get; set; } = null!;
     public static IProjectsManager ProjectsManager { get; set; } = null!;
     public static IGraphService GraphService { get; set; } = null!;
+    public static IGraphNodeScanner GraphNodeScanner { get; set; } = null!;
     public static IPrattFormulaService PrattFormulaService { get; set; } = null!;
+    public static IGameProvider GameProvider { get; set; } = null!;
+    public static IECSService ECS { get; set; } = null!;
 }

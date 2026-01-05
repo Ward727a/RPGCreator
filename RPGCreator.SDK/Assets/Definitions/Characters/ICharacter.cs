@@ -17,6 +17,5 @@ public interface ICharacter : IHasSavePath, IHasUniqueId
     public int MaxLevel { get; set; }
     public Ulid ClassId { get; set; }
     public Dictionary<Ulid,CharacterStats> Stats { get; }
-    public CharacterFeatures Features { get; }
     public CharacterRolePlayInfo RolePlayInfo { get; }
 }

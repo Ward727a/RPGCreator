@@ -19,11 +19,11 @@ public interface ITileDef : ILayerElem, IAssetDef
     public Vector2 DefaultPosition { get; set; }
     public Size SizeInTileset { get; }
     public Vector2 PositionInTileset { get; } // Position in the tileset grid (row by column)
-    public ITilesetDef TilesetDef { get; } // The tileset this tile belongs to
+    public BaseTilesetDef TilesetDef { get; } // The tileset this tile belongs to
     public Rect UV { get; }
     public TileFlip Flip { get; set; }
 
-    public void UpdateTileset(ITilesetDef newTilesetDefinition);
+    public void UpdateTileset(BaseTilesetDef newTilesetDefinition);
 
     public bool IsEqualTo(ITileDef other);
 }

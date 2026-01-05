@@ -1,13 +1,14 @@
 ﻿using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Resources;
 
 namespace RPGCreator.Core;
 
 public class EngineResourcesService : IResourceService
 {
-    private Dictionary<Type, IResourceLoader> _resourceLoaders;
-    private Dictionary<string, object> _resourceCache;
-    private Dictionary<string, int> _resourceReferenceCounts;
+    private Dictionary<Type, IResourceLoader> _resourceLoaders = new();
+    private Dictionary<string, object> _resourceCache = new();
+    private Dictionary<string, int> _resourceReferenceCounts = new();
     
     public T? Load<T>(string path) where T : class
     {

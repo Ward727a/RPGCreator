@@ -16,26 +16,26 @@ public class EntityFactory : IEntityFactory
         _entityManager = entityManager;
     }
 
-    public Entity SpawnEntity(BaseEntity entityData, Vector2 position)
+    public Entity SpawnEntity(IEntityDefinition entityDefinitionData, Vector2 position)
     {
         var entity = _entityManager.CreateEntity();
 
         var transform = entity.AddComponent<TransformComponent>();
         transform.Position = position;
 
-        InitializeEntity(entity, entityData);
+        InitializeEntity(entity, entityDefinitionData);
         
         return entity;
     }
 
-    public void InitializeEntity(Entity entity, BaseEntity entityData)
+    public void InitializeEntity(Entity entity, IEntityDefinition entityDefinitionData)
     {
-        var autoFeatures = EngineCore.Instance.Managers.FeaturesRules.GetAllAutoFeatures(entityData.Tags);
+        var autoFeatures = EngineCore.Instance.Managers.FeaturesRules.GetAllAutoFeatures(entityDefinitionData.Tags);
 
         var addedTypes = new HashSet<Type>();
         
         // First the manual added features
-        foreach (var feature in entityData.Features)
+        foreach (var feature in entityDefinitionData.Features)
         {
             var featureType = feature.GetType();
             addedTypes.Add(featureType);

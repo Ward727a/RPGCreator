@@ -21,9 +21,12 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 // 
 #endregion
+
+using Avalonia.Logging;
 using RPGCreator.Core.Types.Project;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Projects;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types.Interfaces;
 using Serilog;
@@ -49,7 +52,7 @@ namespace RPGCreator.Core.Configs.Helpers
         public override string ConfigName { get; set; } = "ProjectsConf";
         public static ProjectsConf Instance { get; private set; }
 
-        public List<IBaseProjectLink> ProjectLinks { get; private set; } = [];
+        public List<BaseProjectLink> ProjectLinks { get; private set; } = [];
 
         public ProjectsConf() : base()
         {
@@ -133,11 +136,14 @@ namespace RPGCreator.Core.Configs.Helpers
                 throw new ArgumentNullException(nameof(info), "SerializationInfo cannot be null.");
             }
 
-            info.TryGetList("projectLinks", out List<IBaseProjectLink> projectLinks);
+            if (!info.TryGetList("projectLinks", out List<BaseProjectLink>? projectLinks))
+            {
+                Log.Fatal("[ProjectsConf] Failed to deserialize project links. {@info}", info);
+            }
 
             ProjectLinks = projectLinks;
 
-            Log.Information("[ProjectLinks] Found {0} projects in conf {1}", projectLinks.Count, ConfigPath);
+            Log.Information("[ProjectLinks] Found {0} projects in conf {1}", projectLinks?.Count, ConfigPath);
         }
     }
 }

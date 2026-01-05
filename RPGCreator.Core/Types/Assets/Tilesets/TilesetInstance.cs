@@ -28,7 +28,7 @@ public class TilesetInstance : ITilesetInstance
     public int TileHeight => Definition.TileHeight;
 
     public event EventHandler? ImageChanged;
-    public ITilesetDef Definition { get; }
+    public BaseTilesetDef Definition { get; }
  
     public TilesetInstance()
     {

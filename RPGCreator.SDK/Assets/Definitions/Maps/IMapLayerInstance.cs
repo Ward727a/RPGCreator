@@ -4,13 +4,9 @@ using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps;
 
-public interface IMapLayerInstance<TLayerDefElement, TLayerInstanceElement>
+public interface IMapLayerInstance<TLayerDefElement, TLayerInstanceElement> : IMapLayerInstance
 {
-    Ulid RuntimeUnique { get; }
-    TileLayerDefinition Definition { get; }
     ILayerRenderer<TLayerDefElement, TLayerInstanceElement>? Renderer { get; }
-    bool IsVisible { get; }
-    bool IsSelected { get; set; }
     
     public Dictionary<Vector2, TLayerInstanceElement> InstancedElements { get; }
 
@@ -19,4 +15,11 @@ public interface IMapLayerInstance<TLayerDefElement, TLayerInstanceElement>
         renderer.Draw(context, this);
     }
     public void Update(TimeSpan gameTime);
+}
+public interface IMapLayerInstance
+{
+    Ulid RuntimeUnique { get; }
+    TileLayerDefinition Definition { get; }
+    bool IsVisible { get; set; }
+    bool IsSelected { get; set; }
 }

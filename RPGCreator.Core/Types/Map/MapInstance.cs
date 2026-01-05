@@ -22,34 +22,32 @@
 // 
 // 
 #endregion
+
+using CommunityToolkit.Diagnostics;
 using Microsoft.Xna.Framework;
 using RPGCreator.Core.Rendering.Batching;
-using RPGCreator.Core.Types.Assets.Actors;
 using RPGCreator.Core.Types.Map.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
+using RPGCreator.SDK.ECS.Entities;
+using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.Core.Types.Map
 {
 
-    public partial class MapInstance : BaseDrawable
+    public partial class MapInstance : IMapInstance
     {
         // The Ulid Identifier can be used to sort map by creation date
         // See more: https://github.com/ulid/spec
         public Ulid Identifier { get; private set; } = Ulid.NewUlid();
         
         public MapDefinition Definition { get; private set; }
-        public List<TileLayerInstance> TileLayers { get; private set; } = new List<TileLayerInstance>();
-        public List<IActor> ActorsInMap { get; private set; } = [
-            // new CharacterActor()
-            // {
-            //     CharacterData = new CharacterData()
-            //     {
-            //         Name = "Default Character",
-            //     },
-            // }
-        ];
+        private List<TileLayerInstance> _tileLayers = new List<TileLayerInstance>();
+        public IReadOnlyList<IMapLayerInstance> TileLayers => _tileLayers.AsReadOnly();
+        private List<IEntity> _entities = new List<IEntity>();
+        public IReadOnlyList<IEntity> Entities => _entities.AsReadOnly();
 
-        public readonly TileLayerInstance PreviewLayer = new TileLayerInstance(new TileLayerDefinition()
+        public IMapLayerInstance PreviewLayer { get; set; } = new TileLayerInstance(new TileLayerDefinition()
         {
             Name = "Preview Layer",
             ZIndex = 1000, // High ZIndex to ensure it is drawn on top of other layers
@@ -57,9 +55,10 @@ namespace RPGCreator.Core.Types.Map
         });
 
         public MapInstance() { }
-        public MapInstance(MapDefinition definition)
+        public MapInstance(IMapDef definition)
         {
-            Definition = definition;
+            Guard.IsOfType(definition, typeof(MapDefinition));
+            Definition = (MapDefinition)definition;
             if (Definition == null)
             {
                 throw new ArgumentNullException(nameof(definition), "Map definition cannot be null.");
@@ -71,7 +70,7 @@ namespace RPGCreator.Core.Types.Map
                 if (layerDef is TileLayerDefinition tileLayerDef)
                 {
                     var layerInstance = EngineCore.Instance.Managers.Assets.TileLayerFactory.Create(tileLayerDef);
-                    TileLayers.Add(layerInstance);
+                    _tileLayers.Add(layerInstance);
                 }
             }
             
@@ -82,10 +81,10 @@ namespace RPGCreator.Core.Types.Map
 
         private void OnTileLayerRemoved(object? sender, BaseLayerDef e)
         {
-            var layerToRemove = TileLayers.FirstOrDefault(l => l.Definition.Unique == e.Unique);
+            var layerToRemove = _tileLayers.FirstOrDefault(l => l.Definition.Unique == e.Unique);
             if (layerToRemove != null)
             {
-                TileLayers.Remove(layerToRemove);
+                _tileLayers.Remove(layerToRemove);
                 EngineCore.Instance.Managers.Assets.TileLayerFactory.Release(layerToRemove);
             }
             else
@@ -103,19 +102,19 @@ namespace RPGCreator.Core.Types.Map
                 case AutoLayerDefinition autoLayerDefinition:
                 {
                     var newLayer = EngineCore.Instance.Managers.Assets.TileLayerFactory.Create(autoLayerDefinition.InternalTileLayer);
-                    TileLayers.Add(newLayer);
+                    _tileLayers.Add(newLayer);
                     return;
                 }
                 case TileLayerDefinition tileLayerDefinition:
                 {
                     var newLayer = EngineCore.Instance.Managers.Assets.TileLayerFactory.Create(tileLayerDefinition);
-                    TileLayers.Add(newLayer);
+                    _tileLayers.Add(newLayer);
                     break;
                 }
             }
         }
 
-        protected override void _Draw(SpriteBatchExtend? sb)
+        public void Draw(IRenderContext context, IDrawer<IMapLayerInstance> layerDrawer, IDrawer<IEntity> entityDrawer)
         {
             // Draw the map here
             // This is where you would implement the logic to draw the map using the provided SpriteBatchExtend instance.
@@ -125,13 +124,13 @@ namespace RPGCreator.Core.Types.Map
             {
                 if (layer.IsVisible)
                 {
-                    layer.Draw(sb);
+                    layerDrawer.Draw(context, layer);
                 }
             }
             // Nothing here for now, need to think about what the use of this function could be for the map
-            foreach (var actor in ActorsInMap)
+            foreach (var entity in Entities)
             {
-                actor.Draw(sb);
+                entityDrawer.Draw(context, entity);
             }
         }
 
@@ -148,21 +147,22 @@ namespace RPGCreator.Core.Types.Map
         {
             if (index < 0 || index >= Definition.TileLayers.Count)
                 throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range.");
-            SelectLayer(TileLayers[index]);
+            SelectLayer(_tileLayers[index]);
         }
 
         public TileLayerInstance? GetSelectedLayer()
         {
-            return TileLayers.FirstOrDefault(l => l.IsSelected);
+            return _tileLayers.FirstOrDefault(l => l.IsSelected);
         }
 
-        protected override void _Update(GameTime gameTime)
+        public void Update(TimeSpan elapsedTime)
         {
             // Nothing here for now, need to think about what the use of this function could be for the map
-            foreach (var actor in ActorsInMap)
-            {
-                actor.Update(gameTime);
-            }
+            // foreach (var actor in Entities)
+            // {
+                // actor.Update(gameTime);
+                // TODO : Update entites with the IECSWorld?
+            // }
         }
     }
 }

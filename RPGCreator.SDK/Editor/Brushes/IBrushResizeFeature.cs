@@ -22,25 +22,25 @@
 // 
 // 
 #endregion
-using RPGCreator.Core.Events.EventArgs;
-using RPGCreator.Core.Types.Project;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace RPGCreator.Core.Managers.ProjectsManager.Events
+namespace RPGCreator.SDK.Editor.Brushes
 {
-    public class ProjectsManagerLoadingProjectArgs(Ulid projectId) : BasePreEventArgs
+    public interface IBrushResizeFeature
     {
 
-        public Ulid ProjectId = projectId;
+        int Step { get; } // Step size for resizing the brush
+        int MaxSize { get; } // Maximum size of the brush
+        int MinSize { get; } // Minimum size of the brush
 
-        public ProjectsManagerLoadedProjectArgs ToPost(BaseProject? loadedProject)
-        {
-            return new ProjectsManagerLoadedProjectArgs(ProjectId, loadedProject);
-        }
-
+        /// <summary>
+        /// Resize the brush to the specified size.
+        /// </summary>
+        /// <param name="newSize">The new size of the brush.</param>
+        void ResizeBrush(int newSize);
+        /// <summary>
+        /// Get the current size of the brush.
+        /// </summary>
+        /// <returns>The current size of the brush.</returns>
+        int GetBrushSize();
     }
 }

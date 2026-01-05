@@ -16,7 +16,7 @@ public class EditorEntityVisual : ILayerElem, IDisposable
     /// <summary>
     /// Entity being represented visually in the editor.
     /// </summary>
-    public BaseEntity Entity { get; private set; }
+    public IEntityDefinition EntityDefinition { get; private set; }
     /// <summary>
     /// Position of the entity on the map editor grid.
     /// </summary>
@@ -24,16 +24,16 @@ public class EditorEntityVisual : ILayerElem, IDisposable
 
     public UnifiedImage? PreviewImage { get; private set; }
 
-    public EditorEntityVisual(BaseEntity entity, Point position)
+    public EditorEntityVisual(IEntityDefinition entityDefinition, Point position)
     {
-        Entity = entity;
+        EntityDefinition = entityDefinition;
         Position = position;
         ResolvePreview();
     }
 
     private void ResolvePreview()
     {
-        if (string.IsNullOrWhiteSpace(Entity.SpritePath)) return;
+        if (string.IsNullOrWhiteSpace(EntityDefinition.SpritePath)) return;
 
         if (PreviewImage != null)
         {
@@ -41,7 +41,7 @@ public class EditorEntityVisual : ILayerElem, IDisposable
             PreviewImage.Dispose();
         }
 
-        PreviewImage = _imageCache.CreateOrGet(Entity.SpritePath);
+        PreviewImage = _imageCache.CreateOrGet(EntityDefinition.SpritePath);
     }
 
     public void RenderMonoGame(SpriteBatchExtend spriteBatch, Point offset, Microsoft.Xna.Framework.Color? tint = null)

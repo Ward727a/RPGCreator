@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media.Imaging;
 using Avalonia.VisualTree;
-using RPGCreator.Core;
-using RPGCreator.Core.Types.Assets;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor;
 
@@ -283,9 +281,9 @@ public class CharactersManageControl : UserControl
     {
         ViewPanel.Children.Clear();
         
-        foreach (var assetData in EngineCore.Instance.Managers.Assets.SearchAllPacks<CharacterData>())
+        foreach (var assetData in EngineServices.AssetsManager.SearchAllPacks<CharacterData>())
         {
-            if (!EngineCore.Instance.Managers.Assets.TryResolveAsset(assetData.AssetId, out CharacterData? characterData)) continue;
+            if (!EngineServices.AssetsManager.TryResolveAsset(assetData.AssetId, out CharacterData? characterData)) continue;
             
             var item = new CharacterManageItem(characterData);
             item.OnSelected += (data) =>

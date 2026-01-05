@@ -1,4 +1,4 @@
-﻿namespace RPGCreator.SDK.Assets;
+﻿namespace RPGCreator.SDK.Resources;
 
 public interface IResourceService
 {

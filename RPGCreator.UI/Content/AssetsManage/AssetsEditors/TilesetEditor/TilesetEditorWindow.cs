@@ -23,19 +23,14 @@
 // 
 #endregion
 using Avalonia.Controls;
-using RPGCreator.Core.Types.Assets;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
 {
     public class TilesetEditorWindow : Window
     {
 
-        public TilesetEditorWindow(TilesetDef tilesetDefinition)
+        public TilesetEditorWindow(BaseTilesetDef tilesetDefinition)
         {
             Title = "Tileset Editor";
             Width = 800;

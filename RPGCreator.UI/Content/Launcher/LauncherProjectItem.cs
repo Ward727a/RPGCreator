@@ -24,21 +24,17 @@
 #endregion
 using Avalonia.Controls;
 using Avalonia.Media;
-using RPGCreator.Core.Types.Project;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.UI.Content.Launcher
 {
     public class LauncherProjectItem : UserControl
     {
 
-        public event EventHandler<BaseProject>? ProjectSelected;
+        public event EventHandler<IBaseProject>? ProjectSelected;
 
-        public LauncherProjectItem(BaseProject project)
+        public LauncherProjectItem(IBaseProject project)
         {
             var stackPanel = new StackPanel
             {

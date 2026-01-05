@@ -9,11 +9,11 @@ namespace RPGCreator.Core.Types.Editor.Visual.PaintTargets;
 public class TileLayerTarget : IPaintTarget
 {
     private readonly TileLayerDefinition _layerDef;
-    private readonly MapDefinition? _mapDef;
+    private readonly IMapDef? _mapDef;
     public int GridWidth { get; private set; }
     public int GridHeight { get; private set; }
     
-    public TileLayerTarget(TileLayerDefinition layerDef, MapDefinition map, int gridWidth, int gridHeight)
+    public TileLayerTarget(TileLayerDefinition layerDef, IMapDef map, int gridWidth, int gridHeight)
     {
         _layerDef = layerDef;
         _mapDef = map;

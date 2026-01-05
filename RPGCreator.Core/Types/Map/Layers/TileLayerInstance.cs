@@ -13,7 +13,7 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
     public TileLayerDefinition Definition => _def;
     public ILayerRenderer<ITileDef, ITileInstance>? Renderer { get; set; }
     private TileLayerDefinition _def;
-    public bool IsVisible { get; }
+    public bool IsVisible { get; set; }
     public bool IsSelected { get; set; }
     /// <summary>
     /// Instanced elements of this layer.<br/>
@@ -75,13 +75,13 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
 
         if (Renderer != null)
         {
-            Renderer.Draw(this);
+            Renderer.Draw(null, this);
             return;
         }
         
         foreach (var tile in InstancedElements.Values)
         {
-            tile.Draw(sb);
+            tile.Draw(null, null/*NEED TO PASS DRAWER*/); //TODO: pass drawer
         }
     }
 

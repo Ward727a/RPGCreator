@@ -1,4 +1,4 @@
-namespace RPGCreator.Core.ModuleSDK.Attributes;
+namespace RPGCreator.SDK.Modules.Attributes;
 
 [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
 public class ExposePropToPluginAttribute : Attribute

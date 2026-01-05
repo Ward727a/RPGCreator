@@ -23,24 +23,18 @@
 // 
 #endregion
 using RPGCreator.Core.Configs.Helpers;
-using RPGCreator.Core.Managers.ProjectsManager.Events;
 using RPGCreator.Core.Types.Project;
-using System.Collections.ObjectModel;
 using RPGCreator.Core.Types.Assets.BaseAssetsPack;
-using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Projects;
 using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.Core.Managers.ProjectsManager
 {
     public class ProjectsManager : IProjectsManager
     {
-
-        public readonly ProjectsManagerEvent Events;
-
         public ProjectsManager()
         {
-            Events = new ProjectsManagerEvent();
         }
 
         public IBaseProject? CreateProject(string project_name, string project_path)
@@ -72,7 +66,7 @@ namespace RPGCreator.Core.Managers.ProjectsManager
             return newProject;
         }
 
-        public List<IBaseProjectLink> GetAllProjects()
+        public List<BaseProjectLink> GetAllProjects()
         {
             return ProjectsConf.Instance.ProjectLinks;
         }
@@ -94,5 +88,19 @@ namespace RPGCreator.Core.Managers.ProjectsManager
             return false;
         }
 
+        public void OpenProject(IBaseProject project)
+        {
+            if (project == null)
+            {
+                throw new ArgumentNullException(nameof(project), "Project cannot be null.");
+            }
+
+            EngineState.ProjectState.CurrentProject = project;
+        }
+
+        public void CloseCurrentProject()
+        {
+            EngineState.ProjectState.CurrentProject = null;
+        }
     }
 }

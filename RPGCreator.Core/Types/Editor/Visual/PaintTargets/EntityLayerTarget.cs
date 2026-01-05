@@ -1,17 +1,18 @@
 using RPGCreator.Core.Types.Editor.Interfaces;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.SDK.Assets.Definitions.Maps;
 
 namespace RPGCreator.Core.Types.Editor.Visual.PaintTargets;
 
 public class EntityLayerTarget : IPaintTarget
 {
     private readonly EntitiesLayerDefinition _layerDef;
-    private readonly MapDefinition? _mapDef;
+    private readonly IMapDef? _mapDef;
     public int GridWidth { get; private set; }
     public int GridHeight { get; private set; }
     
-    public EntityLayerTarget(EntitiesLayerDefinition layerDef, MapDefinition map, int gridWidth, int gridHeight)
+    public EntityLayerTarget(EntitiesLayerDefinition layerDef, IMapDef map, int gridWidth, int gridHeight)
     {
         _layerDef = layerDef;
         _mapDef = map;

@@ -1,12 +1,8 @@
-using RPGCreator.Core.Configs;
-using RPGCreator.Core.Configs.Helpers;
-using RPGCreator.Core.Types.Project;
-using RPGCreator.SDK;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types.Interfaces;
-using Serilog;
 
-namespace RPGCreator.Core.Types.Internal;
+namespace RPGCreator.SDK.Projects;
 
 public class BaseProjectLink : IBaseProjectLink, ISerializable, IDeserializable
 {
@@ -18,7 +14,7 @@ public class BaseProjectLink : IBaseProjectLink, ISerializable, IDeserializable
     }
     
 
-    public static BaseProjectLink CreateLinkFromProject(BaseProject project)
+    public static BaseProjectLink CreateLinkFromProject(IBaseProject project)
     {
         BaseProjectLink link = new BaseProjectLink();
         link.ProjectID = project.Id;
@@ -42,6 +38,6 @@ public class BaseProjectLink : IBaseProjectLink, ISerializable, IDeserializable
         ProjectID = _ProjectID;
         ProjectConfigPath = _ProjectConfigPath;
         
-        Log.Debug("[ProjectLink] SetObjectData ({0}, {1})", ProjectID, ProjectConfigPath);
+        Logger.Debug("[ProjectLink] SetObjectData ({0}, {1})", ProjectID, ProjectConfigPath);
     }
 }

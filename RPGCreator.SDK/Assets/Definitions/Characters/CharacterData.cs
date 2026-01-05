@@ -3,7 +3,9 @@ using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 using RPGCreator.SDK.Assets.Definitions.Skills;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;
+using RPGCreator.SDK.ECS.Features;
 using RPGCreator.SDK.Extensions;
+using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
@@ -385,7 +387,7 @@ public struct CharacterEquipSlot(string slotName, int slotIndex, string itemType
 /// <summary>
 /// This class represents a character in the game.
 /// </summary>
-public class CharacterData : BaseEntity, ICharacter, ISerializable, IDeserializable
+public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDeserializable
 {
     #region Events
 
@@ -399,8 +401,15 @@ public class CharacterData : BaseEntity, ICharacter, ISerializable, IDeserializa
     
     #region Properties
 
-    public URN Urn { get; }
-    
+    public string SpritePath { get; set; } = string.Empty;
+    public Ulid Unique { get; set; } = Ulid.NewUlid();
+    public URN Urn { get; private set; }
+    public CustomData Properties { get; } = new CustomData();
+
+    public List<BaseEntityFeature> Features => _features;
+
+    public List<string> Tags { get; }
+
     private string _portraitPath = string.Empty;
     
     public Dictionary<string, DirectionalAnimationSet> AnimationsMapping { get; private set; }= new();
@@ -419,6 +428,7 @@ public class CharacterData : BaseEntity, ICharacter, ISerializable, IDeserializa
     private int _maxLevel = 99;
     
     private Ulid _classId = Ulid.Empty;
+    private List<BaseEntityFeature> _features;
 
     public string Name { get; set; }
 
@@ -483,8 +493,6 @@ public class CharacterData : BaseEntity, ICharacter, ISerializable, IDeserializa
     
     public Dictionary<Ulid, CharacterSkill> Skills { get; private set; } = new();
     
-    public CharacterFeatures Features { get; private set; } = new CharacterFeatures();
-    
     public CharacterRolePlayInfo RolePlayInfo { get; private set; } = new CharacterRolePlayInfo();
     
     #endregion
@@ -494,6 +502,10 @@ public class CharacterData : BaseEntity, ICharacter, ISerializable, IDeserializa
     // Needed for serialization
     public CharacterData()
     {
+        Name = "UNKNOWN";
+        Urn = new URN("character", $"UNKNOWN@{Unique}");
+        _features = new List<BaseEntityFeature>();
+        Tags = new List<string>();
     }
     
     public CharacterData(string name) : this()
@@ -564,7 +576,7 @@ public class CharacterData : BaseEntity, ICharacter, ISerializable, IDeserializa
         info.TryGetValue("MaxLevel", out int maxLevel, 99);
         info.TryGetValue("ClassId", out Ulid classId, Ulid.Empty);
         info.TryGetValue("Stats", out Dictionary<Ulid, CharacterStats>? stats);
-        info.TryGetValue("Features", out CharacterFeatures features, new CharacterFeatures());
+        info.TryGetValue("Features", out List<BaseEntityFeature> features, new List<BaseEntityFeature>());
         info.TryGetValue("RolePlayInfo", out CharacterRolePlayInfo rolePlayInfo, new CharacterRolePlayInfo());
         
         Unique = unique;
@@ -576,7 +588,7 @@ public class CharacterData : BaseEntity, ICharacter, ISerializable, IDeserializa
         MaxLevel = maxLevel;
         ClassId = classId;
         Stats = stats ?? new Dictionary<Ulid, CharacterStats>();
-        Features = features;
+        _features = features;
         RolePlayInfo = rolePlayInfo;
         
         RefreshStats();

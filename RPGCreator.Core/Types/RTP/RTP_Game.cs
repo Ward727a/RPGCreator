@@ -29,13 +29,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RPGCreator.Core.Types.Project;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.Core.Types.RTP
 {
     public abstract class RTP_Game : Game
     {
         public RTP_GameEvents _events = new();
-        protected BaseProject? Project => EngineCore.Instance.Data.EditedProject;
+        protected IBaseProject? Project => EngineState.ProjectState.CurrentProject;
         protected bool HasProject => Project != null;
 
         protected virtual void _Init() { }

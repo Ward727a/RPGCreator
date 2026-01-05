@@ -22,21 +22,19 @@
 // 
 // 
 #endregion
+
+using System.Numerics;
+using CommunityToolkit.Diagnostics;
 using RPGCreator.Core.Managers.RTP.BrushManagers.Brushs;
 using RPGCreator.Core.Types.Internal;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RPGCreator.Core.Runtimes.Context;
 using RPGCreator.Core.Types.Editor.Context;
-using RPGCreator.Core.Types.Map;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Editor.Brushes;
 using Serilog;
 
 namespace RPGCreator.Core.Managers.RTP.BrushManagers
 {
-    public class BrushManager
+    public class BrushManager : IBrushManager
     {
         public BrushManagerEvent Event { get; } = new BrushManagerEvent();
         
@@ -49,46 +47,49 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
         protected void RegisterEvents()
         { }
 
-        public void ClickAt(Point at, MapEditorContext context)
+        public void ClickAt(Vector2 at)
         {
 
-            if(!context.IsDrawing)
+            if(!EngineState.BrushState.IsDrawing)
             {
                 Log.Error("Drawing is not enabled. Please enable drawing in the toolbar before clicking.");
                 return;
             }
 
             // Convert the point to a valid position in the tile width and height
-            if (context.SelectedTile == null && context.SelectedIntGridData == null)
+            if (EngineState.EditorState.CurrentTile == null && EngineState.BrushState.CurrentObjectToPaint == null)
             {
                 Log.Error("No tile is currently selected. Please select a tile before clicking.");
                 return;
             }
-            var tileWidth = context.Map.GridParameter.CellWidth;
-            var tileHeight = context.Map.GridParameter.CellHeight;
 
-            int tileX = (at.X / tileWidth) * tileWidth;
-            int tileY = (at.Y / tileHeight) * tileHeight;
+            Guard.IsNotNull(EngineState.EditorState.CurrentMap, "CurrentMap");
+            
+            var tileWidth = EngineState.EditorState.CurrentMap.GridParameter.CellWidth;
+            var tileHeight = EngineState.EditorState.CurrentMap.GridParameter.CellHeight;
 
-            at = new Point(tileX, tileY);
+            float tileX = (at.X / tileWidth) * tileWidth;
+            float tileY = (at.Y / tileHeight) * tileHeight;
+
+            at = new Vector2(tileX, tileY);
 
             // Handle the click at the specified point
             // This is where you would implement the logic for what happens when a brush is clicked at a specific point
             Log.Information($"Brush clicked at: {at}");
-            if(context.ActiveBrush == null)
+            if(EngineState.BrushState.CurrentBrush == null || EngineState.BrushState.CurrentBrush is not IBrush brush)
             {
                 Log.Error("No brush type is currently selected. Please select a brush type before clicking.");
                 return;
             }
 
-            context.ActiveBrush.Draw(at, context);
+            brush.Draw(at);
             
             // Event.OnClickedAt(at, EngineCore.Instance.Data.EditorSettings.BrushType);
         }
 
-        public void PreviewAt(Point at, MapEditorContext context)
+        public void PreviewAt(Vector2 at)
         {
-            if (!context.IsDrawing)
+            if (!EngineState.BrushState.IsDrawing)
             {
                 //Console.ForegroundColor = ConsoleColor.Red;
                 //Console.WriteLine("Drawing is not enabled. Please enable drawing in the toolbar before clicking.");
@@ -97,25 +98,25 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
             }
 
             // Convert the point to a valid position in the tile width and height
-            if (context.SelectedTile == null)
+            if (EngineState.EditorState.CurrentTile == null)
             {
                 //Console.ForegroundColor = ConsoleColor.Red;
                 //Console.WriteLine("No tile is currently selected. Please select a tile before clicking.");
                 //Console.ResetColor();
                 return;
             }
-            var tileWidth = context.SelectedTile.TilesetDef.TileWidth;
-            var tileHeight = context.SelectedTile.TilesetDef.TileHeight;
+            var tileWidth = EngineState.EditorState.CurrentTile.TilesetDef.TileWidth;
+            var tileHeight = EngineState.EditorState.CurrentTile.TilesetDef.TileHeight;
 
-            int tileX = (at.X / tileWidth) * tileWidth;
-            int tileY = (at.Y / tileHeight) * tileHeight;
+            float tileX = (at.X / tileWidth) * tileWidth;
+            float tileY = (at.Y / tileHeight) * tileHeight;
 
-            at = new Point(tileX, tileY);
+            at = new Vector2(tileX, tileY);
 
             // Handle the click at the specified point
             // This is where you would implement the logic for what happens when a brush is clicked at a specific point
             //Console.WriteLine($"Brush previewed at: {at}");
-            if (context.ActiveBrush == null)
+            if (EngineState.BrushState.CurrentBrush == null)
             {
                 //Console.ForegroundColor = ConsoleColor.Red;
                 //Console.WriteLine("No brush type is currently selected. Please select a brush type before clicking.");
@@ -123,9 +124,9 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
                 return;
             }
 
-            if(context.ActiveBrush is IBrushPreviewFeature previewBrush)
+            if(EngineState.BrushState.CurrentBrush is IBrushPreview previewBrush && previewBrush.IsPreviewEnabled)
             {
-                previewBrush.ShowPreview(at, context);
+                previewBrush.ShowPreview(at);
                 Event.OnPreviewAt(at, previewBrush);
                 return;
             }
@@ -142,18 +143,18 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
             Event.OnClearPreview();
         }
 
-        public Point NormalizedPositionToTile(Point position, MapEditorContext context)
+        public Vector2 NormalizedPositionToTile(Vector2 position)
         {
-            if (context.SelectedTile == null)
+            if (EngineState.EditorState.CurrentTile == null)
             {
                 Log.Error("No tile is currently selected. Please select a tile before clicking.");
-                return new Point(-1, -1);
+                return Vector2.Zero;
             }
-            var tileWidth = context.SelectedTile.TilesetDef.TileWidth;
-            var tileHeight = context.SelectedTile.TilesetDef.TileHeight;
-            int tileX = (position.X / tileWidth) * tileWidth;
-            int tileY = (position.Y / tileHeight) * tileHeight;
-            return new Point(tileX, tileY);
+            var tileWidth = EngineState.EditorState.CurrentTile.TilesetDef.TileWidth;
+            var tileHeight = EngineState.EditorState.CurrentTile.TilesetDef.TileHeight;
+            float tileX = (position.X / tileWidth) * tileWidth;
+            float tileY = (position.Y / tileHeight) * tileHeight;
+            return new Vector2(tileX, tileY);
         }
     }
 }

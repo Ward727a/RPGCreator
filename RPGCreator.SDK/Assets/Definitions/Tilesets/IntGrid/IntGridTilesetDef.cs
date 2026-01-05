@@ -4,7 +4,7 @@ using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 
-public class IntGridTilesetDef : ITilesetDef, IAutotileDef
+public class IntGridTilesetDef : BaseTilesetDef, IAutotileDef
 {
     public override Ulid Unique { get; protected set; } = Ulid.NewUlid();
     public override URN Urn => new URN("tileset", $"{Name}@{Unique}");

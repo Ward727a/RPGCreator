@@ -28,11 +28,13 @@ using RPGCreator.Core.Types.Map;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using RPGCreator.Core.Managers.AssetsManager.Factories;
 using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Editor.Context;
+using RPGCreator.SDK.Editor.Brushes;
 using Serilog;
 
 namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
@@ -49,7 +51,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
 
         public int MinSize => 1;
 
-        public void Draw(Point clickPos, MapEditorContext context)
+        public void Draw(Vector2 clickPos)
         {
             Log.Error("[EraserBrush] Draw not implemented yet.");
         }
@@ -63,5 +65,8 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
         {
             Size = newSize;
         }
+
+        public string Name => "Eraser Brush";
+        public string Description => "Erase tiles or objects from the map.";
     }
 }

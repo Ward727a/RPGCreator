@@ -1,18 +1,15 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
 using AvaloniaEdit;
 using AvaloniaEdit.TextMate;
-using RPGCreator.Core;
 using RPGCreator.Core.Types;
-using RPGCreator.Core.Types.Assets.BaseAssetsPack;
-using RPGCreator.Core.Types.Windows;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
-using Serilog;
+using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Parser.PrattFormula;
 using TextMateSharp.Grammars;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor.Tabs;
@@ -310,12 +307,19 @@ public class StatEditorTab : UserControl
             StatDef.StatNonCompiledFormula = _statFormulaEditor.Text ?? "";
             try
             {
-                StatDef.StatCompiledFormula = new PrattCompiler().Compile(StatDef.StatNonCompiledFormula);
-                _statFormulaEditor.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x2A, 0x2A, 0x2A));
+                if (EngineServices.PrattFormulaService.TryCompile(StatDef.StatNonCompiledFormula, out var formula))
+                {
+                    StatDef.StatCompiledFormula = formula;
+                    _statFormulaEditor.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x2A, 0x2A, 0x2A));
+                }
+                else
+                {
+                    throw new Exception("Failed to compile formula.");
+                }
             }
             catch (Exception e)
             {
-                Log.Error(e, "Error parsing formula: {Formula}", StatDef.StatNonCompiledFormula);
+                Logger.Error("Error parsing formula: {Formula} due to {ex}", StatDef.StatNonCompiledFormula, e.Message);
                 // Set background to red
                 _statFormulaEditor.Background = new SolidColorBrush(Color.FromArgb(0xFF, 0x5A, 0x1A, 0x1A));
             }

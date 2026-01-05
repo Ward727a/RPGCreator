@@ -1,11 +1,11 @@
-namespace RPGCreator.Core.Types.Assets.Actors;
+namespace RPGCreator.Core.Types.Assets.Entities;
 
-public interface IInteractableActor : IActor
+public interface IInteractableActor
 {
     
     public event Action? Interacted;
 
-    public void Interact(IActor FromActor);
+    public void Interact(Actor FromActor);
     public void InteractWith(IInteractableActor ToActor);
 
 }

@@ -18,6 +18,7 @@ public class Program
     {
 
         EngineCore.InitCore();
+        EngineCore.StartCore();
 
         BuildAvaloniaApp()
         .StartWithClassicDesktopLifetime(args);

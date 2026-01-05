@@ -1,14 +1,9 @@
 using System;
-using System.IO;
 using Avalonia.Controls;
-using RPGCreator.Core;
-using RPGCreator.Core.Managers.AssetsManager;
-using RPGCreator.Core.Types.Assets.BaseAssetsPack;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 using RPGCreator.SDK.Logging;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor.Tabs;
-using Serilog;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor;
 
@@ -98,7 +93,12 @@ public class StatsEditorWindowControl : UserControl
             EngineServices.SerializerService.Serialize(StatDef, out string data);
             
             // Default test path
-            string defaultTestPAth = System.IO.Path.Combine(EngineCore.Instance.Data.EditedProject.Path, "Assets", "Stats");
+            if (EngineState.ProjectState.CurrentProject == null)
+            {
+                Logger.Error("No project is currently loaded. Cannot save Stat Definition.");
+                return;
+            }
+            string defaultTestPAth = System.IO.Path.Combine(EngineState.ProjectState.CurrentProject.Path, "Assets", "Stats");
             
             // Create directory if not exists
             if (!System.IO.Directory.Exists(defaultTestPAth))

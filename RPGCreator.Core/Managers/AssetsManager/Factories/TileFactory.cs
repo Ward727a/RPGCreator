@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Linq.Expressions;
 using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Types.Interfaces;
 

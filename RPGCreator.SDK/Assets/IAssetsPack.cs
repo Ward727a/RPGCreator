@@ -1,4 +1,4 @@
-﻿namespace RPGCreator.SDK.Types.Interfaces;
+﻿namespace RPGCreator.SDK.Assets;
 
 public interface IAssetsPack
 {

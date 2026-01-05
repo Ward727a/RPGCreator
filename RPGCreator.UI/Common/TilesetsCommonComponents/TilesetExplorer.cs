@@ -122,7 +122,7 @@ public class TilesetExplorer : UserControl
             ITileDef? tileToPaint = null;
             if (_setSelector?.SelectedItem is SetOptionItem selectedItem)
             {
-                var def = _scope.Load<ITilesetDef>(selectedItem.AssetId);
+                var def = _scope.Load<BaseTilesetDef>(selectedItem.AssetId);
                 
                 var tilePositionInTileset = new Point( // Row and Column in tileset
                     (int)((position.X + Math.Abs(_canvas.CurrentElementsPosition.X)) / cellSize.Width),
@@ -146,10 +146,10 @@ public class TilesetExplorer : UserControl
         _canvas.SetGridCellSize(new Size(32, 32));
         ClearTilesetOptions();
         Logger.Debug("[TilingPanel] Loading tileset options...");
-        var searchResults = EngineServices.AssetsManager.SearchAllPacks<ITilesetDef>();
+        var searchResults = EngineServices.AssetsManager.SearchAllPacks<BaseTilesetDef>();
         foreach (var result in searchResults)
         {
-            var def = _scope.Load<ITilesetDef>(result.AssetId);
+            var def = _scope.Load<BaseTilesetDef>(result.AssetId);
 
             bool canAutotile = def is IAutotileDef;
             
@@ -170,7 +170,7 @@ public class TilesetExplorer : UserControl
         _setSelector.SelectionChanged += SetSelectorOnSelectionChanged;
     }
 
-    public void AddTilesetOption(ITilesetDef definition)
+    public void AddTilesetOption(BaseTilesetDef definition)
     {
         _setSelector?.Items.Add(new SetOptionItem(definition));
     }
@@ -188,7 +188,7 @@ public class TilesetExplorer : UserControl
         if (_setSelector?.SelectedItem is SetOptionItem selectedItem)
         {
             Logger.Debug("[TilingPanel] Selected tileset: {0}", selectedItem.Name);
-            var def = _scope.Load<ITilesetDef>(selectedItem.AssetId);
+            var def = _scope.Load<BaseTilesetDef>(selectedItem.AssetId);
             if (_previewImage != null)
                 _previewImage.Source = EngineServices.ResourcesService.Load<Bitmap>(def.ImagePath);
         }
