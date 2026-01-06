@@ -52,7 +52,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             public string TypeName;
         }
         
-        private Dictionary<Ulid, AssetLocation> _assetLocations = new();
+        private readonly Dictionary<Ulid, AssetLocation> _assetLocations = new();
 
         readonly Dictionary<Ulid, IAssetsPack> AssetsPacks = [];
         readonly Dictionary<string, Ulid> AssetsPacksMapping = [];
@@ -266,7 +266,9 @@ namespace RPGCreator.Core.Managers.AssetsManager
             if (_assetLocations.TryGetValue(id, out var location))
             {
                 
-                Type type = Type.GetType(location.TypeName)!;
+                Type? type = EngineServices.AssetTypeRegistry.GetType(location.TypeName);
+                if(type == null)
+                    type = Type.GetType(location.TypeName)!;
                 
                 if (TryResolveRegistry(type, out var registry))
                 {

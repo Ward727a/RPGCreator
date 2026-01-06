@@ -25,6 +25,7 @@
 
 using System.Collections.ObjectModel;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types.Interfaces;
 
@@ -40,6 +41,7 @@ namespace RPGCreator.SDK.Projects
     /// - Items <br/>
     /// - And more... <br/>
     /// </summary>
+    [SerializingType("ProjectGameData")]
     public partial class ProjectGameData : ISerializable, IDeserializable
     {
 

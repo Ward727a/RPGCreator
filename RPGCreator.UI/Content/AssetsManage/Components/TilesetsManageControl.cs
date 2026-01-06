@@ -739,17 +739,14 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
         private void TilesetsManageControl_OnNeedRefresh()
         {
             ViewPanel.Children.Clear();
-            
-            var searchResults = EngineServices.AssetsManager.SearchAllPacks<BaseTilesetDef>();
+
+            var searchResults = EngineServices.AssetsManager.GetAssets<BaseTilesetDef>();
 
             foreach (var result in searchResults)
             {
-                var tilesetId = result.AssetId;
-
-                var tileset = _scope.Load<BaseTilesetDef>(tilesetId);
-                if (tileset is IntGridTilesetDef)
+                if (result is IntGridTilesetDef)
                     continue;
-                var item = new TilesetViewListItem(tileset);
+                var item = new TilesetViewListItem(result);
                 item.OnSelected += () => { SelectedTilesetViewItem = item; };
                 item.OnDeselected += () =>
                 {

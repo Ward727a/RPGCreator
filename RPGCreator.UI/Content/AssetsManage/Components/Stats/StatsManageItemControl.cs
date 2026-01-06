@@ -1,7 +1,7 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Input;
-using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
+using RPGCreator.SDK.Assets.Definitions.Stats;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor;
 

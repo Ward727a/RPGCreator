@@ -8,6 +8,7 @@ using Avalonia.Styling;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
+using RPGCreator.SDK.Extensions;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types.Collections;
@@ -284,12 +285,11 @@ public class TilingPanelControl : UserControl
         _canvas.SetGridCellSize(new Size(32, 32));
         ClearTilesetOptions();
         Logger.Debug("[TilingPanel] Loading tileset options...");
-        var searchResults = EngineServices.AssetsManager.SearchAllPacks<BaseTilesetDef>();
+        var searchResults = EngineServices.AssetsManager.GetAssets<BaseTilesetDef>();
         foreach (var result in searchResults)
         {
-            var def = _scope.Load<BaseTilesetDef>(result.AssetId);
-            AddTilesetOption(def);
-            Logger.Debug("[TilingPanel] Added tileset option from search: {0}", def.Name);
+            AddTilesetOption(result);
+            Logger.Debug("[TilingPanel] Added tileset option from search: {0}", result.Name);
         }
     }
     

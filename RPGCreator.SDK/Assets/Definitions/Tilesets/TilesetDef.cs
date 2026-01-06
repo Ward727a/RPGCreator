@@ -1,9 +1,11 @@
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets;
 
+[SerializingType("Tileset")]
 public sealed class TilesetDef : BaseTilesetDef
 {
     public override URN Urn => new URN("tileset", $"{Name}@{Unique}");

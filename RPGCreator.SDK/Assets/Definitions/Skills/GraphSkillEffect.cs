@@ -1,3 +1,4 @@
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Logging;
@@ -11,6 +12,7 @@ namespace RPGCreator.SDK.Assets.Definitions.Skills;
 /// Graph-based implementation of a skill effect.
 /// Used to allow users to create custom skill effects using the graph visual scripting system.
 /// </summary>
+[SerializingType("GraphSkillEffect")]
 public class GraphSkillEffect : ISkillEffect, IHasSavePath, ISerializable, IDeserializable
 {
     

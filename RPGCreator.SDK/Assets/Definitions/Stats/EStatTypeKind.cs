@@ -1,4 +1,4 @@
-namespace RPGCreator.SDK.Assets.Definitions.Characters.Stats;
+namespace RPGCreator.SDK.Assets.Definitions.Stats;
 
 public enum EStatTypeKind
 {

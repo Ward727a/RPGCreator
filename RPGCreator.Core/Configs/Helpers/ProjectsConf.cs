@@ -26,6 +26,7 @@ using Avalonia.Logging;
 using RPGCreator.Core.Types.Project;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Projects;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types.Interfaces;
@@ -47,6 +48,7 @@ using static RPGCreator.Core.Configs.EngineConfigs;
 
 namespace RPGCreator.Core.Configs.Helpers
 {
+    [SerializingType("ProjectsConf")]
     public class ProjectsConf : ConfHelper
     {
         public override string ConfigName { get; set; } = "ProjectsConf";

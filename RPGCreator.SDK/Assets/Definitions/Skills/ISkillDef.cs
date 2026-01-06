@@ -1,4 +1,4 @@
-using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
+using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Parser.PrattFormula;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;

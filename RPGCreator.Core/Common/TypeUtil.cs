@@ -1,3 +1,6 @@
+using System.Reflection;
+using RPGCreator.SDK.Attributes;
+
 namespace RPGCreator.Core.Common;
 
 public static class TypeUtil
@@ -9,20 +12,39 @@ public static class TypeUtil
     {
         if(_inheritanceCache.TryGetValue(type, out var cached))
             return cached;
+        var names = new List<string>();
+    
+        // On cherche l'attribut sur le type lui-même et ses enfants
+        var typesToScan = AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(s => s.GetTypes())
+            .Where(p => type.IsAssignableFrom(p) && !p.IsInterface && !p.IsAbstract);
 
-        if (!type.IsInterface && !type.IsAbstract)
+        foreach (var t in typesToScan)
         {
-            return new List<string> { type.FullName ?? type.Name };
-        }
+            var attr = t.GetCustomAttribute<SerializingTypeAttribute>();
+            if (attr != null)
+            {
+                names.Add(attr.TypeId); // On ajoute l'ID stable (ex: "tileset_def")
+            }
         
+            // On garde quand même le FullName pour la transition/compatibilité
+            names.Add(t.FullName ?? t.Name);
+        }
+
+        _inheritanceCache[type] = names.Distinct().ToList();
+        return _inheritanceCache[type];
+    }
+    
+    public static List<string> GetChildrenType<T>()
+    {
+        // Get all types that inherit from T
+        var type = typeof(T);
         var names = AppDomain.CurrentDomain.GetAssemblies()
             .Where(a => !a.FullName.StartsWith("System") && !a.FullName.StartsWith("Microsoft"))
             .SelectMany(s => s.GetTypes())
             .Where(p => type.IsAssignableFrom(p) && !p.IsInterface && !p.IsAbstract)
             .Select(t => t.FullName ?? t.Name)
             .ToList();
-        
-        _inheritanceCache[type] = names;
         return names;
     }
     

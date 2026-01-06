@@ -28,6 +28,7 @@ using RPGCreator.Core.Types.Assets.BaseAssetsPack;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Projects;
 using RPGCreator.SDK.Types.Interfaces;
+using Serilog;
 
 namespace RPGCreator.Core.Managers.ProjectsManager
 {
@@ -96,6 +97,19 @@ namespace RPGCreator.Core.Managers.ProjectsManager
             }
 
             EngineState.ProjectState.CurrentProject = project;
+            
+            foreach (string packPath in project.AssetsPackPath)
+            {
+                try
+                {
+                    EngineCore.Instance.Managers.Assets.AddPack(packPath);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Failed to load assets pack at {packPath}: {Message}", packPath, ex.Message);
+                    continue; // Skip this pack and continue with the next one
+                }
+            }
         }
 
         public void CloseCurrentProject()

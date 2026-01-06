@@ -1,9 +1,11 @@
 using System.Numerics;
 using RPGCreator.Core.Types.Map;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
+using RPGCreator.SDK.Attributes;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 
+[SerializingType("AutoLayerDefinition")]
 public class AutoLayerDefinition : BaseLayerDef
 {
     public IntGridLayerDefinition SourceIntGrid { get; set; } = new();

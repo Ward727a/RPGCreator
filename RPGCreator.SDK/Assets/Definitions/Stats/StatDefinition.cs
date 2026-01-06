@@ -1,11 +1,13 @@
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Parser.PrattFormula;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
-namespace RPGCreator.SDK.Assets.Definitions.Characters.Stats;
+namespace RPGCreator.SDK.Assets.Definitions.Stats;
 
+[SerializingType("Stat")]
 public class StatDefinition : IStatDef
 {
     public string SavePath { get; set; }

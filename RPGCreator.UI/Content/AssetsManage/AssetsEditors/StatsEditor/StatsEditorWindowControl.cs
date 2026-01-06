@@ -1,7 +1,7 @@
 using System;
 using Avalonia.Controls;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
+using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Logging;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor.Tabs;
 

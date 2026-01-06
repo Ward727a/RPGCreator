@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RPGCreator.Core.Serializer;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 
@@ -50,7 +51,8 @@ public class EngineSerializer : ISerializerService
             NullValueHandling = NullValueHandling.Ignore,
             Converters = { 
                 new EngineJsonConverter(),
-                new UlidJsonConverter() 
+                new UlidJsonConverter(),
+                new ColorJsonConverter()
             },
             PreserveReferencesHandling = PreserveReferencesHandling.Objects,
             DefaultValueHandling = DefaultValueHandling.Ignore
@@ -102,38 +104,31 @@ public class EngineSerializer : ISerializerService
 
     private static Type? GetTypeFromJsonData(string data)
     {
-
-        if (string.IsNullOrWhiteSpace(data))
-        {
-            return null;
-        }
+        if (string.IsNullOrWhiteSpace(data)) return null;
 
         var jsonObject = JObject.Parse(data);
         var typeToken = jsonObject["$type"];
-        
-        if (typeToken == null)
-        {
-            return null;
-        }
-        
+        if (typeToken == null) return null;
+    
         string typeName = typeToken.ToString();
-        var type = Type.GetType(typeName);
-        
-        if (type == null && typeName.Contains(","))
+
+        // New strategy: Try to resolve the type using the AssetTypeRegistry first
+        var type = EngineServices.AssetTypeRegistry.GetType(typeName);
+        if (type != null && type != typeof(GenericAssetStub)) return type;
+
+        // Old strategy: Try to get the type directly
+        type = Type.GetType(typeName);
+        if (type != null) return type;
+
+        // Fallback: Try to loosen the assembly qualification
+        if (typeName.Contains(","))
         {
             var parts = typeName.Split(',');
-            if (parts.Length >= 2)
-            {
-                var looseTypeName = $"{parts[0].Trim()}, {parts[1].Trim()}";
-                type = Type.GetType(looseTypeName);
-            }
+            var looseTypeName = $"{parts[0].Trim()}, {parts[1].Trim()}";
+            type = Type.GetType(looseTypeName);
         }
 
-        if (type == null)
-            return null;
-        
         return type;
-
     }
     
     #endregion

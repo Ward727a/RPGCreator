@@ -34,6 +34,7 @@ using System.Threading.Tasks;
 using RPGCreator.Core.Types.Assets;
 using RPGCreator.Core.Types.Map;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Projects;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types.Interfaces;
@@ -41,6 +42,7 @@ using Serilog;
 
 namespace RPGCreator.Core.Types.Project
 {
+    [SerializingType("BaseProject")]
     public partial class BaseProject : IBaseProject, ISerializable, IDeserializable
     {
         public event Action? OnProjectLoaded;
@@ -85,31 +87,6 @@ namespace RPGCreator.Core.Types.Project
             {
                 Event.OnMapsListChanged();
             };
-        }
-
-        public void Load()
-        {
-            EngineState.ProjectState.CurrentProject = this;
-
-            foreach (string packPath in AssetsPackPath)
-            {
-                try
-                {
-                    EngineCore.Instance.Managers.Assets.AddPack(packPath);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("Failed to load assets pack at {packPath}: {Message}", packPath, ex.Message);
-                    continue; // Skip this pack and continue with the next one
-                }
-            }
-
-            OnProjectLoaded?.Invoke();
-        }
-
-        public void Unload()
-        {
-            EngineState.ProjectState.CurrentProject = null;
         }
 
         public void Save()

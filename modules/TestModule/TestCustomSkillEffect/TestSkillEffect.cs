@@ -1,6 +1,6 @@
 using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Skills;
-using RPGCreator.SDK.Modules.Attributes;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Types;
 using Entity = RPGCreator.SDK.ECS.Entities.Entity;
 

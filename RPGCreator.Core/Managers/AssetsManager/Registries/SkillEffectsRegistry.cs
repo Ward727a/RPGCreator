@@ -3,7 +3,7 @@ using RPGCreator.Core.Runtimes.Contents;
 using RPGCreator.Core.Types.Blueprint;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK.Assets.Definitions.Skills;
-using RPGCreator.SDK.Modules.Attributes;
+using RPGCreator.SDK.Attributes;
 using Serilog;
 
 namespace RPGCreator.Core.Managers.AssetsManager.Registries;

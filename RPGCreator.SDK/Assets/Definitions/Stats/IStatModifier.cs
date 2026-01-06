@@ -1,6 +1,6 @@
 using RPGCreator.SDK.Serializer;
 
-namespace RPGCreator.SDK.Assets.Definitions.Characters.Stats;
+namespace RPGCreator.SDK.Assets.Definitions.Stats;
 
 public interface IStatModifier : ISerializable, IDeserializable
 {

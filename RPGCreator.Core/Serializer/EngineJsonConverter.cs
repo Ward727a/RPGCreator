@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Serializer;
 
 namespace RPGCreator.Core.Serializer;
@@ -19,7 +20,7 @@ public class EngineJsonConverter : JsonConverter
 
             if (typeKey != null)
             {
-                writer.WritePropertyName("TypeKey");
+                writer.WritePropertyName("$type");
                 writer.WriteValue(typeKey);
             }
             else
@@ -48,13 +49,13 @@ public class EngineJsonConverter : JsonConverter
 
         Type? actualType = null;
         
-        var typeKeyToken = jsonObject["TypeKey"];
+        var typeKeyToken = jsonObject["$type"];
         if (typeKeyToken != null)
         {
             actualType = EngineServices.AssetTypeRegistry.GetType(typeKeyToken.ToString());
         }
 
-        if (actualType == null)
+        if (actualType == null || actualType == typeof(GenericAssetStub))
         {
             var typeToken = jsonObject["$type"];
 

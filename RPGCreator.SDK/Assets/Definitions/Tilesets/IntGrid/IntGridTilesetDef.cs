@@ -1,9 +1,11 @@
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 
+[SerializingType("IntGridTileset")]
 public class IntGridTilesetDef : BaseTilesetDef, IAutotileDef
 {
     public override Ulid Unique { get; protected set; } = Ulid.NewUlid();

@@ -1,10 +1,12 @@
 using System.Drawing;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps;
 
+[SerializingType("Map")]
 public class MapDefinition : IMapDef
 {
     private readonly List<IMapDef> _mapDefs = new List<IMapDef>();

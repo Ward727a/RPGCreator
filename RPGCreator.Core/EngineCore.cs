@@ -39,8 +39,8 @@ using RPGCreator.Core.Types.Map.Layers.AutoLayer;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions.Characters;
-using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using RPGCreator.SDK.Graph.Nodes;
@@ -109,12 +109,7 @@ namespace RPGCreator.Core
             
             var typeMapping = new AssetsTypeMapping();
             
-            typeMapping.RegisterMapping(AssetTypeKeys.Character, typeof(CharacterData));
-            typeMapping.RegisterMapping(AssetTypeKeys.Item, typeof(IItemData));
-            typeMapping.RegisterMapping(AssetTypeKeys.Stat, typeof(StatDefinition));
-            typeMapping.RegisterMapping(AssetTypeKeys.Map, typeof(MapDefinition));
-            typeMapping.RegisterMapping(AssetTypeKeys.Tileset, typeof(TilesetDef));
-            typeMapping.RegisterMapping(AssetTypeKeys.AutoTileset, typeof(IntGridTilesetDef));
+            typeMapping.ScanAllEngineAssemblies();
             
             EngineServices.AssetTypeRegistry = typeMapping;
             

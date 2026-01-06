@@ -1,9 +1,11 @@
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.SDK.Projects;
 
+[SerializingType("BaseProjectLink")]
 public class BaseProjectLink : IBaseProjectLink, ISerializable, IDeserializable
 {
     public Ulid ProjectID { get; set; } = Ulid.NewUlid();

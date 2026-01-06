@@ -1,5 +1,5 @@
 using RPGCreator.SDK;
-using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
+using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Serializer;
 
 namespace RPGCreator.Core.Types.Assets.Characters.Stats;

@@ -4,7 +4,7 @@ using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using RPGCreator.Core.Types;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
+using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Extensions;
 using RPGCreator.SDK.Logging;
 

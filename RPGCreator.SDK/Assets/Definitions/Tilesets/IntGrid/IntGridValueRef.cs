@@ -1,17 +1,25 @@
 ﻿using System.Drawing;
+using CommunityToolkit.Mvvm.ComponentModel;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Types.Records;
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 
-public partial class IntGridValueRef
+[SerializingType("IntGridValueRef")]
+public partial class IntGridValueRef : ObservableObject
 {
-    public int Value;
+    [ObservableProperty]
+    private int _value;
 
-    public string Name;
+    [ObservableProperty]
+    private string _name;
     
-    public Color Color;
+    [ObservableProperty]
+    private Color _color;
     
-    public string IconPath;
+    [ObservableProperty]
+    private string _iconPath;
     
-    public TileData DefaultTileData;
+    [ObservableProperty]
+    private TileData _defaultTileData;
 }

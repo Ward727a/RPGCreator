@@ -1,4 +1,4 @@
-namespace RPGCreator.SDK.Modules.Attributes;
+namespace RPGCreator.SDK.Attributes;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 public sealed class SkillEffectAttribute() : Attribute

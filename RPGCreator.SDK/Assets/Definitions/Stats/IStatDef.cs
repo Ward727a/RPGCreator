@@ -4,7 +4,7 @@ using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types.Interfaces;
 using RPGCreator.SDK.Types.Internals;
 
-namespace RPGCreator.SDK.Assets.Definitions.Characters.Stats;
+namespace RPGCreator.SDK.Assets.Definitions.Stats;
 
 public interface IStatDef : ISerializable, IDeserializable, IHasSavePath, IAssetDef
 {

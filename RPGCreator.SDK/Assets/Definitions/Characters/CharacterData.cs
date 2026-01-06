@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
-using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
 using RPGCreator.SDK.Assets.Definitions.Skills;
+using RPGCreator.SDK.Assets.Definitions.Stats;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Features;
@@ -236,7 +237,7 @@ public struct CharacterFeatures() : ISerializable, IDeserializable
 
 #endregion
 
-
+[SerializingType("DirectionalAnimationSet")]
 public class DirectionalAnimationSet : ISerializable, IDeserializable
 {
     /// <summary>
@@ -286,6 +287,7 @@ public class DirectionalAnimationSet : ISerializable, IDeserializable
 /// This doesn't affect the gameplay directly, but it is used to enhance the role-play experience.<br/>
 /// This structure is just a simple container for the role-play information, but it will be changed and extended in the future.
 /// </summary>
+[SerializingType("CharacterRolePlayInfo")]
 public struct CharacterRolePlayInfo() : ISerializable, IDeserializable
 {
     public string Description { get; set; } = string.Empty;
@@ -349,6 +351,7 @@ public struct CharacterRolePlayInfo() : ISerializable, IDeserializable
     }
 }
 
+[SerializingType("CharacterEquipSlot")]
 public struct CharacterEquipSlot(string slotName, int slotIndex, string itemType, string itemId = "") : ISerializable, IDeserializable
 {
     public string SlotName { get; set; } = slotName; // Name of the slot (e.g., "Head", "Chest", "Legs", etc.)
@@ -387,6 +390,7 @@ public struct CharacterEquipSlot(string slotName, int slotIndex, string itemType
 /// <summary>
 /// This class represents a character in the game.
 /// </summary>
+[SerializingType("Character")]
 public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDeserializable
 {
     #region Events

@@ -1,9 +1,11 @@
 using System.Numerics;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets;
 
+[SerializingType("TileDefinition")]
 public class TileDefinition : ITileDef
 {
     public Vector2 Position { get; set; }

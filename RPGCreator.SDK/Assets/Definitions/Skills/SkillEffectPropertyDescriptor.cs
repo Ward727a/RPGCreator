@@ -1,4 +1,5 @@
 using System.Numerics;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
@@ -65,6 +66,7 @@ public static class EffectPropertyTypeExtensions
     }
 }
 
+[SerializingType("SkillEffectPropertyDescriptor")]
 public record SkillEffectPropertyDescriptor : ISerializable, IDeserializable
 {
     public string Name {get; set; }

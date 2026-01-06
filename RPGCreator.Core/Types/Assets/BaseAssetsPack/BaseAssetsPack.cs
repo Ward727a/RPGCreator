@@ -23,6 +23,7 @@
 // 
 #endregion
 
+using LiteDB;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
@@ -246,9 +247,21 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
         {
             Id = idAsset.Unique,
             RelativePath = relativePath,
-            TypeName = asset.GetType().FullName ?? "Unknown",
+            TypeName = EngineServices.AssetTypeRegistry.GetKey(asset.GetType()) ?? asset.GetType().FullName ?? "Unknown",
             LastIndexed = DateTime.UtcNow,
         };
+        
+        if(record.TypeName == "Unknown")
+        {
+            Log.Warning("[Pack {PackName}] Could not determine type name for asset {AssetId}.", Name, idAsset.Unique);
+        }
+
+        if (record.TypeName == asset.GetType().FullName)
+        {
+            Log.Warning(
+                "[Pack {PackName}] Asset type {TypeFullName} for asset {AssetId} is not registered in the AssetTypeRegistry.",
+                Name, asset.GetType().FullName, idAsset.Unique);
+        }
 
         indexCollection.Upsert(record);
 
@@ -308,11 +321,14 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
         }
 
         var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
+        
+        var validNames = Common.TypeUtil.GetInheritance(type); // Doit retourner ["TilesetDef", "BaseTilesetDef", etc.]
+        
+        var queries = validNames.Select(name => Query.Contains("TypeName", name));
+        var finalQuery = Query.Or(queries.ToArray());
 
-        var validNames = Common.TypeUtil.GetInheritance(type);
-
-        var allIndexed = indexCollection.Find(x => validNames.Contains(x.TypeName));
-
+        var allIndexed = indexCollection.Find(finalQuery);
+        
         foreach (var index in allIndexed)
         {
             yield return index;

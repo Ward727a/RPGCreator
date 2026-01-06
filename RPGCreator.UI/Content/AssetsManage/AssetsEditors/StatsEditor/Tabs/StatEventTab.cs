@@ -5,7 +5,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Assets.Definitions.Characters.Stats;
+using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Graph.Nodes;
 using RPGCreator.SDK.Logging;

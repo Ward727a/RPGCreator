@@ -4,11 +4,13 @@ using System.Drawing;
 using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.Core.Types.Map;
 
+[SerializingType("IntGridLayerDefinition")]
 public class IntGridLayerDefinition : IMapLayerDef<int>
 {
     public event EventHandler<(Vector2, int)>? ElementAdded;

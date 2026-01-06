@@ -29,11 +29,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
 using static RPGCreator.Core.Configs.EngineConfigs;
 
 namespace RPGCreator.Core.Configs.Helpers
 {
+    [SerializingType("AppConf")]
     public class AppConf : ConfHelper
     {
         public override string ConfigName { get; set; } = "AppConf";
