@@ -26,211 +26,97 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended.Input;
 using RPGCreator.Core.Types.Map;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using RPGCreator.SDK.Inputs;
+using MouseButton = RPGCreator.SDK.Inputs.MouseButton;
+using Vector2 = System.Numerics.Vector2;
 
 namespace RPGCreator.Core.Inputs.Mouse
 {
-    public class EngineMouseState
+    public class EngineMouseState : IMouseState
     {
+        
+        private RawMouseData _mouseState;
+        private RawMouseData _previousMouseState;
+        
+        public int X { get; private set; }
+        public int Y { get; private set; }
+        public bool LeftButtonPressed { get; private set; }
+        public bool RightButtonPressed { get; private set; }
+        public bool MiddleButtonPressed { get; private set; }
+        public Vector2 Position { get; private set; }
+        public Vector2 DeltaPosition { get; private set; }
+        public int WheelDelta { get; private set; }
+        public int HorizontalWheelDelta { get; private set; }
+        public bool IsInsideWindow { get; private set; }
 
-        protected readonly MouseStateExtended _mouseState;
-        public readonly EngineMouseStateEvents Events;
-
-        protected List<BaseDrawable> HoveredElements = [];
-
-        #region MouseStateExtended Part
-        //
-        // Summary:
-        //     Gets the current x-coordinate position of the mouse cursor relative to the game
-        //     window.
-        public int X => _mouseState.X;
-
-        //
-        // Summary:
-        //     Gets the current y-coordinate position of the mouse cursor relative to the game
-        //     window.
-        public int Y => _mouseState.Y;
-
-        //
-        // Summary:
-        //     Gets the current xy-coordinate position of the mouse cursor relative to the game
-        //     window.
-        public Point Position => _mouseState.Position;
-
-        //
-        // Summary:
-        //     Gets a value that indicates whether the position of the mouse cursor changes
-        //     between the previous and current states.
-        public bool PositionChanged => _mouseState.PositionChanged;
-
-        //
-        // Summary:
-        //     Gets the difference in the x-coordinate position change of the mouse between
-        //     the previous and current state.
-        public int DeltaX => _mouseState.DeltaX;
-
-        //
-        // Summary:
-        //     Gets the difference in the y-coordinate position change of the mouse between
-        //     the previous and current state.
-        public int DeltaY => _mouseState.DeltaY;
-
-        //
-        // Summary:
-        //     Gets the difference in the xy-coordinate position change of the mouse between
-        //     the previous and curren state.
-        public Point DeltaPosition => _mouseState.DeltaPosition;
-
-        //
-        // Summary:
-        //     Gets the current value of the mouse scroll wheel.
-        public int ScrollWheelValue => _mouseState.ScrollWheelValue;
-
-        //
-        // Summary:
-        //     Gets the difference in the mouse scroll wheel value between the previous and
-        //     current state.
-        public int DeltaScrollWheelValue => _mouseState.DeltaScrollWheelValue;
-
-        //
-        // Summary:
-        //     Gets the current state of the mouse left button.
-        public ButtonState LeftButton => _mouseState.LeftButton;
-
-        //
-        // Summary:
-        //     Gets the current state of the mouse middle button.
-        public ButtonState MiddleButton => _mouseState.MiddleButton;
-
-        //
-        // Summary:
-        //     Gets the current state of the mouse right button.
-        public ButtonState RightButton => _mouseState.RightButton;
-
-        //
-        // Summary:
-        //     Gets the current state of the first mouse extra button.
-        public ButtonState XButton1 => _mouseState.XButton1;
-
-        //
-        // Summary:
-        //     Gets the current state of the second mouse extra button.
-        public ButtonState XButton2 => _mouseState.XButton2;
-
-        //
-        // Summary:
-        //     Returns a value that indicates whether the specified mouse button is down during
-        //     the current state.
-        //
-        // Parameters:
-        //   button:
-        //     The mouse button to check.
-        //
-        // Returns:
-        //     true if the mouse button is down during the current state; otherwise, false.
-        public bool IsButtonDown(MouseButton button)
+        public void Update(RawMouseData rawMouseData)
         {
-            return _mouseState.IsButtonDown(button);
+            _previousMouseState = _previousMouseState == default ? rawMouseData : _mouseState;
+            _mouseState = rawMouseData;
+            SetInsideWindow();
+            SetPosition();
+            SetButtons();
+            SetWheel();
+        }
+        
+        private void SetInsideWindow()
+        {
+            IsInsideWindow = _mouseState.IsInside;
         }
 
-        //
-        // Summary:
-        //     Returns a value that indicates whether the specified mouse button is up during
-        //     the current state.
-        //
-        // Parameters:
-        //   button:
-        //     The mouse button to check.
-        //
-        // Returns:
-        //     true if the mouse button is up during the current state; otherwise, false.
-        public bool IsButtonUp(MouseButton button)
+        private void SetPosition()
         {
-            return _mouseState.IsButtonUp(button);
+            X = _mouseState.X;
+            Y = _mouseState.Y;
+            Position = new Vector2(X, Y);
+            DeltaPosition = new Vector2(
+                X - _previousMouseState.X,
+                Y - _previousMouseState.Y
+            );
         }
 
-        //
-        // Summary:
-        //     Returns whether the specified mouse button was up during the previous, but is
-        //     now down.
-        //
-        // Parameters:
-        //   button:
-        //     The mouse button to check.
-        //
-        // Returns:
-        //     true if the mouse button was up pressed this state-change; otherwise, false.
-        public bool WasButtonPressed(MouseButton button)
+        private void SetButtons()
         {
-            return _mouseState.WasButtonPressed(button);
+            var buttons = _mouseState.Buttons;
+            LeftButtonPressed = buttons.HasFlag(MouseButton.Left);
+            RightButtonPressed = buttons.HasFlag(MouseButton.Right);
+            MiddleButtonPressed = buttons.HasFlag(MouseButton.Middle);
         }
 
-        //
-        // Summary:
-        //     Returns whether the specified mouse button was down during the previous state,
-        //     but is now up.
-        //
-        // Parameters:
-        //   button:
-        //     The mouse button to check.
-        //
-        // Returns:
-        //     true if the mouse button was released this state-change; otherwise, false.
-        public bool WasButtonReleased(MouseButton button)
+        private void SetWheel()
         {
-            return _mouseState.WasButtonReleased(button);
-        }
-        #endregion
-
-        internal EngineMouseState(MouseStateExtended mouseState)
-        {
-            _mouseState = mouseState;
-            Events = new EngineMouseStateEvents();
+            WheelDelta = _mouseState.Scroll - _previousMouseState.Scroll;
+            HorizontalWheelDelta = _mouseState.HScroll - _previousMouseState.HScroll;
         }
 
-        public EngineMouseState(EngineMouseState mouseState)
+        public bool IsButtonPressed(MouseButton buttonIndex)
         {
-            _mouseState = mouseState._mouseState;
-            Events = mouseState.Events;
+            return _mouseState.Buttons.HasFlag(buttonIndex);
         }
 
-        protected bool _IsInside(BaseDrawable _object)
+        public bool IsButtonReleased(MouseButton buttonIndex)
         {
-            if (_object == null)
-                return false;
-
-            if (!_object.IsVisible)
-                return false;
-
-            if(_object.Bounds.Contains(_mouseState.Position))
-                return true;
-
-            return false;
+            return !_mouseState.Buttons.HasFlag(buttonIndex);
         }
 
-        public bool IsInside(BaseDrawable _object)
+        public bool WasButtonPressed(MouseButton buttonIndex)
         {
-            if(_IsInside(_object))
-            {
-                HoveredElements.Add(_object);
-                return true;
-            } else
-            {
-                if (HoveredElements.Contains(_object))
-                    HoveredElements.Remove(_object);
-                return false;
-            }
+            return _previousMouseState.Buttons.HasFlag(buttonIndex);
         }
 
-        public bool IsButtonClicked(MouseButton button)
+        public bool WasButtonReleased(MouseButton buttonIndex)
         {
-            if (IsButtonDown(button) && WasButtonPressed(button))
-                return true;
-            return false;
+            return !_previousMouseState.Buttons.HasFlag(buttonIndex);
+        }
+
+        public bool WasButtonJustPressed(MouseButton buttonIndex)
+        {
+            return IsButtonPressed(buttonIndex) && WasButtonReleased(buttonIndex);
+        }
+
+        public bool WasButtonJustReleased(MouseButton buttonIndex)
+        {
+            return IsButtonReleased(buttonIndex) && WasButtonPressed(buttonIndex);
         }
     }
 }

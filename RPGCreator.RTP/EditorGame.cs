@@ -8,6 +8,7 @@ using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Animations;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Entities;
+using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Resources;
 
 namespace RPGCreator.RTP
@@ -46,7 +47,7 @@ namespace RPGCreator.RTP
 
         public EditorGame()
         {
-            EngineServices.GameProvider = new EngineGameProvider(this);
+            EngineProviders.GameProvider = new EngineGameProvider(this);
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
@@ -159,6 +160,26 @@ namespace RPGCreator.RTP
             _mapEditing.Update(gameTime);
             // Gum.Update(gameTime);
             _ecsWorld.Update(gameTime.ElapsedGameTime);
+
+            var ms = Mouse.GetState();
+            
+            MouseButton buttons = 
+                (ms.LeftButton   == ButtonState.Pressed ? MouseButton.Left : MouseButton.None)
+                | (ms.RightButton  == ButtonState.Pressed ? MouseButton.Right : MouseButton.None)
+                | (ms.MiddleButton == ButtonState.Pressed ? MouseButton.Middle : MouseButton.None)
+                | (ms.XButton1 == ButtonState.Pressed ? MouseButton.XButton1 : MouseButton.None)
+                | (ms.XButton2 == ButtonState.Pressed ? MouseButton.XButton2 : MouseButton.None);
+            
+            RawMouseData rmd = new()
+            {
+                X = ms.X,
+                Y = ms.Y,
+                HScroll = ms.HorizontalScrollWheelValue,
+                Scroll = ms.ScrollWheelValue,
+                IsInside = IsActive,
+                Buttons = buttons
+            };
+            EngineProviders.MouseProvider?.Update(rmd);
             //
             // var _registry = EngineCore.Instance.Managers.Assets.TryResolveRegistry("characters", out var registry) ? registry as CharacterRegistry
             //     : null;

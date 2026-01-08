@@ -28,7 +28,7 @@ public static class MapEditorContext
     
     public static void Initialize()
     {
-        EngineState.BrushState.PropertyChanged += (s, e) =>
+        EngineStates.BrushState.PropertyChanged += (s, e) =>
         {
             if (e.PropertyName == nameof(IBrushState.CurrentMode))
             {
@@ -36,15 +36,15 @@ public static class MapEditorContext
             }
         };
         
-        EngineState.EditorState.PropertyChanged += (s, e) =>
+        EngineStates.EditorState.PropertyChanged += (s, e) =>
         {
             if (e.PropertyName == nameof(IEditorState.CurrentLayer))
             {
-                _selectedLayer = EngineState.EditorState.CurrentLayer;
+                _selectedLayer = EngineStates.EditorState.CurrentLayer;
                 Guard.IsNotNull(_selectedLayer);
             } else if (e.PropertyName == nameof(IEditorState.CurrentMap))
             {
-                _map = EngineState.EditorState.CurrentMap;
+                _map = EngineStates.EditorState.CurrentMap;
                 Guard.IsNotNull(_map);
                 _mapInstance = EngineServices.GameFactory.CreateInstance<MapInstance>(_map);
                 Guard.IsNotNull(_mapInstance);
@@ -68,15 +68,15 @@ public static class MapEditorContext
         Guard.IsNotNull(_selectedLayer);
         Guard.IsNotNull(_map);
 
-        if (EngineState.BrushState.CurrentMode == BrushMode.Tiling && _selectedLayer is TileLayerDefinition tileLayerDefinition)
+        if (EngineStates.BrushState.CurrentMode == BrushMode.Tiling && _selectedLayer is TileLayerDefinition tileLayerDefinition)
         {
             _activePaintTargetCache = new TileLayerTarget(tileLayerDefinition, _map, 32, 32);
         }
-        else if (EngineState.BrushState.CurrentMode == BrushMode.Tiling && _selectedLayer is AutoLayerDefinition autoLayerDefinition)
+        else if (EngineStates.BrushState.CurrentMode == BrushMode.Tiling && _selectedLayer is AutoLayerDefinition autoLayerDefinition)
         {
             _activePaintTargetCache = new IntGridLayerTarget(autoLayerDefinition, _map);
         }
-        else if (EngineState.BrushState.CurrentMode == BrushMode.Entities && _selectedLayer is EntitiesLayerDefinition entityLayerDefinition)
+        else if (EngineStates.BrushState.CurrentMode == BrushMode.Entities && _selectedLayer is EntitiesLayerDefinition entityLayerDefinition)
         {
             _activePaintTargetCache = new EntityLayerTarget(entityLayerDefinition, _map, 32, 32);
         }
@@ -84,15 +84,15 @@ public static class MapEditorContext
         Log.Debug("Paint Target Rebuilt");
     }
     
-    public static object? SelectedObjectToPaint => EngineState.BrushState.CurrentObjectToPaint;
+    public static object? SelectedObjectToPaint => EngineStates.BrushState.CurrentObjectToPaint;
     
     #region Drawing State
-    public static ITileDef? SelectedTile => EngineState.BrushState.CurrentObjectToPaint as ITileDef;
-    public static IntGridData? SelectedIntGridData => EngineState.BrushState.CurrentObjectToPaint as IntGridData;
+    public static ITileDef? SelectedTile => EngineStates.BrushState.CurrentObjectToPaint as ITileDef;
+    public static IntGridData? SelectedIntGridData => EngineStates.BrushState.CurrentObjectToPaint as IntGridData;
     #endregion
 
     #region Placement State
-    public static EditorEntityVisual? SelectedEntity => EngineState.BrushState.CurrentObjectToPaint as EditorEntityVisual;
+    public static EditorEntityVisual? SelectedEntity => EngineStates.BrushState.CurrentObjectToPaint as EditorEntityVisual;
     #endregion
     
 }

@@ -3,6 +3,7 @@ using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Editor.Brushes;
+using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.SDK;
@@ -43,7 +44,7 @@ public interface IProjectState : INotifyPropertyChanged
 /// The global state of the engine.
 /// This contains information about the application and the current editor/project state.
 /// </summary>
-public static class EngineState
+public static class EngineStates
 {
     /// <summary>
     /// The name of the application.
@@ -56,4 +57,5 @@ public static class EngineState
     public static IEditorState EditorState = null!;
     public static IProjectState ProjectState = null!;
     public static IBrushState BrushState = null!;
+    public static IMouseState MouseState = null!;
 }

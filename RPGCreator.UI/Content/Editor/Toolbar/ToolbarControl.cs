@@ -182,7 +182,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
             BrushSizeSelector.ValueChanged += (s, e) => 
             {
                 // Handle brush size change
-                if (EngineState.BrushState.CurrentBrush is IBrushResizeFeature brush)
+                if (EngineStates.BrushState.CurrentBrush is IBrushResizeFeature brush)
                 {
                     brush.ResizeBrush((int)BrushSizeSelector.Value);
                     Console.WriteLine($"Brush size changed to: {BrushSizeSelector.Value}");
@@ -215,7 +215,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
             BrushPreviewCheckBox.IsCheckedChanged += (s, e) =>
             {
                 // Handle brush preview toggle
-                if (EngineState.BrushState.CurrentBrush is IBrushPreviewFeature brush)
+                if (EngineStates.BrushState.CurrentBrush is IBrushPreviewFeature brush)
                 {
                     brush.IsPreviewEnabled = BrushPreviewCheckBox.IsChecked == true;
                     Console.WriteLine($"Brush preview enabled: {brush.IsPreviewEnabled}");
@@ -258,7 +258,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
                 {
                     // Logic to enable place mode
                     Console.WriteLine("Place mode enabled.");
-                    EngineState.EditorState.InPlacingMode = true; // Set the placing mode in editor settings
+                    EngineStates.EditorState.InPlacingMode = true; // Set the placing mode in editor settings
                     if (LastChecked != null && LastChecked != button)
                     {
                         LastChecked.IsChecked = false; // Uncheck the last checked button
@@ -268,7 +268,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
                 else
                 {
                     // Logic to disable place mode
-                    EngineState.EditorState.InPlacingMode = false; // Set the placing mode in editor settings
+                    EngineStates.EditorState.InPlacingMode = false; // Set the placing mode in editor settings
                     Console.WriteLine("Place mode disabled.");
                     if (LastChecked == button)
                     {
@@ -296,7 +296,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
 
         private void ReloadBrushAvailableFeatures()
         {
-            if(EngineState.BrushState.CurrentBrush is IBrushResizeFeature brushResizeFeature)
+            if(EngineStates.BrushState.CurrentBrush is IBrushResizeFeature brushResizeFeature)
             {
                 // If the current brush supports resizing, enable the brush size panel
                 BrushSizePanel.IsVisible = true;
@@ -312,7 +312,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
                 BrushSizePanel.IsVisible = false;
             }
 
-            if (EngineState.BrushState.CurrentBrush is IBrushPreviewFeature brushPreviewFeature)
+            if (EngineStates.BrushState.CurrentBrush is IBrushPreviewFeature brushPreviewFeature)
             {
                 // If the current brush supports preview, enable the brush preview checkbox
                 BrushPreviewPanel.IsVisible = true;
@@ -338,7 +338,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
                 {
                     // Logic to enable drawing mode
                     Console.WriteLine("Drawing mode enabled.");
-                    EngineState.EditorState.InDrawingMode = true; // Set the drawing mode in editor settings
+                    EngineStates.EditorState.InDrawingMode = true; // Set the drawing mode in editor settings
                     if (LastChecked != null && LastChecked != button)
                     {
                         LastChecked.IsChecked = false; // Uncheck the last checked button
@@ -348,7 +348,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
                 else
                 {
                     // Logic to disable drawing mode
-                    EngineState.EditorState.InDrawingMode = false; // Set the drawing mode in editor settings
+                    EngineStates.EditorState.InDrawingMode = false; // Set the drawing mode in editor settings
                     Console.WriteLine("Drawing mode disabled.");
                     if (LastChecked == button)
                     {
@@ -365,7 +365,7 @@ namespace RPGCreator.UI.Content.Editor.Toolbar
                 if (_Brushes.TryGetValue(selectedBrush, out var brushData))
                 {
                     Console.WriteLine($"Selected brush: {brushData.Name}");
-                    EngineState.BrushState.CurrentBrush = brushData.brush;
+                    EngineStates.BrushState.CurrentBrush = brushData.brush;
                     ReloadBrushAvailableFeatures(); // Reload features based on the selected brush
                 }
                 else

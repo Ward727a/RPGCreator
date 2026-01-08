@@ -135,7 +135,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                 if (Layer != null && Layer is BaseLayerDef mapLayer)
                 {
                     // Remove the layer from the engine data
-                    EngineState.EditorState.CurrentMap?.RemoveLayer(mapLayer);
+                    EngineStates.EditorState.CurrentMap?.RemoveLayer(mapLayer);
                     LayerRemoved?.Invoke();
                 }
             };

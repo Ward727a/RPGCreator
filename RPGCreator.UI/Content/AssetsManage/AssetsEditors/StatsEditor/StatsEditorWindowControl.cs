@@ -93,12 +93,12 @@ public class StatsEditorWindowControl : UserControl
             EngineServices.SerializerService.Serialize(StatDef, out string data);
             
             // Default test path
-            if (EngineState.ProjectState.CurrentProject == null)
+            if (EngineStates.ProjectState.CurrentProject == null)
             {
                 Logger.Error("No project is currently loaded. Cannot save Stat Definition.");
                 return;
             }
-            string defaultTestPAth = System.IO.Path.Combine(EngineState.ProjectState.CurrentProject.Path, "Assets", "Stats");
+            string defaultTestPAth = System.IO.Path.Combine(EngineStates.ProjectState.CurrentProject.Path, "Assets", "Stats");
             
             // Create directory if not exists
             if (!System.IO.Directory.Exists(defaultTestPAth))

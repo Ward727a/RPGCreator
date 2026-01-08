@@ -273,7 +273,7 @@ public class TilingPanelControl : UserControl
                 tileToPaint = tileset.GetTileAt((int)tilePositionInTileset.X, (int)tilePositionInTileset.Y);
                 Logger.Debug("[TilingPanel] Created tile definition at position {0} in tileset {1}", tilePositionInTileset, def.Name);
                 
-                EngineState.BrushState.CurrentObjectToPaint = tileToPaint;
+                EngineStates.BrushState.CurrentObjectToPaint = tileToPaint;
             }
         };
     }
@@ -301,7 +301,7 @@ public class TilingPanelControl : UserControl
             if (IntGridListBox.SelectedItem is ListBoxItem selectedTextBlock)
             {
                 Logger.Debug("[TilingPanel] Selected IntGrid reference: {0}", selectedTextBlock.Content as string);
-                EngineState.BrushState.CurrentObjectToPaint = selectedTextBlock.Tag as IntGridData;
+                EngineStates.BrushState.CurrentObjectToPaint = selectedTextBlock.Tag as IntGridData;
             }
         };
     }

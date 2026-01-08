@@ -83,15 +83,6 @@ public interface IBrushManager
     public Vector2 NormalizedPositionToTile(Vector2 position);
 }
 
-public interface IGameProvider
-{
-    /// <summary>
-    /// The current game instance.
-    /// Normally this is the MonoGame Game class instance.
-    /// But to keep the SDK decoupled from MonoGame, this is typed as object.
-    /// </summary>
-    object GameInstance { get; }
-}
 
 public static class EngineServices
 {
@@ -105,6 +96,5 @@ public static class EngineServices
     public static IGraphService GraphService { get; set; } = null!;
     public static IGraphNodeScanner GraphNodeScanner { get; set; } = null!;
     public static IPrattFormulaService PrattFormulaService { get; set; } = null!;
-    public static IGameProvider GameProvider { get; set; } = null!;
     public static IECSService ECS { get; set; } = null!;
 }

@@ -118,9 +118,9 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                 Margin = App.style.Margin;
                 MapDef = new(MapName);
                 
-                Guard.IsNotNull(EngineState.ProjectState.CurrentProject, "CurrentProject");
+                Guard.IsNotNull(EngineStates.ProjectState.CurrentProject, "CurrentProject");
                 
-                EngineState.ProjectState.CurrentProject.GameData.Maps.Add(MapDef);
+                EngineStates.ProjectState.CurrentProject.GameData.Maps.Add(MapDef);
 
                 var header = new TextBlock
                 {
@@ -144,7 +144,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                             return; // If the double click is not on the MapItem itself, do nothing
                         e.Handled = true; // Mark the event as handled to prevent further processing
 
-                        EngineState.EditorState.CurrentMap = MapDef; // Set the edited map to the current map
+                        EngineStates.EditorState.CurrentMap = MapDef; // Set the edited map to the current map
 
                         // Open the map editor
                         Console.ForegroundColor = ConsoleColor.Green;
@@ -172,7 +172,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                         openMapItem.Click += (s, e) =>
                         {
 
-                            EngineState.EditorState.CurrentMap = MapDef; // Set the edited map to the current map
+                            EngineStates.EditorState.CurrentMap = MapDef; // Set the edited map to the current map
                             // Open the map editor
                             Console.ForegroundColor = ConsoleColor.Green;
                             Console.WriteLine($"Opening map editor for map: {MapName}");
@@ -339,9 +339,9 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                     var parent = this.Parent as StackPanel;
                     parent?.Children.Remove(this);
                     
-                    Guard.IsNotNull(EngineState.ProjectState.CurrentProject, "CurrentProject");
+                    Guard.IsNotNull(EngineStates.ProjectState.CurrentProject, "CurrentProject");
                     
-                    EngineState.ProjectState.CurrentProject.GameData.Maps.Remove(MapDef); // Remove the map from the project data
+                    EngineStates.ProjectState.CurrentProject.GameData.Maps.Remove(MapDef); // Remove the map from the project data
                 };
 
                 confirmDialog.ShowDialog(EditorWindow.Instance);

@@ -47,7 +47,7 @@ namespace RPGCreator.UI.Content.Editor
     {
         private Window _Host => (Window)this.GetVisualRoot()!;
 
-        private EditorGame? game = (EditorGame)EngineServices.GameProvider.GameInstance;
+        private EditorGame? game = (EditorGame)EngineProviders.GameProvider.GameInstance;
         private AvaloniaInside.MonoGame.MonoGameControl MonoGameScreen;
 
         private TilesetSelector tilesetSelector;
@@ -111,12 +111,12 @@ namespace RPGCreator.UI.Content.Editor
             openProjectFolderMenuItem.Click += (_, _) =>
             {
                 // Open the project folder in the file explorer
-                if(EngineState.ProjectState.CurrentProject == null)
+                if(EngineStates.ProjectState.CurrentProject == null)
                 {
                     Logger.Error("No project is currently loaded.");
                     return;
                 }
-                var projectPath = EngineState.ProjectState.CurrentProject.Path;
+                var projectPath = EngineStates.ProjectState.CurrentProject.Path;
                 if (!string.IsNullOrEmpty(projectPath))
                 {
                     Process.Start(new ProcessStartInfo
@@ -153,12 +153,12 @@ namespace RPGCreator.UI.Content.Editor
                         Console.WriteLine("Project saved successfully.");
                     }
                 });
-                if(EngineState.ProjectState.CurrentProject == null)
+                if(EngineStates.ProjectState.CurrentProject == null)
                 {
                     Logger.Error("No project is currently loaded.");
                     return;
                 }
-                EngineState.ProjectState.CurrentProject.Save();
+                EngineStates.ProjectState.CurrentProject.Save();
             };
             var closeFileMenuItem = new MenuItem
             {
@@ -481,8 +481,8 @@ namespace RPGCreator.UI.Content.Editor
                 var position = new Vector2((float)mgPosition.X, (float)mgPosition.Y);
                 // Adjust the position to account for the MonoGameScreen's margin (12px)
                 EngineServices.BrushManager.ClickAt(new Vector2(position.X, position.Y));
-                EngineState.BrushState.LastDrawAt = EngineServices.BrushManager.NormalizedPositionToTile(position);
-                EngineState.BrushState.IsDrawing = true; // Set the flag to indicate that a tile is being placed
+                EngineStates.BrushState.LastDrawAt = EngineServices.BrushManager.NormalizedPositionToTile(position);
+                EngineStates.BrushState.IsDrawing = true; // Set the flag to indicate that a tile is being placed
             }
         }
 
@@ -490,8 +490,8 @@ namespace RPGCreator.UI.Content.Editor
         {
             if (e.GetCurrentPoint(MonoGameScreen).Properties.IsLeftButtonPressed && _placingTile)
             {
-                EngineState.BrushState.IsDrawing = false; // Reset the flag when the tile placement is done
-                EngineState.BrushState.LastDrawAt = new(-1, -1); // Reset the last tile position
+                EngineStates.BrushState.IsDrawing = false; // Reset the flag when the tile placement is done
+                EngineStates.BrushState.LastDrawAt = new(-1, -1); // Reset the last tile position
             }
         }
 
@@ -508,7 +508,7 @@ namespace RPGCreator.UI.Content.Editor
                 if(normalizedCurrentPosition != (_LastTilePlacePos))
                 {
                     // If the position has changed, update the last position
-                    EngineState.BrushState.LastDrawAt = normalizedCurrentPosition;
+                    EngineStates.BrushState.LastDrawAt = normalizedCurrentPosition;
                 }
                 else
                 {
@@ -524,10 +524,10 @@ namespace RPGCreator.UI.Content.Editor
                 // Check if the mouse position has at least moved one tile from the last position
                 var normalizedCurrentPosition = EngineServices.BrushManager.NormalizedPositionToTile(position);
 
-                if (normalizedCurrentPosition != (EngineState.BrushState.LastDrawAt))
+                if (normalizedCurrentPosition != (EngineStates.BrushState.LastDrawAt))
                 {
                     // If the position has changed, update the last position
-                    EngineState.BrushState.LastDrawAt = normalizedCurrentPosition;
+                    EngineStates.BrushState.LastDrawAt = normalizedCurrentPosition;
                 }
                 else
                 {

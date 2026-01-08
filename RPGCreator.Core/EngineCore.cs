@@ -26,6 +26,7 @@ using RPGCreator.Core.Configs;
 using RPGCreator.Core.ECS;
 using RPGCreator.Core.Events;
 using RPGCreator.Core.Events.EventArgs;
+using RPGCreator.Core.Inputs.Mouse;
 using RPGCreator.Core.Parser.Graph;
 using RPGCreator.Core.Parser.PRATT;
 using RPGCreator.Core.Resources;
@@ -103,9 +104,11 @@ namespace RPGCreator.Core
 
             Logger.Implementation = new EngineLogger();
             
-            EngineState.EditorState = new EditorState();
-            EngineState.ProjectState = new ProjectState();
-            EngineState.BrushState = new BrushState();
+            EngineStates.EditorState = new EditorState();
+            EngineStates.ProjectState = new ProjectState();
+            EngineStates.BrushState = new BrushState();
+            
+            EngineStates.MouseState = new EngineMouseState();
             
             var typeMapping = new AssetsTypeMapping();
             

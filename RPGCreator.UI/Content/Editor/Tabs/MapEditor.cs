@@ -161,7 +161,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
         protected void RegisterEvents()
         {
-            EngineState.EditorState.PropertyChanged += (s, e) =>
+            EngineStates.EditorState.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == nameof(IEditorState.CurrentMap))
                 {
@@ -177,9 +177,9 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
         public void RefreshMapProperties()
         {
-            if(EngineState.EditorState.CurrentMap == null)
+            if(EngineStates.EditorState.CurrentMap == null)
                 return;
-            var map = EngineState.EditorState.CurrentMap;
+            var map = EngineStates.EditorState.CurrentMap;
             MapNameText.Text = $"Map Name: {map.Name}";
             MapSizeText.Text = $"Map Size: {map.Size.Width}x{map.Size.Height}";
             MapDescriptionText.Text = $"Map Description: {map.Description}";

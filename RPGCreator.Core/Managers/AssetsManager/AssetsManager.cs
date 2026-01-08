@@ -325,11 +325,11 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 skillEffectsRegistry.ReloadData();
             }
             
-            EngineState.ProjectState.PropertyChanged += (object? sender, System.ComponentModel.PropertyChangedEventArgs e) =>
+            EngineStates.ProjectState.PropertyChanged += (object? sender, System.ComponentModel.PropertyChangedEventArgs e) =>
             {
                 if (e.PropertyName == nameof(IProjectState.CurrentProject))
                 {
-                    if (EngineState.ProjectState.CurrentProject == null)
+                    if (EngineStates.ProjectState.CurrentProject == null)
                     {
                         var copyPacks = AssetsPacks.ToArray();
                         foreach (var pack in copyPacks)
@@ -343,7 +343,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
                     }
                     else
                     {
-                        var loadedProject = EngineState.ProjectState.CurrentProject;
+                        var loadedProject = EngineStates.ProjectState.CurrentProject;
                         // Loading handled in LoadedProject event
                         foreach (string packPath in loadedProject.AssetsPackPath)
                         {

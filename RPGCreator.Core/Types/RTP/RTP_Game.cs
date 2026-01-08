@@ -37,7 +37,7 @@ namespace RPGCreator.Core.Types.RTP
     public abstract class RTP_Game : Game
     {
         public RTP_GameEvents _events = new();
-        protected IBaseProject? Project => EngineState.ProjectState.CurrentProject;
+        protected IBaseProject? Project => EngineStates.ProjectState.CurrentProject;
         protected bool HasProject => Project != null;
 
         protected virtual void _Init() { }

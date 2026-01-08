@@ -109,8 +109,8 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
         protected void RefreshComponents()
         {
             LayersList.Items.Clear();
-            if (EngineState.EditorState.CurrentMap == null) return;
-            foreach (var layer in EngineState.EditorState.CurrentMap.TileLayers.OrderBy(l=>l.ZIndex))
+            if (EngineStates.EditorState.CurrentMap == null) return;
+            foreach (var layer in EngineStates.EditorState.CurrentMap.TileLayers.OrderBy(l=>l.ZIndex))
             {
                 LayerItem layerItem = new LayerItem(layer);
                 LayersList.Items.Add(layerItem);
@@ -123,18 +123,18 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
             {
                 LayersList.SelectedIndex = 0;
                 SelectedLayerText.Text = $"Selected Layer: {((LayerItem)LayersList.SelectedItem).Layer.Name}";
-                EngineState.EditorState.CurrentLayer = ((LayerItem)LayersList.SelectedItem).Layer;
+                EngineStates.EditorState.CurrentLayer = ((LayerItem)LayersList.SelectedItem).Layer;
             }
             else
             {
                 SelectedLayerText.Text = "Selected Layer: None";
-                EngineState.EditorState.CurrentLayer = null;
+                EngineStates.EditorState.CurrentLayer = null;
             }
         }
 
         protected void RegisterEvents()
         {
-            EngineState.EditorState.PropertyChanged += (s, e) =>
+            EngineStates.EditorState.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == nameof(IEditorState.CurrentMap))
                 {
@@ -227,18 +227,18 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                     }
                     
                     
-                    if(EngineState.EditorState.CurrentMap == null)
+                    if(EngineStates.EditorState.CurrentMap == null)
                     {
                         return;
                     }
 
-                    layer.ZIndex = EngineState.EditorState.CurrentMap.TileLayers.Count - 1; // Set ZIndex to the last index
+                    layer.ZIndex = EngineStates.EditorState.CurrentMap.TileLayers.Count - 1; // Set ZIndex to the last index
                     // layer.ZIndexChanged += (value) =>
                     // {
                     //     RefreshComponents();
                     // };
 
-                    EngineState.EditorState.CurrentMap?.AddLayer(layer);
+                    EngineStates.EditorState.CurrentMap?.AddLayer(layer);
 
                     LayerItem newLayerItem = new LayerItem(layer);
 
@@ -252,7 +252,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
 
                     SelectedLayerText.Text = $"Selected Layer: {newLayerName}";
 
-                    EngineState.EditorState.CurrentLayer = layer;
+                    EngineStates.EditorState.CurrentLayer = layer;
 
                     popup.Close();
                 }
@@ -290,7 +290,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
         {
             if (LayersList.SelectedItem is not LayerItem layerItem) return;
             SelectedLayerText.Text = $"Selected Layer: {layerItem.Layer.Name}";
-            EngineState.EditorState.CurrentLayer = layerItem.Layer;
+            EngineStates.EditorState.CurrentLayer = layerItem.Layer;
         }
 
         #endregion

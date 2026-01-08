@@ -280,7 +280,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                     CurrentTemp = item.TilesetDef;
                     InnerTilesetCanvas.Children.Remove(TileBorder);
                     TileBorder = null; // Clear the border when a new tileset is selected
-                    EngineState.EditorState.CurrentTile = null; // Clear the selected tile
+                    EngineStates.EditorState.CurrentTile = null; // Clear the selected tile
                 }
             }
         }
@@ -354,7 +354,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                 InnerTilesetCanvas.Children.Add(TileBorder);
             }
 
-            EngineState.EditorState.CurrentTile = tile;
+            EngineStates.EditorState.CurrentTile = tile;
         }
         protected void OnMovingRoot(object? sender, PointerEventArgs e)
         {
