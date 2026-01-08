@@ -31,6 +31,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Inputs;
 
 namespace RPGCreator.Core.Types.Map.Interactable
 {
@@ -42,7 +44,7 @@ namespace RPGCreator.Core.Types.Map.Interactable
     public abstract class BaseInteractable : BaseDrawable
     {
         public BaseInteractableEvents Events { get; } = new();
-        public EngineMouseState Mouse => new(MouseExtended.GetState());
+        public IMouseState Mouse => EngineStates.MouseState;
         
         public bool Active { get; set; } = true;
 
@@ -57,7 +59,7 @@ namespace RPGCreator.Core.Types.Map.Interactable
         #region MouseManagement
         protected void CheckMouse()
         {
-            CursorIn = Mouse.IsInside(this);
+            CursorIn = Bounds.Contains(Mouse.X, Mouse.Y);
 
             if(CursorIn && !WasInside)
             {
@@ -71,7 +73,7 @@ namespace RPGCreator.Core.Types.Map.Interactable
 
             if (CursorIn)
             {
-                if (Mouse.IsButtonClicked(MouseButton.Left))
+                if (Mouse.LeftButtonPressed)
                 {
                     OnClick();
                 }
@@ -97,9 +99,9 @@ namespace RPGCreator.Core.Types.Map.Interactable
         {
             if (!Active) return;
 
-            if (Mouse.IsInside(this))
+            if (Bounds.Contains(Mouse.X, Mouse.Y))
             {
-                if (Mouse.IsButtonClicked(MouseButton.Left))
+                if (Mouse.LeftButtonPressed)
                 {
                     OnClick();
                 }

@@ -30,6 +30,23 @@ public class DefaultMouseProvider : IMouseProvider
     }
 }
 
+public interface IKeyboardProvider
+{
+    /// <summary>
+    /// Update the keyboard data.
+    /// </summary>
+    /// <param name="data"></param>
+    void Update(RawKeyboardData data);
+}
+
+public class DefaultKeyboardProvider : IKeyboardProvider
+{
+    public void Update(RawKeyboardData data)
+    {
+        EngineStates.KeyboardState.Update(data);
+    }
+}
+
 /// <summary>
 /// Provides access to various engine-level service providers.<br/>
 /// This allow to make the 'bridge' between the SDK and various other engine parts.<br/>
@@ -41,4 +58,5 @@ public static class EngineProviders
 {
     public static IGameProvider GameProvider { get; set; } = null!;
     public static IMouseProvider MouseProvider { get; set; } = new DefaultMouseProvider();
+    public static IKeyboardProvider KeyboardProvider { get; set; } = new DefaultKeyboardProvider();
 }

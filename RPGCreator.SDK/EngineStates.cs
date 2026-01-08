@@ -58,4 +58,5 @@ public static class EngineStates
     public static IProjectState ProjectState = null!;
     public static IBrushState BrushState = null!;
     public static IMouseState MouseState = null!;
+    public static IKeyboardState KeyboardState = null!;
 }

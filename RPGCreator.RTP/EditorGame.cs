@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CommunityToolkit.HighPerformance;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -161,25 +162,34 @@ namespace RPGCreator.RTP
             // Gum.Update(gameTime);
             _ecsWorld.Update(gameTime.ElapsedGameTime);
 
-            var ms = Mouse.GetState();
+            var keyboardState = Keyboard.GetState();
+            
+            var keyPressed = keyboardState.GetPressedKeys();
+            
+            ReadOnlySpan<KeyboardKeys> sdkMappedKeys = keyPressed.AsSpan().Cast<Keys, KeyboardKeys>();
+
+            var rawKeyboardData = new RawKeyboardData(sdkMappedKeys, keyboardState.CapsLock, keyboardState.NumLock);
+            EngineProviders.KeyboardProvider.Update(rawKeyboardData);
+            
+            var mouseState = Mouse.GetState();
             
             MouseButton buttons = 
-                (ms.LeftButton   == ButtonState.Pressed ? MouseButton.Left : MouseButton.None)
-                | (ms.RightButton  == ButtonState.Pressed ? MouseButton.Right : MouseButton.None)
-                | (ms.MiddleButton == ButtonState.Pressed ? MouseButton.Middle : MouseButton.None)
-                | (ms.XButton1 == ButtonState.Pressed ? MouseButton.XButton1 : MouseButton.None)
-                | (ms.XButton2 == ButtonState.Pressed ? MouseButton.XButton2 : MouseButton.None);
+                (mouseState.LeftButton   == ButtonState.Pressed ? MouseButton.Left : MouseButton.None)
+                | (mouseState.RightButton  == ButtonState.Pressed ? MouseButton.Right : MouseButton.None)
+                | (mouseState.MiddleButton == ButtonState.Pressed ? MouseButton.Middle : MouseButton.None)
+                | (mouseState.XButton1 == ButtonState.Pressed ? MouseButton.XButton1 : MouseButton.None)
+                | (mouseState.XButton2 == ButtonState.Pressed ? MouseButton.XButton2 : MouseButton.None);
             
-            RawMouseData rmd = new()
+            RawMouseData rawMouseData = new()
             {
-                X = ms.X,
-                Y = ms.Y,
-                HScroll = ms.HorizontalScrollWheelValue,
-                Scroll = ms.ScrollWheelValue,
+                X = mouseState.X,
+                Y = mouseState.Y,
+                HScroll = mouseState.HorizontalScrollWheelValue,
+                Scroll = mouseState.ScrollWheelValue,
                 IsInside = IsActive,
                 Buttons = buttons
             };
-            EngineProviders.MouseProvider?.Update(rmd);
+            EngineProviders.MouseProvider?.Update(rawMouseData);
             //
             // var _registry = EngineCore.Instance.Managers.Assets.TryResolveRegistry("characters", out var registry) ? registry as CharacterRegistry
             //     : null;
