@@ -153,9 +153,9 @@ public class TilesetExplorer : UserControl
 
             bool canAutotile = def is IAutotileDef;
             
-            if (_type == TilesetType.AutotileOnly && canAutotile)
+            if (_type == TilesetType.AutotileOnly && !canAutotile)
                 continue;
-            if (_type == TilesetType.NonAutotileOnly && !canAutotile)
+            if (_type == TilesetType.NonAutotileOnly && canAutotile)
                 continue;
             
             AddTilesetOption(def);

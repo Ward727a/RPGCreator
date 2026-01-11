@@ -370,6 +370,9 @@ public readonly ref struct RawKeyboardData
 
 public interface IKeyboardState
 {
+    event Action<KeyboardKeys> KeyDown;
+    event Action<KeyboardKeys> KeyUp;
+    
     void Update(RawKeyboardData data);
 
     /// <summary>
@@ -410,6 +413,8 @@ public interface IKeyboardState
     /// <param name="key"></param>
     /// <returns></returns>
     public bool WasKeyJustReleased(KeyboardKeys key);
+    
+    public ReadOnlySpan<KeyboardKeys> GetPressedKeys();
     
     /// <summary>
     /// Indicates whether the CAPS LOCK is currently active.

@@ -1,4 +1,5 @@
 ﻿using System;
+using ToolsUtilitiesStandard.Helpers;
 using AvaloniaHSLColor = Avalonia.Media.HslColor;
 using AvaloniaColorsChoice = Avalonia.Media.Colors;
 using AvaloniaColor = Avalonia.Media.Color;
@@ -13,9 +14,9 @@ public static class ColorExtensions
         return AvaloniaColor.FromArgb(c.A, c.R, c.G, c.B);
     }
 
-    public static void FromAvalonia(this DrawingColor c, AvaloniaColor color)
+    public static DrawingColor FromAvalonia(this DrawingColor c, AvaloniaColor color)
     {
-        c = DrawingColor.FromArgb(color.A, color.R, color.G, color.B);
+        return DrawingColor.FromArgb(color.A, color.R, color.G, color.B);
     }
     
     public static AvaloniaColor Invert(this AvaloniaColor color)

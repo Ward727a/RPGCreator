@@ -26,6 +26,7 @@ public interface IBrushState : INotifyPropertyChanged
 
 public interface IEditorState : INotifyPropertyChanged
 {
+    bool InEditorMode { get; set; }
     bool InPlacingMode { get; set; }
     bool InDrawingMode { get; set; }
     bool ShowCollisionLayer { get; set; }
@@ -59,4 +60,6 @@ public static class EngineStates
     public static IBrushState BrushState = null!;
     public static IMouseState MouseState = null!;
     public static IKeyboardState KeyboardState = null!;
+    public static IMouseState ViewportMouseState = null!;
+    public static IKeyboardState ViewportKeyboardState = null!;
 }

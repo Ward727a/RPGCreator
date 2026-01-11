@@ -39,6 +39,7 @@ using RPGCreator.Core.Types.Windows;
 using RPGCreator.RTP;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
+using RPGCreator.UI.Common.Bridge;
 using RPGCreator.UI.Content.Editor.LeftPanel;
 
 namespace RPGCreator.UI.Content.Editor
@@ -388,8 +389,14 @@ namespace RPGCreator.UI.Content.Editor
             monogameGrid.Children.Add(MonoGameScreen);
         }
 
+        
+        AvaloniaKeyboardBridge _keyboardBridge = new AvaloniaKeyboardBridge();
+        AvaloniaMouseBridge _mouseBridge = new AvaloniaMouseBridge();
+        
         private void RegisterEvents()
         {
+            _keyboardBridge.RegisterEvents(MonoGameScreen);
+            _mouseBridge.RegisterEvents(MonoGameScreen);
             MonoGameScreen.PointerEntered += (s, e) =>
             {
                 game.CanUseMouse = true;
@@ -406,7 +413,7 @@ namespace RPGCreator.UI.Content.Editor
             MonoGameScreen.PointerExited += MonoGameScreen_PointerExited;
             MonoGameScreen.KeyDown += MonoGameScreenOnKeyDown;
 
-            game.OnDraw += () =>
+            game.OnDraw += (_) =>
             {
                 var visualPosition = (MonoGameScreen.TransformToVisual(_Host)?.Transform(new Avalonia.Point(0, 0))).GetValueOrDefault();
     
@@ -436,7 +443,6 @@ namespace RPGCreator.UI.Content.Editor
 
         private void MonoGameScreenOnKeyDown(object? sender, KeyEventArgs e)
         {
-            // EngineCore.Instance.Events.OnRTPKeyPressed(e);
         }
 
         private void MonoGameScreen_PointerExited(object? sender, PointerEventArgs e)

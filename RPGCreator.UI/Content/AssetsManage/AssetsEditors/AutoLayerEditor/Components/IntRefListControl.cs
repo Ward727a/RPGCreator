@@ -391,7 +391,7 @@ public class IntRefListCreateModal : Window
             intRef = new IntGridValueRef();
 
         intRef.Name = NameInput.Text;
-        intRef.Color.FromAvalonia(ColorInput?.Color ?? Avalonia.Media.Colors.White);
+        intRef.Color = intRef.Color.FromAvalonia(ColorInput?.Color ?? Avalonia.Media.Colors.White);
         
         if (SelectedDefaultTile != null)
         {

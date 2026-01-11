@@ -41,11 +41,11 @@ public class TilesetInstance : ITilesetInstance
     
     public ITileDef? GetTileAt(int row, int column)
     {
-        var uv = new Size(row * TileWidth, column * TileHeight);
-        var position = new Vector2(row, column);
+        var size = new Size(TileWidth, TileHeight);
+        var position = new Vector2(row * TileWidth, column * TileHeight);
         
         return new TileDefinition(
-            uv,
+            size,
             position,
             Definition
         );

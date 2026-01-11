@@ -35,78 +35,141 @@ namespace RPGCreator.Core.Inputs.Mouse
     public class EngineMouseState : IMouseState
     {
         
-        private RawMouseData _mouseState;
-        private RawMouseData _previousMouseState;
-        
+        protected RawMouseData MouseState;
+        protected RawMouseData PreviousMouseState;
+
+        public event Action<MouseButton>? ButtonDown;
+        public event Action<MouseButton>? ButtonUp;
+        public event Action<int, int>? Moved;
+        public event Action<int>? WheelScrolled;
+        public event Action<int>? HorizontalWheelScrolled;
+        public event Action<object?>? HoveredObjectChanged;
+
         public int X { get; private set; }
         public int Y { get; private set; }
         public bool LeftButtonPressed { get; private set; }
         public bool RightButtonPressed { get; private set; }
         public bool MiddleButtonPressed { get; private set; }
-        public Vector2 Position { get; private set; }
-        public Vector2 DeltaPosition { get; private set; }
+        public Vector2 Position { get; private set; } = Vector2.Zero;
+        public Vector2 DeltaPosition { get; private set; } = Vector2.Zero;
         public int WheelDelta { get; private set; }
         public int HorizontalWheelDelta { get; private set; }
         public bool IsInsideWindow { get; private set; }
+        public object? InObject { get; private set; }
 
-        public void Update(RawMouseData rawMouseData)
+        public virtual void Update(RawMouseData rawMouseData)
         {
-            _previousMouseState = _previousMouseState == default ? rawMouseData : _mouseState;
-            _mouseState = rawMouseData;
+            PreviousMouseState = PreviousMouseState == default ? rawMouseData : MouseState;
+            MouseState = rawMouseData;
+            RefreshLogic();
+        }
+
+        public RawMouseData GetCurrentRawData()
+        {
+            return MouseState;
+        }
+
+        protected void RefreshLogic()
+        {
             SetInsideWindow();
             SetPosition();
             SetButtons();
             SetWheel();
+            SetCurrentObject();
         }
-        
+
         private void SetInsideWindow()
         {
-            IsInsideWindow = _mouseState.IsInside;
+            IsInsideWindow = MouseState.IsInsideWindow;
         }
 
         private void SetPosition()
         {
-            X = _mouseState.X;
-            Y = _mouseState.Y;
+            X = MouseState.X;
+            Y = MouseState.Y;
             Position = new Vector2(X, Y);
             DeltaPosition = new Vector2(
-                X - _previousMouseState.X,
-                Y - _previousMouseState.Y
+                X - PreviousMouseState.X,
+                Y - PreviousMouseState.Y
             );
+            
+            if (DeltaPosition.X != 0 || DeltaPosition.Y != 0)
+            {
+                Moved?.Invoke((int)DeltaPosition.X, (int)DeltaPosition.Y);
+            }
         }
+        private static readonly MouseButton[] AllButtons = (MouseButton[])Enum.GetValues(typeof(MouseButton));
 
         private void SetButtons()
         {
-            var buttons = _mouseState.Buttons;
-            LeftButtonPressed = buttons.HasFlag(MouseButton.Left);
-            RightButtonPressed = buttons.HasFlag(MouseButton.Right);
-            MiddleButtonPressed = buttons.HasFlag(MouseButton.Middle);
+            var currentButtons = MouseState.Buttons;
+            var previousButtons = PreviousMouseState.Buttons;
+
+            LeftButtonPressed = currentButtons.HasFlag(MouseButton.Left);
+            RightButtonPressed = currentButtons.HasFlag(MouseButton.Right);
+            MiddleButtonPressed = currentButtons.HasFlag(MouseButton.Middle);
+    
+            for (int i = 0; i < AllButtons.Length; i++)
+            {
+                var button = AllButtons[i];
+                if (button == MouseButton.None) continue;
+
+                bool isDown = currentButtons.HasFlag(button);
+                bool wasDown = previousButtons.HasFlag(button);
+
+                if (isDown && !wasDown)
+                {
+                    ButtonDown?.Invoke(button);
+                }
+                else if (!isDown && wasDown)
+                {
+                    ButtonUp?.Invoke(button);
+                }
+            }
         }
 
         private void SetWheel()
         {
-            WheelDelta = _mouseState.Scroll - _previousMouseState.Scroll;
-            HorizontalWheelDelta = _mouseState.HScroll - _previousMouseState.HScroll;
+            WheelDelta = MouseState.Scroll - PreviousMouseState.Scroll;
+            HorizontalWheelDelta = MouseState.HScroll - PreviousMouseState.HScroll;
+            
+            if (WheelDelta != 0)
+            {
+                WheelScrolled?.Invoke(WheelDelta);
+            }
+            
+            if (HorizontalWheelDelta != 0)
+            {
+                HorizontalWheelScrolled?.Invoke(HorizontalWheelDelta);
+            }
+        }
+
+        private void SetCurrentObject()
+        {
+            InObject = MouseState.InObject;
+            
+            if(PreviousMouseState.InObject != InObject)
+                HoveredObjectChanged?.Invoke(InObject);
         }
 
         public bool IsButtonPressed(MouseButton buttonIndex)
         {
-            return _mouseState.Buttons.HasFlag(buttonIndex);
+            return MouseState.Buttons.HasFlag(buttonIndex);
         }
 
         public bool IsButtonReleased(MouseButton buttonIndex)
         {
-            return !_mouseState.Buttons.HasFlag(buttonIndex);
+            return !MouseState.Buttons.HasFlag(buttonIndex);
         }
 
         public bool WasButtonPressed(MouseButton buttonIndex)
         {
-            return _previousMouseState.Buttons.HasFlag(buttonIndex);
+            return PreviousMouseState.Buttons.HasFlag(buttonIndex);
         }
 
         public bool WasButtonReleased(MouseButton buttonIndex)
         {
-            return !_previousMouseState.Buttons.HasFlag(buttonIndex);
+            return !PreviousMouseState.Buttons.HasFlag(buttonIndex);
         }
 
         public bool WasButtonJustPressed(MouseButton buttonIndex)

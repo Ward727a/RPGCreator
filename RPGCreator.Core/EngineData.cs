@@ -35,6 +35,7 @@ namespace RPGCreator.Core
 {
     public partial class EditorState : ObservableObject, IEditorState
     {
+        public bool InEditorMode { get; set; } = false;
         public bool InPlacingMode { get; set; } = false;
         public bool InDrawingMode { get; set; } = false;
         public bool ShowCollisionLayer { get; set; } = false;

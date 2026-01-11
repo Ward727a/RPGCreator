@@ -106,11 +106,18 @@ namespace RPGCreator.Core
             Logger.Implementation = new EngineLogger();
             
             EngineStates.EditorState = new EditorState();
+            EngineStates.EditorState.InEditorMode = mode == EEngineMode.EditorMode;
             EngineStates.ProjectState = new ProjectState();
             EngineStates.BrushState = new BrushState();
             
             EngineStates.MouseState = new EngineMouseState();
             EngineStates.KeyboardState = new EngineKeyboardState();
+
+            if (EngineStates.EditorState.InEditorMode)
+            {
+                EngineStates.ViewportMouseState = new ViewportMouseState();
+                EngineStates.ViewportKeyboardState = new ViewportKeyboardState();
+            }
             
             var typeMapping = new AssetsTypeMapping();
             

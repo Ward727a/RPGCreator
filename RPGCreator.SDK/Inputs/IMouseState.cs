@@ -2,7 +2,7 @@
 
 namespace RPGCreator.SDK.Inputs;
 
-public readonly record struct RawMouseData(int X, int Y, int Scroll, int HScroll, MouseButton Buttons, bool IsInside);
+public readonly record struct RawMouseData(int X, int Y, int Scroll, int HScroll, MouseButton Buttons, bool IsInsideWindow, object? InObject = null);
 
 [Flags]
 public enum MouseButton
@@ -17,6 +17,14 @@ public enum MouseButton
 
 public interface IMouseState
 {
+    
+    event Action<MouseButton>? ButtonDown;
+    event Action<MouseButton>? ButtonUp;
+    event Action<int, int>? Moved;
+    event Action<int>? WheelScrolled;
+    event Action<int>? HorizontalWheelScrolled;
+    event Action<object?>? HoveredObjectChanged;
+    
     /// <summary>
     /// The current X position of the mouse cursor.
     /// </summary>
@@ -62,11 +70,24 @@ public interface IMouseState
     bool IsInsideWindow { get; }
     
     /// <summary>
+    /// Indicates the object the mouse is currently hovering over, if any.<br/>
+    /// If the mouse is not hovering over any object, this will be null.<br/>
+    /// Otherwise, this will be the object instance being hovered.
+    /// </summary>
+    object? InObject { get; }
+    
+    /// <summary>
     /// Updates the mouse state with the provided raw mouse data.<br/>
     /// This should be automatically called by the <see cref="RPGCreator.Core"/> engine part at each <see cref="IMouseProvider"/> update.
     /// </summary>
     /// <param name="rawMouseData"></param>
     void Update(RawMouseData rawMouseData);
+    
+    /// <summary>
+    /// Gets the current raw mouse data.
+    /// </summary>
+    /// <returns></returns>
+    RawMouseData GetCurrentRawData();
     
     /// <summary>
     /// Indicates whether the specified mouse button is currently pressed.

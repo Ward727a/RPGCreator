@@ -33,6 +33,7 @@ using RPGCreator.Core.Types.Map.Layers;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
 using RPGCreator.SDK.Types.Interfaces;
@@ -127,6 +128,13 @@ namespace RPGCreator.Core.Managers.AssetsManager
         public bool TryResolveRegistry(System.Type type, [NotNullWhen(true)] out IAssetRegistry? registry)
         {
             registry = null;
+
+            if (type == null)
+            {
+                Logger.Critical("TryResolveRegistry called with null type.");
+                return false;
+            }
+            
             if (_registryTypeToName.TryGetValue(type, out var registryName))
             {
                 return _registries.TryGetValue(registryName, out registry);
@@ -294,7 +302,17 @@ namespace RPGCreator.Core.Managers.AssetsManager
         {
             if (_assetLocations.TryGetValue(id, out var location))
             {
-                Type type = Type.GetType(location.TypeName)!;
+                Type? type = EngineServices.AssetTypeRegistry.GetType(location.TypeName);
+                
+                if(type == null)
+                    type = Type.GetType(location.TypeName);
+                
+                if(type == null)
+                {
+                    Log.Warning("Unable to determine type for asset ID {AssetID} with type name {TypeName}", id, location.TypeName);
+                    return;
+                }
+                
                 if (TryResolveRegistry(type, out var registry))
                 {
                     registry.ReleaseUntyped(id);

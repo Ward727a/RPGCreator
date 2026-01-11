@@ -1,10 +1,12 @@
-﻿using CommunityToolkit.Diagnostics;
+﻿using System.ComponentModel;
+using CommunityToolkit.Diagnostics;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Xna.Framework;
 using RPGCreator.SDK;
 
 namespace RPGCreator.RTP;
 
-public class EngineGameProvider : IGameProvider
+public partial class EngineGameProvider : ObservableObject, IGameProvider
 {
     private Game _game;
 
@@ -20,6 +22,8 @@ public class EngineGameProvider : IGameProvider
     public EngineGameProvider(Game game)
     {
         Guard.IsNotNull(game);
+        OnPropertyChanging(nameof(GameInstance));
         _game = game;
+        OnPropertyChanged(nameof(GameInstance));
     }
 }

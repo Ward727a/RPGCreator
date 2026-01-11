@@ -1,23 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
 using CommunityToolkit.HighPerformance;
+using Gum.Forms.Controls;
+using Gum.Wireframe;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGameGum;
 using RPGCreator.RTP.Editor.Components;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Animations;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Entities;
+using RPGCreator.SDK.GamePlayer;
 using RPGCreator.SDK.Inputs;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Resources;
 
 namespace RPGCreator.RTP
 {
-    public class EditorGame : Game
+    public class EditorGame : Game, IGamePlayer
     {
-        public event Action OnDraw;
-        public event Action OnUpdate;
+        public event Action OnInitialize;
+        public event Action OnLoad;
+        public event Action<TimeSpan> OnUpdate;
+
+        public event Action<TimeSpan> OnDraw;
+        
+        private readonly IMouseState _mouseState;
+        private readonly IKeyboardState _keyboardState;
         
         public bool CanUseMouse = false;
 
@@ -36,7 +47,7 @@ namespace RPGCreator.RTP
         private AnimationInstance? _spritePlayerIdle = null;
         private SpriteBatch _spriteBatch;
 
-        // GumService Gum => GumService.Default;
+        GumService Gum => GumService.Default;
 
         public class Texture2DLoader(GraphicsDevice graphicsDevice) : IResourceLoader
         {
@@ -54,14 +65,20 @@ namespace RPGCreator.RTP
             IsMouseVisible = true;
             
             EngineServices.ResourcesService.RegisterLoader<Texture2D>(new Texture2DLoader(GraphicsDevice));
+
+            _keyboardState = EngineStates.ViewportKeyboardState;
+            _mouseState = EngineStates.ViewportMouseState;
         }
 
+        private TextBox _noMapSelectedText;
+        private TextBox _mousePointerText;
         protected override void Initialize()
         {
             base.Initialize();
+            OnInitialize?.Invoke();
 
-            // Gum.Initialize(this);
-            //
+            Gum.Initialize(this);
+            
             // EngineCore.Instance.Data.EditedMapChanged += (instance) =>
             // {
             //     if (instance == null)
@@ -69,7 +86,26 @@ namespace RPGCreator.RTP
             //     _mapEditing.MapInstance = instance;
             // };
 
-            // var mainPanel = new Panel(Gum.Root);
+            var mainPanel = new Panel(Gum.Root);
+            mainPanel.Width = GraphicalUiElement.CanvasWidth;
+            mainPanel.Height = GraphicalUiElement.CanvasHeight;
+            
+            // Add text box to display when no map is selected.
+            _noMapSelectedText = new TextBox()
+            {
+                IsReadOnly = true,
+                Text = "No map selected. Please select a map to edit.",
+            };
+            mainPanel.AddChild(_noMapSelectedText);
+            
+            _mousePointerText = new TextBox()
+            {
+                IsReadOnly = true,
+                Text = "Pos NONE",
+                X = 0,
+                Y = 30,
+            };
+            mainPanel.AddChild(_mousePointerText);
 
             //
             // EngineCore.Instance.Events.RTPKeyPressed += (sender, keyEventArgs) =>
@@ -122,10 +158,44 @@ namespace RPGCreator.RTP
 
         protected override void LoadContent()
         {
-
+            OnLoad?.Invoke();
             GraphicsDevice.Reset();
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _mapEditing = new(_spriteBatch);
+
+            void OnKeyboardStateOnKeyDown(KeyboardKeys _)
+            {
+                ReadOnlySpan<KeyboardKeys> pressedKeys = EngineStates.KeyboardState.GetPressedKeys();
+
+                if (pressedKeys.Length == 0)
+                {
+                    _noMapSelectedText.Text = "No keys pressed";
+                }
+                else
+                {
+                    var sb = new System.Text.StringBuilder();
+
+                    for (int i = 0; i < pressedKeys.Length; i++)
+                    {
+                        if (i > 0) sb.Append(", ");
+                        sb.Append(pressedKeys[i]);
+                    }
+
+                    _noMapSelectedText.Text = sb.ToString();
+                }
+            }
+            //
+            // _mouseState.ButtonDown += (button) =>
+            // {
+            //     Logger.Info($"Mouse button {button} was pressed.");
+            // };
+            _keyboardState.KeyDown += OnKeyboardStateOnKeyDown;
+            _keyboardState.KeyUp += OnKeyboardStateOnKeyDown;
+            
+            _mouseState.Moved += (x, y) =>
+            {
+                _mousePointerText.Text = $"Pos X:{_mouseState.X} Y:{_mouseState.Y}";
+            };
 
             // Test loop to create multiple entities with sprite and transform components and test the sprite rendering system.
             // Very basic test - Result for now : 10k entities with simple sprites renders, no movement at ~60 FPS => 3-4ms per frame.
@@ -144,7 +214,7 @@ namespace RPGCreator.RTP
             //     transformComponent.Y = 5 + i * 20;
             //     transformComponent.X = 5 + i * 20;
             // }
-            
+
             //CurrentMap = new(_spriteBatch) { game = this };
 
             //backgroundTexture = new Texture2D(GraphicsDevice, 1, 1);
@@ -154,42 +224,52 @@ namespace RPGCreator.RTP
 
         protected override void Update(GameTime gameTime)
         {
-            OnUpdate?.Invoke();
+            OnUpdate?.Invoke(gameTime.ElapsedGameTime);
             // GraphicalUiElement.CanvasHeight = (_graphics.PreferredBackBufferHeight);
             // GraphicalUiElement.CanvasWidth = (_graphics.PreferredBackBufferWidth);
 
             _mapEditing.Update(gameTime);
-            // Gum.Update(gameTime);
+            Gum.Update(gameTime);
             _ecsWorld.Update(gameTime.ElapsedGameTime);
 
-            var keyboardState = Keyboard.GetState();
-            
-            var keyPressed = keyboardState.GetPressedKeys();
-            
-            ReadOnlySpan<KeyboardKeys> sdkMappedKeys = keyPressed.AsSpan().Cast<Keys, KeyboardKeys>();
-
-            var rawKeyboardData = new RawKeyboardData(sdkMappedKeys, keyboardState.CapsLock, keyboardState.NumLock);
-            EngineProviders.KeyboardProvider.Update(rawKeyboardData);
-            
-            var mouseState = Mouse.GetState();
-            
-            MouseButton buttons = 
-                (mouseState.LeftButton   == ButtonState.Pressed ? MouseButton.Left : MouseButton.None)
-                | (mouseState.RightButton  == ButtonState.Pressed ? MouseButton.Right : MouseButton.None)
-                | (mouseState.MiddleButton == ButtonState.Pressed ? MouseButton.Middle : MouseButton.None)
-                | (mouseState.XButton1 == ButtonState.Pressed ? MouseButton.XButton1 : MouseButton.None)
-                | (mouseState.XButton2 == ButtonState.Pressed ? MouseButton.XButton2 : MouseButton.None);
-            
-            RawMouseData rawMouseData = new()
+            if (_mouseState.WasButtonJustPressed(MouseButton.Left))
             {
-                X = mouseState.X,
-                Y = mouseState.Y,
-                HScroll = mouseState.HorizontalScrollWheelValue,
-                Scroll = mouseState.ScrollWheelValue,
-                IsInside = IsActive,
-                Buttons = buttons
-            };
-            EngineProviders.MouseProvider?.Update(rawMouseData);
+                Logger.Info("Left mouse button was just pressed.");
+            }
+            
+            // if (!EngineStates.EditorState.InEditorMode)
+            // {
+            //     var keyboardState = Keyboard.GetState();
+            //
+            //     var keyPressed = keyboardState.GetPressedKeys();
+            //
+            //     ReadOnlySpan<KeyboardKeys> sdkMappedKeys = keyPressed.AsSpan().Cast<Keys, KeyboardKeys>();
+            //
+            //     var rawKeyboardData = new RawKeyboardData(sdkMappedKeys, keyboardState.CapsLock, keyboardState.NumLock);
+            //     EngineProviders.KeyboardProvider.Update(rawKeyboardData);
+            //
+            //     var mouseState = Mouse.GetState();
+            //
+            //     MouseButton buttons =
+            //         (mouseState.LeftButton == ButtonState.Pressed ? MouseButton.Left : MouseButton.None)
+            //         | (mouseState.RightButton == ButtonState.Pressed ? MouseButton.Right : MouseButton.None)
+            //         | (mouseState.MiddleButton == ButtonState.Pressed ? MouseButton.Middle : MouseButton.None)
+            //         | (mouseState.XButton1 == ButtonState.Pressed ? MouseButton.XButton1 : MouseButton.None)
+            //         | (mouseState.XButton2 == ButtonState.Pressed ? MouseButton.XButton2 : MouseButton.None);
+            //
+            //     RawMouseData rawMouseData = new()
+            //     {
+            //         X = mouseState.X,
+            //         Y = mouseState.Y,
+            //         HScroll = mouseState.HorizontalScrollWheelValue,
+            //         Scroll = mouseState.ScrollWheelValue,
+            //         IsInsideWindow = IsActive,
+            //         Buttons = buttons
+            //     };
+            //     EngineProviders.MouseProvider?.Update(rawMouseData);
+            // }
+
+
             //
             // var _registry = EngineCore.Instance.Managers.Assets.TryResolveRegistry("characters", out var registry) ? registry as CharacterRegistry
             //     : null;
@@ -230,14 +310,6 @@ namespace RPGCreator.RTP
             //         SpawnedCharacters.Add(data.Unique);
             //     }
             // }
-
-            if (CanUseMouse)
-            {
-                if (Mouse.GetState().LeftButton == ButtonState.Pressed)
-                {
-                    //Console.WriteLine("Left mouse button pressed inside preview.");
-                }
-            }
 
             //if (CanUseMouse)
             //{
@@ -283,14 +355,13 @@ namespace RPGCreator.RTP
             //        CurrentMap.Layers[SelectedLayer].RemoveTile(new Point(X, Y));
             //    }
             //}
-
             base.Update(gameTime);
         }
 
 
         protected override void Draw(GameTime gameTime)
         {
-            OnDraw?.Invoke();
+            OnDraw?.Invoke(gameTime.ElapsedGameTime);
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             _mapEditing.Draw();
@@ -341,7 +412,7 @@ namespace RPGCreator.RTP
             //}
             //_spriteBatch.End();
 
-            // Gum.Draw();
+            Gum.Draw();
 
             base.Draw(gameTime);
         }

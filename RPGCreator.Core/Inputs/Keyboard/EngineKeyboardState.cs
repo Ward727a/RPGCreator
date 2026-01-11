@@ -1,60 +1,89 @@
 ﻿using RPGCreator.SDK.Inputs;
+using RPGCreator.SDK.Logging;
 
 namespace RPGCreator.Core.Inputs.Keyboard;
 
 public class EngineKeyboardState : IKeyboardState
 {
     
-    private readonly HashSet<KeyboardKeys> _previousPressedKeys = new();
-    private readonly HashSet<KeyboardKeys> _pressedKeys = new();
-    
-    public void Update(RawKeyboardData data)
+    protected HashSet<KeyboardKeys> PreviousPressedKeys = new();
+    protected HashSet<KeyboardKeys> PressedKeys = new();
+
+    public bool IsCapsLockActive { get; protected set; } 
+    public bool IsNumLockActive { get; protected set; }
+    public event Action<KeyboardKeys>? KeyDown;
+    public event Action<KeyboardKeys>? KeyUp;
+
+    public virtual void Update(RawKeyboardData data)
     {
-        _previousPressedKeys.Clear();
-        foreach (var key in _pressedKeys)
-        {
-            _previousPressedKeys.Add(key);
-        }
-        _pressedKeys.Clear();
+        PreviousPressedKeys.Clear();
+        foreach (var key in PressedKeys) PreviousPressedKeys.Add(key);
+
+        PressedKeys.Clear();
         foreach (var key in data.PressedKeys)
         {
-            _pressedKeys.Add(key);
-        }
+            PressedKeys.Add(key);
         
+            if (!PreviousPressedKeys.Contains(key))
+            {
+                KeyDown?.Invoke(key);
+            }
+        }
+    
+        foreach (var key in PreviousPressedKeys)
+        {
+            if (!PressedKeys.Contains(key))
+            {
+                KeyUp?.Invoke(key);
+            }
+        }
+    
         IsCapsLockActive = data.CapsLock;
         IsNumLockActive = data.NumLock;
     }
 
+    protected void OnKeyDown(KeyboardKeys key)
+    {
+        KeyDown?.Invoke(key);
+    }
+    
+    protected void OnKeyUp(KeyboardKeys key)
+    {
+        KeyUp?.Invoke(key);
+    }
+    
     public bool IsKeyPressed(KeyboardKeys key)
     {
-        return _pressedKeys.Contains(key);
+        return PressedKeys.Contains(key);
     }
 
     public bool IsKeyReleased(KeyboardKeys key)
     {
-        return !_pressedKeys.Contains(key);
+        return !PressedKeys.Contains(key);
     }
 
     public bool WasKeyPressed(KeyboardKeys key)
     {
-        return _previousPressedKeys.Contains(key);
+        return PreviousPressedKeys.Contains(key);
     }
 
     public bool WasKeyReleased(KeyboardKeys key)
     {
-        return !_previousPressedKeys.Contains(key);
+        return !PreviousPressedKeys.Contains(key);
     }
 
     public bool WasKeyJustPressed(KeyboardKeys key)
     {
-        return !_previousPressedKeys.Contains(key) && _pressedKeys.Contains(key);
+        return !PreviousPressedKeys.Contains(key) && PressedKeys.Contains(key);
     }
 
     public bool WasKeyJustReleased(KeyboardKeys key)
     {
-        return _previousPressedKeys.Contains(key) && !_pressedKeys.Contains(key);
+        return PreviousPressedKeys.Contains(key) && !PressedKeys.Contains(key);
     }
 
-    public bool IsCapsLockActive { get; private set; } 
-    public bool IsNumLockActive { get; private set; }
+    public ReadOnlySpan<KeyboardKeys> GetPressedKeys()
+    {
+        return PressedKeys.ToArray().AsSpan();
+    }
 }
