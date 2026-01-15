@@ -1,0 +1,103 @@
+﻿using System.ComponentModel;
+
+namespace RPGCreator.SDK.RuntimeService;
+
+public record struct LayerData(int LayerIndex, string LayerName, bool VisibleByDefault);
+
+public interface ILayerService : INotifyPropertyChanged, INotifyPropertyChanging
+{
+    /// <summary>
+    /// Is there a loaded layer?
+    /// </summary>
+    bool HasLoadedLayer { get; }
+
+    /// <summary>
+    /// Can a layer be loaded/selected?<br/>
+    /// If false, no layer loading/selecting actions should be allowed (in the case where no layers exist, or <see cref="IMapService.HasLoadedMap"/> is false).
+    /// </summary>
+    bool CanLoadLayer { get; }
+    
+    /// <summary>
+    /// The index of the currently selected layer.
+    /// </summary>
+    int CurrentLayerIndex { get; }
+    /// <summary>
+    /// The total number of layers available. (Starts at 1 => So if there is 0 layers, this will return 0, if there is 1 layer, this will return 1, etc...)
+    /// </summary>
+    int LayerCount { get; }
+    
+    /// <summary>
+    /// Returns the index of the previous layer.<br/>
+    /// If the current layer is the first one, it will return the index of the first layer.
+    /// </summary>
+    public int PreviousLayerIndex => Math.Max(CurrentLayerIndex - 1, GetFirstLayerIndex());
+    
+    /// <summary>
+    /// Returns the index of the next layer.<br/>
+    /// If the current layer is the last one, it will return the index of the last layer.
+    /// </summary>
+    public int NextLayerIndex => Math.Min(CurrentLayerIndex + 1, GetLastLayerIndex());
+    
+    /// <summary>
+    /// Selects the layer at the given index, or last layer if the index is out of range.<br/>
+    /// In the case where the index is out of range, it will also log a warning message.
+    /// </summary>
+    /// <param name="layerIndex">The layer index to select.</param>
+    /// <exception cref="NotImplementedException">Thrown if the RTP or game does not support this operation.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if no layers can be loaded/selected.</exception>
+    void SelectLayer(int layerIndex);
+    
+    /// <summary>
+    /// Selects the next layer (higher index) if possible.<br/>
+    /// If the current layer is the last one, it will do nothing.
+    /// </summary>
+    public void SelectNextLayer() => SelectLayer(NextLayerIndex);
+    
+    /// <summary>
+    /// Selects the previous layer (lower index) if possible.<br/>
+    /// If the current layer is the first one, it will do nothing.
+    /// </summary>
+    public void SelectPreviousLayer() => SelectLayer(PreviousLayerIndex);
+    
+    /// <summary>
+    /// Returns the index of the first layer.
+    /// </summary>
+    /// <returns>The index of the first layer.</returns>
+    public int GetFirstLayerIndex() => 0;
+    
+    /// <summary>
+    /// Returns the index of the last layer.
+    /// </summary>
+    /// <returns>The index of the last layer.</returns>
+    public int GetLastLayerIndex() => LayerCount - 1;
+    
+    /// <summary>
+    /// Returns the data of the currently selected layer.
+    /// </summary>
+    /// <returns>The data of the currently selected layer.</returns>
+    public LayerData GetCurrentLayerData() => GetLayerData(CurrentLayerIndex);
+    
+    /// <summary>
+    /// Returns the data of the next layer.<br/>
+    /// If the current layer is the last one, it will return the data of the current layer (last).
+    /// </summary>
+    /// <returns>The data of the next layer.</returns>
+    public LayerData GetNextLayerData() => GetLayerData(NextLayerIndex);
+    
+    /// <summary>
+    /// Returns the data of the previous layer.<br/>
+    /// If the current layer is the first one, it will return the data of the current layer (first).
+    /// </summary>
+    /// <returns>The data of the previous layer.</returns>
+    public LayerData GetPreviousLayerData() => GetLayerData(PreviousLayerIndex);
+    
+    /// <summary>
+    /// Returns the data of the layer at the given index or last layer data if the index is out of range.<br/>
+    /// In the case where the index is out of range, it will also log a warning message.
+    /// </summary>
+    /// <param name="layerIndex">The index of the layer to get the data from.</param>
+    /// <returns>The data of the layer at the given index, or last layer data if the index is out of range.</returns>
+    /// <exception cref="NotImplementedException">Thrown if the RTP or game does not support this operation.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if no layers can be loaded/selected.</exception>
+    LayerData GetLayerData(int layerIndex);
+}

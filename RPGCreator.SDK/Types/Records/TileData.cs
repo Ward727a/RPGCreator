@@ -6,7 +6,6 @@ namespace RPGCreator.SDK.Types.Records;
 
 public record struct TileData()
 {
-    public Ulid UniqueId = Ulid.NewUlid();
     public Vector2 TileSize;
     public Vector2 TilePosition;
     public Ulid TilesetId;
