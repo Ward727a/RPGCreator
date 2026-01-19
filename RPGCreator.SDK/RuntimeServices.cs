@@ -1,6 +1,35 @@
-﻿using RPGCreator.SDK.RuntimeService;
+﻿using System.Diagnostics.CodeAnalysis;
+using RPGCreator.SDK.RuntimeService;
 
 namespace RPGCreator.SDK;
+
+
+public class RuntimeServicesProvider : IServiceProvider
+{
+    private readonly Dictionary<Type, IService> _services = new();
+    
+    public T GetService<T>() where T : class, IService
+    {
+        return (T)_services[typeof(T)];
+    }
+
+    public bool TryGetService<T>([NotNullWhen(true)] out T? service) where T : class, IService
+    {
+        if (_services.TryGetValue(typeof(T), out var svc))
+        {
+            service = (T)svc;
+            return true;
+        }
+        
+        service = null;
+        return false;
+    }
+
+    public void RegisterService<T>(T service) where T : class, IService
+    {
+        _services[typeof(T)] = service;
+    }
+}
 
 /// <summary>
 /// Every services related to the runtime environment.<br/>
@@ -24,6 +53,42 @@ namespace RPGCreator.SDK;
 /// </summary>
 public static class RuntimeServices
 {
-    public static IMapService? MapService = null!;
-    public static ILayerService? LayerService = null!;
+    private static readonly RuntimeServicesProvider ServiceProvider = new();
+    
+    // ReSharper disable MemberCanBePrivate.Global
+    public static void RegisterService<T>(T service) where T : class, IService
+    {
+        ServiceProvider.RegisterService(service);
+    }
+    
+    public static T GetService<T>() where T : class, IService
+    {
+        if (ServiceProvider.TryGetService<T>(out var service))
+        {
+            return service;
+        }
+
+        throw new InvalidOperationException($"[Runtime] Critical Service Missing: {typeof(T).Name}. Make sure it's registered during runtime initialization.");
+    }
+    
+    public static IMapService MapService
+    {
+        get => GetService<IMapService>();
+        set => RegisterService(value);
+    }
+    public static ILayerService LayerService
+    {
+        get => GetService<ILayerService>();
+        set => RegisterService(value);
+    }
+    public static ICameraService CameraService
+    {
+        get => GetService<ICameraService>();
+        set => RegisterService(value);
+    }
+    public static IRenderService RenderService
+    {
+        get => GetService<IRenderService>();
+        set => RegisterService(value);
+    }
 }

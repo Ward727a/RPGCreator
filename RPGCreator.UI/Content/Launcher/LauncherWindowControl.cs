@@ -3,14 +3,14 @@
 // RPG Creator - Open-source RPG Engine.
 // (c) 2025 Ward
 // 
-// This file is part of RPG Creator and is distributed under the MIT License.
-// You are free to use, modify, and distribute this file under the terms of the MIT License.
+// This file is part of RPG Creator and is distributed under the Apache 2.0 License.
+// You are free to use, modify, and distribute this file under the terms of the Apache 2.0 License.
 // See LICENSE for details.
 // 
 // ---
 // 
-// Ce fichier fait partie de RPG Creator et est distribué sous licence MIT.
-// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence MIT.
+// Ce fichier fait partie de RPG Creator et est distribué sous licence Apache 2.0.
+// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence Apache 2.0.
 // Voir LICENSE pour plus de détails.
 // 
 // Contact:
@@ -221,7 +221,7 @@ namespace RPGCreator.UI.Content.Launcher
 
         private void RefreshProjectDetails()
         {
-            Logger.Information("Refreshing project details.");
+            Logger.Info("Refreshing project details.");
             // Update the project details panel with the selected project's information
             if (_selectedProject != null)
             {
@@ -240,7 +240,7 @@ namespace RPGCreator.UI.Content.Launcher
         private void RefreshButtonsState()
         {
             // Enable or disable buttons based on whether a project is selected
-            Logger.Information($"Refreshing buttons state. Is project selected: {_IsProjectSelected}");
+            Logger.Info($"Refreshing buttons state. Is project selected: {_IsProjectSelected}");
             _DeleteButton.IsEnabled = _IsProjectSelected;
             _OpenButton.IsEnabled = _IsProjectSelected;
         }
@@ -248,7 +248,7 @@ namespace RPGCreator.UI.Content.Launcher
         private void RefreshProjectList()
         {
             // Logic to refresh the project list, e.g., reloading from disk or updating UI
-            Logger.Information("Refreshing project list.");
+            Logger.Info("Refreshing project list.");
             // This could involve clearing the existing items and re-adding them
             // Reset the project details and buttons state
 
@@ -270,7 +270,7 @@ namespace RPGCreator.UI.Content.Launcher
                     var projectItem = new LauncherProjectItem(project);
                     _ProjectStackPanel.Children.Add(projectItem);
                     projectItem.ProjectSelected += OnSelectProject;
-                    Logger.Information($"Found project: {project.Name} at path {project.Path}");
+                    Logger.Info($"Found project: {project.Name} at path {project.Path}");
                 }
                 else
                 {
@@ -283,7 +283,7 @@ namespace RPGCreator.UI.Content.Launcher
         private void OnNewProjectButtonClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             // Logic to create a new project
-            Logger.Information("New Project button clicked.");
+            Logger.Info("New Project button clicked.");
             // This should open a dialog to create a new project
             var newProjectDialog = new ProjectCreatorWindow();
             newProjectDialog.Control.ProjectCreated += Control_ProjectCreated;
@@ -300,7 +300,7 @@ namespace RPGCreator.UI.Content.Launcher
             // We check if a project is selected before proceeding
             if (!_IsProjectSelected)
             {
-                Logger.Information("No project selected to open.");
+                Logger.Info("No project selected to open.");
                 RefreshButtonsState();
                 RefreshProjectDetails();
                 return;
@@ -311,7 +311,7 @@ namespace RPGCreator.UI.Content.Launcher
                 return;
             }
             EngineServices.ProjectsManager.OpenProject(_selectedProject);
-            Logger.Information("Open Project button clicked.");
+            Logger.Info("Open Project button clicked.");
             //this._Host.Close(); // Close the launcher window
             var ew = EditorWindow.Instance; 
         }
@@ -321,14 +321,14 @@ namespace RPGCreator.UI.Content.Launcher
             // We check if a project is selected before proceeding
             if (!_IsProjectSelected)
             {
-                Logger.Information("No project selected to delete.");
+                Logger.Info("No project selected to delete.");
                 RefreshButtonsState();
                 RefreshProjectDetails();
                 return;
             }
 
             // Logic to delete the project
-            Logger.Information("Delete Project button clicked.");
+            Logger.Info("Delete Project button clicked.");
             // This should prompt the user for confirmation and then delete the project
 
         }
@@ -337,7 +337,7 @@ namespace RPGCreator.UI.Content.Launcher
         {
             // Logic to handle project selection
             // Enable buttons and update details panel with the selected project's information
-            Logger.Information($"Project selected: {project.Name}");
+            Logger.Info($"Project selected: {project.Name}");
             _selectedProject = project;
 
             RefreshButtonsState();

@@ -31,6 +31,12 @@ public class SpritesheetDef : IAssetDef, ISerializable, IDeserializable
         Urn = new URN("rpgcreator", "spritesheet", Unique.ToString());
     }
 
+    public void Init(Ulid id)
+    {
+        if (id != Ulid.Empty) return;
+        Unique = id;
+    }
+
     public Rect GetFrameRect(int index)
     {
         int cols = Columns;

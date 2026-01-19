@@ -24235,7 +24235,7 @@
     {
         "id": "69EE759D-1F0E-414B-A014-5EB611D6286E",
         "baseIconId": "69EE759D-1F0E-414B-A014-5EB611D6286E",
-        "name": "car-speed-limiter",
+        "name": "car-speed-Limiter",
         "codepoint": "F190E",
         "aliases": [],
         "styles": [],
@@ -46685,7 +46685,7 @@
     {
         "id": "46650D6B-318F-4202-AB77-79A113EC77AA",
         "baseIconId": "BFF59001-B52D-47E6-A217-C9095F81C3B8",
-        "name": "file-delimited",
+        "name": "file-deliApache 2.0ed",
         "codepoint": "F0218",
         "aliases": [
             "file-csv"

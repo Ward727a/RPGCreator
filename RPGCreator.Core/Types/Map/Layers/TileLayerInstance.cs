@@ -18,7 +18,7 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
     /// <summary>
     /// Instanced elements of this layer.<br/>
     /// This dictionary is not saved between sessions, it's only used for the current game session.<br/>
-    /// If you need those to be saved, you should check the <see cref="TileLayerDefinition._elements"/> instead.<br/>
+    /// If you need those to be saved, you should check the <see cref="LayerWithElements{TDef}._chunks"/> instead.<br/>
     /// Check <see cref="TileLayerDefinition"/> for more information on how to add or remove elements from the layer definition.
     /// </summary>
     public Dictionary<Vector2, ITileInstance> InstancedElements { get; } = new();
@@ -29,31 +29,34 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
         IsVisible = definition.VisibleByDefault;
         _def = definition;
         
-        foreach (var element in definition.Elements)
+        // TODO: Code to refactor due to changes with LayerChunk system.
+        /*
+        foreach (var element in definition.Chunks)
         {
             var tileInstance = EngineCore.Instance.Managers.Assets.TileFactory.Create(element.Value);
             tileInstance.Position = element.Key;
             InstancedElements.Add(element.Key, tileInstance);
         }
+        */
         
         _def.ElementAdded += OnElementAdded;
         _def.ElementRemoved += OnElementRemoved;
     }
-    private void OnElementAdded(object? sender, (Vector2 location, ITileDef def) e)
+    private void OnElementAdded(LayerWithElements<ITileDef>.LayerElementEventArgs e)
     {
         if(InstancedElements.TryAdd
             (
-                e.location,
-                EngineCore.Instance.Managers.Assets.TileFactory.Create(e.def)
+                e.Location,
+                EngineCore.Instance.Managers.Assets.TileFactory.Create(e.Element)
             ))
-            Log.Information("[TileLayerInstance: {LayerName}] Added tile instance at {Location}", _def.Name, e.location);
+            Log.Information("[TileLayerInstance: {LayerName}] Added tile instance at {Location}", _def.Name, e.Location);
         else
-            Log.Warning("[TileLayerInstance: {LayerName}] Failed to add tile instance at {Location} - already exists", _def.Name, e.location);
+            Log.Warning("[TileLayerInstance: {LayerName}] Failed to add tile instance at {Location} - already exists", _def.Name, e.Location);
     }
 
-    private void OnElementRemoved(object? sender, (Vector2, ITileDef?) e)
+    private void OnElementRemoved(LayerWithElements<ITileDef>.LayerElementEventArgs e)
     {
-        if (e.Item1 == default && e.Item2 == null)
+        if (e.Location == default && e.Element == null)
         {
             foreach (var tile in InstancedElements.ToList())
             {
@@ -62,7 +65,7 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
             }
         }
         
-        if (!InstancedElements.Remove(e.Item1, out var removedTile))
+        if (!InstancedElements.Remove(e.Location, out var removedTile))
             return;
 
         EngineCore.Instance.Managers.Assets.TileFactory.Release(removedTile);
@@ -117,13 +120,16 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
         _def = def;
         InstancedElements.Clear();
 
-        foreach (var element in def.Elements)
+        // TODO: Code to refactor due to changes with LayerChunk system.
+        /*
+        foreach (var element in def.Chunks)
         {
             var tileInstance = EngineCore.Instance.Managers.Assets.TileFactory.Create(element.Value);
             InstancedElements.Add(element.Key, tileInstance);
         }
-        
+        */
         _def.ElementAdded += OnElementAdded;
         _def.ElementRemoved += OnElementRemoved;
+        
     }
 }

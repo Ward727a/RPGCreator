@@ -2,20 +2,26 @@
 
 namespace RPGCreator.SDK.RuntimeService;
 
+/// <summary>
+/// A snapshot of data about a layer.
+/// </summary>
+/// <param name="LayerIndex">The index of the layer.</param>
+/// <param name="LayerName">The name of the layer.</param>
+/// <param name="VisibleByDefault">Is the layer visible by default?</param>
 public record struct LayerData(int LayerIndex, string LayerName, bool VisibleByDefault);
 
-public interface ILayerService : INotifyPropertyChanged, INotifyPropertyChanging
+public interface ILayerService : INotifyPropertyChanged, INotifyPropertyChanging, IDisposable, IService
 {
     /// <summary>
-    /// Is there a loaded layer?
+    /// Is there a selected layer?
     /// </summary>
-    bool HasLoadedLayer { get; }
+    bool HasSelectedLayer { get; }
 
     /// <summary>
-    /// Can a layer be loaded/selected?<br/>
-    /// If false, no layer loading/selecting actions should be allowed (in the case where no layers exist, or <see cref="IMapService.HasLoadedMap"/> is false).
+    /// Can a layer be selected?<br/>
+    /// If false, no layer selecting actions should be allowed (in the case where no layers exist, or <see cref="IMapService.HasLoadedMap"/> is false).
     /// </summary>
-    bool CanLoadLayer { get; }
+    bool CanSelectLayer { get; }
     
     /// <summary>
     /// The index of the currently selected layer.
@@ -44,7 +50,7 @@ public interface ILayerService : INotifyPropertyChanged, INotifyPropertyChanging
     /// </summary>
     /// <param name="layerIndex">The layer index to select.</param>
     /// <exception cref="NotImplementedException">Thrown if the RTP or game does not support this operation.</exception>
-    /// <exception cref="InvalidOperationException">Thrown if no layers can be loaded/selected.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if no layers can be loaded/selected (ex: No Map Loaded).</exception>
     void SelectLayer(int layerIndex);
     
     /// <summary>
@@ -98,6 +104,6 @@ public interface ILayerService : INotifyPropertyChanged, INotifyPropertyChanging
     /// <param name="layerIndex">The index of the layer to get the data from.</param>
     /// <returns>The data of the layer at the given index, or last layer data if the index is out of range.</returns>
     /// <exception cref="NotImplementedException">Thrown if the RTP or game does not support this operation.</exception>
-    /// <exception cref="InvalidOperationException">Thrown if no layers can be loaded/selected.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if no layers can be loaded/selected (ex: No Map Loaded).</exception>
     LayerData GetLayerData(int layerIndex);
 }

@@ -4,20 +4,21 @@ using RPGCreator.Core.Types.Blueprint;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK.Assets.Definitions.Skills;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Logging;
 using Serilog;
 
 namespace RPGCreator.Core.Managers.AssetsManager.Registries;
 
 public class SkillEffectsRegistry: RegistryBase<ISkillEffect>
 {
-    
+    private readonly ScopedLogger _logger = Logger.ForContext<SkillEffectsRegistry>();
     public override string ModuleName => "skill_effects";
     
     public void ReloadData()
     {
         // Clear existing data
         Clear();
-        Log.Information("Skill Effects registry cleared for data reload.");
+        _logger.Info("Skill Effects registry cleared for data reload.");
         
         // We just want assemblies that are not system or common libraries
         // If the creator of the assembly use one of those names, well, too bad for them.
@@ -41,17 +42,17 @@ public class SkillEffectsRegistry: RegistryBase<ISkillEffect>
                     .Where(t => t.GetCustomAttribute<SkillEffectAttribute>() != null);
                 
                 skillEffectTypes.AddRange(types);
-                Log.Information("SkillEffectsRegistry: Found {Count} skill effect candidates in assembly {AssemblyName}.",
-                    types.Count(), assembly.GetName().Name);
+                _logger.Info("SkillEffectsRegistry: Found {Count} skill effect candidates in assembly {AssemblyName}.",
+                    args: [types.Count(), assembly.GetName().Name]);
             }
             catch (ReflectionTypeLoadException ex)
             {
-                Log.Error(ex, "Error loading types from assembly {AssemblyName}", assembly.FullName);
+                _logger.Error(ex, "Error loading types from assembly {AssemblyName}", args: assembly.FullName);
             }
         }
         
-        Log.Information("SkillEffectsRegistry: Total {Count} skill effect candidates found across all assemblies.",
-            skillEffectTypes.Count);
+        _logger.Info("SkillEffectsRegistry: Total {Count} skill effect candidates found across all assemblies.",
+            args: skillEffectTypes.Count);
 
         foreach (var type in skillEffectTypes)
         {
@@ -60,18 +61,18 @@ public class SkillEffectsRegistry: RegistryBase<ISkillEffect>
                 var skillEffectObject = Activator.CreateInstance(type);
                 if (skillEffectObject is not ISkillEffect skillEffect)
                 {
-                    Log.Error("SkillEffectsRegistry: Type {TypeName} is not a valid ISkillEffect.", type.FullName);
+                    _logger.Error("SkillEffectsRegistry: Type {TypeName} is not a valid ISkillEffect.", args: type.FullName);
                     continue;
                 }
 
                 Register(skillEffect);
-                Log.Information(
+                _logger.Info(
                     "SkillEffectsRegistry: Registered skill effect {SkillEffectName} with unique ID {SkillEffectUnique} and URN {SkillEffectUrn}.",
-                    type.FullName, skillEffect.Unique, skillEffect.Urn);
+                    args: [type.FullName, skillEffect.Unique, skillEffect.Urn]);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error instantiating skill effect of type {TypeName}", type.FullName);
+                _logger.Error(ex, "Error instantiating skill effect of type {TypeName}", args: type.FullName);
             }
         }
 

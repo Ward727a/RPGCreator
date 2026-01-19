@@ -3,14 +3,14 @@
 // RPG Creator - Open-source RPG Engine.
 // (c) 2025 Ward
 // 
-// This file is part of RPG Creator and is distributed under the MIT License.
-// You are free to use, modify, and distribute this file under the terms of the MIT License.
+// This file is part of RPG Creator and is distributed under the Apache 2.0 License.
+// You are free to use, modify, and distribute this file under the terms of the Apache 2.0 License.
 // See LICENSE for details.
 // 
 // ---
 // 
-// Ce fichier fait partie de RPG Creator et est distribué sous licence MIT.
-// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence MIT.
+// Ce fichier fait partie de RPG Creator et est distribué sous licence Apache 2.0.
+// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence Apache 2.0.
 // Voir LICENSE pour plus de détails.
 // 
 // Contact:
@@ -24,15 +24,7 @@
 #endregion
 using RPGCreator.Core.Events.EventArgs;
 using RPGCreator.Core.Managers.AssetsManager.EventsArgs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using Avalonia.Input;
-using Microsoft.Xna.Framework.Graphics;
-using RPGCreator.Core.Types.Assets.Animations;
 using RPGCreator.SDK.Assets.Definitions.Animations;
 using Serilog;
 
@@ -60,7 +52,7 @@ namespace RPGCreator.Core.Events
         // This manage all the engine related events.
         // For example, once a project is unloaded, you can subscribe to this event to do something AFTER ALL parts of the engine are done unloading it.
         // In the same way, you can subscribe to the "EngineLoadProject" event to do something BEFORE ALL parts of the engine start loading it.
-        // If you need to "ask" the engine to do something, then you should use the "AskEngine[EventName]" method. (Right now this is still limited to only some events, but this will be expanded in the future)
+        // If you need to "ask" the engine to do something, then you should use the "AskEngine[EventName]" method. (Right now this is still Limited to only some events, but this will be expanded in the future)
         //
         // Be careful to not confound some events with others, example: UILoadedProject, RTPLoadedProject, and EngineLoadProject are 3 different events.
 

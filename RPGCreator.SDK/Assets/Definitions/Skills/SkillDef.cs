@@ -11,7 +11,7 @@ namespace RPGCreator.SDK.Assets.Definitions.Skills;
 public class SkillDef : ISkillDef
 {
     public string SavePath { get; set; }
-    public Ulid Unique { get; private set; } = Ulid.NewUlid();
+    public Ulid Unique { get; private set; }
     public URN Urn { get; private set; }
     public Ulid? PackId { get; set; }
     public string Name { get; private set; } = string.Empty;
@@ -34,6 +34,12 @@ public class SkillDef : ISkillDef
         Unique = Ulid.NewUlid();
         Name = name;
         Urn = new URN("skill", $"{Name}@{Unique}");
+    }
+
+    public void Init(Ulid id)
+    {
+        if (id != Ulid.Empty) return;
+        Unique = id;
     }
     
     public void SetName(string name)

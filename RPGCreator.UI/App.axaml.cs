@@ -3,14 +3,14 @@
 // RPG Creator - Open-source RPG Engine.
 // (c) 2025 Ward
 // 
-// This file is part of RPG Creator and is distributed under the MIT License.
-// You are free to use, modify, and distribute this file under the terms of the MIT License.
+// This file is part of RPG Creator and is distributed under the Apache 2.0 License.
+// You are free to use, modify, and distribute this file under the terms of the Apache 2.0 License.
 // See LICENSE for details.
 // 
 // ---
 // 
-// Ce fichier fait partie de RPG Creator et est distribué sous licence MIT.
-// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence MIT.
+// Ce fichier fait partie de RPG Creator et est distribué sous licence Apache 2.0.
+// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence Apache 2.0.
 // Voir LICENSE pour plus de détails.
 // 
 // Contact:
@@ -33,6 +33,8 @@ using RPGCreator.UI.Styles;
 using System;
 using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.MaterialDesign;
+using RPGCreator.SDK;
+using RPGCreator.UI.Services;
 
 namespace RPGCreator.UI;
 
@@ -46,6 +48,8 @@ public partial class App : Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+        UiServices.DialogService = new DialogService();
+        UiServices.MenuService = new MenuService();
     }
 
     public override void OnFrameworkInitializationCompleted()

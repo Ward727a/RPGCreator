@@ -19,6 +19,12 @@ public abstract class BaseLayerDef : IAssetDef
     public BaseLayerDef()
     {
     }
+
+    public void Init(Ulid id)
+    {
+        if (id != Ulid.Empty) return;
+        Unique = id;
+    }
     // Pour la sérialisation polymorphique
     public virtual SerializationInfo GetObjectData()
     {

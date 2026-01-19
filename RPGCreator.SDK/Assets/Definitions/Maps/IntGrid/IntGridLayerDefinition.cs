@@ -15,7 +15,7 @@ public class IntGridLayerDefinition : IMapLayerDef<int>
 {
     public event EventHandler<(Vector2, int)>? ElementAdded;
     public event EventHandler<(Vector2, int)>? ElementRemoved;
-    public Ulid Unique { get; private set; } = Ulid.NewUlid();
+    public Ulid Unique { get; private set; }
     public URN Urn { get; private set; }
     public string Name { get; set; }
     public int ZIndex { get; set; }
@@ -25,6 +25,13 @@ public class IntGridLayerDefinition : IMapLayerDef<int>
     
     public List<IntGridValueRef> ValueRefs { get; set; }
 
+
+    public void Init(Ulid id)
+    {
+        if (id != Ulid.Empty) return;
+        Unique = id;
+    }
+    
     public void SetValue(Vector2 location, int value)
     {
         _elements[location] = value;

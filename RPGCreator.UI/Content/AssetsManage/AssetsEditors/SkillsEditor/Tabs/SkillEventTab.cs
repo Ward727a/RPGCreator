@@ -79,9 +79,9 @@ public class SkillEventTab : UserControl
         {
             try
             {
-                Logger.Information("Compiling the graph...");
+                Logger.Info("Compiling the graph...");
                 _doc.Compile();
-                Logger.Information("Graph compiled & tested successfully.");
+                Logger.Info("Graph compiled & tested successfully.");
             }
             catch (Exception ex)
             {
@@ -98,9 +98,9 @@ public class SkillEventTab : UserControl
         {
             try
             {
-                Logger.Information("Saving the graph...");
+                Logger.Info("Saving the graph...");
                 _doc.Save("test_save_graph.xml");
-                Logger.Information("Graph saved successfully.");
+                Logger.Info("Graph saved successfully.");
                 
                 _doc.SavePath = "test_save_graph.xml";
             }
@@ -119,10 +119,10 @@ public class SkillEventTab : UserControl
         {
             try
             {
-                Logger.Information("Loading the graph...");
+                Logger.Info("Loading the graph...");
                 _doc = GraphDocument.Load("test_save_graph.xml");
                 _graph.SetDocument(_doc);
-                Logger.Information("Graph loaded successfully.");
+                Logger.Info("Graph loaded successfully.");
             }
             catch (Exception ex)
             {
@@ -139,7 +139,7 @@ public class SkillEventTab : UserControl
         {
             try
             {
-                Logger.Information("Compiling the graph...");
+                Logger.Info("Compiling the graph...");
                 // _doc.Compile();
                 _doc.Save("test.json");
             }

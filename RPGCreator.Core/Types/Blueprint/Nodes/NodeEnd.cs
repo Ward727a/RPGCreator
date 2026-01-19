@@ -26,6 +26,6 @@ public class NodeEnd : Node
     
     public override IEnumerable<GraphInstr> Emit(GraphDocument graph, GraphCompileContext context)
     {
-        throw new InvalidOperationException("End node can't emit any instruction!");
+        throw new InvalidOperationException("End node can't Emit any instruction!");
     }
 }

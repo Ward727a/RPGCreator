@@ -230,7 +230,7 @@ public class CharacterEditorWindowControl : UserControl
     
     private void OnSaveButtonClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        Logger.Information("Character '{characterName}' saved.", Data.Name);
+        Logger.Info("Character '{characterName}' saved.", Data.Name);
         
         Logger.Debug("Character Data: {@characterData}", Data);
         EngineServices.AssetsManager.RegisterAsset(Data);

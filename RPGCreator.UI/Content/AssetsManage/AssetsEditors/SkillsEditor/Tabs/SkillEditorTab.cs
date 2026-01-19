@@ -457,7 +457,7 @@ public class SkillEditorTab : UserControl
 
             //AssetsManager.AssetMapping[typeof(ISkillDef)](SkillDef);
 
-            Logger.Information("Skill '{SkillName}' saved.", SkillDef.Name);
+            Logger.Info("Skill '{SkillName}' saved.", SkillDef.Name);
             
             
             EngineServices.SerializerService.Serialize(SkillDef, out string data);

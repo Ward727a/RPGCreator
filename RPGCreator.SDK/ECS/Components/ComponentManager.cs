@@ -18,6 +18,8 @@ public class ComponentManager(ECSEventBus eventBus)
         var sparseSet = GetOrCreateSparseSet<T>();
         
         ref var component = ref sparseSet.Add(entity.Id, new T());
+        var bit = ComponentTypeRegistry.GetBit<T>();
+        entity.ComponentBits[bit] = true;
         
         MarkDirty<T>(entity.Id);
         _eventBus.Publish(new ComponentChangedEvent<T>(entity.Id, ChangeType.Added, default, component));

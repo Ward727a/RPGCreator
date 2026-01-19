@@ -1,6 +1,6 @@
 ﻿namespace RPGCreator.SDK.Assets;
 
-public interface IAssetTypeRegistry
+public interface IAssetTypeRegistry : IService
 {
     void RegisterMapping(string key, Type type);
     Type? GetType(string key);

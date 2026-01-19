@@ -37,15 +37,20 @@ public class SystemManager(IECSWorld world)
                 sys.OnDisable?.Invoke();
         }
 
-        foreach (var system in _systems.Where(s => !s.IsDrawingSystem).OrderBy(s => s.Priority))
+        foreach (var system in _systems.Where(s => !s.IsDrawingSystem).OrderByDescending(s => s.Priority))
         {
             system.Update(deltaTime);
         }
     }
     
+    public List<ISystem> GetDrawingSystems()
+    {
+        return _systems.Where(s => s.IsDrawingSystem).OrderByDescending(s => s.Priority).ToList();
+    }
+    
     public void Draw(TimeSpan deltaTime)
     {
-        foreach (var system in _systems.Where(s => s.IsDrawingSystem).OrderBy(s => s.Priority))
+        foreach (var system in _systems.Where(s => s.IsDrawingSystem).OrderByDescending(s => s.Priority))
         {
             system.Update(deltaTime);
         }

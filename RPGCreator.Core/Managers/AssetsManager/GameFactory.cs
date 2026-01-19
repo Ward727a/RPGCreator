@@ -1,16 +1,10 @@
 using RPGCreator.Core.Managers.AssetsManager.Factories;
-using RPGCreator.Core.Types.Assets;
-using RPGCreator.Core.Types.Assets.Animations;
-using RPGCreator.Core.Types.Assets.Characters.Stats;
-using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Map;
 using RPGCreator.Core.Types.Map.Layers;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
-using RPGCreator.SDK.Assets.Definitions.Animations;
+using RPGCreator.SDK.Assets.Definitions;
 using RPGCreator.SDK.Assets.Definitions.Maps;
-using RPGCreator.SDK.Assets.Definitions.Stats;
-using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Types.Interfaces;
 using Serilog;
 
@@ -27,8 +21,8 @@ public class GameFactory : IGameFactory
         public Action<IAssetDef> Release { get; init; } = null!;
     }
     
-    private readonly Dictionary<System.Type, FactoryStrategy> _defFactoryStrategies = new();
-    private readonly Dictionary<System.Type, FactoryStrategy> _instStrategies = new();
+    private readonly Dictionary<Type, FactoryStrategy> _defFactoryStrategies = new();
+    private readonly Dictionary<Type, FactoryStrategy> _instStrategies = new();
     
     private readonly List<Action> _clearActions = new();
     
@@ -42,12 +36,12 @@ public class GameFactory : IGameFactory
     public GameFactory()
     {
         // Register built-in factories
-        Register<TileLayerInstance, TileLayerDefinition>(TileLayerFactory);
-        Register<MapInstance, MapDefinition>(MapFactory);
-        Register<TilesetInstance, TilesetDef>(TilesetFactory);
-        Register<TileInstance, TileDefinition>(TileFactory);
-        Register<StatInstance, IStatDef>(StatFactory);
-        Register<AnimationInstance, AnimationDef>(AnimationFactory);
+        Register(TileLayerFactory);
+        Register(MapFactory);
+        Register(TilesetFactory);
+        Register(TileFactory);
+        Register(StatFactory);
+        Register(AnimationFactory);
     }
     
     public void Register<TInst, TDef>(IAssetFactory<TInst, TDef> factory) 

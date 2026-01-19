@@ -3,14 +3,14 @@
 // RPG Creator - Open-source RPG Engine.
 // (c) 2025 Ward
 // 
-// This file is part of RPG Creator and is distributed under the MIT License.
-// You are free to use, modify, and distribute this file under the terms of the MIT License.
+// This file is part of RPG Creator and is distributed under the Apache 2.0 License.
+// You are free to use, modify, and distribute this file under the terms of the Apache 2.0 License.
 // See LICENSE for details.
 // 
 // ---
 // 
-// Ce fichier fait partie de RPG Creator et est distribué sous licence MIT.
-// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence MIT.
+// Ce fichier fait partie de RPG Creator et est distribué sous licence Apache 2.0.
+// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence Apache 2.0.
 // Voir LICENSE pour plus de détails.
 // 
 // Contact:
@@ -27,12 +27,14 @@ using RPGCreator.Core.Managers.ProjectsManager;
 using RPGCreator.Core.Managers.RTP.BrushManagers;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Commands;
+using RPGCreator.SDK.Logging;
 using Serilog;
 
 namespace RPGCreator.Core
 {
     internal class EngineManagers
     {
+        private readonly ScopedLogger _logger = Logger.ForContext<EngineManagers>();
         public AssetsManager Assets { get; private set; }
         public GameFactory GameFactory { get; private set; }
         public ProjectsManager Projects { get; private set; }
@@ -59,7 +61,7 @@ namespace RPGCreator.Core
 
             EngineCore.Instance.Events.OnCoreManagersReady(new());
             
-            Log.Information($"EngineManagers initialized.");
+            _logger.Info($"EngineManagers initialized.");
         }
 
         internal void Init()

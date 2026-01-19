@@ -1,4 +1,3 @@
-using RPGCreator.Core.Types.Assets.Animations;
 using RPGCreator.SDK.Assets.Definitions.Animations;
 
 namespace RPGCreator.Core.Managers.AssetsManager.Registries;

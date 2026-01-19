@@ -22,7 +22,7 @@ public class GetPlayerName : Node
     
     public override IEnumerable<GraphInstr> Emit(GraphDocument graph, GraphCompileContext context)
     {
-        // For now this will be a "fake" emit and variable!
+        // For now this will be a "fake" Emit and variable!
         var instrs = new List<GraphInstr>();
         var dst = context.NewRegister();
         context.BindOuput(this, Outputs[0].Id, dst);

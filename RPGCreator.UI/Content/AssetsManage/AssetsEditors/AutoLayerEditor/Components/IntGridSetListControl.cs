@@ -224,7 +224,7 @@ public class IntGridSetCreateModal : Window
         newIntGridSet.Name = intGridSetName;
         newIntGridSet.Pack = selectedPack;
         selectedPack.AddOrUpdateAsset(newIntGridSet);
-        Logger.Information("[IntGridSetCreateModal] Created new IntGrid Set '{name}' in pack '{packName}'", intGridSetName, selectedPack.Name);
+        Logger.Info("[IntGridSetCreateModal] Created new IntGrid Set '{name}' in pack '{packName}'", intGridSetName, selectedPack.Name);
         
         OnIntGridSetCreated?.Invoke(newIntGridSet);
     }

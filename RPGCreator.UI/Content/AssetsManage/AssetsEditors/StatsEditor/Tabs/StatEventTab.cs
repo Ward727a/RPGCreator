@@ -85,9 +85,9 @@ public class StatEventTab : UserControl
         {
             try
             {
-                Logger.Information("Compiling the graph...");
+                Logger.Info("Compiling the graph...");
                 _doc.Compile();
-                Logger.Information("Graph compiled & tested successfully.");
+                Logger.Info("Graph compiled & tested successfully.");
             }
             catch (Exception ex)
             {
@@ -124,14 +124,14 @@ public class StatEventTab : UserControl
         {
             try
             {
-                Logger.Information("Loading the graph...");
+                Logger.Info("Loading the graph...");
                 if (File.Exists("test_save_graph.xml"))
                 {
                     if(EngineServices.GraphService.TryLoadDocument("test_save_graph.xml", out var loadedDoc))
                     {
                         _graph.SetDocument(loadedDoc);
                         _doc = loadedDoc; // Update the current document reference
-                        Logger.Information("Graph loaded successfully.");
+                        Logger.Info("Graph loaded successfully.");
                         return;
                     }
                     Logger.Error("Loaded object is not a GraphDocument.");
@@ -156,7 +156,7 @@ public class StatEventTab : UserControl
         {
             try
             {
-                Logger.Information("Compiling the graph...");
+                Logger.Info("Compiling the graph...");
                 // _doc.Compile();
                 _doc.Save("test.json");
             }

@@ -4,12 +4,14 @@ using RPGCreator.Core.Types.Blueprint;
 using RPGCreator.Core.Types.Blueprint.Nodes;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Graph.Nodes;
+using RPGCreator.SDK.Logging;
 using Serilog;
 
 namespace RPGCreator.Core.Parser.Graph;
 
 public sealed class GraphTable
 {
+    private static readonly ScopedLogger _logger = Logger.ForContext<GraphTable>();
     public static bool AlreadyScanned { get; private set; } = false;
 
     private static readonly Dictionary<EGraphOpCode, IGraphInstrHandler> HandlersTable = new();
@@ -32,10 +34,10 @@ public sealed class GraphTable
     {
         if (AlreadyScanned)
         {
-            Log.Warning("GraphTable: Already scanned assemblies, skipping.");
+            _logger.Warning("Already scanned assemblies, skipping.");
             return;
         }
-        Log.Information("GraphTable: Scanning assemblies for graph instruction handlers...");
+        _logger.Info("Scanning assemblies for graph instruction handlers...");
         var assemblies = Assembly.GetExecutingAssembly();
 
         foreach (var type in assemblies.GetTypes()
@@ -49,21 +51,21 @@ public sealed class GraphTable
             
             var handler = (IGraphInstrHandler)Activator.CreateInstance(type)!;
             
-            Log.Information("GraphTable: Found handler {Handler} for opcode {OpCode}, trying to register...",
-                type.Name, attr.OpCode);
+            _logger.Info("Found handler {Handler} for opcode {OpCode}, trying to register...",
+                args: [type.Name, attr.OpCode]);
             
             if (HandlersTable.TryGetValue(attr.OpCode, out IGraphInstrHandler? value))
             {
-                Log.Error("GraphTable: Opcode {OpCode} is already registered by {ExistingHandler}.", 
-                    attr.OpCode, value.GetType().Name);
+                _logger.Error("Opcode {OpCode} is already registered by {ExistingHandler}.", 
+                    args: [attr.OpCode, value.GetType().Name]);
                 continue;
             }
             HandlersTable[attr.OpCode] = handler;
-            Log.Information("GraphTable: Registered handler {Handler} for opcode {OpCode}.",
-                type.Name, attr.OpCode);
+            _logger.Info("Registered handler {Handler} for opcode {OpCode}.",
+                args: [type.Name, attr.OpCode]);
         }
         AlreadyScanned = true;
-        Log.Information("GraphTable: Scanned {Count} handlers.", HandlersTable.Count);
+        _logger.Info("Scanned {Count} handlers.", args: HandlersTable.Count);
     }
     
     /// <summary>
@@ -82,13 +84,13 @@ public sealed class GraphTable
     {
         if (!AlreadyScanned)
         {
-            Log.Warning("GraphTable: Not scanned yet, skipping check.");
+            _logger.Warning("Not scanned yet, skipping check.");
             return;
         }
 
         if (!GraphNodeRegistry.AlreadyAnalyzed)
         {
-            Log.Warning("GraphTable: GraphNodeRegistry not analyzed yet, skipping check.");
+            _logger.Warning("GraphNodeRegistry not analyzed yet, skipping check.");
             return;
         }
         
@@ -108,8 +110,8 @@ public sealed class GraphTable
             .Select(n => n.OpCode)
             .ToList();
         
-        Log.Information("GraphTable: Checking {Count} handlers against {NodeCount} nodes.",
-            handlersToCheck.Count, nodesOpCodes.Count);
+        _logger.Info("Checking {Count} handlers against {NodeCount} nodes.",
+            args: [handlersToCheck.Count, nodesOpCodes.Count]);
         
         var missingHandlers = nodesOpCodes
             .Where(opCode => !opCodesToCheck.Contains(opCode))
@@ -125,14 +127,14 @@ public sealed class GraphTable
         
         if (missingHandlers.Count > 0)
         {
-            Log.Error("GraphTable: The following opcodes are missing handlers: {MissingHandlers}.",
-                string.Join(", ", missingHandlers));
+            _logger.Error("The following opcodes are missing handlers: {MissingHandlers}.",
+                args: string.Join(", ", missingHandlers));
         }
         
         if (missingNodes.Count > 0)
         {
-            Log.Error("GraphTable: The following opcodes are missing nodes: {MissingNodes}.",
-                string.Join(", ", missingNodes));
+            _logger.Error("The following opcodes are missing nodes: {MissingNodes}.",
+                args: string.Join(", ", missingNodes));
         }
     }
 
@@ -151,13 +153,13 @@ public sealed class GraphTable
             return;
         if (HandlersTable.TryGetValue(attr.OpCode, out IGraphInstrHandler? value))
         {
-            Log.Error("GraphTable: Opcode {OpCode} is already registered by {ExistingHandler}.", 
-                attr.OpCode, value.GetType().Name);
+            _logger.Error("Opcode {OpCode} is already registered by {ExistingHandler}.", 
+                args: [attr.OpCode, value.GetType().Name]);
             return;
         }
         HandlersTable[attr.OpCode] = handler;
-        Log.Information("GraphTable: Registered handler {Handler} for opcode {OpCode}.",
-            handler.GetType().Name, attr.OpCode);
+        _logger.Info("Registered handler {Handler} for opcode {OpCode}.",
+            args: [handler.GetType().Name, attr.OpCode]);
     }
 
     public static bool IsOpcodeRegistered(EGraphOpCode opCode) => HandlersTable.ContainsKey(opCode);

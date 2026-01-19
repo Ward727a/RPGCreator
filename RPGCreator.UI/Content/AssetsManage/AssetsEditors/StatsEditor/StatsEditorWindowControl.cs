@@ -87,7 +87,7 @@ public class StatsEditorWindowControl : UserControl
         };
         saveButton.Click += (s, e) =>
         {
-            Logger.Information("Saving Stat Definition...");
+            Logger.Info("Saving Stat Definition...");
             // AssetsManager.AssetMapping[typeof(IStatDef)].Invoke(StatDef);
             
             EngineServices.SerializerService.Serialize(StatDef, out string data);
@@ -130,7 +130,7 @@ public class StatsEditorWindowControl : UserControl
             }
             
             Logger.Debug("Stat Definition saved at {Path} with data: {Data}", defaultTestPAth, data);
-            Logger.Information("Stat Definition saved.");
+            Logger.Info("Stat Definition saved.");
         };
         buttonsPanel.Children.Add(saveButton);
     }

@@ -1,4 +1,5 @@
-﻿using RPGCreator.SDK.Serializer;
+﻿using RPGCreator.SDK.Assets.Definitions;
+using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Interfaces;
 
@@ -8,6 +9,12 @@ public class GenericAssetStub : IAssetDef, IDeserializable
 {
     public Ulid Unique { get; set; }
     public URN Urn { get; set; }
+    public void Init(Ulid id)
+    {
+        if (id != Ulid.Empty) return;
+        Unique = id;
+    }
+
     public bool IsDirty { get; set; }
     public bool IsTransient { get; set; }
     public Dictionary<string, object> RawData { get; } = new Dictionary<string, object>();

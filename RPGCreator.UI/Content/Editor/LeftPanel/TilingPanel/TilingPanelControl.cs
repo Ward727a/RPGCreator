@@ -72,66 +72,66 @@ public class SetOptionItem : UserControl
 }
 
 public class SelectionCursorControl : Border
+{
+    private Animation _pulseAnimation;
+    private System.Threading.CancellationTokenSource? _animationCancellationTokenSource;
+
+    public SelectionCursorControl()
     {
-        private Animation _pulseAnimation;
-        private System.Threading.CancellationTokenSource? _animationCts;
+        BorderBrush = Brushes.Cyan;
+        BorderThickness = new Thickness(3);
+        Background = Brushes.Transparent;
 
-        public SelectionCursorControl()
-        {
-            BorderBrush = Brushes.Cyan;
-            BorderThickness = new Thickness(3);
-            Background = Brushes.Transparent;
+        IsHitTestVisible = false;
+        
+        Opacity = .8;
 
-            IsHitTestVisible = false;
-            
-            Opacity = .8;
-
-            InitializeAnimation();
-        }
-
-        private void InitializeAnimation()
-        {
-            _pulseAnimation = new Animation
-            {
-                Duration = TimeSpan.FromSeconds(.5),
-                
-                IterationCount = IterationCount.Infinite,
-                
-                PlaybackDirection = PlaybackDirection.Alternate, 
-                
-                Children =
-                {
-                    new KeyFrame
-                    {
-                        Cue = new Cue(0.0),
-                        Setters = { new Setter(Border.BorderBrushProperty, Brushes.White) }
-                        
-                    },
-                    
-                    new KeyFrame
-                    {
-                        Cue = new Cue(1.0),
-                        Setters = { new Setter(Border.BorderBrushProperty, Brushes.Black)}
-                    }
-                }
-            };
-        }
-
-        protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
-        {
-            base.OnAttachedToVisualTree(e);
-            _animationCts = new System.Threading.CancellationTokenSource();
-            _pulseAnimation.RunAsync(this, _animationCts.Token);
-        }
-
-        protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
-        {
-            base.OnDetachedFromVisualTree(e);
-            _animationCts?.Cancel();
-            _animationCts = null;
-            Opacity = 1.0;
-        }
+        InitializeAnimation();
     }
+
+    private void InitializeAnimation()
+    {
+        _pulseAnimation = new Animation
+        {
+            Duration = TimeSpan.FromSeconds(.5),
+            
+            IterationCount = IterationCount.Infinite,
+            
+            PlaybackDirection = PlaybackDirection.Alternate, 
+            
+            Children =
+            {
+                new KeyFrame
+                {
+                    Cue = new Cue(0.0),
+                    Setters = { new Setter(Border.BorderBrushProperty, Brushes.White) }
+                    
+                },
+                
+                new KeyFrame
+                {
+                    Cue = new Cue(1.0),
+                    Setters = { new Setter(Border.BorderBrushProperty, Brushes.Black)}
+                }
+            }
+        };
+    }
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        _animationCancellationTokenSource = new System.Threading.CancellationTokenSource();
+        _pulseAnimation.RunAsync(this, _animationCancellationTokenSource.Token);
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+        _animationCancellationTokenSource?.Cancel();
+        _animationCancellationTokenSource = null;
+        Opacity = 1.0;
+    }
+}
 
 
 public class TilingPanelControl : UserControl

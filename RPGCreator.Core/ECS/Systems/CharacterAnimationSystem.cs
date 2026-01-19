@@ -1,7 +1,5 @@
-using Microsoft.Xna.Framework;
 using RPGCreator.Core.ECS.Components.Display.Animation;
 using RPGCreator.Core.Runtimes.ECS.Components.Actor;
-using RPGCreator.Core.Types.Assets.Animations;
 using RPGCreator.SDK.Assets.Definitions.Animations;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;
@@ -15,8 +13,8 @@ public class CharacterAnimationSystem : ISystem
     private readonly ILogger _logger = Log.ForContext<CharacterAnimationSystem>();
     
     private readonly ComponentManager _componentManager;
-    public override int Priority { get; } = 100;
-    public override bool IsDrawingSystem { get; }
+    public override int Priority => 100;
+    public override bool IsDrawingSystem => false;
     
     public CharacterAnimationSystem(ComponentManager componentManager)
     {

@@ -84,7 +84,7 @@ public class DefaultKeyboardProvider : IKeyboardProvider
 /// <summary>
 /// Provides access to various engine-level service providers.<br/>
 /// This allow to make the 'bridge' between the SDK and various other engine parts.<br/>
-/// Like but not limited to:
+/// Like but not Limited to:
 /// <ul>
 ///     <li>
 ///         <b>GameProvider</b> => Provides access to the MonoGame game instance from RTP/Player to Core and UI (without the need to reference MonoGame in the SDK).

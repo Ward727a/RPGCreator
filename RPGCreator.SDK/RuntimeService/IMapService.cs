@@ -7,20 +7,26 @@ using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.SDK.RuntimeService;
 
-public record struct MapData(Ulid MapId, string MapName, string MapDescription, Size MapSize, int CellWidth, int CellHeight, Color BackgroundColor);
+public record struct MapData(Ulid MapId, string MapName, string MapDescription, Size MapSize, float CellWidth, float CellHeight, Color BackgroundColor);
 
-public interface IMapService : INotifyPropertyChanged, INotifyPropertyChanging
+public interface IMapService : INotifyPropertyChanged, INotifyPropertyChanging, IService
 {
     /// <summary>
     /// Event called when a map is loaded.<br/>
     /// The Ulid parameter is the ID of the loaded map.
     /// </summary>
-    Action<Ulid>? OnMapLoaded { get; }
+    Action<Ulid>? OnMapLoaded { get; set; }
     
     /// <summary>
     /// Event called when a map is unloaded.
     /// </summary>
-    Action? OnMapUnloaded { get; }
+    Action? OnMapUnloaded { get; set; }
+    
+    /// <summary>
+    /// Event called when the currently loaded map is edited.<br/>
+    /// The float parameters are the X and Y coordinates of the edit.
+    /// </summary>
+    Action<float, float>? OnMapEdited { get; set; }
     
     /// <summary>
     /// Is there any map loaded?
@@ -35,7 +41,7 @@ public interface IMapService : INotifyPropertyChanged, INotifyPropertyChanging
     /// The currently loaded map ID.<br/>
     /// If no map is loaded, this will be <see cref="Ulid.Empty"/>.
     /// </summary>
-    public Ulid CurrentLoadedMapId => CurrentLoadedMapDefinition?.Unique ?? Ulid.Empty;
+    public Ulid CurrentLoadedMapId { get; }
     
     /// <summary>
     /// The currently loaded map data.<br/>
@@ -78,7 +84,7 @@ public interface IMapService : INotifyPropertyChanged, INotifyPropertyChanging
     /// <param name="y">The Y coordinate on the map.</param>
     /// <param name="objectToPlace">The object to place.</param>
     /// <exception cref="NotImplementedException">Thrown if the RTP or game does not support this operation.</exception>
-    /// <exception cref="FormatException">Thrown if the object type is not supported for placement.</exception>
+    /// <exception cref="ArgumentException">Thrown if the object type is not supported for placement.</exception>
     /// <exception cref="InvalidOperationException">Thrown if there is no map loaded or no layer selected.</exception>
     void PlaceObjectAt(float x, float y, object objectToPlace);
     
@@ -87,9 +93,13 @@ public interface IMapService : INotifyPropertyChanged, INotifyPropertyChanging
     /// It should be used with caution as it may not work for all asset types. It is better than the <see cref="PlaceObjectAt"/>.<br/>
     /// The implementation is up to the RTP or game to decide how to handle the asset placement.
     /// </summary>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <param name="assetId"></param>
+    /// <param name="x">The X coordinate on the map.</param>
+    /// <param name="y">The Y coordinate on the map.</param>
+    /// <param name="assetId">The asset ID to place.</param>
+    /// <exception cref="NotImplementedException">Thrown if the RTP or game does not support this operation.</exception>
+    /// <exception cref="ArgumentException">Thrown if the asset type is not supported for placement.</exception>
+    /// <exception cref="ArgumentException">Thrown if the given assetId could not be loaded.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if there is no map loaded or no layer selected.</exception>
     void PlaceAssetAt(float x, float y, Ulid assetId);
     
     /// <summary>

@@ -2,6 +2,7 @@ using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
+using RPGCreator.SDK.Types.Collections;
 using RPGCreator.SDK.Types.Interfaces;
 using RPGCreator.SDK.Types.Internals;
 
@@ -13,6 +14,13 @@ public abstract class BaseTilesetDef : ISerializable, IDeserializable, IAssetDef
     
     public event Action? ImageChanged;
 
+    public virtual Ulid Unique { get; protected set; }
+    public virtual URN Urn { get; protected set; }
+    
+    public virtual bool IsDirty { get; set; }
+    public virtual bool IsTransient { get; set; }
+    public string SavePath { get; set; }
+
     public string PackName { get; set; } = "";
     public virtual IAssetsPack Pack { get; set; }
     public virtual string ImagePath { get; set; }
@@ -22,9 +30,16 @@ public abstract class BaseTilesetDef : ISerializable, IDeserializable, IAssetDef
     public virtual int TileWidth { get; set; }
     public virtual int TileHeight { get; set; }
     
+    public RuntimeBag Tags { get; } = new RuntimeBag();
+    
 
-    public virtual Ulid Unique { get; protected set; }
-    public virtual URN Urn { get; protected set; }
+    
+    public void Init(Ulid id)
+    {
+        if (id != Ulid.Empty) return;
+        Unique = id;
+    }
+    
     public virtual SerializationInfo GetObjectData()
     {
         var info = new SerializationInfo(GetType());
@@ -68,8 +83,4 @@ public abstract class BaseTilesetDef : ISerializable, IDeserializable, IAssetDef
             Logger.Warning("Tileset {TilesetName} ({Unique}) references missing pack {PackName}", Name, Unique, PackName);
         }
     }
-
-    public virtual bool IsDirty { get; set; }
-    public virtual bool IsTransient { get; set; }
-    public string SavePath { get; set; }
 }

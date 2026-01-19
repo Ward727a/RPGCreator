@@ -3,14 +3,14 @@
 // RPG Creator - Open-source RPG Engine.
 // (c) 2025 Ward
 // 
-// This file is part of RPG Creator and is distributed under the MIT License.
-// You are free to use, modify, and distribute this file under the terms of the MIT License.
+// This file is part of RPG Creator and is distributed under the Apache 2.0 License.
+// You are free to use, modify, and distribute this file under the terms of the Apache 2.0 License.
 // See LICENSE for details.
 // 
 // ---
 // 
-// Ce fichier fait partie de RPG Creator et est distribué sous licence MIT.
-// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence MIT.
+// Ce fichier fait partie de RPG Creator et est distribué sous licence Apache 2.0.
+// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence Apache 2.0.
 // Voir LICENSE pour plus de détails.
 // 
 // Contact:
@@ -32,25 +32,32 @@ using RPGCreator.Core.Types.Map;
 using RPGCreator.Core.Types.Map.Layers;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
+using RPGCreator.SDK.Assets.Definitions;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Exceptions;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
-using RPGCreator.SDK.Types.Interfaces;
 using RPGCreator.SDK.Types.Internals;
 using RPGCreator.SDK.Types.Records;
-using Serilog;
 
 namespace RPGCreator.Core.Managers.AssetsManager
 {
     internal class AssetsManager : IAssetsManager
     {
 
-        private struct AssetLocation
+        private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<AssetsManager>();
+        
+        private struct AssetLocation()
         {
-            public IAssetsPack Pack;
+            public IAssetsPack? Pack;
             public string RelativePath;
             public string TypeName;
+
+            /// <summary>
+            /// Determines whether the asset is transient (not saved to disk).
+            /// </summary>
+            public bool IsTransient = false;
         }
         
         private readonly Dictionary<Ulid, AssetLocation> _assetLocations = new();
@@ -100,10 +107,10 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 assetRegistry.RegisterUntyped((IHasUniqueId)asset, true);
                 Guard.IsAssignableToType(asset, typeof(IAssetDef));
                 OnAssetRegistered?.Invoke((IAssetDef)asset);
-                Log.Information("Registered asset of type {AssetType} in registry {RegistryName}", type.FullName, assetRegistry.ModuleName);
+                Logger.Info("Registered asset of type {AssetType} in registry {RegistryName}",  args: [type.FullName, assetRegistry.ModuleName]);
                 return;
             }
-            Log.Warning("No registry found for asset type {AssetType}", type.FullName);
+            Logger.Warning("No registry found for asset type {AssetType}", args: type.FullName);
         }
         
         public void UnregisterAsset(object asset)
@@ -114,10 +121,10 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 assetRegistry.UnregisterUntyped((IHasUniqueId)asset);
                 Guard.IsAssignableToType(asset, typeof(IAssetDef));
                 OnAssetUnregistered?.Invoke((IAssetDef)asset);
-                Log.Information("Unregistered asset of type {AssetType} from registry {RegistryName}", type.FullName, assetRegistry.ModuleName);
+                Logger.Info("Unregistered asset of type {AssetType} from registry {RegistryName}", args:[type.FullName, assetRegistry.ModuleName]);
                 return;
             }
-            Log.Warning("No registry found for asset type {AssetType}", type.FullName);
+            Logger.Warning("No registry found for asset type {AssetType}", args: type.FullName);
         }
         
         public bool TryResolveRegistry(string ModuleName, [NotNullWhen(true)] out IAssetRegistry? registry)
@@ -192,8 +199,8 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Failed to load asset with ID {AssetID} from pack {PackName}", uniqueId,
-                        location.Pack.Name);
+                    Logger.Error(ex, "Failed to load asset with ID {AssetID} from pack {PackName}", args:[uniqueId,
+                        location.Pack.Name]);
                 }
             }
             return false;
@@ -206,6 +213,9 @@ namespace RPGCreator.Core.Managers.AssetsManager
             RegisterAsset(newAsset);
             
             newAsset.IsDirty = true;
+            newAsset.Init(Ulid.NewUlid());
+            
+            Logger.Debug("Created asset of type {AssetType} with ID {AssetID}", args:[typeof(T).FullName, newAsset.Unique]);
             
             return newAsset;
         }
@@ -221,15 +231,24 @@ namespace RPGCreator.Core.Managers.AssetsManager
         
         public T CreateTransientAsset<T>(IAssetScope? scope = null) where T : IAssetDef, new()
         {
+            var typeKey = EngineServices.AssetTypeRegistry.GetKey(typeof(T));
+            if(typeKey == null)
+            {
+                Logger.Error("Cannot create transient asset of type {AssetType} because it is not registered in the AssetTypeRegistry.", args: typeof(T).FullName);
+                return new T();
+            }
             var newAsset = new T();
             
             newAsset.IsTransient = true;
             
             RegisterAsset(newAsset);
-
+            
+            newAsset.IsDirty = true;
+            newAsset.Init(Ulid.NewUlid());
+            AddNewAssetLocation(newAsset.Unique, null, "", typeKey, true);
             scope?.Track(newAsset);
 
-            Log.Information("Created transient asset of type {AssetType} with ID {AssetID}", typeof(T).FullName, newAsset.Unique);
+            Logger.Info("Created transient asset of type {AssetType} with ID {AssetID}", args: [typeof(T).FullName, newAsset.Unique]);
             
             return newAsset;
         }
@@ -238,8 +257,8 @@ namespace RPGCreator.Core.Managers.AssetsManager
         {
             if (!asset.IsTransient)
             {
-                Log.Warning("Attempted to destroy a non-transient asset of type {AssetType} with ID {AssetID}",
-                    typeof(T).FullName, asset.Unique);
+                Logger.Warning("Attempted to destroy a non-transient asset of type {AssetType} with ID {AssetID}",
+                    args:[typeof(T).FullName, asset.Unique]);
                 return;
             }
 
@@ -250,8 +269,8 @@ namespace RPGCreator.Core.Managers.AssetsManager
         {
             if (!asset.IsTransient)
             {
-                Log.Warning("Attempted to commit a non-transient asset of type {AssetType} with ID {AssetID}",
-                    asset.GetType().FullName, asset.Unique);
+                Logger.Warning("Attempted to commit a non-transient asset of type {AssetType} with ID {AssetID}",
+                    args: [asset.GetType().FullName, asset.Unique]);
                 return;
             }
             
@@ -261,14 +280,21 @@ namespace RPGCreator.Core.Managers.AssetsManager
             {
                 asset.IsTransient = false;
                 pack.AddOrUpdateAsset(asset);
-                Log.Information("Committed transient asset of type {AssetType} with ID {AssetID} to pack {PackName}",
-                    asset.GetType().FullName, asset.Unique, packName);
+                Logger.Info("Commited transient asset of type {AssetType} with ID {AssetID} to pack {PackName}",
+                    args:[asset.GetType().FullName, asset.Unique, packName]);
             }
             else
             {
-                Log.Warning("No assets pack found with name {PackName}", packName);
+                Logger.Warning("No assets pack found with name {PackName}", args: packName);
             }
         }
+        
+        /// <summary>
+        /// Retains an asset in memory. If the asset is not already loaded in RAM, it will be loaded from the appropriate Assets Pack.
+        /// </summary>
+        /// <param name="id">The unique ID of the asset to retain.</param>
+        /// <returns>>The retained asset object.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the asset is not found in RAM or on disk.</exception>
         internal object RetainAsset(Ulid id)
         {
             if (_assetLocations.TryGetValue(id, out var location))
@@ -285,7 +311,12 @@ namespace RPGCreator.Core.Managers.AssetsManager
                         return cachedAsset!;
                     }
 
-                    Log.Information($"Asset {id} not in RAM. Loading from Pack...");
+                    if (location.IsTransient)
+                    {
+                        Logger.Error("Attempted to retain a transient asset with ID {AssetID} which is not loaded in RAM.", args: id);
+                        throw new CriticalEngineException($"Transient asset with ID {id} is not loaded in RAM. How did it get inside the _assetLocations without being registered?", _assetLocations);
+                    }
+                    Logger.Info($"Asset {id} not in RAM. Loading from Pack...");
             
                     var loadedAsset = location.Pack.LoadAsset(id);
                     
@@ -293,9 +324,14 @@ namespace RPGCreator.Core.Managers.AssetsManager
 
                     return loadedAsset;
                 }
+                if (!TryResolveRegistry(type, out _))
+                {
+                    throw new CriticalEngineException($"No registry found for asset type '{type.FullName}'. Did you forget to register the AssetRegistry for this type?", _registries);
+                }
+                throw new CriticalEngineException($"Asset with ID {id} not found in RAM or on disk. How did it get inside the _assetLocations without being registered?", _assetLocations);
             }
-
-            throw new Exception($"Asset {id} not found anywhere (RAM or Disk).");
+            
+            throw new KeyNotFoundException($"No asset found with ID: {id}");
         }
 
         internal void ReleaseAsset(Ulid id)
@@ -309,7 +345,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 
                 if(type == null)
                 {
-                    Log.Warning("Unable to determine type for asset ID {AssetID} with type name {TypeName}", id, location.TypeName);
+                    Logger.Warning("Unable to determine type for asset ID {AssetID} with type name {TypeName}", args: [id, location.TypeName]);
                     return;
                 }
                 
@@ -357,7 +393,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
                         AssetsPacks.Clear();
                         AssetsPacksMapping.Clear();
                         _assetLocations.Clear();
-                        Log.Information("Unloaded all assets packs due to project change.");
+                        Logger.Info("Unloaded all assets packs due to project change.");
                     }
                     else
                     {
@@ -382,18 +418,18 @@ namespace RPGCreator.Core.Managers.AssetsManager
                                     };
                                 }
                             
-                                Log.Information("Loaded assets pack from path: {packPath}", packPath);
+                                Logger.Info("Loaded assets pack from path: {packPath}", args: packPath);
                             }
                             catch (Exception ex)
                             {
-                                Log.Error(ex, "Failed to load assets pack from path: {packPath}", packPath);
+                                Logger.Error(ex, "Failed to load assets pack from path: {packPath}", args: packPath);
                                 return;
                             }
                         }
                     }
                 }
             };
-            Log.Information("AssetsManager initialized.");
+            Logger.Info("AssetsManager initialized.");
         }
         
         #region AssetsPackManagement
@@ -415,14 +451,14 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 };
             }
                             
-            Log.Information("Loaded assets pack from path: {packPath}", pack.DbFilePath);
+            Logger.Info("Loaded assets pack from path: {packPath}", args: pack.DbFilePath);
         }
 
         public void RegisterPack(IAssetsPack pack)
         {
             if (AssetsPacks.ContainsKey(pack.Id))
             {
-                Log.Warning("Assets pack with ID {PackID} is already registered.", pack.Id);
+                Logger.Warning("Assets pack with ID {PackID} is already registered.", args: pack.Id);
                 return;
             }
             
@@ -434,10 +470,10 @@ namespace RPGCreator.Core.Managers.AssetsManager
             }
             else
             {
-                Log.Warning("Assets pack with name {PackName} is already registered.", pack.Name);
+                Logger.Warning("Assets pack with name {PackName} is already registered.", pack.Name);
             }
             
-            Log.Information("Pack {PackName} with ID {PackID} registered.", pack.Name, pack.Id);
+            Logger.Info("Pack {PackName} with ID {PackID} registered.", args:[pack.Name, pack.Id]);
         }
         
         public void UnregisterPack(Ulid packId)
@@ -449,11 +485,11 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 
                 pack.Dispose();
                 
-                Log.Information("Pack {PackName} with ID {PackID} unregistered.", pack.Name, pack.Id);
+                Logger.Info("Pack {PackName} with ID {PackID} unregistered.", args: [pack.Name, pack.Id]);
             }
             else
             {
-                Log.Warning("No assets pack found with ID: {PackID}", packId);
+                Logger.Warning("No assets pack found with ID: {PackID}", args: packId);
             }
         }
         
@@ -484,13 +520,14 @@ namespace RPGCreator.Core.Managers.AssetsManager
         }
 
 
-        public void AddNewAssetLocation(Ulid assetId, IAssetsPack pack, string relativePath, string typeName)
+        public void AddNewAssetLocation(Ulid assetId, IAssetsPack? pack, string relativePath, string typeName, bool isTransient = false)
         {
             _assetLocations[assetId] = new AssetLocation
             {
                 Pack = pack,
                 RelativePath = relativePath,
-                TypeName = typeName
+                TypeName = typeName,
+                IsTransient = isTransient
             };
         }
 

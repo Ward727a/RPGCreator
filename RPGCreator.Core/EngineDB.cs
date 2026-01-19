@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using LiteDB;
 using RPGCreator.SDK.Assets;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types.Interfaces;
 using Serilog;
 
@@ -34,6 +35,9 @@ public class EngineDB
 
     public class AssetIndexRecord() : IAssetIndexRecord
     {
+        /// <summary>
+        /// The unique identifier of the asset.
+        /// </summary>
         [BsonId]
         public Ulid Id { get; set; }
         public string RelativePath { get; set; } = string.Empty;
@@ -97,7 +101,7 @@ public class EngineDB
         Success,
     }
     
-    private static readonly ILogger Logger = Log.ForContext<EngineDB>();
+    private static readonly ScopedLogger _logger = Logger.ForContext<EngineDB>();
     
     private static Dictionary<Ulid, LiteDatabase>  Databases { get; } = new Dictionary<Ulid, LiteDatabase>();
     private static Dictionary<string, Ulid> DatabaseIds { get; } = new Dictionary<string, Ulid>();
@@ -113,7 +117,7 @@ public class EngineDB
         
         if (DatabaseIds.TryGetValue(dbFilePath, out var existingId))
         {
-            Logger.Information("Database at {dbFilePath} is already opened with id {dbId}", dbFilePath, existingId);
+            _logger.Info("Database at {dbFilePath} is already opened with id {dbId}", args: [dbFilePath, existingId]);
             return existingId;
         }
 
@@ -124,25 +128,25 @@ public class EngineDB
             {
                 if (hashStatus == ECheckDbHashStatus.HashMismatch)
                 {
-                    Logger.Error("Database file at {dbFilePath} failed integrity check.", dbFilePath);
+                    _logger.Error("Database file at {dbFilePath} failed integrity check.", args: dbFilePath);
                     return Ulid.Empty;
                 }
 
                 if (hashStatus == ECheckDbHashStatus.FileNotFound)
                 {
-                    Logger.Warning("No hash file found for database at {dbFilePath}, creating new hash file.", dbFilePath);
+                    _logger.Warning("No hash file found for database at {dbFilePath}, creating new hash file.", args: dbFilePath);
                     var createHashStatus = CreateDbHash(dbFilePath);
                     if (createHashStatus != ECreateDbHashStatus.Success)
                     {
-                        Logger.Error("Failed to create hash file for database at {dbFilePath} with code {errorCode}",
-                            dbFilePath, createHashStatus);
+                        _logger.Error("Failed to create hash file for database at {dbFilePath} with code {errorCode}",
+                            args: [dbFilePath, createHashStatus]);
                         return Ulid.Empty;
                     }
                 }
                 else
                 {
-                    Logger.Error("Failed to check hash for database at {dbFilePath} with code {errorCode}",
-                        dbFilePath, hashStatus);
+                    _logger.Error("Failed to check hash for database at {dbFilePath} with code {errorCode}",
+                        args: [dbFilePath, hashStatus]);
                     return Ulid.Empty;
                 }
             }
@@ -153,7 +157,7 @@ public class EngineDB
 
             if (metadataCollection.Count() == 0)
             {
-                Logger.Error($"No metadata found for database at {dbFilePath}");
+                _logger.Error($"No metadata found for database at {dbFilePath}");
                 return Ulid.Empty;
             }
 
@@ -161,13 +165,13 @@ public class EngineDB
 
             if (metadata.ObjectId == Ulid.Empty)
             {
-                Logger.Error("Found metadata but no id found for database {dbFilePath}({dbMetaName})", dbFilePath, string.IsNullOrWhiteSpace(metadata.Name) ? "NO NAME" : metadata.Name);
+                _logger.Error("Found metadata but no id found for database {dbFilePath}({dbMetaName})", args: [dbFilePath, string.IsNullOrWhiteSpace(metadata.Name) ? "NO NAME" : metadata.Name]);
                 return Ulid.Empty;
             }
 
             if (RegisterDB(dbFilePath, metadata, db) is var status && status  != ERegisterDbStatus.Success)
             {
-                Logger.Error("Failed to register database at {dbFilePath} with code {errorCode}", dbFilePath, status);
+                _logger.Error("Failed to register database at {dbFilePath} with code {errorCode}", args: [dbFilePath, status]);
                 return Ulid.Empty;
             }
 
@@ -187,11 +191,11 @@ public class EngineDB
             
             if (RegisterDB(dbFilePath, metadata, db) is var status && status  != ERegisterDbStatus.Success)
             {
-                Logger.Error("Failed to register database at {dbFilePath} with code {errorCode}", dbFilePath, status);
+                _logger.Error("Failed to register database at {dbFilePath} with code {errorCode}", args: [dbFilePath, status]);
                 return Ulid.Empty;
             }
             
-            Logger.Debug("Created new database at {dbFilePath} with id {dbId}", dbFilePath, metadata.ObjectId);
+            _logger.Debug("Created new database at {dbFilePath} with id {dbId}", args: [dbFilePath, metadata.ObjectId]);
             
             return metadata.ObjectId;
         }
@@ -212,7 +216,7 @@ public class EngineDB
         {
             return GetDB(dbId);
         }
-        Logger.Warning("Tried to get database at path {dbFilePath} but it was not found", dbFilePath);
+        _logger.Warning("Tried to get database at path {dbFilePath} but it was not found", args: dbFilePath);
         return null;
     }
     
@@ -222,7 +226,7 @@ public class EngineDB
         {
             return db;
         }
-        Logger.Warning("Tried to get database with id {dbId} but it was not found", dbId);
+        _logger.Warning("Tried to get database with id {dbId} but it was not found", args: dbId);
         return null;
     }
     
@@ -239,7 +243,7 @@ public class EngineDB
 
             if (kvp.Equals(default(KeyValuePair<string, Ulid>)))
             {
-                Logger.Warning("Tried to close database with id {dbId} but it was not found", dbId);
+                _logger.Warning("Tried to close database with id {dbId} but it was not found", args: dbId);
                 return ECloseDbStatus.DbNotFound;
             }
 
@@ -250,7 +254,7 @@ public class EngineDB
                 
                 if(createDbHashStatus != ECreateDbHashStatus.Success)
                 {
-                    Logger.Error("Failed to create hash for database at {dbFilePath} while closing with code {errorCode}", kvp.Key, createDbHashStatus);
+                    _logger.Error("Failed to create hash for database at {dbFilePath} while closing with code {errorCode}", args: [kvp.Key, createDbHashStatus]);
                     return ECloseDbStatus.UnexpectedError;
                 }
                 
@@ -261,13 +265,13 @@ public class EngineDB
             }
             else
             {
-                Logger.Warning("Tried to close database with id {dbId} but it was not found", dbId);
+                _logger.Warning("Tried to close database with id {dbId} but it was not found", args:dbId);
                 return ECloseDbStatus.DbNotFound;
             }
         }
         catch (Exception ex)
         {
-            Logger.Error("Failed to close database with id {dbId}: {errorMessage}", dbId, ex.Message);
+            _logger.Error("Failed to close database with id {dbId}: {errorMessage}", args: [dbId, ex.Message]);
             return ECloseDbStatus.UnexpectedError;
         }
     }
@@ -277,7 +281,7 @@ public class EngineDB
         var db = GetDB(dbId);
         if (db == null)
         {
-            Logger.Error("Failed to save database with id {dbId}: Database not found", dbId);
+            _logger.Error("Failed to save database with id {dbId}: Database not found", args: dbId);
             return ESaveDbStatus.DbNotFound;
         }
         
@@ -290,7 +294,7 @@ public class EngineDB
         var db = GetDB(dbId);
         if (db == null)
         {
-            Logger.Error("Failed to get metadata for database with id {dbId}: Database not found", dbId);
+            _logger.Error("Failed to get metadata for database with id {dbId}: Database not found", args: dbId);
             return null;
         }
         
@@ -306,7 +310,7 @@ public class EngineDB
             var dbId = OpenDB(EngineSettingsDbKey);
             if (dbId == Ulid.Empty)
             {
-                Logger.Error("Failed to open engine settings database to insert config file.");
+                _logger.Error("Failed to open engine settings database to insert config file.");
                 return EFileInsertStatus.DbNotFound;
             }
         }
@@ -315,7 +319,7 @@ public class EngineDB
         
         if(db == null)
         {
-            Logger.Error("Failed to insert config file to engine settings database: Database not found");
+            _logger.Error("Failed to insert config file to engine settings database: Database not found");
             return EFileInsertStatus.DbNotFound;
         }
         
@@ -340,7 +344,7 @@ public class EngineDB
         
         if(db == null)
         {
-            Logger.Error("Failed to insert file to database with id {dbId}: Database not found", dbId);
+            _logger.Error("Failed to insert file to database with id {dbId}: Database not found", args: dbId);
             return EFileInsertStatus.DbNotFound;
         }
         
@@ -363,7 +367,7 @@ public class EngineDB
         }
         catch (Exception ex)
         {
-            Logger.Error("Failed to close all databases: {errorMessage}", ex.Message);
+            _logger.Error("Failed to close all databases: {errorMessage}", args: ex.Message);
             return ECloseDbStatus.UnexpectedError;
         }
     }
@@ -418,7 +422,7 @@ public class EngineDB
         }
         catch (Exception ex)
         {
-            Logger.Error("Failed to create DB hash for {dbFilePath}: {errorMessage}", dbFilePath, ex.Message);
+            _logger.Error("Failed to create DB hash for {dbFilePath}: {errorMessage}", args: [dbFilePath, ex.Message]);
             return ECreateDbHashStatus.UnexpectedError;
         }
         return ECreateDbHashStatus.Success;
@@ -452,7 +456,7 @@ public class EngineDB
         }
         catch (Exception ex)
         {
-            Logger.Error("Failed to check DB hash for {dbFilePath}: {errorMessage}", dbFilePath, ex.Message);
+            _logger.Error("Failed to check DB hash for {dbFilePath}: {errorMessage}", args: [dbFilePath, ex.Message]);
             return ECheckDbHashStatus.UnexpectedError;
         }
     }

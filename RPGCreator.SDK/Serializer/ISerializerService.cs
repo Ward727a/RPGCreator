@@ -1,6 +1,6 @@
 ﻿namespace RPGCreator.SDK.Serializer;
 
-public interface ISerializerService
+public interface ISerializerService : IService
 {
     public void Serialize<T>(T obj, out string data);
     public void Deserialize<T>(string data, out T obj);

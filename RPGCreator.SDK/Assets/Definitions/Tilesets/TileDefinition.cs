@@ -1,13 +1,22 @@
+using System.Drawing;
 using System.Numerics;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
+using RPGCreator.SDK.Types.Collections;
+using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets;
 
 [SerializingType("TileDefinition")]
 public class TileDefinition : ITileDef
 {
+
+    public Ulid Unique { get; private set; }
+    public URN Urn { get; }
+    public bool IsDirty { get; set; }
+    public bool IsTransient { get; set; } = false;
+    
     public Vector2 Position { get; set; }
     public Vector2 DefaultPosition { get; set; }
     public Size SizeInTileset { get; private set; }
@@ -15,6 +24,7 @@ public class TileDefinition : ITileDef
     public Rect UV => new (new(PositionInTileset.X, PositionInTileset.Y), new(TilesetDef.TileWidth, TilesetDef.TileHeight));
     public TileFlip Flip { get; set; } = TileFlip.None;
     public BaseTilesetDef TilesetDef { get; private set; }
+    public RuntimeBag Tags { get; }
     
     public TileDefinition(Vector2 defaultPosition, Size sizeInTileset, Vector2 positionInTileset, BaseTilesetDef tilesetDef)
     {
@@ -30,7 +40,13 @@ public class TileDefinition : ITileDef
         TilesetDef = tilesetDef;
         DefaultPosition = Vector2.Zero; // Default position
     }
-    
+
+    public void Init(Ulid id)
+    {
+        if (id != Ulid.Empty) return;
+        Unique = id;
+    }
+
     public void UpdateTileset(BaseTilesetDef newTilesetDefinition)
     {
         if (newTilesetDefinition == null)
@@ -80,9 +96,4 @@ public class TileDefinition : ITileDef
         SizeInTileset = sizeInTileset;
         PositionInTileset = positionInTileset;
     }
-
-    public Ulid Unique { get; }
-    public URN Urn { get; }
-    public bool IsDirty { get; set; }
-    public bool IsTransient { get; set; } = false;
 }

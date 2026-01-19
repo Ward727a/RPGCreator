@@ -7,15 +7,22 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGameGum;
+using RPGCreator.RTP.ECS.Systems;
 using RPGCreator.RTP.Editor.Components;
+using RPGCreator.RTP.Extensions;
+using RPGCreator.RTP.Services;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Animations;
 using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Entities;
+using RPGCreator.SDK.ECS.Systems;
 using RPGCreator.SDK.GamePlayer;
 using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Resources;
+
+// WORKING PROGRESS PART - THIS IS NOT READY YET, AND NEED **MASSIVE** REFACTORING TO WORK WITH THE NEW ECS AND RENDERING SYSTEMS.
 
 namespace RPGCreator.RTP
 {
@@ -162,8 +169,20 @@ namespace RPGCreator.RTP
             GraphicsDevice.Reset();
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _mapEditing = new(_spriteBatch);
+            
+            RuntimeServices.MapService = new MapService();
+            RuntimeServices.LayerService = new LayerService();
+            RuntimeServices.CameraService = new CameraService();
+            RuntimeServices.RenderService = new RenderService(GraphicsDevice, _spriteBatch);
 
-            void OnKeyboardStateOnKeyDown(KeyboardKeys _)
+            var cam = _ecsWorld.EntityManager.CreateCameraEntity();
+            
+            RuntimeServices.CameraService.SetCameraEntity(cam);
+            
+            _ecsWorld.SystemManager.AddSystem(new CameraSystem());
+            _ecsWorld.SystemManager.AddSystem(new MapDrawingSystem(GraphicsDevice));
+
+            void OnKeyboardStateOnKeyDown(KeyboardKeys key)
             {
                 ReadOnlySpan<KeyboardKeys> pressedKeys = EngineStates.KeyboardState.GetPressedKeys();
 
@@ -179,6 +198,11 @@ namespace RPGCreator.RTP
                     {
                         if (i > 0) sb.Append(", ");
                         sb.Append(pressedKeys[i]);
+                    }
+
+                    if (key == KeyboardKeys.D)
+                    {
+                        RuntimeServices.CameraService.Drag(new System.Numerics.Vector2(1, 0));
                     }
 
                     _noMapSelectedText.Text = sb.ToString();
@@ -227,6 +251,19 @@ namespace RPGCreator.RTP
             OnUpdate?.Invoke(gameTime.ElapsedGameTime);
             // GraphicalUiElement.CanvasHeight = (_graphics.PreferredBackBufferHeight);
             // GraphicalUiElement.CanvasWidth = (_graphics.PreferredBackBufferWidth);
+            
+            // If the game window size changes, we need to update the Camera viewport size.
+            var cameraEntity = RuntimeServices.CameraService.CameraEntity;
+            if (cameraEntity != null)
+            {
+                ref var cameraComponent = ref cameraEntity.GetComponent<CameraComponent>();
+                if (cameraComponent.ViewportSize.Width != Window.ClientBounds.Width ||
+                    cameraComponent.ViewportSize.Height != Window.ClientBounds.Height)
+                {
+                    cameraComponent.ViewportSize = new(Window.ClientBounds.Width,
+                        Window.ClientBounds.Height);
+                }
+            }
 
             _mapEditing.Update(gameTime);
             Gum.Update(gameTime);
@@ -364,8 +401,8 @@ namespace RPGCreator.RTP
             OnDraw?.Invoke(gameTime.ElapsedGameTime);
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            _mapEditing.Draw();
-            _ecsWorld.Draw(gameTime.ElapsedGameTime);
+            // _mapEditing.Draw();
+            _ecsWorld.SystemManager.Draw(gameTime.ElapsedGameTime, _spriteBatch);
             
             //_spriteBatch.Begin();
 
@@ -413,6 +450,8 @@ namespace RPGCreator.RTP
             //_spriteBatch.End();
 
             Gum.Draw();
+            
+            
 
             base.Draw(gameTime);
         }

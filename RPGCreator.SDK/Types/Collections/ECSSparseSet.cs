@@ -39,7 +39,7 @@ public sealed class ECSSparseSet<T> : ISparseSet where T : IComponent
 
         if (Has(entityId))
         {
-            dense[sparse[entityId]] = component; // écrase l’ancien
+            dense[sparse[entityId]] = component;
             return ref dense[sparse[entityId]];
         }
 

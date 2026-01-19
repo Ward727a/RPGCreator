@@ -58,11 +58,11 @@ public class AvaloniaMouseBridge
             | (p.IsXButton1Pressed ? MouseButton.XButton1 : MouseButton.None)
             | (p.IsXButton2Pressed ? MouseButton.XButton2 : MouseButton.None);
         
-        Logger.Debug("Mouse Update - Window Pos: ({0}, {1}), Local Pos: ({2}, {3}), Buttons: {4}, Scroll: ({5}, {6})",
-            windowPoint.X, windowPoint.Y,
-            localPoint.X, localPoint.Y,
-            buttonsPressed,
-            _scrollAccumulatorX, _scrollAccumulatorY);
+        // Logger.Debug("Mouse Update - Window Pos: ({0}, {1}), Local Pos: ({2}, {3}), Buttons: {4}, Scroll: ({5}, {6})",
+        //     windowPoint.X, windowPoint.Y,
+        //     localPoint.X, localPoint.Y,
+        //     buttonsPressed,
+        //     _scrollAccumulatorX, _scrollAccumulatorY);
 
         var rawData = new RawMouseData
         {

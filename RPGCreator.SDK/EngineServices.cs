@@ -2,6 +2,7 @@
 using System.Numerics;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK.Assets;
+using RPGCreator.SDK.Assets.Definitions;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Parser.PrattFormula;
@@ -16,7 +17,7 @@ using RPGCreator.SDK.Types.Records;
 
 namespace RPGCreator.SDK;
 
-public interface IGameFactory
+public interface IGameFactory : IService
 {
     public void Register<TInst, TDef>(IAssetFactory<TInst, TDef> factory)
         where TInst : class
@@ -36,7 +37,7 @@ public interface IGameFactory
     public void ClearAll();
 }
 
-public interface IAssetsManager
+public interface IAssetsManager : IService
 {
     event Action<IAssetDef>? OnAssetRegistered;
     event Action<IAssetDef>? OnAssetUnregistered;
@@ -56,12 +57,12 @@ public interface IAssetsManager
     public bool TryGetPack(string? packName, [NotNullWhen(true)] out IAssetsPack? pack);
     public bool TryGetPack(Ulid packId, [NotNullWhen(true)] out IAssetsPack? pack);
     public IAssetsPack GetPack(Ulid packId);
-    public void AddNewAssetLocation(Ulid assetId, IAssetsPack pack, string relativePath, string typeName);
+    public void AddNewAssetLocation(Ulid assetId, IAssetsPack? pack, string relativePath, string typeName, bool isTransient = false);
     public List<IAssetsPack> GetLoadedPacks();
     public IEnumerable<PackSearchResult> SearchAllPacks<T>();
 }
 
-public interface IProjectsManager
+public interface IProjectsManager : IService
 {
     List<BaseProjectLink> GetAllProjects();
     public IBaseProject? CreateProject(string projectName, string projectPath);
@@ -70,12 +71,12 @@ public interface IProjectsManager
     public void CloseCurrentProject();
 }
 
-public interface IECSService
+public interface IECSService : IService
 {
     public IECSWorld CreateWorld();
 }
 
-public interface IBrushManager
+public interface IBrushManager : IService
 {
     public void ClickAt(Vector2 at);
     public void PreviewAt(Vector2 at);
@@ -84,17 +85,110 @@ public interface IBrushManager
 }
 
 
+public class EngineServicesProvider : IServiceProvider
+{
+    private readonly Dictionary<Type, IService> _services = new();
+    
+    public T GetService<T>() where T : class, IService
+    {
+        return (T)_services[typeof(T)];
+    }
+
+    public bool TryGetService<T>([NotNullWhen(true)] out T? service) where T : class, IService
+    {
+        if (_services.TryGetValue(typeof(T), out var svc))
+        {
+            service = (T)svc;
+            return true;
+        }
+        
+        service = null;
+        return false;
+    }
+
+    public void RegisterService<T>(T service) where T : class, IService
+    {
+        _services[typeof(T)] = service;
+    }
+}
+
 public static class EngineServices
 {
-    public static IGameFactory GameFactory { get; set; } = null!;
-    public static IAssetsManager AssetsManager { get; set; } = null!;
-    public static IBrushManager BrushManager { get; set; } = null!;
-    public static ISerializerService SerializerService { get; set; } = null!;
-    public static IAssetTypeRegistry AssetTypeRegistry { get; set; } = null!;
-    public static IResourceService ResourcesService { get; set; } = null!;
-    public static IProjectsManager ProjectsManager { get; set; } = null!;
-    public static IGraphService GraphService { get; set; } = null!;
-    public static IGraphNodeScanner GraphNodeScanner { get; set; } = null!;
-    public static IPrattFormulaService PrattFormulaService { get; set; } = null!;
-    public static IECSService ECS { get; set; } = null!;
+    private static readonly EngineServicesProvider ServiceProvider = new();
+    
+    // ReSharper disable MemberCanBePrivate.Global
+    public static void RegisterService<T>(T service) where T : class, IService
+    {
+        ServiceProvider.RegisterService(service);
+    }
+    public static T GetService<T>() where T : class, IService
+    {
+        if (ServiceProvider.TryGetService<T>(out var service))
+        {
+            return service;
+        }
+
+        throw new InvalidOperationException($"[Engine] Critical Service Missing: {typeof(T).Name}. Make sure it's registered during engine initialization.");
+    }
+
+    public static IGameFactory GameFactory
+    {
+        get => GetService<IGameFactory>();
+        set => RegisterService(value);
+    }
+
+    public static IAssetsManager AssetsManager
+    {
+        get => GetService<IAssetsManager>();
+        set => RegisterService(value);
+    }
+
+    public static IBrushManager BrushManager
+    {
+        get => GetService<IBrushManager>();
+        set => RegisterService(value);
+    }
+
+    public static ISerializerService SerializerService
+    {
+        get => GetService<ISerializerService>();
+        set => RegisterService(value);
+    }
+
+    public static IAssetTypeRegistry AssetTypeRegistry
+    {
+        get => GetService<IAssetTypeRegistry>();
+        set => RegisterService(value);
+    }
+    
+    public static IResourceService ResourcesService
+    {
+        get => GetService<IResourceService>();
+        set => RegisterService(value);
+    }
+    public static IProjectsManager ProjectsManager
+    {
+        get => GetService<IProjectsManager>();
+        set => RegisterService(value);
+    }
+    public static IGraphService GraphService
+    {
+        get => GetService<IGraphService>();
+        set => RegisterService(value);
+    }
+    public static IGraphNodeScanner GraphNodeScanner
+    {
+        get => GetService<IGraphNodeScanner>();
+        set => RegisterService(value);
+    }
+    public static IPrattFormulaService PrattFormulaService
+    {
+        get => GetService<IPrattFormulaService>();
+        set => RegisterService(value);
+    }
+    public static IECSService ECS
+    {
+        get => GetService<IECSService>();
+        set => RegisterService(value);
+    }
 }

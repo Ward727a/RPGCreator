@@ -33,6 +33,9 @@ public class MapDefinition : IMapDef
     
     public MapDefinition()
     {
+        Unique = Ulid.NewUlid();
+        Name = "New Map";
+        Description = "";
     }
 
     public MapDefinition(string mapName, string mapDescription = "")
@@ -40,6 +43,12 @@ public class MapDefinition : IMapDef
         Unique = Ulid.NewUlid();
         Name = mapName;
         Description = mapDescription;
+    }
+
+    public void Init(Ulid id)
+    {
+        if (id != Ulid.Empty) return;
+        Unique = id;
     }
     
     public bool AddMap(IMapDef mapDef)

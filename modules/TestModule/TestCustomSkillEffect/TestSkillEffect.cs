@@ -9,7 +9,7 @@ namespace TestModule.TestCustomSkillEffect;
 [SkillEffect]
 public class TestSkillEffect : ISkillEffect
 {
-    public Ulid Unique { get; } = Ulid.NewUlid();
+    public Ulid Unique { get; private set; }
     public URN Urn { get; } = new URN("test_module", "skill_effect","test_skill_effect");
     public string DisplayName { get; } = "Test Skill Effect";
 
@@ -74,4 +74,8 @@ public class TestSkillEffect : ISkillEffect
 
     public bool IsDirty { get; set; }
     public bool IsTransient { get; set; }
+    public void Init(Ulid id)
+    {
+        Unique = id;
+    }
 }

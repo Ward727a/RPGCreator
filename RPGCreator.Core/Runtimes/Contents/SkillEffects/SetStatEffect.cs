@@ -13,7 +13,7 @@ namespace RPGCreator.Core.Runtimes.Contents.SkillEffects;
 [SkillEffect]
 public class SetStatEffect : ISkillEffect
 {
-    public Ulid Unique { get; } = Ulid.NewUlid();
+    public Ulid Unique { get; private set; }
     public URN Urn { get; } = new URN("skill_effect","set_stat");
     public string DisplayName { get; } = "Set Stat";
     public Dictionary<string, object> Properties { get; set; } = new Dictionary<string, object>()
@@ -79,6 +79,12 @@ public class SetStatEffect : ISkillEffect
         {
             Properties = new Dictionary<string, object>(Properties),
         };
+    }
+
+    public void Init(Ulid id)
+    {
+        if(Unique != Ulid.Empty) return;
+        Unique = id;
     }
 
     public bool IsDirty { get; set; }

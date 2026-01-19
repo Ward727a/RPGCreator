@@ -3,14 +3,14 @@
 // RPG Creator - Open-source RPG Engine.
 // (c) 2025 Ward
 // 
-// This file is part of RPG Creator and is distributed under the MIT License.
-// You are free to use, modify, and distribute this file under the terms of the MIT License.
+// This file is part of RPG Creator and is distributed under the Apache 2.0 License.
+// You are free to use, modify, and distribute this file under the terms of the Apache 2.0 License.
 // See LICENSE for details.
 // 
 // ---
 // 
-// Ce fichier fait partie de RPG Creator et est distribué sous licence MIT.
-// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence MIT.
+// Ce fichier fait partie de RPG Creator et est distribué sous licence Apache 2.0.
+// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence Apache 2.0.
 // Voir LICENSE pour plus de détails.
 // 
 // Contact:
@@ -31,6 +31,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RPGCreator.Core.Common;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Logging;
 using Serilog;
 
 namespace RPGCreator.Core
@@ -55,6 +56,8 @@ namespace RPGCreator.Core
     public class EngineModules
     {
 
+        private readonly ScopedLogger _logger = Logger.ForContext<EngineModules>();
+        
         // This is the SHA256 checksum of the module DLL file to ensure integrity.
         // Those should be updated with each new module version. (even for small changes!)
         private readonly List<string> CHECKSUM_INTERNAL_MODULES =
@@ -67,11 +70,11 @@ namespace RPGCreator.Core
         internal EngineModules()
         {                   
             
-            Log.Information($"EngineModules initialized.");
+            _logger.Info($"EngineModules initialized.");
 
             if (!Directory.Exists(MODULES_PATH))
             {
-                Log.Error("Engine modules directory not found.");
+                _logger.Error("Engine modules directory not found.");
                 return;
             }
             foreach (var directory in Directory.GetDirectories(MODULES_PATH))
@@ -94,18 +97,18 @@ namespace RPGCreator.Core
                             {
                                 var module = (IEngineModule)Activator.CreateInstance(type)!;
                                 module.Initialize();
-                                Log.Information(
+                                _logger.Info(
                                     $"Module '{module.Name}' v{module.Version} by {module.Author} initialized.");
                             }
                         }
                         else
                         {
-                            Log.Warning($"Module file '{file}' failed integrity check and will not be loaded.");
+                            _logger.Warning($"Module file '{file}' failed integrity check and will not be loaded.");
                         }
                     }
                     catch (Exception ex)
                     {
-                        Log.Error(ex, $"Failed to load module from file '{file}'.");
+                        _logger.Error($"Failed to load module from file '{file}'. Exception: {ex}");
                     }
                 }
             }

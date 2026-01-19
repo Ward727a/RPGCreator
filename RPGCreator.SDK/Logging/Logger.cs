@@ -4,6 +4,10 @@ public static class Logger
 {
     // ReSharper disable once MemberCanBePrivate.Global
     public static ILoggerImplementation? Implementation { get; set; } = new DefaultLogger();
+    public static ScopedLogger ForContext<T>()
+    {
+        return new ScopedLogger(typeof(T).FullName ?? "Unknown", typeof(T).Assembly.GetName().Name ?? "Unknown");
+    }
     
     public static void Trace(string message, params object[] args)
     {
@@ -15,8 +19,6 @@ public static class Logger
         Implementation?.Write(LogLevel.Info, message, args);
     }
     
-    public static void Information(string message, params object[] args) => Info(message, args);
-    
     public static void Warning(string message, params object[] args)
     {
         Implementation?.Write(LogLevel.Warning, message, args);
@@ -25,6 +27,11 @@ public static class Logger
     public static void Error(string message, params object[] args)
     {
         Implementation?.Write(LogLevel.Error, message, args);
+    }
+    
+    public static void Error(Exception exception, string message, params object[] args)
+    {
+        Implementation?.Write(LogLevel.Error, $"{message} | Exception: {exception}", args);
     }
     
     public static void Debug(string message, params object[] args)

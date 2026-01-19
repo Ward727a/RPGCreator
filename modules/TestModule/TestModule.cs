@@ -15,7 +15,7 @@ public class TestModule : IEngineModule
     public void Initialize()
     {
         // Initialization code here
-        Logger.Information("Test Module initialized.");
+        Logger.Info("Test Module initialized.");
         
         // Register a UI extension for the Assets Manager region.
         //

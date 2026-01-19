@@ -3,14 +3,14 @@
 // RPG Creator - Open-source RPG Engine.
 // (c) 2025 Ward
 // 
-// This file is part of RPG Creator and is distributed under the MIT License.
-// You are free to use, modify, and distribute this file under the terms of the MIT License.
+// This file is part of RPG Creator and is distributed under the Apache 2.0 License.
+// You are free to use, modify, and distribute this file under the terms of the Apache 2.0 License.
 // See LICENSE for details.
 // 
 // ---
 // 
-// Ce fichier fait partie de RPG Creator et est distribué sous licence MIT.
-// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence MIT.
+// Ce fichier fait partie de RPG Creator et est distribué sous licence Apache 2.0.
+// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence Apache 2.0.
 // Voir LICENSE pour plus de détails.
 // 
 // Contact:
@@ -52,14 +52,14 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
 
             if(!EngineStates.BrushState.IsDrawing)
             {
-                Log.Error("Drawing is not enabled. Please enable drawing in the toolbar before clicking.");
+                // Log.Error("Drawing is not enabled. Please enable drawing in the toolbar before clicking.");
                 return;
             }
 
             // Convert the point to a valid position in the tile width and height
             if (EngineStates.EditorState.CurrentTile == null && EngineStates.BrushState.CurrentObjectToPaint == null)
             {
-                Log.Error("No tile is currently selected. Please select a tile before clicking.");
+                // Log.Error("No tile is currently selected. Please select a tile before clicking.");
                 return;
             }
 
@@ -78,7 +78,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
             Log.Information($"Brush clicked at: {at}");
             if(EngineStates.BrushState.CurrentBrush == null || EngineStates.BrushState.CurrentBrush is not IBrush brush)
             {
-                Log.Error("No brush type is currently selected. Please select a brush type before clicking.");
+                // Log.Error("No brush type is currently selected. Please select a brush type before clicking.");
                 return;
             }
 
@@ -147,7 +147,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
         {
             if (EngineStates.EditorState.CurrentTile == null)
             {
-                Log.Error("No tile is currently selected. Please select a tile before clicking.");
+                // Log.Error("No tile is currently selected. Please select a tile before clicking.");
                 return Vector2.Zero;
             }
             var tileWidth = EngineStates.EditorState.CurrentTile.TilesetDef.TileWidth;

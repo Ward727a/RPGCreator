@@ -15,7 +15,8 @@ public class EngineLogger : ILoggerImplementation
             .WriteTo.Console()
             .CreateLogger();
         
-        Log.Information($"EngineLogger initialized.");
+        // Here we need to add manually the assembly name because this class CANNOT use ScopedLogger as it would create a circular dependency.
+        Log.Information("[RPGCreator.Core.EngineLogger.Constructor] EngineLogger initialized.");
     }
     public void Write(LogLevel level, string message, params object[] args)
     {

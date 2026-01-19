@@ -6,9 +6,9 @@ namespace RPGCreator.Core;
 
 public class EngineResourcesService : IResourceService
 {
+    private readonly ScopedLogger _logger = Logger.ForContext<EngineResourcesService>();
     private Dictionary<Type, IResourceLoader> _resourceLoaders = new();
     private Dictionary<string, object> _resourceCache = new();
-    private Dictionary<string, int> _resourceReferenceCounts = new();
     
     public T? Load<T>(string path) where T : class
     {
@@ -25,7 +25,7 @@ public class EngineResourcesService : IResourceService
             }
             return loadedResource;
         }
-        Logger.Error($"No resource loader registered for type {typeof(T).FullName}");
+        _logger.Error($"No resource loader registered for type {typeof(T).FullName}");
         return null;
     }
 

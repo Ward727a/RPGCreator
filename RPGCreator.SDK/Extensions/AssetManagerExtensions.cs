@@ -1,4 +1,5 @@
-﻿using RPGCreator.SDK.Types.Interfaces;
+﻿using RPGCreator.SDK.Assets.Definitions;
+using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.SDK.Extensions;
 

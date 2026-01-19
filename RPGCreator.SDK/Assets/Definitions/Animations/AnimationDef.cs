@@ -10,7 +10,7 @@ public class AnimationDef : IAssetDef, ISerializable, IDeserializable
 {
     
     public string Name { get; set; } = "New Animation";
-    public Ulid Unique { get; set; }
+    public Ulid Unique { get; private set; }
     public URN Urn { get; set; }
     private Ulid _spriteSheetId;
 
@@ -41,6 +41,12 @@ public class AnimationDef : IAssetDef, ISerializable, IDeserializable
     {
         Unique = Ulid.NewUlid();
         Urn = new URN("rpgcreator", "animation", Unique.ToString());
+    }
+
+    public void Init(Ulid id)
+    {
+        if (id != Ulid.Empty) return;
+        Unique = id;
     }
 
     public SerializationInfo GetObjectData()

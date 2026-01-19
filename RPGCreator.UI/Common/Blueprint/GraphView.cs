@@ -114,7 +114,7 @@ public sealed class GraphView : Control
         if (e.GetCurrentPoint(_hitbox).Properties.IsRightButtonPressed)
         {
             _rightClicking = true;
-            Logger.Information("GraphView.OnPointerDown: Right click detected, clearing link state.");
+            Logger.Info("GraphView.OnPointerDown: Right click detected, clearing link state.");
             e.Handled = true;
         }
         return;
@@ -337,7 +337,7 @@ public sealed class GraphView : Control
         // Max zoom out to 0.1, max zoom in to 5
         if (_view.M11 * f < 0.1 || _view.M11 * f > 5)
         {
-            Logger.Debug("GraphView.OnWheel: Zoom limit reached, ignoring.");
+            Logger.Debug("GraphView.OnWheel: Zoom Limit reached, ignoring.");
             return;
         }
         _view = Matrix.CreateScale(f, f) * _view;
@@ -376,7 +376,7 @@ public sealed class GraphView : Control
             _rightClicking = false;
             // Right click released, and wasn't moving the view, We need to show the context menu
             var pos = e.GetPosition(_overlay);
-            Logger.Information("GraphView.OnPointerUp: Right click released at {Position}, showing context menu.", pos);
+            Logger.Info("GraphView.OnPointerUp: Right click released at {Position}, showing context menu.", pos);
             var menu = new GraphViewCtxMenu(_doc);
             
             var newPos = pos;

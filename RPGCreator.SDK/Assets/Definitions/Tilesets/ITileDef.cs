@@ -1,7 +1,10 @@
+using System.Drawing;
 using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Types;
+using RPGCreator.SDK.Types.Collections;
 using RPGCreator.SDK.Types.Interfaces;
+using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets;
 
@@ -22,8 +25,10 @@ public interface ITileDef : ILayerElem, IAssetDef
     public BaseTilesetDef TilesetDef { get; } // The tileset this tile belongs to
     public Rect UV { get; }
     public TileFlip Flip { get; set; }
+    public RuntimeBag Tags { get; } 
 
     public void UpdateTileset(BaseTilesetDef newTilesetDefinition);
+    
 
     public bool IsEqualTo(ITileDef other);
 }

@@ -9,15 +9,10 @@ using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps;
 
-public interface IMapLayerDef<TLayerElement> : IHasUniqueId, ISerializable, IDeserializable, IAssetDef
+public interface IMapLayerDef<TLayerElement> : IMapLayerDef
 {
     event EventHandler<(Vector2, TLayerElement)>? ElementAdded;
     event EventHandler<(Vector2,TLayerElement?)>? ElementRemoved;
-    Ulid Unique { get; }
-    URN Urn { get; }
-    string Name { get; set; }
-    int ZIndex { get; }
-    bool VisibleByDefault { get; set; }
     ReadOnlyDictionary<Vector2, TLayerElement> Elements { get; }
 
     /// <summary>
@@ -123,4 +118,11 @@ public interface IMapLayerDef<TLayerElement> : IHasUniqueId, ISerializable, IDes
     public Dictionary<Vector2, TLayerElement> GetSurroundingElements(Vector2 location, int radius = 1, int offset = 1);
 
     public void ClearElements();
+}
+
+public interface IMapLayerDef : IHasUniqueId, ISerializable, IDeserializable, IAssetDef
+{
+    string Name { get; set; }
+    int ZIndex { get; }
+    bool VisibleByDefault { get; set; }
 }

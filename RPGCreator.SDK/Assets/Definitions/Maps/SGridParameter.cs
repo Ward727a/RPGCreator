@@ -1,15 +1,18 @@
 using System.Drawing;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
+using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps;
 
 [SerializingType("SGridParameter")]
 public struct SGridParameter : ISerializable, IDeserializable
 {
-    public int CellWidth;
-    public int CellHeight;
+    public float CellWidth;
+    public float CellHeight;
 
+    public Size CellBorderSize => new Size(CellWidth, CellHeight);
+    
     public Color CellBorderColor;
 
 

@@ -40,6 +40,8 @@ public interface ISerializerFormatting
 public class EngineSerializer : ISerializerService
 {
     
+    private readonly ScopedLogger _logger = Logger.ForContext<EngineSerializer>();
+    
     private readonly JsonSerializerSettings _settings;
     
     public EngineSerializer()
@@ -82,19 +84,19 @@ public class EngineSerializer : ISerializerService
         var dataType = GetTypeFromJsonData(data);
         if(dataType == null && typeof(T) == typeof(object))
         {
-            Logger.Warning("[EngineSerializer.Deserialize] Could not determine the type from JSON data.");
+            _logger.Warning("Could not determine the type from JSON data.");
             dataType = typeof(object);
         }
         
         // TODO: Check how to determine the actual type BEFORE deserializing with Newtonsoft.Json, as otherwise we are deserializing an object of type 'Object' and not of the actual type.
         if(JsonConvert.DeserializeObject(data, dataType, _settings) is T deserializedObj)
         {
-            Logger.Information("[EngineSerializer.Deserialize] Successfully deserialized the object of type {type}.", dataType.Name);
+            _logger.Info("Successfully deserialized the object of type {type}.", args: dataType.Name);
             obj = deserializedObj;
         }
         else
         {
-            Logger.Error("[EngineSerializer.Deserialize] Could not deserialize object of type {DataType}.", dataType?.FullName);
+            _logger.Error("[EngineSerializer.Deserialize] Could not deserialize object of type {DataType}.", args: dataType?.FullName);
             obj = default!;
         }
         type = obj!.GetType();

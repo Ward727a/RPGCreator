@@ -96,7 +96,7 @@ public class SkillsEditorWindowControl : UserControl
         };
         saveButton.Click += (s, e) =>
         {
-            Logger.Information("Saving Skill Definition...");
+            Logger.Info("Saving Skill Definition...");
         };
         buttonsPanel.Children.Add(saveButton);
     }

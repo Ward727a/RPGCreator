@@ -3,14 +3,14 @@
 // RPG Creator - Open-source RPG Engine.
 // (c) 2025 Ward
 // 
-// This file is part of RPG Creator and is distributed under the MIT License.
-// You are free to use, modify, and distribute this file under the terms of the MIT License.
+// This file is part of RPG Creator and is distributed under the Apache 2.0 License.
+// You are free to use, modify, and distribute this file under the terms of the Apache 2.0 License.
 // See LICENSE for details.
 // 
 // ---
 // 
-// Ce fichier fait partie de RPG Creator et est distribué sous licence MIT.
-// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence MIT.
+// Ce fichier fait partie de RPG Creator et est distribué sous licence Apache 2.0.
+// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence Apache 2.0.
 // Voir LICENSE pour plus de détails.
 // 
 // Contact:
@@ -62,6 +62,8 @@ namespace RPGCreator.Core
     public class EngineCore
     {
 
+        private readonly ScopedLogger _logger = Logger.ForContext<EngineCore>();
+        
         public enum EEngineMode
         {
             EditorMode,
@@ -154,32 +156,32 @@ namespace RPGCreator.Core
             
             Managers.Init();
             
-            Log.Information("Starting scanning for blueprint opcodes handlers...");
+            _logger.Info("Starting scanning for blueprint opcodes handlers...");
             
             // Scan the assemblies for all blueprint opcodes handlers
             // This will register all the handlers in the graph table.
             GraphTable.ScanAssemblies();
             
-            Log.Information("Blueprint opcodes handlers scanning completed.");
-            Log.Information("Found {Count} handlers.", GraphTable.ValidOpcodes.Count);
+            _logger.Info("Blueprint opcodes handlers scanning completed.");
+            _logger.Info("Found {Count} handlers.", args: GraphTable.ValidOpcodes.Count);
             
-            Log.Information("Starting scanning for graph nodes...");
+            _logger.Info("Starting scanning for graph nodes...");
             
             // Scan the assemblies for all graph nodes
             // This will register all the nodes in the graph node registry.
             EngineServices.GraphNodeScanner.ScanCurrentAssembly();
-            Log.Information("Graph nodes scanning completed.");
-            Log.Information("Found {Count} nodes.", GraphNodeRegistry.GetAllNodes().Count);
+            _logger.Info("Graph nodes scanning completed.");
+            _logger.Info("Found {Count} nodes.", args: GraphNodeRegistry.GetAllNodes().Count);
             
-            Log.Information("Checking graph nodes and opcodes handlers consistency...");
+            _logger.Info("Checking graph nodes and opcodes handlers consistency...");
             // Check if all registered handlers have a corresponding node in the graph node registry.
 
             GraphTable.CheckHandlersAndNodesConsistency();
             
-            Log.Information("Graph nodes and opcodes handlers consistency check completed.");
-            Log.Information("Check above for any errors or warnings.");
+            _logger.Info("Graph nodes and opcodes handlers consistency check completed.");
+            _logger.Info("Check above for any errors or warnings.");
             
-            Log.Information("EngineCore initialized at {Time}.", DateTime.Now);
+            _logger.Info("EngineCore initialized at {Time}.", args: DateTime.Now);
 
             // Managers.Projects.CreateProject("test project new config", "C:\\Users\\Ward\\Desktop\\Test");
             

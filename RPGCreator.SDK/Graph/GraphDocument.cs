@@ -56,7 +56,7 @@ public sealed class GraphDocument : ISerializable, IDeserializable
         EngineServices.SerializerService.Serialize(this, out var serializedData);
         File.WriteAllText(toFile, serializedData, Encoding.UTF8);
         SavePath = toFile;
-        Logger.Information("GraphDocument saved to {toFile}", toFile);
+        Logger.Info("GraphDocument saved to {toFile}", toFile);
     }
     
     public static GraphDocument Load(string fromFile)

@@ -16,6 +16,8 @@ namespace RPGCreator.SDK.Assets.Definitions.Skills;
 public class GraphSkillEffect : ISkillEffect, IHasSavePath, ISerializable, IDeserializable
 {
     
+    public Ulid Unique { get; private set; }
+    public URN Urn { get; private set; }
     /// <summary>
     /// The pack identifier that this stat belongs to.
     /// </summary>
@@ -46,6 +48,12 @@ public class GraphSkillEffect : ISkillEffect, IHasSavePath, ISerializable, IDese
         Properties = new Dictionary<string, object>();
     }
 
+    public void Init(Ulid id)
+    {
+        if (id != Ulid.Empty) return;
+        Unique = id;
+    }
+
     public void SetPropertiesDescriptors(List<SkillEffectPropertyDescriptor> descriptors)
     {
         PropertyDescriptors = descriptors;
@@ -65,8 +73,6 @@ public class GraphSkillEffect : ISkillEffect, IHasSavePath, ISerializable, IDese
         
     }
     
-    public Ulid Unique { get; private set; }
-    public URN Urn { get; private set; }
     public object Clone()
     {
         var clone = new GraphSkillEffect(DisplayName)

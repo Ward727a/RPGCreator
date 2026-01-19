@@ -1,6 +1,6 @@
 ﻿namespace RPGCreator.SDK.Resources;
 
-public interface IResourceService
+public interface IResourceService : IService
 {
     T? Load<T>(string path) where T : class;
     

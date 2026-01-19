@@ -38,6 +38,12 @@ public class StatDefinition : IStatDef
         StatCapStatUnique = null;
         IsVisible = true;
     }
+
+    public void Init(Ulid id)
+    {
+        if (id != Ulid.Empty) return;
+        Unique = id;
+    }
     
     public IPrattFormula? StatCompiledFormula { get; set; }
     public string StatNonCompiledFormula { get; set; } = string.Empty;

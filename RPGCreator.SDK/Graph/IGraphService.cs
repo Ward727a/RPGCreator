@@ -3,7 +3,7 @@ using RPGCreator.Core.Types.Blueprint;
 
 namespace RPGCreator.SDK.Graph;
 
-public interface IGraphService
+public interface IGraphService : IService
 {
     bool Run(IGraphScript script, IGraphEnv env);
     IGraphEnv CreateEnvironment();

@@ -114,7 +114,7 @@ public sealed class GraphDocumentCompiler(GraphDocument doc)
             }
             
             Log.Information("Node {NodeId} ({NodeTitle}) compiled but has no instructions to execute.", nodeId, node.DisplayName);
-            Log.Information("Is this intended? If not, please check node implementation and ensure it emits instructions correctly.");
+            Log.Information("Is this intended? If not, please check node implementation and ensure it Emits instructions correctly.");
         }
 
         Log.Information("Starting to optimize register allocation for the instructions...");
