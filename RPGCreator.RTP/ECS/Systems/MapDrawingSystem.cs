@@ -50,7 +50,7 @@ public class MapDrawingSystem(GraphicsDevice graphicsDevice) : BaseMapDrawingSys
         if(MapService.CurrentLoadedMapDefinition == null)
             return;
         
-        var range = CameraService.GetVisibleChunkBounds();
+        var range = RuntimeServices.ChunkService.GetVisibleChunkBounds();
 
         foreach (var layer in MapService.CurrentLoadedMapDefinition.TileLayers)
         {
@@ -93,33 +93,7 @@ public class MapDrawingSystem(GraphicsDevice graphicsDevice) : BaseMapDrawingSys
     
     private void DrawDebugChunkBounds()
     {
-        var range = CameraService.GetVisibleChunkBounds();
-        
-        // Get numbers of chunks in view
-        var chunksInViewX = range.maxX - range.minX + 1;
-        var chunksInViewY = range.maxY - range.minY + 1;
-        
-        var totalChunks = chunksInViewX * chunksInViewY;
-        Logger.Debug($"Drawing debug for {totalChunks} chunks in view ({chunksInViewX} x {chunksInViewY})");
-
-        for(var x = range.minX; x <= range.maxX; x++)
-        {
-            for(var y = range.minY; y <= range.maxY; y++)
-            {
-                float tileSize = RuntimeServices.MapService.CurrentLoadedMapData.CellWidth;
-                int chunkSizeInTiles = LayerChunk.ChunkSize;
-                float visualSize = chunkSizeInTiles * tileSize;
-                RuntimeServices.RenderService.DrawDebugRect(
-                    new Vector2(
-                        x,
-                        y),
-                    new Size(
-                        visualSize,
-                        visualSize
-                    ),
-                    Color.White
-                );
-            }
-        }
+        RuntimeServices.ChunkService.DebugDrawChunkItemsGrid();
+        RuntimeServices.ChunkService.DebugDrawLoadedChunks();
     }
 }

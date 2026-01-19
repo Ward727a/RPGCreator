@@ -172,6 +172,7 @@ namespace RPGCreator.RTP
             
             RuntimeServices.MapService = new MapService();
             RuntimeServices.LayerService = new LayerService();
+            RuntimeServices.ChunkService = new ChunkService();
             RuntimeServices.CameraService = new CameraService();
             RuntimeServices.RenderService = new RenderService(GraphicsDevice, _spriteBatch);
 
@@ -202,7 +203,12 @@ namespace RPGCreator.RTP
 
                     if (key == KeyboardKeys.D)
                     {
-                        RuntimeServices.CameraService.Drag(new System.Numerics.Vector2(1, 0));
+                        RuntimeServices.CameraService.Drag(new System.Numerics.Vector2(32, 0));
+                    }
+                    
+                    if (key == KeyboardKeys.Q)
+                    {
+                        RuntimeServices.CameraService.Drag(new System.Numerics.Vector2(-32, 0));
                     }
 
                     _noMapSelectedText.Text = sb.ToString();
@@ -248,6 +254,7 @@ namespace RPGCreator.RTP
 
         protected override void Update(GameTime gameTime)
         {
+            RuntimeServices.ChunkService.UpdateLoadedChunk();
             OnUpdate?.Invoke(gameTime.ElapsedGameTime);
             // GraphicalUiElement.CanvasHeight = (_graphics.PreferredBackBufferHeight);
             // GraphicalUiElement.CanvasWidth = (_graphics.PreferredBackBufferWidth);
@@ -400,7 +407,7 @@ namespace RPGCreator.RTP
         {
             OnDraw?.Invoke(gameTime.ElapsedGameTime);
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
+// Dans ta boucle de rendu de debug
             // _mapEditing.Draw();
             _ecsWorld.SystemManager.Draw(gameTime.ElapsedGameTime, _spriteBatch);
             

@@ -19,6 +19,7 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Extensions;
@@ -333,23 +334,46 @@ public abstract class LayerChunk
     /// <param name="chunkX"></param>
     /// <param name="chunkY"></param>
     /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static long GetChunkId(long chunkX, long chunkY)
     {
-        return (chunkY << 32) | (chunkX & 0xFFFFFFFFL);
+        return (long)(((ulong)(uint)chunkX << 32) | (uint)chunkY);
     }
     
-    
-    public static Vector2 GetLocalPosition(int index)
+    /// <summary>
+    /// Deconstructs the given chunk ID into its chunk coordinates (chunkX, chunkY).<br/>
+    /// <br/>
+    /// This allows for efficient retrieval of chunk coordinates from a unique chunk ID.<br/>
+    /// <br/>
+    /// Note: This is strictly like <see cref="GetChunkCoordinate"/> but returns a tuple instead of a Vector2.<br/>
+    /// In fact, <see cref="GetChunkCoordinate"/> uses this method internally.
+    /// </summary>
+    /// <param name="chunkId"></param>
+    /// <returns>
+    /// A tuple containing the chunkX and chunkY coordinates.
+    /// </returns>
+    public static (long chunkX, long chunkY) DeconstructChunkId(long chunkId)
     {
-        if (index is < 0 or >= LocalElementsLength)
-            throw new ArgumentOutOfRangeException(nameof(index), $"Index must be between 0 and {LocalElementsLength}.");
-        
-        int localX = index & 31;
-        int localY = index >> 5;
-        
-        return new Vector2(localX, localY);
-    }
+        long x = chunkId >> 32;
 
+        long y = (int)(chunkId & 0xFFFFFFFF); 
+    
+        return (x, y);
+    }
+    
+    /// <summary>
+    /// Returns the chunk coordinates (chunkX, chunkY) for the given chunk ID as a Vector2.<br/>
+    /// <br/>
+    /// This allows for efficient retrieval of chunk coordinates from a unique chunk ID.
+    /// </summary>
+    /// <param name="index"></param>
+    /// <returns></returns>
+    public static Vector2 GetChunkCoordinate(long index)
+    {
+        var localPos = DeconstructChunkId(index);
+        return new Vector2(localPos.chunkX, localPos.chunkY);
+    }
+    
     public static Vector2 GetWorldPosition(long chunkId, int index)
     {
         if (index is < 0 or >= LocalElementsLength)

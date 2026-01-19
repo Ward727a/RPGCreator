@@ -58,6 +58,8 @@ public static class MonoGameMathExtensions
         if (Unsafe.SizeOf<System.Numerics.Vector3>() != Unsafe.SizeOf<Microsoft.Xna.Framework.Vector3>())
             throw new NotSupportedException("Vector3 size mismatch between System.Numerics and MonoGame.");
     }
+ 
+    #region Unsafe Conversions
     
     public static Microsoft.Xna.Framework.Matrix ToXnaFast(this System.Numerics.Matrix4x4 matrix)
     {
@@ -92,4 +94,23 @@ public static class MonoGameMathExtensions
     {
         return Unsafe.As<Microsoft.Xna.Framework.Vector3, Vector3>(ref vector);
     }
+    
+    #endregion
+    
+    // Here we have standard conversions that involves some copying, but are safer in case the memory layouts change in future versions.
+    // The "fast" suffix is kept for consistency, but these methods do involve some overhead due to copying.
+    #region Standard Conversions
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Microsoft.Xna.Framework.Color ToXnaFast(this System.Drawing.Color color)
+    {
+        return new Microsoft.Xna.Framework.Color(color.R, color.G, color.B, color.A);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static System.Drawing.Color ToSystemFast(this Microsoft.Xna.Framework.Color color)
+    {
+        return System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
+    }
+    
+    #endregion
 }

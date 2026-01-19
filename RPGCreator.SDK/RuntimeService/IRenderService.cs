@@ -49,5 +49,26 @@ public interface IRenderService : IService
     /// <param name="worldPos">World position where the rectangle should be drawn.</param>
     /// <param name="size">Size of the rectangle to be drawn.</param>
     /// <param name="color">Color of the rectangle outline.</param>
-    void DrawDebugRect(Vector2 worldPos, Size size, Color color);
+    /// <param name="thickness">Thickness of the rectangle outline.</param>
+    void DrawDebugRect(Vector2 worldPos, Size size, Color? color = null, float thickness = 2f);
+    
+    /// <summary>
+    /// Draws a debug line between two points with specified thickness and color.<br/>
+    /// This is useful for visualizing paths, directions, and other debug information during development.
+    /// </summary>
+    /// <param name="startPos">The starting position of the line.</param>
+    /// <param name="endPos">The ending position of the line.</param>
+    /// <param name="thickness">The thickness of the line.</param>
+    /// <param name="color">The color of the line.</param>
+    void DrawDebugLine(Vector2 startPos, Vector2 endPos, float thickness = 1f, Color? color = null);
+    
+    /// <summary>
+    /// Draws a debug point at the specified position with given size and color.<br/>
+    /// This is useful for visualizing specific points of interest during development.
+    /// </summary>
+    /// <param name="position">The position of the point.</param>
+    /// <param name="color">The color of the point.</param>
+    /// <param name="size">The size of the point.</param>
+    /// <param name="thickness">The thickness of the point outline.</param>
+    void DrawDebugPoint(Vector2 position, Color? color = null, float size = 4f, float thickness = 2f);
 }

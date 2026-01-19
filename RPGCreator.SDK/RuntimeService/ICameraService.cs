@@ -158,19 +158,6 @@ public interface ICameraService : INotifyPropertyChanged, INotifyPropertyChangin
     /// </summary>
     void UnlinkFromEntity();
 
-    /// <summary>
-    /// This method returns the bounds of the visible chunks based on the current camera position and zoom level.<br/>
-    /// The returned values are the minimum and maximum X and Y coordinates of the chunks that are currently visible on the screen.<br/>
-    /// This is useful for optimizing rendering and processing by only focusing on the chunks that are within the camera's view.
-    /// </summary>
-    /// <returns>
-    /// A tuple containing the minimum and maximum X and Y coordinates of the visible chunks:<br/>
-    /// - minX: The minimum X coordinate of the visible chunks.<br/>
-    /// - maxX: The maximum X coordinate of the visible chunks.<br/>
-    /// - minY: The minimum Y coordinate of the visible chunks.<br/>
-    /// - maxY: The maximum Y coordinate of the visible chunks.
-    /// </returns>
-    (long minX, long maxX, long minY, long maxY) GetVisibleChunkBounds();
     
     Matrix4x4 GetViewMatrix();
 }

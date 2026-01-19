@@ -26,14 +26,14 @@ namespace RPGCreator.RTP.Editor.Components
             // This could include setting up layers, properties, and other map-related functionalities
         }
 
-        protected void RegisterEvents()
+        protected static void RegisterEvents()
         {
             // EngineCore.Instance.Managers.Brush.Event.ClickedAt += Brush_ClickedAt;
             // EngineCore.Instance.Managers.Brush.Event.PreviewAt += Brush_PreviewAt;
             // EngineCore.Instance.Managers.Brush.Event.ClearPreview += Brush_ClearPreview;
         }
 
-        private void Brush_ClearPreview()
+        private static void Brush_ClearPreview()
         {
             // if (MapInstance == null)
             // {
@@ -67,7 +67,7 @@ namespace RPGCreator.RTP.Editor.Components
 
         }
 
-        protected bool HasMap()
+        protected static bool HasMap()
         {
             // return MapInstance != null;
             return true;
@@ -140,7 +140,7 @@ namespace RPGCreator.RTP.Editor.Components
         /// This methods is used to draw a previews of the tile that is currently selected on the grid / map editor.<br/>
         /// This should always be called at last, after all the other components have been drawn.<br/>
         /// </summary>
-        protected void DrawTilePreview()
+        protected static void DrawTilePreview()
         {
 
         }

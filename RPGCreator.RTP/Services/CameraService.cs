@@ -157,7 +157,7 @@ public class CameraService : ObservableObject, ICameraService
     public void Drag(Vector2 delta)
     {
         var deltaVectorSized = new Vector2(delta.X / _cellSize.Width, delta.Y / _cellSize.Height);
-        Position += new Vector2(10,0) / ZoomLevel;
+        Position += new Vector2(1*delta.X,0) / ZoomLevel;
     }
 
     public void MoveTo(Vector2 newPosition)
@@ -196,31 +196,12 @@ public class CameraService : ObservableObject, ICameraService
         LinkedEntity = null;
         IsLinkedToEntity = false;
     }
-    public (long minX, long maxX, long minY, long maxY) GetVisibleChunkBounds()
-    {
-        float tileSize = _cellSize.Width;
-
-        var halfWidth = (ViewportSize.Width / 2f) / (ZoomLevel * tileSize);
-        var halfHeight = (ViewportSize.Height / 2f) / (ZoomLevel * tileSize);
-
-        var left = Position.X - halfWidth;
-        var right = Position.X + halfWidth;
-        var top = Position.Y - halfHeight;
-        var bottom = Position.Y + halfHeight;
-
-        return (
-            minX: (long)Math.Floor(left / LayerChunk.ChunkSize),
-            maxX: (long)Math.Floor(right / LayerChunk.ChunkSize),
-            minY: (long)Math.Floor(top / LayerChunk.ChunkSize),
-            maxY: (long)Math.Floor(bottom / LayerChunk.ChunkSize)
-        );
-    }
     
     public Matrix4x4 GetViewMatrix()
     {
         var viewportCenter = new Vector2(ViewportSize.Width / 2f, ViewportSize.Height / 2f);
 
-        return Matrix4x4.CreateTranslation(new Vector3(-Position.X * _cellSize.Width, -Position.Y * _cellSize.Height, 0)) *
+        return Matrix4x4.CreateTranslation(new Vector3(-Position.X, -Position.Y, 0)) *
                Matrix4x4.CreateScale(new Vector3(ZoomLevel, ZoomLevel, 1)) *
                Matrix4x4.CreateTranslation(new Vector3(viewportCenter.X, viewportCenter.Y, 0));
     }

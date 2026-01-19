@@ -18,11 +18,13 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Numerics;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended;
 using RenderingLibrary.Graphics;
 using RPGCreator.Core.Types.Map.Chunks;
 using RPGCreator.RTP.Extensions;
@@ -53,17 +55,15 @@ public class RenderService : IRenderService
             _cellSize = new(loadedMapData.CellWidth, loadedMapData.CellHeight);
             _cellSizeAsVector = _cellSize;
         };
-        _pixel = new Texture2D(graphicsDevice, 1, 1);
-        _pixel.SetData(new[] { Microsoft.Xna.Framework.Color.White });
     }
 
     public void DrawTile(ITileDef tileDef, Vector2 worldPosition)
     {
         var camera = RuntimeServices.CameraService;
-        float zoom = camera.ZoomLevel;
+        var zoom = camera.ZoomLevel;
 
-        Vector2 worldPixels = worldPosition * _cellSizeAsVector;
-        Texture2D texture = GetTilesetTexture(tileDef.TilesetDef);
+        var worldPixels = worldPosition * _cellSizeAsVector;
+        var texture = GetTilesetTexture(tileDef.TilesetDef);
         
         Rectangle sourceRect;
         if (tileDef.Tags.TryGet<Rectangle>(out var rect))
@@ -99,25 +99,84 @@ public class RenderService : IRenderService
         
     }
 
-    private readonly Texture2D _pixel;
-    public void DrawDebugRect(Vector2 worldPos, Size size, Color color)
-    { 
+    public void DrawDebugRect(Vector2 worldPos, Size size, Color? color = null, float thickness = 2f)
+    {
         var camera = RuntimeServices.CameraService;
-        float zoom = camera.ZoomLevel;
+        var adjustedThickness = thickness / camera.ZoomLevel;
         
-        Vector2 worldPixels = worldPos * (float)LayerChunk.ChunkSize * _cellSizeAsVector;
-        int w = (int)(size.Width * _cellSize.Width);
-        int h = (int)(size.Height * _cellSize.Height);
+        var w = (int)(size.Width);
+        var h = (int)(size.Height);
 
-        var xnaColor = new Microsoft.Xna.Framework.Color(color.R, color.G, color.B, color.A);
+        var finalColor = color??Color.BlueViolet;
+        var xnaColor = finalColor.ToXnaFast();
 
-        spriteBatch.Draw(_pixel, new Rectangle((int)worldPixels.X, (int)worldPixels.Y, w, 2), xnaColor); // Haut
-        spriteBatch.Draw(_pixel, new Rectangle((int)worldPixels.X, (int)worldPixels.Y + h, w, 2), xnaColor); // Bas
-        spriteBatch.Draw(_pixel, new Rectangle((int)worldPixels.X, (int)worldPixels.Y, 2, h), xnaColor); // Gauche
-        spriteBatch.Draw(_pixel, new Rectangle((int)worldPixels.X + w, (int)worldPixels.Y, 2, h), xnaColor); // Droite
+        spriteBatch.DrawRectangle(
+            new Rectangle(
+                (int)worldPos.X,
+                (int)worldPos.Y,
+                w,
+                h
+            ),
+            xnaColor,
+            adjustedThickness
+        );
     }
-    
-    
+
+    public void DrawDebugLine(Vector2 startPos, Vector2 endPos, float thickness = 1, Color? color = null)
+    {
+        
+        var camera = RuntimeServices.CameraService;
+        var adjustedThickness = thickness / camera.ZoomLevel;
+        
+        var finalColor = color??Color.Red;
+        var xnaColor = finalColor.ToXnaFast();
+        
+        spriteBatch.DrawLine(
+            startPos.ToXnaFast(),
+            endPos.ToXnaFast(),
+            xnaColor,
+            adjustedThickness
+        );
+    }
+
+    public void DrawDebugPoint(Vector2 position, Color? color = null, float size = 4, float thickness = 2f)
+    {
+        var camera = RuntimeServices.CameraService;
+        var adjustedSize = size / camera.ZoomLevel;
+        var adjustedThickness = thickness / camera.ZoomLevel;
+        
+        var finalColor = color??Color.GreenYellow;
+        var xnaColor = finalColor.ToXnaFast();
+        
+        spriteBatch.DrawCircle(
+            position.ToXnaFast(),
+            adjustedSize / 2,
+            6,
+            xnaColor,
+            adjustedThickness
+        );
+    }
+    //
+    // public void DrawDebugString(string text, Vector2 position, Color? color = null, float scale = 1f)
+    // {
+    //     var finalColor = color ?? Color.White;
+    //     var xnaColor = finalColor.ToXnaFast();
+    //
+    //     var font = RuntimeServices.FontService.DefaultFont;
+    //     spriteBatch.DrawString(
+    //         font,
+    //         text,
+    //         position.ToXnaFast(),
+    //         xnaColor,
+    //         0f,
+    //         Vector2.Zero,
+    //         scale,
+    //         SpriteEffects.None,
+    //         0f
+    //     );
+    // }
+
+
     #region Helpers
     
     private BaseTilesetDef? _lastTilesetDef;

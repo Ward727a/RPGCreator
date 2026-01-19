@@ -39,6 +39,9 @@ public static class SystemManagerExtensions
         {
             drawingSystem.Update(deltaTime);
         }
+        var render = RuntimeServices.RenderService;
+        render.DrawDebugLine(new System.Numerics.Vector2(-10000, 0), new System.Numerics.Vector2(10000, 0), 2f, Color.Red.ToSystemFast());
+        render.DrawDebugLine(new System.Numerics.Vector2(0, -10000), new Vector2(0, 10000).ToNumerics(), 2f, Color.Green.ToSystemFast());
         
         spriteBatch.End();
     }

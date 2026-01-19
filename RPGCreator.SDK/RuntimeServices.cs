@@ -91,4 +91,10 @@ public static class RuntimeServices
         get => GetService<IRenderService>();
         set => RegisterService(value);
     }
+    
+    public static IChunkService ChunkService
+    {
+        get => GetService<IChunkService>();
+        set => RegisterService(value);
+    }
 }

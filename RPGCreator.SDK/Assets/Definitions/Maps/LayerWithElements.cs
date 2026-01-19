@@ -176,7 +176,7 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Vector2 GetElementLocalPosition(int elementIndex) 
-        => LayerChunk.GetLocalPosition(elementIndex);
+        => LayerChunk.GetChunkCoordinate(elementIndex);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Vector2 GetElementWorldPosition(long chunkId, int elementIndex) 
