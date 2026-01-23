@@ -33,10 +33,13 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
     /// <param name="location">Location to add the element at.</param>
     public void AddElement(TDef element, Vector2 location)
     {
+        var chunkPosition = LayerChunk.GetChunkPosition(location);
         var chunkId = LayerChunk.GetChunkId(location);
 
         var chunk = GetChunk(chunkId);
-        chunk.SetElement(location, element);
+        chunk.SetElement(chunkPosition, element);
+        
+        Logger.Debug("Placed element of type {ElementType} at location {Location} in chunk {ChunkId}.", args: [typeof(TDef).Name, location, chunkId]);
         
         ElementAdded?.Invoke(new LayerElementEventArgs(chunkId, location, element));
     }

@@ -2,12 +2,14 @@
 using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
+using RPGCreator.SDK.Types;
 
 namespace TestModule;
 
 public class TestModule : IEngineModule
 {
     public Version TargetEngineVersion { get; } = new Version(1, 0, 0);
+    public URN ModuleUrn { get; } = new("Ward727", "Module", "TestModule");
     public string Name { get; } = "Test Module";
     public string Version { get; } = "1.0.0";
     public string Author { get; } = "Your Name";
@@ -37,5 +39,10 @@ public class TestModule : IEngineModule
                 window.Background = Avalonia.Media.Brushes.LightGray;
             }
         });
+    }
+
+    public void Shutdown()
+    {
+        throw new NotImplementedException();
     }
 }

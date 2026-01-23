@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using RPGCreator.SDK.Assets.Definitions.Maps;
 
 namespace RPGCreator.SDK.RuntimeService;
 
@@ -98,6 +99,26 @@ public interface ILayerService : INotifyPropertyChanged, INotifyPropertyChanging
     public LayerData GetPreviousLayerData() => GetLayerData(PreviousLayerIndex);
     
     /// <summary>
+    /// Tries to add a new layer with the given definition.<br/>
+    /// Returns true if the layer was added successfully, false otherwise.
+    /// </summary>
+    /// <param name="layerDef">The definition of the layer to add.</param>
+    /// <returns>
+    /// True if the layer was added successfully, false otherwise.
+    /// </returns>
+    bool TryAddLayer(BaseLayerDef layerDef);
+    
+    /// <summary>
+    /// Tries to remove the layer at the given index.<br/>
+    /// Returns true if the layer was removed successfully, false otherwise.
+    /// </summary>
+    /// <param name="layerIndex">The index of the layer to remove.</param>
+    /// <returns>
+    /// True if the layer was removed successfully, false otherwise.
+    /// </returns>
+    bool TryRemoveLayer(int layerIndex);
+    
+    /// <summary>
     /// Returns the data of the layer at the given index or last layer data if the index is out of range.<br/>
     /// In the case where the index is out of range, it will also log a warning message.
     /// </summary>
@@ -106,4 +127,10 @@ public interface ILayerService : INotifyPropertyChanged, INotifyPropertyChanging
     /// <exception cref="NotImplementedException">Thrown if the RTP or game does not support this operation.</exception>
     /// <exception cref="InvalidOperationException">Thrown if no layers can be loaded/selected (ex: No Map Loaded).</exception>
     LayerData GetLayerData(int layerIndex);
+
+    /// <summary>
+    /// Returns the definition of the currently selected layer.
+    /// </summary>
+    /// <returns>The definition of the currently selected layer.</returns>
+    BaseLayerDef GetSelectedLayer();
 }

@@ -181,5 +181,12 @@ namespace RPGCreator.Core.Inputs.Mouse
         {
             return IsButtonReleased(buttonIndex) && WasButtonPressed(buttonIndex);
         }
+
+        public void ResetDeltas()
+        {
+            DeltaPosition = Vector2.Zero;
+            WheelDelta = 0;
+            HorizontalWheelDelta = 0;
+        }
     }
 }

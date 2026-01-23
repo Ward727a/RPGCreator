@@ -19,6 +19,7 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
 using Microsoft.Xna.Framework.Graphics;
@@ -29,6 +30,7 @@ using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Systems;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.RuntimeService;
 using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.RTP.ECS.Systems;
@@ -50,8 +52,10 @@ public class MapDrawingSystem(GraphicsDevice graphicsDevice) : BaseMapDrawingSys
         if(MapService.CurrentLoadedMapDefinition == null)
             return;
         
-        var range = RuntimeServices.ChunkService.GetVisibleChunkBounds();
+        var range = RuntimeServices.ChunkService.GetVisibleChunkBounds(IChunkService.ChunkLoadDistance);
 
+        List<(long X, long Y, long ID)> visibleChunks = new();
+        
         foreach (var layer in MapService.CurrentLoadedMapDefinition.TileLayers)
         {
             if(layer is not LayerWithElements<ITileDef> tileLayer)
@@ -62,11 +66,17 @@ public class MapDrawingSystem(GraphicsDevice graphicsDevice) : BaseMapDrawingSys
                 for(var y = range.minY; y <= range.maxY; y++)
                 {
                     var chunk = LayerChunk.GetChunkId(x, y);
+                    // if (chunk == -4)
+                    //     Logger.Debug("H");
+                    
+                    visibleChunks.Add((x, y, chunk));
 
                     DrawChunkTiles(chunk, tileLayer);
                 }
             }
         }
+        
+        // Logger.Debug("Visible chunks: {@chunks} AT CAMERA POSITION: {position}", args: [visibleChunks, RuntimeServices.CameraService.Position]);
         DrawDebugChunkBounds();
     }
     

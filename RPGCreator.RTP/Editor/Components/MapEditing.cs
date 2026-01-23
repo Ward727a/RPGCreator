@@ -7,11 +7,9 @@ namespace RPGCreator.RTP.Editor.Components
     public class MapEditing
     {
         public bool ShowGridInFront { get; set; } = false;
-        // public MapInstance? MapInstance;
         private SpriteBatch _sb;
 
         public Point _LastPreviewAt;
-        // public IBrushPreviewFeature? _LastPreviewBrush;
 
         private MapEditing()
         {
@@ -22,8 +20,6 @@ namespace RPGCreator.RTP.Editor.Components
         public MapEditing(SpriteBatch spriteBatchExtend) : this()
         {
             _sb = spriteBatchExtend;
-            // Initialize components related to map editing
-            // This could include setting up layers, properties, and other map-related functionalities
         }
 
         protected static void RegisterEvents()

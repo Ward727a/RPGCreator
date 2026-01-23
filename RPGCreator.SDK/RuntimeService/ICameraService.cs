@@ -157,6 +157,22 @@ public interface ICameraService : INotifyPropertyChanged, INotifyPropertyChangin
     /// The camera will no longer follow the entity's position and can be moved independently.
     /// </summary>
     void UnlinkFromEntity();
+    
+    /// <summary>
+    /// Converts a screen position to a world position based on the current camera settings.<br/>
+    /// This takes into account the camera's position, zoom level, and offset to accurately map screen coordinates to world coordinates.
+    /// </summary>
+    /// <param name="screenPosition">The screen position to convert.</param>
+    /// <returns></returns>
+    Vector2 ScreenToWorld(Vector2 screenPosition);
+    
+    /// <summary>
+    /// Converts a world position to a screen position based on the current camera settings.<br/>
+    /// This takes into account the camera's position, zoom level, and offset to accurately map world coordinates to screen coordinates.
+    /// </summary>
+    /// <param name="worldPosition">The world position to convert.</param>
+    /// <returns></returns>
+    Vector2 WorldToScreen(Vector2 worldPosition);
 
     
     Matrix4x4 GetViewMatrix();

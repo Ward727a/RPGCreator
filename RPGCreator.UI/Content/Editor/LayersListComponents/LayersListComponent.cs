@@ -227,32 +227,32 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                     }
                     
                     
-                    if(EngineStates.EditorState.CurrentMap == null)
+                    if(!RuntimeServices.MapService.HasLoadedMap)
                     {
                         return;
                     }
 
-                    layer.ZIndex = EngineStates.EditorState.CurrentMap.TileLayers.Count - 1; // Set ZIndex to the last index
+
+                    layer.ZIndex = EngineStates.EditorState.CurrentMap.TileLayers.Count; // Set ZIndex to the last index
                     // layer.ZIndexChanged += (value) =>
                     // {
                     //     RefreshComponents();
                     // };
 
-                    EngineStates.EditorState.CurrentMap?.AddLayer(layer);
-
-                    LayerItem newLayerItem = new LayerItem(layer);
-
-                    newLayerItem.LayerRemoved += () =>
+                    if (RuntimeServices.LayerService.TryAddLayer(layer))
                     {
-                        RefreshComponents();
-                    };
 
-                    LayersList.Items.Add(newLayerItem);
-                    LayersList.SelectedItem = newLayerItem;
+                        LayerItem newLayerItem = new LayerItem(layer);
 
-                    SelectedLayerText.Text = $"Selected Layer: {newLayerName}";
+                        newLayerItem.LayerRemoved += () => { RefreshComponents(); };
 
-                    EngineStates.EditorState.CurrentLayer = layer;
+                        LayersList.Items.Add(newLayerItem);
+                        LayersList.SelectedItem = newLayerItem;
+
+                        SelectedLayerText.Text = $"Selected Layer: {newLayerName}";
+
+                        RuntimeServices.LayerService.SelectLayer(RuntimeServices.LayerService.GetLastLayerIndex());
+                    }
 
                     popup.Close();
                 }

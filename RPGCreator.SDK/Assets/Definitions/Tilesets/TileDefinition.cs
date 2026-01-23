@@ -24,7 +24,7 @@ public class TileDefinition : ITileDef
     public Rect UV => new (new(PositionInTileset.X, PositionInTileset.Y), new(TilesetDef.TileWidth, TilesetDef.TileHeight));
     public TileFlip Flip { get; set; } = TileFlip.None;
     public BaseTilesetDef TilesetDef { get; private set; }
-    public RuntimeBag Tags { get; }
+    public RuntimeBag Tags { get; } = new RuntimeBag();
     
     public TileDefinition(Vector2 defaultPosition, Size sizeInTileset, Vector2 positionInTileset, BaseTilesetDef tilesetDef)
     {

@@ -397,15 +397,6 @@ namespace RPGCreator.UI.Content.Editor
         {
             _keyboardBridge.RegisterEvents(MonoGameScreen);
             _mouseBridge.RegisterEvents(MonoGameScreen);
-            MonoGameScreen.PointerEntered += (s, e) =>
-            {
-                game.CanUseMouse = true;
-            };
-
-            MonoGameScreen.PointerExited += (s, e) =>
-            {
-                game.CanUseMouse = false;
-            };
 
             MonoGameScreen.PointerPressed += MonoGameScreen_PointerPressed;
             MonoGameScreen.PointerReleased += MonoGameScreen_PointerReleased;
@@ -429,7 +420,7 @@ namespace RPGCreator.UI.Content.Editor
                 {
                     game.GraphicsDevice.PresentationParameters.BackBufferWidth = newWidth;
                     game.GraphicsDevice.PresentationParameters.BackBufferHeight = newHeight;
-                    game._graphics.ApplyChanges();
+                    game.Graphics.ApplyChanges();
                 }
 
                 if (game.Window.Position != newPos)

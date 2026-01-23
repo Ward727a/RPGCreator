@@ -33,8 +33,15 @@ public static class SystemManagerExtensions
     {        
         var drawingSystems = self.GetDrawingSystems();
         
-        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, transformMatrix: RuntimeServices.CameraService.GetViewMatrix().ToXnaFast());
-
+        spriteBatch.Begin(
+            SpriteSortMode.Deferred, 
+            BlendState.AlphaBlend, 
+            SamplerState.PointClamp, 
+            DepthStencilState.None, 
+            RasterizerState.CullNone, // Force le rendu même si MonoGame hésite
+            null, 
+            transformMatrix: RuntimeServices.CameraService.GetViewMatrix().ToXnaFast()
+        );
         foreach (var drawingSystem in drawingSystems)
         {
             drawingSystem.Update(deltaTime);

@@ -31,7 +31,26 @@ public interface IService
 
 public interface IServiceProvider
 {
-    T GetService<T>() where T : class, IService;
-    bool TryGetService<T>([NotNullWhen(true)] out T? service) where T : class, IService;
-    void RegisterService<T>(T service) where T : class, IService;
+    /// <summary>
+    /// Get a service of type T. Throws an exception if not found.
+    /// </summary>
+    /// <param name="groupName">Optional group name for the service.</param>
+    /// <typeparam name="T">Type of the service.</typeparam>
+    /// <returns>The service instance.</returns>
+    T GetService<T>(string groupName = "") where T : class, IService;
+    /// <summary>
+    /// Try to get a service of type T. Returns true if found, false otherwise.
+    /// </summary>
+    /// <param name="service">The output service instance.</param>
+    /// <param name="groupName">Optional group name for the service.</param>
+    /// <typeparam name="T">Type of the service.</typeparam>
+    /// <returns>True if the service was found, false otherwise.</returns>
+    bool TryGetService<T>([NotNullWhen(true)] out T? service,string groupName = "") where T : class, IService;
+    /// <summary>
+    /// Register a service of type T with an optional group name.
+    /// </summary>
+    /// <param name="service">The service instance to register.</param>
+    /// <param name="groupName">Optional group name for the service.</param>
+    /// <typeparam name="T">Type of the service.</typeparam>
+    void RegisterService<T>(T service, string groupName) where T : class, IService;
 }

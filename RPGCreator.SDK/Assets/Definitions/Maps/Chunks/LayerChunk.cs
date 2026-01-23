@@ -20,6 +20,7 @@
 
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Extensions;
@@ -317,10 +318,17 @@ public abstract class LayerChunk
     /// <returns></returns>
     public static long GetChunkId(Vector2 location)
     {
-        long x = (long)Math.Floor(location.X) >> 5;
-        long y = (long)Math.Floor(location.Y) >> 5;
-        
-        return (y << 32) | (x & 0xFFFFFFFFL);
+        // 1. Calcul des index (Utilise 1024f pour être explicite : 32 tuiles * 32 pixels)
+        int cx = (int)Math.Floor(location.X / 1024f);
+        int cy = (int)Math.Floor(location.Y / 1024f);
+
+        // 2. On traite les bits comme des tiroirs de 32 bits vides
+        // On masque avec 0xFFFFFFFF pour être CERTAIN de ne garder que 32 bits
+        long xBits = (long)(uint)cx & 0xFFFFFFFFL;
+        long yBits = (long)(uint)cy & 0xFFFFFFFFL;
+
+        // 3. On assemble
+        return (yBits << 32) | xBits;
     }
     
     /// <summary>
@@ -337,7 +345,7 @@ public abstract class LayerChunk
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static long GetChunkId(long chunkX, long chunkY)
     {
-        return (long)(((ulong)(uint)chunkX << 32) | (uint)chunkY);
+        return (long)(((ulong)(uint)chunkY << 32) | (uint)chunkX);
     }
     
     /// <summary>
@@ -354,10 +362,10 @@ public abstract class LayerChunk
     /// </returns>
     public static (long chunkX, long chunkY) DeconstructChunkId(long chunkId)
     {
-        long x = chunkId >> 32;
+        long x = (int)(chunkId & 0xFFFFFFFFL);
 
-        long y = (int)(chunkId & 0xFFFFFFFF); 
-    
+        long y = chunkId >> 32;
+
         return (x, y);
     }
     
@@ -376,6 +384,13 @@ public abstract class LayerChunk
     
     public static Vector2 GetWorldPosition(long chunkId, int index)
     {
+        if (!RuntimeServices.MapService.HasLoadedMap)
+            return Vector2.Zero;
+        
+        var gridParam = RuntimeServices.MapService.CurrentLoadedMapDefinition?.GridParameter;
+        if (gridParam == null)
+            return Vector2.Zero;
+        
         if (index is < 0 or >= LocalElementsLength)
             throw new ArgumentOutOfRangeException(nameof(index), $"Index must be between 0 and {LocalElementsLength}.");
         
@@ -385,9 +400,24 @@ public abstract class LayerChunk
         int localX = index & 31;
         int localY = index >> 5;
         
-        float worldX = (chunkX * ChunkSize) + localX;
-        float worldY = (chunkY * ChunkSize) + localY;
+        float worldX = ((chunkX * ChunkSize) + localX) * gridParam.Value.CellWidth;
+        float worldY = ((chunkY * ChunkSize) + localY) * gridParam.Value.CellHeight;
         
         return new Vector2(worldX, worldY);
+    }
+
+    public static Vector2 GetChunkPosition(Vector2 worldPosition)
+    {
+        if (!RuntimeServices.MapService.HasLoadedMap)
+            return Vector2.Zero;
+        
+        var gridParam = RuntimeServices.MapService.CurrentLoadedMapDefinition?.GridParameter;
+        if (gridParam == null)
+            return Vector2.Zero;
+        
+        float cellWidth = gridParam.Value.CellWidth;
+        float cellHeight = gridParam.Value.CellHeight;
+        
+        return new Vector2(worldPosition.X/cellWidth, worldPosition.Y/cellHeight);
     }
 }

@@ -164,22 +164,26 @@ public partial class ChunkService : ObservableObject, IChunkService
     {
         var camera = RuntimeServices.CameraService;
     
-        float chunkPixelSize = LayerChunk.ChunkSize * _chunkTileSize.Width;
+        // Taille d'un chunk en pixels (ex: 32 * 32 = 1024)
+        float chunkPx = LayerChunk.ChunkSize * _chunkTileSize.Width;
 
-        float halfWidthPx = (camera.ViewportSize.Width / 2f) / camera.ZoomLevel;
-        float halfHeightPx = (camera.ViewportSize.Height / 2f) / camera.ZoomLevel;
+        // On calcule les bords réels du monde vus par la caméra
+        // (L'utilisation du zoom est correcte ici)
+        float viewW = (camera.ViewportSize.Width / camera.ZoomLevel);
+        float viewH = (camera.ViewportSize.Height / camera.ZoomLevel);
 
-        float left = camera.Position.X - halfWidthPx;
-        float right = camera.Position.X + halfWidthPx;
-        float top = camera.Position.Y - halfHeightPx;
-        float bottom = camera.Position.Y + halfHeightPx;
+        float left = camera.Position.X - (viewW / 2f);
+        float right = camera.Position.X + (viewW / 2f);
+        float top = camera.Position.Y - (viewH / 2f);
+        float bottom = camera.Position.Y + (viewH / 2f);
 
-        return (
-            minX: (long)Math.Floor(left / chunkPixelSize) - padding,
-            maxX: (long)Math.Floor(right / chunkPixelSize) + padding,
-            minY: (long)Math.Floor(top / chunkPixelSize) - padding,
-            maxY: (long)Math.Floor(bottom / chunkPixelSize) + padding
-        );
+        // Conversion en index de Chunks avec Math.Floor impératif
+        long minX = (long)Math.Floor(left / chunkPx) - padding;
+        long maxX = (long)Math.Floor(right / chunkPx) + padding;
+        long minY = (long)Math.Floor(top / chunkPx) - padding;
+        long maxY = (long)Math.Floor(bottom / chunkPx) + padding;
+
+        return (minX, maxX, minY, maxY);
     }
 
     public void DebugDrawLoadedChunks()

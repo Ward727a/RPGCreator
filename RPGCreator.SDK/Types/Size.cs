@@ -25,6 +25,11 @@ public record struct Size : ISerializable, IDeserializable
     public static implicit operator Vector2(Size s) => new(s.Width, s.Height);
     public static implicit operator Size(Vector2 v) => new(v.X, v.Y);
 
+    public Vector2 ToVector2()
+    {
+        return new Vector2(Width, Height);
+    }
+    
     public static Size Parse(string s)
     {
         if (string.IsNullOrWhiteSpace(s)) throw new ArgumentException("Input cannot be empty", nameof(s));

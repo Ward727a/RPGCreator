@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Types.Records;
 using Size = RPGCreator.SDK.Types.Size;
 
@@ -107,10 +109,10 @@ public interface IMapService : INotifyPropertyChanged, INotifyPropertyChanging, 
     /// </summary>
     /// <param name="x">The X coordinate on the map.</param>
     /// <param name="y">The Y coordinate on the map.</param>
-    /// <param name="tileData">The tile data to place.</param>
+    /// <param name="tileDef">The tile def to place.</param>
     /// <exception cref="NotImplementedException">Thrown if the RTP or game does not support this operation.</exception>
     /// <exception cref="InvalidOperationException">Thrown if there is no map loaded or no layer selected.</exception>
-    void PlaceTileAt(int x, int y, TileData tileData);
+    void PlaceTileAt(int x, int y, ITileDef tileDef);
     
     /// <summary>
     /// A general purpose method to get an object at the given coordinates on the map.<br/>
@@ -141,4 +143,15 @@ public interface IMapService : INotifyPropertyChanged, INotifyPropertyChanging, 
     /// <exception cref="NotImplementedException">Thrown if the RTP or game does not support this operation.</exception>
     /// <exception cref="InvalidOperationException">Thrown if there is no map loaded or no layer selected.</exception>
     bool TryGetTileAt(int x, int y, out TileData tileData);
+    
+    /// <summary>
+    /// Converts a world position to map coordinates.<br/>
+    /// World position is the position in the game world with the camera at (0,0).<br/>
+    /// Map coordinates are the coordinates on the map grid.<br/>
+    /// This conversion takes into account the map's cell size.
+    /// </summary>
+    /// <param name="worldPosition">The world position to convert.</param>
+    /// <returns>The corresponding map coordinates.</returns>
+    Vector2 WorldToMapCoordinates(Vector2 worldPosition);
+    
 }

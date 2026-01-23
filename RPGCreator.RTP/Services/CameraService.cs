@@ -84,9 +84,14 @@ public class CameraService : ObservableObject, ICameraService
         get => GetCameraComponent().Zoom;
         private set
         {
-            OnPropertyChanging();
-            GetCameraComponent().Zoom = value;
-            OnPropertyChanged();
+            float clampedValue = Math.Clamp(value, 0.1f, 5.0f);
+        
+            if (Math.Abs(GetCameraComponent().Zoom - clampedValue) > 0.0001f)
+            {
+                OnPropertyChanging();
+                GetCameraComponent().Zoom = clampedValue;
+                OnPropertyChanged();
+            }
         }
     }
 
@@ -156,8 +161,7 @@ public class CameraService : ObservableObject, ICameraService
 
     public void Drag(Vector2 delta)
     {
-        var deltaVectorSized = new Vector2(delta.X / _cellSize.Width, delta.Y / _cellSize.Height);
-        Position += new Vector2(1*delta.X,0) / ZoomLevel;
+        Position += delta / ZoomLevel;
     }
 
     public void MoveTo(Vector2 newPosition)
@@ -196,7 +200,24 @@ public class CameraService : ObservableObject, ICameraService
         LinkedEntity = null;
         IsLinkedToEntity = false;
     }
-    
+
+    public Vector2 ScreenToWorld(Vector2 screenPosition)
+    {
+        if (!Matrix4x4.Invert(GetViewMatrix(), out var invertedMatrix))
+            return Vector2.Zero;
+        var screenPos3D = new Vector3(screenPosition, 0);
+        var worldPos3D = Vector3.Transform(screenPos3D, invertedMatrix);
+        return new Vector2(worldPos3D.X, worldPos3D.Y);
+    }
+
+    public Vector2 WorldToScreen(Vector2 worldPosition)
+    {
+        var matrix = GetViewMatrix();
+        var worldPos3D = new Vector3(worldPosition, 0);
+        var screenPos3D = Vector3.Transform(worldPos3D, matrix);
+        return new Vector2(screenPos3D.X, screenPos3D.Y);
+    }
+
     public Matrix4x4 GetViewMatrix()
     {
         var viewportCenter = new Vector2(ViewportSize.Width / 2f, ViewportSize.Height / 2f);

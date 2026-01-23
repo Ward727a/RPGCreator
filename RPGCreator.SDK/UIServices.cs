@@ -19,34 +19,69 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Diagnostics.CodeAnalysis;
+using RPGCreator.SDK.Exceptions;
 using RPGCreator.SDK.UiService;
 
 namespace RPGCreator.SDK;
 
 public class UiServicesProvider : IServiceProvider
 {
-    private readonly Dictionary<Type, IService> _services = new();
-    
-    public T GetService<T>() where T : class, IService
-    {
-        return (T)_services[typeof(T)];
-    }
+    private readonly Dictionary<Type, Dictionary<string, IService>> _services = new();
 
-    public bool TryGetService<T>([NotNullWhen(true)] out T? service) where T : class, IService
+    public T GetService<T>(string groupName = "") where T : class, IService
     {
-        if (_services.TryGetValue(typeof(T), out var svc))
+        if (_services.TryGetValue(typeof(T), out var groups))
         {
-            service = (T)svc;
-            return true;
+            if (groups.TryGetValue(groupName, out var service))
+            {
+                return (T)service;
+            }
+            
+            if (string.IsNullOrEmpty(groupName) && groups.Count == 1)
+            {
+                return (T)groups.Values.First();
+            }
         }
-        
+
+        throw new CriticalEngineException($"[UI] Critical Service Missing: {typeof(T).Name} (Group: '{groupName}')", _services);
+    }
+    
+    
+    public bool TryGetService<T>([NotNullWhen(true)] out T? service, string groupName = "") where T : class, IService
+    {
+        if (_services.TryGetValue(typeof(T), out var groups))
+        {
+            if (groups.TryGetValue(groupName, out var svc))
+            {
+                service = (T)svc;
+                return true;
+            }
+            
+            if (string.IsNullOrEmpty(groupName) && groups.Count == 1)
+            {
+                service = (T)groups.Values.First();
+                return true;
+            }
+        }
+
         service = null;
         return false;
-    }
+    } 
 
-    public void RegisterService<T>(T service) where T : class, IService
+    public void RegisterService<T>(T service, string groupName) where T : class, IService
     {
-        _services[typeof(T)] = service;
+        if (!_services.TryGetValue(typeof(T), out var groups))
+        {
+            groups = new Dictionary<string, IService>();
+            _services[typeof(T)] = groups;
+        }
+
+        if (groups.ContainsKey(groupName))
+        {
+            throw new InvalidOperationException($"[UI] Service '{typeof(T).Name}' already registered in group '{groupName}'.");
+        }
+
+        groups[groupName] = service;
     }
 }
 
@@ -61,22 +96,30 @@ public class UiServicesProvider : IServiceProvider
 public static class UiServices
 {
     private static readonly UiServicesProvider ServiceProvider = new();
-
     
     // ReSharper disable MemberCanBePrivate.Global
-    public static void RegisterService<T>(T service) where T : class, IService
+    public static void RegisterService<T>(T service, string groupName) where T : class, IService
     {
-        ServiceProvider.RegisterService(service);
+        if(string.Equals(groupName, "default", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("[UI] 'default' is a reserved group name. Use a different name for the service group.");
+        }
+        
+        ServiceProvider.RegisterService(service, groupName);
     }
-    
-    public static T GetService<T>() where T : class, IService
+    public static T GetService<T>(string groupName = "default") where T : class, IService
     {
-        if (ServiceProvider.TryGetService<T>(out var service))
+        if (ServiceProvider.TryGetService<T>(out var service, groupName))
         {
             return service;
         }
 
         throw new InvalidOperationException($"[UI] Critical Service Missing: {typeof(T).Name}. Make sure it's registered during UI initialization.");
+    }
+    
+    private static void RegisterService<T>(T service) where T : class, IService
+    {
+        ServiceProvider.RegisterService(service, "default");
     }
 
     public static IMenuService MenuService

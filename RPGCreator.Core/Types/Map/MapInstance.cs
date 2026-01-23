@@ -79,7 +79,7 @@ namespace RPGCreator.Core.Types.Map
             Definition.TileLayerRemoved += OnTileLayerRemoved;
         }
 
-        private void OnTileLayerRemoved(object? sender, BaseLayerDef e)
+        private void OnTileLayerRemoved(BaseLayerDef e)
         {
             var layerToRemove = _tileLayers.FirstOrDefault(l => l.Definition.Unique == e.Unique);
             if (layerToRemove != null)
@@ -93,7 +93,7 @@ namespace RPGCreator.Core.Types.Map
             }
         }
 
-        private void OnTileLayerAdded(object? sender, BaseLayerDef e)
+        private void OnTileLayerAdded(BaseLayerDef e)
         {
             switch (e)
             {

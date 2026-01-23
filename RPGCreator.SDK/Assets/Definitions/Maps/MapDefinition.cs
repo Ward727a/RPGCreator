@@ -12,8 +12,8 @@ public class MapDefinition : IMapDef
     private readonly List<IMapDef> _mapDefs = new List<IMapDef>();
     private readonly List<BaseLayerDef> _tileLayers = new List<BaseLayerDef>();
     
-    public event EventHandler<BaseLayerDef>? TileLayerAdded;
-    public event EventHandler<BaseLayerDef>? TileLayerRemoved;
+    public event Action<BaseLayerDef>? TileLayerAdded;
+    public event Action<BaseLayerDef>? TileLayerRemoved;
     
     public Ulid Unique { get; private set; }
     public URN Urn => new URN("maps", $"{Name}@{Unique}");
@@ -70,20 +70,20 @@ public class MapDefinition : IMapDef
     
     public bool AddLayer(BaseLayerDef layer)
     {
-        if (layer == null || _tileLayers.Contains(layer))
+        if (layer == null || _tileLayers.Exists(l => l.Unique == layer.Unique))
             return false; // If the layer is null or already exists, we can't add it
 
         _tileLayers.Add(layer);
-        TileLayerAdded?.Invoke(this, layer); // Notify subscribers that a new layer has been added
+        TileLayerAdded?.Invoke(layer); // Notify subscribers that a new layer has been added
         return true;
     }
     public bool RemoveLayer(BaseLayerDef layer)
     {
-        if (layer == null || !_tileLayers.Contains(layer))
+        if (layer == null || !_tileLayers.Exists(l => l.Unique == layer.Unique))
             return false; // If the layer is null or doesn't exist, we can't remove it
 
         _tileLayers.Remove(layer);
-        TileLayerRemoved?.Invoke(this, layer); // Notify subscribers that a layer has been removed
+        TileLayerRemoved?.Invoke(layer); // Notify subscribers that a layer has been removed
         return true;
     }
     

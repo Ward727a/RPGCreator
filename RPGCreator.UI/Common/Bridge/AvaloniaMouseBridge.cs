@@ -37,6 +37,8 @@ public class AvaloniaMouseBridge
             {
                 X = -1,
                 Y = -1,
+                Scroll = _scrollAccumulatorY,
+                HScroll = _scrollAccumulatorX,
                 IsInsideWindow = true,
                 InObject = null,
                 Buttons = MouseButton.None

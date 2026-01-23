@@ -30,6 +30,7 @@ using RPGCreator.Core.Types.Map.Chunks;
 using RPGCreator.RTP.Extensions;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 using Size = RPGCreator.SDK.Types.Size;
@@ -57,12 +58,11 @@ public class RenderService : IRenderService
         };
     }
 
-    public void DrawTile(ITileDef tileDef, Vector2 worldPosition)
+    public void DrawTile(ITileDef tileDef, Vector2 tilePositionInChunk)
     {
         var camera = RuntimeServices.CameraService;
         var zoom = camera.ZoomLevel;
 
-        var worldPixels = worldPosition * _cellSizeAsVector;
         var texture = GetTilesetTexture(tileDef.TilesetDef);
         
         Rectangle sourceRect;
@@ -80,17 +80,16 @@ public class RenderService : IRenderService
             );
             tileDef.Tags.Set(sourceRect);
         }
-
         spriteBatch.Draw(
             texture,
-            worldPixels.ToXnaFast(),
+            tilePositionInChunk.ToXnaFast(),
             sourceRect,
             Microsoft.Xna.Framework.Color.White,
             0f,             // Rotation
             Vector2.Zero,   // Origin
-            zoom,           // Scale (Zoom)
+            1f,
             SpriteEffects.None,
-            0f              // LayerDepth
+            0.5f              // LayerDepth
         );
     }
 

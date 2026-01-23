@@ -81,12 +81,20 @@ public interface IMouseState
     /// This should be automatically called by the <see cref="RPGCreator.Core"/> engine part at each <see cref="IMouseProvider"/> update.
     /// </summary>
     /// <param name="rawMouseData"></param>
+    /// <exception cref="NotImplementedException">
+    /// Thrown if the method is not implemented by the current used service.<br/>
+    /// If you didn't modify the engine, this should never happen.
+    /// </exception>
     void Update(RawMouseData rawMouseData);
     
     /// <summary>
     /// Gets the current raw mouse data.
     /// </summary>
     /// <returns></returns>
+    /// <exception cref="NotImplementedException">
+    /// Thrown if the method is not implemented by the current used service.<br/>
+    /// If you didn't modify the engine, this should never happen.
+    /// </exception>
     RawMouseData GetCurrentRawData();
     
     /// <summary>
@@ -94,35 +102,69 @@ public interface IMouseState
     /// </summary>
     /// <param name="buttonIndex"></param>
     /// <returns></returns>
+    /// <exception cref="NotImplementedException">
+    /// Thrown if the method is not implemented by the current used service.<br/>
+    /// If you didn't modify the engine, this should never happen.
+    /// </exception>
     bool IsButtonPressed(MouseButton buttonIndex);
     /// <summary>
     /// Indicates whether the specified mouse button is currently released.
     /// </summary>
     /// <param name="buttonIndex"></param>
     /// <returns></returns>
+    /// <exception cref="NotImplementedException">
+    /// Thrown if the method is not implemented by the current used service.<br/>
+    /// If you didn't modify the engine, this should never happen.
+    /// </exception>
     bool IsButtonReleased(MouseButton buttonIndex);
     /// <summary>
     /// Indicates whether the specified mouse button was pressed at the previous frame.
     /// </summary>
     /// <param name="buttonIndex"></param>
     /// <returns></returns>
+    /// <exception cref="NotImplementedException">
+    /// Thrown if the method is not implemented by the current used service.<br/>
+    /// If you didn't modify the engine, this should never happen.
+    /// </exception>
     bool WasButtonPressed(MouseButton buttonIndex);
     /// <summary>
     /// Indicates whether the specified mouse button was released at the previous frame.
     /// </summary>
     /// <param name="buttonIndex"></param>
     /// <returns></returns>
+    /// <exception cref="NotImplementedException">
+    /// Thrown if the method is not implemented by the current used service.<br/>
+    /// If you didn't modify the engine, this should never happen.
+    /// </exception>
     bool WasButtonReleased(MouseButton buttonIndex);
     /// <summary>
     /// Indicates whether the specified mouse button was just pressed this frame.
     /// </summary>
     /// <param name="buttonIndex"></param>
     /// <returns></returns>
+    /// <exception cref="NotImplementedException">
+    /// Thrown if the method is not implemented by the current used service.<br/>
+    /// If you didn't modify the engine, this should never happen.
+    /// </exception>
     bool WasButtonJustPressed(MouseButton buttonIndex);
     /// <summary>
     /// Indicates whether the specified mouse button was just released this frame.
     /// </summary>
     /// <param name="buttonIndex"></param>
     /// <returns></returns>
+    /// <exception cref="NotImplementedException">
+    /// Thrown if the method is not implemented by the current used service.<br/>
+    /// If you didn't modify the engine, this should never happen.
+    /// </exception>
     bool WasButtonJustReleased(MouseButton buttonIndex);
+    
+    /// <summary>
+    /// After processing the current frame, reset the delta values (position delta, wheel delta, etc.) to zero.<br/>
+    /// This is typically called at the end of each frame update to prepare for the next frame.
+    /// </summary>
+    /// <exception cref="NotImplementedException">
+    /// Thrown if the method is not implemented by the current used service.<br/>
+    /// If you didn't modify the engine, this should never happen.
+    /// </exception>
+    void ResetDeltas();
 }

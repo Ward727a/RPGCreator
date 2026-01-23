@@ -26,6 +26,7 @@ using RPGCreator.Core.Configs;
 using RPGCreator.Core.ECS;
 using RPGCreator.Core.Events;
 using RPGCreator.Core.Events.EventArgs;
+using RPGCreator.Core.Inputs;
 using RPGCreator.Core.Inputs.Keyboard;
 using RPGCreator.Core.Inputs.Mouse;
 using RPGCreator.Core.Parser.Graph;
@@ -45,7 +46,9 @@ using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
+using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Graph.Nodes;
+using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Logging;
 using Serilog;
 
@@ -151,7 +154,23 @@ namespace RPGCreator.Core
             EngineServices.PrattFormulaService = new PrattFormulaService();
             EngineServices.GraphNodeScanner = new GraphNodeScanner();
             EngineServices.ECS = new ECSService();
+            EngineServices.InputsService = new InputsService();
 
+            Logger.Warning("---");
+            Logger.Warning("NORMAL WARNING: The warning below can be ignored!");
+            EngineServices.InputsService.SetBinding(KeyboardKeys.Z, "forward");
+            EngineServices.InputsService.SetBinding(KeyboardKeys.S, "backward");
+            EngineServices.InputsService.SetBinding(KeyboardKeys.Q, "left");
+            EngineServices.InputsService.SetBinding(KeyboardKeys.D, "right");
+            
+            EngineServices.InputsService.SetBinding(ScrollType.Up, "zoom_in");
+            EngineServices.InputsService.SetBinding(ScrollType.Down, "zoom_out");
+            
+            EngineServices.InputsService.SetBinding(MouseButton.Left, "left_click");
+            EngineServices.InputsService.SetBinding(MouseButton.Middle, "middle_click");
+            EngineServices.InputsService.SetBinding(MouseButton.Right, "right_click");
+            Logger.Warning("---");
+            
             SDKAutoTileSolver.Service = new AutoTileSolver();
             
             Managers.Init();

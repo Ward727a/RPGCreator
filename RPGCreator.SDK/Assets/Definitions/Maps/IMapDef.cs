@@ -8,8 +8,8 @@ namespace RPGCreator.SDK.Assets.Definitions.Maps;
 
 public interface IMapDef : IHasUniqueId, ISerializable, IDeserializable, IAssetDef
 {
-    event EventHandler<BaseLayerDef> TileLayerAdded;
-    event EventHandler<BaseLayerDef> TileLayerRemoved;
+    event Action<BaseLayerDef> TileLayerAdded;
+    event Action<BaseLayerDef> TileLayerRemoved;
     /// <summary>
     /// Name of the map.
     /// </summary>
@@ -38,4 +38,18 @@ public interface IMapDef : IHasUniqueId, ISerializable, IDeserializable, IAssetD
     /// Background color of the map, which can be used to set a default background or for visual effects.
     /// </summary>
     public Color BackgroundColor { get; set; }
+    
+    /// <summary>
+    /// Adds a new tile layer to the map definition.
+    /// </summary>
+    /// <param name="layer">The layer to add.</param>
+    /// <returns>True if the layer was added successfully; false if it already exists.</returns>
+    bool AddLayer(BaseLayerDef layer);
+    
+    /// <summary>
+    /// Removes a tile layer from the map definition.
+    /// </summary>
+    /// <param name="layer">The layer to remove.</param>
+    /// <returns>True if the layer was removed successfully; false if it was not found.</returns>
+    bool RemoveLayer(BaseLayerDef layer);
 }

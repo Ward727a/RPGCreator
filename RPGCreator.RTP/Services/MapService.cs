@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
@@ -114,17 +115,29 @@ public partial class MapService : ObservableObject, IMapService
 
         if (assetType == typeof(ITileDef) && asset is ITileDef tileDef)
         {
-            PlaceTileAt((int)x, (int)y, TileData.FromTileDef(tileDef));
+            PlaceTileAt((int)x, (int)y, tileDef);
             return;
         }
         
         OnMapEdited?.Invoke(x, y);
     }
 
-    public void PlaceTileAt(int x, int y, TileData tileData)
+    public void PlaceTileAt(int x, int y, ITileDef tileDef)
     {
         ValidatePlacementChecks();
+        
+        var layer = RuntimeServices.LayerService.GetSelectedLayer();
+        
+        // Should probably handle this more gracefully
+        if (layer is not LayerWithElements<ITileDef> tileLayer)
+            throw new InvalidOperationException("Selected layer is not a tile layer. Cannot place tile.");
+        
+        tileLayer.AddElement(tileDef, new Vector2(x, y));
+        
         OnMapEdited?.Invoke(x, y);
+        SetDirtyFlag();
+        _logger.Debug("Placed tile '{tilePos}' at ({x}, {y}) on layer '{layerName}'.", 
+            args: [tileDef.PositionInTileset, x, y, tileLayer.Name]);
     }
 
     public bool TryGetObjectAt(float x, float y, out object foundObject)
@@ -136,7 +149,28 @@ public partial class MapService : ObservableObject, IMapService
     {
         throw new NotImplementedException();
     }
-    
+
+    /// <summary>
+    /// This should convert world coordinates to map grid coordinates.<br/>
+    /// Like: (1,0) should return: (0,0)
+    /// >>> (34, 0) should return: (32, 0) if cell width is 32
+    /// </summary>
+    /// <param name="worldPosition"></param>
+    /// <returns></returns>
+    public Vector2 WorldToMapCoordinates(Vector2 worldPosition)
+    {
+        if (CurrentLoadedMapDefinition == null)
+            return Vector2.Zero;
+        var cellWidth = CurrentLoadedMapDefinition.GridParameter.CellWidth;
+        var cellHeight = CurrentLoadedMapDefinition.GridParameter.CellHeight;
+        
+        var mapPosition = new Vector2(
+            (float)Math.Floor(worldPosition.X / cellWidth) * cellWidth,
+            (float)Math.Floor(worldPosition.Y / cellHeight) * cellHeight
+        );
+        return mapPosition;
+    }
+
     #region Helpers
 
     /// <summary>

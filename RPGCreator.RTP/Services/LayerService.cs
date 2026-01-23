@@ -57,6 +57,32 @@ public class LayerService : ObservableObject, ILayerService
         HasSelectedLayer = true;
     }
 
+    public bool TryAddLayer(BaseLayerDef layerDef)
+    {
+        if (!RuntimeServices.MapService.HasLoadedMap)
+            return false;
+        var mapDef = RuntimeServices.MapService.CurrentLoadedMapDefinition;
+        if (mapDef == null)
+            return false;
+        
+        return mapDef.AddLayer(layerDef);
+    }
+
+    public bool TryRemoveLayer(int layerIndex)
+    {
+        if (!RuntimeServices.MapService.HasLoadedMap)
+            return false;
+        var mapDef = RuntimeServices.MapService.CurrentLoadedMapDefinition;
+        if (mapDef == null)
+            return false;
+        
+        if (!CanSelectLayerIndex(layerIndex))
+            return false;
+        
+        var layerDef = GetLayerDefAt(layerIndex);
+        return mapDef.RemoveLayer(layerDef);
+    }
+
     public LayerData GetLayerData(int layerIndex)
     {
         ValidateLayerAvailability();
@@ -68,6 +94,12 @@ public class LayerService : ObservableObject, ILayerService
         
         var layerDef = GetLayerDefAt(layerIndex);
         return CreateLayerData(layerDef);
+    }
+
+    public BaseLayerDef GetSelectedLayer()
+    {
+        ValidateLayerAvailability();
+        return GetLayerDefAt(CurrentLayerIndex);
     }
 
     #region Helpers
@@ -122,6 +154,16 @@ public class LayerService : ObservableObject, ILayerService
 
     private void OnMapUnloaded()
     {
+        var mapDef = RuntimeServices.MapService.CurrentLoadedMapDefinition;
+        if (mapDef != null)
+        {
+            mapDef.TileLayerAdded -= OnLayerAdded;
+            mapDef.TileLayerRemoved -= OnLayerRemoved;
+        }
+        else
+        {
+            _logger.Error("Map unloaded event triggered, but no map definition was found, events could not be unsubscribed!!");
+        }
         LayerCount = 0;
         CanSelectLayer = false;
         HasSelectedLayer = false;
@@ -137,12 +179,29 @@ public class LayerService : ObservableObject, ILayerService
             CanSelectLayer = LayerCount > 0;
             CurrentLayerIndex = CanSelectLayer ? 0 : -1;
             HasSelectedLayer = CanSelectLayer;
+            mapDef.TileLayerAdded += OnLayerAdded;
+            mapDef.TileLayerRemoved += OnLayerRemoved;
         }
         else
         {
             LayerCount = 0;
             CanSelectLayer = false;
             CurrentLayerIndex = -1;
+        }
+    }
+    
+    private void OnLayerAdded(BaseLayerDef layerDef)
+    {
+        LayerCount++;
+        CanSelectLayer = LayerCount > 0;
+    }
+    private void OnLayerRemoved(BaseLayerDef layerIndex)
+    {
+        LayerCount--;
+        CanSelectLayer = LayerCount > 0;
+        if (CurrentLayerIndex >= LayerCount)
+        {
+            CurrentLayerIndex = LayerCount - 1;
         }
     }
 

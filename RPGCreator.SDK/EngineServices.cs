@@ -4,6 +4,8 @@ using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions;
 using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.EngineService;
+using RPGCreator.SDK.Exceptions;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Parser.PrattFormula;
 using RPGCreator.SDK.Projects;
@@ -87,48 +89,93 @@ public interface IBrushManager : IService
 
 public class EngineServicesProvider : IServiceProvider
 {
-    private readonly Dictionary<Type, IService> _services = new();
-    
-    public T GetService<T>() where T : class, IService
-    {
-        return (T)_services[typeof(T)];
-    }
+    private readonly Dictionary<Type, Dictionary<string, IService>> _services = new();
 
-    public bool TryGetService<T>([NotNullWhen(true)] out T? service) where T : class, IService
+    public T GetService<T>(string groupName = "") where T : class, IService
     {
-        if (_services.TryGetValue(typeof(T), out var svc))
+        if (_services.TryGetValue(typeof(T), out var groups))
         {
-            service = (T)svc;
-            return true;
+            if (groups.TryGetValue(groupName, out var service))
+            {
+                return (T)service;
+            }
+            
+            if (string.IsNullOrEmpty(groupName) && groups.Count == 1)
+            {
+                return (T)groups.Values.First();
+            }
         }
-        
+
+        throw new CriticalEngineException($"[Engine] Critical Service Missing: {typeof(T).Name} (Group: '{groupName}')", _services);
+    }
+    
+    
+    public bool TryGetService<T>([NotNullWhen(true)] out T? service, string groupName = "") where T : class, IService
+    {
+        if (_services.TryGetValue(typeof(T), out var groups))
+        {
+            if (groups.TryGetValue(groupName, out var svc))
+            {
+                service = (T)svc;
+                return true;
+            }
+            
+            if (string.IsNullOrEmpty(groupName) && groups.Count == 1)
+            {
+                service = (T)groups.Values.First();
+                return true;
+            }
+        }
+
         service = null;
         return false;
-    }
+    } 
 
-    public void RegisterService<T>(T service) where T : class, IService
+    public void RegisterService<T>(T service, string groupName) where T : class, IService
     {
-        _services[typeof(T)] = service;
+        if (!_services.TryGetValue(typeof(T), out var groups))
+        {
+            groups = new Dictionary<string, IService>();
+            _services[typeof(T)] = groups;
+        }
+
+        if (groups.ContainsKey(groupName))
+        {
+            throw new InvalidOperationException($"[Engine] Service '{typeof(T).Name}' already registered in group '{groupName}'.");
+        }
+
+        groups[groupName] = service;
     }
 }
+
 
 public static class EngineServices
 {
     private static readonly EngineServicesProvider ServiceProvider = new();
     
     // ReSharper disable MemberCanBePrivate.Global
-    public static void RegisterService<T>(T service) where T : class, IService
+    public static void RegisterService<T>(T service, string groupName) where T : class, IService
     {
-        ServiceProvider.RegisterService(service);
+        if(string.Equals(groupName, "default", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("[Engine] 'default' is a reserved group name. Use a different name for the service group.");
+        }
+        
+        ServiceProvider.RegisterService(service, groupName);
     }
-    public static T GetService<T>() where T : class, IService
+    public static T GetService<T>(string groupName = "default") where T : class, IService
     {
-        if (ServiceProvider.TryGetService<T>(out var service))
+        if (ServiceProvider.TryGetService<T>(out var service, groupName))
         {
             return service;
         }
 
         throw new InvalidOperationException($"[Engine] Critical Service Missing: {typeof(T).Name}. Make sure it's registered during engine initialization.");
+    }
+    
+    private static void RegisterService<T>(T service) where T : class, IService
+    {
+        ServiceProvider.RegisterService(service, "default");
     }
 
     public static IGameFactory GameFactory
@@ -189,6 +236,12 @@ public static class EngineServices
     public static IECSService ECS
     {
         get => GetService<IECSService>();
+        set => RegisterService(value);
+    }
+    
+    public static IInputsService InputsService
+    {
+        get => GetService<IInputsService>();
         set => RegisterService(value);
     }
 }

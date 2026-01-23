@@ -32,8 +32,8 @@ public interface IRenderService : IService
     /// This method uses the provided tile definition to render the tile correctly in the game world.
     /// </summary>
     /// <param name="tileDef">The tile definition to be drawn.</param>
-    /// <param name="worldPosition">The world position where the tile should be drawn.</param>
-    void DrawTile(ITileDef tileDef, Vector2 worldPosition);
+    /// <param name="tilePositionInChunk">The world position where the tile should be drawn.</param>
+    void DrawTile(ITileDef tileDef, Vector2 tilePositionInChunk);
 
     /// <summary>
     /// Draws a tile instance at its designated world position.<br/>
