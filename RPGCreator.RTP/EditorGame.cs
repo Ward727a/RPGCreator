@@ -93,20 +93,23 @@ namespace RPGCreator.RTP
             }, false);
             EngineServices.InputsService.RegisterAction("left_click", () =>
             {
+                EngineStates.BrushState.IsDrawing = true;
                 var mousePos = _mouseState.Position;
                 var worldPos = RuntimeServices.CameraService.ScreenToWorld(mousePos);
 
-                var layer = EngineStates.EditorState.CurrentLayer;
-                var map = EngineStates.EditorState.CurrentMap;
-                var tile = EngineStates.BrushState.CurrentObjectToPaint;
-                
-                if(layer == null || map == null || tile == null || tile is not ITileDef tileDef)
-                    return;
-
-                var mapPos = RuntimeServices.MapService.WorldToMapCoordinates(worldPos);
-                Logger.Info("Left click action triggered at {pos}.", args: mapPos);
-                
-                RuntimeServices.MapService.PlaceTileAt((int)mapPos.X, (int)mapPos.Y, tileDef);
+                EngineServices.BrushManager.ClickAt(worldPos);
+                //
+                // var layer = EngineStates.EditorState.CurrentLayer;
+                // var map = EngineStates.EditorState.CurrentMap;
+                // var tile = EngineStates.BrushState.CurrentObjectToPaint;
+                //
+                // if(layer == null || map == null || tile == null || tile is not ITileDef tileDef)
+                //     return;
+                //
+                // var mapPos = RuntimeServices.MapService.WorldToMapCoordinates(worldPos);
+                // Logger.Info("Left click action triggered at {pos}.", args: mapPos);
+                //
+                // RuntimeServices.MapService.PlaceTileAt((int)mapPos.X, (int)mapPos.Y, tileDef);
             }, false);
             EngineServices.InputsService.RegisterAction("right_click", () =>
             {

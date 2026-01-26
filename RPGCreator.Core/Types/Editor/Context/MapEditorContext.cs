@@ -20,11 +20,7 @@ public static class MapEditorContext
 {
     
     private static IPaintTarget? _activePaintTargetCache;
-    private static IMapDef? _map;
-    private static BaseLayerDef? _selectedLayer;
-    private static MapInstance? _mapInstance;
 
-    public static MapInstance? MapInstance => _mapInstance;
     
     public static void Initialize()
     {
@@ -33,21 +29,6 @@ public static class MapEditorContext
             if (e.PropertyName == nameof(IBrushState.CurrentMode))
             {
                 RefreshPaintTarget();
-            }
-        };
-        
-        EngineStates.EditorState.PropertyChanged += (s, e) =>
-        {
-            if (e.PropertyName == nameof(IEditorState.CurrentLayer))
-            {
-                _selectedLayer = EngineStates.EditorState.CurrentLayer;
-                Guard.IsNotNull(_selectedLayer);
-            } else if (e.PropertyName == nameof(IEditorState.CurrentMap))
-            {
-                _map = EngineStates.EditorState.CurrentMap;
-                Guard.IsNotNull(_map);
-                _mapInstance = EngineServices.GameFactory.CreateInstance<MapInstance>(_map);
-                Guard.IsNotNull(_mapInstance);
             }
         };
     }
@@ -65,20 +46,20 @@ public static class MapEditorContext
     {
         _activePaintTargetCache = null;
 
-        Guard.IsNotNull(_selectedLayer);
-        Guard.IsNotNull(_map);
+        var selectedLayer = RuntimeServices.LayerService.GetSelectedLayer();
+        var map = RuntimeServices.MapService.CurrentLoadedMapDefinition;
 
-        if (EngineStates.BrushState.CurrentMode == BrushMode.Tiling && _selectedLayer is TileLayerDefinition tileLayerDefinition)
+        if (EngineStates.BrushState.CurrentMode == BrushMode.Tiling && selectedLayer is TileLayerDefinition tileLayerDefinition)
         {
-            _activePaintTargetCache = new TileLayerTarget(tileLayerDefinition, _map, 32, 32);
+            _activePaintTargetCache = new TileLayerTarget(tileLayerDefinition, map, 32, 32);
         }
-        else if (EngineStates.BrushState.CurrentMode == BrushMode.Tiling && _selectedLayer is AutoLayerDefinition autoLayerDefinition)
+        else if (EngineStates.BrushState.CurrentMode == BrushMode.Tiling && selectedLayer is AutoLayerDefinition autoLayerDefinition)
         {
-            _activePaintTargetCache = new IntGridLayerTarget(autoLayerDefinition, _map);
+            _activePaintTargetCache = new IntGridLayerTarget(autoLayerDefinition, map);
         }
-        else if (EngineStates.BrushState.CurrentMode == BrushMode.Entities && _selectedLayer is EntitiesLayerDefinition entityLayerDefinition)
+        else if (EngineStates.BrushState.CurrentMode == BrushMode.Entities && selectedLayer is EntitiesLayerDefinition entityLayerDefinition)
         {
-            _activePaintTargetCache = new EntityLayerTarget(entityLayerDefinition, _map, 32, 32);
+            _activePaintTargetCache = new EntityLayerTarget(entityLayerDefinition, map, 32, 32);
         }
         
         Log.Debug("Paint Target Rebuilt");

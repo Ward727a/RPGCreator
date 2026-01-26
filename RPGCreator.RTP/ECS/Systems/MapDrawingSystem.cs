@@ -26,6 +26,7 @@ using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.Core.Types.Map.Chunks;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Systems;
@@ -58,7 +59,11 @@ public class MapDrawingSystem(GraphicsDevice graphicsDevice) : BaseMapDrawingSys
         
         foreach (var layer in MapService.CurrentLoadedMapDefinition.TileLayers)
         {
-            if(layer is not LayerWithElements<ITileDef> tileLayer)
+            var actualLayer = layer;
+            if (layer is AutoLayerDefinition autoLayer)
+                actualLayer = autoLayer.InternalTileLayer;
+            
+            if(actualLayer is not LayerWithElements<ITileDef> tileLayer)
                 continue;
             
             for(var x = range.minX; x <= range.maxX; x++)
@@ -66,8 +71,6 @@ public class MapDrawingSystem(GraphicsDevice graphicsDevice) : BaseMapDrawingSys
                 for(var y = range.minY; y <= range.maxY; y++)
                 {
                     var chunk = LayerChunk.GetChunkId(x, y);
-                    // if (chunk == -4)
-                    //     Logger.Debug("H");
                     
                     visibleChunks.Add((x, y, chunk));
 
@@ -76,10 +79,14 @@ public class MapDrawingSystem(GraphicsDevice graphicsDevice) : BaseMapDrawingSys
             }
         }
         
-        // Logger.Debug("Visible chunks: {@chunks} AT CAMERA POSITION: {position}", args: [visibleChunks, RuntimeServices.CameraService.Position]);
         DrawDebugChunkBounds();
     }
     
+    /// <summary>
+    /// Draw all tiles in the given chunk for the given layer.
+    /// </summary>
+    /// <param name="chunkId">The chunk ID.</param>
+    /// <param name="layer">The layer containing the tiles.</param>
     private void DrawChunkTiles(long chunkId, LayerWithElements<ITileDef> layer)
     {
         var chunkElements = layer.GetElements(chunkId);

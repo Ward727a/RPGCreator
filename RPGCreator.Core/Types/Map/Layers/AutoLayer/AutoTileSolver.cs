@@ -79,7 +79,7 @@ public class AutoTileSolver : IAutoTileSolver
             var fallback = bestCandidates.Last();
             return PickTile(fallback.Rule, position, null, fallback.FlipX, fallback.FlipY);
         }
-        
+
         return null;
     }
     

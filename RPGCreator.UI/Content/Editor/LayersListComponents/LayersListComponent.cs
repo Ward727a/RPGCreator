@@ -27,6 +27,7 @@ using Avalonia.VisualTree;
 using RPGCreator.Core.Types;
 using System;
 using System.Linq;
+using Avalonia.Layout;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
@@ -151,139 +152,102 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
             RefreshComponents();
         }
 
-        protected void OnAddLayerButtonClicked(object? sender, EventArgs e)
+        protected async void OnAddLayerButtonClicked(object? sender, EventArgs e)
         {
-            if (this.GetVisualRoot() is not Window win) return;
-
-            var popup = new Window
+            if(!RuntimeServices.MapService.HasLoadedMap)
             {
-                Title = "Add Layer",
-                SizeToContent = Avalonia.Controls.SizeToContent.WidthAndHeight,
-                MinWidth = 300,
-                WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner,
+                UiServices.NotificationService.Error("No Map Loaded", "Please load a map before adding layers.");
+                return;
+            }
+
+            var promptContent = new StackPanel()
+                { Spacing = 5};
+            var layerNameTextBox = new TextBox()
+            {
+                Watermark = "Enter layer name...",
+                Text = "My Layer",
+                InnerLeftContent = "Layer Name:",
             };
-
-            var stackPanel = new StackPanel
+            var layerTypeComboBox = new ComboBox()
             {
-                Margin = App.style.Margin
-            };
-            popup.Content = stackPanel;
-
-            var layerNameTextBox = new TextBox
-            {
-                Watermark = "Enter layer name",
-                Margin = App.style.Margin
-            };
-            stackPanel.Children.Add(layerNameTextBox);
-
-            var layerType = new ComboBox()
-            {
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                HorizontalContentAlignment = HorizontalAlignment.Stretch
             };
             
-            stackPanel.Children.Add(layerType);
-            layerType.Items.Add("Tile Layer");
-            layerType.Items.Add("Auto Layer");
-            layerType.SelectedIndex = 0;
+            layerTypeComboBox.Items.Add("Tile Layer");
+            layerTypeComboBox.Items.Add("Auto Layer");
             
+            layerTypeComboBox.SelectedIndex = 0;
+            
+            promptContent.Children.Add(layerNameTextBox);
+            promptContent.Children.Add(layerTypeComboBox);
 
-            var addButton = new Button
+            var result = await UiServices.DialogService.ConfirmAsync(
+                "Add Layer", 
+                promptContent,
+                confirmButtonText: "Add");
+
+            if(!result)
             {
-                Content = "Add Layer",
-                Margin = App.style.Margin,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center
-            };
-            addButton.Click += (s, args) =>
+                // User canceled the dialog
+                return;
+            }
+            
+            var resultText = layerNameTextBox.Text;
+            var resultType = layerTypeComboBox.SelectedIndex;
+            
+            if (string.IsNullOrWhiteSpace(resultText))
             {
-                if (!string.IsNullOrWhiteSpace(layerNameTextBox.Text))
+                UiServices.NotificationService.Warn("Invalid Layer Name", "Layer name cannot be empty.");
+                return;
+            }
+            
+            
+            var layerName = resultText;
+            if (!string.IsNullOrWhiteSpace(layerName))
+            {
+                // Logic to add a new layer with the specified name
+                BaseLayerDef newLayer;
+                
+                switch (resultType)
                 {
-                    // Logic to add a new layer with the specified name
-                    var newLayerName = layerNameTextBox.Text;
-
-                    BaseLayerDef? layer = null;
-                    
-                    switch (layerType.SelectedIndex)
-                    {
-                        case 0:
-                            layer = new TileLayerDefinition()
-                            {
-                                Name = newLayerName
-                            };
-                            break;
-                        case 1:
-                            layer = new AutoLayerDefinition()
-                            {
-                                Name = newLayerName
-                            };
-                            break;
-                        default:
-                            Logger.Error("[LayersListComponent] Unknown layer type index {LayerTypeIndex}", layerType.SelectedIndex);
-                            break;
-                    }
-
-                    if (layer == null)
-                    {
-                        Logger.Error("[LayersListComponent] Failed to create layer of type index {LayerTypeIndex}", layerType.SelectedIndex);
+                    case 0: // Tile Layer
+                        newLayer = EngineServices.AssetsManager.CreateAsset<TileLayerDefinition>();
+                        break;
+                    case 1: // Auto Layer
+                        newLayer = EngineServices.AssetsManager.CreateAsset<AutoLayerDefinition>();
+                        break;
+                    default:
+                        UiServices.NotificationService.Error("Error Adding Layer", "Invalid layer type selected.");
                         return;
-                    }
-                    
-                    
-                    if(!RuntimeServices.MapService.HasLoadedMap)
-                    {
-                        return;
-                    }
-
-
-                    layer.ZIndex = EngineStates.EditorState.CurrentMap.TileLayers.Count; // Set ZIndex to the last index
-                    // layer.ZIndexChanged += (value) =>
-                    // {
-                    //     RefreshComponents();
-                    // };
-
-                    if (RuntimeServices.LayerService.TryAddLayer(layer))
-                    {
-
-                        LayerItem newLayerItem = new LayerItem(layer);
-
-                        newLayerItem.LayerRemoved += () => { RefreshComponents(); };
-
-                        LayersList.Items.Add(newLayerItem);
-                        LayersList.SelectedItem = newLayerItem;
-
-                        SelectedLayerText.Text = $"Selected Layer: {newLayerName}";
-
-                        RuntimeServices.LayerService.SelectLayer(RuntimeServices.LayerService.GetLastLayerIndex());
-                    }
-
-                    popup.Close();
                 }
-                else
+                
+                newLayer.Name = layerName;
+                newLayer.ZIndex = RuntimeServices.MapService.CurrentLoadedMapDefinition!.TileLayers.Count; // Set ZIndex to the last index
+
+                if(!RuntimeServices.MapService.HasLoadedMap)
                 {
-                    // Show an error message or handle empty input
+                    return;
                 }
-            };
-            layerNameTextBox.KeyDown += (s, args) =>
-            {
-                if (args.Key == Avalonia.Input.Key.Enter)
-                {
-                    addButton.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent, addButton));
-                }
-            };
-            stackPanel.Children.Add(addButton);
 
-            popup.Opened += (s, e) =>
-            {
-                layerNameTextBox.Focus();
-                // Focus the TextBox when the popup opens
-            };
-
-            popup.ShowDialog(win).ContinueWith(t =>
-            {
-                if (t.IsFaulted)
+                if (RuntimeServices.LayerService.TryAddLayer(newLayer))
                 {
-                    // Handle any errors that occurred while showing the popup
-                    Console.WriteLine("Error showing popup: " + t.Exception?.Message);
+                    LayerItem newLayerItem = new LayerItem(newLayer);
+
+                    newLayerItem.LayerRemoved += () => { RefreshComponents(); };
+
+                    LayersList.Items.Add(newLayerItem);
+                    LayersList.SelectedItem = newLayerItem;
+
+                    SelectedLayerText.Text = $"Selected Layer: {layerName}";
+
+                    RuntimeServices.LayerService.SelectLayer(RuntimeServices.LayerService.GetLastLayerIndex());
+
+                    return;
                 }
-            });
+                
+                UiServices.NotificationService.Error("Error Adding Layer", "Could not add the new layer. It may already exist?");
+            }
         }
 
         private void OnLayerSelected(object? sender, SelectionChangedEventArgs e)

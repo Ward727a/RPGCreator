@@ -472,15 +472,15 @@ namespace RPGCreator.UI.Content.Editor
 
         private void MonoGameScreen_PointerPressed(object? sender, PointerPressedEventArgs e)
         {
-            if (e.GetCurrentPoint(MonoGameScreen).Properties.IsLeftButtonPressed)
-            {
-                var mgPosition = e.GetPosition(MonoGameScreen);
-                var position = new Vector2((float)mgPosition.X, (float)mgPosition.Y);
-                // Adjust the position to account for the MonoGameScreen's margin (12px)
-                EngineServices.BrushManager.ClickAt(new Vector2(position.X, position.Y));
-                EngineStates.BrushState.LastDrawAt = EngineServices.BrushManager.NormalizedPositionToTile(position);
-                EngineStates.BrushState.IsDrawing = true; // Set the flag to indicate that a tile is being placed
-            }
+            // if (e.GetCurrentPoint(MonoGameScreen).Properties.IsLeftButtonPressed)
+            // {
+            //     var mgPosition = e.GetPosition(MonoGameScreen);
+            //     var position = new Vector2((float)mgPosition.X, (float)mgPosition.Y);
+            //     // Adjust the position to account for the MonoGameScreen's margin (12px)
+            //     EngineServices.BrushManager.ClickAt(new Vector2(position.X, position.Y));
+            //     EngineStates.BrushState.LastDrawAt = EngineServices.BrushManager.NormalizedPositionToTile(position);
+            //     EngineStates.BrushState.IsDrawing = true; // Set the flag to indicate that a tile is being placed
+            // }
         }
 
         private void MonoGameScreen_PointerReleased(object? sender, PointerReleasedEventArgs e)

@@ -22,7 +22,7 @@ public abstract class BaseLayerDef : IAssetDef
 
     public void Init(Ulid id)
     {
-        if (id != Ulid.Empty) return;
+        if (Unique != Ulid.Empty) return;
         Unique = id;
     }
     // Pour la sérialisation polymorphique

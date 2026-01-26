@@ -50,6 +50,7 @@ public partial class App : Application
         AvaloniaXamlLoader.Load(this);
         UiServices.DialogService = new DialogService();
         UiServices.MenuService = new MenuService();
+        UiServices.NotificationService = new NotificationService();
     }
 
     public override void OnFrameworkInitializationCompleted()

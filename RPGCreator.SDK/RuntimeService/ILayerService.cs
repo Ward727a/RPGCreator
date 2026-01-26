@@ -13,6 +13,8 @@ public record struct LayerData(int LayerIndex, string LayerName, bool VisibleByD
 
 public interface ILayerService : INotifyPropertyChanged, INotifyPropertyChanging, IDisposable, IService
 {
+    Action<int>? OnLayerSelected { get; set; }
+    
     /// <summary>
     /// Is there a selected layer?
     /// </summary>

@@ -36,7 +36,7 @@ public abstract class BaseTilesetDef : ISerializable, IDeserializable, IAssetDef
     
     public void Init(Ulid id)
     {
-        if (id != Ulid.Empty) return;
+        if (Unique != Ulid.Empty) return;
         Unique = id;
     }
     

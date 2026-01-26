@@ -47,7 +47,7 @@ public class MapDefinition : IMapDef
 
     public void Init(Ulid id)
     {
-        if (id != Ulid.Empty) return;
+        if (Unique != Ulid.Empty) return;
         Unique = id;
     }
     

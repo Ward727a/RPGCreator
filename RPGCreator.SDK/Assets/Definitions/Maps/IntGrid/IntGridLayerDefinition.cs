@@ -28,7 +28,7 @@ public class IntGridLayerDefinition : IMapLayerDef<int>
 
     public void Init(Ulid id)
     {
-        if (id != Ulid.Empty) return;
+        if (Unique != Ulid.Empty) return;
         Unique = id;
     }
     

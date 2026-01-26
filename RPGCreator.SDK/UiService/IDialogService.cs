@@ -153,7 +153,20 @@ public interface IDialogService : IService
     /// True if the user confirmed, false if the user canceled.
     /// </returns>
     /// <exception cref="NotImplementedException">Thrown if the UI framework does not support this operation.</exception>
-    Task<bool> ConfirmAsync(string title, string message, DialogStyle style = new());
+    Task<bool> ConfirmAsync(string title, string message, DialogStyle style = new(), string confirmButtonText = "OK", string cancelButtonText = "Cancel");
+    
+    /// <summary>
+    /// Show a confirmation dialog to the user, with custom content.<br/>
+    /// As content, you can provide any Avalonia control or object that can be rendered in the dialog.
+    /// </summary>
+    /// <param name="title">The title of the confirmation dialog.</param>
+    /// <param name="content">The content to display in the confirmation dialog.</param>
+    /// <param name="style">The style of the dialog.</param>
+    /// <exception cref="NotImplementedException">Thrown if the UI framework does not support this operation.</exception>
+    /// <returns>
+    /// Returns true if the user confirmed, false if the user canceled.
+    /// </returns>
+    Task<bool> ConfirmAsync(string title, object content, DialogStyle style = new(), string confirmButtonText = "OK", string cancelButtonText = "Cancel");
     
     /// <summary>
     /// Show a message dialog to the user.
@@ -174,4 +187,5 @@ public interface IDialogService : IService
     /// <returns>A task that represents the asynchronous operation.</returns>
     /// <exception cref="NotImplementedException">Thrown if the UI framework does not support this operation.</exception>
     Task ShowErrorAsync(string title, string message, DialogStyle style = new());
+    
 }

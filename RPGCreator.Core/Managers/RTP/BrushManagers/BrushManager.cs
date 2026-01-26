@@ -64,18 +64,13 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
             }
 
             Guard.IsNotNull(EngineStates.EditorState.CurrentMap, "CurrentMap");
-            
-            var tileWidth = EngineStates.EditorState.CurrentMap.GridParameter.CellWidth;
-            var tileHeight = EngineStates.EditorState.CurrentMap.GridParameter.CellHeight;
 
-            float tileX = (at.X / tileWidth) * tileWidth;
-            float tileY = (at.Y / tileHeight) * tileHeight;
-
-            at = new Vector2(tileX, tileY);
+            at = RuntimeServices.MapService.WorldToMapCoordinates(at);
 
             // Handle the click at the specified point
             // This is where you would implement the logic for what happens when a brush is clicked at a specific point
             Log.Information($"Brush clicked at: {at}");
+            EngineStates.BrushState.CurrentBrush = new SimpleBrush();
             if(EngineStates.BrushState.CurrentBrush == null || EngineStates.BrushState.CurrentBrush is not IBrush brush)
             {
                 // Log.Error("No brush type is currently selected. Please select a brush type before clicking.");

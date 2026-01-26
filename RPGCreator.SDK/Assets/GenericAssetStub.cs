@@ -11,7 +11,7 @@ public class GenericAssetStub : IAssetDef, IDeserializable
     public URN Urn { get; set; }
     public void Init(Ulid id)
     {
-        if (id != Ulid.Empty) return;
+        if (Unique != Ulid.Empty) return;
         Unique = id;
     }
 

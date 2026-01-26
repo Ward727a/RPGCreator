@@ -133,4 +133,10 @@ public static class UiServices
         get => GetService<IDialogService>();
         set => RegisterService(value);
     }
+
+    public static INotificationService NotificationService
+    {
+        get => GetService<INotificationService>();
+        set => RegisterService(value);
+    }
 }

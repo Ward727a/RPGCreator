@@ -39,7 +39,7 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
         var chunk = GetChunk(chunkId);
         chunk.SetElement(chunkPosition, element);
         
-        Logger.Debug("Placed element of type {ElementType} at location {Location} in chunk {ChunkId}.", args: [typeof(TDef).Name, location, chunkId]);
+        // Logger.Debug("Placed element of type {ElementType} at location {Location} in chunk {ChunkId}.", args: [typeof(TDef).Name, location, chunkId]);
         
         ElementAdded?.Invoke(new LayerElementEventArgs(chunkId, location, element));
     }
@@ -120,9 +120,10 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
     /// <returns>The element at the specified location, or null if no element exists there.</returns>
     public TDef? GetElement(Vector2 location)
     {
+        var chunkPosition = LayerChunk.GetChunkPosition(location);
         var chunkId = LayerChunk.GetChunkId(location);
         var chunk = GetChunk(chunkId);
-        return chunk.GetElement(location);
+        return chunk.GetElement(chunkPosition);
     }
 
     /// <summary>

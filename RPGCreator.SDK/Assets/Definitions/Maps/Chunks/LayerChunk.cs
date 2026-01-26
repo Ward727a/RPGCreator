@@ -81,11 +81,16 @@ public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where
     /// <exception cref="ArgumentOutOfRangeException">Thrown if the local coordinates are out of bounds even after sanitization.</exception>
     public void SetElement(int localX, int localY, TDef? element)
     {
-        if(SanitizeLocalCoord(ref localX))
-            Logger.Debug("Sanitized local X coordinate to {localX}.", args: localX);
-        if(SanitizeLocalCoord(ref localY))
-            Logger.Debug("Sanitized local Y coordinate to {localY}.", args: localY);
-        
+        if (SanitizeLocalCoord(ref localX))
+        {
+            // Logger.Debug("Sanitized local X coordinate to {localX}.", args: localX);
+        }
+
+        if (SanitizeLocalCoord(ref localY))
+        {
+            // Logger.Debug("Sanitized local Y coordinate to {localY}.", args: localY);
+        }
+
         if (localX is < 0 or >= ChunkSize)
             throw new ArgumentOutOfRangeException(nameof(localX), "Local coordinates must be between 0 and 31.");
         
@@ -125,10 +130,15 @@ public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where
     /// <exception cref="ArgumentOutOfRangeException">Thrown if the local coordinates are out of bounds even after sanitization.</exception>
     public TDef? GetElement(int localX, int localY)
     {
-        if(SanitizeLocalCoord(ref localX))
-            Logger.Debug("Sanitized local X coordinate to {localX}.", args: localX);
-        if(SanitizeLocalCoord(ref localY))
-            Logger.Debug("Sanitized local Y coordinate to {localY}.", args: localY);
+        if (SanitizeLocalCoord(ref localX))
+        {
+            // Logger.Debug("Sanitized local X coordinate to {localX}.", args: localX);
+        }
+
+        if (SanitizeLocalCoord(ref localY))
+        {
+            // Logger.Debug("Sanitized local Y coordinate to {localY}.", args: localY);
+        }
         
         if (localX is < 0 or >= ChunkSize)
             throw new ArgumentOutOfRangeException(nameof(localX), "Local coordinates must be between 0 and 31.");
@@ -239,7 +249,6 @@ public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where
     
     private bool SanitizeLocalCoord(ref int coord)
     {
-        
         var originalCoord = coord;
         // Bitwise AND with ChunkSize - 1 (31) to wrap around
         // Very efficient way to do coord % 32 when ChunkSize is a power of two
@@ -318,16 +327,12 @@ public abstract class LayerChunk
     /// <returns></returns>
     public static long GetChunkId(Vector2 location)
     {
-        // 1. Calcul des index (Utilise 1024f pour être explicite : 32 tuiles * 32 pixels)
         int cx = (int)Math.Floor(location.X / 1024f);
         int cy = (int)Math.Floor(location.Y / 1024f);
 
-        // 2. On traite les bits comme des tiroirs de 32 bits vides
-        // On masque avec 0xFFFFFFFF pour être CERTAIN de ne garder que 32 bits
         long xBits = (long)(uint)cx & 0xFFFFFFFFL;
         long yBits = (long)(uint)cy & 0xFFFFFFFFL;
 
-        // 3. On assemble
         return (yBits << 32) | xBits;
     }
     

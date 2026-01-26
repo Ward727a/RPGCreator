@@ -1,7 +1,9 @@
 using System.Numerics;
 using RPGCreator.Core.Types.Map;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Logging;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 
@@ -14,8 +16,30 @@ public class AutoLayerDefinition : BaseLayerDef
     public Ulid IntGridSetUnique { get; set; }
     public IntGridTilesetDef? IntGridSet { get; set; }
 
+    /// <summary>
+    /// Bakes auto-tiles in the specified region.
+    /// </summary>
+    /// <param name="center">The center position of the region to bake.</param>
+    /// <param name="radius">The radius around the center to bake. Default is 0 (only the center position).<br/>Note: The radius is measured in grid units.</param>
     public void BakeRegion(Vector2 center, float radius = 0)
     {
+
+        Logger.Debug("BAKING AUTOTILES for region centered at {center} with radius {radius}", center, radius);
+        
+        if (!RuntimeServices.MapService.HasLoadedMap)
+        {
+            Logger.Error("Cannot bake autotiles: No map is currently loaded.");
+            return;
+        }
+
+        if (IntGridSet == null)
+        {
+            Logger.Error("Cannot bake autotiles: IntGridTilesetDef is not set.");
+            return;
+        }
+        
+        radius *= RuntimeServices.MapService.CurrentLoadedMapDefinition!.GridParameter.CellHeight;
+        
         for (var x = center.X - radius; x <= center.X + radius; x++)
         {
             for (var y = center.Y - radius; y <= center.Y + radius; y++)
@@ -28,9 +52,13 @@ public class AutoLayerDefinition : BaseLayerDef
                     InternalTileLayer.AddElement(newTile, position);
                     BakeDirtyTiles(CheckAround(position));
                 }
-                else
+                else if(InternalTileLayer.GetElement(position) == null)
                 {
-                    // InternalTileLayer.TryRemoveElement(position, out var _);
+                    var defaultTile = IntGridSet.IntRefs[SourceIntGrid.GetValue(position)].DefaultTileData;
+                    var tile = defaultTile.ToTileDef();
+
+                    InternalTileLayer.AddElement(tile, position);
+                    BakeDirtyTiles(CheckAround(position));
                 }
             }
         }
@@ -81,6 +109,11 @@ public class AutoLayerDefinition : BaseLayerDef
         }
     }
     
+    /// <summary>
+    /// Bakes tiles at the positions specified in the context, and recursively checks surrounding tiles for updates.<br/>
+    /// This method continues until no more tiles need to be updated, and to avoid infinite loops, it keeps track of already checked positions (context).
+    /// </summary>
+    /// <param name="context">The bake context containing positions to check and already checked positions.</param>
     protected void BakeDirtyTiles(BakeContext context)
     {
         
@@ -106,13 +139,24 @@ public class AutoLayerDefinition : BaseLayerDef
                     BakeDirtyTiles(CheckAround(position, context));
                 }
             }
-            else
+            else if(InternalTileLayer.GetElement(position) != null)
             {
-                // InternalTileLayer.TryRemoveElement(position, out var _);
+                var defaultTile = IntGridSet.IntRefs[SourceIntGrid.GetValue(position)].DefaultTileData;
+                var tile = defaultTile.ToTileDef();
+
+                // VERY IMPORTANT HERE: Do not add a "BakeDirtyTiles" call here, or it will create an infinite loop!
+                InternalTileLayer.AddElement(tile, position);
             }
         }
     }
     
+    /// <summary>
+    /// Checks the surrounding positions of the given center position in a grid and adds them to the bake context if they contain elements in the source int grid.
+    /// </summary>
+    /// <param name="center">The center position to check around.</param>
+    /// <param name="context">The existing bake context to update, or null to create a new one.</param>
+    /// <param name="GridSize">The size of the grid cells. Default is 32.</param>
+    /// <returns></returns>
     protected BakeContext CheckAround(Vector2 center, BakeContext? context = null, int GridSize = 32)
     {
         if(context == null)

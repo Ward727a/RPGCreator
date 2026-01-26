@@ -18,9 +18,11 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Layout;
 using RPGCreator.SDK.UiService;
 using RPGCreator.UI.Content.Editor;
@@ -30,7 +32,25 @@ namespace RPGCreator.UI.Services;
 
 public class DialogService : IDialogService
 {
-    private Window GetParent() => EditorWindow.Instance; 
+    #region Helpers
+    
+    protected Window GetParent(Window? manualOwner = null) 
+    {
+        if (manualOwner != null) return manualOwner;
+
+        var lifetime = Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
+        if (lifetime == null) return EditorWindow.Instance;
+
+        var active = lifetime.Windows.FirstOrDefault(w => w.IsActive);
+        if (active != null) return active;
+
+        var last = lifetime.Windows.LastOrDefault();
+        if (last != null) return last;
+
+        return EditorWindow.Instance;
+    }
+    
+    #endregion
     
     public Task<string?> PromptTextAsync(string title, string message, string defaultText = "", DialogStyle style = new(), bool selectAllText = true)
     {
@@ -47,6 +67,8 @@ public class DialogService : IDialogService
         
         var stackPanel = new StackPanel { Margin = new Thickness(15), Spacing = 10 };
         promptWindow.Content = stackPanel;
+        
+        var inputBox = new TextBox { Text = defaultText, Watermark = "Enter text here..." };
 
         if (content is Control avaloniaContent)
         {
@@ -54,15 +76,17 @@ public class DialogService : IDialogService
         }
         else
         {
-            stackPanel.Children.Add(
-                new TextBlock(){
+            var textContent =
+                new TextBlock()
+                {
                     Text = content?.ToString() ?? "EMPTY CONTENT PROVIDED",
                     TextWrapping = Avalonia.Media.TextWrapping.Wrap
-                }
-            );
+                };
+            
+            inputBox.InnerLeftContent = textContent;
         }
 
-        var inputBox = new TextBox { Text = defaultText, Watermark = "Enter text here..." };
+
         stackPanel.Children.Add(inputBox);
         
         var buttonPanel = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Spacing = 10 };
@@ -93,7 +117,7 @@ public class DialogService : IDialogService
         return promptWindow.ShowDialog<string?>(GetParent());
     }
 
-    public Task<bool> ConfirmAsync(string title, string message, DialogStyle style = new())
+    public Task<bool> ConfirmAsync(string title, string message, DialogStyle style = new(), string confirmButtonText = "OK", string cancelButtonText = "Cancel")
     {
         var confirmWindow = new Window { Title = title };
         ApplyStyle(confirmWindow, style);
@@ -110,10 +134,48 @@ public class DialogService : IDialogService
         var buttonPanel = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Spacing = 10 };
         stackPanel.Children.Add(buttonPanel);
         
-        var yesButton = new Button { Content = "Yes", IsDefault = true };
+        var yesButton = new Button { Content = confirmButtonText, IsDefault = true };
         buttonPanel.Children.Add(yesButton);
         
-        var noButton = new Button { Content = "No", IsCancel = true };
+        var noButton = new Button { Content = cancelButtonText, IsCancel = true };
+        buttonPanel.Children.Add(noButton);
+
+        yesButton.Click += (_, _) => confirmWindow.Close(true);
+        noButton.Click += (_, _) => confirmWindow.Close(false);
+
+        return confirmWindow.ShowDialog<bool>(GetParent());
+    }
+
+    public Task<bool> ConfirmAsync(string title, object content, DialogStyle style = new DialogStyle(), string confirmButtonText = "OK", string cancelButtonText = "Cancel")
+    {
+        var confirmWindow = new Window { Title = title };
+        ApplyStyle(confirmWindow, style);
+
+        var stackPanel = new StackPanel { Margin = new Thickness(15), Spacing = 20 };
+        confirmWindow.Content = stackPanel;
+        
+        if (content is Control avaloniaContent)
+        {
+            stackPanel.Children.Add(avaloniaContent);
+        }
+        else
+        {
+            var textContent =
+                new TextBlock()
+                {
+                    Text = content?.ToString() ?? "EMPTY CONTENT PROVIDED",
+                    TextWrapping = Avalonia.Media.TextWrapping.Wrap
+                };
+            stackPanel.Children.Add(textContent);
+        }
+
+        var buttonPanel = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Spacing = 10 };
+        stackPanel.Children.Add(buttonPanel);
+        
+        var yesButton = new Button { Content = confirmButtonText, IsDefault = true };
+        buttonPanel.Children.Add(yesButton);
+        
+        var noButton = new Button { Content = cancelButtonText, IsCancel = true };
         buttonPanel.Children.Add(noButton);
 
         yesButton.Click += (_, _) => confirmWindow.Close(true);

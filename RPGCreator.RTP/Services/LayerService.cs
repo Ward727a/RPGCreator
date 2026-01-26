@@ -11,6 +11,9 @@ public class LayerService : ObservableObject, ILayerService
 {
     private readonly ScopedLogger _logger = Logger.ForContext<LayerService>(); 
     private bool _hasSelectedLayer;
+    
+    public Action<int>? OnLayerSelected { get; set; }
+
     public bool HasSelectedLayer
     {
         get => _hasSelectedLayer;
@@ -55,6 +58,7 @@ public class LayerService : ObservableObject, ILayerService
         
         CurrentLayerIndex = layerIndex;
         HasSelectedLayer = true;
+        OnLayerSelected?.Invoke(layerIndex);
     }
 
     public bool TryAddLayer(BaseLayerDef layerDef)
