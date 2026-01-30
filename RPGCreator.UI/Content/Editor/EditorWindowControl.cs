@@ -514,7 +514,7 @@ namespace RPGCreator.UI.Content.Editor
                 }
 
                 // Adjust the position to account for the MonoGameScreen's margin (12px)
-                EngineServices.BrushManager.ClickAt(position);
+                EngineServices.BrushManager.DrawAt(position);
             }
             
             {

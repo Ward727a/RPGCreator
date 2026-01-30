@@ -1,13 +1,14 @@
 using System.Collections;
 using RPGCreator.Core.Types.Internal;
+using RPGCreator.SDK.Exceptions;
 using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.SDK.ECS.Entities;
 
 public class Entity : IEntity, ICleanable
 {
-    public EntityManager? _entityManager { get; private set; }
-    public ComponentManager? _componentManager { get; private set; }
+    public EntityManager _entityManager { get; private set; }
+    public ComponentManager _componentManager { get; private set; }
 
     public void SetManager(EntityManager manager, ComponentManager componentManager)
     {
@@ -18,28 +19,29 @@ public class Entity : IEntity, ICleanable
     }
     
     public int Id { get; set; }
-    public bool HasComponent<T>() where T : IComponent
+    public bool HasComponent<T>() where T : struct, IComponent
     {
-        var bit = ComponentTypeRegistry.GetBit<T>();
+        var bit = ComponentTypeIdRegistry.GetBit<T>();
         return ComponentBits[bit];
     }
 
-    public ref T GetComponent<T>() where T : IComponent
+    public ref T GetComponent<T>() where T : struct, IComponent
     {
-        return ref _componentManager.GetComponent<T>(this);
+        return ref _componentManager.GetComponent<T>(Id);
     }
 
-    public ref T AddComponent<T>() where T : IComponent, new()
+    public ref T AddComponent<T>() where T : struct, IComponent
     {
-        return ref _componentManager.AddComponent<T>(this);
+        return ref _componentManager.AddComponent<T>(Id);
     }
 
-    public void RemoveComponent<T>() where T :  IComponent
+    public void RemoveComponent<T>() where T : struct, IComponent
     {
-        _componentManager.RemoveComponent<T>(this);
+        _componentManager.RemoveComponent<T>(Id);
     }
 
-    public BitArray ComponentBits { get; } = new BitArray(64); // Initial size of 256 bits, can grow dynamically if needed.
+    public BitArray ComponentBits => _componentManager?.GetEntityComponentBits(Id) ??
+                                     throw new CriticalEngineException("Entity's ComponentManager is null.", this);
 
     public void Clean()
     {

@@ -23,8 +23,9 @@
 // 
 #endregion
 using RPGCreator.Core.Managers.AssetsManager;
+using RPGCreator.Core.Managers.BrushManagers;
+using RPGCreator.Core.Managers.BrushManagers.Brushs;
 using RPGCreator.Core.Managers.ProjectsManager;
-using RPGCreator.Core.Managers.RTP.BrushManagers;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Commands;
 using RPGCreator.SDK.Logging;
@@ -58,6 +59,10 @@ namespace RPGCreator.Core
             EngineServices.GameFactory = GameFactory;
             EngineServices.ProjectsManager = Projects;
             EngineServices.BrushManager = Brush;
+            EngineServices.UndoRedoService = Commands;
+            
+            Brush.AddBrush(new SimpleBrush());
+            Brush.AddBrush(new EraserBrush());
 
             EngineCore.Instance.Events.OnCoreManagersReady(new());
             

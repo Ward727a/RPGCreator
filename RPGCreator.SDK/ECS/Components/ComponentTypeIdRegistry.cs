@@ -2,7 +2,7 @@ using RPGCreator.Core.Runtimes.ECS;
 
 namespace RPGCreator.SDK.ECS;
 
-public static class ComponentTypeRegistry
+public static class ComponentTypeIdRegistry
 {
     private static readonly Dictionary<System.Type, int> _componentTypeToId = new();
     private static int _nextId = 0;
@@ -39,7 +39,7 @@ public static class ComponentTypeRegistry
 
     /// <summary>
     /// This method is an alias for GetComponentTypeId and is used to get the bit position for a component type T.
-    /// The bit position can be used in a BitVector32 to represent the presence or absence of the component in an entity.
+    /// The bit position can be used in a BitArray to represent the presence or absence of the component in an entity.
     /// This is useful for quickly checking if an entity has a specific component using bitwise operations.
     /// </summary>
     /// <typeparam name="T"></typeparam>

@@ -9,26 +9,25 @@ namespace RPGCreator.Core.Runtimes.Factories;
 public class EntityFactory : IEntityFactory
 {
     
-    private readonly EntityManager _entityManager;
+    private readonly IEcsWorld _world;
 
-    public EntityFactory(EntityManager entityManager)
+    public EntityFactory(IEcsWorld world)
     {
-        _entityManager = entityManager;
+        _world = world;
     }
 
-    public Entity SpawnEntity(IEntityDefinition entityDefinitionData, Vector2 position)
+    public BufferedEntity SpawnEntity(IEntityDefinition entityDefinitionData, Vector2 position)
     {
-        var entity = _entityManager.CreateEntity();
-
-        var transform = entity.AddComponent<TransformComponent>();
-        transform.Position = position;
+        var entity = _world.CreateEntity();
+        
+        entity.AddComponent(new TransformComponent(){Position = position});
 
         InitializeEntity(entity, entityDefinitionData);
         
         return entity;
     }
 
-    public void InitializeEntity(Entity entity, IEntityDefinition entityDefinitionData)
+    public void InitializeEntity(BufferedEntity entity, IEntityDefinition entityDefinitionData)
     {
         var autoFeatures = EngineCore.Instance.Managers.FeaturesRules.GetAllAutoFeatures(entityDefinitionData.Tags);
 
@@ -40,7 +39,7 @@ public class EntityFactory : IEntityFactory
             var featureType = feature.GetType();
             addedTypes.Add(featureType);
             
-            feature.OnInitialize(entity);
+            feature.OnInject(entity);
         }
         
         // Then the auto added features
@@ -49,7 +48,7 @@ public class EntityFactory : IEntityFactory
             var featureType = feature.GetType();
             if (addedTypes.Contains(featureType))
                 continue;
-            feature.OnInitialize(entity);
+            feature.OnInject(entity);
         }
     }
 }

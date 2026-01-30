@@ -29,6 +29,7 @@ using RPGCreator.Core.Events.EventArgs;
 using RPGCreator.Core.Inputs;
 using RPGCreator.Core.Inputs.Keyboard;
 using RPGCreator.Core.Inputs.Mouse;
+using RPGCreator.Core.Module;
 using RPGCreator.Core.Parser.Graph;
 using RPGCreator.Core.Parser.PRATT;
 using RPGCreator.Core.Resources;
@@ -144,7 +145,6 @@ namespace RPGCreator.Core
             Configs = new EngineConfigs();
             Events = new EngineEvents();
             Managers = new EngineManagers();
-            Modules = new EngineModules();
             #if DEBUG
             // In debug mode, we load the engine icons for debug tools (like IconsExplorer).
             Icons = new EngineIcons();
@@ -153,8 +153,9 @@ namespace RPGCreator.Core
             EngineServices.GraphService = new GraphService();
             EngineServices.PrattFormulaService = new PrattFormulaService();
             EngineServices.GraphNodeScanner = new GraphNodeScanner();
-            EngineServices.ECS = new ECSService();
+            EngineServices.ECS = new EcsService();
             EngineServices.InputsService = new InputsService();
+            EngineServices.ModulePathResolver = new ModulePathResolver();
 
             Logger.Warning("---");
             Logger.Warning("NORMAL WARNING: The warning below can be ignored!");
@@ -174,6 +175,8 @@ namespace RPGCreator.Core
             SDKAutoTileSolver.Service = new AutoTileSolver();
             
             Managers.Init();
+            
+            Modules = new EngineModules();
             
             _logger.Info("Starting scanning for blueprint opcodes handlers...");
             

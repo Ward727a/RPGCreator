@@ -1,6 +1,5 @@
 using CommunityToolkit.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
-using RPGCreator.Core.Managers.RTP.BrushManagers.Brushs;
 using RPGCreator.Core.Types.Editor.Interfaces;
 using RPGCreator.Core.Types.Editor.Visual;
 using RPGCreator.Core.Types.Editor.Visual.PaintTargets;

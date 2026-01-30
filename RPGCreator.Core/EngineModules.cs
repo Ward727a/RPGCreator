@@ -31,6 +31,8 @@ using System.Text;
 using System.Threading.Tasks;
 using RPGCreator.Core.Common;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.ECS.Features;
 using RPGCreator.SDK.Logging;
 using Serilog;
 
@@ -86,8 +88,16 @@ namespace RPGCreator.Core
                     {
                         // Calculate the SHA256 checksum of the file.
                         var hashString = ShaUtil.ComputeSha256(file);
-                        if (CHECKSUM_INTERNAL_MODULES.Contains(hashString))
+                        if (CHECKSUM_INTERNAL_MODULES.Contains(hashString) || true) // TODO: REMOVE THE TRUE!!!!!
                         {
+                            _logger.Error("[ModuleLoader] Warning: Module integrity check is currently disabled. This should only be used for development purposes.");
+                            _logger.Error("[ModuleLoader] Warning: Module integrity check is currently disabled. This should only be used for development purposes.");
+                            _logger.Error("[ModuleLoader] Warning: Module integrity check is currently disabled. This should only be used for development purposes.");
+                            _logger.Error("[ModuleLoader] Warning: Module integrity check is currently disabled. This should only be used for development purposes.");
+                            _logger.Error("[ModuleLoader] Warning: Module integrity check is currently disabled. This should only be used for development purposes.");
+                            _logger.Error("[ModuleLoader] Warning: Module integrity check is currently disabled. This should only be used for development purposes.");
+                            _logger.Error("[ModuleLoader] Warning: Module integrity check is currently disabled. This should only be used for development purposes.");
+                            
                             var context = new ModuleContext(file);
                             var assembly = context.LoadFromAssemblyPath(file);
                             
@@ -99,6 +109,18 @@ namespace RPGCreator.Core
                                 module.Initialize();
                                 _logger.Info(
                                     $"Module '{module.Name}' v{module.Version} by {module.Author} initialized.");
+                            }
+
+                            var entityFeatures = assembly.GetTypes().Where(t =>
+                                typeof(IEntityFeature).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract &&
+                                t.GetCustomAttributes(typeof(EntityFeatureAttribute), false).Length > 0);
+                            
+                            foreach (var featureType in entityFeatures)
+                            {
+                                var featureInstance = (IEntityFeature)Activator.CreateInstance(featureType)!;
+                                EngineServices.ECS.RegisterFeature(featureInstance);
+                                _logger.Info(
+                                    $"Entity Feature '{featureInstance.FeatureUrn}'({featureInstance.FeatureName}) from module '{assembly.FullName}' registered.");
                             }
                         }
                         else

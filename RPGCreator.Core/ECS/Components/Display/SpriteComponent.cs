@@ -5,14 +5,14 @@ using RPGCreator.SDK.Types;
 
 namespace RPGCreator.Core.ECS.Components.Display;
 
-public class SpriteComponent() : IComponent
+public struct SpriteComponent : IComponent
 {
     public Texture2D? Texture;
-    public Rectangle? SourceRectangle = null;
+    public Rectangle? SourceRectangle;
     public Size RenderSize;
-    public Color Color = Color.White;
+    public Color Color;
     
-    public SpriteEffects SpriteEffect = SpriteEffects.None;
+    public SpriteEffects SpriteEffect;
     
-    public float LayerDepth = 0f;
+    public float LayerDepth;
 }

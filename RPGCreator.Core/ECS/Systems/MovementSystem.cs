@@ -23,7 +23,7 @@ public class MovementSystem : ISystem
         _componentManager = componentManager;
     }
     
-    public override void Initialize(IECSWorld iecsWorld)
+    public override void Initialize(IEcsWorld iecsWorld)
     {
         _logger.Information("MovementSystem initialized.");
     }

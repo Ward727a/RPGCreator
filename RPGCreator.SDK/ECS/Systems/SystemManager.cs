@@ -1,9 +1,10 @@
 namespace RPGCreator.SDK.ECS.Systems;
 
-public class SystemManager(IECSWorld world)
+public class SystemManager(IEcsWorld world)
 {
-    private IECSWorld _world = world;
-    private readonly List<ISystem> _systems = new();
+    private IEcsWorld _world = world;
+    private readonly List<ISystem> _updateSystems = new();
+    private readonly List<ISystem> _drawingSystems = new();
     private readonly Queue<ISystem> _toAdd = new();
     private readonly Queue<ISystem> _toRemove = new();
 
@@ -23,21 +24,30 @@ public class SystemManager(IECSWorld world)
         {
             var sys = _toAdd.Dequeue();
             
-            if (_systems.Contains(sys)) continue;
+            if (_updateSystems.Contains(sys)) continue;
             
             sys.Initialize(_world);
-            _systems.Add(sys);
+            if (sys.IsDrawingSystem)
+            {
+                _drawingSystems.Add(sys);
+                _drawingSystems.Sort((a, b) => b.Priority.CompareTo(a.Priority));
+            }
+            else
+            {
+                _updateSystems.Add(sys);
+                _updateSystems.Sort((a, b) => b.Priority.CompareTo(a.Priority));
+            }
             sys.OnEnable?.Invoke();
         }
 
         while (_toRemove.Count > 0)
         {
             var sys = _toRemove.Dequeue();
-            if (_systems.Remove(sys))
+            if (_drawingSystems.Remove(sys) || _updateSystems.Remove(sys))
                 sys.OnDisable?.Invoke();
         }
 
-        foreach (var system in _systems.Where(s => !s.IsDrawingSystem).OrderByDescending(s => s.Priority))
+        foreach (var system in _updateSystems)
         {
             system.Update(deltaTime);
         }
@@ -45,12 +55,12 @@ public class SystemManager(IECSWorld world)
     
     public List<ISystem> GetDrawingSystems()
     {
-        return _systems.Where(s => s.IsDrawingSystem).OrderByDescending(s => s.Priority).ToList();
+        return _drawingSystems;
     }
     
     public void Draw(TimeSpan deltaTime)
     {
-        foreach (var system in _systems.Where(s => s.IsDrawingSystem).OrderByDescending(s => s.Priority))
+        foreach (var system in _drawingSystems)
         {
             system.Update(deltaTime);
         }

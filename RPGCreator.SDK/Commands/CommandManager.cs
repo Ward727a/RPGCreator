@@ -1,6 +1,6 @@
 namespace RPGCreator.SDK.Commands;
 
-public class CommandManager
+public class CommandManager : ICommandManager
 {
     public event Action? StateChanged;
     
@@ -14,7 +14,12 @@ public class CommandManager
         _redoCommands.Clear();
         StateChanged?.Invoke();
     }
-    
+
+    public void ExecuteCommand(ECS.ICommand command)
+    {
+        throw new NotImplementedException();
+    }
+
     public void UndoLastCommand()
     {
         if (_undoCommands.Count <= 0) return;

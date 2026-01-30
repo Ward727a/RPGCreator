@@ -25,7 +25,7 @@
 
 namespace RPGCreator.SDK.Editor.Brushes
 {
-    public interface IBrushResizeFeature
+    public interface IBrushResizeFeature : IBrushFeature
     {
 
         int Step { get; } // Step size for resizing the brush

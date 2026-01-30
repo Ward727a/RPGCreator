@@ -8,48 +8,84 @@ namespace RPGCreator.SDK.ECS;
 
 public class ComponentManager(ECSEventBus eventBus)
 {
+    
+    public const int MaxComponents = 64;
+    
     private ECSEventBus _eventBus { get; } = eventBus;
+    private EntityManager _entityManager = null!;
     private Dictionary<System.Type, object> _sparseSets = new();
     private Dictionary<System.Type, Action<int>> _removeActions = new();
     private readonly Dictionary<System.Type, HashSet<int>> _dirtyEntities = new();
     
-    public ref T AddComponent<T>(IEntity entity) where T : IComponent, new()
+    private readonly Dictionary<int, BitArray> _entityComponentBits = new();
+    
+    public void Initialize(EntityManager entityManager)
+    {
+        _entityManager = entityManager;
+    }
+    
+    public ref T AddComponent<T>(int entityId) where T : struct, IComponent
     {
         var sparseSet = GetOrCreateSparseSet<T>();
         
-        ref var component = ref sparseSet.Add(entity.Id, new T());
-        var bit = ComponentTypeRegistry.GetBit<T>();
-        entity.ComponentBits[bit] = true;
+        ref var component = ref sparseSet.Add(entityId, new T());
+        var bit = ComponentTypeIdRegistry.GetBit<T>();
+        GetEntityComponentBits(entityId).Set(bit, true);
         
-        MarkDirty<T>(entity.Id);
-        _eventBus.Publish(new ComponentChangedEvent<T>(entity.Id, ChangeType.Added, default, component));
+        MarkDirty<T>(entityId);
+        _eventBus.Publish(new ComponentChangedEvent<T>(entityId, ChangeType.Added, default, component));
         
         return ref component;
     }
     
-    public ref T GetComponent<T>(IEntity entity) where T : IComponent
+    public void AddComponent<T>(int entityId, T component) where T : struct, IComponent
     {
         var sparseSet = GetOrCreateSparseSet<T>();
-        return ref sparseSet.Get(entity.Id);
+        
+        sparseSet.Add(entityId, component);
+        var bit = ComponentTypeIdRegistry.GetBit<T>();
+        GetEntityComponentBits(entityId).Set(bit, true);
+        
+        MarkDirty<T>(entityId);
+        _eventBus.Publish(new ComponentChangedEvent<T>(entityId, ChangeType.Added, default, component));
     }
     
-    public ref T GetComponent<T>(int entityId) where T : IComponent
+    public void RegisterEntityComponentBits(int entityId)
+    {
+        if(!_entityComponentBits.TryGetValue(entityId, out var bit))
+            _entityComponentBits[entityId] = new BitArray(MaxComponents);
+        else
+            bit.SetAll(false);
+    }
+    
+    public BitArray GetEntityComponentBits(int entityId)
+    {
+        return _entityComponentBits[entityId];
+    }
+    
+    public bool HasComponent<T>(int entityId) where T : IComponent
+    {
+        var bit = ComponentTypeIdRegistry.GetBit<T>();
+        return GetEntityComponentBits(entityId).Get(bit);
+    }
+    
+    public ref T GetComponent<T>(int entityId) where T : struct, IComponent
     {
         var sparseSet = GetOrCreateSparseSet<T>();
         return ref sparseSet.Get(entityId);
     }
 
-    public void RemoveComponent<T>(IEntity entity) where T : IComponent
+    public void RemoveComponent<T>(int entityId) where T : struct, IComponent
     {
         var sparseSet = GetOrCreateSparseSet<T>();
-        var bit = ComponentTypeRegistry.GetBit<T>();
-        entity.ComponentBits[bit] = false;
-        sparseSet.Remove(entity.Id);
-        MarkDirty<T>(entity.Id);
-        _eventBus.Publish(new ComponentChangedEvent<T>(entity.Id, ChangeType.Removed));
+        var bit = ComponentTypeIdRegistry.GetBit<T>();
+        GetEntityComponentBits(entityId).Set(bit, false);
+        sparseSet.Remove(entityId);
+        MarkDirty<T>(entityId);
+        _eventBus.Publish(new ComponentChangedEvent<T>(entityId, ChangeType.Removed));
     }
 
-    public IEnumerable<(int entityId, T component)> GetAll<T>() where T : IComponent
+    public IEnumerable<(int entityId, T component)> GetAll<T>() where T : struct, IComponent
     {
         var set = GetOrCreateSparseSet<T>();
         return set.ActiveElements();
@@ -124,7 +160,7 @@ public class ComponentManager(ECSEventBus eventBus)
         }
     }
     
-    private ECSSparseSet<T> GetOrCreateSparseSet<T>(T _ = default) where T : IComponent
+    private ECSSparseSet<T> GetOrCreateSparseSet<T>(T _ = default) where T : struct, IComponent
     {
         var type = typeof(T);
         if (!_sparseSets.TryGetValue(type, out var set))
@@ -210,22 +246,18 @@ public class ComponentManager(ECSEventBus eventBus)
     }
     
     // Called by EntityManager to remove all components of an entity
-    public void RemoveAllComponents(int entityId, BitArray componentBits)
+    public void RemoveAllComponents(int entityId)
     {
+        var componentBits = GetEntityComponentBits(entityId);
         for (int i = 0; i < componentBits.Length; i++)
         {
             if (componentBits[i])
             {
-                var type = ComponentTypeRegistry.GetType(i);
+                var type = ComponentTypeIdRegistry.GetType(i);
                 if (type != null && _removeActions.TryGetValue(type, out var remove))
                     remove(entityId);
             }
         }
     }
     
-    public bool HasComponent<T>(int entityId) where T : IComponent
-    {
-        var sparseSet = GetOrCreateSparseSet<T>();
-        return sparseSet.Contains(entityId);
-    }
 }

@@ -34,6 +34,10 @@ public readonly struct UIRegion : IEquatable<UIRegion>
     public static UIRegion AutoLayerEditorIntRefListMenu => new("AutoLayerEditor.IntRefList.Menu");
     public static UIRegion AutoLayerEditorIntRefListCreateModal => new("AutoLayerEditor.IntRefList.CreateModal");
     
+    // CHARACTER FEATURES EDITOR
+    public static UIRegion CharacterFeaturesEditor => new("CharacterFeaturesEditor");
+    public static UIRegion CharacterFeaturesEditorFeatureItem => new("CharacterFeaturesEditor.FeatureItem");
+    
     #endregion
 
     public override string ToString()

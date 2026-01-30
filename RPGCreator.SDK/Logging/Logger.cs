@@ -43,4 +43,17 @@ public static class Logger
     {
         Implementation?.Write(LogLevel.Critical, message, args);
     }
+    
+    public static void Dump(object obj)
+    {
+        var finalMessage = "--- ADDITIONAL DEBUG INFORMATION ---";
+        finalMessage += "\n----------------------------------";
+        finalMessage += "\n--- PLEASE READ BEFORE SHARING ---";
+        finalMessage += "\n----------------------------------";
+        finalMessage += "\n/!\\ CAUTION: THE DUMP BELOW MAY CONTAIN SENSITIVE DATA FROM YOUR PROJECT OR SYSTEM PATHS.";
+        finalMessage += "\n/!\\ DO NOT SHARE THIS LOG PUBLICLY UNLESS YOU TRUST THE RECIPIENT.";
+        
+        Implementation?.Write(LogLevel.Critical, finalMessage);
+        Implementation?.Dump(obj);
+    }
 }

@@ -11,8 +11,8 @@ public class IntGridLayerTarget : IPaintTarget
 {
     public int GridWidth { get; } = 32;
     public int GridHeight { get; } = 32;
-    
-    public AutoLayerDefinition LayerDef { get; }
+
+    private AutoLayerDefinition LayerDef { get; }
     public IMapDef? MapDef { get; }
     
     public IntGridLayerTarget(AutoLayerDefinition layerDef, IMapDef? mapDef)

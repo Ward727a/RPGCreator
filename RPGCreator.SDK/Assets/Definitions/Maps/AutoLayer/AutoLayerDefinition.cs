@@ -1,6 +1,5 @@
 using System.Numerics;
 using RPGCreator.Core.Types.Map;
-using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Logging;
@@ -20,7 +19,10 @@ public class AutoLayerDefinition : BaseLayerDef
     /// Bakes auto-tiles in the specified region.
     /// </summary>
     /// <param name="center">The center position of the region to bake.</param>
-    /// <param name="radius">The radius around the center to bake. Default is 0 (only the center position).<br/>Note: The radius is measured in grid units.</param>
+    /// <param name="radius">
+    /// The radius around the center to bake. Default is 0 (only the center position).<br/>
+    /// Note: The radius is measured in grid units.
+    /// </param>
     public void BakeRegion(Vector2 center, float radius = 0)
     {
 

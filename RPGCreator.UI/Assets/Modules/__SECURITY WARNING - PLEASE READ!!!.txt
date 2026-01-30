@@ -1,0 +1,13 @@
+﻿If you are here, it could mean one of the following:
+1. You have created your own module, then it's all good, continue!
+2. You have downloaded a module from the internet, please make sure to read this!
+
+=== IF YOU HAVE DOWNLOADED A MODULE FROM THE INTERNET -- READ PLEASE ===
+
+The modules you download on the internet and move in this folder could be potentially harmful for your computer.
+The engine (RPG Creator) has no way of verifying the code inside those modules, and as such will only disable it by default.
+You can enable the module by going to the "Modules" tab in the project settings, BUT BE AWARE that once the module is enabled,
+the engine has NO WAY of knowing what the module does, and as such, can't stop any harmful code from being executed on your computer.
+By enabling the module, you are taking full responsibility for any damage that may occur to your computer or data.
+
+Please make sure to only enable modules from sources you trust!!!

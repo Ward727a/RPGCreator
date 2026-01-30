@@ -18,7 +18,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\RPGCreator.SDK\RPGCreator.SDK.csproj" />
+      <ProjectReference Include="..\..\RPGCreator.SDK\RPGCreator.SDK.csproj">
+        <Private>false</Private>
+        <ExcludeAssets>runtime</ExcludeAssets>
+      </ProjectReference>
     </ItemGroup>
 
     <ItemGroup>

@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <Folder Include="Managers\CommandManager\" />
+    <Folder Include="Managers\RTP\" />
     <Folder Include="Types\Assets\Skills\" />
     <Folder Include="Types\Assets\Tilesets\IntGridTileset\" />
     <Folder Include="Types\Blueprint\Nodes\Entity\Position\" />

@@ -41,7 +41,7 @@ public class MapDrawingSystem(GraphicsDevice graphicsDevice) : BaseMapDrawingSys
 
     private GraphicsDevice _graphicsDevice = graphicsDevice;
 
-    public override void Initialize(IECSWorld iecsWorld)
+    public override void Initialize(IEcsWorld iecsWorld)
     {
     }
 

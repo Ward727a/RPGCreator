@@ -33,12 +33,15 @@ public class TestModule : IEngineModule
         {
             // Customize the control in the Assets Manager region
             // For example, here we change the background color and edit the title
-            if (control is Window window)
-            {
-                window.Title = "Test Module";
-                window.Background = Avalonia.Media.Brushes.LightGray;
-            }
+            //if (control is Window window)
+            //{
+            //    window.Title = "Test Module";
+            //    window.Background = Avalonia.Media.Brushes.LightGray;
+            //}
         });
+
+        EngineServices.ModulePathResolver.RegisterPath(new URN("Ward727", "module", "Folder"),
+            Path.GetDirectoryName(typeof(TestModule).Assembly.Location));
     }
 
     public void Shutdown()

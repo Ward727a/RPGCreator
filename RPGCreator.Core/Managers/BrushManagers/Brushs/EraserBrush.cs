@@ -22,22 +22,14 @@
 // 
 // 
 #endregion
-using RPGCreator.Core.Rendering.Batching;
-using RPGCreator.Core.Types.Internal;
-using RPGCreator.Core.Types.Map;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 using RPGCreator.Core.Managers.AssetsManager.Factories;
-using RPGCreator.Core.Types.Assets.Tilesets;
-using RPGCreator.Core.Types.Editor.Context;
 using RPGCreator.SDK.Editor.Brushes;
+using RPGCreator.SDK.Types;
 using Serilog;
 
-namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
+namespace RPGCreator.Core.Managers.BrushManagers.Brushs
 {
     public class EraserBrush : IBrush, IBrushResizeFeature
     {
@@ -66,6 +58,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
             Size = newSize;
         }
 
+        public URN UniqueName => new URN("rpgcreator", "brush", "eraser");
         public string Name => "Eraser Brush";
         public string Description => "Erase tiles or objects from the map.";
     }

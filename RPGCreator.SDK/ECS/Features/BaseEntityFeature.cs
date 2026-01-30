@@ -1,50 +1,130 @@
+using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
-using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.Modules.Definition;
+using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.ECS.Features;
 
+
+/// <summary>
+/// Just an extension class to provide shared custom data access for BaseEntityFeature instances.
+/// </summary>
+public static class BaseEntityFeatureExtensions
+{
+    private static readonly ConcurrentDictionary<URN, CustomData> SharedCustomDataCache = new();
+
+    /// <summary>
+    /// Retrieves the shared custom data for the given feature.<br/>
+    /// This data is shared across all instances of the feature type, allowing for global settings or configurations.
+    /// </summary>
+    /// <param name="feature">The feature instance for which to retrieve the shared custom data.</param>
+    /// <returns>
+    /// The shared custom data associated with the feature type.
+    /// </returns>
+    internal static CustomData GetSharedCustomData(this BaseEntityFeature feature)
+    {
+        return SharedCustomDataCache.GetOrAdd(feature.FeatureUrn, _ => new CustomData());
+    }
+}
+
 public abstract class BaseEntityFeature : IEntityFeature
 {
+    
+    /// <summary>
+    /// Just the module URN where all entity features are stored.<br/>
+    /// This is mainly a constant to avoid hardcoding the string everywhere.
+    /// </summary>
+    protected const string FeatureUrnModule = "entity_features";
+
+    /// <summary>
+    /// If this feature depends on other features to function correctly.<br/>
+    /// This is used to ensure that all required features are present when this feature is injected into an entity.
+    /// <example>[ new ("rpgc://entity_features/HasInventory"), new("rpgc://entity_features/CanEquipItems") ]</example>
+    /// </summary>
+    public abstract URN[] DependentFeatures { get; }
+    
+    /// <summary>
+    /// The display name of this feature.<br/>
+    /// This is used in the editor and UI to represent this feature type.
+    /// <example>Has Inventory</example>
+    /// </summary>
+    public abstract string FeatureName { get; }
+    
+    /// <summary>
+    /// A brief description of this feature.<br/>
+    /// This is used in the editor and UI to provide more context about what this feature does.
+    /// <example>Allows the entity to have an inventory system for storing items.</example>
+    /// </summary>
+    public abstract string FeatureDescription { get; }
+
+    /// <summary>
+    /// An icon representing this feature.<br/>
+    /// This is used in the editor and UI to visually represent this feature type.<br/>
+    /// <br/>
+    /// This is fully optional, and can be an empty string if no icon is desired.
+    /// </summary>
+    public virtual string FeatureIcon { get; } = "";
+
+    /// <summary>
+    /// The feature URN uniquely identifying this feature type.<br/>
+    /// This is used to register and look up features in the system.
+    /// <example>rpgc://entity_features/HasInventory</example>
+    /// </summary>
+    public abstract URN FeatureUrn { get; }
+    
+    /// <summary>
+    /// Cached reference to the shared memory configuration.<br/>
+    /// This is used to avoid multiple lookups for the shared custom data.
+    /// </summary>
+    private CustomData? _cachedSharedMemoryConfiguration;
+
+    /// <summary>
+    /// The shared memory configuration for this feature.<br/>
+    /// This data <b>WILL</b> be shared across all instances of this feature in the same ECS world (e.g. for global settings).<br/>
+    /// And as such, it only allows serializable data types that are stored as strings, and converted back when retrieved.
+    /// </summary>
+    public CustomData SharedMemoryConfiguration
+    {
+        get
+        {
+            _cachedSharedMemoryConfiguration ??= this.GetSharedCustomData();
+            return _cachedSharedMemoryConfiguration;
+        }
+    }
+    
     /// <summary>
     /// This feature's configuration.<br/>
     /// This data <b>WILL</b> be serialized and saved with the project.<br/>
     /// And as such, it only allows serializable data types that are stored as strings, and converted back when retrieved.
     /// </summary>
     public CustomData Configuration { get; private set; } = new();
+
+    /// <summary>
+    /// When this feature is initialized (created).<br/>
+    /// This is called once when the feature instance is created, before being injected into any entity, when the engine loads the feature definitions.
+    /// </summary>
+    public abstract void OnSetup();
     
     /// <summary>
-    /// When this feature is initialized (created) on an entity.<br/>
+    /// When the ECS world is being set up.<br/>
+    /// This is called once when the ECS world is initialized, allowing the feature to register any necessary systems.<br/>
+    /// Note: This is called only once per world, and ONLY if any entity in the world has this feature.
     /// </summary>
-    /// <param name="entity">The entity on which this feature is being initialized.</param>
-    public abstract void OnInitialize(IEntity entity);
-
+    /// <param name="world"></param>
+    public abstract void OnWorldSetup(IEcsWorld world);
+    
     /// <summary>
-    /// When the entity is being updated.<br/>
-    /// Do not confuse with drawing - This is for logic updates only.
+    /// When this feature need to be injected (added on runtime) on an entity.
     /// </summary>
-    /// <param name="entity">The entity being updated.</param>
-    /// <param name="deltaTime">The game time.</param>
-    public virtual void OnUpdate(Entity entity, double deltaTime)
-    {
-    }
-
-    /// <summary>
-    /// When the entity is being drawn.<br/>
-    /// Do not confuse with updating - This is for drawing only.
-    /// </summary>
-    /// <param name="entity">The entity being drawn.</param>
-    /// <param name="deltaTime">The game time.</param>
-    public virtual void OnDraw(Entity entity, double deltaTime)
-    {
-    }
+    /// <param name="entity">The entity on which this feature is being injected.</param>
+    public abstract void OnInject(BufferedEntity entity);
 
     /// <summary>
     /// When this feature is being destroyed (removed) from an entity (e.g. when the entity is deleted).<br/>
     /// This is the last chance to clean up any resources or references related to this feature on the entity.
     /// </summary>
-    /// <param name="entity"></param>
-    public abstract void OnDestroy(IEntity entity);
+    /// <param name="entity">The entity from which this feature is being removed.</param>
+    public abstract void OnDestroy(BufferedEntity entity);
 
     /// <summary>
     /// Accessor for configuration values with a default fallback.<br/>
@@ -95,5 +175,62 @@ public abstract class BaseEntityFeature : IEntityFeature
     protected void SetConfig<T>(T value, [CallerMemberName] string key = "")
     {
         Configuration.Set(key, value);
+    }
+    
+    /// <summary>
+    /// Get a value from the shared memory configuration with a default fallback.<br/>
+    /// Uses the caller member name as the key if none is provided.<br/>
+    /// <br/>
+    /// The shared memory configuration is shared across all instances of this feature in the same ECS world (e.g. for global settings).<br/>
+    /// It work similarly to GetConfig, but operates on the shared memory configuration.
+    /// </summary>
+    /// <param name="defaultValue">The default value to return if the key does not exist.</param>
+    /// <param name="key">The configuration key. Defaults to the caller member name.</param>
+    /// <typeparam name="T">The type of the configuration value.</typeparam>
+    /// <returns>
+    /// The configuration value associated with the key, or the default value if the key does not exist.
+    /// </returns>
+    protected T GetShared<T>(T defaultValue, [CallerMemberName] string key = "")
+    {
+        return SharedMemoryConfiguration.GetOrDefault(key, defaultValue);
+    }
+    
+    /// <summary>
+    /// Sets a value in the shared memory configuration.<br/>
+    /// Uses the caller member name as the key if none is provided.<br/>
+    /// <br/>
+    /// The shared memory configuration is shared across all instances of this feature in the same ECS world (e.g. for global settings).<br/>
+    /// It work similarly to SetConfig, but operates on the shared memory configuration.
+    /// </summary>
+    /// <param name="value">The value to set.</param>
+    /// <param name="key">The configuration key. Defaults to the caller member name.</param>
+    /// <typeparam name="T">The type of the configuration value.</typeparam>
+    protected void SetShared<T>(T value, [CallerMemberName] string key = "")
+    {
+        SharedMemoryConfiguration.Set(key, value);
+    }
+
+    public IEntityFeature Clone()
+    {
+        var clone = (BaseEntityFeature)MemberwiseClone();
+        clone.Configuration = this.Configuration.Clone();
+        clone.OnAfterClone();
+        return clone;
+    }
+    
+    /// <summary>
+    /// When this feature has been cloned.<br/>
+    /// This is called after the feature has been duplicated to allow for any necessary adjustments or initializations.
+    /// </summary>
+    protected virtual void OnAfterClone()
+    {
+    }
+
+    /// <summary>
+    /// To reset the feature's state to its default configuration.<br/>
+    /// This can be used to clear any runtime data or settings specific to this feature.
+    /// </summary>
+    public virtual void Reset()
+    {
     }
 }

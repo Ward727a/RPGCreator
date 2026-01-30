@@ -24,34 +24,13 @@
 #endregion
 
 using System.Numerics;
-using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Map;
-using RPGCreator.Core.Types.Editor.Context;
 using RPGCreator.SDK.Editor.Brushes;
 
-namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
+namespace RPGCreator.Core.Managers.BrushManagers.Brushs
 {
     public interface IBrush : IBrushInfo
     {
         void Draw(Vector2 clickPos);
-
-        protected static bool InBorder(Vector2 at, MapInstance mapInstance)
-        {
-            if (mapInstance == null)
-            {
-                return false;
-            }
-
-            float cellSize = mapInstance.Definition.GridParameter.CellWidth;
-            float horizontalCells = mapInstance.Definition.Size.Width;
-            float verticalCells = mapInstance.Definition.Size.Height;
-
-            // Check if the point is within the bounds of the map
-            if (at.X < 0 || at.Y < 0 || at.X >= horizontalCells * cellSize || at.Y >= verticalCells * cellSize)
-            {
-                return false;
-            }
-            return true;
-        }
     }
 }

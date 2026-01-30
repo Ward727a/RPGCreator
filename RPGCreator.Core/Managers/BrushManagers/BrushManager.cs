@@ -23,33 +23,125 @@
 // 
 #endregion
 
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using CommunityToolkit.Diagnostics;
-using RPGCreator.Core.Managers.RTP.BrushManagers.Brushs;
-using RPGCreator.Core.Types.Internal;
-using RPGCreator.Core.Types.Editor.Context;
+using RPGCreator.Core.Managers.BrushManagers.Brushs;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Editor.Brushes;
+using RPGCreator.SDK.Types;
 using Serilog;
 
-namespace RPGCreator.Core.Managers.RTP.BrushManagers
+namespace RPGCreator.Core.Managers.BrushManagers
 {
     public class BrushManager : IBrushManager
     {
-        public BrushManagerEvent Event { get; } = new BrushManagerEvent();
-        
+        private readonly Dictionary<URN, IBrushInfo> _brushes = new();
         
         internal BrushManager()
         {
 
         }
 
-        protected void RegisterEvents()
-        { }
+        public IBrushState State => EngineStates.BrushState;
 
-        public void ClickAt(Vector2 at)
+        public IBrushInfo? GetBrush(URN brushUrn)
         {
+            return !HasBrush(brushUrn) ? null : _brushes[brushUrn];
+        }
 
+        public bool TryGetBrush(URN brushName, [NotNullWhen(true)] out IBrushInfo? brush)
+        {
+            if (!HasBrush(brushName))
+            {
+                brush = null;
+                return false;
+            }
+
+            brush = _brushes[brushName];
+            return true;
+        }
+
+        public void AddBrush(IBrushInfo brush, bool overwriteIfExists = false)
+        {
+            if (HasBrush(brush.UniqueName) && !overwriteIfExists)
+                return;
+            _brushes[brush.UniqueName] = brush;
+        }
+
+        public bool TryAddBrush(IBrushInfo brush)
+        {
+            if (HasBrush(brush.UniqueName))
+                return false;
+            _brushes[brush.UniqueName] = brush;
+            return true;
+        }
+
+        public void RemoveBrush(IBrushInfo brush)
+        {
+            _brushes.Remove(brush.UniqueName);
+        }
+
+        public bool TryRemoveBrush(URN brushUrn)
+        {
+            return _brushes.Remove(brushUrn);
+        }
+
+        public bool HasBrush(URN brushUrn)
+        {
+            return _brushes.ContainsKey(brushUrn);
+        }
+
+        public bool SelectBrush(URN brushUrn)
+        {
+            if (!HasBrush(brushUrn))
+                return false;
+            EngineStates.BrushState.CurrentBrush = _brushes[brushUrn];
+            return true;
+        }
+
+        public void SelectBrush(IBrushInfo brush)
+        {
+            EngineStates.BrushState.CurrentBrush = brush;
+        }
+
+        public IBrushInfo? GetSelectedBrush()
+        {
+            return EngineStates.BrushState.CurrentBrush;
+        }
+
+        public bool IsBrushAbleTo<BrushFeature>(URN brushUrn) where BrushFeature : IBrushFeature
+        {
+            // Check if brushUrn use the BrushFeature
+            if (!HasBrush(brushUrn))
+                return false;
+            
+            var brush = _brushes[brushUrn];
+            return brush is BrushFeature;
+        }
+
+        public IEnumerable<IBrushFeature> GetBrushFeatures(URN brushUrn)
+        {
+            if (!HasBrush(brushUrn))
+                yield break;
+            
+            var brush = _brushes[brushUrn];
+            foreach (var feature in brush.GetType().GetInterfaces())
+            {
+                if (typeof(IBrushFeature).IsAssignableFrom(feature) && feature != typeof(IBrushInfo))
+                {
+                    yield return (IBrushFeature)brush;
+                }
+            }
+        }
+
+        public IEnumerable<URN> GetAllBrushes()
+        {
+            return _brushes.Keys;
+        }
+
+        public void DrawAt(Vector2 at)
+        {
             if(!EngineStates.BrushState.IsDrawing)
             {
                 // Log.Error("Drawing is not enabled. Please enable drawing in the toolbar before clicking.");
@@ -122,8 +214,6 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
             if(EngineStates.BrushState.CurrentBrush is IBrushPreview previewBrush && previewBrush.IsPreviewEnabled)
             {
                 previewBrush.ShowPreview(at);
-                Event.OnPreviewAt(at, previewBrush);
-                return;
             }
 
             //Console.ForegroundColor = ConsoleColor.Red;
@@ -135,7 +225,6 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers
         public void ClearPreview()
         {
             //Console.WriteLine("Clearing brush preview.");
-            Event.OnClearPreview();
         }
 
         public Vector2 NormalizedPositionToTile(Vector2 position)

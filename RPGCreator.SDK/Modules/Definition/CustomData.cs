@@ -9,13 +9,18 @@ namespace RPGCreator.SDK.Modules.Definition;
 /// </summary>
 public class CustomData : ISerializable, IDeserializable
 {
+    public event Action<string>? OnDataChanged;
+    public event Action<string>? OnDataRemoved;
     
-    private Dictionary<string, string>? _data = new();
+    private Dictionary<string, string> _data = new();
     
     public void Set<T>(string key, T value)
     {
         _data[key] = Convert.ToString(value, CultureInfo.InvariantCulture) ?? "";
+        OnDataChanged?.Invoke(key);
     }
+    
+    public IEnumerable<string> Keys => _data.Keys;
     
     public T? Get<T>(string key)
     {
@@ -48,11 +53,17 @@ public class CustomData : ISerializable, IDeserializable
     }
     
     public bool Has(string key) => _data.ContainsKey(key);
+
+    public bool Remove(string key)
+    {
+        if (!_data.Remove(key)) return false;
+        
+        OnDataRemoved?.Invoke(key);
+        return true;
+    }
     
-    public bool Remove(string key) => _data.Remove(key);
     public SerializationInfo GetObjectData()
     {
-        // On sauvegarde juste le dictionnaire
         return new SerializationInfo(typeof(CustomData)).AddValue("Store", _data ?? new Dictionary<string, string>());
     }
 
@@ -60,5 +71,15 @@ public class CustomData : ISerializable, IDeserializable
     {
         info.TryGetDictionary("Store", out _data);
         if (_data == null) _data = new Dictionary<string, string>();
+    }
+    
+    public CustomData Clone()
+    {
+        var clone = new CustomData();
+        foreach (var kvp in _data)
+        {
+            clone._data[kvp.Key] = kvp.Value;
+        }
+        return clone;
     }
 }

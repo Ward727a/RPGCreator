@@ -86,7 +86,7 @@ public class AnimationSystem : ISystem
         _graphicsDevice = graphicsDevice;
     }
     
-    public override void Initialize(IECSWorld iecsWorld)
+    public override void Initialize(IEcsWorld iecsWorld)
     {
         _logger.Information("AnimationSystem initialized.");
         

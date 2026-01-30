@@ -25,12 +25,12 @@
 
 using System.Numerics;
 using CommunityToolkit.Diagnostics;
-using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Managers.AssetsManager.Factories;
 using RPGCreator.Core.Types.Editor.Context;
 using RPGCreator.SDK.Editor.Brushes;
+using RPGCreator.SDK.Types;
 
-namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
+namespace RPGCreator.Core.Managers.BrushManagers.Brushs
 {
     public class SimpleBrush : IBrush, IBrushResizeFeature, IBrushPreview
     {
@@ -141,6 +141,7 @@ namespace RPGCreator.Core.Managers.RTP.BrushManagers.Brushs
             // }
         }
 
+        public URN UniqueName => new URN("rpgcreator", "brush","simple_brush");
         public string Name => "Simple Brush";
         public string Description => "A simple brush that paints single tiles or larger areas based on brush size.";
     }

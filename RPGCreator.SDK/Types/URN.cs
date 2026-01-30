@@ -63,6 +63,22 @@ public readonly record struct URN
         }
     }
     
+    public URN(string fullUrn)
+    {
+        if (!TryParse(fullUrn, out var result))
+        {
+            Namespace = "";
+            Module = "";
+            Name = "";
+            Logger.Error("Failed to parse URN from string: {FullUrn}", fullUrn);
+            return;
+        }
+
+        Namespace = result.Value.Namespace;
+        Module = result.Value.Module;
+        Name = result.Value.Name;
+    }
+    
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override string ToString() => $"{Namespace}://{Module}/{Name}";
 

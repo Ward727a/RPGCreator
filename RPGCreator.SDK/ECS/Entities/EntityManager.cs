@@ -1,26 +1,55 @@
-using RPGCreator.Core.Runtimes.ECS;
 using RPGCreator.Core.Runtimes.ECS.Components.Display;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK.ECS.Components;
-using RPGCreator.SDK.ECS.Entities;
+using RPGCreator.SDK.Exceptions;
 
-namespace RPGCreator.SDK.ECS;
+namespace RPGCreator.SDK.ECS.Entities;
 
 public class EntityManager(ComponentManager componentManager)
 {
-    ObjectPool<Entity> _entityPool = new(() => new Entity());
-    private ComponentManager _componentManager { get; } = componentManager;
+    private readonly ObjectPool<Entity> _entityPool = new(() => new Entity());
+    private Entity?[] _entitiesById = new Entity?[1024];
     
-    private int _nextEntityId = 0;
+    private int _nextEntityId;
+    
+    private readonly Queue<int> _freeIds = new();
 
-    public Entity CreateEntity()
+    private int GetNextEntityId()
+    {
+        return _freeIds.Count > 0 ? _freeIds.Dequeue() : _nextEntityId++;
+    }
+    
+    private void ReleaseEntityId(int entityId)
+    {
+        _freeIds.Enqueue(entityId);
+    }
+
+    public int CreateEntity()
     {
         var entity = _entityPool.Rent();
-        entity.Id = _nextEntityId;
-        _nextEntityId++;
-        entity.SetManager(this, _componentManager);
+        entity.Id = GetNextEntityId();
+        entity.SetManager(this, componentManager);
+        
+        componentManager.RegisterEntityComponentBits(entity.Id);
+        EnsureCapacity(entity.Id);
+        _entitiesById[entity.Id] = entity;
+        
+        return entity.Id;
+    }
+    
+    private Entity CreateEntityInternal()
+    {
+        var entity = _entityPool.Rent();
+        entity.Id = GetNextEntityId();
+        entity.SetManager(this, componentManager);
+        
+        componentManager.RegisterEntityComponentBits(entity.Id);
+        EnsureCapacity(entity.Id);
+        _entitiesById[entity.Id] = entity;
+        
         return entity;
     }
+
 
     /// <summary>
     /// Create a basic camera entity with Transform and Camera components.<br/>
@@ -29,9 +58,9 @@ public class EntityManager(ComponentManager componentManager)
     /// <returns>
     /// The created camera entity.
     /// </returns>
-    public Entity CreateCameraEntity()
+    public IEntity CreateCameraEntity()
     {
-        var entity = CreateEntity();
+        var entity = CreateEntityInternal();
         entity.AddComponent<TransformComponent>();
         ref var cameraComponent = ref entity.AddComponent<CameraComponent>();
         
@@ -46,8 +75,34 @@ public class EntityManager(ComponentManager componentManager)
     
     public void DestroyEntity(Entity entity)
     {
-        _componentManager.RemoveAllComponents(entity.Id, entity.ComponentBits);
+        componentManager.RemoveAllComponents(entity.Id);
         _entityPool.Return(entity);
+        ReleaseEntityId(entity.Id);
     }
     
+    public void DestroyEntity(int entityId)
+    {
+        DestroyEntity(GetEntityById(entityId));
+    }
+    
+    private Entity GetEntityById(int id)
+    {
+        EnsureCapacity(id);
+        var entity = _entitiesById[id];
+        if (entity == null)
+        {
+            throw new CriticalEngineException($"Entity with ID {id} does not exist.",
+                new KeyNotFoundException($"_entitiesById length is {_entitiesById.Length} asking for ID {id}"), this);
+        }
+
+        return entity;
+    }
+    
+    private void EnsureCapacity(int id)
+    {
+        if (id >= _entitiesById.Length)
+        {
+            Array.Resize(ref _entitiesById, _entitiesById.Length * 2);
+        }
+    }
 }

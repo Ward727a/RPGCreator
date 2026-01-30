@@ -20,6 +20,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using RPGCreator.SDK.Exceptions;
+using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.UiService;
 
 namespace RPGCreator.SDK;

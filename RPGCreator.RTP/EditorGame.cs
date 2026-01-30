@@ -39,7 +39,7 @@ namespace RPGCreator.RTP
         
         public GraphicsDeviceManager Graphics;
 
-        private IECSWorld _ecsWorld = EngineServices.ECS.CreateWorld();
+        private IEcsWorld _ecsWorld = EngineServices.ECS.CreateWorld();
 
         private SpriteBatch _spriteBatch = null!;
 
@@ -97,7 +97,7 @@ namespace RPGCreator.RTP
                 var mousePos = _mouseState.Position;
                 var worldPos = RuntimeServices.CameraService.ScreenToWorld(mousePos);
 
-                EngineServices.BrushManager.ClickAt(worldPos);
+                EngineServices.BrushManager.DrawAt(worldPos);
                 //
                 // var layer = EngineStates.EditorState.CurrentLayer;
                 // var map = EngineStates.EditorState.CurrentMap;

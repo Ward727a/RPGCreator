@@ -99,7 +99,6 @@ public class CriticalEngineException : Exception
             }
             catch (Exception ex)
             {
-                // Si même Newtonsoft échoue, on affiche au moins pourquoi
                 finalMessage += $"\n(Failed to dump object of type {dumpObject.GetType().Name}. Reason: {ex.Message})";
             }
         }
