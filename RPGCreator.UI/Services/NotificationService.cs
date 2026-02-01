@@ -23,7 +23,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Notifications;
-using Avalonia.Rendering;
 using Avalonia.Threading;
 using RPGCreator.SDK.UiService;
 using RPGCreator.UI.Content.Editor;
@@ -42,6 +41,12 @@ public class NotificationService : INotificationService
         {
 
             options = CheckOptions(options);
+            
+            if(options.DurationMs == 0) // We don't want to have a duration of 0 without a close button
+            {
+                options.ShowClose = true;
+            }
+            
             var manager = GetWindowNotificationManager();
 
             var expiration = System.TimeSpan.FromMilliseconds(options.DurationMs);
@@ -64,6 +69,11 @@ public class NotificationService : INotificationService
 
             var manager = GetWindowNotificationManager();
 
+            if(options.DurationMs == 0)
+            {
+                options.ShowClose = true;
+            }
+            
             manager.Show(content, ConvertNotificationType(type),  System.TimeSpan.FromMilliseconds(options.DurationMs), options.ShowIcon, options.ShowClose, options.OnClick, options.OnClose, options.Classes);
             
         });

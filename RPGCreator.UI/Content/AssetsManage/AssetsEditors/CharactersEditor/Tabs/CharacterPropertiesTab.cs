@@ -1,11 +1,8 @@
-using System.Globalization;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using RPGCreator.Core.Types;
 using RPGCreator.SDK.Assets.Definitions.Characters;
 using Ursa.Controls;
-using NumericUpDown = Avalonia.Controls.NumericUpDown;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;
 

@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Numerics;
+﻿using System.Numerics;
 using RPGCreator.Core.Types.Map;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 

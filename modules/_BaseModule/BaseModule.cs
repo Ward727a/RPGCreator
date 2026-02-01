@@ -1,4 +1,5 @@
-﻿using _BaseModule.Features;
+﻿using _BaseModule.Features.Entity;
+using _BaseModule.Features.Game;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules;
@@ -38,7 +39,7 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
             EngineServices.ModulePathResolver.RegisterPath(FolderUrn, folderPath);
         
         EngineServices.FeaturesManager.RegisterEntityFeature<MovementFeature>();
-        EngineServices.FeaturesManager.RegisterEntityFeature<PlayerControlledFeature>();
+        EngineServices.FeaturesManager.RegisterGameFeature<StandardControlFeature>();
         
         Logger.Info("BaseModule initialized.");
     }

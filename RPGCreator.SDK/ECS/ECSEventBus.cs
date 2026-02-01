@@ -1,5 +1,3 @@
-using RPGCreator.Core.Runtimes.ECS;
-
 namespace RPGCreator.SDK.ECS;
 
 public class ECSEventBus

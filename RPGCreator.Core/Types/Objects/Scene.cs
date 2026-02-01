@@ -25,11 +25,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.Core.Rendering.Batching;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RPGCreator.Core.Types.Map;
 
 namespace RPGCreator.Core.Types.Objects

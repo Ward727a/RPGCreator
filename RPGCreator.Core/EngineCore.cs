@@ -34,25 +34,14 @@ using RPGCreator.Core.Parser.Graph;
 using RPGCreator.Core.Parser.PRATT;
 using RPGCreator.Core.Resources;
 using RPGCreator.Core.Scheduler;
-using RPGCreator.Core.Types.Assets.Items;
-using RPGCreator.Core.Types.Assets.Tilesets;
-using RPGCreator.Core.Types.Blueprint;
 using RPGCreator.Core.Types.Editor.Context;
-using RPGCreator.Core.Types.Map;
 using RPGCreator.Core.Types.Map.Layers.AutoLayer;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
-using RPGCreator.SDK.Assets.Definitions.Characters;
-using RPGCreator.SDK.Assets.Definitions.Maps;
-using RPGCreator.SDK.Assets.Definitions.Stats;
-using RPGCreator.SDK.Assets.Definitions.Tilesets;
-using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Graph.Nodes;
 using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Logging;
-using Serilog;
-
 using SDKAutoTileSolver = RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer.AutoTileSolver;
 
 namespace RPGCreator.Core

@@ -1,16 +1,11 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
-using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.Types.Interfaces;
 using RPGCreator.UI;
-using RPGCreator.UI.Common;
 
 namespace RPGCreator.Core.Types.Windows;
 

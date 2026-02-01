@@ -1,4 +1,3 @@
-using RPGCreator.Core.Types.Blueprint.Nodes;
 using RPGCreator.SDK.Graph;
 
 namespace RPGCreator.Core.Parser.Graph.TableHandler;

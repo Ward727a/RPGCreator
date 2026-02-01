@@ -1,7 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using RPGCreator.SDK.Assets;
-using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Exceptions;
 using RPGCreator.SDK.Graph;
@@ -77,6 +75,9 @@ public class EngineServicesProvider : IServiceProvider
 public static class EngineServices
 {
     private static readonly EngineServicesProvider ServiceProvider = new();
+    private static readonly Dictionary<Type, List<Action<IService>>> ServiceReadyCallbacks = new();
+    private static readonly object ServiceReadyLock = new object();
+
     
     // ReSharper disable MemberCanBePrivate.Global
     public static void RegisterService<T>(T service, string groupName) where T : class, IService
@@ -101,6 +102,23 @@ public static class EngineServices
     private static void RegisterService<T>(T service) where T : class, IService
     {
         ServiceProvider.RegisterService(service, "default");
+        InvokeServiceReadyCallbacks(service);
+    }
+    
+    private static void InvokeServiceReadyCallbacks<T>(T service) where T : class, IService
+    {
+        lock (ServiceReadyLock)
+        {
+            if (ServiceReadyCallbacks.TryGetValue(typeof(T), out var callbacks))
+            {
+                foreach (var callback in callbacks)
+                {
+                    callback(service);
+                }
+
+                ServiceReadyCallbacks.Remove(typeof(T));
+            }
+        }
     }
 
     public static IGameFactory GameFactory
@@ -193,5 +211,47 @@ public static class EngineServices
     {
         get => GetService<IFeaturesManager>();
         set => RegisterService(value);
+    }
+    
+    /// <summary>
+    /// Checks if a service is ready (registered) in the runtime services provider.
+    /// </summary>
+    /// <param name="groupName">The group name of the service. Defaults to "default".</param>
+    /// <typeparam name="T">The type of the service to check.</typeparam>
+    /// <returns>
+    /// True if the service is registered and ready; otherwise, false.
+    /// </returns>
+    public static bool IsServiceReady<T>(string groupName = "default") where T : class, IService
+    {
+        return ServiceProvider.TryGetService<T>(out _, groupName);
+    }
+    
+    /// <summary>
+    /// Executes the provided action once the specified service is ready (registered).<br/>
+    /// If the service is already registered, the action is executed immediately.<br/>
+    /// Otherwise, the action is queued and will be executed when the service becomes available.
+    /// </summary>
+    /// <param name="action">The action to execute with the service instance.</param>
+    /// <param name="groupName">The group name of the service. Defaults to "default".</param>
+    /// <typeparam name="T">The type of the service.</typeparam>
+    public static void OnceServiceReady<T>(Action<T> action, string groupName = "default") where T : class, IService
+    {
+        lock (ServiceReadyLock)
+        {
+            if (ServiceProvider.TryGetService<T>(out var service, groupName))
+            {
+                action(service);
+            }
+            else
+            {
+                if (!ServiceReadyCallbacks.TryGetValue(typeof(T), out var callbacks))
+                {
+                    callbacks = new List<Action<IService>>();
+                    ServiceReadyCallbacks[typeof(T)] = callbacks;
+                }
+
+                callbacks.Add(svc => action((T)svc));
+            }
+        }
     }
 }

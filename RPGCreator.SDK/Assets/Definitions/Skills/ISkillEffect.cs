@@ -1,6 +1,4 @@
 using RPGCreator.SDK.ECS.Entities;
-using RPGCreator.SDK.Types.Interfaces;
-using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.SDK.Assets.Definitions.Skills;
 

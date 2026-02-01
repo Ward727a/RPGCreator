@@ -1,4 +1,3 @@
-using RPGCreator.Core.Types.Assets.Entities;
 using RPGCreator.Core.Types.Internal;
 
 namespace RPGCreator.Core.Types.Assets.Actors;

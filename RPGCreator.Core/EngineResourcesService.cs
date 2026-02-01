@@ -1,5 +1,4 @@
-﻿using RPGCreator.SDK.Assets;
-using RPGCreator.SDK.Logging;
+﻿using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Resources;
 
 namespace RPGCreator.Core;

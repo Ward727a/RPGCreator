@@ -2,8 +2,8 @@ using System.Numerics;
 using RPGCreator.Core.Runtimes.ECS.Components.Display;
 using RPGCreator.SDK;
 using RPGCreator.SDK.ECS;
-using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.ECS.Factories;
+using RPGCreator.SDK.Modules;
 
 namespace RPGCreator.Core.Runtimes.Factories;
 
@@ -42,7 +42,7 @@ public class EntityFactory : IEntityFactory
                 continue;
             var featureType = feature.GetType();
             addedTypes.Add(featureType);
-            feature.SetConfiguration(featureData.Configuration);
+            feature.SetConfiguration(featureData.Configuration, new EngineSecurityToken());
             feature.OnInject(entity);
         }
         

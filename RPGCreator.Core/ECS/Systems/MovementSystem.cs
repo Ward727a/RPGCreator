@@ -1,4 +1,3 @@
-using Microsoft.Xna.Framework;
 using RPGCreator.Core.ECS.Components.Display.Animation;
 using RPGCreator.Core.Runtimes.ECS.Components.Actor;
 using RPGCreator.Core.Runtimes.ECS.Components.Display;

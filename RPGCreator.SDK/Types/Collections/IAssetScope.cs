@@ -1,5 +1,4 @@
 ﻿using RPGCreator.SDK.Assets.Definitions;
-using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.SDK.Types.Collections;
 

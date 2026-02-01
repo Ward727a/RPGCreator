@@ -1,4 +1,3 @@
-using RPGCreator.SDK.Types.Interfaces;
 using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.Core.Types.Internal;

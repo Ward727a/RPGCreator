@@ -33,7 +33,6 @@ using RPGCreator.SDK.Assets.Definitions;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using RPGCreator.SDK.Extensions;
-using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 {

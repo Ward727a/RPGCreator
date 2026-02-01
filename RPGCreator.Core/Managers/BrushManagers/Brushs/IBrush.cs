@@ -24,7 +24,6 @@
 #endregion
 
 using System.Numerics;
-using RPGCreator.Core.Types.Map;
 using RPGCreator.SDK.Editor.Brushes;
 
 namespace RPGCreator.Core.Managers.BrushManagers.Brushs

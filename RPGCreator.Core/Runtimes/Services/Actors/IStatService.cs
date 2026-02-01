@@ -1,8 +1,3 @@
-using RPGCreator.Core.Types.Assets.Actors;
-using RPGCreator.Core.Types.Assets.Characters;
-using RPGCreator.Core.Types.Assets.Characters.Stats;
-using RPGCreator.Core.Types.Assets.Items;
-using RPGCreator.Core.Types.Assets.Effect;
 using RPGCreator.Core.Types.Assets.Entities.Characters;
 using RPGCreator.SDK.Assets.Definitions.Stats;
 

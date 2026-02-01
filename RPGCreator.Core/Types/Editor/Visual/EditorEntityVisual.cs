@@ -1,8 +1,6 @@
 using System.Numerics;
 using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Rendering.Batching;
-using RPGCreator.Core.Types.Assets.Actors;
-using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.ECS;

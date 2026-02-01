@@ -22,23 +22,14 @@
 // 
 // 
 #endregion
-using CommunityToolkit.Mvvm.ComponentModel;
+
 using RPGCreator.Core.Configs.Helpers;
-using RPGCreator.Core.Types.Assets.BaseAssetsPack;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RPGCreator.Core.Types.Assets;
 using RPGCreator.Core.Types.Map;
-using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Projects;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types.Interfaces;
-using Serilog;
 
 namespace RPGCreator.Core.Types.Project
 {

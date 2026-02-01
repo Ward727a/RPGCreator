@@ -1,9 +1,7 @@
-using System.Drawing;
 using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
-using RPGCreator.SDK.Types.Interfaces;
 using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets;

@@ -22,9 +22,7 @@
 // 
 #endregion
 
-using Avalonia.Logging;
 using RPGCreator.Core.Types.Project;
-using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Projects;

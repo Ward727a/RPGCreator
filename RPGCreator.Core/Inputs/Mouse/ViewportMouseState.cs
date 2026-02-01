@@ -10,34 +10,10 @@ public class ViewportMouseState : EngineMouseState
     
     public ViewportMouseState()
     {
-        EngineProviders.PropertyChanged += (propName) =>
+        RuntimeServices.OnceServiceReady((IGameRunner gameRunner) =>
         {
-            if (propName != nameof(EngineProviders.GameProvider)) return;
-
-            if (EngineProviders.GameProvider.GameInstance is IGamePlayer game)
-            {
-                game.OnUpdate += FrameUpdate;
-            }
-
-            EngineProviders.GameProvider.PropertyChanging += (_, e) =>
-            {
-                if (e.PropertyName != nameof(EngineProviders.GameProvider.GameInstance)) return;
-            
-                if (EngineProviders.GameProvider.GameInstance is IGamePlayer game)
-                {
-                    game.OnUpdate -= FrameUpdate;
-                }
-            };
-            EngineProviders.GameProvider.PropertyChanged += (_, e) =>
-            {
-                if (e.PropertyName != nameof(EngineProviders.GameProvider.GameInstance)) return;
-            
-                if (EngineProviders.GameProvider.GameInstance is IGamePlayer game)
-                {
-                    game.OnUpdate += FrameUpdate;
-                }
-            };
-        };
+            gameRunner.OnUpdate += FrameUpdate;
+        });
     }
 
     private void FrameUpdate(TimeSpan elapsed)

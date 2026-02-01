@@ -18,7 +18,6 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.ComponentModel;
 using System.Numerics;
 using RPGCreator.Core.Runtimes.ECS.Components.Display;
 using RPGCreator.SDK;
@@ -28,9 +27,8 @@ using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Systems;
 using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Types;
-using IComponent = RPGCreator.SDK.ECS.IComponent;
 
-namespace _BaseModule.Features;
+namespace _BaseModule.Features.Entity;
 
 public enum MovementType
 {
@@ -135,7 +133,7 @@ public class MovementSystem(int movementStateIdx, int movementDirStateIdx) : ISy
 
     public override void Update(TimeSpan deltaTime)
     {
-        foreach (var entityId in _componentManager.Query<MovementComponent>())
+        foreach (var entityId in _componentManager.Query<MovementComponent, TransformComponent, StateComponent>())
         {
             ref var moveComponent = ref _componentManager.GetComponent<MovementComponent>(entityId);
             ref var transformComponent = ref _componentManager.GetComponent<TransformComponent>(entityId);
@@ -160,6 +158,9 @@ public class MovementSystem(int movementStateIdx, int movementDirStateIdx) : ISy
                 stateComponent.GetString(_movementStateIdx) = "idle";
             
             stateComponent.GetInt(_movementDirStateIdx) = GetDirectionFromVector(moveComponent.Direction);
+            
+            // Reset direction
+            moveComponent.Direction = new Vector2();
         }
 
     }
@@ -206,5 +207,13 @@ public class MovementSystem(int movementStateIdx, int movementDirStateIdx) : ISy
     }
     private void HandleMovementFree(int entityId, ref MovementComponent movement, ref TransformComponent transform, TimeSpan deltaTime)
     {
+        if (movement.Direction.LengthSquared() > 0)
+        {
+            // On normalise pour éviter d'aller plus vite en diagonale
+            var normalizedDir = Vector2.Normalize(movement.Direction);
+            float dt = (float)deltaTime.TotalSeconds;
+        
+            transform.Position += normalizedDir * movement.Speed * dt;
+        }
     }
 }

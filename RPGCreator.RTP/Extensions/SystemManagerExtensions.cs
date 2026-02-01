@@ -21,10 +21,8 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using RenderingLibrary.Graphics;
 using RPGCreator.SDK;
 using RPGCreator.SDK.ECS.Systems;
-using RPGCreator.SDK.EngineService;
 
 namespace RPGCreator.RTP.Extensions;
 

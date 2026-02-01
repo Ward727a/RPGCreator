@@ -9,7 +9,6 @@ using RPGCreator.Core.Types;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.Parser.PrattFormula;
 using TextMateSharp.Grammars;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor.Tabs;

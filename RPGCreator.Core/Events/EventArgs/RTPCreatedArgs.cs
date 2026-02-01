@@ -23,11 +23,6 @@
 // 
 #endregion
 using RPGCreator.Core.Types.RTP;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RPGCreator.Core.Events.EventArgs
 {

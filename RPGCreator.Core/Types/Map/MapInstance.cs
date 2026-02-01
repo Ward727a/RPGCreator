@@ -24,8 +24,6 @@
 #endregion
 
 using CommunityToolkit.Diagnostics;
-using Microsoft.Xna.Framework;
-using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Types.Map.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;

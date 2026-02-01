@@ -16,7 +16,6 @@ using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.UiService;
 using Ursa.Controls;
-using NumericUpDown = Avalonia.Controls.NumericUpDown;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;
 

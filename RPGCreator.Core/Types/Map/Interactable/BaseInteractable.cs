@@ -23,14 +23,6 @@
 // 
 #endregion
 using Microsoft.Xna.Framework;
-using MonoGame.Extended.Input;
-using RPGCreator.Core.Inputs.Mouse;
-using RPGCreator.Core.Rendering.Batching;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Inputs;
 

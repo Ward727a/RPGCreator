@@ -1,4 +1,3 @@
-using System.Drawing;
 using System.Numerics;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;

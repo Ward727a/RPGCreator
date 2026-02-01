@@ -18,7 +18,6 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.Numerics;
 using RPGCreator.Core.Runtimes.ECS.Components.Display;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.RuntimeService;

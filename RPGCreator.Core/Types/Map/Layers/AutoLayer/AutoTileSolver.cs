@@ -1,6 +1,4 @@
 using System.Numerics;
-using RPGCreator.Core.Managers.AssetsManager;
-using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;

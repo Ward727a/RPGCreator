@@ -1,8 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Layout;
-using Avalonia.Media;
-using RPGCreator.UI;
 using ScrollViewer = Avalonia.Controls.ScrollViewer;
 using UserControl = Avalonia.Controls.UserControl;
 

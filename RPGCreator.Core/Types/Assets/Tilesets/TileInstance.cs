@@ -4,14 +4,11 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.Core.CSharp.Extensions;
 using RPGCreator.Core.Rendering.Batching;
-using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Map;
-using RPGCreator.Core.Types.Map.Layers;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using SkiaSharp;
-using Point = RPGCreator.Core.Types.Internal.Point;
 
 namespace RPGCreator.Core.Types.Assets.Tilesets;
 

@@ -5,7 +5,6 @@ using Avalonia.Input;
 using AvaloniaInside.MonoGame;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Inputs;
-using RPGCreator.SDK.Logging;
 
 namespace RPGCreator.UI.Common.Bridge;
 

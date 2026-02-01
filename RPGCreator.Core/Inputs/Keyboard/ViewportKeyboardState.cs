@@ -16,45 +16,11 @@ public class ViewportKeyboardState : EngineKeyboardState
         _pendingCount = 0;
         _pendingCapsLock = false;
         _pendingNumLock = false;
-        
-        EngineProviders.PropertyChanged += (propName) =>
+
+        RuntimeServices.OnceServiceReady((IGameRunner gameRunner) =>
         {
-            if (propName != nameof(EngineProviders.GameProvider)) return;
-            if(EngineProviders.GameProvider == null) return;
-
-            {
-                var gameInstance = EngineProviders.GameProvider.GameInstance;
-
-                if (gameInstance is IGamePlayer game)
-                {
-                    game.OnUpdate += UpdateFrame;
-                }
-            }
-
-            EngineProviders.GameProvider.PropertyChanged += (_, e) =>
-            {
-                if (e.PropertyName != nameof(EngineProviders.GameProvider.GameInstance)) return;
-                
-                var gameInstance = EngineProviders.GameProvider.GameInstance;
-
-                if (gameInstance is IGamePlayer game)
-                {
-                    game.OnUpdate += UpdateFrame;
-                }
-            };
-            
-            EngineProviders.GameProvider.PropertyChanging += (_, e) =>
-            {
-                if (e.PropertyName != nameof(EngineProviders.GameProvider.GameInstance)) return;
-                
-                var gameInstance = EngineProviders.GameProvider.GameInstance;
-
-                if (gameInstance is IGamePlayer game)
-                {
-                    game.OnUpdate -= UpdateFrame;
-                }
-            };
-        };
+            gameRunner.OnUpdate += UpdateFrame;
+        });
     }
     
     /// <summary>
@@ -77,15 +43,18 @@ public class ViewportKeyboardState : EngineKeyboardState
     {
         (PreviousPressedKeys, PressedKeys) = (PressedKeys, PreviousPressedKeys);
         PressedKeys.Clear();
-        for (int i = 0; i < _pendingCount; i++)
+
+        ReadOnlySpan<KeyboardKeys> pending = _pendingBuffer.AsSpan(0, _pendingCount);
+        
+        foreach (var key in pending)
         {
-            var key = _pendingBuffer[i];
             PressedKeys.Add(key);
             if (!PreviousPressedKeys.Contains(key))
             {
                 OnKeyDown(key);
             }
         }
+        
         foreach (var key in PreviousPressedKeys)
         {
             if (!PressedKeys.Contains(key))

@@ -1,4 +1,3 @@
-using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Serializer;
 

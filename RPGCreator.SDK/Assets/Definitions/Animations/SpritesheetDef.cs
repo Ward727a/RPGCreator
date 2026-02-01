@@ -1,7 +1,6 @@
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
-using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.SDK.Assets.Definitions.Animations;
 

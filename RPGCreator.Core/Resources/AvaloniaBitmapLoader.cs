@@ -1,7 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Resources;
 
 namespace RPGCreator.Core.Resources;

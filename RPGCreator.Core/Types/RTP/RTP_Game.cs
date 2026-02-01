@@ -23,12 +23,6 @@
 // 
 #endregion
 using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RPGCreator.Core.Types.Project;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Types.Interfaces;
 

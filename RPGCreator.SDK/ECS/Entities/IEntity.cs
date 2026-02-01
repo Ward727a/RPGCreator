@@ -1,5 +1,4 @@
 using System.Collections;
-using RPGCreator.SDK.Exceptions;
 
 namespace RPGCreator.SDK.ECS.Entities;
 

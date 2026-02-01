@@ -18,7 +18,6 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.Logging;
 
 namespace RPGCreator.SDK.ECS;

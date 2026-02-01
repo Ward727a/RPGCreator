@@ -7,9 +7,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using RPGCreator.Core.Types;
-using RPGCreator.Core.Types.Blueprint;
 using RPGCreator.SDK.Graph;
-using RPGCreator.UI.Common.Blueprint.LeftBar;
 
 namespace RPGCreator.UI.Common.Blueprint;
 

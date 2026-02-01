@@ -86,7 +86,7 @@ public interface IInputsService : IService
     /// <summary>
     /// The update method called each frame to process input states and execute registered actions.<br/>
     /// Note that this is called automatically by the engine; you should not call it manually.<br/>
-    /// Also note that in-game AND in-editor, this method is called inside the main RTP update loop (<see cref="IGamePlayer"/>)
+    /// Also note that in-game AND in-editor, this method is called inside the main RTP update loop (<see cref="IGameRunner"/>)
     /// </summary>
     /// <param name="keyboardState">Optional keyboard state to use for this update. If null, the current keyboard state will be used.</param>
     /// <param name="mouseState">Optional mouse state to use for this update. If null, the current mouse state will be used.</param>

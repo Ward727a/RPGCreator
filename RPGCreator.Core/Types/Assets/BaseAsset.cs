@@ -23,16 +23,8 @@
 // 
 #endregion
 using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK.Types.Internals;
-using static RPGCreator.Core.Types.Assets.AssetCategoryAttribute;
-using static RPGCreator.Core.Types.Assets.BaseAsset;
 
 // Devnote:
 // This class should be removed or at least refactored to be more generic.

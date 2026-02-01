@@ -1,5 +1,3 @@
-using RPGCreator.Core.Runtimes.ECS;
-
 namespace RPGCreator.SDK.ECS;
 
 public static class ComponentTypeIdRegistry
@@ -18,6 +16,19 @@ public static class ComponentTypeIdRegistry
     public static int GetComponentTypeId<T>() where T : IComponent
     {
         var type = typeof(T);
+        if (!_componentTypeToId.TryGetValue(type, out var id))
+        {
+            _componentTypeToId[type] = id;
+            id = _nextId++;
+        }
+        return id;
+    }
+    
+    public static int GetComponentTypeId(System.Type type)
+    {
+        if (!typeof(IComponent).IsAssignableFrom(type))
+            throw new ArgumentException($"Type {type.FullName} does not implement IComponent interface.");
+
         if (!_componentTypeToId.TryGetValue(type, out var id))
         {
             _componentTypeToId[type] = id;
@@ -45,4 +56,5 @@ public static class ComponentTypeIdRegistry
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
     public static int GetBit<T>() where T : IComponent => GetComponentTypeId<T>();
+    public static int GetBit(System.Type type) => GetComponentTypeId(type);
 }

@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using CommunityToolkit.Mvvm.ComponentModel;
 using RPGCreator.SDK.Inputs;
 
 namespace RPGCreator.SDK;
@@ -87,9 +86,6 @@ public class DefaultKeyboardProvider : IKeyboardProvider
 /// Like but not Limited to:
 /// <ul>
 ///     <li>
-///         <b>GameProvider</b> => Provides access to the MonoGame game instance from RTP/Player to Core and UI (without the need to reference MonoGame in the SDK).
-///     </li>
-///     <li>
 ///         <b>MouseProvider</b> => Provides access to mouse handling across different engine parts.
 ///     </li>
 ///     <li>
@@ -99,18 +95,6 @@ public class DefaultKeyboardProvider : IKeyboardProvider
 /// </summary>
 public static class EngineProviders
 {
-    private static IGameProvider? _gameProvider;
-    public static IGameProvider? GameProvider 
-    {
-        get => _gameProvider;
-        set
-        {
-            if (_gameProvider == value) return;
-            
-            _gameProvider = value;
-            PropertyChanged?.Invoke(nameof(GameProvider));
-        }
-    }
     private static IMouseProvider _mouseProvider = new DefaultMouseProvider();
 
     public static IMouseProvider MouseProvider

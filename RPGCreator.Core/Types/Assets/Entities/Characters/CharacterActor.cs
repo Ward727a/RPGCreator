@@ -1,7 +1,5 @@
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.Core.Rendering.Batching;
-using RPGCreator.Core.Types.Assets.Actors;
 using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.SDK.Serializer;
 using Serilog;

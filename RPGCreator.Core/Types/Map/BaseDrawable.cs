@@ -24,14 +24,7 @@
 #endregion
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.Core.Rendering.Batching;
-using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RPGCreator.Core.Types.Internal.LayerRenderer;
 
 namespace RPGCreator.Core.Types.Map

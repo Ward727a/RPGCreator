@@ -24,11 +24,6 @@
 #endregion
 using Microsoft.Xna.Framework;
 using RPGCreator.Core.Events.EventArgs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RPGCreator.Core.Types.RTP.EventsArgs
 {

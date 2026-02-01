@@ -1,11 +1,7 @@
-using CommunityToolkit.Diagnostics;
-using CommunityToolkit.Mvvm.ComponentModel;
 using RPGCreator.Core.Types.Editor.Interfaces;
 using RPGCreator.Core.Types.Editor.Visual;
 using RPGCreator.Core.Types.Editor.Visual.PaintTargets;
-using RPGCreator.Core.Types.Internal;
 using RPGCreator.Core.Types.Map;
-using RPGCreator.Core.Types.Map.Layers;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;

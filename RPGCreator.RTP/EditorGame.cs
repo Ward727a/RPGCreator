@@ -22,7 +22,7 @@ using RPGCreator.SDK.RuntimeService;
 
 namespace RPGCreator.RTP
 {
-    public class EditorGame : Game, IGamePlayer
+    public class EditorGame : Game, IGameRunner
     {
         public event Action? OnInitialize;
         public event Action? OnLoad;
@@ -53,7 +53,7 @@ namespace RPGCreator.RTP
 
         public EditorGame()
         {
-            EngineProviders.GameProvider = new EngineGameProvider(this);
+            RuntimeServices.GameRunner = this;
             Graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
@@ -198,6 +198,9 @@ namespace RPGCreator.RTP
             RuntimeServices.ChunkService = new ChunkService();
             RuntimeServices.CameraService = new CameraService();
             RuntimeServices.RenderService = new RenderService(GraphicsDevice, _spriteBatch);
+            RuntimeServices.PlayerController = new BasePlayerController();
+            RuntimeServices.GameSession = new DefaultGameSession();
+            RuntimeServices.GameSession.ActiveEcsWorld = _ecsWorld;
 
             var cam = _ecsWorld.EntityManager.CreateCameraEntity();
             

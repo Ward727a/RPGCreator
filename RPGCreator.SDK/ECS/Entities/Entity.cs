@@ -1,5 +1,4 @@
 using System.Collections;
-using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK.Exceptions;
 using RPGCreator.SDK.Types.Internals;
 

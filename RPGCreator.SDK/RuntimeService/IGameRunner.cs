@@ -1,6 +1,6 @@
 ﻿namespace RPGCreator.SDK.GamePlayer;
 
-public interface IGamePlayer
+public interface IGameRunner : IService
 {
     event Action? OnInitialize;
     event Action? OnLoad;

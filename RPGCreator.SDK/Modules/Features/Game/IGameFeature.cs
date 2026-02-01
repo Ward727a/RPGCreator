@@ -18,7 +18,7 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGCreator.SDK.GamePlayer;
+using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Modules.Features.Game;
@@ -98,6 +98,21 @@ public interface IGameFeature : IDisposable
     public int EffectivePriority => ManualForcedPriority ?? FeaturePriority;
     
     /// <summary>
+    /// This feature's configuration.<br/>
+    /// This data <b>WILL</b> be serialized and saved with the project.<br/>
+    /// And as such, it only allows serializable data types that are stored as strings, and converted back when retrieved.
+    /// </summary>
+    CustomData Configuration { get; }
+    
+    /// <summary>
+    /// Sets the configuration for this feature.<br/>
+    /// This is mainly used during deserialization to restore the feature's configuration.<br/>
+    /// This is an engine reserved method and should not be called directly!!
+    /// </summary>
+    /// <param name="configuration">The configuration data to set.</param>
+    public void SetConfiguration(CustomData configuration, EngineSecurityToken token);
+    
+    /// <summary>
     /// When the feature is being set up.<br/>
     /// This is called once when the feature is registered inside the engine.<br/>
     /// You can use this to initialize any static data, register states, etc...
@@ -114,7 +129,7 @@ public interface IGameFeature : IDisposable
     /// When the game starts, this method is called to activate the feature.<br/>
     /// This is where you should implement the core logic and behavior of the feature that should be active during the game's runtime.
     /// </summary>
-    void OnStartGame();
+    void OnGameStart();
     
     /// <summary>
     /// When the game is doing a new frame update, this method is called.<br/>

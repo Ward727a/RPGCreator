@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using RPGCreator.Core.Types.Blueprint;
 
 namespace RPGCreator.SDK.Graph;
 

@@ -23,7 +23,6 @@
 // 
 #endregion
 using Avalonia.Controls;
-using Avalonia.VisualTree;
 using RPGCreator.Core.Types;
 using System;
 using System.Linq;
@@ -31,7 +30,6 @@ using Avalonia.Layout;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
-using RPGCreator.SDK.Logging;
 
 namespace RPGCreator.UI.Content.Editor.LayersListComponents
 {

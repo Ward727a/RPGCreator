@@ -69,7 +69,7 @@ public interface IEntityFeature : IDisposable
     /// This is an engine reserved method and should not be called directly!!
     /// </summary>
     /// <param name="configuration">The configuration data to set.</param>
-    public void SetConfiguration(CustomData configuration);
+    public void SetConfiguration(CustomData configuration, EngineSecurityToken token);
 
     /// <summary>
     /// When this feature is initialized (created).<br/>

@@ -1,5 +1,4 @@
 using System.Globalization;
-using RPGCreator.Core;
 using RPGCreator.SDK.Serializer;
 
 namespace RPGCreator.SDK.Modules.Definition;

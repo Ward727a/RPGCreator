@@ -1,6 +1,5 @@
 using RPGCreator.Core.Types.Editor;
 using RPGCreator.SDK.Logging;
-using Serilog;
 
 namespace RPGCreator.Core;
 

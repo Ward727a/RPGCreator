@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-using RPGCreator.Core.Runtimes.ECS;
 using RPGCreator.SDK.ECS;
 
 namespace RPGCreator.Core.Types.Internal;

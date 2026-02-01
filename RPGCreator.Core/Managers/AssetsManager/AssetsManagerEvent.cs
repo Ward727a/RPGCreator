@@ -25,11 +25,6 @@
 using RPGCreator.Core.Events.EventArgs;
 using RPGCreator.Core.Managers.AssetsManager.EventsArgs;
 using RPGCreator.Core.Types.Assets;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RPGCreator.Core.Managers.AssetsManager
 {

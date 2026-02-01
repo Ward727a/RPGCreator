@@ -22,10 +22,7 @@
 // 
 // 
 #endregion
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
-using MonoGame.Extended.Input;
-using RPGCreator.Core.Types.Map;
+
 using RPGCreator.SDK.Inputs;
 using MouseButton = RPGCreator.SDK.Inputs.MouseButton;
 using Vector2 = System.Numerics.Vector2;

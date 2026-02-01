@@ -1,11 +1,9 @@
-﻿using Avalonia;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.VisualTree;
 using AvaloniaInside.MonoGame;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Inputs;
-using RPGCreator.SDK.Logging;
 using MouseButton = RPGCreator.SDK.Inputs.MouseButton;
 
 namespace RPGCreator.UI.Common.Bridge;
@@ -84,7 +82,7 @@ public class AvaloniaMouseBridge
             Scroll = _scrollAccumulatorY,
             HScroll = _scrollAccumulatorX,
             IsInsideWindow = true,
-            InObject = control is MonoGameControl ? EngineProviders.GameProvider.GameInstance : null,
+            InObject = control is MonoGameControl ? RuntimeServices.GameRunner : null,
             Buttons = buttonsPressed
         };
 

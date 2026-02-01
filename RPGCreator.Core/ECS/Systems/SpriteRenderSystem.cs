@@ -1,4 +1,3 @@
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.Core.ECS.Components.Display;
 using RPGCreator.Core.Rendering.Batching;

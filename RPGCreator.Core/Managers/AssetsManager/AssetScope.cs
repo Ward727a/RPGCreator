@@ -1,10 +1,6 @@
-using RPGCreator.Core.Types.Assets;
-using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK.Assets.Definitions;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types.Collections;
-using RPGCreator.SDK.Types.Interfaces;
-using Serilog;
 
 namespace RPGCreator.Core.Managers.AssetsManager;
 

@@ -30,7 +30,6 @@ using RPGCreator.Core.Module;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Commands;
 using RPGCreator.SDK.Logging;
-using Serilog;
 
 namespace RPGCreator.Core
 {

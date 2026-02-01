@@ -1,12 +1,10 @@
 using RPGCreator.Core.Managers.AssetsManager.Factories;
 using RPGCreator.Core.Types.Map;
 using RPGCreator.Core.Types.Map.Layers;
-using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.EngineService;
-using RPGCreator.SDK.Types.Interfaces;
 using Serilog;
 
 namespace RPGCreator.Core.Managers.AssetsManager;

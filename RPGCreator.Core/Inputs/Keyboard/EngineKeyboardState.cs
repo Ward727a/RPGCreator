@@ -1,5 +1,4 @@
 ﻿using RPGCreator.SDK.Inputs;
-using RPGCreator.SDK.Logging;
 
 namespace RPGCreator.Core.Inputs.Keyboard;
 

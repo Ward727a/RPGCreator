@@ -1,9 +1,6 @@
-using System.Text.RegularExpressions;
 using LiteDB;
 using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.Types.Interfaces;
-using Serilog;
 
 namespace RPGCreator.Core;
 

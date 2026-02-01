@@ -1,10 +1,51 @@
 using System.Collections;
-using RPGCreator.Core.Runtimes;
-using RPGCreator.Core.Runtimes.ECS;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK.ECS.Entities;
 
 namespace RPGCreator.SDK.ECS;
+
+public readonly ref struct QueryView
+{
+    private readonly ReadOnlySpan<int> _entities;
+    private readonly BitArray _queryMask;
+    private readonly ComponentManager _manager;
+
+    public QueryView(ReadOnlySpan<int> entities, BitArray queryMask, ComponentManager manager)
+    {
+        _entities = entities;
+        _queryMask = queryMask;
+        _manager = manager;
+    }
+
+    public QueryEnumerator GetEnumerator() => new QueryEnumerator(_entities, _queryMask, _manager);
+}
+public ref struct QueryEnumerator
+{
+    private readonly ReadOnlySpan<int> _entities;
+    private readonly BitArray _queryMask;
+    private readonly ComponentManager _manager;
+    private int _index;
+
+    public QueryEnumerator(ReadOnlySpan<int> entities, BitArray queryMask, ComponentManager manager)
+    {
+        _entities = entities;
+        _queryMask = queryMask;
+        _manager = manager;
+        _index = -1;
+    }
+
+    public int Current => _entities[_index];
+
+    public bool MoveNext()
+    {
+        while (++_index < _entities.Length)
+        {
+            if (_manager.IsMatch(_entities[_index], _queryMask))
+                return true;
+        }
+        return false;
+    }
+}
 
 public class ComponentManager(ECSEventBus eventBus)
 {
@@ -177,19 +218,19 @@ public class ComponentManager(ECSEventBus eventBus)
         return (ECSSparseSet<T>)set;
     }
     
-    public IEnumerable<int> Query<T>() where T : IComponent
+    public QueryView Query<T>() where T : IComponent
     {
         return Query(typeof(T));
     }
     
-    public IEnumerable<int> Query<T1, T2>()
+    public QueryView Query<T1, T2>()
         where T1 : IComponent
         where T2 : IComponent
     {
         return Query(typeof(T1), typeof(T2));
     }
     
-    public IEnumerable<int> Query<T1, T2, T3>()
+    public QueryView Query<T1, T2, T3>()
         where T1 : IComponent
         where T2 : IComponent
         where T3 : IComponent
@@ -197,41 +238,126 @@ public class ComponentManager(ECSEventBus eventBus)
         return Query(typeof(T1), typeof(T2), typeof(T3));
     }
     
-    public IEnumerable<int> Query(params System.Type[] componentTypes)
+    public QueryView Query<T1, T2, T3, T4>()
+        where T1 : IComponent
+        where T2 : IComponent
+        where T3 : IComponent
+        where T4 : IComponent
     {
-        if (componentTypes == null || componentTypes.Length == 0)
-            yield break;
+        return Query(typeof(T1), typeof(T2), typeof(T3), typeof(T4));
+    }
+    
+    public QueryView Query<T1, T2, T3, T4, T5>()
+        where T1 : IComponent
+        where T2 : IComponent
+        where T3 : IComponent
+        where T4 : IComponent
+        where T5 : IComponent
+    {
+        return Query(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5));
+    }
+    
+    public QueryView Query<T1, T2, T3, T4, T5, T6>()
+        where T1 : IComponent
+        where T2 : IComponent
+        where T3 : IComponent
+        where T4 : IComponent
+        where T5 : IComponent
+        where T6 : IComponent
+    {
+        return Query(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6));
+    }
+    
+    public QueryView Query<T1, T2, T3, T4, T5, T6, T7>()
+        where T1 : IComponent
+        where T2 : IComponent
+        where T3 : IComponent
+        where T4 : IComponent
+        where T5 : IComponent
+        where T6 : IComponent
+        where T7 : IComponent
+    {
+        return Query(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7));
+    }
+    
+    public QueryView Query<T1, T2, T3, T4, T5, T6, T7, T8>()
+        where T1 : IComponent
+        where T2 : IComponent
+        where T3 : IComponent
+        where T4 : IComponent
+        where T5 : IComponent
+        where T6 : IComponent
+        where T7 : IComponent
+        where T8 : IComponent
+    {
+        return Query(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7), typeof(T8));
+    }
+    
+    public QueryView Query<T1, T2, T3, T4, T5, T6, T7, T8, T9>()
+        where T1 : IComponent
+        where T2 : IComponent
+        where T3 : IComponent
+        where T4 : IComponent
+        where T5 : IComponent
+        where T6 : IComponent
+        where T7 : IComponent
+        where T8 : IComponent
+        where T9 : IComponent
+    {
+        return Query(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7), typeof(T8), typeof(T9));
+    }
+    
+    private BitArray GenerateQueryMask(params Type[] types)
+    {
+        var mask = new BitArray(MaxComponents);
+        foreach (var type in types)
+        {
+            var bit = ComponentTypeIdRegistry.GetBit(type);
+            mask.Set(bit, true);
+        }
+        return mask;
+    }
+    
+    public bool IsMatch(int entityId, BitArray queryMask)
+    {
+        var entityBits = GetEntityComponentBits(entityId);
+        for (int i = 0; i < queryMask.Length; i++)
+        {
+            if (queryMask.Get(i) && !entityBits.Get(i))
+                return false;
+        }
+        return true;
+    }
+    
+    public QueryView Query(params System.Type[] componentTypes)
+    {
+        var queryMask = GenerateQueryMask(componentTypes);
+        var smallestSet = GetSmallestSet(componentTypes);
 
-        var sets = new List<ISparseSet>();
+        if (smallestSet == null)
+            return new QueryView(ReadOnlySpan<int>.Empty, queryMask, this);
+        
+        return new QueryView(smallestSet.EntitiesSpan, queryMask, this);
+    }
+    
+    private ISparseSet? GetSmallestSet(Type[] componentTypes)
+    {
+        ISparseSet? smallest = null;
+        int minCount = int.MaxValue;
+
         foreach (var type in componentTypes)
         {
             if (_sparseSets.TryGetValue(type, out var obj) && obj is ISparseSet set)
-                sets.Add(set);
-            else
-                yield break;
-        }
-
-        if (sets.Count == 0)
-            yield break;
-
-        var smallest = sets.OrderBy(s => s.Count).First();
-
-        for (var index = 0; index < smallest.EntitiesSpan.Length; index++)
-        {
-            var entityId = smallest.EntitiesSpan[index];
-            bool hasAll = true;
-            for (int i = 0; i < sets.Count; i++)
             {
-                if (!sets[i].Contains(entityId))
+                if (set.Count < minCount)
                 {
-                    hasAll = false;
-                    break;
+                    minCount = set.Count;
+                    smallest = set;
                 }
             }
-
-            if (hasAll)
-                yield return entityId;
+            else return null;
         }
+        return smallest;
     }
 
     public void MarkDirty<T>(int entityId) where T : IComponent

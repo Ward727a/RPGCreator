@@ -1,4 +1,3 @@
-using RPGCreator.SDK;
 using RPGCreator.SDK.Serializer;
 
 namespace RPGCreator.Core.Types.Blueprint;

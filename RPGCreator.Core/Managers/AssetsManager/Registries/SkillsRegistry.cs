@@ -1,6 +1,4 @@
-using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK.Assets.Definitions.Skills;
-using Serilog;
 
 namespace RPGCreator.Core.Managers.AssetsManager.Registries;
 

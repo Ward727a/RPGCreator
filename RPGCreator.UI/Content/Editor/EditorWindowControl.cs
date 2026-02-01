@@ -48,7 +48,7 @@ namespace RPGCreator.UI.Content.Editor
     {
         private Window _Host => (Window)this.GetVisualRoot()!;
 
-        private EditorGame? game = (EditorGame)EngineProviders.GameProvider.GameInstance;
+        private EditorGame? game = (EditorGame)RuntimeServices.GameRunner;
         private AvaloniaInside.MonoGame.MonoGameControl MonoGameScreen;
 
         private TilesetSelector tilesetSelector;

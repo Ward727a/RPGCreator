@@ -18,26 +18,13 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-namespace RPGCreator.SDK.GamePlayer;
+using System.ComponentModel;
+using RPGCreator.SDK.ECS;
 
-public interface IPlayerController
+namespace RPGCreator.SDK.RuntimeService;
+
+public interface IGameSession : IService, INotifyPropertyChanged, INotifyPropertyChanging
 {
-    int PossessedEntityId { get;  }
-    void Possess(int entityId);
-    bool IsPossessing(int entityId);
-}
-
-public class BasePlayerController : IPlayerController
-{
-    public int PossessedEntityId { get; private set; } = -1;
-
-    public void Possess(int entityId)
-    {
-        PossessedEntityId = entityId;
-    }
-
-    public bool IsPossessing(int entityId)
-    {
-        return PossessedEntityId == entityId;
-    }
+    public event Action<IEcsWorld?>? EcsWorldChanged;
+    public IEcsWorld? ActiveEcsWorld { get; set; }
 }

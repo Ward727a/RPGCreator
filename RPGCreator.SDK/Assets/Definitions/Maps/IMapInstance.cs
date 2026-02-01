@@ -1,6 +1,4 @@
-﻿using RPGCreator.SDK.Assets.Definitions.Tilesets;
-using RPGCreator.SDK.ECS;
-using RPGCreator.SDK.ECS.Entities;
+﻿using RPGCreator.SDK.ECS.Entities;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps;
 
