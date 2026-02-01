@@ -28,7 +28,7 @@ public class SpriteRenderSystem : ISystem
     public override int Priority { get; } = 400;
     public override bool IsDrawingSystem { get; } = true;
 
-    public override void Initialize(IEcsWorld iecsWorld)
+    public override void Initialize(IEcsWorld ecsWorld)
     {
         Log.Information("SpriteRenderSystem initialized.");
     }

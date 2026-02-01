@@ -20,8 +20,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Numerics;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.Core.Types.Map.Chunks;
 using RPGCreator.SDK;
@@ -30,9 +28,7 @@ using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Systems;
-using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
-using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.RTP.ECS.Systems;
 
@@ -41,7 +37,7 @@ public class MapDrawingSystem(GraphicsDevice graphicsDevice) : BaseMapDrawingSys
 
     private GraphicsDevice _graphicsDevice = graphicsDevice;
 
-    public override void Initialize(IEcsWorld iecsWorld)
+    public override void Initialize(IEcsWorld ecsWorld)
     {
     }
 

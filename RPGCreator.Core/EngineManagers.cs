@@ -26,6 +26,7 @@ using RPGCreator.Core.Managers.AssetsManager;
 using RPGCreator.Core.Managers.BrushManagers;
 using RPGCreator.Core.Managers.BrushManagers.Brushs;
 using RPGCreator.Core.Managers.ProjectsManager;
+using RPGCreator.Core.Module;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Commands;
 using RPGCreator.SDK.Logging;
@@ -60,6 +61,7 @@ namespace RPGCreator.Core
             EngineServices.ProjectsManager = Projects;
             EngineServices.BrushManager = Brush;
             EngineServices.UndoRedoService = Commands;
+            EngineServices.FeaturesManager = new FeatureManager();
             
             Brush.AddBrush(new SimpleBrush());
             Brush.AddBrush(new EraserBrush());

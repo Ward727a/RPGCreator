@@ -4,9 +4,10 @@ using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;
-using RPGCreator.SDK.ECS.Features;
 using RPGCreator.SDK.Extensions;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.Definition;
+using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
@@ -244,14 +245,14 @@ public class DirectionalAnimationSet : ISerializable, IDeserializable
     /// Key: Direction <br/>
     /// Value: Animation Unique ID <br/>
     /// </summary>
-    public Dictionary<EDirection, Ulid> Animations { get; private set; } = new();
+    public Dictionary<EntityDirection, Ulid> Animations { get; private set; } = new();
     
-    public void SetAnimation(EDirection direction, Ulid animationUnique)
+    public void SetAnimation(EntityDirection direction, Ulid animationUnique)
     {
         Animations[direction] = animationUnique;
     }
     
-    public Ulid GetAnimation(EDirection direction)
+    public Ulid GetAnimation(EntityDirection direction)
     {
         if (Animations.TryGetValue(direction, out var animationUnique))
         {
@@ -273,7 +274,7 @@ public class DirectionalAnimationSet : ISerializable, IDeserializable
             throw new ArgumentNullException(nameof(info), "SerializationInfo cannot be null.");
         }
 
-        info.TryGetValue("Animations", out Dictionary<EDirection, Ulid>? animations);
+        info.TryGetValue("Animations", out Dictionary<EntityDirection, Ulid>? animations);
         if (animations != null)
         {
             Animations = animations;
@@ -387,6 +388,45 @@ public struct CharacterEquipSlot(string slotName, int slotIndex, string itemType
     }
 }
 
+public class CharacterFeatureData(URN featureUrn, CustomData configuration) : ISerializable, IDeserializable
+{
+    private static readonly ScopedLogger Logger = Logging.Logger.ForContext<CharacterFeatureData>();
+    
+    public Ulid InstanceId { get; set; } = Ulid.NewUlid();
+    public URN FeatureUrn { get; set; } = featureUrn;
+    public CustomData Configuration { get; set; } = configuration;
+    
+    public SerializationInfo GetObjectData()
+    {
+        return new SerializationInfo(typeof(CharacterFeatureData))
+            .AddValue("InstanceId", InstanceId)
+            .AddValue("FeatureUrn", FeatureUrn)
+            .AddValue("Configuration", Configuration);
+    }
+
+    public void SetObjectData(DeserializationInfo info)
+    {
+        if (info == null)
+        {
+            throw new ArgumentNullException(nameof(info), "SerializationInfo cannot be null.");
+        }
+
+        info.TryGetValue("InstanceId", out Ulid instanceId, Ulid.Empty);
+        info.TryGetValue("FeatureUrn", out URN featureUrn, URN.Empty);
+        info.TryGetValue("Configuration", out CustomData configuration, new CustomData());
+
+        if(instanceId == Ulid.Empty)
+            Logger.Error("InstanceId key is missing or invalid during deserialization of CharacterFeatureData.");
+        
+        if(featureUrn == URN.Empty)
+            Logger.Error("FeatureUrn key is missing or invalid during deserialization of CharacterFeatureData.");
+        
+        InstanceId = instanceId;
+        FeatureUrn = featureUrn;
+        Configuration = configuration;
+    }
+}
+
 /// <summary>
 /// This class represents a character in the game.
 /// </summary>
@@ -410,7 +450,7 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
     public URN Urn { get; private set; }
     public CustomData Properties { get; } = new CustomData();
 
-    public List<BaseEntityFeature> Features => _features;
+    public List<CharacterFeatureData> Features => _features;
 
     public List<string> Tags { get; }
 
@@ -432,7 +472,7 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
     private int _maxLevel = 99;
     
     private Ulid _classId = Ulid.Empty;
-    private List<BaseEntityFeature> _features;
+    private List<CharacterFeatureData> _features;
 
     public string Name { get; set; }
 
@@ -508,7 +548,7 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
     {
         Name = "UNKNOWN";
         Urn = new URN("character", $"UNKNOWN@{Unique}");
-        _features = new List<BaseEntityFeature>();
+        _features = new List<CharacterFeatureData>();
         Tags = new List<string>();
     }
     
@@ -542,6 +582,90 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
                 Stats[statDef.Unique].SetDef(statDef);
             }
         }
+    }
+    
+    
+    /// <summary>
+    /// Retrieves the feature configuration for the given URN.<br/>
+    /// This method searches through the character's features and returns the configuration if found.
+    /// </summary>
+    /// <param name="instanceId">The instance ID of the feature to retrieve.</param>
+    /// <param name="config">The output parameter that will hold the feature configuration if found.</param>
+    /// <returns>
+    /// True if the feature configuration was found; otherwise, false.
+    /// </returns>
+    public bool TryGetFeatureConfig(Ulid instanceId, [NotNullWhen(true)] out CustomData? config)
+    {
+        var data = _features.FirstOrDefault(f => f.InstanceId == instanceId);
+        config = data?.Configuration;
+        return config != null;
+    }
+    
+    /// <summary>
+    /// Retrieves the first feature configuration for the given URN.<br/>
+    /// This method searches through the character's features and returns the configuration of the first matching feature.
+    /// </summary>
+    /// <param name="featureUrn">The URN of the feature to search for.</param>
+    /// <param name="config">The output parameter that will hold the feature configuration if found.</param>
+    /// <returns>
+    /// True if the feature configuration was found; otherwise, false.
+    /// </returns>
+    public bool TryGetFirstFeatureConfig(URN featureUrn, [NotNullWhen(true)] out CustomData? config)
+    {
+        var data = _features.FirstOrDefault(f => f.FeatureUrn == featureUrn);
+        config = data?.Configuration;
+        return config != null;
+    }
+
+    /// <summary>
+    /// Adds a new feature configuration to the character.<br/>
+    /// This method creates a new CharacterFeatureData instance and adds it to the character's features list.<br/>
+    /// It will also generate a new unique instance ID for the feature.
+    /// </summary>
+    /// <param name="urn">The URN of the feature to add.</param>
+    /// <param name="config">The configuration data for the feature.</param>
+    /// <returns>
+    /// The unique instance ID of the newly added feature.
+    /// </returns>
+    public Ulid AddFeatureConfig(URN urn, CustomData config)
+    {
+        var featureData = new CharacterFeatureData(urn, config);
+        _features.Add(featureData);
+        return featureData.InstanceId;
+    }
+
+    public Ulid AddFeatureConfig(IEntityFeature feature)
+    {
+        return AddFeatureConfig(feature.FeatureUrn, feature.Configuration);
+    }
+    
+    /// <summary>
+    /// Removes a feature configuration from the character by its instance ID.<br/>
+    /// This method searches through the character's features and removes the one with the matching instance ID.
+    /// </summary>
+    /// <param name="instanceId">The instance ID of the feature to remove.</param>
+    /// <returns>
+    /// True if the feature configuration was found and removed; otherwise, false.
+    /// </returns>
+    public bool RemoveFeatureConfig(Ulid instanceId)
+    {
+        var featureData = _features.FirstOrDefault(f => f.InstanceId == instanceId);
+        return featureData != null && _features.Remove(featureData);
+    }
+
+    /// <summary>
+    /// Retrieves all instance IDs of features matching the given URN.<br/>
+    /// This method searches through the character's features and returns all matching instance IDs.
+    /// </summary>
+    /// <param name="featureUrn">The URN of the feature to search for.</param>
+    /// <returns>
+    /// An enumerable collection of instance IDs for the matching features.
+    /// </returns>
+    public IEnumerable<Ulid> GetAllFeatureInstanceIds(URN featureUrn)
+    {
+        return _features
+            .Where(f => f.FeatureUrn == featureUrn)
+            .Select(f => f.InstanceId);
     }
     
     #endregion
@@ -580,7 +704,7 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
         info.TryGetValue("MaxLevel", out int maxLevel, 99);
         info.TryGetValue("ClassId", out Ulid classId, Ulid.Empty);
         info.TryGetValue("Stats", out Dictionary<Ulid, CharacterStats>? stats);
-        info.TryGetValue("Features", out List<BaseEntityFeature> features, new List<BaseEntityFeature>());
+        info.TryGetValue("Features", out List<CharacterFeatureData> features, new List<CharacterFeatureData>());
         info.TryGetValue("RolePlayInfo", out CharacterRolePlayInfo rolePlayInfo, new CharacterRolePlayInfo());
         
         Unique = unique;

@@ -18,6 +18,8 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using RPGCreator.SDK.Types;
+
 namespace RPGCreator.SDK.Attributes;
 
 /// <summary>
@@ -26,6 +28,11 @@ namespace RPGCreator.SDK.Attributes;
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 public sealed class EntityFeatureAttribute() : Attribute
 {
+    /// <summary>
+    /// Defines the maximum number of instances of this feature that can be added to a single character.<br/>
+    /// Default is 1. Set to 0 for unlimited instances.
+    /// </summary>
+    public int MaxInstancesPerCharacter { get; set; } = 1;
 }
 
 /// <summary>

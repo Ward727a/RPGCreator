@@ -1,6 +1,6 @@
 using RPGCreator.Core.ModuleSDK.Definition;
 using RPGCreator.Core.Types.Internal;
-using RPGCreator.SDK.ECS.Features;
+using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Interfaces;
@@ -23,7 +23,7 @@ public interface IEntityDefinition : IHasUniqueId
     public URN Urn => new("entity", Unique.ToString());
     
     public CustomData Properties { get; }
-    public List<BaseEntityFeature> Features { get; }
+    public List<CharacterFeatureData> Features { get; }
     public List<string> Tags { get; }
     
 }

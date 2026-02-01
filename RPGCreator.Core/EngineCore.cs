@@ -177,6 +177,7 @@ namespace RPGCreator.Core
             Managers.Init();
             
             Modules = new EngineModules();
+            EngineServices.ModuleManager = Modules;
             
             _logger.Info("Starting scanning for blueprint opcodes handlers...");
             

@@ -11,7 +11,7 @@ public interface ISparseSet
 }
 public sealed class ECSSparseSet<T> : ISparseSet where T : IComponent
 {
-    private T[] dense;
+    private T[] dense;        // Dense are the actual components
     private int[] sparse;     // entityId => dense index
     private int[] entities;   // dense index => entityId
     private int count;
@@ -71,6 +71,7 @@ public sealed class ECSSparseSet<T> : ISparseSet where T : IComponent
         // nettoie
         sparse[entityId] = -1;
         count--;
+        dense[count] = default!;
     }
     
     public ref T Get(int entityId)

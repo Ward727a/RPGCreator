@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using RPGCreator.SDK.Exceptions;
+using RPGCreator.SDK.GamePlayer;
 using RPGCreator.SDK.RuntimeService;
 
 namespace RPGCreator.SDK;
@@ -141,4 +142,6 @@ public static class RuntimeServices
         get => GetService<IChunkService>();
         set => RegisterService(value);
     }
+
+    public static IPlayerController PlayerController = new BasePlayerController();
 }

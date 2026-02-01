@@ -5,7 +5,8 @@ using MonoGame.Extended.Collections;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.ECS;
-using RPGCreator.SDK.ECS.Features;
+using RPGCreator.SDK.EngineService;
+using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Types;
 using Logger = RPGCreator.SDK.Logging.Logger;
 
@@ -23,7 +24,7 @@ public class EcsService : IEcsService
         return new EcsWorld();
     }
 
-    public IEntityFeature GetFeature(URN featureUrn)
+    public IEntityFeature CreateFeatureInstance(URN featureUrn)
     {
         if (_featuresPools.TryGetValue(featureUrn, out var pool) && pool.Count > 0)
         {
@@ -67,7 +68,7 @@ public class EcsService : IEcsService
             return false;
         }
 
-        feature = GetFeature(featureUrn);
+        feature = CreateFeatureInstance(featureUrn);
         return true;
     }
 
@@ -112,4 +113,6 @@ public class EcsService : IEcsService
         _featuresTemplates.Remove(featureUrn);
         _featuresPools.Remove(featureUrn);
     }
+
+    public EntityStateRegistry StateRegistry { get; } = new();
 }

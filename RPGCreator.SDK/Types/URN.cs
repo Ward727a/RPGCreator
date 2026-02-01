@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using RPGCreator.SDK.Logging;
 
@@ -88,7 +89,7 @@ public readonly record struct URN
     public void Deconstruct(out string @namespace, out string module, out string name)
     { @namespace = Namespace; module = Module; name = Name; }
     
-    public static bool TryParse(string urn, out URN? result)
+    public static bool TryParse(string urn, [NotNullWhen(true)]out URN? result)
     {
         result = null;
         if (string.IsNullOrWhiteSpace(urn))
@@ -99,9 +100,10 @@ public readonly record struct URN
 
         var parts = urn.Split(new[] { "://", "/" }, StringSplitOptions.RemoveEmptyEntries);
 
-        if (parts.Length == 3)
+        if (parts.Length >= 3)
         {
-            result = new URN(parts[0], parts[1], parts[2]);
+            var leftover = string.Join("/", parts, 2, parts.Length - 2);
+            result = new URN(parts[0], parts[1], leftover);
             return true;
         }
         

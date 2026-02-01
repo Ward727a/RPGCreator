@@ -1,8 +1,8 @@
 using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Skills;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.Types;
-using Entity = RPGCreator.SDK.ECS.Entities.Entity;
 
 namespace TestModule.TestCustomSkillEffect;
 

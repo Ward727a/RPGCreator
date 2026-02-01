@@ -20,6 +20,6 @@ public abstract class ISystem
     /// </summary>
     public abstract bool IsDrawingSystem { get; } 
 
-    public abstract void Initialize(IEcsWorld iecsWorld);
+    public abstract void Initialize(IEcsWorld ecsWorld);
     public abstract void Update(TimeSpan deltaTime);
 }

@@ -19,6 +19,7 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using RPGCreator.SDK;
+using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types;
 
@@ -44,5 +45,11 @@ public class ModulePathResolver : IModulePathResolver
     {
         Logger.Debug($"Registering path: {path} for URN: {targetUrn}");
         _registeredPath[targetUrn] = path;
+    }
+
+    public void UnregisterPath(URN targetUrn)
+    {
+        Logger.Debug($"Unregistering path for URN: {targetUrn}");
+        _registeredPath.Remove(targetUrn);
     }
 }

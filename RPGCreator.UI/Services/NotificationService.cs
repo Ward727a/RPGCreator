@@ -23,6 +23,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Notifications;
+using Avalonia.Rendering;
+using Avalonia.Threading;
 using RPGCreator.SDK.UiService;
 using RPGCreator.UI.Content.Editor;
 using Notification = Ursa.Controls.Notification;
@@ -36,25 +38,35 @@ public class NotificationService : INotificationService
     public void ShowNotification(string title, string message, NotificationType type = NotificationType.Info,
         NotificationOptions options = default)
     {
-        options = CheckOptions(options);
-        var manager = GetWindowNotificationManager();
+        Dispatcher.UIThread.Post(() =>
+        {
 
-        var expiration = System.TimeSpan.FromMilliseconds(options.DurationMs);
-        var notification = new Notification(title, message, ConvertNotificationType(type), expiration, options.ShowClose, options.OnClick, options.OnClose);
-        notification.ShowIcon = options.ShowIcon;
-        
-        manager.Show(notification);
+            options = CheckOptions(options);
+            var manager = GetWindowNotificationManager();
+
+            var expiration = System.TimeSpan.FromMilliseconds(options.DurationMs);
+            var notification = new Notification(title, message, ConvertNotificationType(type), expiration,
+                options.ShowClose, options.OnClick, options.OnClose);
+            notification.ShowIcon = options.ShowIcon;
+
+            manager.Show(notification);
+        });
     }
 
     public void ShowCustomNotification(object? content, NotificationType type = NotificationType.Info,
         NotificationOptions options = default)
     {
-        if (content == null) return;
-        options = CheckOptions(options);
+        Dispatcher.UIThread.Post(() =>
+        {
 
-        var manager = GetWindowNotificationManager();
+            if (content == null) return;
+            options = CheckOptions(options);
 
-        manager.Show(content, ConvertNotificationType(type),  System.TimeSpan.FromMilliseconds(options.DurationMs), options.ShowIcon, options.ShowClose, options.OnClick, options.OnClose, options.Classes);
+            var manager = GetWindowNotificationManager();
+
+            manager.Show(content, ConvertNotificationType(type),  System.TimeSpan.FromMilliseconds(options.DurationMs), options.ShowIcon, options.ShowClose, options.OnClick, options.OnClose, options.Classes);
+            
+        });
     }
     
     #region helpers

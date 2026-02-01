@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
 

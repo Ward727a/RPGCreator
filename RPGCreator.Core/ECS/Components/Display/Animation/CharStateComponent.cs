@@ -23,8 +23,8 @@ public struct CharStateComponent() : IComponent
     private string _previousState;
     public string PreviousState { get => _previousState; private set => _previousState = value.ToLowerInvariant().Trim().ReplaceLineEndings().Replace(" ", "_"); }
 
-    private EDirection _currentDirection = EDirection.Down;
-    public EDirection CurrentDirection
+    private EntityDirection _currentDirection = EntityDirection.Down;
+    public EntityDirection CurrentDirection
     {
         get => _currentDirection;
         set
@@ -35,7 +35,7 @@ public struct CharStateComponent() : IComponent
             Log.Debug("StateComponent: Changing direction from {PreviousDirection} to {NewDirection}", PreviousDirection, _currentDirection);
         }
     }
-    public EDirection PreviousDirection { get; private set; }
+    public EntityDirection PreviousDirection { get; private set; }
     
     public bool HasChanged => CurrentState != PreviousState || CurrentDirection != PreviousDirection;
     

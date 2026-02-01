@@ -1,5 +1,6 @@
 using System.Numerics;
 using RPGCreator.Core.Runtimes.ECS.Components.Display;
+using RPGCreator.SDK;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.ECS.Factories;
@@ -34,11 +35,14 @@ public class EntityFactory : IEntityFactory
         var addedTypes = new HashSet<Type>();
         
         // First the manual added features
-        foreach (var feature in entityDefinitionData.Features)
+        foreach (var featureData in entityDefinitionData.Features)
         {
+            var feature = EngineServices.FeaturesManager.CreateEntityFeatureInstance(featureData.FeatureUrn);
+            if (feature == null)
+                continue;
             var featureType = feature.GetType();
             addedTypes.Add(featureType);
-            
+            feature.SetConfiguration(featureData.Configuration);
             feature.OnInject(entity);
         }
         

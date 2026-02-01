@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using RPGCreator.SDK;
+using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Types.Collections;
 using RPGCreator.SDK.Types.Interfaces;
 using RPGCreator.SDK.Types.Internals;

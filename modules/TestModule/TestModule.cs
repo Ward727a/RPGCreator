@@ -1,20 +1,24 @@
-﻿using Avalonia.Controls;
-using RPGCreator.SDK;
+﻿using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Modules;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types;
 
+[assembly: ModuleManifest(
+    urn: "rpgc://module/test_module",
+    name: "Test Module",
+    Author = "Your Name",
+    TargetEngineVersion = "1.0.0",
+    Description = "A test module for RPG Creator.",
+    Dependencies = [],
+    Incompatibilities = []
+)]
+
 namespace TestModule;
 
-public class TestModule : IEngineModule
+public class TestModule : BaseModule
 {
-    public Version TargetEngineVersion { get; } = new Version(1, 0, 0);
-    public URN ModuleUrn { get; } = new("Ward727", "Module", "TestModule");
-    public string Name { get; } = "Test Module";
-    public string Version { get; } = "1.0.0";
-    public string Author { get; } = "Your Name";
-    public string Description { get; } = "A test module for RPG Creator.";
-    public void Initialize()
+    protected override void OnInitialize()
     {
         // Initialization code here
         Logger.Info("Test Module initialized.");
@@ -40,12 +44,11 @@ public class TestModule : IEngineModule
             //}
         });
 
-        EngineServices.ModulePathResolver.RegisterPath(new URN("Ward727", "module", "Folder"),
+        EngineServices.ModulePathResolver.RegisterPath(new URN("Ward727", "module", "TestModule/Folder"),
             Path.GetDirectoryName(typeof(TestModule).Assembly.Location));
     }
 
-    public void Shutdown()
+    protected override void OnShutdown()
     {
-        throw new NotImplementedException();
     }
 }

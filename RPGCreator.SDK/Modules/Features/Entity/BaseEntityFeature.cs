@@ -1,9 +1,10 @@
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
+using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Types;
 
-namespace RPGCreator.SDK.ECS.Features;
+namespace RPGCreator.SDK.Modules.Features.Entity;
 
 
 /// <summary>
@@ -41,8 +42,15 @@ public abstract class BaseEntityFeature : IEntityFeature
     /// This is used to ensure that all required features are present when this feature is injected into an entity.
     /// <example>[ new ("rpgc://entity_features/HasInventory"), new("rpgc://entity_features/CanEquipItems") ]</example>
     /// </summary>
-    public abstract URN[] DependentFeatures { get; }
-    
+    public virtual URN[] DependentFeatures { get; } = [];
+
+    /// <summary>
+    /// If this feature is incompatible with other features.<br/>
+    /// This is used to prevent conflicts when injecting features into an entity.
+    /// <example>[ new ("author://entity_features/AugmentedMovement") ]</example>
+    /// </summary>
+    public virtual URN[] IncompatibleFeatures { get; } = [];
+
     /// <summary>
     /// The display name of this feature.<br/>
     /// This is used in the editor and UI to represent this feature type.
@@ -98,6 +106,17 @@ public abstract class BaseEntityFeature : IEntityFeature
     /// And as such, it only allows serializable data types that are stored as strings, and converted back when retrieved.
     /// </summary>
     public CustomData Configuration { get; private set; } = new();
+    
+    /// <summary>
+    /// Sets the configuration for this feature.<br/>
+    /// This is mainly used during deserialization to restore the feature's configuration.<br/>
+    /// This is an engine reserved method and should not be called directly!!
+    /// </summary>
+    /// <param name="configuration">The configuration data to set.</param>
+    public void SetConfiguration(CustomData configuration)
+    {
+        Configuration = configuration;
+    }
 
     /// <summary>
     /// When this feature is initialized (created).<br/>
@@ -182,7 +201,7 @@ public abstract class BaseEntityFeature : IEntityFeature
     /// Uses the caller member name as the key if none is provided.<br/>
     /// <br/>
     /// The shared memory configuration is shared across all instances of this feature in the same ECS world (e.g. for global settings).<br/>
-    /// It work similarly to GetConfig, but operates on the shared memory configuration.
+    /// It works similarly to GetConfig, but operates on the shared memory configuration.
     /// </summary>
     /// <param name="defaultValue">The default value to return if the key does not exist.</param>
     /// <param name="key">The configuration key. Defaults to the caller member name.</param>
@@ -200,7 +219,7 @@ public abstract class BaseEntityFeature : IEntityFeature
     /// Uses the caller member name as the key if none is provided.<br/>
     /// <br/>
     /// The shared memory configuration is shared across all instances of this feature in the same ECS world (e.g. for global settings).<br/>
-    /// It work similarly to SetConfig, but operates on the shared memory configuration.
+    /// It works similarly to SetConfig, but operates on the shared memory configuration.
     /// </summary>
     /// <param name="value">The value to set.</param>
     /// <param name="key">The configuration key. Defaults to the caller member name.</param>
@@ -210,7 +229,7 @@ public abstract class BaseEntityFeature : IEntityFeature
         SharedMemoryConfiguration.Set(key, value);
     }
 
-    public IEntityFeature Clone()
+    public virtual IEntityFeature Clone()
     {
         var clone = (BaseEntityFeature)MemberwiseClone();
         clone.Configuration = this.Configuration.Clone();
@@ -233,4 +252,6 @@ public abstract class BaseEntityFeature : IEntityFeature
     public virtual void Reset()
     {
     }
+
+    public abstract void Dispose();
 }

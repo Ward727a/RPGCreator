@@ -86,12 +86,12 @@ public class AnimationSystem : ISystem
         _graphicsDevice = graphicsDevice;
     }
     
-    public override void Initialize(IEcsWorld iecsWorld)
+    public override void Initialize(IEcsWorld ecsWorld)
     {
         _logger.Information("AnimationSystem initialized.");
         
         // Ensure AnimationStateSystem is also added - If it's already added, this will have no effect
-        iecsWorld.SystemManager.AddSystem(new CharacterAnimationSystem(_componentManager));
+        ecsWorld.SystemManager.AddSystem(new CharacterAnimationSystem(_componentManager));
     }
 
     public override void Update(TimeSpan deltaTime)

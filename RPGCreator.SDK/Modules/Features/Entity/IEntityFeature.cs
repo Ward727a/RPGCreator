@@ -1,9 +1,10 @@
+using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Types;
 
-namespace RPGCreator.SDK.ECS.Features;
+namespace RPGCreator.SDK.Modules.Features.Entity;
 
-public interface IEntityFeature 
+public interface IEntityFeature : IDisposable
 {
     /// <summary>
     /// The display name of this feature.<br/>
@@ -18,6 +19,13 @@ public interface IEntityFeature
     /// <example>[ new ("rpgc://entity_features/HasInventory"), new("rpgc://entity_features/CanEquipItems") ]</example>
     /// </summary>
     public URN[] DependentFeatures { get; }
+    
+    /// <summary>
+    /// If this feature is incompatible with other features.<br/>
+    /// This is used to prevent conflicts when injecting features into an entity.
+    /// <example>[ new ("author://entity_features/AugmentedMovement") ]</example>
+    /// </summary>
+    public URN[] IncompatibleFeatures { get; }
     
     /// <summary>
     /// A brief description of this feature.<br/>
@@ -54,6 +62,14 @@ public interface IEntityFeature
     /// And as such, it only allows serializable data types that are stored as strings, and converted back when retrieved.
     /// </summary>
     CustomData Configuration { get; }
+
+    /// <summary>
+    /// Sets the configuration for this feature.<br/>
+    /// This is mainly used during deserialization to restore the feature's configuration.<br/>
+    /// This is an engine reserved method and should not be called directly!!
+    /// </summary>
+    /// <param name="configuration">The configuration data to set.</param>
+    public void SetConfiguration(CustomData configuration);
 
     /// <summary>
     /// When this feature is initialized (created).<br/>

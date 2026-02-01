@@ -27,7 +27,7 @@ public class CharacterDisplayTab : UserControl
 {
     #region Properties
 
-    private EDirection _currentAnimationDirection = EDirection.None;
+    private EntityDirection _currentAnimationDirection = EntityDirection.Center;
     private string _currentAnimationName = string.Empty;
     
     private Button? _currentDirectionButton;
@@ -431,64 +431,64 @@ public class CharacterDisplayTab : UserControl
         
         _downLeftButton = CreateDirButton("↙");
         _downLeftButton.IsEnabled = false;
-        _downLeftButton.Tag = EDirection.DownLeft;
+        _downLeftButton.Tag = EntityDirection.DownLeft;
         _animDirBox.Children.Add(_downLeftButton);
         Grid.SetRow(_downLeftButton, 4);
         Grid.SetColumn(_downLeftButton, 0);
         
         _downButton = CreateDirButton("↓");
-        _downButton.Tag = EDirection.Down;
+        _downButton.Tag = EntityDirection.Down;
         _animDirBox.Children.Add(_downButton);
         Grid.SetRow(_downButton, 4);
         Grid.SetColumn(_downButton, 2);
         
         _downRightButton = CreateDirButton("↘");
         _downRightButton.IsEnabled = false;
-        _downRightButton.Tag = EDirection.DownRight;
+        _downRightButton.Tag = EntityDirection.DownRight;
         _animDirBox.Children.Add(_downRightButton);
         Grid.SetRow(_downRightButton, 4);
         Grid.SetColumn(_downRightButton, 4); 
         
         _leftButton = CreateDirButton("←");
-        _leftButton.Tag = EDirection.Left;
+        _leftButton.Tag = EntityDirection.Left;
         _animDirBox.Children.Add(_leftButton);
         Grid.SetRow(_leftButton, 2);
         Grid.SetColumn(_leftButton, 0);
         
         _upButton = CreateDirButton("↑");
-        _upButton.Tag = EDirection.Up;
+        _upButton.Tag = EntityDirection.Up;
         _animDirBox.Children.Add(_upButton);
         Grid.SetRow(_upButton, 0);
         Grid.SetColumn(_upButton, 2);
         
         _upRightButton = CreateDirButton("↗");
         _upRightButton.IsEnabled = false;
-        _upRightButton.Tag = EDirection.UpRight;
+        _upRightButton.Tag = EntityDirection.UpRight;
         _animDirBox.Children.Add(_upRightButton);
         Grid.SetRow(_upRightButton, 0);
         Grid.SetColumn(_upRightButton, 4);
         
         _rightButton = CreateDirButton("→");
-        _rightButton.Tag = EDirection.Right;
+        _rightButton.Tag = EntityDirection.Right;
         _animDirBox.Children.Add(_rightButton);
         Grid.SetRow(_rightButton, 2);
         Grid.SetColumn(_rightButton, 4);
         
         _upLeftButton = CreateDirButton("↖");
         _upLeftButton.IsEnabled = false;
-        _upLeftButton.Tag = EDirection.UpLeft;
+        _upLeftButton.Tag = EntityDirection.UpLeft;
         _animDirBox.Children.Add(_upLeftButton);
         Grid.SetRow(_upLeftButton, 0);
         Grid.SetColumn(_upLeftButton, 0);
         
         _centerButton = CreateDirButton("●");
-        _centerButton.Tag = EDirection.None;
+        _centerButton.Tag = EntityDirection.Center;
         _animDirBox.Children.Add(_centerButton);
         Grid.SetRow(_centerButton, 2);
         Grid.SetColumn(_centerButton, 2);
         _currentDirectionButton = _centerButton;
         _centerButton.Foreground = Brushes.Red;
-        _currentAnimationDirection = EDirection.None;
+        _currentAnimationDirection = EntityDirection.Center;
         
         AnimationPreviewer = new AnimationPreviewer()
         {
@@ -586,7 +586,7 @@ public class CharacterDisplayTab : UserControl
     private void OnAnimationDirectionButtonClicked(object? sender, RoutedEventArgs e)
     {
         if (sender is not Button button) return;
-        if (button.Tag is not EDirection direction) return;
+        if (button.Tag is not EntityDirection direction) return;
         if(_currentAnimationDirection == direction) return;
 
         if (_currentDirectionButton != null)

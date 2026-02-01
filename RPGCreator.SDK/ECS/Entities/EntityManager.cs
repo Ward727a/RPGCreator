@@ -33,6 +33,7 @@ public class EntityManager(ComponentManager componentManager)
         componentManager.RegisterEntityComponentBits(entity.Id);
         EnsureCapacity(entity.Id);
         _entitiesById[entity.Id] = entity;
+        componentManager.AddComponent(entity.Id, StateComponentFactory.CreateState());
         
         return entity.Id;
     }

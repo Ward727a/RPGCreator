@@ -32,7 +32,7 @@ public class CameraSystem : ISystem
     
     private ICameraService _cameraService;
     
-    public override void Initialize(IEcsWorld iecsWorld)
+    public override void Initialize(IEcsWorld ecsWorld)
     {
         _cameraService = RuntimeServices.CameraService;
     }

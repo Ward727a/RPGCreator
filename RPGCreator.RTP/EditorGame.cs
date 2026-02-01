@@ -8,7 +8,6 @@ using RPGCreator.RTP.ECS.Systems;
 using RPGCreator.RTP.Extensions;
 using RPGCreator.RTP.Services;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Entities;
@@ -18,7 +17,6 @@ using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Resources;
 using RPGCreator.SDK.RuntimeService;
-using RPGCreator.SDK.Types.Records;
 
 // WORKING PROGRESS PART - THIS IS NOT READY YET, AND NEED **MASSIVE** REFACTORING TO WORK WITH THE NEW ECS AND RENDERING SYSTEMS.
 

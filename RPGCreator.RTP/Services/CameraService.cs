@@ -21,8 +21,6 @@
 using System;
 using System.Numerics;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.Xna.Framework;
-using RPGCreator.Core.Types.Map.Chunks;
 using RPGCreator.SDK;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Entities;

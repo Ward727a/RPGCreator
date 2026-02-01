@@ -19,11 +19,11 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using RPGCreator.SDK;
-using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.ECS;
-using RPGCreator.SDK.ECS.Features;
 using RPGCreator.SDK.ECS.Systems;
+using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Types;
 
 namespace TestModule.TestCustomFeature;
@@ -53,7 +53,7 @@ public class TestFeature : BaseEntityFeature
     //
     public override URN FeatureUrn => new("ward727", FeatureUrnModule, "TestFeature");
 
-    public override string FeatureIcon => EngineServices.ModulePathResolver.ResolveFilePath(new URN("Ward727", "module", "Folder"), "feature_icon.png");
+    public override string FeatureIcon => EngineServices.ModulePathResolver.ResolveFilePath(new URN("Ward727", "module", "TestModule/Folder"), "feature_icon.png");
 
     /*
      *
@@ -127,6 +127,12 @@ public class TestFeature : BaseEntityFeature
     {
         entity.RemoveComponent<TestFeatureComponent>();
     }
+
+    public override void Dispose()
+    {
+        // Cleanup logic here
+        // This is called when the feature is being unloaded by the engine.
+    }
 }
 
 public struct TestFeatureComponent : IComponent
@@ -141,10 +147,10 @@ public class TestFeatureSystem : ISystem
     
     private IEcsWorld _world;
     
-    public override void Initialize(IEcsWorld iecsWorld)
+    public override void Initialize(IEcsWorld ecsWorld)
     {
         // Initialization logic here
-        _world = iecsWorld;
+        _world = ecsWorld;
     }
 
     // Note for this: the "Update" method is used for non-drawing systems (if IsDrawingSystem is false) AND drawing systems (if IsDrawingSystem is true).

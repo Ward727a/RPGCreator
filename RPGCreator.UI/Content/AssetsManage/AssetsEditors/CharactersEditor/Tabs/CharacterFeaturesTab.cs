@@ -9,8 +9,9 @@ using Avalonia.Media.Imaging;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.SDK.Commands;
-using RPGCreator.SDK.ECS.Features;
+using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.UiService;
@@ -108,15 +109,25 @@ public class CharacterFeaturesTab : UserControl
     {
         public event Action? Executed;
         public event Action? Undone;
+
+        /// <summary>
+        /// The instance id of the feature added.<br/>
+        /// This is used to identify the feature instance in the character data.<br/>
+        /// It is generated when the feature is added.
+        /// </summary>
+        private Ulid FeatureInstanceId { get; set; }
+
         private readonly IEntityFeature _feature;
-        private readonly StackPanel _featuresList; 
+        private readonly StackPanel _featuresList;
+        private readonly CharacterData _characterData;
         private FeatureItemControl? _featureControl;
         public string Name { get; }
 
-        public FeatureAddedCommand(IEntityFeature feature, StackPanel featuresList)
+        public FeatureAddedCommand(IEntityFeature feature, StackPanel featuresList, CharacterData characterData)
         {
             _feature = feature;
             _featuresList = featuresList;
+            _characterData = characterData;
             
             var displayableName = string.IsNullOrWhiteSpace(_feature.FeatureName) ? _feature.FeatureUrn.ToString() : _feature.FeatureName;
             
@@ -130,6 +141,7 @@ public class CharacterFeaturesTab : UserControl
         {
             _featureControl ??= new FeatureItemControl(_feature);
             _featuresList.Children.Add(_featureControl);
+            FeatureInstanceId = _characterData.AddFeatureConfig(_feature);
             Executed?.Invoke();
         }
 
@@ -138,6 +150,10 @@ public class CharacterFeaturesTab : UserControl
             if (_featureControl != null)
             {
                 _featuresList.Children.Remove(_featureControl);
+                if (_characterData.RemoveFeatureConfig(FeatureInstanceId))
+                {
+                    FeatureInstanceId = Ulid.Empty;
+                }
                 Undone?.Invoke();
             }
             else
@@ -165,7 +181,7 @@ public class CharacterFeaturesTab : UserControl
             {
                 var feature = dialog.GetSelectedFeature();
                 Logger.Debug("Feature selected: {featureName}", feature.FeatureName);
-                var cmd = new FeatureAddedCommand(feature, FeaturesList);
+                var cmd = new FeatureAddedCommand(feature, FeaturesList, Data);
                 cmd.Executed += () =>
                 {
                     _addedFeatures.Add(feature);
@@ -240,13 +256,21 @@ public class FeatureItemControl : UserControl
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
             Margin = new Avalonia.Thickness(0, 0, 0, 5)
         };
-        var body = new StackPanel
+        var body = new Grid
         {
-            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            ColumnDefinitions = new ColumnDefinitions("Auto, *, Auto"),
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
             Margin = new Avalonia.Thickness(5)
         };
+        
+        var leftBodyPanel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        body.Children.Add(leftBodyPanel);
 
         if (File.Exists(Feature.FeatureIcon))
         {
@@ -257,7 +281,7 @@ public class FeatureItemControl : UserControl
                 Height = 32,
                 Margin = new Avalonia.Thickness(0, 0, 10, 0)
             };
-            body.Children.Add(icon);
+            leftBodyPanel.Children.Add(icon);
         }
         
         var nameLabel = new TextBlock
@@ -266,7 +290,17 @@ public class FeatureItemControl : UserControl
             FontWeight = Avalonia.Media.FontWeight.Bold
         };
         
-        body.Children.Add(nameLabel);
+        leftBodyPanel.Children.Add(nameLabel);
+        
+        var deleteButton = new Button
+        {
+            Content = "Remove",
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(5, 0, 0, 0)
+        };
+        body.Children.Add(deleteButton);
+        Grid.SetColumn(deleteButton, 2);
 
         PropExpander.Header = body;
         
@@ -274,7 +308,7 @@ public class FeatureItemControl : UserControl
         {
             Orientation = Orientation.Vertical,
             Margin = new Thickness(5),
-            HorizontalAlignment = HorizontalAlignment.Left
+            HorizontalAlignment = HorizontalAlignment.Stretch
         };
         
         var description = new TextBlock()
@@ -297,7 +331,7 @@ public class FeatureItemControl : UserControl
     private void LoadProperties()
     {
         Dictionary<string, Expander> propCategories = new();
-        var propertiesList = EngineServices.ECS.GetEditableProperties(Feature.FeatureUrn);
+        var propertiesList = EngineServices.FeaturesManager.GetEntityProperties(Feature.FeatureUrn);
 
         foreach (var propertyMetadata in propertiesList)
         {
@@ -383,7 +417,7 @@ public class FeatureItemControl : UserControl
 
         switch (notNullType)
         {
-            case Type t when t == typeof(int):
+            case { } t when t == typeof(int):
                 {
                     var min = int.MinValue;
                     var max = int.MaxValue;
@@ -403,6 +437,15 @@ public class FeatureItemControl : UserControl
                     {
                         propertyMetadata.PropertyInfo.SetValue(Feature, (int)numericUpDown.Value);
                     };
+                    Feature.Configuration.OnDataChanged += (propName) =>
+                    {
+                        if (propName == propertyMetadata.PropertyInfo.Name)
+                        {
+                            var newValue = Feature.Configuration.Get<int>(propName);
+                            if(numericUpDown.Value != newValue)
+                                numericUpDown.Value = newValue;
+                        }
+                    };
                     if (propertyMetadata.Attribute.IsShared)
                     {
                         Feature.SharedMemoryConfiguration.OnDataChanged += (propName) =>
@@ -417,7 +460,7 @@ public class FeatureItemControl : UserControl
                     }
                     return numericUpDown;
                 }
-            case Type t when t == typeof(float):
+            case { } t when t == typeof(float):
                 {
                     var min = float.MinValue;
                     var max = float.MaxValue;
@@ -437,6 +480,15 @@ public class FeatureItemControl : UserControl
                     {
                         propertyMetadata.PropertyInfo.SetValue(Feature, (float)numericUpDown.Value);
                     };
+                    Feature.Configuration.OnDataChanged += (propName) =>
+                    {
+                        if (propName == propertyMetadata.PropertyInfo.Name)
+                        {
+                            var newValue = Feature.Configuration.Get<float>(propName);
+                            if(numericUpDown.Value != newValue)
+                                numericUpDown.Value = newValue;
+                        }
+                    };
                     if (propertyMetadata.Attribute.IsShared)
                     {
                         Feature.SharedMemoryConfiguration.OnDataChanged += (propName) =>
@@ -451,7 +503,7 @@ public class FeatureItemControl : UserControl
                     }
                     return numericUpDown;
                 }
-            case Type t when t == typeof(string):
+            case { } t when t == typeof(string):
                 {
                     var textBox = new TextBox
                     {
@@ -461,6 +513,15 @@ public class FeatureItemControl : UserControl
                     textBox.TextChanged += (s, e) =>
                     {
                         propertyMetadata.PropertyInfo.SetValue(Feature, textBox.Text);
+                    };
+                    Feature.Configuration.OnDataChanged += (propName) =>
+                    {
+                        if (propName == propertyMetadata.PropertyInfo.Name)
+                        {
+                            var newValue = Feature.Configuration.Get<string>(propName);
+                            if (textBox.Text != newValue)
+                                textBox.Text = newValue;
+                        }
                     };
                     if (propertyMetadata.Attribute.IsShared)
                     {
@@ -476,19 +537,27 @@ public class FeatureItemControl : UserControl
                     }
                     return textBox;
                 }
-            case Type t when t == typeof(bool):
+            case { } t when t == typeof(bool):
                 {
                     var checkBox = new CheckBox
                     {
                         IsChecked = (bool)(propertyMetadata.PropertyInfo.GetValue(Feature) ?? false),
                     };
-                    checkBox.Checked += (s, e) =>
+                    checkBox.IsCheckedChanged += (s, e) =>
                     {
-                        propertyMetadata.PropertyInfo.SetValue(Feature, true);
+                        if (checkBox.IsChecked.HasValue)
+                        {
+                            propertyMetadata.PropertyInfo.SetValue(Feature, checkBox.IsChecked.Value);
+                        }
                     };
-                    checkBox.Unchecked += (s, e) =>
+                    Feature.Configuration.OnDataChanged += (propName) =>
                     {
-                        propertyMetadata.PropertyInfo.SetValue(Feature, false);
+                        if (propName == propertyMetadata.PropertyInfo.Name)
+                        {
+                            var newValue = Feature.Configuration.Get<bool>(propName);
+                            if(checkBox.IsChecked != newValue)
+                                checkBox.IsChecked = newValue;
+                        }
                     };
                     if (propertyMetadata.Attribute.IsShared)
                     {
@@ -503,6 +572,79 @@ public class FeatureItemControl : UserControl
                         };
                     }
                     return checkBox;
+                }
+            case { } t when t.IsEnum:
+                {
+                    var comboBox = new ComboBox
+                    {
+                        Width = 150
+                    };
+
+                    var enumValues = Enum.GetValues(notNullType);
+                    
+                    foreach (var value in enumValues)
+                    {
+                        comboBox.Items.Add(new ComboBoxItem()
+                        {
+                            Content = Enum.GetName(notNullType, value) ?? $"[Unknown-{value}]",
+                            Tag = value,
+                        });
+                    }
+                    
+                    comboBox.SelectedIndex = propertyMetadata.PropertyInfo.GetValue(Feature) is Enum enumValue
+                        ? Array.IndexOf(enumValues, enumValue)
+                        : 0;
+                    comboBox.SelectionChanged += (s, e) =>
+                    {
+                        if (comboBox.SelectedItem is ComboBoxItem item && item.Tag != null)
+                        {
+                            propertyMetadata.PropertyInfo.SetValue(Feature, item.Tag);
+                        }
+                    };
+                    Feature.Configuration.OnDataChanged += (propName) =>
+                    {
+                        if (propName == propertyMetadata.PropertyInfo.Name)
+                        {
+                            var enumName = Feature.Configuration.Get<string>(propName);
+        
+                            if (!string.IsNullOrEmpty(enumName))
+                            {
+                                for (int i = 0; i < comboBox.Items.Count; i++)
+                                {
+                                    if (comboBox.Items[i] is ComboBoxItem item && item.Tag?.ToString() == enumName)
+                                    {
+                                        if (comboBox.SelectedIndex != i)
+                                            comboBox.SelectedIndex = i;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    if (propertyMetadata.Attribute.IsShared)
+                    {
+                        Feature.SharedMemoryConfiguration.OnDataChanged += (propName) =>
+                        {
+                            if (propName == propertyMetadata.PropertyInfo.Name)
+                            {
+                                var enumName = Feature.SharedMemoryConfiguration.Get<string>(propName);
+            
+                                if (!string.IsNullOrEmpty(enumName))
+                                {
+                                    for (int i = 0; i < comboBox.Items.Count; i++)
+                                    {
+                                        if (comboBox.Items[i] is ComboBoxItem item && item.Tag?.ToString() == enumName)
+                                        {
+                                            if (comboBox.SelectedIndex != i)
+                                                comboBox.SelectedIndex = i;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        };
+                    }
+                    return comboBox;
                 }
             default:
                 return new TextBlock { Text = $"[Unsupported Type: {notNullType.Name}]" };
@@ -574,7 +716,7 @@ public class FeatureLibraryExplorerDialog : UserControl
 
     private void LoadFeatures()
     {
-        var features = EngineServices.ECS.GetAllFeatures();
+        var features = EngineServices.FeaturesManager.GetAllEntityFeatures();
 
         if (features.Count == 0)
         {

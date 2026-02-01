@@ -1,3 +1,5 @@
+using RPGCreator.SDK.EngineService;
+
 namespace RPGCreator.SDK.Commands;
 
 public class CommandManager : ICommandManager

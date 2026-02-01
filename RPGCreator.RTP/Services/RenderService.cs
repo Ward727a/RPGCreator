@@ -18,19 +18,14 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Numerics;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
-using RenderingLibrary.Graphics;
-using RPGCreator.Core.Types.Map.Chunks;
 using RPGCreator.RTP.Extensions;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
-using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 using Size = RPGCreator.SDK.Types.Size;

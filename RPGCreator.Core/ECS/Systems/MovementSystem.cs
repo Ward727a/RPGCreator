@@ -23,7 +23,7 @@ public class MovementSystem : ISystem
         _componentManager = componentManager;
     }
     
-    public override void Initialize(IEcsWorld iecsWorld)
+    public override void Initialize(IEcsWorld ecsWorld)
     {
         _logger.Information("MovementSystem initialized.");
     }
@@ -64,7 +64,7 @@ public class MovementSystem : ISystem
             
                         var newDir = GetDirectionFromVector(movement.TargetDirection);
             
-                        if (newDir != EDirection.None)
+                        if (newDir != EntityDirection.Center)
                         {
                             animState.CurrentDirection = newDir;
                         }
@@ -104,7 +104,7 @@ public class MovementSystem : ISystem
             
             var newDir = GetDirectionFromVector(dir);
             
-            if (newDir != EDirection.None)
+            if (newDir != EntityDirection.Center)
             {
                 animState.CurrentDirection = newDir;
             }
@@ -114,18 +114,18 @@ public class MovementSystem : ISystem
         _logger.Debug("Entity {entityId} moved to position {position} using grid movement.", entityId, transform.Position);
     }
 
-    private EDirection GetDirectionFromVector(Vector2 dir)
+    private EntityDirection GetDirectionFromVector(Vector2 dir)
     {
         if(dir == Vector2.Zero)
-            return EDirection.None;
+            return EntityDirection.Center;
         
         if(Math.Abs(dir.X) > Math.Abs(dir.Y))
         {
-            return dir.X > 0 ? EDirection.Right : EDirection.Left;
+            return dir.X > 0 ? EntityDirection.Right : EntityDirection.Left;
         }
         else
         {
-            return dir.Y > 0 ? EDirection.Down : EDirection.Up;
+            return dir.Y > 0 ? EntityDirection.Down : EntityDirection.Up;
         }
     }
 }

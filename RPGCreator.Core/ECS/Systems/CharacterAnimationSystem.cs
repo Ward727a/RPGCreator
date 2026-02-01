@@ -21,7 +21,7 @@ public class CharacterAnimationSystem : ISystem
         _componentManager = componentManager;
     }
     
-    public override void Initialize(IEcsWorld iecsWorld)
+    public override void Initialize(IEcsWorld ecsWorld)
     {
         _logger.Information("AnimationStateSystem initialized.");
     }
@@ -48,7 +48,7 @@ public class CharacterAnimationSystem : ISystem
                 if (newAnimationId == Ulid.Empty)
                 {
                     // Fallback to default direction
-                    newAnimationId = directionMap.GetAnimation(EDirection.None);
+                    newAnimationId = directionMap.GetAnimation(EntityDirection.Center);
                 }
             }
 
@@ -60,7 +60,7 @@ public class CharacterAnimationSystem : ISystem
                     if (newAnimationId == Ulid.Empty)
                     {
                         // Fallback to default direction
-                        newAnimationId = idleDirectionMap.GetAnimation(EDirection.None);
+                        newAnimationId = idleDirectionMap.GetAnimation(EntityDirection.Center);
                     }
                 }
             }

@@ -15,8 +15,15 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Modules\" />
+      <Folder Include="ECS\Features\" />
       <Folder Include="Modules\ECS\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="EntityFeaturePropertyMetadata.cs" />
+      <Compile Remove="GameFeaturePropertyMetadata.cs" />
+      <Compile Remove="EngineService\EngineServicesProvider.cs" />
+      <Compile Remove="EngineService\IServiceProvider.cs" />
     </ItemGroup>
 
 </Project>
