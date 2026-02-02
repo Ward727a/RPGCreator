@@ -48,13 +48,14 @@ public class EngineSerializer : ISerializerService
     {
         _settings = new JsonSerializerSettings
         {
-            TypeNameHandling = TypeNameHandling.None,
+            TypeNameHandling = TypeNameHandling.Auto,
             Formatting = Formatting.Indented,
             NullValueHandling = NullValueHandling.Ignore,
             Converters = { 
                 new EngineJsonConverter(),
                 new UlidJsonConverter(),
-                new ColorJsonConverter()
+                new ColorJsonConverter(),
+                new UrnJsonConverter()
             },
             PreserveReferencesHandling = PreserveReferencesHandling.Objects,
             DefaultValueHandling = DefaultValueHandling.Ignore

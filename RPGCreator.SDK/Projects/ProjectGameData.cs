@@ -47,8 +47,6 @@ namespace RPGCreator.SDK.Projects
 
         private IBaseProject Project;
 
-        public ObservableCollection<MapDefinition> Maps = [];
-
         public ProjectGameData()
         {
         }
@@ -61,7 +59,6 @@ namespace RPGCreator.SDK.Projects
         public SerializationInfo GetObjectData()
         {
             SerializationInfo info = new SerializationInfo(typeof(ProjectGameData));
-            info.AddValue(nameof(Maps), Maps);
             // Add other properties as needed
             return info;
         }
@@ -69,15 +66,7 @@ namespace RPGCreator.SDK.Projects
         public void SetObjectData(DeserializationInfo info)
         {
             if (info == null) throw new ArgumentNullException(nameof(info));
-
-            info.TryGetList("Maps", out List<MapDefinition> maps);
-            
-            if(maps == null)
-            {
-                maps = new List<MapDefinition>();
-            }
             // Set other properties as needed
-            Maps = new ObservableCollection<MapDefinition>(maps);
             
         }
     }

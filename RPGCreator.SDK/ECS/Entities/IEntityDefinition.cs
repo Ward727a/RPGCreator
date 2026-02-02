@@ -1,3 +1,4 @@
+using RPGCreator.SDK.Assets.Definitions;
 using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Types;
@@ -11,16 +12,17 @@ namespace RPGCreator.SDK.ECS;
 ///
 /// This should be used to create an IEntity instance via an EntityFactory.
 /// </summary>
-public interface IEntityDefinition : IHasUniqueId
+public interface IEntityDefinition : IAssetDef
 {
+    public string Name { get; set; }
     
-    public string SpritePath { get; set; }
+    public string SpritePath { get; }
     
     public Ulid Unique { get; protected set; }
     public URN Urn => new("entity", Unique.ToString());
     
     public CustomData Properties { get; }
-    public List<CharacterFeatureData> Features { get; }
+    public List<EntityFeatureData> Features { get; }
     public List<string> Tags { get; }
     
 }

@@ -12,9 +12,8 @@ using SkiaSharp;
 
 namespace RPGCreator.Core.Types.Assets.Tilesets;
 
-public class TileInstance : BaseDrawable, ITileInstance
+public class TileInstance : ITileInstance
 {
-    public System.Numerics.Vector2 Position { get; set; }
     public ITileDef Definition { get; private set; }
 
     public TileInstance()
@@ -24,7 +23,6 @@ public class TileInstance : BaseDrawable, ITileInstance
     public TileInstance(ITileDef tileDef)
     {
         Definition = tileDef;
-        Position = tileDef.Position;
     }
 
 
@@ -51,77 +49,6 @@ public class TileInstance : BaseDrawable, ITileInstance
         return Definition.IsEqualTo(other.Definition);
     }
 
-
-    protected override void _Draw(SpriteBatchExtend? sb)
-    {
-        var texture = EngineServices.ResourcesService.Load<Texture2D>(Definition.TilesetDef.ImagePath);
-        switch (Definition.Flip)
-        {
-            case TileFlip.None:
-                sb.Draw(texture, Position, Definition.UV.ToRectangle(), Color.White);
-                return;
-            case TileFlip.Horizontal:
-                sb.Draw(texture, Position, Definition.UV.ToRectangle(), Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0f);
-                return;
-            case TileFlip.Vertical:
-                sb.Draw(texture, Position, Definition.UV.ToRectangle(), Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.FlipVertically, 0f);
-                return;
-            case TileFlip.Both:
-                sb.Draw(texture, Position, Definition.UV.ToRectangle(), Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically, 0f);
-                return;
-        }
-    }
-
-    protected override void _Update(GameTime gameTime)
-    {
-    }
-
-    /// <summary>
-    /// This bitmap SHOULD NOT be used directly for rendering.<br/>
-    /// For rendering, use the GetTileAt method of the corresponding TilesetFamily or NTileset.<br/>
-    /// This bitmap it could be used in the editor or for other purposes.<br/>
-    /// </summary>
-    /// <remarks>Not for in-game rendering.</remarks>
-    protected virtual SKBitmap GetTileBitmap()
-    {
-        var imageToCrop = SKBitmap.Decode(Definition.TilesetDef.ImagePath);
-        
-        var cropRegion = new SKRect(
-            Definition.SizeInTileset.Width,
-            Definition.SizeInTileset.Height,
-            Definition.SizeInTileset.Width + Definition.TilesetDef.TileWidth,
-            Definition.SizeInTileset.Height + Definition.TilesetDef.TileHeight
-        );
-        var drawRegion = new SKRect(
-            0,
-            0,
-            Definition.TilesetDef.TileWidth,
-            Definition.TilesetDef.TileHeight
-        );
-        
-        var tileBitmap = new SKBitmap(Definition.TilesetDef.TileWidth, Definition.TilesetDef.TileHeight);
-        using var canvas = new SKCanvas(tileBitmap);
-        
-        canvas.DrawBitmap(imageToCrop, cropRegion, drawRegion);
-        
-        return tileBitmap;
-    }
-
-    protected virtual CroppedBitmap GetTileBmpAvalonia()
-    {
-        var tilesetBitmap = new Bitmap(Definition.TilesetDef.ImagePath);
-        
-        var cropRegion = new PixelRect(
-            (int)Definition.SizeInTileset.Width,
-            (int)Definition.SizeInTileset.Height,
-            (int)Definition.SizeInTileset.Width + Definition.TilesetDef.TileWidth,
-            (int)Definition.SizeInTileset.Height + Definition.TilesetDef.TileHeight
-        );
-
-        var croppedBitmap = new CroppedBitmap(tilesetBitmap, cropRegion);
-        return croppedBitmap;
-    }
-
     public void Clean()
     {
         // No resources to clean up for TileInstance
@@ -137,6 +64,5 @@ public class TileInstance : BaseDrawable, ITileInstance
 
         // Reset the tile instance to the provided definition
         Definition = def;
-        Position = def.Position;
     }
 }

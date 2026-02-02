@@ -21,10 +21,12 @@
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using CommunityToolkit.Diagnostics;
 using RPGCreator.Core.Types;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Extensions;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types.Collections;
 using RPGCreator.SDK.UiService;
@@ -36,7 +38,11 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
         private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<MapLevelTab>();
         private readonly IAssetScope _assetScope = EngineServices.AssetsManager.CreateAssetScope("MapLevelTab");
-        
+
+        private Grid _BodyGrid;
+        private AutoCompleteBox _SearchBox;
+
+        private Grid _ContentGrid;
         private ScrollViewer _Scroller;
         private StackPanel _MapList;
 
@@ -76,12 +82,16 @@ namespace RPGCreator.UI.Content.Editor.Tabs
             }
         }
 
-       
-        
-
         public MapLevelTab()
         {
-            var cont = new Grid
+            CreateComponents();
+            RegisterEvents();
+        }
+
+        private void CreateComponents()
+        {
+            
+            _BodyGrid = new Grid
             {
                 Margin = App.style.Margin,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
@@ -89,23 +99,23 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                 RowDefinitions = new RowDefinitions("Auto,*"),
                 Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromArgb(60, 0, 0, 0))
             };
-            this.Content = cont;
+            this.Content = _BodyGrid;
 
-            var searchBox = new TextBox
+            _SearchBox = new AutoCompleteBox()
             {
                 Watermark = "Search ([map] | [level] | [level]@[map])",
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
                 Margin = App.style.Margin
             };
-            cont.Children.Add(searchBox);
+            _BodyGrid.Children.Add(_SearchBox);
 
-            var grid = new Grid
+            _ContentGrid = new Grid
             {
                 Margin = App.style.Margin,
                 RowDefinitions = new("*")
             };
-            cont.Children.Add(grid);
+            _BodyGrid.Children.Add(_ContentGrid);
 
             _Scroller = new ScrollViewer
             {
@@ -124,16 +134,20 @@ namespace RPGCreator.UI.Content.Editor.Tabs
             };
 
             _Scroller.Content = _MapList;
-            cont.Children.Add(_Scroller);
+            _BodyGrid.Children.Add(_Scroller);
             Grid.SetRow(_Scroller, 1);
+        }
 
-            cont.PointerPressed += (s, e) =>
+        private void RegisterEvents()
+        {
+            Loaded += OnLoaded;
+            _BodyGrid.PointerPressed += (s, e) =>
             {
-                if (e.GetCurrentPoint(cont).Properties.IsRightButtonPressed)
+                if (e.GetCurrentPoint(_BodyGrid).Properties.IsRightButtonPressed)
                 {
-                    var elementUnderPointer = cont.InputHitTest(e.GetPosition(cont));
+                    var elementUnderPointer = _BodyGrid.InputHitTest(e.GetPosition(_BodyGrid));
 
-                    if (elementUnderPointer != cont && elementUnderPointer != _Scroller && elementUnderPointer.GetType().Name != "ScrollContentPresenter")
+                    if (elementUnderPointer != _BodyGrid && elementUnderPointer != _Scroller && elementUnderPointer.GetType().Name != "ScrollContentPresenter")
                         return; // If the right click is not on the MapLevelPanel itself, do nothing
 
                     e.Handled = true;
@@ -143,9 +157,23 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                     var addMapItem = new MenuItem { Header = "Add Map" };
                     addMapItem.Click += (s, e) => OnCreateNewMap();
                     (GlobalStaticUIData.CurrentContext as ContextMenu).Items.Add(addMapItem);
-                    GlobalStaticUIData.OpenContext(cont);
+                    GlobalStaticUIData.OpenContext(_BodyGrid);
                 }
             };
+        }
+
+        private void OnLoaded(object? sender, RoutedEventArgs e)
+        {
+            var project = EngineServices.ProjectsManager.GetCurrentProject();
+
+            if (project != null)
+            {
+                var maps = EngineServices.AssetsManager.GetAssets<MapDefinition>();
+                foreach (var map in maps)
+                {
+                    AddMapToUi(map);
+                }
+            }
         }
 
         private async Task OnCreateNewMap()
@@ -158,8 +186,10 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
             var mapDef = EngineServices.AssetsManager.CreateTransientAsset<MapDefinition>();
             mapDef.Name = result;
+
+            var defaultPack = EngineServices.AssetsManager.GetLoadedPacks()[0];
             
-            EngineStates.ProjectState.CurrentProject.GameData.Maps.Add(mapDef);
+            defaultPack.AddOrUpdateAsset(mapDef);
             
             AddMapToUi(mapDef);
             Logger.Info($"Map '{result}' created.");

@@ -20,9 +20,9 @@ public partial class MapService : ObservableObject, IMapService
     private readonly HashSet<Type> _validAssetTypes = [typeof(ITileDef)];
     private readonly IAssetScope _assetScope;
     
-    public Action<Ulid>? OnMapLoaded { get; set; }
-    public Action? OnMapUnloaded { get; set; }
-    public Action<float, float>? OnMapEdited { get; set; }
+    public event Action<Ulid>? OnMapLoaded;
+    public event Action? OnMapUnloaded;
+    public event Action<float, float>? OnMapEdited;
     
     private bool _hasLoadedMap;
     public bool HasLoadedMap
@@ -81,6 +81,24 @@ public partial class MapService : ObservableObject, IMapService
         CurrentLoadedMapData = CreateMapData(mapDef);
         ClearDirtyFlag();
         OnMapLoaded?.Invoke(mapId);
+        return true;
+    }
+    
+    public bool SaveMap()
+    {
+        if (!HasLoadedMap || CurrentLoadedMapDefinition == null)
+            return false;
+        
+        // Here we would implement the logic to save the CurrentLoadedMapData back to the asset system.
+        // This is a placeholder for demonstration purposes.
+        
+        // Getting the first assetpack (it should be the default project assetpack)
+        var assetPacks = EngineServices.AssetsManager.GetLoadedPacks()[0];
+        assetPacks.AddOrUpdateAsset(CurrentLoadedMapDefinition);
+        
+        ClearDirtyFlag();
+        _logger.Info("Map '{mapName}' (ID: {mapId}) has been saved.", 
+            args: [CurrentLoadedMapDefinition.Name, CurrentLoadedMapDefinition.Unique]);
         return true;
     }
 

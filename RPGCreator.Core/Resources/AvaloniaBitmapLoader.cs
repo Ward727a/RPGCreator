@@ -41,7 +41,7 @@ public class AvaloniaBitmapLoader : IResourceLoader
     public object Load(string path)
     {
         if(string.IsNullOrEmpty(path) || !File.Exists(path))
-            return _fallbackBitmap;
+            return _fallbackBitmap.Value;
         return new Bitmap(path);
     }
 }

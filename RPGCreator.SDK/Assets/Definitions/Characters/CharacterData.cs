@@ -6,6 +6,7 @@ using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.Extensions;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Modules;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Serializer;
@@ -388,17 +389,23 @@ public struct CharacterEquipSlot(string slotName, int slotIndex, string itemType
     }
 }
 
-public class CharacterFeatureData(URN featureUrn, CustomData configuration) : ISerializable, IDeserializable
+[SerializingType("EntityFeatureData")]
+public class EntityFeatureData() : ISerializable, IDeserializable
 {
-    private static readonly ScopedLogger Logger = Logging.Logger.ForContext<CharacterFeatureData>();
+    public EntityFeatureData(URN featureUrn, CustomData configuration) : this()
+    {
+        FeatureUrn = featureUrn;
+        Configuration = configuration;
+    }
+    private static readonly ScopedLogger Logger = Logging.Logger.ForContext<EntityFeatureData>();
     
     public Ulid InstanceId { get; set; } = Ulid.NewUlid();
-    public URN FeatureUrn { get; set; } = featureUrn;
-    public CustomData Configuration { get; set; } = configuration;
+    public URN FeatureUrn { get; set; }
+    public CustomData Configuration { get; set; }
     
     public SerializationInfo GetObjectData()
     {
-        return new SerializationInfo(typeof(CharacterFeatureData))
+        return new SerializationInfo(typeof(EntityFeatureData))
             .AddValue("InstanceId", InstanceId)
             .AddValue("FeatureUrn", FeatureUrn)
             .AddValue("Configuration", Configuration);
@@ -425,6 +432,13 @@ public class CharacterFeatureData(URN featureUrn, CustomData configuration) : IS
         FeatureUrn = featureUrn;
         Configuration = configuration;
     }
+    
+    public IEntityFeature ToEntityFeature()
+    {
+        var feature = EngineServices.FeaturesManager.CreateEntityFeatureInstance(FeatureUrn);
+        feature.SetConfiguration(Configuration, new EngineSecurityToken());
+        return feature;
+    }
 }
 
 /// <summary>
@@ -433,6 +447,15 @@ public class CharacterFeatureData(URN featureUrn, CustomData configuration) : IS
 [SerializingType("Character")]
 public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDeserializable
 {
+    public string SavePath { get; set; }
+    public bool IsDirty { get; set; }
+    public bool IsTransient { get; set; }
+    public void Init(Ulid id)
+    {
+        Unique = id;
+        Urn = new URN("character", $"{Name}@{Unique}");
+    }
+    
     #region Events
 
     public event EventHandler<string>? PortraitChanged;
@@ -445,12 +468,12 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
     
     #region Properties
 
-    public string SpritePath { get; set; } = string.Empty;
+    public string SpritePath => _portraitPath;
     public Ulid Unique { get; set; } = Ulid.NewUlid();
     public URN Urn { get; private set; }
     public CustomData Properties { get; } = new CustomData();
 
-    public List<CharacterFeatureData> Features => _features;
+    public List<EntityFeatureData> Features => _features;
 
     public List<string> Tags { get; }
 
@@ -472,7 +495,7 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
     private int _maxLevel = 99;
     
     private Ulid _classId = Ulid.Empty;
-    private List<CharacterFeatureData> _features;
+    private List<EntityFeatureData> _features;
 
     public string Name { get; set; }
 
@@ -548,7 +571,7 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
     {
         Name = "UNKNOWN";
         Urn = new URN("character", $"UNKNOWN@{Unique}");
-        _features = new List<CharacterFeatureData>();
+        _features = new List<EntityFeatureData>();
         Tags = new List<string>();
     }
     
@@ -629,7 +652,7 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
     /// </returns>
     public Ulid AddFeatureConfig(URN urn, CustomData config)
     {
-        var featureData = new CharacterFeatureData(urn, config);
+        var featureData = new EntityFeatureData(urn, config);
         _features.Add(featureData);
         return featureData.InstanceId;
     }
@@ -678,7 +701,6 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
             .AddValue("Unique", Unique)
             .AddValue("Name", Name)
             .AddValue("PortraitPath", PortraitPath)
-            .AddValue("SpritePath", SpritePath)
             .AddValue("InitialLevel", InitialLevel)
             .AddValue("CurrentLevel", CurrentLevel)
             .AddValue("MaxLevel", MaxLevel)
@@ -698,19 +720,17 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
         info.TryGetValue("Unique", out Ulid unique, Ulid.Empty);
         info.TryGetValue("Name", out string name, "UNKNOWN");
         info.TryGetValue("PortraitPath", out string portraitPath, string.Empty);
-        info.TryGetValue("SpritePath", out string spritePath, string.Empty);
         info.TryGetValue("InitialLevel", out int initialLevel, 1);
         info.TryGetValue("CurrentLevel", out int currentLevel, 1);
         info.TryGetValue("MaxLevel", out int maxLevel, 99);
         info.TryGetValue("ClassId", out Ulid classId, Ulid.Empty);
         info.TryGetValue("Stats", out Dictionary<Ulid, CharacterStats>? stats);
-        info.TryGetValue("Features", out List<CharacterFeatureData> features, new List<CharacterFeatureData>());
+        info.TryGetValue("Features", out List<EntityFeatureData> features, new List<EntityFeatureData>());
         info.TryGetValue("RolePlayInfo", out CharacterRolePlayInfo rolePlayInfo, new CharacterRolePlayInfo());
         
         Unique = unique;
         Name = name;
         PortraitPath = portraitPath;
-        SpritePath = spritePath;
         InitialLevel = initialLevel;
         CurrentLevel = currentLevel;
         MaxLevel = maxLevel;
@@ -724,5 +744,4 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
     
     #endregion
 
-    public string SavePath { get; set; }
 }

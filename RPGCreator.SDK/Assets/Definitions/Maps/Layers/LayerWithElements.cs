@@ -3,7 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using RPGCreator.Core.Types.Map.Chunks;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 
@@ -22,6 +24,7 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
     public event Action<LayerElementEventArgs>? ElementAdded;
     public event Action<LayerElementEventArgs>? ElementRemoved;
     public ReadOnlyDictionary<long, LayerChunk<TDef>> Chunks => _chunks.AsReadOnly();
+    protected abstract LayerChunk<TDef> CreateChunkInstance();
     
     /// <summary>
     /// Add a new element to the layer at the specified location.<br/>
@@ -285,8 +288,8 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
     {
         if (_chunks.TryGetValue(chunkId, out var chunk))
             return chunk;
-        
-        var newChunk = new LayerChunk<TDef>();
+
+        var newChunk = CreateChunkInstance();
         _chunks.Add(chunkId, newChunk);
         return newChunk;
     }
@@ -311,7 +314,7 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
         return info;
     }
 
-    public void SetObjectData(DeserializationInfo info)
+    public override void SetObjectData(DeserializationInfo info)
     {
         base.SetObjectData(info);
         info.TryGetValue(nameof(_chunks), out Dictionary<long, LayerChunk<TDef>> elements, new Dictionary<long, LayerChunk<TDef>>());
@@ -323,6 +326,8 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
 }
 
 
+[SerializingType("TileLayerDef")]
 public class TileLayerDefinition : LayerWithElements<ITileDef>
 {
+    protected override LayerChunk<ITileDef> CreateChunkInstance() => new TileLayerChunk();
 }

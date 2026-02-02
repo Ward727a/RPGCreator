@@ -1,5 +1,6 @@
 using System.Numerics;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
@@ -17,27 +18,22 @@ public class TileDefinition : ITileDef
     public bool IsTransient { get; set; } = false;
     
     public Vector2 Position { get; set; }
-    public Vector2 DefaultPosition { get; set; }
     public Size SizeInTileset { get; private set; }
     public Vector2 PositionInTileset { get; private set; }
     public Rect UV => new (new(PositionInTileset.X, PositionInTileset.Y), new(TilesetDef.TileWidth, TilesetDef.TileHeight));
     public TileFlip Flip { get; set; } = TileFlip.None;
     public BaseTilesetDef TilesetDef { get; private set; }
     public RuntimeBag Tags { get; } = new RuntimeBag();
-    
-    public TileDefinition(Vector2 defaultPosition, Size sizeInTileset, Vector2 positionInTileset, BaseTilesetDef tilesetDef)
+
+    public TileDefinition()
     {
-        DefaultPosition = defaultPosition;
-        SizeInTileset = sizeInTileset;
-        PositionInTileset = positionInTileset;
-        TilesetDef = tilesetDef;
     }
+
     public TileDefinition(Size sizeInTileset, Vector2 positionInTileset, BaseTilesetDef tilesetDef)
     {
         SizeInTileset = sizeInTileset;
         PositionInTileset = positionInTileset;
         TilesetDef = tilesetDef;
-        DefaultPosition = Vector2.Zero; // Default position
     }
 
     public void Init(Ulid id)
@@ -63,8 +59,7 @@ public class TileDefinition : ITileDef
             return false;
         }
 
-        return DefaultPosition == other.DefaultPosition &&
-               SizeInTileset.Equals(other.SizeInTileset) &&
+        return SizeInTileset.Equals(other.SizeInTileset) &&
                PositionInTileset.Equals(other.PositionInTileset) &&
                TilesetDef.Unique == other.TilesetDef.Unique;
     }
@@ -72,7 +67,6 @@ public class TileDefinition : ITileDef
     public SerializationInfo GetObjectData()
     {
         SerializationInfo info = new SerializationInfo(typeof(TileDefinition));
-        info.AddValue("DefaultPosition", DefaultPosition);
         info.AddValue("SizeInTileset", SizeInTileset);
         info.AddValue("PositionInTileset", PositionInTileset);
         info.AddValue("Tileset", TilesetDef.Unique);
@@ -86,13 +80,19 @@ public class TileDefinition : ITileDef
             throw new ArgumentNullException(nameof(info), "SerializationInfo cannot be null.");
         }
 
-        info.TryGetValue("DefaultPosition", out Vector2 defaultPosition, Vector2.Zero);
         info.TryGetValue("SizeInTileset", out Size sizeInTileset, new Size(32, 32));
         info.TryGetValue("PositionInTileset", out Vector2 positionInTileset, Vector2.Zero);
         info.TryGetValue("Tileset", out Ulid tilesetUnique, Ulid.Empty);
 
-        DefaultPosition = defaultPosition;
         SizeInTileset = sizeInTileset;
         PositionInTileset = positionInTileset;
+        if(EngineServices.AssetsManager.TryResolveAsset(tilesetUnique, out TilesetDef? tileset))
+        {
+            TilesetDef = tileset;
+        }
+        else
+        {
+            Logger.Error("Failed to resolve TilesetDef with Unique ID {TilesetUnique} during TileDefinition deserialization.", tilesetUnique);
+        }
     }
 }

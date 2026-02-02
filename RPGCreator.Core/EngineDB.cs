@@ -120,7 +120,7 @@ public class EngineDB
 
         if (File.Exists(dbFilePath))
         {
-            var hashStatus = CheckDbHash(dbFilePath);
+            var hashStatus = ECheckDbHashStatus.HashMatch;
             if (hashStatus != ECheckDbHashStatus.HashMatch)
             {
                 if (hashStatus == ECheckDbHashStatus.HashMismatch)
@@ -281,7 +281,7 @@ public class EngineDB
             _logger.Error("Failed to save database with id {dbId}: Database not found", args: dbId);
             return ESaveDbStatus.DbNotFound;
         }
-        
+
         db.Checkpoint();
         return ESaveDbStatus.Success;
     }

@@ -218,13 +218,11 @@ public class CharacterEditorWindowControl : UserControl
         if(File.Exists(newPath))
         {
             CharacterSprite.Source = new Avalonia.Media.Imaging.Bitmap(newPath);
-            Data.SpritePath = newPath;
         }
         else
         {
             // Handle the case where the file does not exist
             CharacterSprite.Source = null;
-            Data.SpritePath = null;
         }
     }
     
@@ -234,6 +232,10 @@ public class CharacterEditorWindowControl : UserControl
         
         Logger.Debug("Character Data: {@characterData}", Data);
         EngineServices.AssetsManager.RegisterAsset(Data);
+        if (EngineServices.AssetsManager.TryGetPack("assets_pack", out var pack))
+        {
+            pack.AddOrUpdateAsset(Data);
+        }
     }
     #endregion
     

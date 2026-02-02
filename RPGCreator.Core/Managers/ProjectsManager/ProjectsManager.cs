@@ -117,5 +117,10 @@ namespace RPGCreator.Core.Managers.ProjectsManager
         {
             EngineStates.ProjectState.CurrentProject = null;
         }
+        
+        public IBaseProject? GetCurrentProject()
+        {
+            return EngineStates.ProjectState.CurrentProject;
+        }
     }
 }

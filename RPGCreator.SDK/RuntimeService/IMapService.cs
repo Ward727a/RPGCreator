@@ -17,18 +17,18 @@ public interface IMapService : INotifyPropertyChanged, INotifyPropertyChanging, 
     /// Event called when a map is loaded.<br/>
     /// The Ulid parameter is the ID of the loaded map.
     /// </summary>
-    Action<Ulid>? OnMapLoaded { get; set; }
+    event Action<Ulid>? OnMapLoaded;
     
     /// <summary>
     /// Event called when a map is unloaded.
     /// </summary>
-    Action? OnMapUnloaded { get; set; }
+    event Action? OnMapUnloaded;
     
     /// <summary>
     /// Event called when the currently loaded map is edited.<br/>
     /// The float parameters are the X and Y coordinates of the edit.
     /// </summary>
-    Action<float, float>? OnMapEdited { get; set; }
+    event Action<float, float>? OnMapEdited;
     
     /// <summary>
     /// Is there any map loaded?
@@ -69,6 +69,16 @@ public interface IMapService : INotifyPropertyChanged, INotifyPropertyChanging, 
     /// </returns>
     /// <exception cref="NotImplementedException">Thrown if the RTP or game does not support this operation.</exception>
     bool LoadMap(Ulid mapId);
+
+    /// <summary>
+    /// Save the current loaded map.
+    /// </summary>
+    /// <returns>
+    /// True: It worked, the map is now saved.<br/>
+    /// False: It didn't work, either there is no map loaded, see <see cref="HasLoadedMap"/> to check that, or there was an error during the save process.
+    /// </returns>
+    /// <exception cref="NotImplementedException">Thrown if the RTP or game does not support this operation.</exception>
+    bool SaveMap();
     
     /// <summary>
     /// Unload the current loaded map.<br/>

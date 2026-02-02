@@ -26,6 +26,7 @@
 using LiteDB;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types.Internals;
 using Serilog;
@@ -184,6 +185,7 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
             {
                 if (loadedAsset is IHasUniqueId idAsset && idAsset.Unique != index.Id)
                 {
+                    idAsset.Init(index.Id); // Force the ID to match the index
                     Log.Warning(
                         "[Pack {PackName}] Loaded asset ID {LoadedId} does not match index ID {IndexId} for file at path {FilePath}.",
                         Name, idAsset.Unique, index.Id, fullPath);
@@ -213,9 +215,27 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
 
     public void AddOrUpdateAsset(object asset, string relativeFolderPath = "")
     {
-        if (asset is not IHasUniqueId idAsset) return;
-        if (asset is not IHasSavePath savePathAsset) return;
-        if (asset is not ISerializable serializableAsset) return;
+        if (asset is not IHasUniqueId idAsset)
+        {
+            Logger.Error(
+                "[Pack {PackName}] Attempted to add or update an asset that does not implement IHasUniqueId. Asset type: {AssetType}.",
+                Name, asset.GetType().FullName ?? "Unknown");
+            return;
+        };
+        if (asset is not IHasSavePath savePathAsset)
+        {
+            Logger.Error(
+                "[Pack {PackName}] Attempted to add or update an asset that does not implement IHasSavePath. Asset ID: {AssetId}.",
+                Name, (idAsset).Unique);
+            return;
+        };
+        if (asset is not ISerializable serializableAsset)
+        {
+            Logger.Error(
+                "[Pack {PackName}] Attempted to add or update an asset that does not implement ISerializable. Asset ID: {AssetId} at \"{filepath}\".",
+                Name, (idAsset).Unique, savePathAsset.SavePath);
+            return;
+        }
 
         var db = EngineDB.GetDB(_dbId);
         if (db == null) return;
@@ -351,7 +371,6 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
                 Log.Error("[Pack {PackName}] Failed to save database. Status: {Status}", Name, status);
                 return;
             }
-
             Log.Information("[Pack {PackName}] Database saved successfully.", Name);
         }
     }

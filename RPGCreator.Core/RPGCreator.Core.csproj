@@ -33,6 +33,7 @@
     <Folder Include="Types\Assets\Tilesets\IntGridTileset\" />
     <Folder Include="Types\Blueprint\Nodes\Entity\Position\" />
     <Folder Include="Types\Blueprint\Nodes\Entity\Stats\" />
+    <Folder Include="Types\Editor\Interfaces\" />
   </ItemGroup>
 
   <ItemGroup>

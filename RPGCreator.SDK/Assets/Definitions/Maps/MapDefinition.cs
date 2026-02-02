@@ -1,4 +1,6 @@
 using System.Drawing;
+using Newtonsoft.Json;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
@@ -10,8 +12,10 @@ namespace RPGCreator.SDK.Assets.Definitions.Maps;
 public class MapDefinition : IMapDef
 {
     private readonly List<IMapDef> _mapDefs = new List<IMapDef>();
+    [JsonProperty(ItemTypeNameHandling = TypeNameHandling.All)]
     private readonly List<BaseLayerDef> _tileLayers = new List<BaseLayerDef>();
-    
+
+    public Ulid PackId { get; set; }
     public event Action<BaseLayerDef>? TileLayerAdded;
     public event Action<BaseLayerDef>? TileLayerRemoved;
     
@@ -20,6 +24,8 @@ public class MapDefinition : IMapDef
     public string Name { get; set; }
     public string Description { get; set; }
     public IReadOnlyList<IMapDef> MapDefs => _mapDefs;
+    
+    [JsonProperty(ItemTypeNameHandling = TypeNameHandling.All)]
     public IReadOnlyList<BaseLayerDef> TileLayers => _tileLayers;
     public Size Size { get; set; } = new Size(10, 20); // Default size, can be changed later
 
@@ -115,7 +121,7 @@ public class MapDefinition : IMapDef
         info.TryGetValue(nameof(MapDefs), out var mapDefs, new List<IMapDef>());
         _mapDefs.Clear();
         _mapDefs.AddRange(mapDefs);
-        info.TryGetValue(nameof(TileLayers), out var tileLayers, new List<TileLayerDefinition>());
+        info.TryGetValue(nameof(TileLayers), out var tileLayers, new List<BaseLayerDef>());
         _tileLayers.Clear();
         _tileLayers.AddRange(tileLayers);
         info.TryGetValue(nameof(Size), out var size, new Size(10, 20));
@@ -128,4 +134,5 @@ public class MapDefinition : IMapDef
 
     public bool IsDirty { get; set; }
     public bool IsTransient { get; set; } = false;
+    public string SavePath { get; set; }
 }

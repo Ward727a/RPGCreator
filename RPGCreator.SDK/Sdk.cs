@@ -18,17 +18,15 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGCreator.SDK.Projects;
-using RPGCreator.SDK.Types.Interfaces;
+using RPGCreator.SDK.Assets;
+using RPGCreator.SDK.Assets.Definitions.Characters;
+using RPGCreator.SDK.Modules.Definition;
 
-namespace RPGCreator.SDK.EngineService;
+namespace RPGCreator.SDK;
 
-public interface IProjectsManager : IService
+internal static class Sdk
 {
-    List<BaseProjectLink> GetAllProjects();
-    public IBaseProject? CreateProject(string projectName, string projectPath);
-    public bool TryGetProject(string configPath, out IBaseProject? project);
-    public void OpenProject(IBaseProject project);
-    public void CloseCurrentProject();
-    public IBaseProject? GetCurrentProject();
+    static Sdk()
+    {
+    }
 }

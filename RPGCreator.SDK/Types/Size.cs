@@ -1,14 +1,22 @@
 ﻿using System.Globalization;
 using System.Numerics;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
 
 namespace RPGCreator.SDK.Types;
 
+[SerializingType("Size")]
 public record struct Size : ISerializable, IDeserializable
 {
     public float Width { get; set; }
     public float Height { get; set; }
 
+    public Size()
+    {
+        Width = 0;
+        Height = 0;
+    }
+    
     public Size(float width, float height)
     {
         Width = width;

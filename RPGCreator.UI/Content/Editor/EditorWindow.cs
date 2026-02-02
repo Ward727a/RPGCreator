@@ -24,7 +24,10 @@
 #endregion
 using Avalonia.Controls;
 using System;
+using Avalonia.Input;
 using RPGCreator.RTP;
+using RPGCreator.SDK;
+using RPGCreator.SDK.UiService;
 
 namespace RPGCreator.UI.Content.Editor
 {
@@ -48,6 +51,20 @@ namespace RPGCreator.UI.Content.Editor
             Content = new EditorWindowControl();
             //InitializeIfNeeded();
             this.Show(); // Show the window immediately
+            
+            GotFocus += OnGotFocus;
+        }
+
+        private void OnGotFocus(object? sender, GotFocusEventArgs e)
+        {
+            
+            UiServices.NotificationService.Warn(
+                "Welcome to RPG Creator Editor!",
+                "This is a pre-release (and alpha) version of the editor, there might be bugs, and there is still a lot of features to implement." +
+                "\nThank you for testing and helping us improve RPG Creator!" +
+                "\nDon't worry, this message will disappear in 20 seconds!", new NotificationOptions(20000));
+            
+            GotFocus -= OnGotFocus;
         }
 
         public static EditorWindow Instance

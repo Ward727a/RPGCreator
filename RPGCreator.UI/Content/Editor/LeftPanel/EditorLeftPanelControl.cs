@@ -3,9 +3,14 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Layout;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Contexts;
 using RPGCreator.SDK.Modules.UIModule;
+using RPGCreator.SDK.RuntimeService;
 using RPGCreator.UI.Content.Editor.LeftPanel.EntitiesPanel;
 using RPGCreator.UI.Content.Editor.LeftPanel.NonePanel;
 using RPGCreator.UI.Content.Editor.LeftPanel.TilingPanel;
@@ -20,7 +25,7 @@ public class EditorLeftPanelControl : UserControl
 
     private TabControl? _tabControl;
     private ScrollViewer? _scrollViewer;
-    private StackPanel? _body;
+    private Grid? _body;
 
     private static Dictionary<string, Control> _components = new();
     
@@ -53,9 +58,10 @@ public class EditorLeftPanelControl : UserControl
             Content = _scrollViewer,
             Header = "Tool Properties"
         });
-        _body = new StackPanel
+        _body = new Grid
         {
-            Orientation = Orientation.Vertical,
+            RowDefinitions = new RowDefinitions("Auto"),
+            ColumnDefinitions = new ColumnDefinitions("*"),
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
             Margin = new Thickness(10),
@@ -81,6 +87,20 @@ public class EditorLeftPanelControl : UserControl
         AddComponent("entities", new EntitiesPanelControl());
         
         // Show default component
+        RuntimeServices.OnceServiceReady((ILayerService ls) =>
+        {
+            ls.OnLayerSelected += (int layerIndex) =>
+            {
+                var selected = RuntimeServices.LayerService.GetSelectedLayer();
+
+                if (selected is TileLayerDefinition or AutoLayerDefinition)
+                    ShowComponent("tiling");
+                else if (selected is EntityLayerDefinition)
+                    ShowComponent("entities");
+                else
+                    ShowComponent("none");
+            };
+        });
         ShowComponent("tiling");
         
         
@@ -118,7 +138,10 @@ public class EditorLeftPanelControl : UserControl
             return;
         var component = _components[key];
         if (!_body!.Children.Contains(component))
+        {
+            HideComponent();
             _body.Children.Add(component);
+        }
     }
 
     [ExposeToPlugin("EditorLeftPanel.Components")]

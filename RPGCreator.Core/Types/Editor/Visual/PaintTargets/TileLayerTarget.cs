@@ -1,7 +1,7 @@
-using RPGCreator.Core.Types.Editor.Interfaces;
-using RPGCreator.Core.Types.Internal;
+using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Editor;
 
 namespace RPGCreator.Core.Types.Editor.Visual.PaintTargets;
 
@@ -20,25 +20,25 @@ public class TileLayerTarget : IPaintTarget
         GridHeight = gridHeight;
     }
     
-    public bool IsValidPosition(Point position)
+    public bool IsValidPosition(Vector2 position)
     {
         if (_mapDef == null)
             return false;
         return position is { X: >= 0, Y: >= 0 } && (position.X < _mapDef.Size.Width * GridWidth && position.Y < _mapDef.Size.Height * GridHeight);
     }
 
-    public void PaintAt(Point position, object objectToPaint)
+    public void PaintAt(Vector2 position, object objectToPaint)
     {
         if(objectToPaint is ITileDef tileDef)
             _layerDef.AddElement(tileDef, position);
     }
 
-    public void EraseAt(Point position)
+    public void EraseAt(Vector2 position)
     {
         _layerDef.TryRemoveElement(position, out var _);
     }
 
-    public void PreviewAt(Point position, object objectToPreview)
+    public void PreviewAt(Vector2 position, object objectToPreview)
     {
         // Preview functionality can be implemented here if needed
     }

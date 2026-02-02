@@ -30,6 +30,8 @@ using System;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 
 namespace RPGCreator.UI.Content.Editor.LayersListComponents
 {
@@ -91,6 +93,9 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                     break;
                 case AutoLayerDefinition:
                     LayerTypeText = "[AL] ";
+                    break;
+                case EntityLayerDefinition:
+                    LayerTypeText = "[EL] ";
                     break;
                 default:
                     LayerTypeText = "[??] ";

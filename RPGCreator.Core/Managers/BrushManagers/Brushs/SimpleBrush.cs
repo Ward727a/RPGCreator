@@ -46,6 +46,8 @@ namespace RPGCreator.Core.Managers.BrushManagers.Brushs
         public void Draw(Vector2 clickPos)
         {
             var target = MapEditorContext.GetActivePaintTarget();
+            if (target == null)
+                return;
             Guard.IsNotNull(target, nameof(target));
             object? objectToPaint = MapEditorContext.SelectedObjectToPaint;
 

@@ -39,6 +39,7 @@ using RPGCreator.Core.Types.Windows;
 using RPGCreator.RTP;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.UiService;
 using RPGCreator.UI.Common.Bridge;
 using RPGCreator.UI.Content.Editor.LeftPanel;
 
@@ -150,8 +151,15 @@ namespace RPGCreator.UI.Content.Editor
                     }
                     else
                     {
+                        RuntimeServices.MapService.SaveMap();
                         // Successfully saved the project
                         Console.WriteLine("Project saved successfully.");
+                        foreach (var pack in EngineServices.AssetsManager.GetLoadedPacks())
+                        {
+                            pack.Save();
+                        }
+
+                        loadingModal.Hide();
                     }
                 });
                 if(EngineStates.ProjectState.CurrentProject == null)

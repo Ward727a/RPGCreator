@@ -74,10 +74,6 @@ namespace RPGCreator.Core.Types.Project
             Event = new ProjectEvent();
             GameData = new ProjectGameData(this);
             Id = Ulid.NewUlid();
-            GameData.Maps.CollectionChanged += (_, _) =>
-            {
-                Event.OnMapsListChanged();
-            };
         }
 
         public void Save()
@@ -150,10 +146,6 @@ namespace RPGCreator.Core.Types.Project
             Authors = authors;
             AssetsPackPath = assetsPackPath;
             GameData = gameData;
-            GameData.Maps.CollectionChanged += (_, _) =>
-            {
-                Event.OnMapsListChanged();
-            };
         }
     }
 }

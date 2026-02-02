@@ -101,7 +101,9 @@ public class ComponentManager(ECSEventBus eventBus)
     
     public BitArray GetEntityComponentBits(int entityId)
     {
-        return _entityComponentBits[entityId];
+        if (!_entityComponentBits.TryGetValue(entityId, out var bits))
+            return new BitArray(MaxComponents);
+        return bits;
     }
     
     public bool HasComponent<T>(int entityId) where T : IComponent

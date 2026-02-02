@@ -1,8 +1,8 @@
-using RPGCreator.Core.Types.Editor.Interfaces;
-using RPGCreator.Core.Types.Internal;
+using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
+using RPGCreator.SDK.Editor;
 
 namespace RPGCreator.Core.Types.Editor.Visual.PaintTargets;
 
@@ -21,7 +21,7 @@ public class IntGridLayerTarget : IPaintTarget
         MapDef = mapDef;
     }
 
-    public void PaintAt(Point position, object objectToPaint)
+    public void PaintAt(Vector2 position, object objectToPaint)
     {
         if (objectToPaint is not IntGridData gridData) return;
         
@@ -30,12 +30,12 @@ public class IntGridLayerTarget : IPaintTarget
         LayerDef.BakeRegion(position);
     }
 
-    public void EraseAt(Point position)
+    public void EraseAt(Vector2 position)
     {
         throw new NotImplementedException();
     }
 
-    public void PreviewAt(Point position, object objectToPreview)
+    public void PreviewAt(Vector2 position, object objectToPreview)
     {
         // Preview functionality can be implemented here if needed
     }

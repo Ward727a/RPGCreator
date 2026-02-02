@@ -43,10 +43,29 @@ namespace RPGCreator.RTP
 
         GumService Gum => GumService.Default;
 
+        private static Texture2D? _fakeTexture2D = null!;
+        
+        private static Texture2D FakeTexture2D(GraphicsDevice graphicsDevice)
+        {
+            if (_fakeTexture2D != null)
+                return _fakeTexture2D;
+            
+            Texture2D texture = new Texture2D(graphicsDevice, 16, 16);
+            Color[] data = new Color[16 * 16];
+            for (int i = 0; i < data.Length; ++i) data[i] = Color.Magenta;
+            texture.SetData(data);
+            _fakeTexture2D = texture;
+            return texture;
+        }
+        
         public class Texture2DLoader(GraphicsDevice graphicsDevice) : IResourceLoader
         {
             public object Load(string path)
             {
+                if (string.IsNullOrEmpty(path))
+                {
+                    return FakeTexture2D(graphicsDevice);
+                }
                 return Texture2D.FromFile(graphicsDevice, path);
             }
         }

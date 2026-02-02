@@ -81,7 +81,6 @@ public class MapItem : StackPanel
 
             AddLevelToUi(levelDef);
         }
-        
 
     }
     
@@ -328,7 +327,8 @@ public class MapItem : StackPanel
             if(confirmed)
             {
                 Guard.IsNotNull(EngineStates.ProjectState.CurrentProject, "CurrentProject");
-                EngineStates.ProjectState.CurrentProject.GameData.Maps.Remove(_mapDef); // Remove the map from the project data
+
+                EngineServices.AssetsManager.GetPack(_mapDef.PackId).RemoveAsset(_mapDef.Unique);
                 
                 OnMapRemoved?.Invoke();
             };

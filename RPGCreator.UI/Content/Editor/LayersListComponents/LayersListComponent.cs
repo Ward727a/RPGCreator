@@ -30,6 +30,9 @@ using Avalonia.Layout;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
+using RPGCreator.SDK.RuntimeService;
 
 namespace RPGCreator.UI.Content.Editor.LayersListComponents
 {
@@ -108,27 +111,19 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
         protected void RefreshComponents()
         {
             LayersList.Items.Clear();
-            if (EngineStates.EditorState.CurrentMap == null) return;
-            foreach (var layer in EngineStates.EditorState.CurrentMap.TileLayers.OrderBy(l=>l.ZIndex))
+            RuntimeServices.OnceServiceReady((IMapService mapService) =>
             {
-                LayerItem layerItem = new LayerItem(layer);
-                LayersList.Items.Add(layerItem);
-                layerItem.LayerRemoved += () =>
+                if (mapService.CurrentLoadedMapDefinition == null) return;
+                foreach (var layer in mapService.CurrentLoadedMapDefinition.TileLayers.OrderBy(l=>l.ZIndex))
                 {
-                    RefreshComponents();
-                };
-            }
-            if (LayersList.Items.Count > 0)
-            {
-                LayersList.SelectedIndex = 0;
-                SelectedLayerText.Text = $"Selected Layer: {((LayerItem)LayersList.SelectedItem).Layer.Name}";
-                EngineStates.EditorState.CurrentLayer = ((LayerItem)LayersList.SelectedItem).Layer;
-            }
-            else
-            {
-                SelectedLayerText.Text = "Selected Layer: None";
-                EngineStates.EditorState.CurrentLayer = null;
-            }
+                    LayerItem layerItem = new LayerItem(layer);
+                    LayersList.Items.Add(layerItem);
+                    layerItem.LayerRemoved += () =>
+                    {
+                        RefreshComponents();
+                    };
+                }
+            });
         }
 
         protected void RegisterEvents()
@@ -140,6 +135,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                     OnMapChanged();
                 }
             };
+            RuntimeServices.OnceServiceReady((IMapService mapService) => mapService.OnMapLoaded += (mapId) => OnMapChanged());
         }
 
         #region EventsHandlers
@@ -174,6 +170,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
             
             layerTypeComboBox.Items.Add("Tile Layer");
             layerTypeComboBox.Items.Add("Auto Layer");
+            layerTypeComboBox.Items.Add("Entity Layer");
             
             layerTypeComboBox.SelectedIndex = 0;
             
@@ -215,6 +212,9 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                     case 1: // Auto Layer
                         newLayer = EngineServices.AssetsManager.CreateAsset<AutoLayerDefinition>();
                         break;
+                    case 2: // Entity Layer
+                        newLayer = EngineServices.AssetsManager.CreateAsset<EntityLayerDefinition>();
+                        break;
                     default:
                         UiServices.NotificationService.Error("Error Adding Layer", "Invalid layer type selected.");
                         return;
@@ -239,7 +239,8 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
 
                     SelectedLayerText.Text = $"Selected Layer: {layerName}";
 
-                    RuntimeServices.LayerService.SelectLayer(RuntimeServices.LayerService.GetLastLayerIndex());
+                    newLayer.LayerIndex = RuntimeServices.LayerService.GetLastLayerIndex();
+                    RuntimeServices.LayerService.SelectLayer(newLayer.LayerIndex);
 
                     return;
                 }
@@ -252,7 +253,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
         {
             if (LayersList.SelectedItem is not LayerItem layerItem) return;
             SelectedLayerText.Text = $"Selected Layer: {layerItem.Layer.Name}";
-            EngineStates.EditorState.CurrentLayer = layerItem.Layer;
+            RuntimeServices.LayerService.SelectLayer(layerItem.Layer.LayerIndex);
         }
 
         #endregion

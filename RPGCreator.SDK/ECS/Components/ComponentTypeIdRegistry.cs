@@ -18,8 +18,9 @@ public static class ComponentTypeIdRegistry
         var type = typeof(T);
         if (!_componentTypeToId.TryGetValue(type, out var id))
         {
-            _componentTypeToId[type] = id;
-            id = _nextId++;
+            var tempId = _nextId++;
+            _componentTypeToId[type] = tempId;
+            id = tempId;
         }
         return id;
     }
@@ -31,8 +32,9 @@ public static class ComponentTypeIdRegistry
 
         if (!_componentTypeToId.TryGetValue(type, out var id))
         {
-            _componentTypeToId[type] = id;
-            id = _nextId++;
+            var tempId = _nextId++;
+            _componentTypeToId[type] = tempId;
+            id = tempId;
         }
         return id;
     }

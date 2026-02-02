@@ -1,4 +1,4 @@
-﻿#region LICENSE
+#region LICENSE
 //
 // RPG Creator - Open-source RPG Engine.
 // (c) 2025 Ward
@@ -27,6 +27,7 @@ using CommunityToolkit.Diagnostics;
 using RPGCreator.Core.Types.Map.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.Types.Internals;
 
@@ -42,8 +43,6 @@ namespace RPGCreator.Core.Types.Map
         public MapDefinition Definition { get; private set; }
         private List<TileLayerInstance> _tileLayers = new List<TileLayerInstance>();
         public IReadOnlyList<IMapLayerInstance> TileLayers => _tileLayers.AsReadOnly();
-        private List<IEntity> _entities = new List<IEntity>();
-        public IReadOnlyList<IEntity> Entities => _entities.AsReadOnly();
 
         public IMapLayerInstance PreviewLayer { get; set; } = new TileLayerInstance(new TileLayerDefinition()
         {
@@ -112,55 +111,5 @@ namespace RPGCreator.Core.Types.Map
             }
         }
 
-        public void Draw(IRenderContext context, IDrawer<IMapLayerInstance> layerDrawer, IDrawer<IEntity> entityDrawer)
-        {
-            // Draw the map here
-            // This is where you would implement the logic to draw the map using the provided SpriteBatchExtend instance.
-            // For example, you might loop through the tiles in the map and draw them using sb.Draw() method.
-
-            foreach (var layer in TileLayers.OrderBy(l => l.Definition.ZIndex))
-            {
-                if (layer.IsVisible)
-                {
-                    layerDrawer.Draw(context, layer);
-                }
-            }
-            // Nothing here for now, need to think about what the use of this function could be for the map
-            foreach (var entity in Entities)
-            {
-                entityDrawer.Draw(context, entity);
-            }
-        }
-
-        public void SelectLayer(TileLayerInstance layer)
-        {
-            foreach (var l in TileLayers)
-            {
-                l.IsSelected = false;
-            }
-            layer.IsSelected = true;
-        }
-
-        public void SelectLayer(int index)
-        {
-            if (index < 0 || index >= Definition.TileLayers.Count)
-                throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range.");
-            SelectLayer(_tileLayers[index]);
-        }
-
-        public TileLayerInstance? GetSelectedLayer()
-        {
-            return _tileLayers.FirstOrDefault(l => l.IsSelected);
-        }
-
-        public void Update(TimeSpan elapsedTime)
-        {
-            // Nothing here for now, need to think about what the use of this function could be for the map
-            // foreach (var actor in Entities)
-            // {
-                // actor.Update(gameTime);
-                // TODO : Update entites with the IECSWorld?
-            // }
-        }
     }
 }

@@ -25,6 +25,7 @@ using RPGCreator.Core.Types.Map.Chunks;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Systems;
@@ -59,8 +60,8 @@ public class MapDrawingSystem(GraphicsDevice graphicsDevice) : BaseMapDrawingSys
             if (layer is AutoLayerDefinition autoLayer)
                 actualLayer = autoLayer.InternalTileLayer;
             
-            if(actualLayer is not LayerWithElements<ITileDef> tileLayer)
-                continue;
+            bool IsEntityLayer = actualLayer is EntityLayerDefinition;
+            bool IsTileLayer = actualLayer is LayerWithElements<ITileDef>;
             
             for(var x = range.minX; x <= range.maxX; x++)
             {
@@ -70,7 +71,10 @@ public class MapDrawingSystem(GraphicsDevice graphicsDevice) : BaseMapDrawingSys
                     
                     visibleChunks.Add((x, y, chunk));
 
-                    DrawChunkTiles(chunk, tileLayer);
+                    if(IsTileLayer)
+                        DrawChunkTiles(chunk, actualLayer as LayerWithElements<ITileDef>);
+                    else if(IsEntityLayer)
+                        DrawEntity(chunk, actualLayer as LayerWithElements<EntitySpawner>);
                 }
             }
         }
@@ -101,6 +105,27 @@ public class MapDrawingSystem(GraphicsDevice graphicsDevice) : BaseMapDrawingSys
             var position = layer.GetElementWorldPosition(chunkId, i);
             
             RuntimeServices.RenderService.DrawTile(tileDefinition, position);
+        }
+    }
+
+    private void DrawEntity(long chunkId, LayerWithElements<EntitySpawner> layerEntity)
+    {
+        var chunkElements = layerEntity.GetElements(chunkId);
+        if (chunkElements == null)
+            return;
+        
+        if(chunkElements.IsEmpty)
+            return;
+        
+        for (int i = 0; i < chunkElements.Length; i++)
+        {
+            var entitySpawner  = chunkElements[i]; 
+            if(entitySpawner == null)
+                continue;
+
+            var position = layerEntity.GetElementWorldPosition(chunkId, i);
+            
+            RuntimeServices.RenderService.DrawEntitySpawner(entitySpawner, position);
         }
     }
     

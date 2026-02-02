@@ -20,6 +20,7 @@
 
 using System.Drawing;
 using System.Numerics;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using Size = RPGCreator.SDK.Types.Size;
 
@@ -34,6 +35,14 @@ public interface IRenderService : IService
     /// <param name="tileDef">The tile definition to be drawn.</param>
     /// <param name="tilePositionInChunk">The world position where the tile should be drawn.</param>
     void DrawTile(ITileDef tileDef, Vector2 tilePositionInChunk);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="entityDef"></param>
+    /// <param name="position"></param>
+    public void DrawEntitySpawner(EntitySpawner entityDef, Vector2 position);
+    
 
     /// <summary>
     /// Draws a tile instance at its designated world position.<br/>

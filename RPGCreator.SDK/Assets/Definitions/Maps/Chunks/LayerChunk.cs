@@ -22,12 +22,24 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Extensions;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 
 namespace RPGCreator.Core.Types.Map.Chunks;
+
+[SerializingType("TileLayerChunk")]
+public class TileLayerChunk() : LayerChunk<ITileDef>
+{
+}
+
+[SerializingType("EntityLayerChunk")]
+public class EntityLayerChunk() : LayerChunk<EntitySpawner>
+{
+}
 
 /// <summary>
 /// A chunk of a layer in a map.<br/>
@@ -40,7 +52,6 @@ namespace RPGCreator.Core.Types.Map.Chunks;
 /// Note: This class is generic and can be used with any type that implements <see cref="ILayerElem"/>.
 /// </summary>
 /// <typeparam name="TDef">The type of elements stored in the chunk. Must implement <see cref="ILayerElem"/>.</typeparam>
-[SerializingType("LayerChunk")]
 public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where TDef : class, ILayerElem
 {
 
@@ -258,7 +269,7 @@ public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where
     
     #endregion
 
-    public SerializationInfo GetObjectData()
+    public override SerializationInfo GetObjectData()
     {
         var info = new SerializationInfo(typeof(LayerChunk<TDef>));
     
@@ -279,7 +290,7 @@ public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where
         return info;
     }
 
-    public void SetObjectData(DeserializationInfo info)
+    public override void SetObjectData(DeserializationInfo info)
     {
         Array.Clear(_localElements, 0, _localElements.Length);
 
@@ -302,7 +313,7 @@ public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where
     }
 }
 
-public abstract class LayerChunk
+public abstract class LayerChunk : ISerializable, IDeserializable
 {
     /// <summary>
     /// The size of the chunk in both width and height.<br/>
@@ -425,4 +436,8 @@ public abstract class LayerChunk
         
         return new Vector2(worldPosition.X/cellWidth, worldPosition.Y/cellHeight);
     }
+
+    public abstract SerializationInfo GetObjectData();
+
+    public abstract void SetObjectData(DeserializationInfo info);
 }

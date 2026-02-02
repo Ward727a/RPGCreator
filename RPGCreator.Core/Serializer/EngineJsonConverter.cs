@@ -2,6 +2,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 
 namespace RPGCreator.Core.Serializer;
@@ -37,6 +39,7 @@ public class EngineJsonConverter : JsonConverter
                     writer.WritePropertyName(entryName);
                     serializer.Serialize(writer, entryValue);
                 }
+
             }
 
             writer.WriteEndObject();
@@ -45,6 +48,10 @@ public class EngineJsonConverter : JsonConverter
 
     public override object? ReadJson(JsonReader reader, System.Type objectType, object? existingValue, JsonSerializer serializer)
     {
+        if (objectType == typeof(EntityLayerDefinition))
+        {
+            Logger.Error("Wtf");
+        }
         var jsonObject = JObject.Load(reader);
 
         Type? actualType = null;

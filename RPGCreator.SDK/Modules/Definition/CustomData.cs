@@ -1,4 +1,5 @@
 using System.Globalization;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
 
 namespace RPGCreator.SDK.Modules.Definition;
@@ -6,6 +7,7 @@ namespace RPGCreator.SDK.Modules.Definition;
 /// <summary>
 /// A custom data system, also called "data bags" or "property bags", that allows modules to store and retrieve misc data, defined by users or other modules.
 /// </summary>
+[SerializingType("CustomData")]
 public class CustomData : ISerializable, IDeserializable
 {
     public event Action<string>? OnDataChanged;

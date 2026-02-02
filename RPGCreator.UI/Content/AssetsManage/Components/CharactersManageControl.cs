@@ -49,7 +49,7 @@ public class CharacterManageItem : UserControl
         
         CharacterImage = new Image
         {
-            Source = new Bitmap(CharacterData.PortraitPath),
+            Source = EngineServices.ResourcesService.Load<Bitmap>(CharacterData.PortraitPath),
             Width = 64,
             Height = 64,
             VerticalAlignment = VerticalAlignment.Center

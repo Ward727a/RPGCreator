@@ -25,7 +25,9 @@ using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using RPGCreator.RTP.Extensions;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.RuntimeService;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 using Size = RPGCreator.SDK.Types.Size;
@@ -53,11 +55,24 @@ public class RenderService : IRenderService
         };
     }
 
+    public void DrawEntitySpawner(EntitySpawner entityDef, Vector2 position)
+    {
+        var texture = EngineServices.ResourcesService.Load<Texture2D>(entityDef.PreviewImagePath);
+        spriteBatch.Draw(
+            texture,
+            position.ToXnaFast(),
+            null,
+            Microsoft.Xna.Framework.Color.White,
+            0f,             // Rotation
+            Vector2.Zero,   // Origin
+            1f,
+            SpriteEffects.None,
+            0.5f              // LayerDepth
+        );
+    }
+
     public void DrawTile(ITileDef tileDef, Vector2 tilePositionInChunk)
     {
-        var camera = RuntimeServices.CameraService;
-        var zoom = camera.ZoomLevel;
-
         var texture = GetTilesetTexture(tileDef.TilesetDef);
         
         Rectangle sourceRect;

@@ -25,6 +25,7 @@
 using RPGCreator.Core.Types.Project;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Projects;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types.Interfaces;
@@ -119,7 +120,7 @@ namespace RPGCreator.Core.Configs.Helpers
             }
             File.WriteAllText(projectConfigPath, projectData);
             
-            Console.WriteLine($"Saved project '{project.Name}' to config at {ConfigPath}.");
+            Logger.Info($"Saved project '{project.Name}' to config at {ConfigPath}.");
         }
 
         public override SerializationInfo GetObjectData()

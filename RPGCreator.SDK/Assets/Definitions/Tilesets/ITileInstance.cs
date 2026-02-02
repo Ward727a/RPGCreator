@@ -7,7 +7,6 @@ namespace RPGCreator.SDK.Assets.Definitions.Tilesets;
 
 public interface ITileInstance : ICleanable, IResettable<ITileDef>
 {
-    public Vector2 Position { get; set; } // Position in the map, not in the tileset
     public ITileDef Definition { get; }
     /// <summary>
     /// This method returns a drawable tile based on the current tileable object.<br/>

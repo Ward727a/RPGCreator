@@ -7,11 +7,12 @@ using Microsoft.Xna.Framework.Input;
 using MonoGameGum;
 using RPGCreator.Core;
 using RPGCreator.Core.Rendering.Batching;
+using RPGCreator.SDK.GamePlayer;
 using Serilog;
 
 namespace RPGCreator.Player;
 
-public class GamePlayer : Game
+public class GamePlayer : Game, IGameRunner
 {
     private GraphicsDeviceManager _graphics;
     private SpriteBatchExtend _spriteBatch;
@@ -99,6 +100,7 @@ public class GamePlayer : Game
     {
         // TODO: Add your initialization logic here
         Gum.Initialize(this, DefaultVisualsVersion.V2);
+        OnInitialize?.Invoke();
         
         Gum.Root.Width = _graphics.GraphicsDevice.Viewport.Width;
         Gum.Root.Height = _graphics.GraphicsDevice.Viewport.Height;
@@ -122,11 +124,14 @@ public class GamePlayer : Game
     {
         _spriteBatch = new SpriteBatchExtend(GraphicsDevice);
 
+        OnLoad?.Invoke();
+        
         // TODO: use this.Content to load your game content here
     }
 
     protected override void Update(GameTime gameTime)
     {
+        OnUpdate?.Invoke(gameTime.ElapsedGameTime);
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
             Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
@@ -140,9 +145,15 @@ public class GamePlayer : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
+        OnDraw?.Invoke(gameTime.ElapsedGameTime);
 
         // TODO: Add your drawing code here
         Gum.Draw();
         base.Draw(gameTime);
     }
+
+    public event Action OnInitialize;
+    public event Action OnLoad;
+    public event Action<TimeSpan> OnUpdate;
+    public event Action<TimeSpan> OnDraw;
 }

@@ -211,10 +211,11 @@ namespace RPGCreator.Core.Managers.AssetsManager
         {
             var newAsset = new T();
             
-            RegisterAsset(newAsset);
-            
             newAsset.IsDirty = true;
             newAsset.Init(Ulid.NewUlid());
+            
+            RegisterAsset(newAsset);
+            
             
             Logger.Debug("Created asset of type {AssetType} with ID {AssetID}", args:[typeof(T).FullName, newAsset.Unique]);
             

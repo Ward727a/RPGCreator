@@ -1,14 +1,16 @@
 ﻿using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
-namespace RPGCreator.SDK.Assets.Definitions.Maps;
+namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 
-public abstract class BaseLayerDef : IAssetDef
+public abstract class BaseLayerDef : IAssetDef, ISerializable, IDeserializable
 {
     public Ulid Unique { get; protected set; }
     public URN Urn => new URN("layer", $"{Name}@{Unique}");
     public bool IsDirty { get; set; }
     public bool IsTransient { get; set; }
+    
+    public int LayerIndex { get; set; } = 0;
 
     public string Name { get; set; } = "Layer";
     public int ZIndex { get; set; } = 0;
@@ -29,6 +31,7 @@ public abstract class BaseLayerDef : IAssetDef
     {
         var info = new SerializationInfo(GetType());
         info.AddValue(nameof(Unique), Unique);
+        info.AddValue(nameof(LayerIndex), LayerIndex);
         info.AddValue(nameof(Name), Name);
         info.AddValue(nameof(ZIndex), ZIndex);
         info.AddValue(nameof(VisibleByDefault), VisibleByDefault);
@@ -39,12 +42,14 @@ public abstract class BaseLayerDef : IAssetDef
     public virtual void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue(nameof(Unique), out Ulid unique);
+        info.TryGetValue(nameof(LayerIndex), out int layerIndex);
         info.TryGetValue(nameof(Name), out string name);
         info.TryGetValue(nameof(ZIndex), out int zIndex);
         info.TryGetValue(nameof(VisibleByDefault), out bool visible);
         info.TryGetValue(nameof(Opacity), out float opacity, 1.0f);
 
         Unique = unique;
+        LayerIndex = layerIndex;
         Name = name ?? "Layer";
         ZIndex = zIndex;
         VisibleByDefault = visible;
