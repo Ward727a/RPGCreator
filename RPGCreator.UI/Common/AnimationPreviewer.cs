@@ -28,13 +28,13 @@ public class AvaloniaAnimationDrawer : IDrawer<AnimationInstance>, IDisposable
     
     public void Draw(IRenderContext context, AnimationInstance animation)
     {
-        if(_cachedSpritesheet == null || _cachedSpritesheet.Unique != animation.Definition.SpriteSheetId)
+        if(_cachedSpritesheet == null || _cachedSpritesheet.Unique != animation.Definition.SpritesheetId)
         {
-            _cachedSpritesheet = _assetScope.Load<SpritesheetDef>(animation.Definition.SpriteSheetId);
+            _cachedSpritesheet = _assetScope.Load<SpritesheetDef>(animation.Definition.SpritesheetId);
             
             if (_cachedSpritesheet == null)
             {
-                Logger.Error("[AvaloniaAnimationDrawer] Failed to load spritesheet with ID: " + animation.Definition.SpriteSheetId);
+                Logger.Error("[AvaloniaAnimationDrawer] Failed to load spritesheet with ID: " + animation.Definition.SpritesheetId);
                 return;
             }
         }
@@ -91,7 +91,7 @@ public class AnimationPreviewer : UserControl
             if(value == null || value == _animationDef) return;
             _animationDef = value;
 
-            if (_animationDef.SpriteSheetId == Ulid.Empty)
+            if (_animationDef.SpritesheetId == Ulid.Empty)
             {
                 return;
             }

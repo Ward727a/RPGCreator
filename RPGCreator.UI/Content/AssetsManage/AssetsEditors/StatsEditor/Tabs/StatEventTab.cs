@@ -168,10 +168,10 @@ public class StatEventTab : UserControl
         grid.Children.Add(testbutton);
         Grid.SetRow(testbutton, 0);
         
-        var start = GraphNodeRegistry.GetNode("System|Start");
+        var start = GraphNodeRegistry.GetNode("@hide|Start");
         _doc.AddNode(start);
         
-        var end = GraphNodeRegistry.GetNode("System|End");
+        var end = GraphNodeRegistry.GetNode("@hide|End");
         _doc.AddNode(end);
         _doc.MoveNode(end.Id, 200, 0);
 

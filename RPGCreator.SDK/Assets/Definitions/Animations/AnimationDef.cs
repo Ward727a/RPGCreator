@@ -11,15 +11,16 @@ public class AnimationDef : IAssetDef, ISerializable, IDeserializable
     public string Name { get; set; } = "New Animation";
     public Ulid Unique { get; private set; }
     public URN Urn { get; set; }
-    private Ulid _spriteSheetId;
+    private Ulid _spritesheetId;
+    public bool Loop { get; set; } = false;
 
-    public Ulid SpriteSheetId
+    public Ulid SpritesheetId
     {
-        get => _spriteSheetId;
+        get => _spritesheetId;
         set
         {
-            if(_spriteSheetId == value) return;
-            _spriteSheetId = value;
+            if(_spritesheetId == value) return;
+            _spritesheetId = value;
             IsDirty = true;
         }
     }
@@ -53,7 +54,7 @@ public class AnimationDef : IAssetDef, ISerializable, IDeserializable
         var info = new SerializationInfo(GetType());
         info.AddValue("Unique", Unique);
         info.AddValue("Name", Name);
-        info.AddValue("SpriteSheetId", SpriteSheetId);
+        info.AddValue("SpriteSheetId", SpritesheetId);
         info.AddValue("FrameIndexes", FrameIndexes);
         info.AddValue("FrameDuration", FrameDuration);
         return info;
@@ -67,7 +68,7 @@ public class AnimationDef : IAssetDef, ISerializable, IDeserializable
         info.TryGetValue("Name", out string name, "New Animation");
         Name = name;
         info.TryGetValue("SpriteSheetId", out Ulid spriteSheetId, Ulid.Empty);
-        SpriteSheetId = spriteSheetId;
+        SpritesheetId = spriteSheetId;
         info.TryGetValue("FrameIndexes", out List<int> frameIndexes, new List<int>());
         FrameIndexes = frameIndexes;
         info.TryGetValue("FrameDuration", out double frameDuration, 100);

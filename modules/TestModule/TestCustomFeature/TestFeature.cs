@@ -30,7 +30,12 @@ namespace TestModule.TestCustomFeature;
 
 /// <summary>
 /// This is just a test feature.<br/>
-/// It can also be used as a template for creating new features.
+/// It can also be used as a template for creating new features.<br/>
+/// A feature is a modular component that can be added to entities to provide them with specific functionalities.<br/>
+/// Each feature can have its own configuration properties, dependencies, and behavior defined through systems and components.<br/>
+/// And each feature can be used multiple times on different entities, depending on the "MaxInstancesPerCharacter" property defined in the <see cref="EntityFeatureAttribute"/>.<br/>
+/// <br/>
+/// Each feature declared will be automatically discovered by the engine at startup, and will be available in the editor for use on entities.
 /// </summary>
 [EntityFeature]
 public class TestFeature : BaseEntityFeature

@@ -204,69 +204,6 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
     }
 
     /// <summary>
-    /// Return a dictionary of surrounding elements around the specified location.<br/>
-    /// The radius parameter defines how far from the location to check (in tiles).<br/>
-    /// The offset parameter defines the distance between each surrounding tile (in tiles).<br/>
-    /// <br/>
-    /// For example, with radius = 1 and offset = 1, it will check the 8 surrounding tiles.<br/>
-    /// With radius = 2 and offset = 1, it will check the 16 surrounding tiles in a 5x5 area (excluding the center).<br/>
-    /// With radius = 1 and offset = 2, it will check the 8 surrounding tiles in a 3x3 area, but spaced out by 2 tiles.<br/>
-    /// <br/>
-    /// Tiles that are in the <see cref="_surroundingElementsToIgnore"/> list will be ignored and not included in the result.
-    /// </summary>
-    /// <param name="location">The center location to check around.</param>
-    /// <param name="results">An array to store the results. Must be pre-allocated with a size of at least (radius * 2 + 1)² - 1. For a radius 1, the size need to be 8.</param>
-    /// <param name="radius">The radius around the location to check (in tiles).</param>
-    /// <returns>
-    /// A dictionary of surrounding elements, with their locations as keys.
-    /// </returns>
-    public int GetSurroundingElements(Vector2 location, TDef?[] results, int radius = 1)
-    {
-        int expectedSize = (radius * 2 + 1) * (radius * 2 + 1) - 1;
-        
-        if (results.Length < expectedSize)
-            throw new ArgumentException($"Results array must be at least of size {expectedSize} for radius {radius}.", nameof(results));
-        
-        var foundCount = 0;
-        long lastChunkId = -1;
-        LayerChunk<TDef>? lastChunk = null;
-
-        var index = 0;
-        for (var y = -radius; y <= radius; y++)
-        {
-            for (var x = -radius; x <= radius; x++)
-            {
-                if (x == 0 && y == 0) continue;
-
-                Vector2 surroundingPosition = new(location.X + x, location.Y + y);
-            
-                var currentId = LayerChunk.GetChunkId(surroundingPosition);
-            
-                if (currentId != lastChunkId)
-                {
-                    lastChunkId = currentId;
-                    if (!TryGetChunk(currentId, out lastChunk))
-                    {
-                        lastChunk = null;
-                    }
-                }
-
-                if (lastChunk != null)
-                {
-                    results[index] = lastChunk.GetElement(surroundingPosition);
-                    if (results[index] != null) foundCount++;
-                }
-                else
-                {
-                    results[index] = null;
-                }
-                index++;
-            }
-        }
-        return foundCount;
-    }
-
-    /// <summary>
     /// Remove all elements from the layer.<br/>
     /// This will trigger the <see cref="ElementRemoved"/> event with null element to indicate all elements have been cleared.
     /// </summary>

@@ -36,6 +36,7 @@ public struct StateComponent : IComponent
         Floats = new float[floatCount];
         Ints = new int[intCount];
         Strings = new string[stringCount];
+        for(int i = 0; i < stringCount; i++) Strings[i] = string.Empty;
         Bool = new bool[boolCount];
         Vector2 = new Vector2[vector2Count];
     }

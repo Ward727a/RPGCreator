@@ -7,7 +7,7 @@ public class AnimationFactory : GenericPooledFactory<AnimationInstance, Animatio
     public override AnimationInstance Create(AnimationDef def)
     {
         // First we retrieve the spritesheet associated with the animation.
-        if (EngineCore.Instance.Managers.Assets.TryResolveAsset(def.SpriteSheetId, out SpritesheetDef? spritesheetDef))
+        if (EngineCore.Instance.Managers.Assets.TryResolveAsset(def.SpritesheetId, out SpritesheetDef? spritesheetDef))
         {
             AnimationInstance instance;
             
@@ -26,6 +26,6 @@ public class AnimationFactory : GenericPooledFactory<AnimationInstance, Animatio
             
             return instance;
         }
-        throw new InvalidOperationException($"Failed to resolve spritesheet with ID {def.SpriteSheetId} for animation {def.Urn}");
+        throw new InvalidOperationException($"Failed to resolve spritesheet with ID {def.SpritesheetId} for animation {def.Urn}");
     }
 }

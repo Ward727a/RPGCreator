@@ -34,6 +34,13 @@ public sealed class GameFeatureAttribute() : Attribute
     /// Default is 1. Set to 0 for unlimited instances.
     /// </summary>
     public int MaxInstances { get; set; } = 1;
+    
+    /// <summary>
+    /// Defines the URN of an existing feature that this feature replaces when added to a game.<br/>
+    /// Default is null, meaning it does not replace any existing feature.<br/>
+    /// This is particularly useful when some parts of the engine expect a specific feature to be present on a game.
+    /// </summary>
+    public string? ReplacingFeatureUrn { get; set; } = null;
 }
 
 /// <summary>

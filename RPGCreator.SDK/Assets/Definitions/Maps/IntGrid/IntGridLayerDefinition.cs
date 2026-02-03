@@ -101,11 +101,6 @@ public class IntGridLayerDefinition : IMapLayerDef<int>
         return _elements.ContainsKey(location);
     }
 
-    public Dictionary<Vector2, int> GetSurroundingElements(Vector2 location, int radius = 1, int offset = 1)
-    {
-        throw new NotImplementedException();
-    }
-
     public void ClearElements()
     {
         _elements.Clear();

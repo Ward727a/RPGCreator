@@ -122,6 +122,20 @@ public abstract class BaseEntityFeature : IEntityFeature
     }
 
     /// <summary>
+    /// Called when this feature is added to an entity definition.<br/>
+    /// This is called once when the feature is added to the definition, allowing it to perform any necessary setup or registration.
+    /// </summary>
+    /// <param name="definition">The entity definition to which this feature is being added.</param>
+    public virtual void OnAddedToDefinition(IEntityDefinition definition) { }
+    
+    /// <summary>
+    /// Called when this feature is removed from an entity definition.<br/>
+    /// This is called once when the feature is removed from the definition, allowing it to perform any necessary cleanup or deregistration.
+    /// </summary>
+    /// <param name="definition">The entity definition from which this feature is being removed.</param>
+    public virtual void OnRemovedFromDefinition(IEntityDefinition definition) { }
+
+    /// <summary>
     /// When this feature is initialized (created).<br/>
     /// This is called once when the feature instance is created, before being injected into any entity, when the engine loads the feature definitions.
     /// </summary>

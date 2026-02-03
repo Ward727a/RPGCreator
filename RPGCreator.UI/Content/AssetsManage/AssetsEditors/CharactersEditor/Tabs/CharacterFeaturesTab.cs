@@ -141,6 +141,7 @@ public class CharacterFeaturesTab : UserControl
             _featureControl ??= new FeatureItemControl(_feature);
             _featuresList.Children.Add(_featureControl);
             FeatureInstanceId = _characterData.AddFeatureConfig(_feature);
+            _feature.OnAddedToDefinition(_characterData);
             Executed?.Invoke();
         }
 
@@ -153,6 +154,7 @@ public class CharacterFeaturesTab : UserControl
                 {
                     FeatureInstanceId = Ulid.Empty;
                 }
+                _feature.OnRemovedFromDefinition(_characterData);
                 Undone?.Invoke();
             }
             else

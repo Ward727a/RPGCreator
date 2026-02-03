@@ -24,6 +24,13 @@ namespace RPGCreator.SDK.Attributes;
 public sealed class WorldFeatureAttribute() : Attribute
 {
     public int MaxInstancesPerWorld = 1;
+    
+    /// <summary>
+    /// Defines the URN of an existing feature that this feature replaces when added to a world.<br/>
+    /// Default is null, meaning it does not replace any existing feature.<br/>
+    /// This is particularly useful when some parts of the engine expect a specific feature to be present on a world.
+    /// </summary>
+    public string? ReplacingFeatureUrn { get; set; } = null;
 }
 
 /// <summary>

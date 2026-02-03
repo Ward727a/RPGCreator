@@ -31,7 +31,7 @@ using RPGCreator.SDK.Types;
 
 namespace _BaseModule.Features.Game;
 
-[EntityFeature(MaxInstancesPerCharacter = 1)]
+[GameFeature]
 public class StandardControlFeature : BaseGameFeature
 {
     public override int FeaturePriority { get; } = 100;

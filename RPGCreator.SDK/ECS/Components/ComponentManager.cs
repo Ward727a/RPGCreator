@@ -57,12 +57,29 @@ public class ComponentManager(ECSEventBus eventBus)
     private Dictionary<System.Type, object> _sparseSets = new();
     private Dictionary<System.Type, Action<int>> _removeActions = new();
     private readonly Dictionary<System.Type, HashSet<int>> _dirtyEntities = new();
+    private Dictionary<System.Type, Action<int, object>> _cleanupActions = new();
     
     private readonly Dictionary<int, BitArray> _entityComponentBits = new();
     
     public void Initialize(EntityManager entityManager)
     {
         _entityManager = entityManager;
+    }
+    
+    public void RegisterComponentCleanup<T>(Action<int, T> cleanupAction) where T : struct, IComponent
+    {
+        var type = typeof(T);
+        
+        _cleanupActions[type] = (entityId, component) => cleanupAction(entityId, (T)component);
+    }
+    
+    private void CallCleanupActions<T>(int entityId, T component) where T : IComponent
+    {
+        var type = typeof(T);
+        if (_cleanupActions.TryGetValue(type, out var action))
+        {
+            action(entityId, component);
+        }
     }
     
     public ref T AddComponent<T>(int entityId) where T : struct, IComponent
@@ -121,6 +138,7 @@ public class ComponentManager(ECSEventBus eventBus)
     public void RemoveComponent<T>(int entityId) where T : struct, IComponent
     {
         var sparseSet = GetOrCreateSparseSet<T>();
+        CallCleanupActions(entityId, sparseSet.Get(entityId));
         var bit = ComponentTypeIdRegistry.GetBit<T>();
         GetEntityComponentBits(entityId).Set(bit, false);
         sparseSet.Remove(entityId);
@@ -210,11 +228,7 @@ public class ComponentManager(ECSEventBus eventBus)
         {
             set = new ECSSparseSet<T>();
             _sparseSets[type] = set;
-            _removeActions.TryAdd(type, (entityId) =>
-            {
-                var sparseSet = (ECSSparseSet<T>)set;
-                sparseSet.Remove(entityId);
-            });
+            _removeActions.TryAdd(type, RemoveComponent<T>);
         }
         
         return (ECSSparseSet<T>)set;

@@ -100,21 +100,7 @@ public interface IMapLayerDef<TLayerElement> : IMapLayerDef
     /// True if there is an element at the specified location; otherwise, false.
     /// </returns>
     public bool HasElement(Vector2 location);
-    /// <summary>
-    /// Get all elements that are within a specified radius around a given location.<br/>
-    /// This method will return a list of elements that are within the specified radius from the given location.<br/>
-    /// The radius is defined as the middle distance from the location, meaning that it includes all elements that are within the specified number of tiles in any direction (up, down, left, right, up-right, up-left, down-right, and down-left).
-    /// </summary>
-    /// <param name="location">The location around which to search for surrounding elements.</param>
-    /// <param name="radius">The radius within which to search for surrounding elements. Default is 1 tile.</param>
-    /// <param name="offset">The offset to apply to the search radius. Default is 1 tile.</param>
-    /// <returns>
-    /// Returns a dictionary where the keys are the locations of the surrounding elements and the values are the elements themselves.<br/>
-    /// The dictionary will contain all elements that are within the specified radius from the given location.<br/>
-    /// If no elements are found within the specified radius, an empty dictionary will be returned.
-    /// </returns>
-    public Dictionary<Vector2, TLayerElement> GetSurroundingElements(Vector2 location, int radius = 1, int offset = 1);
-
+    
     public void ClearElements();
 }
 

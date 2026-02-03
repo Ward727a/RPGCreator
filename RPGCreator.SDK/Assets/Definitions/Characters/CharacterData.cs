@@ -242,20 +242,29 @@ public struct CharacterFeatures() : ISerializable, IDeserializable
 [SerializingType("DirectionalAnimationSet")]
 public class DirectionalAnimationSet : ISerializable, IDeserializable
 {
+
+    /// <summary>
+    /// Indicates the maximum number of directions supported by this animation set. <br/>
+    /// Eight Directions => 8, or 4, or 1. <br/>
+    /// Four Directions => 4, or 1. <br/>
+    /// Single Direction => 1. <br/>
+    /// </summary>
+    public AnimationDirection MaxDirections = AnimationDirection.EightDirections;
+    
     /// <summary>
     /// Key: Direction <br/>
     /// Value: Animation Unique ID <br/>
     /// </summary>
-    public Dictionary<EntityDirection, Ulid> Animations { get; private set; } = new();
+    public Dictionary<int, Ulid> Animations { get; private set; } = new();
     
     public void SetAnimation(EntityDirection direction, Ulid animationUnique)
     {
-        Animations[direction] = animationUnique;
+        Animations[direction.ToInt()] = animationUnique;
     }
     
     public Ulid GetAnimation(EntityDirection direction)
     {
-        if (Animations.TryGetValue(direction, out var animationUnique))
+        if (Animations.TryGetValue(direction.ToInt(), out var animationUnique))
         {
             return animationUnique;
         }
@@ -275,7 +284,7 @@ public class DirectionalAnimationSet : ISerializable, IDeserializable
             throw new ArgumentNullException(nameof(info), "SerializationInfo cannot be null.");
         }
 
-        info.TryGetValue("Animations", out Dictionary<EntityDirection, Ulid>? animations);
+        info.TryGetValue("Animations", out Dictionary<int, Ulid>? animations);
         if (animations != null)
         {
             Animations = animations;
@@ -447,6 +456,8 @@ public class EntityFeatureData() : ISerializable, IDeserializable
 [SerializingType("Character")]
 public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDeserializable
 {
+    public event Action? OnFeaturesChanged;
+    
     public string SavePath { get; set; }
     public bool IsDirty { get; set; }
     public bool IsTransient { get; set; }
@@ -654,6 +665,7 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
     {
         var featureData = new EntityFeatureData(urn, config);
         _features.Add(featureData);
+        OnFeaturesChanged?.Invoke();
         return featureData.InstanceId;
     }
 
@@ -673,7 +685,12 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
     public bool RemoveFeatureConfig(Ulid instanceId)
     {
         var featureData = _features.FirstOrDefault(f => f.InstanceId == instanceId);
-        return featureData != null && _features.Remove(featureData);
+        if (featureData != null && _features.Remove(featureData))
+        {
+            OnFeaturesChanged?.Invoke();
+            return true;
+        }
+        return false;
     }
 
     /// <summary>

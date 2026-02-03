@@ -42,6 +42,8 @@ public sealed record GameFeaturePropertyMetadata(
     GameFeaturePropertyAttribute Attribute,
     Type PropertyType);
 
+public sealed record EntityFeatureAnimationRequirement(string AnimName, AnimationDirection Direction);
+
 /// <summary>
 /// The features manager service.<br/>
 /// Manages all features available in the engine/editor.<br/>
@@ -129,6 +131,19 @@ public interface IFeaturesManager : IService
     /// <param name="featureUrn">The URN of the entity feature to retrieve.</param>
     /// <returns>The entity feature template associated with the specified URN.</returns>
     IEntityFeature GetEntityFeature(URN featureUrn);
+
+    public URN GetEntityFeatureReplacedFeature(URN replacingFeature);
+
+    /// <summary>
+    /// Checks if the given entity feature is replacing another feature.
+    /// </summary>
+    /// <param name="featureToReplace"></param>
+    /// <param name="replacingFeature"></param>
+    /// <returns></returns>
+    public bool IsEntityFeatureReplacing(URN featureToReplace, URN replacingFeature);
+    public IEnumerable<EntityFeatureAnimationRequirement> GetEntityRequiredAnimations(URN feature);
+    public bool AddEntityFeatureAnimationRequirement(URN featureUrn, EntityFeatureAnimationRequirement requirement);
+    
     
     /// <summary>
     /// Return the world feature template associated with the specified URN.

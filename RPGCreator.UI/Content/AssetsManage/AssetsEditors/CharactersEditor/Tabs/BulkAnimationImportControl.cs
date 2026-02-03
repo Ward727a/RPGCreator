@@ -291,7 +291,7 @@ public class BulkAnimationImportControl : UserControl
                     spritesheetDef.FrameHeight = 64;
                     
                     var animationDef = EngineServices.AssetsManager.CreateTransientAsset<AnimationDef>(AssetScope);
-                    animationDef.SpriteSheetId = spritesheetDef.Unique;
+                    animationDef.SpritesheetId = spritesheetDef.Unique;
                     animationDef.FrameIndexes = spritesheetDef.GetAllRowIndexes(rowIndex);
                     animationsToImport[animationName] = animationDef;
                 }
@@ -328,7 +328,7 @@ public class BulkAnimationImportControl : UserControl
         spritesheetDef.FrameWidth = 48;
         spritesheetDef.FrameHeight = 64;
         var animationDef = EngineServices.AssetsManager.CreateTransientAsset<AnimationDef>(AssetScope);
-        animationDef.SpriteSheetId = spritesheetDef.Unique;
+        animationDef.SpritesheetId = spritesheetDef.Unique;
         animationDef.FrameIndexes = spritesheetDef.GetAllRowIndexes(_selectedRow);
         
         // Previewer.AnimationPath = bitmapPath;

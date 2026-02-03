@@ -15,7 +15,7 @@ public readonly record struct URN
     
     public string FullName => $"{Namespace}://{Module}/{Name}".ToLowerInvariant().Trim();
 
-    public static readonly URN Empty = default;
+    public static URN Empty => new ("", "", "");
     
     private string Normalize(string value)
     {

@@ -23,6 +23,7 @@ public interface IEntityDefinition : IAssetDef
     
     public CustomData Properties { get; }
     public List<EntityFeatureData> Features { get; }
+    public Dictionary<string, DirectionalAnimationSet> AnimationsMapping { get; }
     public List<string> Tags { get; }
     
 }

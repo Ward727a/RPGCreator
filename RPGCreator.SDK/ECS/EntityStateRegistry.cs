@@ -47,6 +47,8 @@ public record struct StateStorageInfo(int Index, StateStorageType StorageType);
 public class EntityStateRegistry
 {
     private readonly Dictionary<URN, StateStorageInfo> _registry = new();
+
+    private readonly Dictionary<URN, int> _actionsUrn = new();
     
     public int TotalFloat { get; private set; }
     public int TotalInt { get; private set; }
@@ -90,5 +92,15 @@ public class EntityStateRegistry
         var info = new StateStorageInfo(index, storageType);
         _registry[stateUrn] = info;
         return info;
+    }
+
+    public int RegisterAction(URN actionUrn)
+    {
+        if (_actionsUrn.ContainsKey(actionUrn))
+            return _actionsUrn[actionUrn];
+        
+        int index = _actionsUrn.Count+1;
+        _actionsUrn[actionUrn] = index;
+        return index;
     }
 }

@@ -18,6 +18,8 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using RPGCreator.SDK.Types;
+
 namespace RPGCreator.SDK.Attributes;
 
 /// <summary>
@@ -31,6 +33,13 @@ public sealed class EntityFeatureAttribute() : Attribute
     /// Default is 1. Set to 0 for unlimited instances.
     /// </summary>
     public int MaxInstancesPerCharacter { get; set; } = 1;
+    
+    /// <summary>
+    /// Defines the URN of an existing feature that this feature replaces when added to a character.<br/>
+    /// Default is null, meaning it does not replace any existing feature.<br/>
+    /// This is particularly useful when some parts of the engine expect a specific feature to be present on an entity.
+    /// </summary>
+    public string? ReplacingFeatureUrn { get; set; } = null;
 }
 
 /// <summary>
@@ -57,4 +66,49 @@ public sealed class EntityFeaturePropertyAttribute(string name, string descripti
     /// Set this to true if the property use the SharedConfiguration!<br/>
     /// </summary>
     public bool IsShared = false;
+}
+
+/// <summary>
+/// Define the possible animation directions for an entity feature.<br/>
+/// The engine will search for example an animation named "walk_up" for the 'up' direction and the 'walk' animation name.<br/>
+/// Just for info, if the user want to use "8" directions, then you NEED to put "EightDirections".
+/// If the user want to use "4" directions, then you can either put "FourDirections" or "EightDirections".<br/>
+/// If you put "SingleDirection", then the engine will just use the base animation name without any direction suffix, and the user can't change the direction of the animation inside the anim editor.<br/>
+/// This is useful for entities that don't need directional animations, like effects.
+/// </summary>
+public enum AnimationDirection
+{
+    
+    /// <summary>
+    /// Define a single direction for the animation.<br/>
+    /// For info, inside the engine, this will be treated as "up" direction.
+    /// </summary>
+    SingleDirection,
+    
+    /// <summary>
+    /// Define four possible directions for the animation.<br/>
+    /// Up, Down, Left, Right.
+    /// </summary>
+    FourDirections,
+    
+    /// <summary>
+    /// Define eight possible directions for the animation.<br/>
+    /// Up, Down, Left, Right, Up-Left, Up-Right, Down-Left, Down-Right.
+    /// </summary>
+    EightDirections,
+}
+
+/// <summary>
+/// Define that an entity feature requires a specific animation to function properly.<br/>
+/// The engine will ensure that the required animation is present for the entity using this feature.
+/// </summary>
+/// <param name="animationUrn">The URN of the required animation.</param>
+/// <param name="displayName">The name of the required animation.</param>
+/// <param name="animationDirection">The direction type of the required animation.</param>
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+public sealed class EntityAnimationRequiredAttribute(string animationUrn, string displayName, AnimationDirection animationDirection) : Attribute
+{
+    public URN AnimationUrn { get; } = new URN(animationUrn);
+    public string DisplayName { get; } = displayName;
+    public AnimationDirection AnimationDirection { get; } = animationDirection;
 }

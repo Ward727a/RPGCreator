@@ -114,8 +114,16 @@ namespace RPGCreator.Core
                     {
                         // Calculate the SHA256 checksum of the file.
                         var hashString = ShaUtil.ComputeSha256(file);
-                        if (CHECKSUM_INTERNAL_MODULES.Contains(hashString) || true) // TODO: REMOVE THE TRUE!!!!!
+                        if (CHECKSUM_INTERNAL_MODULES.Contains(hashString)
+                            #if DEBUG
+                            || true
+                            #endif
+                            )
                         {
+                            // DISABLED FOR NOW
+                            // I was kinda annoyed during development, having to update the checksum each time I made a small change.
+                            // So this is disabled for now, but should be re-enabled before release.
+                            #if DEBUG
                             _logger.Error("[ModuleLoader] Warning: Module integrity check is currently disabled. This should only be used for development purposes.");
                             _logger.Error("[ModuleLoader] Warning: Module integrity check is currently disabled. This should only be used for development purposes.");
                             _logger.Error("[ModuleLoader] Warning: Module integrity check is currently disabled. This should only be used for development purposes.");
@@ -123,7 +131,7 @@ namespace RPGCreator.Core
                             _logger.Error("[ModuleLoader] Warning: Module integrity check is currently disabled. This should only be used for development purposes.");
                             _logger.Error("[ModuleLoader] Warning: Module integrity check is currently disabled. This should only be used for development purposes.");
                             _logger.Error("[ModuleLoader] Warning: Module integrity check is currently disabled. This should only be used for development purposes.");
-
+                            #endif
                             if (TryLoadModule(file, new EngineSecurityToken()))
                             {
                                 _logger.Info($"Module file '{file}' loaded successfully.");
@@ -154,7 +162,7 @@ namespace RPGCreator.Core
             AppDomain.CurrentDomain.UnhandledException += (sender, e) => 
             {
                 var ex = (Exception)e.ExceptionObject;
-                // On regarde si l'exception vient d'un assembly chargé dans un de nos ModuleContext
+                
                 var assembly = ex.TargetSite?.DeclaringType?.Assembly;
     
                 if (assembly != null && _moduleAssemblies.Contains(assembly)) 

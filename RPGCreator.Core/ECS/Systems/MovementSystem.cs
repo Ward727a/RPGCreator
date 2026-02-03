@@ -5,6 +5,7 @@ using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Systems;
 using Serilog;
+using CharStateComponent = RPGCreator.Core.ECS.Components.Display.Animation.CharStateComponent;
 using Vector2 = System.Numerics.Vector2;
 
 namespace RPGCreator.Core.ECS.Systems;

@@ -40,20 +40,30 @@ public enum MovementType
     FreeDir
 }
 
+[EntityAnimationRequired("rpgc://entity_animations/walk", "walk", AnimationDirection.EightDirections)]
+[EntityAnimationRequired("rpgc://entity_animations/idle", "idle", AnimationDirection.EightDirections)]
+[EntityAnimationRequired("rpgc://entity_animations/test", "test", AnimationDirection.FourDirections)]
+[EntityAnimationRequired("rpgc://entity_animations/test_single_dir", "test single dir", AnimationDirection.SingleDirection)]
 [EntityFeature(MaxInstancesPerCharacter = 1)]
 public class MovementFeature : BaseEntityFeature
 {
+    private static readonly URN WalkUrn = new("rpgc://entity_animations/walk");
+    private static readonly URN IdleUrn = new("rpgc://entity_animations/idle");
+    
     public override string FeatureName => "Movement Feature";
     public override string FeatureDescription => "Provides basic movement capabilities to entities.";
     public override URN FeatureUrn => new("rpgc", FeatureUrnModule, "MovementFeature");
 
     /// <summary>
-    /// Define the movement state index inside the state component.<br/>
-    /// This is used to know which state to use for movement animations.<br/>
+    /// Define the animation state index inside the state component.<br/>
+    /// This is used to know which state to use for animations.<br/>
     /// Note: This is assigned inside the <see cref="OnSetup"/> with the help of the <see cref="EntityStateRegistry.Register"/> method.
     /// </summary>
-    private int _movementStateIdx = 0;
-    private int _movementDirStateIdx = 0;
+    private int _animationStateIdx = 0;
+    private int _animationDirStateIdx = 0;
+    
+    private int _walkActionId = 0;
+    private int _idleActionId = 0;
     
     [EntityFeatureProperty("Movement Type", "Defines the type of movement allowed for the entity." +
                                             "Property is global with all other same feature.", IsShared = true)]
@@ -69,23 +79,29 @@ public class MovementFeature : BaseEntityFeature
         get => GetConfig(5);
         set => SetConfig(value);
     }
-    
+
+    public override void OnAddedToDefinition(IEntityDefinition definition)
+    {
+    }
+
     public override void OnSetup()
     {
         // Initialization logic for the movement feature can be added here.
         var stateRegistry = EngineServices.ECS.StateRegistry;
 
-        _movementStateIdx =
-            stateRegistry.Register(new URN("rpgc", "entity_states", "move_state"), StateStorageType.String).Index;
-        _movementDirStateIdx =
-            stateRegistry.Register(new URN("rpgc", "entity_states", "move_direction"), StateStorageType.Int).Index;
-        
+        _animationStateIdx =
+            stateRegistry.Register(new URN("rpgc", "entity_states", "animation_state"), StateStorageType.Int).Index;
+        _animationDirStateIdx =
+            stateRegistry.Register(new URN("rpgc", "entity_states", "animation_direction"), StateStorageType.Int).Index;
+
+        _walkActionId = stateRegistry.RegisterAction(WalkUrn);
+        _idleActionId = stateRegistry.RegisterAction(IdleUrn);
     }
 
     public override void OnWorldSetup(IEcsWorld world)
     {
         // Logic to execute when the world is set up can be added here.
-        world.SystemManager.AddSystem(new MovementSystem(_movementStateIdx, _movementDirStateIdx));
+        world.SystemManager.AddSystem(new MovementSystem(_animationStateIdx, _animationDirStateIdx, _walkActionId, _idleActionId));
     }
 
     public override void OnInject(BufferedEntity entity)
@@ -115,16 +131,12 @@ public struct MovementComponent : IComponent
     public Vector2 Direction;
 }
 
-public class MovementSystem(int movementStateIdx, int movementDirStateIdx) : ISystem
+public class MovementSystem(int animationStateIdx, int animationDirStateIdx, int walkId, int idleId) : ISystem
 {
-    
-    private int _movementStateIdx = movementStateIdx;
-    private int _movementDirStateIdx = movementDirStateIdx;
-    
     public override int Priority => 100;
     public override bool IsDrawingSystem => false;
 
-    private ComponentManager _componentManager;
+    private ComponentManager _componentManager = null!;
     
     public override void Initialize(IEcsWorld ecsWorld)
     {
@@ -142,74 +154,62 @@ public class MovementSystem(int movementStateIdx, int movementDirStateIdx) : ISy
             switch (moveComponent.MovementType)
             {
                 case MovementType.FourDir:
-                    HandleMovement4(entityId, ref moveComponent, ref transformComponent, deltaTime);
+                    HandleMovement4(ref moveComponent, ref transformComponent, deltaTime);
                     break;
                 case MovementType.EightDir:
-                    HandleMovement8(entityId, ref moveComponent, ref transformComponent, deltaTime);
+                    HandleMovement8(ref moveComponent, ref transformComponent, deltaTime);
                     break;
                 case MovementType.FreeDir:
-                    HandleMovementFree(entityId, ref moveComponent, ref transformComponent, deltaTime);
+                    HandleMovementFree(ref moveComponent, ref transformComponent, deltaTime);
                     break;
             }
-            
-            if(moveComponent.Direction != Vector2.Zero)
-                stateComponent.GetString(_movementStateIdx) = "move";
+
+            if (moveComponent.Direction != Vector2.Zero)
+                stateComponent.GetInt(animationStateIdx) = walkId;
             else
-                stateComponent.GetString(_movementStateIdx) = "idle";
+                stateComponent.GetInt(animationStateIdx) = idleId;
             
-            stateComponent.GetInt(_movementDirStateIdx) = GetDirectionFromVector(moveComponent.Direction);
+            stateComponent.GetInt(animationDirStateIdx) = moveComponent.Direction.GetDirectionFromVector();
             
             // Reset direction
             moveComponent.Direction = new Vector2();
         }
 
     }
-    
-    /// <summary>
-    /// A simple map to convert a vector2 direction to an entity direction int.<br/>
-    /// The index is calculated as: (signX + 1) + (signY + 1) * 3<br/>
-    /// Where signX and signY are the signs of the X and Y components of the vector2 direction (-1, 0, 1).
-    /// </summary>
-    public static readonly int[] DirectionMap =
-    {
-        (int)EntityDirection.UpLeft,    // (-1,-1)
-        (int)EntityDirection.Up,        // (0,-1)
-        (int)EntityDirection.UpRight,   // (1,-1)
-        (int)EntityDirection.Left,      // (-1,0)
-        (int)EntityDirection.Center,    // (0,0)
-        (int)EntityDirection.Right,     // (1,0)
-        (int)EntityDirection.DownLeft,  // (-1,1)
-        (int)EntityDirection.Down,      // (0,1)
-        (int)EntityDirection.DownRight  // (1,1)
-    };
-    
-    /// <summary>
-    /// Return a direction int from a vector2 direction.<br/>
-    /// Values are defined in <see cref="DirectionMap"/>, see for more info.
-    /// </summary>
-    /// <param name="direction">The direction vector.</param>
-    /// <returns>The direction as an int.</returns>
-    private int GetDirectionFromVector(Vector2 direction)
-    {
-        if (direction.LengthSquared() < 0.01f) // Plus robuste qu'un simple == Zero
-            return (int)EntityDirection.Center;
-        int ix = (int)Math.Sign(direction.X) + 1; // -1,0,1 -> 0,1,2
-        int iy = (int)Math.Sign(direction.Y) + 1; // -1,0,1 -> 0,1,2
-        return DirectionMap[ix + iy * 3];
-    }
 
-    private void HandleMovement4(int entityId, ref MovementComponent movement, ref TransformComponent transform, TimeSpan deltaTime)
-    {
-        
-    }
-    private void HandleMovement8(int entityId, ref MovementComponent movement, ref TransformComponent transform, TimeSpan deltaTime)
-    {
-    }
-    private void HandleMovementFree(int entityId, ref MovementComponent movement, ref TransformComponent transform, TimeSpan deltaTime)
+    private void HandleMovement4(ref MovementComponent movement, ref TransformComponent transform, TimeSpan deltaTime)
     {
         if (movement.Direction.LengthSquared() > 0)
         {
-            // On normalise pour éviter d'aller plus vite en diagonale
+            Vector2 dir = movement.Direction;
+
+            if (MathF.Abs(dir.X) > MathF.Abs(dir.Y))
+                dir = new Vector2(MathF.Sign(dir.X), 0);
+            else
+                dir = new Vector2(0, MathF.Sign(dir.Y));
+
+            float dt = (float)deltaTime.TotalSeconds;
+            transform.Position += dir * movement.Speed * dt;
+        
+            movement.Direction = dir;
+        }
+    }
+    private void HandleMovement8(ref MovementComponent movement, ref TransformComponent transform, TimeSpan deltaTime)
+    {
+        if (movement.Direction.LengthSquared() > 0)
+        {
+            var normalizedDir = Vector2.Normalize(movement.Direction);
+            float dt = (float)deltaTime.TotalSeconds;
+        
+            transform.Position += normalizedDir * movement.Speed * dt;
+        
+            movement.Direction = normalizedDir;
+        }
+    }
+    private void HandleMovementFree(ref MovementComponent movement, ref TransformComponent transform, TimeSpan deltaTime)
+    {
+        if (movement.Direction.LengthSquared() > 0)
+        {
             var normalizedDir = Vector2.Normalize(movement.Direction);
             float dt = (float)deltaTime.TotalSeconds;
         
