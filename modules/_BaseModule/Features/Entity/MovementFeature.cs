@@ -19,7 +19,6 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Numerics;
-using RPGCreator.Core.Runtimes.ECS.Components.Display;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.ECS;
@@ -32,11 +31,11 @@ namespace _BaseModule.Features.Entity;
 
 public enum MovementType
 {
-    [Description("Four Directions")]
+    [Description("Four Directions", "Allows movement in up, down, left, and right directions only.")]
     FourDir,
-    [Description("Eight Directions")]
+    [Description("Eight Directions", "Allows movement in up, down, left, right, and diagonal directions.")]
     EightDir,
-    [Description("Free Direction")]
+    [Description("Free Direction", "Allows movement in any direction without restrictions.")]
     FreeDir
 }
 
@@ -47,12 +46,15 @@ public enum MovementType
 [EntityFeature(MaxInstancesPerCharacter = 1)]
 public class MovementFeature : BaseEntityFeature
 {
+
+    public static URN Urn = new("rpgc", FeatureUrnModule, "movement_feature");
+    
     private static readonly URN WalkUrn = new("rpgc://entity_animations/walk");
     private static readonly URN IdleUrn = new("rpgc://entity_animations/idle");
     
     public override string FeatureName => "Movement Feature";
     public override string FeatureDescription => "Provides basic movement capabilities to entities.";
-    public override URN FeatureUrn => new("rpgc", FeatureUrnModule, "MovementFeature");
+    public override URN FeatureUrn => Urn;
 
     /// <summary>
     /// Define the animation state index inside the state component.<br/>
@@ -65,7 +67,7 @@ public class MovementFeature : BaseEntityFeature
     private int _walkActionId = 0;
     private int _idleActionId = 0;
     
-    [EntityFeatureProperty("Movement Type", "Defines the type of movement allowed for the entity." +
+    [EntityFeatureProperty("Movement Type", "Defines the type of movement allowed for the entity.\n" +
                                             "Property is global with all other same feature.", IsShared = true)]
     public MovementType MovementType
     {
@@ -78,10 +80,6 @@ public class MovementFeature : BaseEntityFeature
     {
         get => GetConfig(5);
         set => SetConfig(value);
-    }
-
-    public override void OnAddedToDefinition(IEntityDefinition definition)
-    {
     }
 
     public override void OnSetup()
@@ -104,7 +102,7 @@ public class MovementFeature : BaseEntityFeature
         world.SystemManager.AddSystem(new MovementSystem(_animationStateIdx, _animationDirStateIdx, _walkActionId, _idleActionId));
     }
 
-    public override void OnInject(BufferedEntity entity)
+    public override void OnInject(BufferedEntity entity, IEntityDefinition entityDefinition)
     {
         entity.AddComponent(new MovementComponent
         {
@@ -116,11 +114,6 @@ public class MovementFeature : BaseEntityFeature
     public override void OnDestroy(BufferedEntity entity)
     {
         entity.RemoveComponent<MovementComponent>();
-    }
-
-    public override void Dispose()
-    {
-        // Cleanup logic for the movement feature can be added here.
     }
 }
 

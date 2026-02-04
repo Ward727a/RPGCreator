@@ -22,6 +22,7 @@ using System.Drawing;
 using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.ECS.Components;
 using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.SDK.RuntimeService;
@@ -42,7 +43,6 @@ public interface IRenderService : IService
     /// <param name="entityDef"></param>
     /// <param name="position"></param>
     public void DrawEntitySpawner(EntitySpawner entityDef, Vector2 position);
-    
 
     /// <summary>
     /// Draws a tile instance at its designated world position.<br/>
@@ -80,4 +80,61 @@ public interface IRenderService : IService
     /// <param name="size">The size of the point.</param>
     /// <param name="thickness">The thickness of the point outline.</param>
     void DrawDebugPoint(Vector2 position, Color? color = null, float size = 4f, float thickness = 2f);
+
+    public enum SpriteSortMode
+    {
+        Deferred,
+        Immediate,
+        Texture,
+        BackToFront,
+        FrontToBack
+    }
+    
+    /// <summary>
+    /// A direct preparation call before starting drawing operations.<br/>
+    /// This method sets up the necessary rendering context and states for subsequent draw calls.<br/>
+    /// Inside the game, this method will usually call the SpriteBatch.Begin method or equivalent rendering function.
+    /// </summary>
+    void PrepareDrawing(SpriteSortMode sortMode = SpriteSortMode.BackToFront);
+
+
+    /// <summary>
+    /// Method to "pause" the current drawing state.<br/>
+    /// this will queue up the current spritebatch.Begin done with PrepareDrawing()<br/>
+    /// and allow to do other operations before resuming the drawing with ResumeDrawing()<br/>
+    /// </summary>
+    public void PauseDrawing();
+    
+    /// <summary>
+    /// Method to "resume" the drawing state after a PauseDrawing() call.<br/>
+    /// This will re-initialize the spritebatch.Begin with the previous parameters used in PrepareDrawing()<br/>
+    /// </summary>
+    public void ResumeDrawing();
+
+    /// <summary>
+    /// A direct draw call to render an asset by its ID at the specified position with optional parameters for source rectangle, tint, rotation, scale, and layer depth.<br/>
+    /// This method allows for flexible rendering of assets in the game world.<br/>
+    /// Inside the game, this method will usually call the SpriteBatch.Draw method or equivalent rendering function.
+    /// </summary>
+    /// <param name="texturePath"></param>
+    /// <param name="position"></param>
+    /// <param name="sourceRect"></param>
+    /// <param name="tint"></param>
+    /// <param name="rotation"></param>
+    /// <param name="origin"></param>
+    /// <param name="scale"></param>
+    /// <param name="layerDepth"></param>
+    /// <param name="effects"></param>
+    public void DirectDraw(
+        string texturePath, Vector2 position, 
+        Rectangle? sourceRect = null, Color? tint = null,
+        float rotation = 0, Vector2 origin = default,
+        Vector2? scale = null, float layerDepth = 0, 
+        SpriteEffects effects = SpriteEffects.None);
+    /// <summary>
+    /// A direct finish call after completing drawing operations.<br/>
+    /// This method finalizes the rendering context and flushes any pending draw calls to the screen.<br/>
+    /// Inside the game, this method will usually call the SpriteBatch.End method or equivalent rendering function.
+    /// </summary>
+    void FinishDrawing();
 }

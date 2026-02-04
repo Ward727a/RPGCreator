@@ -19,12 +19,21 @@
   </ItemGroup>
     <Target Name="CopyUIAssets" AfterTargets="Build">
         <ItemGroup>
-            <!-- Tous les fichiers du dossier Assets de RPGCreator.UI -->
             <UIAssets Include="..\RPGCreator.UI\Assets\**\*.*" />
         </ItemGroup>
 
         <Copy SourceFiles="@(UIAssets)"
               DestinationFolder="$(OutputPath)Assets\%(RecursiveDir)"
+              SkipUnchangedFiles="true" />
+    </Target>
+
+    <Target Name="CopyPlayerAssets" AfterTargets="Build">
+        <ItemGroup>
+            <UIAssets Include="..\RPGCreator.UI\Assets\Modules\**\*.*" />
+        </ItemGroup>
+
+        <Copy SourceFiles="@(UIAssets)"
+              DestinationFolder="$(OutputPath)..\..\..\..\RPGCreator.Player\bin\Debug\net9.0\Modules\%(RecursiveDir)"
               SkipUnchangedFiles="true" />
     </Target>
 

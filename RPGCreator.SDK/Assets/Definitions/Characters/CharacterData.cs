@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using RPGCreator.SDK.Assets.Definitions.Skills;
 using RPGCreator.SDK.Assets.Definitions.Stats;
@@ -412,12 +413,25 @@ public class EntityFeatureData() : ISerializable, IDeserializable
     public URN FeatureUrn { get; set; }
     public CustomData Configuration { get; set; }
     
+    /// <summary>
+    /// Define if this feature has been added by another feature or macro-features.
+    /// </summary>
+    public bool IsSubFeature;
+    
+    /// <summary>
+    /// If the <see cref="IsSubFeature"/> is true, this contain the URN of the parent feature that added this feature.<br/>
+    /// Else it is <see cref="Ulid.Empty"/>.<br/>
+    /// </summary>
+    public Ulid ParentFeatureId = Ulid.Empty;
+    
     public SerializationInfo GetObjectData()
     {
         return new SerializationInfo(typeof(EntityFeatureData))
             .AddValue("InstanceId", InstanceId)
             .AddValue("FeatureUrn", FeatureUrn)
-            .AddValue("Configuration", Configuration);
+            .AddValue("Configuration", Configuration)
+            .AddValue(nameof(IsSubFeature), IsSubFeature)
+            .AddValue(nameof(ParentFeatureId), ParentFeatureId);
     }
 
     public void SetObjectData(DeserializationInfo info)
@@ -430,7 +444,9 @@ public class EntityFeatureData() : ISerializable, IDeserializable
         info.TryGetValue("InstanceId", out Ulid instanceId, Ulid.Empty);
         info.TryGetValue("FeatureUrn", out URN featureUrn, URN.Empty);
         info.TryGetValue("Configuration", out CustomData configuration, new CustomData());
-
+        info.TryGetValue(nameof(IsSubFeature), out bool isSubFeature, false);
+        info.TryGetValue(nameof(ParentFeatureId), out Ulid parentFeatureId, Ulid.Empty);
+        
         if(instanceId == Ulid.Empty)
             Logger.Error("InstanceId key is missing or invalid during deserialization of CharacterFeatureData.");
         
@@ -440,6 +456,8 @@ public class EntityFeatureData() : ISerializable, IDeserializable
         InstanceId = instanceId;
         FeatureUrn = featureUrn;
         Configuration = configuration;
+        IsSubFeature = isSubFeature;
+        ParentFeatureId = parentFeatureId;
     }
     
     public IEntityFeature ToEntityFeature()
@@ -484,21 +502,23 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
     public URN Urn { get; private set; }
     public CustomData Properties { get; } = new CustomData();
 
-    public List<EntityFeatureData> Features => _features;
+    public ObservableCollection<EntityFeatureData> Features => _features;
 
     public List<string> Tags { get; }
 
     private string _portraitPath = string.Empty;
     
-    public Dictionary<string, DirectionalAnimationSet> AnimationsMapping { get; private set; }= new();
+    public Dictionary<int, DirectionalAnimationSet> AnimationsMapping { get; private set; }= new();
     
-    public DirectionalAnimationSet GetOrCreateAnimationSet(string animationSetName)
+    public DirectionalAnimationSet GetOrCreateAnimationSet(URN animationUrn)
     {
-        if (!AnimationsMapping.ContainsKey(animationSetName))
+        var animIndex = EngineServices.ECS.StateRegistry.GetActionId(animationUrn);
+        
+        if (!AnimationsMapping.ContainsKey(animIndex))
         {
-            AnimationsMapping[animationSetName] = new DirectionalAnimationSet();
+            AnimationsMapping[animIndex] = new DirectionalAnimationSet();
         }
-        return AnimationsMapping[animationSetName];
+        return AnimationsMapping[animIndex];
     }
     
     private int _initialLevel = 1;
@@ -506,7 +526,7 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
     private int _maxLevel = 99;
     
     private Ulid _classId = Ulid.Empty;
-    private List<EntityFeatureData> _features;
+    private ObservableCollection<EntityFeatureData> _features;
 
     public string Name { get; set; }
 
@@ -582,7 +602,7 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
     {
         Name = "UNKNOWN";
         Urn = new URN("character", $"UNKNOWN@{Unique}");
-        _features = new List<EntityFeatureData>();
+        _features = new ObservableCollection<EntityFeatureData>();
         Tags = new List<string>();
     }
     
@@ -724,6 +744,7 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
             .AddValue("ClassId", ClassId)
             .AddValue("Stats", Stats)
             .AddValue("Features", Features)
+            .AddValue(nameof(AnimationsMapping), AnimationsMapping)
             .AddValue("RolePlayInfo", RolePlayInfo);
     }
 
@@ -742,8 +763,14 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
         info.TryGetValue("MaxLevel", out int maxLevel, 99);
         info.TryGetValue("ClassId", out Ulid classId, Ulid.Empty);
         info.TryGetValue("Stats", out Dictionary<Ulid, CharacterStats>? stats);
-        info.TryGetValue("Features", out List<EntityFeatureData> features, new List<EntityFeatureData>());
+        info.TryGetValue(nameof(AnimationsMapping), out Dictionary<int, DirectionalAnimationSet>? animationsMapping);
+        info.TryGetValue("Features", out ObservableCollection<EntityFeatureData> features, new ObservableCollection<EntityFeatureData>());
         info.TryGetValue("RolePlayInfo", out CharacterRolePlayInfo rolePlayInfo, new CharacterRolePlayInfo());
+        
+        if (animationsMapping != null)
+        {
+            AnimationsMapping = animationsMapping;
+        }
         
         Unique = unique;
         Name = name;

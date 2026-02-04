@@ -27,7 +27,9 @@ public readonly record struct URN
     /// The namespace, module, and name are normalized to lowercase and trimmed of whitespace.<br/>
     /// If any of the parts are empty or null, an error is logged and the URN will not be created.<br/>
     /// The URN format is: "namespace://module/name".<br/>
-    /// Example: "rpgc://characters/hero".
+    /// Example: "rpgc://characters/hero".<br/>
+    /// <br/>
+    /// You should use snake_case! Like: "rpgc://my_module/my_name" and not "RPGC://MyModule/MyName".
     /// </summary>
     /// <param name="namespace">The namespace part of the URN.</param>
     /// <param name="module">The module part of the URN.</param>

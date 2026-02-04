@@ -1,10 +1,10 @@
 using Microsoft.Xna.Framework.Graphics;
-using RPGCreator.Core.ECS.Components.Display;
 using RPGCreator.Core.Rendering.Batching;
-using RPGCreator.Core.Runtimes.ECS.Components.Display;
 using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Systems;
 using Serilog;
+using SpriteComponent = RPGCreator.Core.ECS.Components.Display.SpriteComponent;
 
 namespace RPGCreator.Core.ECS.Systems;
 

@@ -17,9 +17,11 @@ using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
 using RPGCreator.UI.Common;
 using Ursa.Controls;
+using Size = Avalonia.Size;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;
 
@@ -30,15 +32,13 @@ public class CharacterDisplayTab : UserControl
     #region Properties
 
     private EntityDirection _currentAnimationDirection = EntityDirection.Center;
-    private string _currentAnimationName = string.Empty;
+    private int _currentAnimationIdx = 0;
     
     private Button? _currentDirectionButton;
     
     private readonly IAssetScope _assetScope;
 
     private readonly CharacterData _data;
-    
-    private readonly Dictionary<string, DirectionalAnimationSet> _directionalAnimationSets = new();
     
     private AnimationDef? _selectedAnimationData;
 
@@ -58,6 +58,7 @@ public class CharacterDisplayTab : UserControl
     private Button _centerButton = null!;
     private Grid _animDirBox = null!;
     private Divider _animationDetailSeparator = null!;
+    private string _currentAnimationName;
 
     #endregion
     
@@ -103,11 +104,10 @@ public class CharacterDisplayTab : UserControl
         _data = data;
         Name = "Display";
         CreateComponents();
-        _data.OnFeaturesChanged += () =>
+        _data.Features.CollectionChanged += (_, _) =>
         {
             // Clear existing animations
             AnimationList.Items.Clear();
-            _directionalAnimationSets.Clear();
             
             CreateAnimationExpanders();
         };
@@ -515,11 +515,11 @@ public class CharacterDisplayTab : UserControl
                 
                 ListBoxItem item = new ListBoxItem
                 {
-                    Content = anim.AnimName,
+                    Content = anim.AnimDisplayName,
                     Tag = anim
                 };
                 AnimationList.Items.Add(item);
-                _basicAnimationsNames.Add(anim.AnimName);
+                _basicAnimationsNames.Add(anim.AnimDisplayName);
                 ToolTip.SetTip(item, $"From feature: {urn}");
                 ToolTip.SetPlacement(item, PlacementMode.RightEdgeAlignedBottom);
             }
@@ -562,7 +562,7 @@ public class CharacterDisplayTab : UserControl
             return;
         }
 
-        _directionalAnimationSets.Remove(animationName);
+        // _data.AnimationsMapping.Remove(animationName);
         _availableAnimationsNames.Remove(animationName);
         AnimationList.Items.Remove(selectedItem);
         
@@ -577,13 +577,13 @@ public class CharacterDisplayTab : UserControl
     {
         var newAnimationName = AddAnimationLabel.Text?.Trim();
         if (string.IsNullOrEmpty(newAnimationName)) return;
-        if (_directionalAnimationSets.ContainsKey(newAnimationName))
-        {
-            // Animation already exists
-            return;
-        }
+        // if (_data.AnimationsMapping.ContainsKey(newAnimationName))
+        // {
+        //     // Animation already exists
+        //     return;
+        // }
 
-        _directionalAnimationSets.Add(newAnimationName, new DirectionalAnimationSet());
+        // _data.AnimationsMapping.Add(newAnimationName, new DirectionalAnimationSet());
         
         ListBoxItem item = new ListBoxItem
         {
@@ -612,14 +612,14 @@ public class CharacterDisplayTab : UserControl
         
         _currentAnimationDirection = direction;
         
-        if(string.IsNullOrEmpty(_currentAnimationName))
+        if(_currentAnimationIdx < 0)
             return;
         
-        var directionalAnimationsSet = _directionalAnimationSets[_currentAnimationName];
+        var directionalAnimationsSet = _data.AnimationsMapping[_currentAnimationIdx];
         Ulid animationId = directionalAnimationsSet.GetAnimation(_currentAnimationDirection);
         if (animationId == Ulid.Empty)
         {
-            _selectedAnimationData = EngineServices.AssetsManager.CreateTransientAsset<AnimationDef>();
+            _selectedAnimationData = EngineServices.AssetsManager.CreateAsset<AnimationDef>();
             _selectedAnimationData.Name = _currentAnimationName;
             directionalAnimationsSet.SetAnimation(_currentAnimationDirection, _selectedAnimationData.Unique);
         }
@@ -636,7 +636,7 @@ public class CharacterDisplayTab : UserControl
         AnimationPreviewer.ClearImage();
         AnimationPreviewer.UpdateFPS(_selectedAnimationData.Fps);
         AnimationPreviewer.AnimationDefinition = _selectedAnimationData;
-        AnimationPreviewer.UpdateFrame(0);
+        AnimationPreviewer.UpdateFrame();
         if(AutoPlayCheckBox.IsChecked.HasValue && AutoPlayCheckBox.IsChecked.Value)
             AnimationPreviewer.Play();
     }
@@ -682,8 +682,9 @@ public class CharacterDisplayTab : UserControl
         {
             var tempSpriteSheetDef = EngineServices.AssetsManager.CreateTransientAsset<SpritesheetDef>();
             tempSpriteSheetDef.ImagePath = (newPath);
-            tempSpriteSheetDef.FrameWidth = 48;
-            tempSpriteSheetDef.FrameHeight = 64;
+            tempSpriteSheetDef.FrameWidth = 16;
+            tempSpriteSheetDef.FrameHeight = 32;
+            tempSpriteSheetDef.CalculateValues();
 
             _selectedAnimationData.FrameIndexes = tempSpriteSheetDef.GetAllRowIndexes(0);
             _selectedAnimationData.SpritesheetId = tempSpriteSheetDef.Unique;
@@ -697,18 +698,19 @@ public class CharacterDisplayTab : UserControl
         if (AnimationList.SelectedItem is not ListBoxItem selectedItem) return;
         if (selectedItem.Tag is not EntityFeatureAnimationRequirement animation) return;
 
-        _currentAnimationName = animation.AnimName;
+        _currentAnimationName = animation.AnimDisplayName;
+        _currentAnimationIdx = EngineServices.ECS.StateRegistry.GetActionId(animation.AnimUrn);
         
-        if (!_directionalAnimationSets.TryGetValue(_currentAnimationName, out var directionalAnimationSet))
+        if (!_data.AnimationsMapping.TryGetValue(_currentAnimationIdx, out var directionalAnimationSet))
         {
             directionalAnimationSet = new DirectionalAnimationSet();
-            _directionalAnimationSets.Add(_currentAnimationName, directionalAnimationSet);
+            _data.AnimationsMapping.Add(_currentAnimationIdx, directionalAnimationSet);
         }
         
         Ulid animationId = directionalAnimationSet.GetAnimation(_currentAnimationDirection);
         if (animationId == Ulid.Empty)
         {
-            _selectedAnimationData = EngineServices.AssetsManager.CreateTransientAsset<AnimationDef>();
+            _selectedAnimationData = EngineServices.AssetsManager.CreateAsset<AnimationDef>();
             _selectedAnimationData.Name = _currentAnimationName;
             directionalAnimationSet.SetAnimation(_currentAnimationDirection, _selectedAnimationData.Unique);
         }
@@ -731,7 +733,7 @@ public class CharacterDisplayTab : UserControl
         RemoveAnimationButton.IsEnabled = !_basicAnimationsNames.Contains(_selectedAnimationData.Name);
 
         AnimationPreviewer.AnimationDefinition = _selectedAnimationData;
-        AnimationPreviewer.UpdateFrame(0);
+        AnimationPreviewer.UpdateFrame();
         if(AutoPlayCheckBox.IsChecked.HasValue && AutoPlayCheckBox.IsChecked.Value)
             AnimationPreviewer.Play();
     }
@@ -749,7 +751,6 @@ public class CharacterDisplayTab : UserControl
         _upRightButton.IsEnabled = eight;
         _downLeftButton.IsEnabled = eight;
         _downRightButton.IsEnabled = eight; 
-        
     }
     
     private void OnAnimationTypeChanged(object? sender, SelectionChangedEventArgs e)

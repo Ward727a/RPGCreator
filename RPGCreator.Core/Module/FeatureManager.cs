@@ -20,7 +20,9 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.ECS.Features;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.Features.Entity;
@@ -41,6 +43,8 @@ public class FeatureManager : IFeaturesManager
     private readonly Dictionary<URN, List<EntityFeaturePropertyMetadata>> _featureEntityPropertiesMetadata = new();
     private readonly Dictionary<URN, List<EntityFeatureAnimationRequirement>> _featureEntityAnimationMetadata = new();
     
+    private readonly Dictionary<URN, List<Action<URN>>> _entityFeatureRegisteredCallbacks = new();
+    
     /// <summary>
     /// First URN is the entity feature to be replaced.<br/>
     /// The list contains the URNs of the features that can replace it.<br/>
@@ -52,6 +56,14 @@ public class FeatureManager : IFeaturesManager
     /// The second URN is the entity feature being replaced.<br/>
     /// </summary>
     private readonly Dictionary<URN, URN> _entityFeatureReplacedByMapping = new();
+    
+    public FeatureManager()
+    {
+        EngineServices.OnceServiceReady((IFeaturesManager featureManager) =>
+        {
+            featureManager.RegisterEntityFeature<SpriteFeature>();
+        });
+    }
     
     public void RegisterEntityFeature<T>() where T : IEntityFeature, new()
     {
@@ -95,7 +107,7 @@ public class FeatureManager : IFeaturesManager
             foreach (var animAttr in animAttrs)
             {
                 _featureEntityAnimationMetadata[feature.FeatureUrn].Add(
-                    new EntityFeatureAnimationRequirement(animAttr.DisplayName, animAttr.AnimationDirection));
+                    new EntityFeatureAnimationRequirement(animAttr.DisplayName, animAttr.AnimationUrn, animAttr.AnimationDirection));
             }
         
             if (animAttrs.Count > 0)
@@ -118,7 +130,37 @@ public class FeatureManager : IFeaturesManager
             Logger.Debug("Entity feature {feature} is registered as a replacer for feature {replacedFeature}.", 
                 args: [feature.FeatureUrn, replacingFeature]);
         }
+        
+        CallbackRegisteredEntityFeature(feature.FeatureUrn);
     }
+    
+    private void CallbackRegisteredEntityFeature(URN feature)
+    {
+        if (_entityFeatureRegisteredCallbacks.TryGetValue(feature, out var callbacks))
+        {
+            foreach (var callback in callbacks)
+            {
+                callback(feature);
+            }
+            _entityFeatureRegisteredCallbacks.Remove(feature);
+        }
+    }
+
+    public void OnceEntityFeaturesRegistered(URN feature, Action<URN> callback)
+    {
+        if (HasEntityFeature(feature))
+        {
+            callback(feature);
+            return;
+        }
+        
+        if (!_entityFeatureRegisteredCallbacks.ContainsKey(feature))
+        {
+            _entityFeatureRegisteredCallbacks[feature] = new List<Action<URN>>();
+        }
+        _entityFeatureRegisteredCallbacks[feature].Add(callback);
+    }
+
     /// <summary>
     /// Checks if an entity feature with the given URN is registered.
     /// </summary>
@@ -228,7 +270,7 @@ public class FeatureManager : IFeaturesManager
         }
 
         var requirements = _featureEntityAnimationMetadata[featureUrn];
-        if (requirements.Any(r => r.AnimName == requirement.AnimName && r.Direction == requirement.Direction))
+        if (requirements.Any(r => r.AnimUrn == requirement.AnimUrn && r.Direction == requirement.Direction))
         {
             return false; // Requirement already exists
         }
@@ -237,6 +279,32 @@ public class FeatureManager : IFeaturesManager
         return true;
     }
     
+    /// <summary>
+    /// Returns all entity features that are macro features.
+    /// </summary>
+    /// <returns></returns>
+    public List<IEntityFeature> GetAllMacroEntityFeatures()
+    {
+        return _featuresTemplates.Values
+            .Where(f => f is BaseMacroEntityFeature)
+            .ToList();
+    }
+    
+    /// <summary>
+    /// Returns all entity features that are not macro features.
+    /// </summary>
+    /// <returns></returns>
+    public List<IEntityFeature> GetAllAtomicEntityFeatures()
+    {
+        return _featuresTemplates.Values
+            .Where(f => f is not BaseMacroEntityFeature)
+            .ToList();
+    }
+    
+    /// <summary>
+    /// Returns all registered entity features.
+    /// </summary>
+    /// <returns></returns>
     public List<IEntityFeature> GetAllEntityFeatures()
     {
         return _featuresTemplates.Values.ToList();

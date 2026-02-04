@@ -33,9 +33,10 @@ namespace _BaseModule.Features.Entity;
 [EntityFeature(MaxInstancesPerCharacter = 1)]
 public class AnimationFeature : BaseEntityFeature
 {
+    public static URN Urn = new URN("rpgc", FeatureUrnModule, "animation_feature");
     public override string FeatureName => "Animation Feature";
     public override string FeatureDescription => "Adds animation capabilities to the entity.";
-    public override URN FeatureUrn => new URN("rpgc", FeatureUrnModule, "animation_feature");
+    public override URN FeatureUrn => Urn;
     
     /// <summary>
     /// Define the animation state index inside the state component.<br/>
@@ -58,17 +59,9 @@ public class AnimationFeature : BaseEntityFeature
     public override void OnWorldSetup(IEcsWorld world)
     {
         world.SystemManager.AddSystem(new AnimationSystem(_animationStateIdx, _animationDirStateIdx));
-        
-        world.ComponentManager.RegisterComponentCleanup((int entityId, AnimationComponent component) =>
-        {
-            if (component.CurrentAnimationInstance != null)
-            {
-                EngineServices.GameFactory.ReleaseInstance(component.CurrentAnimationInstance);
-            }
-        });
     }
 
-    public override void OnInject(BufferedEntity entity)
+    public override void OnInject(BufferedEntity entity, IEntityDefinition entityDefinition)
     {
         entity.AddComponent(new AnimationComponent
         {
@@ -94,7 +87,7 @@ public struct AnimationComponent : IComponent
 {
     
     public Ulid CurrentAnimationId { get; set; }
-    public AnimationInstance? CurrentAnimationInstance;
+    public AnimationDef? CurrentAnimationDef;
     
     public int CurrentAnimation;
     public int CurrentDirection;
@@ -109,7 +102,7 @@ public struct AnimationComponent : IComponent
 public class AnimationSystem(int animationStateIdx, int animationDirStateIdx) : ISystem
 {
     public override int Priority => 80;
-    public override bool IsDrawingSystem => true;
+    public override bool IsDrawingSystem => false;
     
     private int _animationStateIdx = animationStateIdx;
     private int _animationDirStateIdx = animationDirStateIdx;
@@ -148,8 +141,7 @@ public class AnimationSystem(int animationStateIdx, int animationDirStateIdx) : 
             {
                 // Start new animation
                 animationComponent.CurrentAnimationId = anim;
-                EngineServices.GameFactory.ReleaseInstance(animationComponent.CurrentAnimationInstance);
-                animationComponent.CurrentAnimationInstance = null;
+                animationComponent.CurrentAnimationDef = null;
                 animationComponent.ElapsedTime = 0;
                 animationComponent.CurrentFrame = 0;
                 animationComponent.IsPlaying = true;
@@ -157,12 +149,12 @@ public class AnimationSystem(int animationStateIdx, int animationDirStateIdx) : 
 
             if (animationComponent.IsPlaying && animationComponent.CurrentAnimationId != Ulid.Empty)
             {
-                if (animationComponent.CurrentAnimationInstance == null)
+                if (animationComponent.CurrentAnimationDef == null)
                 {
                     if (EngineServices.AssetsManager.TryResolveAsset(animationComponent.CurrentAnimationId,
                             out AnimationDef? animDef))
                     {
-                        animationComponent.CurrentAnimationInstance = EngineServices.GameFactory.CreateInstance<AnimationInstance>(animDef);
+                        animationComponent.CurrentAnimationDef = animDef;
                         spriteComponent.SpritesheetId = animDef.SpritesheetId;
                         spriteComponent.CurrentFrameIndex = animDef.FrameIndexes[animationComponent.CurrentFrame];
                     }
@@ -175,31 +167,31 @@ public class AnimationSystem(int animationStateIdx, int animationDirStateIdx) : 
                     }
                 }
                 
-                var animInstance = animationComponent.CurrentAnimationInstance!;
+                var animDefinition = animationComponent.CurrentAnimationDef!;
                 animationComponent.ElapsedTime += deltaTime.TotalMilliseconds * animationComponent.SpeedMultiplier;
                 
-                double frameDuration = animInstance.Definition.FrameDuration;
+                double frameDuration = animDefinition.FrameDuration;
                 
                 while (animationComponent.ElapsedTime >= frameDuration && animationComponent.IsPlaying)
                 {
                     animationComponent.ElapsedTime -= frameDuration;
                     animationComponent.CurrentFrame++;
 
-                    if (animationComponent.CurrentFrame >= animInstance.Definition.TotalFrames)
+                    if (animationComponent.CurrentFrame >= animDefinition.TotalFrames)
                     {
-                        if (animInstance.Definition.Loop)
+                        if (animDefinition.Loop)
                         {
                             animationComponent.CurrentFrame = 0;
                         }
                         else
                         {
-                            animationComponent.CurrentFrame = Math.Max(0, animInstance.Definition.TotalFrames - 1);
+                            animationComponent.CurrentFrame = Math.Max(0, animDefinition.TotalFrames - 1);
                             animationComponent.IsPlaying = false;
-                            animationComponent.ElapsedTime = 0; // On arrête l'accumulation
+                            animationComponent.ElapsedTime = 0;
                         }
                     }
                     
-                    spriteComponent.CurrentFrameIndex = animInstance.Definition.FrameIndexes[animationComponent.CurrentFrame];
+                    spriteComponent.CurrentFrameIndex = animDefinition.FrameIndexes[animationComponent.CurrentFrame];
                 }
             }
         }

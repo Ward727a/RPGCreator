@@ -20,11 +20,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.Core.Types.Map.Chunks;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.ECS;
@@ -53,8 +56,14 @@ public class MapDrawingSystem(GraphicsDevice graphicsDevice) : BaseMapDrawingSys
         var range = RuntimeServices.ChunkService.GetVisibleChunkBounds(IChunkService.ChunkLoadDistance);
 
         List<(long X, long Y, long ID)> visibleChunks = new();
+
+        var sortedLayersZIndex = MapService.CurrentLoadedMapDefinition.TileLayers
+            .OrderBy(layer => layer.ZIndex)
+            .ToList();
         
-        foreach (var layer in MapService.CurrentLoadedMapDefinition.TileLayers)
+        RuntimeServices.RenderService.PauseDrawing();
+        RuntimeServices.RenderService.PrepareDrawing(IRenderService.SpriteSortMode.Deferred);
+        foreach (var layer in sortedLayersZIndex)
         {
             var actualLayer = layer;
             if (layer is AutoLayerDefinition autoLayer)
@@ -78,8 +87,9 @@ public class MapDrawingSystem(GraphicsDevice graphicsDevice) : BaseMapDrawingSys
                 }
             }
         }
-        
         DrawDebugChunkBounds();
+        RuntimeServices.RenderService.FinishDrawing();
+        RuntimeServices.RenderService.ResumeDrawing();
     }
     
     /// <summary>

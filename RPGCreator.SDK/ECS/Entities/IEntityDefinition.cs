@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using RPGCreator.SDK.Assets.Definitions;
 using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.SDK.Modules.Definition;
@@ -22,8 +23,7 @@ public interface IEntityDefinition : IAssetDef
     public URN Urn => new("entity", Unique.ToString());
     
     public CustomData Properties { get; }
-    public List<EntityFeatureData> Features { get; }
-    public Dictionary<string, DirectionalAnimationSet> AnimationsMapping { get; }
+    public ObservableCollection<EntityFeatureData> Features { get; }
+    public Dictionary<int, DirectionalAnimationSet> AnimationsMapping { get; }
     public List<string> Tags { get; }
-    
 }

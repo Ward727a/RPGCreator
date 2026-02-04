@@ -18,15 +18,18 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGCreator.SDK.Assets;
-using RPGCreator.SDK.Assets.Definitions.Characters;
-using RPGCreator.SDK.Modules.Definition;
+using RPGCreator.SDK.Serializer;
 
-namespace RPGCreator.SDK;
+namespace RPGCreator.SDK.GameRunner;
 
-internal static class Sdk
+/// <summary>
+/// Represents game data paths and accepted module hashes.<br/>
+/// This is destined to be implemented by the game runner, to provide necessary paths and security checks for the RPG Creator SDK to run the game.
+/// </summary>
+public interface IGameData : ISerializable, IDeserializable
 {
-    static Sdk()
-    {
-    }
+    public string ProjectPath { get; }
+    public string ModulesPath { get; }
+    public IReadOnlyList<string> AcceptedModuleHashes { get; }
+    public Ulid MainMapId { get; }
 }

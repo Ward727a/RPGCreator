@@ -1,29 +1,23 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
+using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.SDK.Assets.Definitions.Animations;
 
 [SerializingType("AnimationDef")]
-public class AnimationDef : IAssetDef, ISerializable, IDeserializable
+public partial class AnimationDef : ObservableObject, IAssetDef, ISerializable, IDeserializable, IHasSavePath
 {
-    
     public string Name { get; set; } = "New Animation";
     public Ulid Unique { get; private set; }
     public URN Urn { get; set; }
+    
+    [ObservableProperty]
     private Ulid _spritesheetId;
-    public bool Loop { get; set; } = false;
 
-    public Ulid SpritesheetId
-    {
-        get => _spritesheetId;
-        set
-        {
-            if(_spritesheetId == value) return;
-            _spritesheetId = value;
-            IsDirty = true;
-        }
-    }
+    [ObservableProperty] 
+    private bool _loop = true;
 
     public List<int> FrameIndexes { get; set; } = new List<int>();
     public int TotalFrames => FrameIndexes.Count;
@@ -74,4 +68,6 @@ public class AnimationDef : IAssetDef, ISerializable, IDeserializable
         info.TryGetValue("FrameDuration", out double frameDuration, 100);
         FrameDuration = frameDuration;
     }
+
+    public string SavePath { get; set; }
 }

@@ -55,14 +55,18 @@ public class SystemManager(IEcsWorld world)
     
     public List<ISystem> GetDrawingSystems()
     {
-        return _drawingSystems;
+        return _drawingSystems.OrderBy(x => x.Priority).ToList();
     }
     
     public void Draw(TimeSpan deltaTime)
     {
-        foreach (var system in _drawingSystems)
+        RuntimeServices.RenderService.PrepareDrawing();
+        
+        foreach (var system in GetDrawingSystems())
         {
             system.Update(deltaTime);
         }
+        
+        RuntimeServices.RenderService.FinishDrawing();
     }
 }

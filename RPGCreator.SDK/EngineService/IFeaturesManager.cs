@@ -42,7 +42,7 @@ public sealed record GameFeaturePropertyMetadata(
     GameFeaturePropertyAttribute Attribute,
     Type PropertyType);
 
-public sealed record EntityFeatureAnimationRequirement(string AnimName, AnimationDirection Direction);
+public sealed record EntityFeatureAnimationRequirement(string AnimDisplayName, URN AnimUrn, AnimationDirection Direction);
 
 /// <summary>
 /// The features manager service.<br/>
@@ -59,6 +59,8 @@ public interface IFeaturesManager : IService
     /// </summary>
     /// <typeparam name="T">The type of the entity feature to register.</typeparam>
     void RegisterEntityFeature<T>() where T : IEntityFeature, new();
+    
+    void OnceEntityFeaturesRegistered(URN feature, Action<URN> callback);
     
     /// <summary>
     /// Registers a new world feature type.<br/>
@@ -240,6 +242,18 @@ public interface IFeaturesManager : IService
     /// An enumerable of <see cref="GameFeaturePropertyMetadata"/> containing metadata for each property of the specified game feature.
     /// </returns>
     public IEnumerable<GameFeaturePropertyMetadata> GetGameProperties(URN feature);
+
+    /// <summary>
+    /// Returns all entity features that are macro features.
+    /// </summary>
+    /// <returns></returns>
+    public List<IEntityFeature> GetAllMacroEntityFeatures();
+    
+    /// <summary>
+    /// Returns all entity features that are not macro features.
+    /// </summary>
+    /// <returns></returns>
+    public List<IEntityFeature> GetAllAtomicEntityFeatures();
     
     /// <summary>
     /// Gets all registered entity features.<br/>

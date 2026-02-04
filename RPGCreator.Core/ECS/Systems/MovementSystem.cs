@@ -1,6 +1,5 @@
 using RPGCreator.Core.ECS.Components.Display.Animation;
 using RPGCreator.Core.Runtimes.ECS.Components.Actor;
-using RPGCreator.Core.Runtimes.ECS.Components.Display;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Systems;

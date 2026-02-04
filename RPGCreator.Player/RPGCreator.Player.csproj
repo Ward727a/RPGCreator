@@ -33,4 +33,14 @@
     <ItemGroup>
       <ProjectReference Include="..\RPGCreator.Core\RPGCreator.Core.csproj" />
     </ItemGroup>
+
+    <Target Name="CopyUIAssets" AfterTargets="Build">
+        <ItemGroup>
+            <UIAssets Include="..\RPGCreator.UI\Assets\Modules\**\*.*" />
+        </ItemGroup>
+
+        <Copy SourceFiles="@(UIAssets)"
+              DestinationFolder="$(OutputPath)Modules\%(RecursiveDir)"
+              SkipUnchangedFiles="true" />
+    </Target>
 </Project>

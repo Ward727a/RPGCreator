@@ -19,6 +19,7 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System;
+using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
@@ -93,6 +94,18 @@ public static class MonoGameMathExtensions
     public static Vector3 ToNumericFast(this Microsoft.Xna.Framework.Vector3 vector)
     {
         return Unsafe.As<Microsoft.Xna.Framework.Vector3, Vector3>(ref vector);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Microsoft.Xna.Framework.Rectangle ToXnaFast(this Rectangle rect)
+    {
+        return Unsafe.As<Rectangle, Microsoft.Xna.Framework.Rectangle>(ref rect);
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Rectangle ToSystemFast(this Microsoft.Xna.Framework.Rectangle rect)
+    {
+        return Unsafe.As<Microsoft.Xna.Framework.Rectangle, Rectangle>(ref rect);
     }
     
     #endregion

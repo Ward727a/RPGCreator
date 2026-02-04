@@ -1,13 +1,25 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using Gum.Forms;
 using Gum.Forms.Controls;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGameGum;
 using RPGCreator.Core;
 using RPGCreator.Core.Rendering.Batching;
-using RPGCreator.SDK.GamePlayer;
+using RPGCreator.Player.ECS.Systems;
+using RPGCreator.Player.Services;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
+using RPGCreator.SDK.ECS.Systems;
+using RPGCreator.SDK.Exceptions;
+using RPGCreator.SDK.GameRunner;
+using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.RuntimeService;
 using Serilog;
 
 namespace RPGCreator.Player;
@@ -30,21 +42,47 @@ public class GamePlayer : Game, IGameRunner
         Paused
     }
     
-    ILogger logger = Log.ForContext<GamePlayer>();
+    ScopedLogger logger = Logger.ForContext<GamePlayer>();
 
     GameFrom _gameFrom;
     GameState _gameState;
 
     string _gameFilePath;
+    IGameData _gameData;
     
     public GamePlayer()
     {
 
-        EngineCore.InitCore();
+        EngineCore.InitCore(EngineCore.EEngineMode.PlayerMode);
         
-        logger.Information("Starting RPG Creator Player...");
+        
+        _graphics = new GraphicsDeviceManager(this);
+        _gameState = GameState.Playing;
+        Content.RootDirectory = "Content";
+        IsMouseVisible = true;
+    }
+
+    protected override void Initialize()
+    {
+        // TODO: Add your initialization logic here
+        Gum.Initialize(this, DefaultVisualsVersion.V2);
+        OnInitialize?.Invoke();
+        
+        logger.Info("Starting RPG Creator Player...");
+        
         // Check for command line arguments or file input to determine game source
-        logger.Information("Checking for game source...");
+        logger.Info("Checking for game source...");
+        var exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+
+        if (string.IsNullOrEmpty(exePath))
+            throw new CriticalEngineException("[GamePlayer] Unable to determine executable path.",
+                System.Reflection.Assembly.GetExecutingAssembly());
+
+        if (!Directory.Exists("Modules"))
+        {
+            Directory.CreateDirectory("Modules");
+        }
+        
         if (Environment.GetCommandLineArgs().Length > 1)
         {
             _gameFrom = GameFrom.Args;
@@ -55,7 +93,7 @@ public class GamePlayer : Game, IGameRunner
             {
                 if (args[i] == "--file" && i + 1 < args.Length)
                 {
-                    logger.Information("Game source from command line arguments.");
+                    logger.Info("Game source from command line arguments.");
                     string filePath = args[i + 1];
                     
                     // Check if the file is an .xml file
@@ -75,32 +113,30 @@ public class GamePlayer : Game, IGameRunner
         }
         else
         {
-            logger.Information("No command line arguments found, defaulting to GameData.xml file.");
+            logger.Info("No command line arguments found, defaulting to GameData.json file.");
             _gameFrom = GameFrom.File;
             
             // Get the path of the currently executing assembly
-            string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            string exeDirectory = System.IO.Path.GetDirectoryName(exePath);
-            _gameFilePath = System.IO.Path.Combine(exeDirectory, "GameData.xml");
+            var exeDirectory = System.IO.Path.GetDirectoryName(exePath);
+            _gameFilePath = System.IO.Path.Combine(exeDirectory, "GameData.json");
             
             if(!File.Exists(_gameFilePath))
             {
-                logger.Error("Default GameData.xml file not found in executable directory.");
+                logger.Error("Default GameData.json file not found in executable directory.");
                 // throw new("Error: No game file specified and default GameData.xml not found.");
             }
+            var data = File.ReadAllText(_gameFilePath);
+            try
+            {
+                EngineServices.SerializerService.Deserialize(data, out DefaultGameData gameData);
+                _gameData = gameData;
+            }
+            catch (Exception ex)
+            {
+                logger.Critical("Failed to deserialize GameData.json: {Message}", args: ex.Message);
+                throw new("Error: Failed to load game data from GameData.json.", ex);
+            }
         }
-        
-        _graphics = new GraphicsDeviceManager(this);
-        _gameState = GameState.Playing;
-        Content.RootDirectory = "Content";
-        IsMouseVisible = true;
-    }
-
-    protected override void Initialize()
-    {
-        // TODO: Add your initialization logic here
-        Gum.Initialize(this, DefaultVisualsVersion.V2);
-        OnInitialize?.Invoke();
         
         Gum.Root.Width = _graphics.GraphicsDevice.Viewport.Width;
         Gum.Root.Height = _graphics.GraphicsDevice.Viewport.Height;
@@ -117,16 +153,60 @@ public class GamePlayer : Game, IGameRunner
         };
         mainPanel.AddChild(startButton);
         
+        EngineServices.ResourcesService.RegisterLoader<Texture2D>(new Texture2DLoader(GraphicsDevice));
+        
+        RuntimeServices.MapService = new MapService();
+        RuntimeServices.MapService.OnMapLoaded += (mapId) =>
+        {
+            var def = RuntimeServices.MapService.CurrentLoadedMapDefinition;
+
+            if (def == null)
+                return;
+
+            foreach (var baseLayerDef in def.TileLayers.Where(l => l is EntityLayerDefinition))
+            {
+                var layerDef = (EntityLayerDefinition)baseLayerDef;
+                foreach (var chunkData in layerDef.Chunks)
+                {
+                    var chunkId = chunkData.Key;
+                    var spawners = layerDef.GetElements(chunkId);
+                    for (int i = 0; i < spawners.Length; i++)
+                    {
+                        var position = layerDef.GetElementWorldPosition(chunkId, i);
+                        var spawner = spawners[i];
+                        if(spawner == null)
+                            continue;
+                        
+                        var entity = RuntimeServices.GameSession.ActiveEcsWorld.CreateEntity();
+                        RuntimeServices.GameSession.ActiveEcsWorld.EntityFactory.InitializeEntity(entity, spawner.EntityDefinition, position);
+                    }
+                }
+            }
+        };
+        
         base.Initialize();
     }
 
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatchExtend(GraphicsDevice);
-
-        OnLoad?.Invoke();
+        RuntimeServices.LayerService = new LayerService();
+        RuntimeServices.ChunkService = new ChunkService();
+        RuntimeServices.CameraService = new CameraService();
+        RuntimeServices.RenderService = new RenderService(GraphicsDevice, _spriteBatch);
+        RuntimeServices.PlayerController = new BasePlayerController();
+        RuntimeServices.GameSession = new DefaultGameSession();
+        RuntimeServices.GameSession.ActiveEcsWorld = EngineServices.ECS.CreateWorld();
         
-        // TODO: use this.Content to load your game content here
+        
+        if(!EngineCore.LoadGameData(_gameData))
+            throw new CriticalEngineException("[GamePlayer] Failed to load game data.", this);
+
+        RuntimeServices.CameraService.SetCameraEntity(RuntimeServices.GameSession.ActiveEcsWorld.EntityManager.CreateCameraEntity());
+        
+        RuntimeServices.GameSession.ActiveEcsWorld.SystemManager.AddSystem(new MapDrawingSystem());
+        
+        OnLoad?.Invoke();
     }
 
     protected override void Update(GameTime gameTime)
@@ -137,6 +217,7 @@ public class GamePlayer : Game, IGameRunner
             Exit();
 
         // TODO: Add your update logic here
+        RuntimeServices.GameSession.ActiveEcsWorld.Update(gameTime.ElapsedGameTime);
         Gum.Update(gameTime);
 
         base.Update(gameTime);
@@ -148,6 +229,8 @@ public class GamePlayer : Game, IGameRunner
         OnDraw?.Invoke(gameTime.ElapsedGameTime);
 
         // TODO: Add your drawing code here
+        
+        RuntimeServices.GameSession.ActiveEcsWorld.Draw(gameTime.ElapsedGameTime);
         Gum.Draw();
         base.Draw(gameTime);
     }

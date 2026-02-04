@@ -10,7 +10,7 @@ namespace RPGCreator.SDK.Modules.Features.Entity;
 /// <summary>
 /// Just an extension class to provide shared custom data access for BaseEntityFeature instances.
 /// </summary>
-public static class BaseEntityFeatureExtensions
+public static class SharedDataFeatures
 {
     private static readonly ConcurrentDictionary<URN, CustomData> SharedCustomDataCache = new();
 
@@ -25,6 +25,28 @@ public static class BaseEntityFeatureExtensions
     internal static CustomData GetSharedCustomData(this BaseEntityFeature feature)
     {
         return SharedCustomDataCache.GetOrAdd(feature.FeatureUrn, _ => new CustomData());
+    }
+
+    internal static void SetSharedCustomData(URN featureUrn, CustomData customData)
+    {
+        SharedCustomDataCache[featureUrn] = customData;
+    }
+    
+    internal static CustomData GetSharedCustomData(URN featureUrn)
+    {
+        return SharedCustomDataCache.GetOrAdd(featureUrn, _ => new CustomData());
+    }
+    
+    internal static void SetValueShared<T>(URN featureUrn, string key, T value)
+    {
+        var customData = GetSharedCustomData(featureUrn);
+        customData.Set(key, value);
+    }
+    
+    internal static T GetValueShared<T>(URN featureUrn, string key, T defaultValue)
+    {
+        var customData = GetSharedCustomData(featureUrn);
+        return customData.GetOrDefault(key, defaultValue);
     }
 }
 
@@ -126,7 +148,10 @@ public abstract class BaseEntityFeature : IEntityFeature
     /// This is called once when the feature is added to the definition, allowing it to perform any necessary setup or registration.
     /// </summary>
     /// <param name="definition">The entity definition to which this feature is being added.</param>
-    public virtual void OnAddedToDefinition(IEntityDefinition definition) { }
+    public virtual bool OnAddedToDefinition(IEntityDefinition definition)
+    {
+        return true;
+    }
     
     /// <summary>
     /// Called when this feature is removed from an entity definition.<br/>
@@ -139,7 +164,7 @@ public abstract class BaseEntityFeature : IEntityFeature
     /// When this feature is initialized (created).<br/>
     /// This is called once when the feature instance is created, before being injected into any entity, when the engine loads the feature definitions.
     /// </summary>
-    public abstract void OnSetup();
+    public virtual void OnSetup() { }
     
     /// <summary>
     /// When the ECS world is being set up.<br/>
@@ -147,20 +172,21 @@ public abstract class BaseEntityFeature : IEntityFeature
     /// Note: This is called only once per world, and ONLY if any entity in the world has this feature.
     /// </summary>
     /// <param name="world"></param>
-    public abstract void OnWorldSetup(IEcsWorld world);
-    
+    public virtual void OnWorldSetup(IEcsWorld world) { }
+
     /// <summary>
     /// When this feature need to be injected (added on runtime) on an entity.
     /// </summary>
     /// <param name="entity">The entity on which this feature is being injected.</param>
-    public abstract void OnInject(BufferedEntity entity);
+    /// <param name="entityDefinition"></param>
+    public virtual void OnInject(BufferedEntity entity, IEntityDefinition entityDefinition) { }
 
     /// <summary>
     /// When this feature is being destroyed (removed) from an entity (e.g. when the entity is deleted).<br/>
     /// This is the last chance to clean up any resources or references related to this feature on the entity.
     /// </summary>
     /// <param name="entity">The entity from which this feature is being removed.</param>
-    public abstract void OnDestroy(BufferedEntity entity);
+    public virtual void OnDestroy(BufferedEntity entity) { }
 
     /// <summary>
     /// Accessor for configuration values with a default fallback.<br/>
@@ -270,5 +296,7 @@ public abstract class BaseEntityFeature : IEntityFeature
     {
     }
 
-    public abstract void Dispose();
+    public virtual void Dispose()
+    {
+    }
 }

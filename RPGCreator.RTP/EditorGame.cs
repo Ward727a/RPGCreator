@@ -12,10 +12,8 @@ using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.ECS.Systems;
-using RPGCreator.SDK.GamePlayer;
 using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.Resources;
 using RPGCreator.SDK.RuntimeService;
 
 // WORKING PROGRESS PART - THIS IS NOT READY YET, AND NEED **MASSIVE** REFACTORING TO WORK WITH THE NEW ECS AND RENDERING SYSTEMS.
@@ -43,32 +41,7 @@ namespace RPGCreator.RTP
 
         GumService Gum => GumService.Default;
 
-        private static Texture2D? _fakeTexture2D = null!;
         
-        private static Texture2D FakeTexture2D(GraphicsDevice graphicsDevice)
-        {
-            if (_fakeTexture2D != null)
-                return _fakeTexture2D;
-            
-            Texture2D texture = new Texture2D(graphicsDevice, 16, 16);
-            Color[] data = new Color[16 * 16];
-            for (int i = 0; i < data.Length; ++i) data[i] = Color.Magenta;
-            texture.SetData(data);
-            _fakeTexture2D = texture;
-            return texture;
-        }
-        
-        public class Texture2DLoader(GraphicsDevice graphicsDevice) : IResourceLoader
-        {
-            public object Load(string path)
-            {
-                if (string.IsNullOrEmpty(path))
-                {
-                    return FakeTexture2D(graphicsDevice);
-                }
-                return Texture2D.FromFile(graphicsDevice, path);
-            }
-        }
 
         public EditorGame()
         {
@@ -309,7 +282,7 @@ namespace RPGCreator.RTP
         {
             OnDraw?.Invoke(gameTime.ElapsedGameTime);
             GraphicsDevice.Clear(Color.CornflowerBlue);
-            _ecsWorld.SystemManager.Draw(gameTime.ElapsedGameTime, _spriteBatch);
+            _ecsWorld.SystemManager.Draw(gameTime.ElapsedGameTime);
             
             Gum.Draw();
             

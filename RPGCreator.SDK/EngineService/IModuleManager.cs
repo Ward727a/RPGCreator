@@ -91,7 +91,7 @@ public interface IModuleManager : IService
     /// Note: This should be called only when no modules are being loaded or unloaded to avoid issues.<br/>
     /// This will do nothing if there are active module load/unload operations.
     /// </summary>
-    public void ClearTempModulesShadowCopies();
+    public void ClearTempModulesShadowCopies(string path = "", EngineSecurityToken? token = null);
 
 
     /// <summary>

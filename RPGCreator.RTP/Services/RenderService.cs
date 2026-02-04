@@ -18,6 +18,8 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Numerics;
@@ -58,16 +60,21 @@ public class RenderService : IRenderService
     public void DrawEntitySpawner(EntitySpawner entityDef, Vector2 position)
     {
         var texture = EngineServices.ResourcesService.Load<Texture2D>(entityDef.PreviewImagePath);
+
+        
+        float scaleX = (float)32 / texture?.Height ?? 32;
+        float scaleY = (float)32 / texture?.Width ?? 32;
+
         spriteBatch.Draw(
             texture,
             position.ToXnaFast(),
             null,
             Microsoft.Xna.Framework.Color.White,
-            0f,             // Rotation
-            Vector2.Zero,   // Origin
-            1f,
+            0f, // Rotation
+            Vector2.Zero, // Origin
+            new Microsoft.Xna.Framework.Vector2(scaleX, scaleY),
             SpriteEffects.None,
-            0.5f              // LayerDepth
+            0.4f              // LayerDepth
         );
     }
 
@@ -164,6 +171,121 @@ public class RenderService : IRenderService
             xnaColor,
             adjustedThickness
         );
+    }
+
+    public record struct DrawingState
+    {
+        public SpriteSortMode SortMode;
+        public BlendState BlendState;
+        public SamplerState SamplerState;
+        public DepthStencilState DepthStencilState;
+        public RasterizerState RasterizerState;
+        public Microsoft.Xna.Framework.Matrix? TransformMatrix;
+    }
+    
+    public Stack<DrawingState> DrawingStateStack { get; } = new Stack<DrawingState>();
+    public DrawingState CurrentDrawingState { get; private set; }
+    
+    public void PrepareDrawing(IRenderService.SpriteSortMode sortMode = IRenderService.SpriteSortMode.BackToFront)
+    {
+        SpriteSortMode trueSortMode;
+            
+        switch (sortMode)
+        {
+            case IRenderService.SpriteSortMode.BackToFront:
+                trueSortMode = SpriteSortMode.BackToFront;
+                break;
+            case IRenderService.SpriteSortMode.Deferred:
+                trueSortMode = SpriteSortMode.Deferred;
+                break;
+            case IRenderService.SpriteSortMode.FrontToBack:
+                trueSortMode = SpriteSortMode.FrontToBack;
+                break;
+            case IRenderService.SpriteSortMode.Immediate:
+                trueSortMode = SpriteSortMode.Immediate;
+                break;
+            case IRenderService.SpriteSortMode.Texture:
+                trueSortMode = SpriteSortMode.Texture;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(sortMode), sortMode, null);
+        }
+        
+        CurrentDrawingState = new DrawingState
+        {
+            SortMode = trueSortMode,
+            BlendState = BlendState.AlphaBlend,
+            SamplerState = SamplerState.PointClamp,
+            DepthStencilState = DepthStencilState.Default,
+            RasterizerState = RasterizerState.CullNone,
+            TransformMatrix = RuntimeServices.CameraService.GetViewMatrix().ToXnaFast()
+        };
+        
+        spriteBatch.Begin(
+            sortMode: trueSortMode,
+            blendState: BlendState.AlphaBlend,
+            samplerState: SamplerState.PointClamp,
+            depthStencilState: DepthStencilState.Default,
+            rasterizerState: RasterizerState.CullNone,
+            transformMatrix: RuntimeServices.CameraService.GetViewMatrix().ToXnaFast()
+        );
+    }
+
+    public void PauseDrawing()
+    {
+        DrawingStateStack.Push(CurrentDrawingState);
+        spriteBatch.End();
+    }
+    
+    public void ResumeDrawing()
+    {
+        if (DrawingStateStack.Count == 0)
+            return;
+
+        var previousState = DrawingStateStack.Pop();
+        CurrentDrawingState = previousState;
+        
+        spriteBatch.Begin(
+            sortMode: previousState.SortMode,
+            blendState: previousState.BlendState,
+            samplerState: previousState.SamplerState,
+            depthStencilState: previousState.DepthStencilState,
+            rasterizerState: previousState.RasterizerState,
+            transformMatrix: RuntimeServices.CameraService.GetViewMatrix().ToXnaFast()
+        );
+    }
+    
+    public void DirectDraw(string texturePath, Vector2 position, System.Drawing.Rectangle? sourceRect = null, Color? tint = null, float rotation = 0, Vector2 origin = default,
+        Vector2? scale = null, float layerDepth = 0, SDK.ECS.Components.SpriteEffects effects = SDK.ECS.Components.SpriteEffects.None)
+    {
+        var texture = EngineServices.ResourcesService.Load<Texture2D>(texturePath);
+        var xnaColor = (tint ?? Color.White).ToXnaFast();
+        var xnaEffects = SpriteEffects.None;
+        if (effects.HasFlag(SDK.ECS.Components.SpriteEffects.FlipHorizontally))
+            xnaEffects |= SpriteEffects.FlipHorizontally;
+        if (effects.HasFlag(SDK.ECS.Components.SpriteEffects.FlipVertically))
+            xnaEffects |= SpriteEffects.FlipVertically;
+        // Si scale est null, on utilise Vector2.One (1,1)
+        var finalScale = scale?.ToXnaFast() ?? Microsoft.Xna.Framework.Vector2.One;
+        
+        var finalSourceRect = sourceRect?.ToXnaFast() ?? null;
+        
+        spriteBatch.Draw(
+            texture,
+            position.ToXnaFast(),
+            finalSourceRect,
+            xnaColor,
+            rotation,
+            origin.ToXnaFast(),
+            finalScale,
+            xnaEffects,
+            layerDepth
+        );
+    }
+
+    public void FinishDrawing()
+    {
+        spriteBatch.End();
     }
     //
     // public void DrawDebugString(string text, Vector2 position, Color? color = null, float scale = 1f)

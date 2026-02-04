@@ -3,13 +3,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using RPGCreator.Core.Types.Map.Chunks;
-using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 
-namespace RPGCreator.SDK.Assets.Definitions.Maps;
+namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 
 public abstract class LayerWithElements<TDef> : BaseLayerDef
     where TDef : class, ILayerElem

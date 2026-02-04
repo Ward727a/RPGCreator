@@ -4,6 +4,7 @@ using RPGCreator.Core.Types.Map.Layers;
 using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.EngineService;
 using Serilog;
 

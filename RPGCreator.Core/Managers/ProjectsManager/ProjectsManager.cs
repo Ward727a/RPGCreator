@@ -22,6 +22,8 @@
 // 
 // 
 #endregion
+
+using System.Diagnostics.CodeAnalysis;
 using RPGCreator.Core.Configs.Helpers;
 using RPGCreator.Core.Types.Project;
 using RPGCreator.Core.Types.Assets.BaseAssetsPack;
@@ -73,7 +75,7 @@ namespace RPGCreator.Core.Managers.ProjectsManager
             return ProjectsConf.Instance.ProjectLinks;
         }
         
-        public bool TryGetProject(string configPath, out IBaseProject? project)
+        public bool TryGetProject(string configPath, [NotNullWhen(true)] out IBaseProject? project)
         {
             project = null;
             if (File.Exists(configPath))

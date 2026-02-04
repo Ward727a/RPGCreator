@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Avalonia;
 using Avalonia.Controls;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Animations;
 using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.SDK.Logging;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;
@@ -231,6 +233,37 @@ public class CharacterEditorWindowControl : UserControl
         Logger.Info("Character '{characterName}' saved.", Data.Name);
         
         Logger.Debug("Character Data: {@characterData}", Data);
+
+        HashSet<Ulid> animationSpritesheet = new HashSet<Ulid>();
+        
+        foreach (var animationsMappingValue in Data.AnimationsMapping.Values)
+        {
+            foreach (var ulid in animationsMappingValue.Animations.Values)
+            {
+                if (EngineServices.AssetsManager.TryResolveAsset(ulid, out AnimationDef? animationDef))
+                {
+                    EngineServices.AssetsManager.RegisterAsset(animationDef);
+                    if (EngineServices.AssetsManager.TryGetPack("assets_pack", out var animPack))
+                    {
+                        animPack.AddOrUpdateAsset(animationDef);
+                        animationSpritesheet.Add(animationDef.SpritesheetId);
+                    }
+                }
+            }
+        }
+
+        foreach (var ulid in animationSpritesheet)
+        {
+            if (EngineServices.AssetsManager.TryResolveAsset(ulid, out SpritesheetDef? spriteSheet))
+            {
+                EngineServices.AssetsManager.RegisterAsset(spriteSheet);
+                if (EngineServices.AssetsManager.TryGetPack("assets_pack", out var spritePack))
+                {
+                    spritePack.AddOrUpdateAsset(spriteSheet);
+                }
+            }
+        }
+        
         EngineServices.AssetsManager.RegisterAsset(Data);
         if (EngineServices.AssetsManager.TryGetPack("assets_pack", out var pack))
         {

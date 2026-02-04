@@ -1,14 +1,19 @@
+using System.Numerics;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
+using RPGCreator.SDK.Types.Internals;
+using SixLabors.ImageSharp;
+using Rectangle = System.Drawing.Rectangle;
 
 namespace RPGCreator.SDK.Assets.Definitions.Animations;
 
 [SerializingType("SpritesheetDef")]
-public class SpritesheetDef : IAssetDef, ISerializable, IDeserializable
+public class SpritesheetDef : IAssetDef, ISerializable, IDeserializable, IHasSavePath
 {
     
-    
+    private Rectangle[] _frames;
     public Ulid Unique { get; private set; }
     public URN Urn { get; private set; }
     public bool IsDirty { get; set; }
@@ -20,9 +25,11 @@ public class SpritesheetDef : IAssetDef, ISerializable, IDeserializable
     
     public int FrameWidth { get; set; }
     public int FrameHeight { get; set; }
-    
-    public int Columns => FrameWidth > 0 ? ImageWidth / FrameWidth : 1;
-    public int Rows => FrameHeight > 0 ? ImageHeight / FrameHeight : 1;
+
+    public int Columns = 0;
+    public int Rows = 0;
+
+    public Vector2 FeetOrigin { get; private set; }
     
     public SpritesheetDef()
     {
@@ -36,12 +43,10 @@ public class SpritesheetDef : IAssetDef, ISerializable, IDeserializable
         Unique = id;
     }
 
-    public Rect GetFrameRect(int index)
+    public Rectangle GetFrameRect(int index)
     {
-        int cols = Columns;
-        int x = (index % cols) * FrameWidth;
-        int y = (index / cols) * FrameHeight;
-        return new Rect(x, y, FrameWidth, FrameHeight);
+        if (index < 0 || index >= _frames.Length) return _frames[0];
+        return _frames[index];
     }
     
     public List<int> GetAllRowIndexes(int row)
@@ -83,5 +88,46 @@ public class SpritesheetDef : IAssetDef, ISerializable, IDeserializable
         FrameHeight = frameHeight;
 
         Urn = new URN("rpgcreator", "spritesheet", Unique.ToString());
+        CalculateValues();
     }
+
+    /// <summary>
+    /// This method calculates derived values such as FeetOrigin, Columns, Rows, and frame rectangles based on the current properties.
+    /// </summary>
+    public void CalculateValues()
+    {
+        if (!string.IsNullOrEmpty(ImagePath) && (ImageWidth <= 0 || ImageHeight <= 0))
+        {
+            TryResolveDimensions();
+        }
+        
+        FeetOrigin = new Vector2(FrameWidth / 2f, FrameHeight);
+        Columns = FrameWidth > 0 ? ImageWidth / FrameWidth : 1;
+        Rows = FrameHeight > 0 ? ImageHeight / FrameHeight : 1;
+        
+        _frames = new Rectangle[Columns * Rows];
+        for (int i = 0; i < _frames.Length; i++)
+        {
+            _frames[i] = new Rectangle((i % Columns) * FrameWidth, (i / Columns) * FrameHeight, FrameWidth, FrameHeight);
+        }
+    }
+
+    public void TryResolveDimensions()
+    {
+        try
+        {
+            if (!File.Exists(ImagePath)) return;
+            
+            var info = Image.Identify(ImagePath);
+                
+            ImageWidth = info.Width;
+            ImageHeight = info.Height;
+            
+        } catch (Exception ex)
+        {
+            Logger.Error("Failed to resolve image dimensions for SpritesheetDef: {Urn} ({path}) | Exception: @{ex}", Urn, ImagePath, ex);
+        }
+    }
+
+    public string SavePath { get; set; }
 }

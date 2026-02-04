@@ -76,7 +76,7 @@ public interface IEntityFeature : IDisposable
     /// This is called once when the feature is added to the definition, allowing it to perform any necessary setup or registration.
     /// </summary>
     /// <param name="definition">The entity definition to which this feature is being added.</param>
-    void OnAddedToDefinition(IEntityDefinition definition);
+    bool OnAddedToDefinition(IEntityDefinition definition);
     
     /// <summary>
     /// Called when this feature is removed from an entity definition.<br/>
@@ -98,12 +98,13 @@ public interface IEntityFeature : IDisposable
     /// </summary>
     /// <param name="world"></param>
     public void OnWorldSetup(IEcsWorld world);
-    
+
     /// <summary>
     /// When this feature is injected (added on runtime) on an entity.
     /// </summary>
     /// <param name="entity">The entity on which this feature is being injected.</param>
-    void OnInject(BufferedEntity entity);
+    /// <param name="entityDefinition"></param>
+    void OnInject(BufferedEntity entity, IEntityDefinition entityDefinition);
 
     /// <summary>
     /// When this feature is being destroyed (removed) from an entity (e.g. when the entity is deleted).<br/>

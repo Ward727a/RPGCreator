@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Characters;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Commands;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
@@ -15,6 +18,7 @@ using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.UiService;
+using RPGCreator.UI.Common.Modal.Browser;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;
@@ -176,7 +180,7 @@ public class CharacterFeaturesTab : UserControl
             Logger.Debug("Add Feature button clicked");
 
             var dialog = new FeatureLibraryExplorerDialog();
-            var result = await UiServices.DialogService.ConfirmAsync("Add Feature", dialog, new DialogStyle(Height: 400, CanResize: true));
+            var result = await UiServices.DialogService.ConfirmAsync("Add Feature", dialog, new DialogStyle(Height: 450, Width:500, CanResize: true, SizeToContent:DialogSizeToContent.None));
 
             if (result && dialog.HasFeature)
             {
@@ -238,6 +242,13 @@ public class FeatureItemControl : UserControl
     public Expander PropExpander { get; set; }
     
     public StackPanel ExpanderContent { get; set; }
+    
+    private Grid ExpanderBodyGrid { get; set; }
+    private StackPanel LeftExpanderContentPanel { get; set; }
+    private Image? FeatureIconImage { get; set; }
+    private TextBlock FeatureNameLabel { get; set; }
+    private Button FeatureDeleteButton { get; set; }
+    private TextBlock FeatureDescription { get; set; }
 
     public FeatureItemControl(IEntityFeature feature)
     {
@@ -257,54 +268,53 @@ public class FeatureItemControl : UserControl
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
             Margin = new Avalonia.Thickness(0, 0, 0, 5)
         };
-        var body = new Grid
+        ExpanderBodyGrid = new Grid
         {
             ColumnDefinitions = new ColumnDefinitions("Auto, *, Auto"),
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
             Margin = new Avalonia.Thickness(5)
         };
+        PropExpander.Header = ExpanderBodyGrid;
         
-        var leftBodyPanel = new StackPanel
+        LeftExpanderContentPanel = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Center
         };
-        body.Children.Add(leftBodyPanel);
+        ExpanderBodyGrid.Children.Add(LeftExpanderContentPanel);
 
         if (File.Exists(Feature.FeatureIcon))
         {
-            var icon = new Image
+            FeatureIconImage = new Image
             {
                 Source = EngineServices.ResourcesService.Load<Bitmap>(Feature.FeatureIcon),
                 Width = 32,
                 Height = 32,
                 Margin = new Avalonia.Thickness(0, 0, 10, 0)
             };
-            leftBodyPanel.Children.Add(icon);
+            LeftExpanderContentPanel.Children.Add(FeatureIconImage);
         }
         
-        var nameLabel = new TextBlock
+        FeatureNameLabel = new TextBlock
         {
             Text = Feature.FeatureName,
             FontWeight = Avalonia.Media.FontWeight.Bold
         };
         
-        leftBodyPanel.Children.Add(nameLabel);
+        LeftExpanderContentPanel.Children.Add(FeatureNameLabel);
         
-        var deleteButton = new Button
+        FeatureDeleteButton = new Button
         {
             Content = "Remove",
             HorizontalAlignment = HorizontalAlignment.Right,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(5, 0, 0, 0)
         };
-        body.Children.Add(deleteButton);
-        Grid.SetColumn(deleteButton, 2);
+        ExpanderBodyGrid.Children.Add(FeatureDeleteButton);
+        Grid.SetColumn(FeatureDeleteButton, 2);
 
-        PropExpander.Header = body;
-        
         ExpanderContent = new StackPanel()
         {
             Orientation = Orientation.Vertical,
@@ -312,13 +322,13 @@ public class FeatureItemControl : UserControl
             HorizontalAlignment = HorizontalAlignment.Stretch
         };
         
-        var description = new TextBlock()
+        FeatureDescription = new TextBlock()
         {
             Inlines = new InlineCollection()
         };
-        description.Inlines.Add(new Run {Text = "Description: ", Foreground = Avalonia.Media.Brushes.Gray, FontWeight = Avalonia.Media.FontWeight.Bold});
-        description.Inlines.Add(new Run { Text = Feature.FeatureDescription });
-        ExpanderContent.Children.Add(description);
+        FeatureDescription.Inlines.Add(new Run {Text = "Description: ", Foreground = Avalonia.Media.Brushes.Gray, FontWeight = Avalonia.Media.FontWeight.Bold});
+        FeatureDescription.Inlines.Add(new Run { Text = Feature.FeatureDescription });
+        ExpanderContent.Children.Add(FeatureDescription);
         PropExpander.Content = ExpanderContent;
         
         Content = PropExpander;
@@ -336,19 +346,56 @@ public class FeatureItemControl : UserControl
 
         foreach (var propertyMetadata in propertiesList)
         {
-            var categoryPanel = GetOrCreateCategory(propertyMetadata.Attribute.Category, propCategories);
-            var propText = new TextBlock()
-            {
-                Inlines = new InlineCollection()
-            };
-            
-            propText.Inlines.Add(new Run {Text = "Property: ", Foreground = Avalonia.Media.Brushes.Gray, FontWeight = Avalonia.Media.FontWeight.Bold});
-            propText.Inlines.Add(new Run { Text = propertyMetadata.Attribute.Name });
-            categoryPanel.Children.Add(propText);
-            var inputControl = CreateValidInput(propertyMetadata);
-            categoryPanel.Children.Add(inputControl);
+            CreatePropertyControl(propertyMetadata, propCategories);
         }
+    }
+
+    private void CreatePropertyControl(EntityFeaturePropertyMetadata propertyMetadata, Dictionary<string, Expander> propCategories)
+    {
+        var categoryPanel = GetOrCreateCategory(propertyMetadata.Attribute.Category, propCategories);
         
+        var propGrid = new Grid()
+        {
+            ColumnDefinitions = new ColumnDefinitions("Auto, *"),
+            RowDefinitions = new RowDefinitions("Auto, Auto"),
+            ColumnSpacing = 10,
+            RowSpacing = 10,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            Margin = new Thickness(0, 5, 0, 5)
+        };
+        categoryPanel.Children.Add(propGrid);
+        
+        var propText = new TextBlock()
+        {
+            Inlines = new InlineCollection(),
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        
+        propText.Inlines.Add(new Run {Text = "Property: ", Foreground = Avalonia.Media.Brushes.Gray, FontWeight = Avalonia.Media.FontWeight.Bold});
+        propText.Inlines.Add(new Run { Text = propertyMetadata.Attribute.Name });
+        propGrid.Children.Add(propText);
+        
+        var propDesc = new TextBlock()
+        {
+            Inlines = new InlineCollection(),
+            TextWrapping = TextWrapping.Wrap,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        propDesc.Inlines.Add(new Run {Text = "Description: ", Foreground = Brushes.Gray, FontWeight = FontWeight.Bold});
+        propDesc.Inlines.Add(new Run { Text = propertyMetadata.Attribute.Description });
+        propGrid.Children.Add(propDesc);
+        Grid.SetRow(propDesc, 1);
+        Grid.SetColumnSpan(propDesc, 2);
+        
+        var inputControl = CreateValidInput(propertyMetadata);
+        inputControl.HorizontalAlignment = HorizontalAlignment.Stretch;
+        propGrid.Children.Add(inputControl);
+        Grid.SetColumn(inputControl, 1);
+        
+        categoryPanel.Children.Add(new Divider
+        {
+            Margin = new Thickness(10)
+        });
     }
 
     /// <summary>
@@ -432,7 +479,6 @@ public class FeatureItemControl : UserControl
                         Minimum = min,
                         Maximum = max,
                         Value = (int)(propertyMetadata.PropertyInfo.GetValue(Feature) ?? 0),
-                        Width = 100
                     };
                     numericUpDown.ValueChanged += (s, e) =>
                     {
@@ -475,7 +521,6 @@ public class FeatureItemControl : UserControl
                         Minimum = min,
                         Maximum = max,
                         Value = (float)(propertyMetadata.PropertyInfo.GetValue(Feature) ?? 0f),
-                        Width = 100
                     };
                     numericUpDown.ValueChanged += (s, e) =>
                     {
@@ -509,7 +554,6 @@ public class FeatureItemControl : UserControl
                     var textBox = new TextBox
                     {
                         Text = (string)(propertyMetadata.PropertyInfo.GetValue(Feature) ?? string.Empty),
-                        Width = 200
                     };
                     textBox.TextChanged += (s, e) =>
                     {
@@ -578,18 +622,25 @@ public class FeatureItemControl : UserControl
                 {
                     var comboBox = new ComboBox
                     {
-                        Width = 150
                     };
 
                     var enumValues = Enum.GetValues(notNullType);
-                    
-                    foreach (var value in enumValues)
+                    foreach (Enum value in enumValues)
                     {
-                        comboBox.Items.Add(new ComboBoxItem()
+                        var attr = value.GetDescription();
+                        var comboBoxItem = new ComboBoxItem
                         {
-                            Content = Enum.GetName(notNullType, value) ?? $"[Unknown-{value}]",
-                            Tag = value,
-                        });
+                            Content = attr.Name,
+                            Tag = value
+                        };
+                        if (!string.IsNullOrEmpty(attr.Description))
+                        {
+                            ToolTip.SetTip(comboBoxItem, attr.Description);
+                            ToolTip.SetPlacement(comboBoxItem, PlacementMode.LeftEdgeAlignedBottom);
+                        }
+
+                        comboBox.Items.Add(comboBoxItem);
+                        
                     }
                     
                     comboBox.SelectedIndex = propertyMetadata.PropertyInfo.GetValue(Feature) is Enum enumValue
@@ -651,173 +702,4 @@ public class FeatureItemControl : UserControl
                 return new TextBlock { Text = $"[Unsupported Type: {notNullType.Name}]" };
         }
     }
-}
-
-public class FeatureLibraryExplorerDialog : UserControl
-{
-
-    private IEntityFeature? SelectedFeature { get; set; }
-
-    public bool HasFeature => SelectedFeature != null;
-    
-    private StackPanel Body { get; set; } = null!;
-    private ListBox FeaturesListBox { get; set; } = null!;
-
-    public FeatureLibraryExplorerDialog()
-    {
-        CreateComponents();
-        RegisterEvents();
-    }
-    
-    private void CreateComponents()
-    {
-        Body = new StackPanel
-        {
-            Orientation = Avalonia.Layout.Orientation.Vertical,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-            Margin = new Avalonia.Thickness(10)
-        };
-        
-        FeaturesListBox = new ListBox
-        {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-            Height = 300
-        };
-        
-        Body.Children.Add(FeaturesListBox);
-        
-        Content = Body;
-    }
-
-    private void RegisterEvents()
-    {
-        Loaded += OnLoaded;
-        Unloaded += OnUnloaded;
-        FeaturesListBox.SelectionChanged += OnFeatureSelected;
-    }
-    
-    private void OnLoaded(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
-    {
-        LoadFeatures();
-    }
-    private void OnUnloaded(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
-    {
-        FeaturesListBox.Items.Clear();
-    }
-    
-    private void OnFeatureSelected(object? sender, SelectionChangedEventArgs e)
-    {
-        if(e.AddedItems.Count > 0 && e.AddedItems[0] is FeatureListItem item)
-        {
-            SelectedFeature = item.Feature;
-        }
-    }
-
-    private void LoadFeatures()
-    {
-        var features = EngineServices.FeaturesManager.GetAllEntityFeatures();
-
-        if (features.Count == 0)
-        {
-            FeaturesListBox.Items.Add(new TextBlock
-            {
-                Text = "No features available.",
-                Foreground = Avalonia.Media.Brushes.Gray,
-                Margin = new Avalonia.Thickness(5)
-            });
-            return;
-        }
-        
-        foreach (var feature in features)
-        {
-            FeaturesListBox.Items.Add(new FeatureListItem(feature));
-        }
-        
-    }
-    
-    /// <summary>
-    /// Returns the selected feature.<br/>
-    /// It will do a clone of the feature to avoid modifying the template.<br/>
-    /// Throws an exception if no feature is selected.
-    /// </summary>
-    /// <returns>The selected feature clone.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if no feature is selected.</exception>
-    public IEntityFeature GetSelectedFeature()
-    {
-        if (SelectedFeature == null)
-            throw new InvalidOperationException("No feature selected.");
-        return SelectedFeature.Clone();
-    }
-    
-    private class FeatureListItem : UserControl
-    {
-        public IEntityFeature Feature { get; set; }
-        public URN Urn { get; set; }
-        
-        public FeatureListItem(IEntityFeature feature)
-        {
-            Feature = feature;
-            Urn = feature.FeatureUrn;
-            CreateComponents();
-        }
-        
-        private void CreateComponents()
-        {
-            var body = new StackPanel
-            {
-                Orientation = Avalonia.Layout.Orientation.Horizontal,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                Margin = new Avalonia.Thickness(5)
-            };
-
-            if (File.Exists(Feature.FeatureIcon))
-            {
-                var icon = new Image
-                {
-                    Source = EngineServices.ResourcesService.Load<Bitmap>(Feature.FeatureIcon),
-                    Width = 32,
-                    Height = 32,
-                    Margin = new Avalonia.Thickness(0, 0, 10, 0)
-                };
-                body.Children.Add(icon);
-            }
-            else
-            {
-                var noIconText = new TextBlock
-                {
-                    Text = "[No Icon]",
-                    Foreground = Avalonia.Media.Brushes.Gray,
-                    Width = 32,
-                    Height = 32,
-                    Margin = new Avalonia.Thickness(0, 0, 10, 0),
-                    TextAlignment = Avalonia.Media.TextAlignment.Center,
-                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
-                };
-                body.Children.Add(noIconText);
-            }
-            
-            var nameLabel = new TextBlock
-            {
-                Text = Feature.FeatureName,
-                FontWeight = Avalonia.Media.FontWeight.Bold,
-                Margin = new Avalonia.Thickness(0, 0, 10, 0)
-            };
-            
-            var urnLabel = new TextBlock
-            {
-                Text = Urn.ToString(),
-                FontStyle = Avalonia.Media.FontStyle.Italic,
-                Foreground = Avalonia.Media.Brushes.Gray
-            };
-            
-            body.Children.Add(nameLabel);
-            body.Children.Add(urnLabel);
-            
-            Content = body;
-        }
-    }
-    
 }

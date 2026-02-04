@@ -43,6 +43,30 @@ public sealed class EntityFeatureAttribute() : Attribute
 }
 
 /// <summary>
+/// Attribute to mark a class as a macro entity feature for entities.<br/>
+/// A macro entity feature is a feature that can contain multiple sub-features.<br/>
+/// This allows to group features together, and simplify the management of features on entities for the user.<br/>
+/// <br/>
+/// Note: A macro-feature should be easy to use and understand for the user, and SHOULD NOT require complex configurations.<br/>
+/// As all macro-features will be directly accessible from the editor UI for the user without having the 'advanced' mode enabled.
+/// </summary>
+public sealed class EntityMacroFeatureAttribute() : Attribute
+{
+    /// <summary>
+    /// Defines the maximum number of instances of this feature that can be added to a single character.<br/>
+    /// Default is 1. Set to 0 for unlimited instances.
+    /// </summary>
+    public int MaxInstancesPerCharacter { get; set; } = 1;
+    
+    /// <summary>
+    /// Defines the URN of an existing feature that this feature replaces when added to a character.<br/>
+    /// Default is null, meaning it does not replace any existing feature.<br/>
+    /// This is particularly useful when some parts of the engine expect a specific feature to be present on an entity.
+    /// </summary>
+    public string? ReplacingFeatureUrn { get; set; } = null;
+}
+
+/// <summary>
 /// Attribute to mark a property or field as an entity feature property.<br/>
 /// This will make the property/field editable in the editor.
 /// </summary>

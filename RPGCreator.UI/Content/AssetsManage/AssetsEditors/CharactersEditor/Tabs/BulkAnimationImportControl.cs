@@ -335,7 +335,7 @@ public class BulkAnimationImportControl : UserControl
         Previewer.Stop(false);
         Previewer.ClearImage();
         Previewer.AnimationDefinition = animationDef;
-        Previewer.UpdateFrame(0);
+        Previewer.UpdateFrame();
         Previewer.Play();
     }
 

@@ -103,4 +103,12 @@ public class EntityStateRegistry
         _actionsUrn[actionUrn] = index;
         return index;
     }
+    
+    public int GetActionId(URN actionUrn)
+    {
+        if (_actionsUrn.TryGetValue(actionUrn, out var actionId))
+            return actionId;
+
+        return -1;
+    }
 }

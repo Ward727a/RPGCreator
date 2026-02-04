@@ -18,8 +18,8 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGCreator.SDK.GamePlayer;
 using RPGCreator.SDK.Inputs;
+using RPGCreator.SDK.RuntimeService;
 
 namespace RPGCreator.SDK.EngineService;
 

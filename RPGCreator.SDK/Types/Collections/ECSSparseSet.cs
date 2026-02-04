@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using RPGCreator.SDK.ECS;
 
 namespace RPGCreator.Core.Types.Internal;
@@ -72,10 +73,9 @@ public sealed class ECSSparseSet<T> : ISparseSet where T : IComponent
         dense[count] = default!;
     }
     
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ref T Get(int entityId)
     {
-        if (!Has(entityId))
-            throw new Exception($"Entity has no component of type {typeof(T)}");
         return ref dense[sparse[entityId]];
     }
 
@@ -92,15 +92,14 @@ public sealed class ECSSparseSet<T> : ISparseSet where T : IComponent
 
     private void EnsureCapacity(int entityId)
     {
-        if (entityId < sparse.Length)
-            return;
+        int oldSize = sparse.Length;
+        if (entityId < oldSize) return;
 
-        int newSize = sparse.Length;
-        while (newSize <= entityId)
-            newSize *= 2;
+        int newSize = oldSize;
+        while (newSize <= entityId) newSize *= 2;
 
         Array.Resize(ref sparse, newSize);
-        Array.Fill(sparse, -1, count, newSize - count);
+        Array.Fill(sparse, -1, oldSize, newSize - oldSize);
     }
 
     private void Grow()

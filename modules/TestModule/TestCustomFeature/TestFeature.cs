@@ -120,7 +120,7 @@ public class TestFeature : BaseEntityFeature
         world.SystemManager.AddSystem(new TestFeatureSystem());
     }
 
-    public override void OnInject(BufferedEntity entity)
+    public override void OnInject(BufferedEntity entity, IEntityDefinition entityDefinition)
     {
         entity.AddComponent(new TestFeatureComponent
         {

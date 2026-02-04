@@ -18,6 +18,8 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Reflection;
+
 namespace RPGCreator.SDK.Attributes;
 
 /// <summary>
@@ -28,4 +30,20 @@ public class DescriptionAttribute(string name, string description = "") : Attrib
 {
     public string Name { get; } = name;
     public string Description { get; } = description;
+}
+
+public static class EnumExtensions
+{
+    public static DescriptionAttribute GetDescription(this Enum value)
+    {
+        Type type = value.GetType();
+        string? name = Enum.GetName(type, value);
+        if (name == null) return new DescriptionAttribute(value.ToString());
+
+        FieldInfo? field = type.GetField(name);
+        if (field == null) return new DescriptionAttribute(name);
+
+        var attr = field.GetCustomAttribute<DescriptionAttribute>();
+        return attr ?? new DescriptionAttribute(name);
+    }
 }

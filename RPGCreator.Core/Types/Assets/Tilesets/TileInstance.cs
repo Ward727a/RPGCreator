@@ -7,6 +7,7 @@ using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Core.Types.Map;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using SkiaSharp;
 

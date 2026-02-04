@@ -1,4 +1,3 @@
-using RPGCreator.Core.Runtimes.ECS.Components.Display;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.Exceptions;
@@ -33,6 +32,8 @@ public class EntityManager(ComponentManager componentManager)
         componentManager.RegisterEntityComponentBits(entity.Id);
         EnsureCapacity(entity.Id);
         _entitiesById[entity.Id] = entity;
+        
+        // Add very basic components
         componentManager.AddComponent(entity.Id, StateComponentFactory.CreateState());
         
         return entity.Id;

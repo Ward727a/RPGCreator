@@ -97,13 +97,19 @@ namespace RPGCreator.Core
             };
             _logger.Info($"EngineModules initialized.");
 
+            if (EngineCore.DetectedMode == EngineCore.EEngineMode.PlayerMode)
+            {
+                _logger.Debug("Player mode detected, skipping module loading.");
+                return;
+            }
+
             if (!Directory.Exists(MODULES_PATH))
             {
                 _logger.Error("Engine modules directory not found.");
                 return;
             }
 
-            ClearTempModulesShadowCopies();
+            ClearTempModulesShadowCopies("", new EngineSecurityToken());
             
             foreach (var directory in Directory.GetDirectories(MODULES_PATH))
             {
@@ -357,14 +363,23 @@ namespace RPGCreator.Core
             return _startedModulesByUrn.Values;
         }
         
-        public void ClearTempModulesShadowCopies()
+        public void ClearTempModulesShadowCopies(string path = "", EngineSecurityToken? token = null)
         {            
-            if (!Directory.Exists(MODULES_PATH))
+            if(token == null)
+            {
+                StackTrace stackTrace = new StackTrace();
+                var callingMethod = stackTrace.GetFrame(1)?.GetMethod();
+                throw new UnauthorizedAccessException($"ClearTempModulesShadowCopies method can only be called by the engine. Unauthorized call from method: {callingMethod?.DeclaringType?.FullName}.{callingMethod?.Name} in assembly {callingMethod?.DeclaringType?.Assembly.FullName} estimed path: {callingMethod?.DeclaringType?.Assembly.Location}");
+            }
+            
+            if (!Directory.Exists(MODULES_PATH) && string.IsNullOrEmpty(path))
             {
                 return;
             }
             
-            string[] filesToDelete = Directory.GetFiles(MODULES_PATH, "_runned_temp_*", SearchOption.AllDirectories);
+            var searchPath = string.IsNullOrEmpty(path) ? MODULES_PATH : path;
+            
+            string[] filesToDelete = Directory.GetFiles(searchPath, "_runned_temp_*", SearchOption.AllDirectories);
             
             foreach (var filePath in filesToDelete)
             {

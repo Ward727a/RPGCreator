@@ -5,6 +5,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.VisualTree;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Characters;
+using RPGCreator.SDK.ECS.Features;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor;
 
 namespace RPGCreator.UI.Content.AssetsManage.Components;
@@ -313,7 +314,9 @@ public class CharactersManageControl : UserControl
     private void OnAddCharacter(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         var host_ = ((AssetsManageWindow)this.GetVisualRoot()!);
-        var characterEditor = new CharacterEditorWindowControl(new CharacterData(""));
+        var data = new CharacterData("");
+        data.AddFeatureConfig(new SpriteFeature());
+        var characterEditor = new CharacterEditorWindowControl(data);
         host_.OpenCustom(characterEditor);
         OnNeedRefresh?.Invoke();
     }

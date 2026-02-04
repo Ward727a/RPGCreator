@@ -1,6 +1,6 @@
 ﻿using RPGCreator.SDK;
-using RPGCreator.SDK.GamePlayer;
 using RPGCreator.SDK.Inputs;
+using RPGCreator.SDK.RuntimeService;
 
 namespace RPGCreator.Core.Inputs.Mouse;
 

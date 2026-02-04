@@ -135,6 +135,11 @@ public class ComponentManager(ECSEventBus eventBus)
         return ref sparseSet.Get(entityId);
     }
 
+    public ECSSparseSet<T> GetSet<T>() where T : struct, IComponent
+    {
+        return GetOrCreateSparseSet<T>();
+    }
+
     public void RemoveComponent<T>(int entityId) where T : struct, IComponent
     {
         var sparseSet = GetOrCreateSparseSet<T>();

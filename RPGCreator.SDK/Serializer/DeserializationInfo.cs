@@ -45,6 +45,13 @@ public sealed class DeserializationInfo
         }
     }
 
+    /// <summary>
+    /// Literally just a wrapper around TryGetValue. Old code compatibility.
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="value"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
     public bool TryGetList<T>(string name, [NotNullWhen(true)]out List<T>? value)
     {
         return TryGetValue(name, out value);

@@ -22,6 +22,8 @@
 // 
 // 
 #endregion
+
+using RPGCreator.Core.Common;
 using RPGCreator.Core.Configs;
 using RPGCreator.Core.ECS;
 using RPGCreator.Core.Events;
@@ -38,10 +40,15 @@ using RPGCreator.Core.Types.Editor.Context;
 using RPGCreator.Core.Types.Map.Layers.AutoLayer;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
+using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.EngineService;
+using RPGCreator.SDK.GameRunner;
 using RPGCreator.SDK.Graph.Nodes;
 using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Modules;
+using RPGCreator.SDK.Types;
+using RPGCreator.SDK.Types.Interfaces;
 using SDKAutoTileSolver = RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer.AutoTileSolver;
 
 namespace RPGCreator.Core
@@ -122,7 +129,8 @@ namespace RPGCreator.Core
             
             EngineResourcesService resService = new EngineResourcesService();
             
-            resService.RegisterLoader<Avalonia.Media.Imaging.Bitmap>(new AvaloniaBitmapLoader());
+            if(mode == EEngineMode.EditorMode)
+                resService.RegisterLoader<Avalonia.Media.Imaging.Bitmap>(new AvaloniaBitmapLoader());
             
             EngineServices.ResourcesService = resService;
             
@@ -201,6 +209,88 @@ namespace RPGCreator.Core
 
         }
 
+        public static bool LoadGameData(IGameData data)
+        {
+            var directoryPath = AppContext.BaseDirectory;
+            var acceptedHashes = data.AcceptedModuleHashes;
+            var moduleDirectory = Path.Combine(directoryPath, data.ModulesPath);
+            var projectPath = data.ProjectPath;
+            var mainMapId = data.MainMapId;
+            
+            if (!File.Exists(projectPath))
+            {
+                Logger.Critical("Project file not found: {ProjectPath}", args: projectPath);
+                return false;
+            }
+            
+            if (!EngineServices.ProjectsManager.TryGetProject(data.ProjectPath, out var project))
+            {
+                Logger.Critical("Failed to load project at path: {ProjectPath}", args: data.ProjectPath);
+                return false;
+            }
+            
+            if (!Directory.Exists(moduleDirectory))
+            {
+                Logger.Critical("Module directory not found: {ModuleDirectory}", args: moduleDirectory);
+                return false;
+            }
+            
+            var dllList = Directory.GetFiles(moduleDirectory, "*.dll", SearchOption.AllDirectories);
+
+            foreach (var dll in dllList)
+            {
+                if (dll.StartsWith("_runned_temp_"))
+                    continue;
+                var sha256 = ShaUtil.ComputeSha256(dll);
+                
+                if(!acceptedHashes.Contains(sha256, StringComparer.InvariantCultureIgnoreCase))
+                {
+                    Logger.Critical("Module hash mismatch for file: {FilePath}", args: dll);
+                    Logger.Critical("Please contact the game developer!");
+                    continue;
+                }
+
+                EngineServices.ModuleManager.ClearTempModulesShadowCopies(Path.GetDirectoryName(dll) ?? string.Empty, new ());
+                EngineServices.ModuleManager.TryLoadModule(dll, new());
+            }
+
+            var loadedModules = EngineServices.ModuleManager.GetAllLoadedModules(new EngineSecurityToken());
+            
+            List<URN> moduleToStart = new();
+            
+            foreach (var module in loadedModules)
+            {
+                moduleToStart.Add(module.ModuleUrn);
+            }
+            
+            EngineServices.ModuleManager.PlanStarting(out HashSet<URN> startOrders, out HashSet<URN> incompatibleModules, moduleToStart);
+
+            if (incompatibleModules.Count > 0)
+            {
+                Logger.Critical("Some modules are incompatible and cannot be started:");
+                foreach (var urn in incompatibleModules)
+                {
+                    Logger.Critical(" - {ModuleUrn}", args: urn.ToString());
+                }
+                return false;
+            }
+
+            foreach (var startOrder in startOrders.Where(startOrder => !EngineServices.ModuleManager.StartModule(startOrder, new EngineSecurityToken())))
+            {
+                Logger.Critical("Failed to start module: {ModuleUrn}", args: startOrder.ToString());
+                return false;
+            }
+            
+            EngineServices.ProjectsManager.OpenProject(project);
+
+            if (EngineServices.AssetsManager.TryResolveAsset(mainMapId, out IMapDef? _))
+                return RuntimeServices.MapService.LoadMap(mainMapId);
+            
+            Logger.Critical("Failed to resolve main map with ID: {MapId}", args: mainMapId);
+            return false;
+
+        }
+
         private void SubscribeBaseEvents()
         {
             // Suscribe to base events here
@@ -251,17 +341,21 @@ namespace RPGCreator.Core
         }
 
 
-        static public EngineCore InitCore(EEngineMode mode = EEngineMode.EditorMode)
+        public static EEngineMode DetectedMode = EEngineMode.EditorMode;
+        
+        public static EngineCore InitCore(EEngineMode mode = EEngineMode.EditorMode)
         {
             Instance = new(mode);
 
             IsCoreReady = true;
             Instance.Events.OnCoreReady(new());
+            
+            DetectedMode = mode;
 
             return Instance;
         }
 
-        static public EngineCore StartCore()
+        public static EngineCore StartCore()
         {
 
             // Please don't remove the line below,

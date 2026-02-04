@@ -4,6 +4,7 @@ namespace RPGCreator.SDK.Assets.Definitions.Animations;
 
 public class AnimationInstance: IResettable<AnimationDef>, ICleanable
 {
+    
     public AnimationDef Definition { get; private set; }
     
     public double ElapsedTime { get; private set; } = 0.0;
@@ -19,13 +20,28 @@ public class AnimationInstance: IResettable<AnimationDef>, ICleanable
     {
         if (!IsPlaying || Definition.TotalFrames <= 1) return;
         
-        ElapsedTime += deltaTime.TotalMilliseconds;
+        ElapsedTime += deltaTime.Milliseconds;
 
         if (ElapsedTime >= Definition.FrameDuration)
         {
             CurrentFrameIndex = (CurrentFrameIndex + 1) % Definition.TotalFrames;
             ElapsedTime = 0;
         }
+    }
+    
+    public void ForceSetFrame(int frameIndex)
+    {
+        if (frameIndex < 0 || frameIndex >= Definition.TotalFrames)
+            throw new ArgumentOutOfRangeException(nameof(frameIndex), "Frame index is out of range.");
+
+        CurrentFrameIndex = frameIndex;
+        ElapsedTime = 0.0;
+    }
+    
+    public void ForceNextFrame()
+    {
+        CurrentFrameIndex = (CurrentFrameIndex + 1) % Definition.TotalFrames;
+        ElapsedTime = 0.0;
     }
 
     public int GetCurrentSpritesheetIndex()

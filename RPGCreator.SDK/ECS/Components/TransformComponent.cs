@@ -1,7 +1,6 @@
 using System.Numerics;
-using RPGCreator.SDK.ECS;
 
-namespace RPGCreator.Core.Runtimes.ECS.Components.Display;
+namespace RPGCreator.SDK.ECS.Components;
 
 public struct TransformComponent : IComponent
 {
@@ -11,6 +10,7 @@ public struct TransformComponent : IComponent
     /// In degrees
     /// </summary>
     public float Rotation;
+    
     public float ScaleX;
     public float ScaleY;
 
@@ -21,6 +21,16 @@ public struct TransformComponent : IComponent
         {
             X = value.X;
             Y = value.Y;
+        }
+    }
+    
+    public Vector2 Scale
+    {
+        get => new Vector2(ScaleX, ScaleY);
+        set
+        {
+            ScaleX = value.X;
+            ScaleY = value.Y;
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
@@ -19,6 +20,7 @@ public class AvaloniaAnimationDrawer : IDrawer<AnimationInstance>, IDisposable
     private Image _targetImage;
     private IAssetScope _assetScope;
     private SpritesheetDef? _cachedSpritesheet;
+    private Bitmap? _cachedSpritesheetImage;
     
     public AvaloniaAnimationDrawer(Image targetImage)
     {
@@ -31,6 +33,7 @@ public class AvaloniaAnimationDrawer : IDrawer<AnimationInstance>, IDisposable
         if(_cachedSpritesheet == null || _cachedSpritesheet.Unique != animation.Definition.SpritesheetId)
         {
             _cachedSpritesheet = _assetScope.Load<SpritesheetDef>(animation.Definition.SpritesheetId);
+            _cachedSpritesheetImage = EngineServices.ResourcesService.Load<Bitmap>(_cachedSpritesheet.ImagePath);
             
             if (_cachedSpritesheet == null)
             {
@@ -38,21 +41,17 @@ public class AvaloniaAnimationDrawer : IDrawer<AnimationInstance>, IDisposable
                 return;
             }
         }
-        var bitmap = EngineServices.ResourcesService.Load<Bitmap>(_cachedSpritesheet.ImagePath);
 
-        if (bitmap == null)
+        if (_cachedSpritesheetImage == null)
         {
             Logger.Error("[AvaloniaAnimationDrawer] Failed to load spritesheet image at path: " + _cachedSpritesheet.ImagePath);
             return;
         }
 
         var rect = _cachedSpritesheet.GetFrameRect(animation.GetCurrentSpritesheetIndex());
-        
-        var croppedBitmap = new CroppedBitmap(bitmap, new PixelRect((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height));
-        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-        {
-            _targetImage.Source = croppedBitmap;
-        });
+        var croppedBitmap = new CroppedBitmap(_cachedSpritesheetImage, new PixelRect((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height));
+    
+        _targetImage.Source = croppedBitmap;
     }
 
     public void Dispose()
@@ -89,8 +88,11 @@ public class AnimationPreviewer : UserControl
         set
         {
             if(value == null || value == _animationDef) return;
+            
+            _animationDef?.PropertyChanged -= OnAnimationDefChanged;
             _animationDef = value;
 
+            _animationDef.PropertyChanged += OnAnimationDefChanged;
             if (_animationDef.SpritesheetId == Ulid.Empty)
             {
                 return;
@@ -98,37 +100,33 @@ public class AnimationPreviewer : UserControl
 
             AnimationInstance = EngineServices.GameFactory.CreateInstance<AnimationInstance>(_animationDef);
             
-            UpdateFrame(0);
+            UpdateFrame();
         }
     }
-    
-    public bool IsPlaying { get; private set; }
-    public bool IsPaused { get; private set; }
-    public int CurrentFrame { get; private set; }
-    public int TotalFrames { get; private set; }
-    /// <summary>
-    /// Milliseconds per frame
-    /// </summary>
-    private double FrameDuration { get; set; } = 100;
+
+    private void OnAnimationDefChanged(object? s, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(AnimationDef.SpritesheetId))
+        {
+            OnAnimationPathChanged(AnimationDefinition.SpritesheetId);
+        }
+    }
 
     public int FPS
     {
-        get => (int)(1000 / FrameDuration);
+        get => (int)(1000 / _animationDef?.FrameDuration ?? 1);
         set
         {
-            FrameDuration = 1000.0 / value;
+            _animationDef?.FrameDuration = 1000.0 / value;
             if(AnimationTimer != null)
-                AnimationTimer.Interval = FrameDuration;
+                AnimationTimer.Interval = TimeSpan.FromMilliseconds(_animationDef?.FrameDuration ?? 100);
         }
     }
     
-    public System.Timers.Timer? AnimationTimer { get; private set; }
+    public Avalonia.Threading.DispatcherTimer? AnimationTimer { get; }
     
     public Size FrameSize { get; set; } = new Size(42, 64);
-    public Size AnimationImageSize { get; private set; }
 
-    private Bitmap _animationImageSource;
-    
     #endregion
     
     #region Components
@@ -149,7 +147,8 @@ public class AnimationPreviewer : UserControl
     {
         
         CreateComponents();
-        AnimationTimer = new System.Timers.Timer(FrameDuration);
+        AnimationTimer = new Avalonia.Threading.DispatcherTimer();
+        AnimationTimer.Interval = TimeSpan.FromMilliseconds(100);
         RegisterEvents();
 
         if (animationImage != null) _drawer = new AvaloniaAnimationDrawer(animationImage);
@@ -257,38 +256,30 @@ public class AnimationPreviewer : UserControl
 
         AnimationPathChanged += OnAnimationPathChanged;
         
-        AnimationTimer.Elapsed += (s, e) =>
+        AnimationTimer?.Tick += (s, e) =>
         {
-            if (IsPlaying && !IsPaused)
+            if (AnimationInstance?.IsPlaying ?? false)
             {
-                CurrentFrame++;
-                if (CurrentFrame >= _animationDef.TotalFrames)
-                {
-                    CurrentFrame = 0; // Loop back to the first frame
-                }
-
                 UpdateFrame();
             }
         };
-        AnimationTimer.AutoReset = true;
+        
     }
 
     public void Play()
     {
         if(AnimationInstance == null) return;
-        if (IsPlaying) return;
-        IsPlaying = true;
-        IsPaused = false;
-        AnimationTimer.Start();
+        if (AnimationInstance?.IsPlaying ?? false) return;
+        AnimationInstance?.IsPlaying = true;
+        AnimationTimer?.Start();
         PlayStarted?.Invoke();
         // Start animation timer logic here
     }
     
     public void Pause()
     {
-        if (!IsPlaying || IsPaused) return;
-        IsPaused = true;
-        IsPlaying = false;
+        if (!AnimationInstance?.IsPlaying ?? true) return;
+        AnimationInstance?.IsPlaying = false;
         AnimationTimer.Stop();
         Paused?.Invoke();
         // Pause animation timer logic here
@@ -296,14 +287,13 @@ public class AnimationPreviewer : UserControl
     
     public void Stop(bool resetFrame = true)
     {
-        if (!IsPlaying) return;
-        IsPlaying = false;
-        IsPaused = false;
+        if (!AnimationInstance?.IsPlaying ?? true) return;
+        AnimationInstance?.IsPlaying = false;
         AnimationTimer.Stop();
-        CurrentFrame = 0;
         if(resetFrame)
-            UpdateFrame(0);
+            UpdateFrame();
         Stopped?.Invoke();
+        AnimationInstance.ForceSetFrame(0);
         // Stop animation timer logic here
     }
     
@@ -317,13 +307,11 @@ public class AnimationPreviewer : UserControl
             FPSSpeedUpDown.Value = fps;
     }
 
-    public void UpdateFrame(int frameIndex = -1)
+    public void UpdateFrame()
     {
-        if(frameIndex == -1)
-            frameIndex = CurrentFrame;
-
         if(!IsValidAnimationInstance()) return;
         
+        AnimationInstance.ForceNextFrame();
         AnimationInstance?.Draw(null, _drawer);
     }
 
@@ -351,8 +339,7 @@ public class AnimationPreviewer : UserControl
         Stop();
         // Load animation from newSpriteSheetId and set TotalFrames accordingly
         // Reset CurrentFrame to 0
-        CurrentFrame = 0;
-        UpdateFrame(0);
+        AnimationInstance.ForceSetFrame(0);
     }
     
     private void OnAnimationPathChanged(string newPath)
@@ -366,8 +353,7 @@ public class AnimationPreviewer : UserControl
         Stop();
         // Load animation from newPath and set TotalFrames accordingly
         // Reset CurrentFrame to 0
-        CurrentFrame = 0;
-        UpdateFrame(0);
+        AnimationInstance.ForceSetFrame(0);
     }
     
     #endregion
