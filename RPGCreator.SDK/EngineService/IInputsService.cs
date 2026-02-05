@@ -49,11 +49,13 @@ public enum ScrollType
 /// <param name="IsContinuous">Indicates if the action is continuous (called while the input is held down).</param>
 public record struct BindedAction(Action Action, bool IsContinuous = false, bool ShouldCtrlBeHeld = false, bool ShouldAltBeHeld = false, bool ShouldShiftBeHeld = false);
 
+public abstract record InputTriggerEmpty;
+
 /// <summary>
 /// Defines an input trigger for an action.
 /// </summary>
 /// <param name="ActionName">The name of the action to be triggered.</param>
-public abstract record InputTrigger(string ActionName);
+public abstract record InputTrigger(string ActionName) : InputTriggerEmpty;
 
 /// <summary>
 /// Triggered by a keyboard key.
@@ -75,6 +77,19 @@ public record MouseTrigger(MouseButton Button, string ActionName) : InputTrigger
 /// <param name="Type">The type of scroll that triggers the action.</param>
 /// <param name="ActionName">The name of the action to be triggered.</param>
 public record ScrollTrigger(ScrollType Type, string ActionName) : InputTrigger(ActionName);
+
+public record AxisTrigger(string AxisName) : InputTriggerEmpty;
+
+public record KeyAxisTrigger(KeyboardKeys Key, string AxisName, float Scale) : AxisTrigger(AxisName);
+
+
+public record struct AxisValue()
+{
+    public float Value { get; set; }
+    public float MinValue { get; set; }
+    public float MaxValue { get; set; }
+}
+
 /// <summary>
 /// A service that manages input actions and their bindings to keyboard keys and mouse buttons.<br/>
 /// This allows the user (player) to customize controls.<br/>
@@ -95,6 +110,31 @@ public interface IInputsService : IService
     /// If you didn't modify the engine, this should never happen.
     /// </exception>
     void Update(IKeyboardState? keyboardState = null, IMouseState? mouseState = null);
+    
+    /// <summary>
+    /// Get the current value of the specified axis.<br/>
+    /// Axes can be configured to use keyboard keys for positive and negative input.<br/>
+    /// This allows for customizable input controls for actions like movement or camera control.
+    /// </summary>
+    /// <param name="axisName">The unique name of the axis.</param>
+    /// <returns>
+    /// The current value of the axis, ranging from -1 to 1 (or the configured min/max values).
+    /// </returns>
+    public float GetAxis(string axisName);
+    
+    /// <summary>
+    /// Set the keyboard keys for the specified axis.<br/>
+    /// This allows for customizable input controls for actions like movement or camera control.
+    /// </summary>
+    /// <param name="axisName">The unique name of the axis.</param>
+    /// <param name="positiveKey">The keyboard key that represents positive input for the axis.</param>
+    /// <param name="negativeKey">The keyboard key that represents negative input for the axis.</param>
+    /// <param name="minValue">The minimum value of the axis when the negative key is pressed. Default is -1.</param>
+    /// <param name="maxValue">The maximum value of the axis when the positive key is pressed. Default is 1.</param>
+    /// <returns>
+    /// The current value of the axis after setting the keys.
+    /// </returns>
+    public float SetAxisBinding(string axisName, KeyboardKeys positiveKey, KeyboardKeys negativeKey, float minValue = -1f, float maxValue = 1f);
     
     /// <summary>
     /// Register an action to be called when input is detected.<br/>
@@ -210,4 +250,10 @@ public interface IInputsService : IService
     /// If you didn't modify the engine, this should never happen.
     /// </exception>
     bool UnsetBinding(ScrollType scrollType, string? actionName = null);
+
+    /// <summary>
+    /// Reset all input axes to their default state.<br/>
+    /// This will set all axis values to zero and clear any key bindings associated with them.
+    /// </summary>
+    public void ResetInputAxis();
 }

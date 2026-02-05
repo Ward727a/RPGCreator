@@ -1,9 +1,11 @@
-﻿using Avalonia;
+﻿using System;
+using System.IO;
+using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using RPGCreator.SDK.Resources;
 
-namespace RPGCreator.Core.Resources;
+namespace RPGCreator.UI.Ressources;
 
 public class AvaloniaBitmapLoader : IResourceLoader 
 {

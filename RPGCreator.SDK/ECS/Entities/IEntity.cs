@@ -20,10 +20,10 @@ public interface IEntity
     /// <summary>
     /// A bit vector representing the components attached to this entity.
     /// Explanation:
-    /// Each bit in the BitArray corresponds to a specific component type.
+    /// Each bit in the ComponentMask corresponds to a specific component type.
     /// If a bit is set to 1, it indicates that the entity has that component attached.
     /// If a bit is set to 0, it indicates that the entity does not have that component.
     /// This allows for efficient storage and quick checks of component presence using bitwise operations.
     /// </summary>
-    public BitArray ComponentBits { get; }
+    public ComponentMask ComponentMask { get; }
 }

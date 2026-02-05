@@ -70,9 +70,6 @@ namespace RPGCreator.UI.Content.AssetsManage
                 ["Quests"] = () => new UserControl(), // Replace with actual assets panel
                 ["---4"] = null, // Separator
                 ["Backgrounds"] = () => new UserControl(), // Replace with actual assets panel (This should be for backgrounds, like the title screen background, fighting background, map background etc...)
-                ["System"] = () => new UserControl(), // Replace with actual assets panel (This should be for the system settings, like game title, game over screen, etc...)
-                ["---1"] = null, // Separator
-                ["Animations"] = () => new UserControl(), // Replace with actual assets panel
                 ["---2"] = null, // Separator
                 ["Sounds"] = () => new UserControl(), // Replace with actual assets panel
                 ["Music"] = () => new UserControl(), // Replace with actual assets panel  

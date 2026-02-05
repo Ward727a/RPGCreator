@@ -20,8 +20,7 @@ public class Entity : IEntity, ICleanable
     public int Id { get; set; }
     public bool HasComponent<T>() where T : struct, IComponent
     {
-        var bit = ComponentTypeIdRegistry.GetBit<T>();
-        return ComponentBits[bit];
+        return _componentManager.HasComponent<T>(Id);
     }
 
     public ref T GetComponent<T>() where T : struct, IComponent
@@ -39,7 +38,7 @@ public class Entity : IEntity, ICleanable
         _componentManager.RemoveComponent<T>(Id);
     }
 
-    public BitArray ComponentBits => _componentManager?.GetEntityComponentBits(Id) ??
+    public ComponentMask ComponentMask => _componentManager?.GetEntityComponentMask(Id) ??
                                      throw new CriticalEngineException("Entity's ComponentManager is null.", this);
 
     public void Clean()
@@ -47,6 +46,6 @@ public class Entity : IEntity, ICleanable
         Id = -1;
         _entityManager = null;
         _componentManager = null;
-        ComponentBits.SetAll(false);
+        ComponentMask.Clear();
     }
 }

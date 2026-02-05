@@ -22,6 +22,8 @@
 // 
 // 
 #endregion
+
+using System.ComponentModel.Design;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
@@ -31,7 +33,9 @@ using RPGCreator.UI.Styles;
 using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.MaterialDesign;
 using RPGCreator.SDK;
+using RPGCreator.UI.Ressources;
 using RPGCreator.UI.Services;
+using IResourceService = RPGCreator.SDK.Resources.IResourceService;
 
 namespace RPGCreator.UI;
 
@@ -48,6 +52,10 @@ public partial class App : Application
         UiServices.DialogService = new DialogService();
         UiServices.MenuService = new MenuService();
         UiServices.NotificationService = new NotificationService();
+        EngineServices.OnceServiceReady((IResourceService ResourcesService) =>
+        {
+            ResourcesService.RegisterLoader<Avalonia.Media.Imaging.Bitmap>(new AvaloniaBitmapLoader());
+        });
     }
 
     public override void OnFrameworkInitializationCompleted()

@@ -24,7 +24,9 @@ using _BaseModule.Features.Entity;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.ECS.Systems;
 using RPGCreator.SDK.EngineService;
+using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Modules.Features.Game;
 using RPGCreator.SDK.RuntimeService;
 using RPGCreator.SDK.Types;
@@ -38,7 +40,7 @@ public class StandardControlFeature : BaseGameFeature
     public override string FeatureName => "Standard Player Control";
     public override string FeatureDescription => "Allows the controlled entity to be moved by the player with the keyboard.\n" +
                                                  "All controls can be reconfigured in the input settings in the editor parameters.";
-    public override URN FeatureUrn => new("rpgc", FeatureUrnModule, "StandardControlFeature");
+    public override URN FeatureUrn => new("rpgc", FeatureUrnModule, "standard_control_feature");
 
     private int _controlledEntityRuntimeId = -1;
     private bool _controlledEntityHasMovement;
@@ -61,13 +63,14 @@ public class StandardControlFeature : BaseGameFeature
             IS.RegisterAction("backward", HandleMovementBackward, true);
             IS.RegisterAction("left", HandleMovementLeft, true);
             IS.RegisterAction("right", HandleMovementRight, true);
+            IS.SetAxisBinding("horizontal",  KeyboardKeys.D, KeyboardKeys.Q);
+            IS.SetAxisBinding("vertical", KeyboardKeys.Z, KeyboardKeys.S);
         });
     }
 
     private void OnEcsWorldChanged(IEcsWorld? obj)
     {
-        _currentEcsWorld = obj;
-        _controlledEntityHasMovement = CheckEntityHasMovement();
+        obj.SystemManager.AddSystem(new StandardControlSystem());
     }
 
     private bool CheckEntityHasMovement()
@@ -148,5 +151,30 @@ public class StandardControlFeature : BaseGameFeature
             IS.UnregisterAction("left");
             IS.UnregisterAction("right");
         });
+    }
+}
+
+public class StandardControlSystem : ISystem
+{
+    public override int Priority => 200;
+    public override bool IsDrawingSystem => false;
+    
+    ComponentManager _componentManager;
+    public override void Initialize(IEcsWorld ecsWorld)
+    {
+        _componentManager = ecsWorld.ComponentManager;
+    }
+
+    public override void Update(TimeSpan deltaTime)
+    {
+        float x = EngineServices.InputsService.GetAxis("horizontal");
+        float y = EngineServices.InputsService.GetAxis("vertical");
+        
+        foreach (var entityId in _componentManager.Query<MovementComponent, PlayerTagComponent>())
+        {
+            ref var movementComponent = ref _componentManager.GetComponent<MovementComponent>(entityId);
+            movementComponent.Direction.X = x;
+            movementComponent.Direction.Y = y;
+        }
     }
 }

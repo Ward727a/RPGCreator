@@ -22,7 +22,6 @@
 // 
 // 
 #endregion
-using RPGCreator.Core.Configs.EventsArgs;
 using RPGCreator.Core.Configs.Helpers;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Serializer;
@@ -32,14 +31,12 @@ namespace RPGCreator.Core.Configs
 {
     public class EngineConfigs
     {
-        public EngineConfigEvents Events { get; private set; }
 
         private Dictionary<string, ConfHelper> LoadedConfig = [];
         private Dictionary<string, string> ConfigMap = []; // Map of the config path to the config name
 
         internal EngineConfigs()
         {
-            Events = new EngineConfigEvents();
             // Load the default config file that should be inside the folder where the .exe is
             var t = AppDomain.CurrentDomain.BaseDirectory;
             LoadOrCreateConfig<AppConf>(
@@ -246,21 +243,11 @@ namespace RPGCreator.Core.Configs
 
         public bool Save(string config)
         {
-            var preArgs = new SavingConfigArgs(config);
-            Events.OnSavingConfig(preArgs);
-
-            if(preArgs.Cancel)
-                return false;
-
-            config = preArgs.ConfigName;
-
             if (LoadedConfig.TryGetValue(config, out var conf))
             {
                 conf.Save();
-                Events.OnSavedConfig(preArgs.ToPost());
                 return true;
             }
-            Events.OnSavedConfig(preArgs.ToPost().SetError(true, $"Config {config} is not found in the LoadedConfig."));
             return false;
 
         }
@@ -279,24 +266,14 @@ namespace RPGCreator.Core.Configs
 
         public bool Export(string config, string export_path)
         {
-            var preArgs = new ExportingConfigArgs(config, export_path);
-            Events.OnExportingConfig(preArgs);
-
-            if (preArgs.Cancel)
-                return false;
-
-            config = preArgs.ConfigName;
-            export_path = preArgs.ExportPath;
 
             if (LoadedConfig.ContainsKey(config))
             {
                 LoadedConfig[config].Save(export_path);
-                Events.OnExportedConfig(preArgs.ToPost());
                 return true;
             }
             else
             {
-                Events.OnExportedConfig(preArgs.ToPost().SetError(true, $"Config {config} is not found in the LoadedConfig."));
                 return false;
             }
         }

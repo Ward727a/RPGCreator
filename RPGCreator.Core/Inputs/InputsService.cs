@@ -18,6 +18,8 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using CommunityToolkit.HighPerformance;
 using RPGCreator.SDK;
 using RPGCreator.SDK.EngineService;
@@ -30,9 +32,13 @@ public class InputsService : IInputsService
 {
     private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<InputsService>();
     
-    private readonly List<InputTrigger> _triggerBinding = new();
+    private readonly List<InputTriggerEmpty> _triggerBinding = new();
 
+    private readonly List<AxisTrigger> _axisBindings = new();
+    
     private readonly Dictionary<string, BindedAction> _bindedActions = new();
+    
+    private readonly Dictionary<string, AxisValue> _axisValues = new();
 
     public void Update(IKeyboardState? keyboardState = null, IMouseState? mouseState = null)
     {
@@ -54,41 +60,101 @@ public class InputsService : IInputsService
         
         foreach (var trigger in triggerSpan)
         {
-            var actionName = trigger.ActionName;
-            if (actionName == null)
-                continue;
-            
-            if (!_bindedActions.TryGetValue(actionName, out var bindedAction))
-                continue;
-
-            if (bindedAction.ShouldCtrlBeHeld != ctrlHeld || bindedAction.ShouldAltBeHeld != altHeld || bindedAction.ShouldShiftBeHeld != shiftHeld)
-                continue;
-
-            var isTriggered = trigger switch
+            if (trigger is  InputTrigger inputTrigger)
             {
-                KeyTrigger keyTrigger => bindedAction.IsContinuous?
-                keyboardState.IsKeyPressed(keyTrigger.Key)
-                : keyboardState.WasKeyJustPressed(keyTrigger.Key)
-                ,
-                MouseTrigger mouseTrigger => bindedAction.IsContinuous ?
-                mouseState.IsButtonPressed(mouseTrigger.Button)
-                : mouseState.WasButtonJustPressed(mouseTrigger.Button),
-                ScrollTrigger scrollTrigger => scrollTrigger.Type switch
+                var actionName = inputTrigger.ActionName;
+                if (actionName == null)
+                    continue;
+
+                if (!_bindedActions.TryGetValue(actionName, out var bindedAction))
+                    continue;
+
+                if (bindedAction.ShouldCtrlBeHeld != ctrlHeld || bindedAction.ShouldAltBeHeld != altHeld ||
+                    bindedAction.ShouldShiftBeHeld != shiftHeld)
+                    continue;
+
+                var isTriggered = trigger switch
                 {
-                    ScrollType.Up => scrollDelta > 0,
-                    ScrollType.Down => scrollDelta < 0,
+                    KeyTrigger keyTrigger => bindedAction.IsContinuous
+                        ? keyboardState.IsKeyPressed(keyTrigger.Key)
+                        : keyboardState.WasKeyJustPressed(keyTrigger.Key),
+                    MouseTrigger mouseTrigger => bindedAction.IsContinuous
+                        ? mouseState.IsButtonPressed(mouseTrigger.Button)
+                        : mouseState.WasButtonJustPressed(mouseTrigger.Button),
+                    ScrollTrigger scrollTrigger => scrollTrigger.Type switch
+                    {
+                        ScrollType.Up => scrollDelta > 0,
+                        ScrollType.Down => scrollDelta < 0,
+                        _ => false
+                    },
                     _ => false
-                },
-                _ => false
-            };
-            
-            if (isTriggered)
+                };
+
+                if (isTriggered)
+                {
+                    bindedAction.Action.Invoke();
+                }
+            }
+
+            if (trigger is AxisTrigger axisTrigger)
             {
-                bindedAction.Action.Invoke();
+                switch (axisTrigger)
+                {
+                    case KeyAxisTrigger keyAxisTrigger:
+                    {
+                        ref var axis = ref CollectionsMarshal.GetValueRefOrNullRef(_axisValues, keyAxisTrigger.AxisName);
+                        if (Unsafe.IsNullRef(ref axis))
+                            continue;
+                        var keyValue = keyAxisTrigger.Scale;
+                        
+                        
+                        axis.Value += (keyboardState.IsKeyPressed(keyAxisTrigger.Key) ? keyValue : 0f);
+                        axis.Value = Math.Clamp(axis.Value, axis.MinValue, axis.MaxValue);
+                        if(keyAxisTrigger.AxisName == "horizontal" && (axis.Value > 0f || axis.Value < 0f))
+                        {
+                            Logger.Info("Horizontal Axis Value: {Value}", args: axis.Value);
+                        }
+                        break;
+                    }
+                    default:
+                        continue;
+                }
             }
         }
     }
 
+    public float GetAxis(string axisName)
+    {
+        if (_axisValues.TryGetValue(axisName, out var axis))
+        {
+            var value = axis.Value;
+            return value;
+        }
+
+        return 0f;
+    }
+    
+    public float SetAxisBinding(string axisName, KeyboardKeys positiveKey, KeyboardKeys negativeKey, float minValue = -1f, float maxValue = 1f)
+    {
+        if (!_axisValues.ContainsKey(axisName))
+        {
+            _axisValues[axisName] = new AxisValue()
+            {
+                Value = 0f,
+                MinValue = minValue,
+                MaxValue = maxValue
+            };
+        }
+
+        var positiveTrigger = new KeyAxisTrigger(positiveKey, axisName, 1f);
+        var negativeTrigger = new KeyAxisTrigger(negativeKey, axisName, -1f);
+
+        _triggerBinding.Add(positiveTrigger);
+        _triggerBinding.Add(negativeTrigger);
+
+        return 0f;
+    }
+    
     public bool RegisterAction(string actionName, Action action, bool isContinuous = false, bool shouldCtrlBeHeld = false, bool shouldAltBeHeld = false, bool shouldShiftBeHeld = false,  bool overrideIfExists = false)
     {
         if(_bindedActions.ContainsKey(actionName) && !overrideIfExists)
@@ -103,7 +169,7 @@ public class InputsService : IInputsService
         return _bindedActions.Remove(actionName);
     }
 
-    private bool PredicateKeyTrigger(InputTrigger trigger, KeyboardKeys awaitedKey, string? awaitedActionName = null)
+    private bool PredicateKeyTrigger(InputTriggerEmpty trigger, KeyboardKeys awaitedKey, string? awaitedActionName = null)
     {
         if (trigger is not KeyTrigger keyTrigger)
             return false;
@@ -134,7 +200,7 @@ public class InputsService : IInputsService
     }
 
     
-    private bool PredicateScrollTrigger(InputTrigger trigger, ScrollType awaitedScrollType, string? awaitedActionName = null)
+    private bool PredicateScrollTrigger(InputTriggerEmpty trigger, ScrollType awaitedScrollType, string? awaitedActionName = null)
     {
         if (trigger is not ScrollTrigger scrollTrigger)
             return false;
@@ -163,7 +229,7 @@ public class InputsService : IInputsService
         return true;
     }
 
-    private bool PredicateMouseTrigger(InputTrigger trigger, MouseButton awaitedButton, string? awaitedActionName = null)
+    private bool PredicateMouseTrigger(InputTriggerEmpty trigger, MouseButton awaitedButton, string? awaitedActionName = null)
     {
         if (trigger is not MouseTrigger mouseTrigger)
             return false;
@@ -205,5 +271,16 @@ public class InputsService : IInputsService
     public bool UnsetBinding(ScrollType scrollType, string? actionName = null)
     {
         return _triggerBinding.RemoveAll(t => PredicateScrollTrigger(t, scrollType, actionName)) > 0;
+    }
+
+    public void ResetInputAxis()
+    {
+        foreach (var axisKey in _axisValues.Keys)
+        {
+            ref var axis = ref CollectionsMarshal.GetValueRefOrNullRef(_axisValues, axisKey);
+            if (Unsafe.IsNullRef(ref axis))
+                continue;
+            axis.Value = 0f;
+        }
     }
 }

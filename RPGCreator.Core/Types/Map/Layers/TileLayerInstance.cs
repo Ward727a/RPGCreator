@@ -1,5 +1,4 @@
 using System.Numerics;
-using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
@@ -72,7 +71,7 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
         EngineCore.Instance.Managers.Assets.TileFactory.Release(removedTile);
     }
     
-    public void Draw(SpriteBatchExtend? sb)
+    public void Draw()
     {
         if (!IsVisible)
             return;

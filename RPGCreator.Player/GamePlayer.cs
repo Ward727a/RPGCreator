@@ -8,26 +8,22 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGameGum;
 using RPGCreator.Core;
-using RPGCreator.Core.Rendering.Batching;
 using RPGCreator.Player.ECS.Systems;
 using RPGCreator.Player.Services;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Assets.Definitions.Maps;
-using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
-using RPGCreator.SDK.ECS.Systems;
 using RPGCreator.SDK.Exceptions;
 using RPGCreator.SDK.GameRunner;
+using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
-using Serilog;
 
 namespace RPGCreator.Player;
 
 public class GamePlayer : Game, IGameRunner
 {
     private GraphicsDeviceManager _graphics;
-    private SpriteBatchExtend _spriteBatch;
+    private SpriteBatch _spriteBatch;
     GumService Gum = GumService.Default;
 
     public enum GameFrom
@@ -151,6 +147,14 @@ public class GamePlayer : Game, IGameRunner
             X = (Gum.Root.Width - 200) / 2,
             Y = (Gum.Root.Height - 50) / 2,
         };
+        startButton.Click += (_, _) =>
+        {
+            RuntimeServices.OnceServiceReady((IGameSession gameSession) =>
+            {
+                gameSession.IsPaused = false;
+                startButton.IsVisible = false;
+            });
+        };
         mainPanel.AddChild(startButton);
         
         EngineServices.ResourcesService.RegisterLoader<Texture2D>(new Texture2DLoader(GraphicsDevice));
@@ -183,30 +187,55 @@ public class GamePlayer : Game, IGameRunner
                 }
             }
         };
-        
-        base.Initialize();
-    }
-
-    protected override void LoadContent()
-    {
-        _spriteBatch = new SpriteBatchExtend(GraphicsDevice);
+        _spriteBatch = new SpriteBatch(GraphicsDevice);
         RuntimeServices.LayerService = new LayerService();
         RuntimeServices.ChunkService = new ChunkService();
         RuntimeServices.CameraService = new CameraService();
         RuntimeServices.RenderService = new RenderService(GraphicsDevice, _spriteBatch);
         RuntimeServices.PlayerController = new BasePlayerController();
         RuntimeServices.GameSession = new DefaultGameSession();
+
+        LoadingValue = EngineCore.LoadGameData(_gameData);
+        
         RuntimeServices.GameSession.ActiveEcsWorld = EngineServices.ECS.CreateWorld();
-        
-        
-        if(!EngineCore.LoadGameData(_gameData))
+        if(!LoadingValue.success)
             throw new CriticalEngineException("[GamePlayer] Failed to load game data.", this);
 
         RuntimeServices.CameraService.SetCameraEntity(RuntimeServices.GameSession.ActiveEcsWorld.EntityManager.CreateCameraEntity());
         
         RuntimeServices.GameSession.ActiveEcsWorld.SystemManager.AddSystem(new MapDrawingSystem());
         
+        base.Initialize();
+    }
+
+    private (bool success, Ulid mapId) LoadingValue;
+    
+    protected override void LoadContent()
+    {
+        RuntimeServices.MapService.LoadMap(LoadingValue.mapId);
         OnLoad?.Invoke();
+    }
+    
+    public void UpdateKeyboard()
+    {
+        var mgState = Microsoft.Xna.Framework.Input.Keyboard.GetState();
+        var pressedKeys = mgState.GetPressedKeys();
+
+        Span<KeyboardKeys> sdkKeys = stackalloc KeyboardKeys[pressedKeys.Length];
+
+        for (int i = 0; i < pressedKeys.Length; i++)
+        {
+            sdkKeys[i] = (KeyboardKeys)(int)pressedKeys[i];
+        }
+
+        // On crée la donnée brute
+        var rawData = new RawKeyboardData(
+            sdkKeys, 
+            mgState.CapsLock, 
+            mgState.NumLock
+        );
+
+        EngineProviders.KeyboardProvider?.Update(rawData);
     }
 
     protected override void Update(GameTime gameTime)
@@ -216,9 +245,13 @@ public class GamePlayer : Game, IGameRunner
             Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
-        // TODO: Add your update logic here
-        RuntimeServices.GameSession.ActiveEcsWorld.Update(gameTime.ElapsedGameTime);
+        UpdateKeyboard();
+        EngineServices.InputsService.Update();
+        
+        RuntimeServices.GameSession.ActiveEcsWorld?.Update(gameTime.ElapsedGameTime);
         Gum.Update(gameTime);
+        
+        EngineServices.InputsService.ResetInputAxis();
 
         base.Update(gameTime);
     }

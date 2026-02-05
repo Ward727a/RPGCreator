@@ -782,7 +782,7 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
         Stats = stats ?? new Dictionary<Ulid, CharacterStats>();
         _features = features;
         RolePlayInfo = rolePlayInfo;
-        
+        Urn = new URN("character", $"{Name}@{Unique}");
         RefreshStats();
     }
     

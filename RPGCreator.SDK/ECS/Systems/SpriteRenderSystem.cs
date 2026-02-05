@@ -22,6 +22,7 @@ using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Animations;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Types.Collections;
 
 namespace RPGCreator.SDK.ECS.Systems;
 
@@ -62,8 +63,8 @@ public class SpriteRenderSystem : ISystem
     {
         var renderer = RuntimeServices.RenderService;
         
-        var transformSet = _componentManager.GetSet<TransformComponent>();
-        var spriteSet = _componentManager.GetSet<SpriteComponent>();
+        var transformSet = _componentManager.GetCompSet<TransformComponent>();
+        var spriteSet = _componentManager.GetCompSet<SpriteComponent>();
         
         foreach (var entityId in _componentManager.Query<SpriteComponent, TransformComponent>())
         {

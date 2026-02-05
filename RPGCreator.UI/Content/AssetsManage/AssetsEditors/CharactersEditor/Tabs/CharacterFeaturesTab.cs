@@ -5,6 +5,7 @@ using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -51,6 +52,7 @@ public class CharacterFeaturesTab : UserControl
         CreateComponents();
         RegisterEvents();
         Content = Body;
+        LoadFeatures();
     }
     #endregion
     
@@ -98,6 +100,19 @@ public class CharacterFeaturesTab : UserControl
     private void RegisterEvents()
     {
         AddFeatureButton.Click += OnAddFeatureButtonClick;
+    }
+
+    private void LoadFeatures()
+    {
+        if (Data != null)
+        {
+            foreach (var feature in Data.Features)
+            {
+                if (feature.IsSubFeature) return;
+                var _featureControl = new FeatureItemControl(feature.ToEntityFeature());
+                FeaturesList.Children.Add(_featureControl);
+            }
+        }
     }
     
     #endregion
@@ -273,7 +288,7 @@ public class FeatureItemControl : UserControl
             ColumnDefinitions = new ColumnDefinitions("Auto, *, Auto"),
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            Margin = new Avalonia.Thickness(5)
+            Margin = new Avalonia.Thickness(5),
         };
         PropExpander.Header = ExpanderBodyGrid;
         
@@ -300,7 +315,8 @@ public class FeatureItemControl : UserControl
         FeatureNameLabel = new TextBlock
         {
             Text = Feature.FeatureName,
-            FontWeight = Avalonia.Media.FontWeight.Bold
+            FontWeight = Avalonia.Media.FontWeight.Bold,
+            FontSize = 18,
         };
         
         LeftExpanderContentPanel.Children.Add(FeatureNameLabel);
@@ -332,6 +348,38 @@ public class FeatureItemControl : UserControl
         PropExpander.Content = ExpanderContent;
         
         Content = PropExpander;
+
+        if (Feature is BaseMacroEntityFeature baseMacroEntityFeature)
+        {
+            var debug_subFeature = new Expander()
+            {
+                Header = "[DEBUG] Sub-Features",
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Top,
+                Margin = new Thickness(0, 5, 0, 5)
+            };
+            
+            var debug_subFeaturePanel = new StackPanel()
+            {
+                Orientation = Orientation.Vertical,
+                Margin = new Thickness(5),
+                HorizontalAlignment = HorizontalAlignment.Stretch
+            };
+            debug_subFeature.Content = debug_subFeaturePanel;
+            ExpanderContent.Children.Add(debug_subFeature);
+            debug_subFeaturePanel.Children.Add(new TextBlock()
+            {
+                Text = "This group add the following sub-features:"
+            });
+            foreach (var subFeature in baseMacroEntityFeature.RequiredFeatures)
+            {
+                debug_subFeaturePanel.Children.Add(new TextBlock()
+                {
+                    Text = $"{subFeature.FeatureName} ({subFeature.FeatureUrn})",
+                    Margin = new Thickness(0, 2, 0, 2)
+                });
+            }
+        }
     }
     
     private void RegisterEvents()

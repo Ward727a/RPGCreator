@@ -40,7 +40,6 @@ namespace RPGCreator.Core
         public GameFactory GameFactory { get; private set; }
         public ProjectsManager Projects { get; private set; }
         public BrushManager Brush { get; private set; }
-        public ImageCache ImageCache { get; private set; }
         public CommandManager Commands { get; private set; }
         
         public FeaturesRulesManager FeaturesRules { get; private set; }
@@ -51,7 +50,6 @@ namespace RPGCreator.Core
             Projects = new ProjectsManager();
             GameFactory = new GameFactory();
             Brush = new BrushManager();
-            ImageCache = new ImageCache();
             FeaturesRules = new FeaturesRulesManager();
             Commands = new CommandManager();
             
@@ -65,8 +63,6 @@ namespace RPGCreator.Core
             Brush.AddBrush(new SimpleBrush());
             Brush.AddBrush(new EraserBrush());
 
-            EngineCore.Instance.Events.OnCoreManagersReady(new());
-            
             _logger.Info($"EngineManagers initialized.");
         }
 

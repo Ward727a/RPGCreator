@@ -138,26 +138,30 @@ public class MovementSystem(int animationStateIdx, int animationDirStateIdx, int
 
     public override void Update(TimeSpan deltaTime)
     {
+        
         foreach (var entityId in _componentManager.Query<MovementComponent, TransformComponent, StateComponent>())
         {
             ref var moveComponent = ref _componentManager.GetComponent<MovementComponent>(entityId);
             ref var transformComponent = ref _componentManager.GetComponent<TransformComponent>(entityId);
             ref var stateComponent = ref _componentManager.GetComponent<StateComponent>(entityId);
             
-            switch (moveComponent.MovementType)
+            if (!RuntimeServices.GameSession.IsPaused)
             {
-                case MovementType.FourDir:
-                    HandleMovement4(ref moveComponent, ref transformComponent, deltaTime);
-                    break;
-                case MovementType.EightDir:
-                    HandleMovement8(ref moveComponent, ref transformComponent, deltaTime);
-                    break;
-                case MovementType.FreeDir:
-                    HandleMovementFree(ref moveComponent, ref transformComponent, deltaTime);
-                    break;
+                switch (moveComponent.MovementType)
+                {
+                    case MovementType.FourDir:
+                        HandleMovement8(ref moveComponent, ref transformComponent, deltaTime);
+                        break;
+                    case MovementType.EightDir:
+                        HandleMovement8(ref moveComponent, ref transformComponent, deltaTime);
+                        break;
+                    case MovementType.FreeDir:
+                        HandleMovementFree(ref moveComponent, ref transformComponent, deltaTime);
+                        break;
+                }
             }
 
-            if (moveComponent.Direction != Vector2.Zero)
+            if (moveComponent.Direction != Vector2.Zero && !RuntimeServices.GameSession.IsPaused)
                 stateComponent.GetInt(animationStateIdx) = walkId;
             else
                 stateComponent.GetInt(animationStateIdx) = idleId;

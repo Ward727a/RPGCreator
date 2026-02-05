@@ -8,17 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="11.3.6" />
-    <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.3.0" />
-    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.6" />
-    <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="11.3.6" />
-    <PackageReference Include="AvaloniaEdit.TextMate" Version="11.3.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="IronSoftware.System.Drawing" Version="2025.3.6" />
     <PackageReference Include="LiteDB" Version="5.0.21" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
-    <PackageReference Include="MonoGame.Extended" Version="4.0.4" />
-    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.3" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="Serilog" Version="4.3.1-dev-02373" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.1-dev-00953" />
@@ -29,6 +20,7 @@
   <ItemGroup>
     <Folder Include="Managers\CommandManager\" />
     <Folder Include="Managers\RTP\" />
+    <Folder Include="Resources\" />
     <Folder Include="Types\Assets\Skills\" />
     <Folder Include="Types\Assets\Tilesets\IntGridTileset\" />
     <Folder Include="Types\Blueprint\Nodes\Entity\Position\" />

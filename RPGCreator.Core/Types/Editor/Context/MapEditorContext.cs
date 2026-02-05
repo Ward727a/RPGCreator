@@ -1,6 +1,5 @@
 using RPGCreator.Core.Types.Editor.Visual.PaintTargets;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;

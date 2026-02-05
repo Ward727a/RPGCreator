@@ -1,15 +1,19 @@
 using System.Runtime.CompilerServices;
 using RPGCreator.SDK.ECS;
 
-namespace RPGCreator.Core.Types.Internal;
+namespace RPGCreator.SDK.Types.Collections;
 public interface ISparseSet
 {
     int Count { get; }
     ReadOnlySpan<int> EntitiesSpan { get; }
     bool Contains(int entityId);
+
+    public bool IsTag { get; }
 }
 public sealed class ECSSparseSet<T> : ISparseSet where T : IComponent
 {
+    public bool IsTag => false;
+    
     private T[] dense;        // Dense are the actual components
     private int[] sparse;     // entityId => dense index
     private int[] entities;   // dense index => entityId

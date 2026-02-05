@@ -1,4 +1,0 @@
-{
-    "description": "Contains event-related functionalities, and mostly events used in the engine and that should be exposed to the .UI and .RTP projects.",
-    "ignore_dir": ["EventArgs"]
-}

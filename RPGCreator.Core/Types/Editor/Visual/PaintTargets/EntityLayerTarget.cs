@@ -1,5 +1,4 @@
 using System.Numerics;
-using RPGCreator.Core.Types.Map;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Editor;

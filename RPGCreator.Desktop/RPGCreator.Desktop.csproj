@@ -29,10 +29,10 @@
 
     <Target Name="CopyPlayerAssets" AfterTargets="Build">
         <ItemGroup>
-            <UIAssets Include="..\RPGCreator.UI\Assets\Modules\**\*.*" />
+            <ModuleAssets Include="..\RPGCreator.UI\Assets\Modules\**\*.*" />
         </ItemGroup>
 
-        <Copy SourceFiles="@(UIAssets)"
+        <Copy SourceFiles="@(ModuleAssets)"
               DestinationFolder="$(OutputPath)..\..\..\..\RPGCreator.Player\bin\Debug\net9.0\Modules\%(RecursiveDir)"
               SkipUnchangedFiles="true" />
     </Target>

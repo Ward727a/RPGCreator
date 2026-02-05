@@ -18,7 +18,6 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using Avalonia.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RPGCreator.SDK.Types;

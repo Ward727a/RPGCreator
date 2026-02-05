@@ -1,5 +1,4 @@
 using System.Numerics;
-using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
@@ -116,7 +115,7 @@ public class AutoTileSolver : IAutoTileSolver
                     continue;
                 
                 var targetValue = constraint.IsRelative ? centerValue : constraint.TargetValue;
-                var neighborValue = layer.GetValue(new Point(position.X + (x * GridSize), position.Y + (y * GridSize)));
+                var neighborValue = layer.GetValue(new Vector2(position.X + (x * GridSize), position.Y + (y * GridSize)));
 
                 switch (constraint.Condition)
                 {
@@ -152,7 +151,7 @@ public class AutoTileSolver : IAutoTileSolver
                     continue;
                 
                 var targetValue = constraint.IsRelative ? centerValue : constraint.TargetValue;
-                var neighborValue = layer.GetValue(new Point(position.X + (-x * GridSize), position.Y + (y * GridSize)));
+                var neighborValue = layer.GetValue(new Vector2(position.X + (-x * GridSize), position.Y + (y * GridSize)));
 
                 switch (constraint.Condition)
                 {
@@ -187,7 +186,7 @@ public class AutoTileSolver : IAutoTileSolver
                     continue;
                 
                 var targetValue = constraint.IsRelative ? centerValue : constraint.TargetValue;
-                var neighborValue = layer.GetValue(new Point(position.X + (x * GridSize), position.Y + (-y * GridSize)));
+                var neighborValue = layer.GetValue(new Vector2(position.X + (x * GridSize), position.Y + (-y * GridSize)));
 
                 switch (constraint.Condition)
                 {

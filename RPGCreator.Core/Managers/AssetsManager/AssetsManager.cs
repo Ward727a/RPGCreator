@@ -67,7 +67,6 @@ namespace RPGCreator.Core.Managers.AssetsManager
         readonly Dictionary<Ulid, IAssetsPack> AssetsPacks = [];
         readonly Dictionary<string, Ulid> AssetsPacksMapping = [];
 
-        public AssetsManagerEvent Event;
         
         #region Registries
         
@@ -362,7 +361,6 @@ namespace RPGCreator.Core.Managers.AssetsManager
         
         public AssetsManager()
         {
-            Event = new();
             
             // Register default registries
             RegisterRegistry(new SkillEffectsRegistry());

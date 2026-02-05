@@ -1,12 +1,22 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
 using Avalonia.Layout;
 using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.SDK.ECS.Features;
+using RPGCreator.SDK.Extensions;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor;
+using Ursa.Controls;
+using AutoCompleteBox = Avalonia.Controls.AutoCompleteBox;
 
 namespace RPGCreator.UI.Content.AssetsManage.Components;
 
@@ -27,7 +37,15 @@ public class CharacterManageItem : UserControl
     public Grid Body { get; private set; }
     
     public Image CharacterImage { get; private set; }
+    
+    public StackPanel InfoPanel { get; private set; }
     public TextBlock NameTextBlock { get; private set; }
+    public TextBlock UrnTextBlock { get; private set; }
+    
+    public StackPanel ButtonsPanel { get; private set; }
+    public Button EditButton { get; private set; }
+    public Button DeleteButton { get; private set; }
+    
     #endregion
     
     #region constructor
@@ -44,7 +62,7 @@ public class CharacterManageItem : UserControl
     {
         Body = new Grid()
         {
-            ColumnDefinitions = new ColumnDefinitions("64, *"),
+            ColumnDefinitions = new ColumnDefinitions("64, *, Auto"),
             HorizontalAlignment = HorizontalAlignment.Stretch
         };
         
@@ -58,14 +76,54 @@ public class CharacterManageItem : UserControl
         Body.Children.Add(CharacterImage);
         Grid.SetColumn(CharacterImage, 0);
         
+        InfoPanel = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
+            Margin = new Avalonia.Thickness(5)
+        };
+        Body.Children.Add(InfoPanel);
+        Grid.SetColumn(InfoPanel, 1);
+        
         NameTextBlock = new TextBlock
         {
             Text = CharacterData.Name,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Avalonia.Thickness(5, 0, 0, 0)
         };
-        Body.Children.Add(NameTextBlock);
-        Grid.SetColumn(NameTextBlock, 1);
+        InfoPanel.Children.Add(NameTextBlock);
+        
+        UrnTextBlock = new TextBlock
+        {
+            Text = CharacterData.Urn.ToString(),
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Avalonia.Thickness(5, 0, 0, 0),
+            FontSize = 10,
+            Opacity = 0.6
+        };
+        InfoPanel.Children.Add(UrnTextBlock);
+        
+        ButtonsPanel = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
+            Margin = new Avalonia.Thickness(5)
+        };
+        Body.Children.Add(ButtonsPanel);
+        Grid.SetColumn(ButtonsPanel, 2);
+        
+        EditButton = new Button
+        {
+            Content = "Edit",
+            Margin = new Avalonia.Thickness(5)
+        };
+        ButtonsPanel.Children.Add(EditButton);
+        
+        DeleteButton = new Button
+        {
+            Content = "Delete",
+            Margin = new Avalonia.Thickness(5)
+        };
+        ButtonsPanel.Children.Add(DeleteButton);
+        
     }
 
     private void RegisterEvents()
@@ -98,6 +156,8 @@ public class CharactersManageControl : UserControl
 
     public CharacterData? SelectedCharacterData;
     
+    public List<String> AvailableCharNames { get; private set; } = new List<string>();
+    
     #endregion
     
     #region Components
@@ -105,23 +165,22 @@ public class CharactersManageControl : UserControl
     
         #region FiltersComponents
         public Grid FiltersGrid { get; private set; }
-        public TextBox Filter_Search { get; private set; }
+        public AutoCompleteBox Filter_Search { get; private set; }
         public StackPanel Filter_Options { get; private set; }
         public StackPanel Filter_ButtonsBar { get; private set; }
-        public Button Filter_Apply { get; private set; }
         public Button Filter_Reset { get; private set; }
         #endregion
         
         #region FooterComponents
-        public Grid FooterGrid { get; private set; }
+        public StackPanel FooterGrid { get; private set; }
         public Button Footer_Add { get; private set; }
         public Button Footer_Edit { get; private set; }
         public Button Footer_Delete { get; private set; }
-        public Button Footer_Refresh { get; private set; }
         #endregion
         
         #region ViewComponents
-        public StackPanel ViewPanel { get; private set; }
+        public ScrollViewer ViewComponents { get; private set; }
+        public ListBox ViewPanel { get; private set; }
         #endregion
     
     #endregion
@@ -141,10 +200,10 @@ public class CharactersManageControl : UserControl
         Body = new Grid()
         {
             RowDefinitions = new RowDefinitions("Auto, *, Auto"),
-            Margin = new Avalonia.Thickness(5)
         };
         
         CreateFiltersComponents();
+        LoadCharacters();
         CreateViewComponents();
         CreateFooterComponents();
     }
@@ -154,15 +213,17 @@ public class CharactersManageControl : UserControl
         FiltersGrid = new Grid()
         {
             RowDefinitions = new RowDefinitions("*, *, *"),
-            Margin = new Avalonia.Thickness(5)
+            RowSpacing = 5,
+            Margin = new Thickness(5)
         };
         Body.Children.Add(FiltersGrid);
         Grid.SetRow(FiltersGrid, 0);
         
-        Filter_Search = new TextBox
+        Filter_Search = new AutoCompleteBox()
         {
             Watermark = "Search characters...",
-            Margin = new Avalonia.Thickness(5)
+            FilterMode = AutoCompleteFilterMode.Contains,
+            ItemsSource = _filteredCharacterDatas
         };
         FiltersGrid.Children.Add(Filter_Search);
         Grid.SetRow(Filter_Search, 0);
@@ -170,7 +231,7 @@ public class CharactersManageControl : UserControl
         Filter_Options = new StackPanel
         {
             Orientation = Orientation.Horizontal,
-            Margin = new Avalonia.Thickness(5)
+            Spacing = 5
         };
         FiltersGrid.Children.Add(Filter_Options);
         Grid.SetRow(Filter_Options, 1);
@@ -179,41 +240,90 @@ public class CharactersManageControl : UserControl
         {
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Right,
-            Margin = new Avalonia.Thickness(5)
+            Spacing = 5
         };
         FiltersGrid.Children.Add(Filter_ButtonsBar);
         Grid.SetRow(Filter_ButtonsBar, 2);
         
-        Filter_Apply = new Button
-        {
-            Content = "Apply Filters",
-            Margin = new Avalonia.Thickness(5)
-        };
-        Filter_ButtonsBar.Children.Add(Filter_Apply);
-        
         Filter_Reset = new Button
         {
             Content = "Reset Filters",
-            Margin = new Avalonia.Thickness(5)
         };
         Filter_ButtonsBar.Children.Add(Filter_Reset);
     }
 
+    private IEnumerable<CharacterData> _characterDatas;
+    private ObservableCollection<CharacterData> _filteredCharacterDatas = new ObservableCollection<CharacterData>();
+    private void LoadCharacters()
+    {
+        _characterDatas = EngineServices.AssetsManager.GetAssets<CharacterData>();
+        RefreshFilters();
+    }
+
     private void CreateViewComponents()
     {
-        ViewPanel = new StackPanel()
+        ViewComponents = new ScrollViewer()
         {
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             Margin = new Avalonia.Thickness(5)
         };
-        Body.Children.Add(ViewPanel);
-        Grid.SetRow(ViewPanel, 1);
+        Body.Children.Add(ViewComponents);
+        Grid.SetRow(ViewComponents, 1);
+        
+        ViewPanel = new ListBox()
+        {
+            Margin = new Avalonia.Thickness(5),
+            ItemsSource = _filteredCharacterDatas,
+            ItemTemplate = new FuncDataTemplate<CharacterData>((charactersData, _) =>
+            {
+                if (charactersData == null) return null;
+                return new CharacterManageItem(charactersData);
+            }),
+        };
+
+        ViewComponents.Content = (ViewPanel);
+    }
+
+    private string _filterSearchText = "";
+    
+    private void RefreshFilters()
+    {
+        Filter_Search.ItemsSource = null;
+        _filteredCharacterDatas.Clear();
+        AvailableCharNames.Clear();
+        
+        var filtered = _characterDatas.Where(characterData =>
+        {
+            if (!string.IsNullOrWhiteSpace(_filterSearchText))
+            {
+                var search = _filterSearchText.ToLower();
+                bool matches = characterData.Name.ToLower().Contains(search);
+                if (!matches) return false;
+            }
+            // Add more filter conditions here
+            
+            return true;
+        });
+        
+        foreach (var characterData in filtered)
+        {
+            _filteredCharacterDatas.Add(characterData);
+            AvailableCharNames.Add(characterData.Name);
+        }
+        
+        Filter_Search.ItemsSource = AvailableCharNames;
     }
 
     private void CreateFooterComponents()
     {
-        FooterGrid = new Grid()
+        FooterGrid = new StackPanel()
         {
-            ColumnDefinitions = new ColumnDefinitions("Auto, Auto, Auto, Auto"),
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Center,
+            Spacing = 5,
+            Margin = new Thickness(5)
         };
         Body.Children.Add(FooterGrid);
         Grid.SetRow(FooterGrid, 2);
@@ -221,34 +331,20 @@ public class CharactersManageControl : UserControl
         Footer_Add = new Button
         {
             Content = "Add Character",
-            Margin = new Avalonia.Thickness(5)
         };
         FooterGrid.Children.Add(Footer_Add);
-        Grid.SetColumn(Footer_Add, 0);
         
         Footer_Edit = new Button
         {
             Content = "Edit Character",
-            Margin = new Avalonia.Thickness(5)
         };
         FooterGrid.Children.Add(Footer_Edit);
-        Grid.SetColumn(Footer_Edit, 1);
         
         Footer_Delete = new Button
         {
             Content = "Delete Character",
-            Margin = new Avalonia.Thickness(5)
         };
         FooterGrid.Children.Add(Footer_Delete);
-        Grid.SetColumn(Footer_Delete, 2);
-        
-        Footer_Refresh = new Button
-        {
-            Content = "Refresh",
-            Margin = new Avalonia.Thickness(5)
-        };
-        FooterGrid.Children.Add(Footer_Refresh);
-        Grid.SetColumn(Footer_Refresh, 3);
     }
 
     private void RegisterEvents()
@@ -264,10 +360,29 @@ public class CharactersManageControl : UserControl
     
     private void RegisterFiltersEvents()
     {
+        Filter_Search.TextChanged += (_, e) =>
+        {
+            _filterSearchText = Filter_Search.Text ?? "";
+            Dispatcher.UIThread.Post(RefreshFilters, DispatcherPriority.Normal);
+        };
+        
+        Filter_Reset.Click += (_, e) =>
+        {
+            _filterSearchText = "";
+            Filter_Search.Text = "";;
+            Dispatcher.UIThread.Post(RefreshFilters, DispatcherPriority.Normal);
+        };
     }
 
     private void RegisterViewEvents()
     {
+        ViewPanel.SelectionChanged += (_, e) =>
+        {
+            if (ViewPanel.SelectedItem is CharacterData characterData)
+            {
+                SelectedCharacterData = characterData;
+            }
+        };
     }
 
     private void RegisterFooterEvents()
@@ -275,26 +390,11 @@ public class CharactersManageControl : UserControl
         Footer_Add.Click += OnAddCharacter;
         Footer_Edit.Click += OnEditCharacter;
         Footer_Delete.Click += OnDeleteCharacter;
-        Footer_Refresh.Click += OnRefreshCharacters;
     }
 
     private void ReloadView()
     {
-        ViewPanel.Children.Clear();
         
-        foreach (var assetData in EngineServices.AssetsManager.SearchAllPacks<CharacterData>())
-        {
-            if (!EngineServices.AssetsManager.TryResolveAsset(assetData.AssetId, out CharacterData? characterData)) continue;
-            
-            var item = new CharacterManageItem(characterData);
-            item.OnSelected += (data) =>
-            {
-                OnSelectedCharacter?.Invoke();
-                SelectedCharacterData = data;
-            };
-            ViewPanel.Children.Add(item);
-
-        }
     }
     
     #endregion
@@ -315,22 +415,18 @@ public class CharactersManageControl : UserControl
     {
         var host_ = ((AssetsManageWindow)this.GetVisualRoot()!);
         var data = new CharacterData("");
-        data.AddFeatureConfig(new SpriteFeature());
         var characterEditor = new CharacterEditorWindowControl(data);
         host_.OpenCustom(characterEditor);
-        OnNeedRefresh?.Invoke();
     }
     
     private void OnEditCharacter(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (SelectedCharacterData == null)
+        if (SelectedCharacterData != null)
         {
-            // Show a message or handle the case where no character is selected
-            return;
+            var host_ = ((AssetsManageWindow)this.GetVisualRoot()!);
+            var characterEditor = new CharacterEditorWindowControl(SelectedCharacterData);
+            host_.OpenCustom(characterEditor);
         }
-        
-        // Logic to edit the selected character
-        OnNeedRefresh?.Invoke();
     }
     
     private void OnDeleteCharacter(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -341,12 +437,6 @@ public class CharactersManageControl : UserControl
             return;
         }
         
-        OnNeedRefresh?.Invoke();
-    }
-    
-    private void OnRefreshCharacters(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
-    {
-        OnNeedRefresh?.Invoke();
     }
     
     #endregion

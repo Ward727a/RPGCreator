@@ -68,7 +68,9 @@ public class AnimationFeature : BaseEntityFeature
             CurrentAnimation = 0,
             CurrentDirection = EntityDirection.Center.ToInt(),
             SpeedMultiplier = 1.0f,
-            IsPlaying = false
+            IsPlaying = false,
+            LastWorkingAnimation = -1,
+            LastWorkingDirection = -1
         });
     }
 
@@ -97,6 +99,9 @@ public struct AnimationComponent : IComponent
     
     public bool IsPlaying;
     public float SpeedMultiplier;
+    
+    public int LastWorkingAnimation;
+    public int LastWorkingDirection;
 }
 
 public class AnimationSystem(int animationStateIdx, int animationDirStateIdx) : ISystem
@@ -128,18 +133,42 @@ public class AnimationSystem(int animationStateIdx, int animationDirStateIdx) : 
 
             if (desiredAnimation < 0)
                 desiredAnimation = 0;
-            
+
             if (!charStateComponent.AnimationsMapping.TryGetValue(desiredAnimation, out var animSet))
-                continue;
+            {
+                if(animationComponent.LastWorkingAnimation == -1)
+                    continue;
+                Logger.Error("[AnimationSystem] Failed to find animation set for animation ID: {animId} - Trying fallback with last working animationId.", desiredAnimation);
+                desiredAnimation = animationComponent.LastWorkingAnimation;
+                if (!charStateComponent.AnimationsMapping.TryGetValue(desiredAnimation, out animSet))
+                {
+                    animationComponent.LastWorkingAnimation = -1;
+                    Logger.Error("[AnimationSystem] Failed to find fallback animation set for animation ID: {animId} - Stopping animation.", desiredAnimation);
+                    continue;
+                }
+                
+                Logger.Warning("[AnimationSystem] Successfully found fallback animation set for animation ID: {animId}.", desiredAnimation);
+            }
             
             if (!animSet.Animations.TryGetValue(desiredDirection, out var animId))
-                continue;
+            {
+                if(animationComponent.LastWorkingDirection == -1)
+                    continue;
+                Logger.Error("[AnimationSystem] Failed to find animation for direction ID: {dirId} in animation set for animation ID: {animId} - Trying fallback with last working direction.", desiredDirection, desiredAnimation);
+                desiredDirection = animationComponent.LastWorkingDirection;
+                if (!animSet.Animations.TryGetValue(desiredDirection, out animId))
+                {
+                    Logger.Error("[AnimationSystem] Failed to find animation for direction ID: {dirId} in animation set for animation ID: {animId} - Stopping animation.", desiredDirection, desiredAnimation);
+                    animationComponent.LastWorkingDirection = -1;
+                    continue;
+                }
+                Logger.Warning("[AnimationSystem] Successfully found fallback animation for direction ID: {dirId} in animation set for animation ID: {animId}.", desiredDirection, desiredAnimation);
+            }
             
             var anim = animId;
             
             if(animationComponent.CurrentAnimationId != anim)
             {
-                // Start new animation
                 animationComponent.CurrentAnimationId = anim;
                 animationComponent.CurrentAnimationDef = null;
                 animationComponent.ElapsedTime = 0;
@@ -157,6 +186,8 @@ public class AnimationSystem(int animationStateIdx, int animationDirStateIdx) : 
                         animationComponent.CurrentAnimationDef = animDef;
                         spriteComponent.SpritesheetId = animDef.SpritesheetId;
                         spriteComponent.CurrentFrameIndex = animDef.FrameIndexes[animationComponent.CurrentFrame];
+                        animationComponent.LastWorkingAnimation = desiredAnimation;
+                        animationComponent.LastWorkingDirection = desiredDirection;
                     }
                     else
                     {

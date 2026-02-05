@@ -40,4 +40,6 @@ public class DefaultGameSession : ObservableObject, IGameSession
             }
         }
     }
+
+    public bool IsPaused { get; set; } = true;
 }

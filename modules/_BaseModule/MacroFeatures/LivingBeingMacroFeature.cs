@@ -21,6 +21,7 @@
 using _BaseModule.Features.Entity;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Types;
 
@@ -38,8 +39,17 @@ public class LivingBeingMacroFeature : BaseMacroEntityFeature
     public MovementType MovementType
     {
         get => GetSharedConfigurationValue(MovementFeature.Urn, MovementType.FourDir);
-        set => GetSharedConfigurationValue(MovementFeature.Urn, value);
+        set => SetSharedConfigurationValue(MovementFeature.Urn, value);
     }
+    
+
+    [EntityFeatureProperty("Player Controlled", "If enabled, this entity can be controlled by the player.", Category = "Control")]
+    public bool ShouldBePlayerControlled
+    {
+        get => GetConfig(true);
+        set => SetConfig(value);
+    }
+
     
     [EntityFeatureProperty("Speed", "Defines the movement speed of the entity.", MinValue = 0, Category = "Movement")]
     public int Speed
@@ -48,7 +58,6 @@ public class LivingBeingMacroFeature : BaseMacroEntityFeature
         set => SetConfigurationValue(MovementFeature.Urn, value);
     }
     
-    
     public override void OnSetup()
     {
         var fm = EngineServices.FeaturesManager;
@@ -56,5 +65,14 @@ public class LivingBeingMacroFeature : BaseMacroEntityFeature
         fm.OnceEntityFeaturesRegistered(MovementFeature.Urn, RegisterSubFeature);
         fm.OnceEntityFeaturesRegistered(AnimationFeature.Urn, RegisterSubFeature);
         // More to come...
+    }
+
+    public override void OnInject(BufferedEntity entity, IEntityDefinition entityDefinition)
+    {
+        base.OnInject(entity, entityDefinition);
+        if (ShouldBePlayerControlled)
+        {
+            entity.AddComponent(new PlayerTagComponent());
+        }
     }
 }

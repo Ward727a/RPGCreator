@@ -24,7 +24,6 @@
 #endregion
 
 using RPGCreator.Core.Configs.Helpers;
-using RPGCreator.Core.Types.Assets;
 using RPGCreator.Core.Types.Map;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Projects;
@@ -55,8 +54,6 @@ namespace RPGCreator.Core.Types.Project
 
         public ProjectGameData GameData { get; set; }
 
-        public ProjectEvent Event;
-
         #region PropertyEvent
 
 
@@ -64,14 +61,12 @@ namespace RPGCreator.Core.Types.Project
 
         public BaseProject()
         {
-            Event = new ProjectEvent();
             GameData = new ProjectGameData(this);
         }
         
         public BaseProject(string name)
         {
             Name = name;
-            Event = new ProjectEvent();
             GameData = new ProjectGameData(this);
             Id = Ulid.NewUlid();
         }
@@ -80,17 +75,6 @@ namespace RPGCreator.Core.Types.Project
         {
             ProjectsConf conf = EngineCore.Instance.Configs.GetConfig<ProjectsConf>("ProjectsConf");
             conf.SaveProject(this, false);
-        }
-
-        private string[] FormatString(string unformatedString)
-        {
-            return unformatedString.Split([':'], StringSplitOptions.TrimEntries);
-        }
-        public List<T> GetAssetsType<T>(BaseAsset.TYPE type) where T:BaseAsset
-        {
-            List<T> assets_found = [];
-
-            return assets_found;
         }
 
         public SerializationInfo GetObjectData()

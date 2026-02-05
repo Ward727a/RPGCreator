@@ -26,15 +26,12 @@
 using RPGCreator.Core.Common;
 using RPGCreator.Core.Configs;
 using RPGCreator.Core.ECS;
-using RPGCreator.Core.Events;
-using RPGCreator.Core.Events.EventArgs;
 using RPGCreator.Core.Inputs;
 using RPGCreator.Core.Inputs.Keyboard;
 using RPGCreator.Core.Inputs.Mouse;
 using RPGCreator.Core.Module;
 using RPGCreator.Core.Parser.Graph;
 using RPGCreator.Core.Parser.PRATT;
-using RPGCreator.Core.Resources;
 using RPGCreator.Core.Scheduler;
 using RPGCreator.Core.Types.Editor.Context;
 using RPGCreator.Core.Types.Map.Layers.AutoLayer;
@@ -48,7 +45,6 @@ using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules;
 using RPGCreator.SDK.Types;
-using RPGCreator.SDK.Types.Interfaces;
 using SDKAutoTileSolver = RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer.AutoTileSolver;
 
 namespace RPGCreator.Core
@@ -85,7 +81,6 @@ namespace RPGCreator.Core
 
         internal EngineScheduler Scheduler { get; private set; }
         internal EngineConfigs Configs { get; private set; }
-        internal EngineEvents Events { get; private set; }
         internal EngineManagers Managers { get; private set; }
         internal EngineModules Modules { get; private set; }
         internal EngineSerializer Serializer { get; private set; }
@@ -129,9 +124,6 @@ namespace RPGCreator.Core
             
             EngineResourcesService resService = new EngineResourcesService();
             
-            if(mode == EEngineMode.EditorMode)
-                resService.RegisterLoader<Avalonia.Media.Imaging.Bitmap>(new AvaloniaBitmapLoader());
-            
             EngineServices.ResourcesService = resService;
             
             Instance = this;
@@ -140,7 +132,6 @@ namespace RPGCreator.Core
             Serializer = new EngineSerializer();
             EngineServices.SerializerService = Serializer;
             Configs = new EngineConfigs();
-            Events = new EngineEvents();
             Managers = new EngineManagers();
             #if DEBUG
             // In debug mode, we load the engine icons for debug tools (like IconsExplorer).
@@ -209,7 +200,7 @@ namespace RPGCreator.Core
 
         }
 
-        public static bool LoadGameData(IGameData data)
+        public static (bool success, Ulid mapId) LoadGameData(IGameData data)
         {
             var directoryPath = AppContext.BaseDirectory;
             var acceptedHashes = data.AcceptedModuleHashes;
@@ -220,19 +211,19 @@ namespace RPGCreator.Core
             if (!File.Exists(projectPath))
             {
                 Logger.Critical("Project file not found: {ProjectPath}", args: projectPath);
-                return false;
+                return (false, Ulid.Empty);
             }
             
             if (!EngineServices.ProjectsManager.TryGetProject(data.ProjectPath, out var project))
             {
                 Logger.Critical("Failed to load project at path: {ProjectPath}", args: data.ProjectPath);
-                return false;
+                return (false, Ulid.Empty);
             }
             
             if (!Directory.Exists(moduleDirectory))
             {
                 Logger.Critical("Module directory not found: {ModuleDirectory}", args: moduleDirectory);
-                return false;
+                return (false, Ulid.Empty);
             }
             
             var dllList = Directory.GetFiles(moduleDirectory, "*.dll", SearchOption.AllDirectories);
@@ -272,73 +263,25 @@ namespace RPGCreator.Core
                 {
                     Logger.Critical(" - {ModuleUrn}", args: urn.ToString());
                 }
-                return false;
+                return (false, Ulid.Empty);
             }
 
             foreach (var startOrder in startOrders.Where(startOrder => !EngineServices.ModuleManager.StartModule(startOrder, new EngineSecurityToken())))
             {
                 Logger.Critical("Failed to start module: {ModuleUrn}", args: startOrder.ToString());
-                return false;
+                return (false, Ulid.Empty);
             }
             
             EngineServices.ProjectsManager.OpenProject(project);
 
             if (EngineServices.AssetsManager.TryResolveAsset(mainMapId, out IMapDef? _))
-                return RuntimeServices.MapService.LoadMap(mainMapId);
+                return (true, mainMapId);
             
             Logger.Critical("Failed to resolve main map with ID: {MapId}", args: mainMapId);
-            return false;
+            return (false, Ulid.Empty);
 
         }
 
-        private void SubscribeBaseEvents()
-        {
-            // Suscribe to base events here
-            Events.RTPReady += (sender, args) =>
-            {
-                IsRTPReady = true;
-            };
-
-            Events.UIReady += (sender, args) =>
-            {
-                IsUIReady = true;
-            };
-
-            Events.UIEditorOpened += (sender, args) =>
-            {
-                _openedWindowsCount++;
-            };
-
-            Events.UIEditorClosed += (sender, args) =>
-            {
-                _openedWindowsCount--;
-                if (_openedWindowsCount <= 0)
-                {
-                    // If no windows are opened, then we can close the engine.
-                    Events.OnEngineStopping(new());
-                }
-            };
-
-            Events.UILauncherOpened += (sender, args) =>
-            {
-                _openedWindowsCount++;
-            };
-
-            Events.UILauncherClosed += (sender, args) =>
-            {
-                _openedWindowsCount--;
-                if (_openedWindowsCount <= 0)
-                {
-                    // If no windows are opened, then we can close the engine.
-                    Events.OnEngineStopping(new());
-                }
-            };
-
-            Events.EngineStopping += (sender, args) =>
-            {
-                // This event is called when the engine is stopping, we can do some cleanup here.
-            };
-        }
 
 
         public static EEngineMode DetectedMode = EEngineMode.EditorMode;
@@ -348,7 +291,6 @@ namespace RPGCreator.Core
             Instance = new(mode);
 
             IsCoreReady = true;
-            Instance.Events.OnCoreReady(new());
             
             DetectedMode = mode;
 
@@ -368,10 +310,6 @@ namespace RPGCreator.Core
                 throw new Exception("Engine core has not been initialized, it should happen before starting the engine.");
 #endif
             }
-            // Start the engine
-            Instance.Events.OnEngineStarting(new EngineStartingArgs());
-
-            Instance.SubscribeBaseEvents();
 
             return Instance;
         }
