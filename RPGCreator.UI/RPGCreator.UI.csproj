@@ -8,32 +8,29 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <ItemGroup>
-    <AvaloniaResource Include="Assets\**">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </AvaloniaResource>
-    <AvaloniaResource Remove="Content\AssetsManage\AssetsEditors\AutotileEditor\**" />
-  </ItemGroup>
+    <ItemGroup>
+        <AvaloniaResource Include="Assets\**">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </AvaloniaResource>
+        <AvaloniaResource Remove="Content\AssetsManage\AssetsEditors\AutotileEditor\**" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <AvaloniaResource Remove="Assets\rpgc-logo.ico" />
-  </ItemGroup>
+    <ItemGroup>
+        <AvaloniaResource Remove="Assets\rpgc-logo.ico" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="Assets\TMGrammar\RPGFormula.tmLanguage.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\rpgc-logo.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-      <ProjectReference Include="..\RPGCreator.Generators\RPGCreator.Generators.csproj">
-          <OutputItemType>Analyzer</OutputItemType>
-          <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      </ProjectReference>
-  </ItemGroup>
-
+    <ItemGroup>
+        <Content Include="Assets\TMGrammar\RPGFormula.tmLanguage.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+        <Content Include="Assets\rpgc-logo.ico">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\RPGCreator.SDK.EditorUI\RPGCreator.SDK.EditorUI.csproj" />
+    </ItemGroup>
+    
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.6" />
     <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.3.0" />

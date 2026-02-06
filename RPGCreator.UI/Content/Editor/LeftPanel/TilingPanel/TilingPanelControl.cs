@@ -12,6 +12,7 @@ using RPGCreator.SDK.Extensions;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types.Collections;
+using RPGCreator.SDK.UI.UiService;
 using RPGCreator.UI.Common;
 using Ursa.Controls;
 using Size = System.Drawing.Size;
@@ -40,7 +41,7 @@ public class SetOptionItem : UserControl
         if (_previewImage != null)
             _previewImage.Source = EngineServices.ResourcesService.Load<Bitmap>(definition.ImagePath);
         Content = _body;
-        UIExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelTilingPanelTilesetItem, this);
+        UiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelTilingPanelTilesetItem, this);
     }
     
     private void CreateComponents()
@@ -159,7 +160,7 @@ public class TilingPanelControl : UserControl
         CreateComponents();
         RegisterEvents();
         Content = _body;
-        UIExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelTilingPanel, this);
+        UiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelTilingPanel, this);
     }
     
     private void CreateComponents()

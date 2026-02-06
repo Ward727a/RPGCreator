@@ -22,13 +22,17 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Numerics;
+using System.Security.Cryptography;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
+using RPGCreator.Player.ECS.Systems;
 using RPGCreator.Player.Extensions;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.RuntimeService;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 using Size = RPGCreator.SDK.Types.Size;
@@ -38,14 +42,55 @@ namespace RPGCreator.Player.Services;
 public class RenderService : IRenderService
 {
     
-    private readonly GraphicsDevice _graphicsDevice;
     private readonly SpriteBatch spriteBatch;
     private Size _cellSize = new(32f, 32f);
     private Vector2 _cellSizeAsVector = new(32f, 32f);
-    
-    public RenderService(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
+    private readonly List<RenderCommand> _ySortQueue = new();
+
+    public void SubmitToQueue(RenderCommand command)
     {
-        _graphicsDevice = graphicsDevice;
+        _ySortQueue.Add(command);
+    }
+
+    public void DrawSortedQueue()
+    {
+        if (_ySortQueue.Count == 0) return;
+        
+        // Sort by Y position (ascending)
+        _ySortQueue.Sort((a, b) => a.SortY.CompareTo(b.SortY));
+        
+        // Draw in sorted order
+        foreach (var command in _ySortQueue)
+        {
+            DirectDraw(
+                command.TexturePath,
+                command.Position,
+                command.SourceRect,
+                command.Color,
+                command.Rotation,
+                command.Origin,
+                command.Scale,
+                0f,
+                command.Effects
+            );
+        }
+        
+        _ySortQueue.Clear();
+    }
+    
+    /// <summary>
+    /// Just a quick (and dirty) way to add the RenderBatchSystem to the world, which is required for the RenderService to work properly.<br/>
+    /// This need to be moved / removed.
+    /// </summary>
+    /// <param name="world"></param>
+    public void AddSystemToWorld(IEcsWorld world)
+    {
+        if (world.SystemManager.GetDrawingSystems().Any(s => s is RenderBatchSystem)) return;
+        world.SystemManager.AddSystem(new RenderBatchSystem());
+    }
+    
+    public RenderService(SpriteBatch spriteBatch)
+    {
         this.spriteBatch = spriteBatch;
         
         RuntimeServices.MapService.OnMapLoaded += (_) =>
@@ -64,32 +109,18 @@ public class RenderService : IRenderService
     public void DrawTile(ITileDef tileDef, Vector2 tilePositionInChunk)
     {
         var texture = GetTilesetTexture(tileDef.TilesetDef);
-        
-        Rectangle sourceRect;
-        if (tileDef.Tags.TryGet<Rectangle>(out var rect))
-        {
-            sourceRect = rect;
-        }
-        else
-        {
-            sourceRect = new Rectangle(
-                (int)tileDef.PositionInTileset.X,
-                (int)tileDef.PositionInTileset.Y,
-                (int)tileDef.SizeInTileset.Width,
-                (int)tileDef.SizeInTileset.Height
-            );
-            tileDef.Tags.Set(sourceRect);
-        }
+
+        Rectangle sourceRect = InternalGetTileSourceRect(tileDef);
         spriteBatch.Draw(
             texture,
             tilePositionInChunk.ToXnaFast(),
             sourceRect,
             Microsoft.Xna.Framework.Color.White,
-            0f,             // Rotation
-            Vector2.Zero,   // Origin
+            0f,
+            Vector2.Zero,
             1f,
             SpriteEffects.None,
-            0.5f              // LayerDepth
+            0.4f
         );
     }
 
@@ -199,7 +230,7 @@ public class RenderService : IRenderService
             SortMode = trueSortMode,
             BlendState = BlendState.AlphaBlend,
             SamplerState = SamplerState.PointClamp,
-            DepthStencilState = DepthStencilState.Default,
+            DepthStencilState = DepthStencilState.None,
             RasterizerState = RasterizerState.CullNone,
             TransformMatrix = RuntimeServices.CameraService.GetViewMatrix().ToXnaFast()
         };
@@ -208,7 +239,7 @@ public class RenderService : IRenderService
             sortMode: trueSortMode,
             blendState: BlendState.AlphaBlend,
             samplerState: SamplerState.PointClamp,
-            depthStencilState: DepthStencilState.Default,
+            depthStencilState: DepthStencilState.None,
             rasterizerState: RasterizerState.CullNone,
             transformMatrix: RuntimeServices.CameraService.GetViewMatrix().ToXnaFast()
         );
@@ -238,6 +269,8 @@ public class RenderService : IRenderService
         );
     }
     
+    public int GetStackSize() => DrawingStateStack.Count;
+    
     public void DirectDraw(string texturePath, Vector2 position, System.Drawing.Rectangle? sourceRect = null, Color? tint = null, float rotation = 0, Vector2 origin = default,
         Vector2? scale = null, float layerDepth = 0, SDK.ECS.Components.SpriteEffects effects = SDK.ECS.Components.SpriteEffects.None)
     {
@@ -255,12 +288,12 @@ public class RenderService : IRenderService
         
         spriteBatch.Draw(
             texture,
-            position.ToXnaFast() + new Microsoft.Xna.Framework.Vector2(16, 24), // Offset for grid alignment (assuming 32x32 cells)
+            position.ToXnaFast(), // Offset for grid alignment (assuming 32x32 cells)
             finalSourceRect,
             xnaColor,
             rotation,
             origin.ToXnaFast(),
-            finalScale*2f,
+            finalScale,
             xnaEffects,
             layerDepth
         );
@@ -297,7 +330,33 @@ public class RenderService : IRenderService
     private BaseTilesetDef? _lastTilesetDef;
     private Texture2D? _lastTilesetTexture;
 
-    private Texture2D GetTilesetTexture(BaseTilesetDef tilesetDef)
+    public System.Drawing.Rectangle GetTileSourceRect(ITileDef tileDef)
+    {
+        return InternalGetTileSourceRect(tileDef).ToSystemFast();
+    }
+    
+    private Rectangle InternalGetTileSourceRect(ITileDef tileDef)
+    {
+        if (tileDef.Tags.TryGet<Rectangle>(out var rect))
+        {
+            return rect;
+        }
+        else
+        {
+            var newRect = new Rectangle(
+                (int)tileDef.PositionInTileset.X,
+                (int)tileDef.PositionInTileset.Y,
+                (int)tileDef.SizeInTileset.Width,
+                (int)tileDef.SizeInTileset.Height
+            );
+            tileDef.Tags.Set(newRect);
+            return newRect;
+        }
+    }
+    
+    
+    
+    public Texture2D GetTilesetTexture(BaseTilesetDef tilesetDef)
     {
         if(_lastTilesetDef == tilesetDef && _lastTilesetTexture != null)
         {

@@ -144,6 +144,7 @@ namespace RPGCreator.Core
             EngineServices.ECS = new EcsService();
             EngineServices.InputsService = new InputsService();
             EngineServices.ModulePathResolver = new ModulePathResolver();
+            EngineServices.GlobalPathData = new EngineGlobalPathData();
 
             Logger.Warning("---");
             Logger.Warning("NORMAL WARNING: The warning below can be ignored!");

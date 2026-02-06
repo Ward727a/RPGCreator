@@ -78,7 +78,7 @@ public class MovementFeature : BaseEntityFeature
     [EntityFeatureProperty("Speed", "Defines the movement speed of the entity.", MinValue = 0)]
     public int Speed
     {
-        get => GetConfig(5);
+        get => GetConfig(16);
         set => SetConfig(value);
     }
 

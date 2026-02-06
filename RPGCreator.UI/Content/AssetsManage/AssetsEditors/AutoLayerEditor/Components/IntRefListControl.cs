@@ -18,11 +18,13 @@ using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Commands;
-using RPGCreator.SDK.Contexts;
+using RPGCreator.SDK.EditorUI;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types.Collections;
 using RPGCreator.SDK.Types.Records;
+using RPGCreator.SDK.EditorUI.Contexts;
+using RPGCreator.SDK.UI.UiService;
 using RPGCreator.UI.Common;
 using RPGCreator.UI.Common.CustomBrush;
 using RPGCreator.UI.Common.TilesetsCommonComponents;
@@ -36,12 +38,6 @@ using Size = System.Drawing.Size;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutoLayerEditor.Components;
 
-public class IntRefContext
-{
-    public HashSet<IntGridValueRef> IntRefs { get; } = new();
-    
-    public Dictionary<int, List<AutoLayerRule>> RulesByIntRefValue { get; } = new();
-}
 
 public class IntRefListMenu : Grid
 {
@@ -58,7 +54,7 @@ public class IntRefListMenu : Grid
         HorizontalAlignment = HorizontalAlignment.Stretch;
         CreateComponents();
         RegisterEvents();
-        UIExtensionManager.ApplyExtensions(UIRegion.AutoLayerEditorIntRefListMenu, this);
+        UiServices.ExtensionManager.ApplyExtensions(UIRegion.AutoLayerEditorIntRefListMenu, this);
     }
     
     private void CreateComponents()
@@ -228,7 +224,7 @@ public class IntRefListCreateModal : Window
             RemoveOnCreateIntRefConfirmed = (handler) => OnCreateIntRefConfirmed -= handler
         };
         
-        UIExtensionManager.ApplyExtensions(UIRegion.AutoLayerEditorIntRefListCreateModal, this, config);
+        UiServices.ExtensionManager.ApplyExtensions(UIRegion.AutoLayerEditorIntRefListCreateModal, this, config);
     }
     
     private void CreateComponents()
@@ -1300,7 +1296,7 @@ public class IntRefListItemControl : UserControl
                 RefreshDisplay = RefreshDisplay,
             };
         
-        UIExtensionManager.ApplyExtensions(UIRegion.AutoLayerEditorIntRefListItem, this, config);
+        UiServices.ExtensionManager.ApplyExtensions(UIRegion.AutoLayerEditorIntRefListItem, this, config);
     }
     
     private void CreateComponents()
@@ -1658,7 +1654,7 @@ public class IntRefListControl : UserControl
             RemoveRemovedIntRef = (handler) => RemovedIntRef -= handler,
         };
         
-        UIExtensionManager.ApplyExtensions(UIRegion.AutoLayerEditorIntRefList, this, new AutoLayerEditorIntRefListContext(config));
+        UiServices.ExtensionManager.ApplyExtensions(UIRegion.AutoLayerEditorIntRefList, this, new AutoLayerEditorIntRefListContext(config));
     }
 
     private void CreateComponents()

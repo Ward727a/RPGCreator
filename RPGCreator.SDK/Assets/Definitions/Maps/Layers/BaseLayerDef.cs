@@ -3,8 +3,43 @@ using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 
+public enum RenderingMode
+{
+    /// <summary>
+    /// Always render below entities, regardless of their Y position. This is the default rendering mode for background layers.<br/>
+    /// </summary>
+    StaticUnder,
+    /// <summary>
+    /// Always render above entities, regardless of their Y position. This is the default rendering mode for foreground layers.<br/>
+    /// </summary>
+    StaticOver,
+    /// <summary>
+    /// Y-Sorted rendering mode. Entities will be rendered between the layers based on their Y position. This is the default rendering mode for non-foreground layers.<br/>
+    /// </summary>
+    Dynamic
+}
+
 public abstract class BaseLayerDef : IAssetDef, ISerializable, IDeserializable
 {
+    
+    /// <summary>
+    /// Define whether this layer is a foreground layer or not.<br/>
+    /// A foreground layer is ALWAYS rendered above the entities, and a non-foreground layer will be rendered based on the Y position of the entities.<br/>
+    /// Entities will be rendered above non-foreground layers when they are below them, and below non-foreground layers when they are above them.<br/>
+    /// Note: EntityLayerDefinition will NEVER be a foreground layer, and will always be rendered in Dynamic mode. This is because the entity layer is the reference point for rendering order of entities and layers.
+    /// </summary>
+    public bool IsForeground { get; set; } = false;
+    
+    /// <summary>
+    /// The rendering mode of the layer. This defines how the layer is rendered in relation to the entities.<br/>
+    /// This will be pre-calculated based on the <see cref="IsForeground"/> property, and will be set to <see cref="RenderingMode.StaticOver"/> if the layer is a foreground layer,<br/>
+    /// If it's not, then it will either be <see cref="RenderingMode.StaticUnder"/> or <see cref="RenderingMode.Dynamic"/> based on<br/>
+    /// the layer's position in the layer stack (if it's above or below the entity layer).<br/>
+    /// Above entity layer AND not IsForeground => Dynamic<br/>
+    /// Below entity layer AND not IsForeground => StaticUnder
+    /// </summary>
+    public RenderingMode RenderingMode { get; set; } = RenderingMode.StaticUnder;
+    
     public Ulid Unique { get; protected set; }
     public URN Urn => new URN("layer", $"{Name}@{Unique}");
     public bool IsDirty { get; set; }

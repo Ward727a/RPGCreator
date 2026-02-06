@@ -21,24 +21,65 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework;
 using RPGCreator.Core.Types.Map.Chunks;
+using RPGCreator.Player.Extensions;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Systems;
 using RPGCreator.SDK.RuntimeService;
+using ToolsUtilitiesStandard.Helpers;
+using Vector2 = System.Numerics.Vector2;
 
 namespace RPGCreator.Player.ECS.Systems;
 
 public class MapDrawingSystem() : BaseMapDrawingSystem
 {
     public override int Priority => 100;
-
+    
     public override void Initialize(IEcsWorld ecsWorld)
     {
+        RuntimeServices.OnceServiceReady((IMapService MapService) =>
+        {
+            MapService.OnMapLoaded += map =>
+            {
+                if (!RuntimeServices.MapService.HasLoadedMap) return;
+                PrecalculateLayerRenderingMode(RuntimeServices.MapService.CurrentLoadedMapDefinition);
+            };
+            if (!RuntimeServices.MapService.HasLoadedMap) return;
+            PrecalculateLayerRenderingMode(RuntimeServices.MapService.CurrentLoadedMapDefinition);
+        });
+    }
+
+    private void PrecalculateLayerRenderingMode(IMapDef map)
+    {
+        var entityLayer = map.TileLayers.FirstOrDefault(l => l is EntityLayerDefinition);
+        int spawnLayerZIndex = entityLayer?.LayerIndex ?? 0;
+
+        foreach (var layer in map.TileLayers)
+        {
+            if (layer is EntityLayerDefinition) continue;
+            if(layer.IsForeground && layer is not EntityLayerDefinition)
+            {
+                layer.RenderingMode = RenderingMode.StaticOver;
+                continue;
+            }
+
+            if (layer.LayerIndex < spawnLayerZIndex)
+            {
+                layer.RenderingMode = RenderingMode.StaticUnder;
+            }
+            else
+            {
+                layer.RenderingMode = RenderingMode.Dynamic;
+            }
+        }
     }
 
     public override void Update(TimeSpan deltaTime)
@@ -56,35 +97,32 @@ public class MapDrawingSystem() : BaseMapDrawingSystem
         var sortedLayersZIndex = MapService.CurrentLoadedMapDefinition.TileLayers
             .OrderBy(layer => layer.ZIndex)
             .ToList();
-        
+
         RuntimeServices.RenderService.PauseDrawing();
         RuntimeServices.RenderService.PrepareDrawing(IRenderService.SpriteSortMode.Deferred);
-        foreach (var layer in sortedLayersZIndex)
+        foreach (var layer in sortedLayersZIndex.Where(l => l.RenderingMode == RenderingMode.StaticUnder))
         {
-            var actualLayer = layer;
-            if (layer is AutoLayerDefinition autoLayer)
-                actualLayer = autoLayer.InternalTileLayer;
-            
-            bool isTileLayer = actualLayer is LayerWithElements<ITileDef>;
-            
-            for(var x = range.minX; x <= range.maxX; x++)
-            {
-                for(var y = range.minY; y <= range.maxY; y++)
-                {
-                    var chunk = LayerChunk.GetChunkId(x, y);
-                    
-                    visibleChunks.Add((x, y, chunk));
+            DrawSimpleLayer(range, layer);
+        }
+        
+        foreach (var layer in sortedLayersZIndex.Where(l => l.RenderingMode == RenderingMode.Dynamic))
+        {
+            CollectTilesInQueue(range, layer);
+        }
+    }
+    private void DrawSimpleLayer((long minX, long maxX, long minY, long maxY) range, BaseLayerDef layer)
+    {
+        var actualLayer = (layer is AutoLayerDefinition auto) ? auto.InternalTileLayer : layer;
+        if (actualLayer is not LayerWithElements<ITileDef> tileLayer) return;
 
-                    if(isTileLayer)
-                        DrawChunkTiles(chunk, actualLayer as LayerWithElements<ITileDef>);
-                }
+        for (var x = range.minX; x <= range.maxX; x++)
+        {
+            for (var y = range.minY; y <= range.maxY; y++)
+            {
+                DrawChunkTiles(LayerChunk.GetChunkId(x, y), tileLayer);
             }
         }
-        DrawDebugChunkBounds();
-        RuntimeServices.RenderService.FinishDrawing();
-        RuntimeServices.RenderService.ResumeDrawing();
     }
-    
     /// <summary>
     /// Draw all tiles in the given chunk for the given layer.
     /// </summary>
@@ -110,31 +148,41 @@ public class MapDrawingSystem() : BaseMapDrawingSystem
             RuntimeServices.RenderService.DrawTile(tileDefinition, position);
         }
     }
-
-    private void DrawEntity(long chunkId, LayerWithElements<EntitySpawner> layerEntity)
+    
+    private void CollectTilesInQueue((long minX, long maxX, long minY, long maxY) range, BaseLayerDef layer)
     {
-        var chunkElements = layerEntity.GetElements(chunkId);
-        if (chunkElements == null)
-            return;
-        
-        if(chunkElements.IsEmpty)
-            return;
-        
-        for (int i = 0; i < chunkElements.Length; i++)
-        {
-            var entitySpawner  = chunkElements[i]; 
-            if(entitySpawner == null)
-                continue;
+        var actualLayer = (layer is AutoLayerDefinition auto) ? auto.InternalTileLayer : layer;
+        if (actualLayer is not LayerWithElements<ITileDef> tileLayer) return;
 
-            var position = layerEntity.GetElementWorldPosition(chunkId, i);
-            
-            RuntimeServices.RenderService.DrawEntitySpawner(entitySpawner, position);
+        for (var x = range.minX; x <= range.maxX; x++)
+        {
+            for (var y = range.minY; y <= range.maxY; y++)
+            {
+                var chunkId = LayerChunk.GetChunkId(x, y);
+                var elements = tileLayer.GetElements(chunkId);
+                if (elements == null || elements.IsEmpty) continue;
+
+                for (int i = 0; i < elements.Length; i++)
+                {
+                    var tile = elements[i];
+                    if (tile == null) continue;
+
+                    var worldPos = tileLayer.GetElementWorldPosition(chunkId, i);
+                
+                    // UX : On trie par le BAS de la tuile pour que le perso passe derrière
+                    float sortY = worldPos.Y + tile.SizeInTileset.Height;
+
+                    RuntimeServices.RenderService.SubmitToQueue(new RenderCommand
+                    {
+                        TexturePath = tile.TilesetDef.ImagePath, // Supposant que ITileDef a accès au tileset
+                        Position = worldPos,
+                        SourceRect = RuntimeServices.RenderService.GetTileSourceRect(tile),
+                        Color = (Color.White * layer.Opacity).ToSystemFast(),
+                        SortY = sortY
+                    });
+                }
+            }
         }
     }
     
-    private void DrawDebugChunkBounds()
-    {
-        RuntimeServices.ChunkService.DebugDrawChunkItemsGrid();
-        RuntimeServices.ChunkService.DebugDrawLoadedChunks();
-    }
 }

@@ -18,6 +18,7 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Drawing;
 using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Animations;
 using RPGCreator.SDK.ECS.Components;
@@ -28,6 +29,7 @@ namespace RPGCreator.SDK.ECS.Systems;
 
 public class SpriteRenderSystem : ISystem
 {
+    
     public override int Priority => 2000;
     public override bool IsDrawingSystem => true;
     
@@ -87,17 +89,16 @@ public class SpriteRenderSystem : ISystem
             float finalDepth = spriteComponent.LayerDepth - depthOffset;
             
             
-            renderer.DirectDraw(
-                imagePath,
-                transformComponent.Position,
-                frameRect,
-                spriteComponent.Color,
-                transformComponent.Rotation,
-                spritesheet.FeetOrigin,
-                transformComponent.Scale,
-                finalDepth,
-                spriteComponent.SpriteEffect
-            );
+            renderer.SubmitToQueue(new RenderCommand {
+                TexturePath = spritesheet.ImagePath,
+                Position = transformComponent.Position,
+                SourceRect = frameRect,
+                Color = spriteComponent.Color,
+                Rotation = transformComponent.Rotation,
+                Origin = spritesheet.FeetOrigin,
+                Scale = transformComponent.Scale * 2,
+                SortY = transformComponent.Position.Y // Pivot pieds
+            });
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
@@ -17,14 +18,62 @@ namespace RPGCreator.Generators
     {
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-            var classDeclarations = context.SyntaxProvider
-                .CreateSyntaxProvider(
-                    predicate: (node, _) => IsSyntaxTargetForGeneration(node),
-                    transform: (ctx, _) => GetSemanticTargetForGeneration(ctx)
-                )
-                .Where(m => m != null);
+            var languageVersion = context.CompilationProvider.Select((c, _) => 
+                (c as Microsoft.CodeAnalysis.CSharp.CSharpCompilation)?.LanguageVersion ?? Microsoft.CodeAnalysis.CSharp.LanguageVersion.Latest);
 
-            context.RegisterSourceOutput(classDeclarations, (spc, source) => Execute(spc, source));
+            var additionalTexts = context.AdditionalTextsProvider
+                .Where(file => file.Path.EndsWith(".cs"))
+                .Select((text, token) => text.GetText(token)?.ToString())
+                .Where(t => t != null);
+
+            var provider = context.CompilationProvider
+                .Combine(additionalTexts.Collect())
+                .Combine(languageVersion);
+
+            var classSymbols = provider.SelectMany((combined, token) =>
+            {
+                var compilation = combined.Left.Left;
+                var texts = combined.Left.Right;
+                var version = combined.Right;
+
+                var symbols = new List<INamedTypeSymbol>();
+                
+                var parseOptions = new Microsoft.CodeAnalysis.CSharp.CSharpParseOptions(version);
+
+                foreach (var text in texts)
+                {
+                    if (string.IsNullOrEmpty(text)) continue;
+
+                    var syntaxTree = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(
+                        text!, 
+                        options: parseOptions, 
+                        cancellationToken: token);
+                    
+                    var newCompilation = compilation.AddSyntaxTrees(syntaxTree);
+                    var semanticModel = newCompilation.GetSemanticModel(syntaxTree);
+
+                    var declarations = syntaxTree.GetRoot(token).DescendantNodes().OfType<ClassDeclarationSyntax>();
+                    foreach (var decl in declarations)
+                    {
+                        var symbol = semanticModel.GetDeclaredSymbol(decl, token) as INamedTypeSymbol;
+                        if (symbol != null && IsTargetSymbol(symbol))
+                        {
+                            symbols.Add(symbol);
+                        }
+                    }
+                }
+                return symbols;
+            });
+
+            context.RegisterSourceOutput(classSymbols.Collect(), (spc, sources) => Execute(spc, sources));
+        }
+        
+        private static bool IsTargetSymbol(INamedTypeSymbol symbol)
+        {
+            return symbol.GetMembers().Any(m => m.GetAttributes().Any(a => 
+                a.AttributeClass?.Name == "ExposeToPluginAttribute" || 
+                a.AttributeClass?.Name == "ExposePropToPluginAttribute" || 
+                a.AttributeClass?.Name == "ExposeEventToPluginAttribute"));
         }
 
         private static bool IsSyntaxTargetForGeneration(SyntaxNode node)
@@ -60,20 +109,42 @@ namespace RPGCreator.Generators
             return containsTargetAttribute ? namedSymbol : null;
         }
 
-        private static void Execute(SourceProductionContext context, INamedTypeSymbol? classSymbol)
+        private static void Execute(SourceProductionContext context, System.Collections.Immutable.ImmutableArray<INamedTypeSymbol?> classSymbols)
         {
-            if (classSymbol == null) return;
+            var allRegions = new HashSet<string>();
+            HashSet<string> generatedContexts = new();
 
-            var sourceCode = GenerateContextClasses(classSymbol); 
-            
-            context.AddSource($"{classSymbol.Name}Context.g.cs", SourceText.From(sourceCode, Encoding.UTF8));
+            foreach (var symbol in classSymbols)
+            {
+                if (symbol == null) continue;
+
+                (string sourceCode, HashSet<string> regions) = GenerateContextClasses(symbol);
+                context.AddSource($"{symbol.Name}Context.g.cs", SourceText.From(sourceCode, Encoding.UTF8));
+
+                allRegions.UnionWith(regions);
+            }
+
+            foreach (var r in allRegions)
+            {
+                generatedContexts.Add($"{r.Replace(".", "").Replace(" ", "")}Context");
+            }
+
+            if (allRegions.Any())
+            {
+                var extensionCode = GenerateFluentExtensions(allRegions, generatedContexts);
+                context.AddSource("UiExtensionExtensions_Global.g.cs", SourceText.From(extensionCode, Encoding.UTF8));
+            }
         }
 
-        private static string GenerateContextClasses(INamedTypeSymbol classSymbol)
+        private static (string sourceCode, HashSet<string> regions) GenerateContextClasses(INamedTypeSymbol classSymbol)
         {
             var sb = new StringBuilder();
-            var baseNamespace = "RPGCreator.SDK.Contexts";
+            var baseNamespace = "RPGCreator.SDK.EditorUI.Contexts";
+            
+            HashSet<string> regions = new();
 
+            sb.AppendLine("// <auto-generated/>");
+            sb.AppendLine("#nullable enable");
             sb.AppendLine("using System;");
             sb.AppendLine("using Avalonia.Controls;");
             sb.AppendLine($"namespace {baseNamespace}");
@@ -109,6 +180,7 @@ namespace RPGCreator.Generators
             foreach (var group in groupedMembers)
             {
                 string regionId = group.Key;
+                regions.Add(regionId);
                 
                 string safeRegionName = regionId.Replace(".", "").Replace(" ", "");
                 string contextName = $"{safeRegionName}Context";
@@ -403,6 +475,127 @@ namespace RPGCreator.Generators
             }
 
             sb.AppendLine("}"); // Namespace closure
+            return (sb.ToString(), regions);
+        }
+
+        private static string GenerateFluentExtensions(IEnumerable<string> regions, HashSet<string> generatedContexts)
+        {
+            var sb = new StringBuilder();
+            var ns = "RPGCreator.SDK.EditorUI.Extensions";
+            var contextNs = "RPGCreator.SDK.EditorUI.Contexts";
+            
+            sb.AppendLine("// <auto-generated/>");
+            sb.AppendLine("#nullable enable");
+            sb.AppendLine("using System;");
+            sb.AppendLine($"using {contextNs};");
+            sb.AppendLine("using RPGCreator.SDK.Attributes;");
+            sb.AppendLine("using RPGCreator.SDK.UiService;");
+            sb.AppendLine("using RPGCreator.SDK.Modules.UIModule;");
+            sb.AppendLine();
+            sb.AppendLine($"namespace {ns}");
+            sb.AppendLine("{");
+            sb.AppendLine("    /// <summary>");
+            sb.AppendLine("    /// Fluent extensions for IUiExtensionManager to access plugin contexts in a structured way.<br/>");
+            sb.AppendLine("    /// Example usage: UiService.ExtensionManager.Editor().LeftPanel_Components((target, context) => { /* ... */ });");
+            sb.AppendLine("    /// </summary>");
+            sb.AppendLine("    public static partial class UiExtensionExtensions_Generated");
+            sb.AppendLine("    {");
+
+            // Grouping by "main" scope (e.g., "Editor" for "Editor.EditorLeftPanel.Components") to create nested structs for better organization
+            var groupedByScope = regions.Distinct().OrderBy(r => r).GroupBy(r => r.Split('.')[0]);
+
+            foreach (var scopeGroup in groupedByScope)
+            {
+                var scopeName = scopeGroup.Key;
+                var structName = $"{scopeName}Scope";
+                
+                // Extensions to access the context: ui.ExtensionManager.Editor() => returns EditorScope struct
+                sb.AppendLine("        /// <summary>");
+                sb.AppendLine($"        /// Accessor for the {scopeName} scope, providing fluent methods to register extensions for its regions.");
+                sb.AppendLine("        /// </summary>");
+                sb.AppendLine($"        public static {structName} {scopeName}(this IUiExtensionManager manager) => new {structName}(manager);");
+                sb.AppendLine();
+                sb.AppendLine("        /// <summary>");
+                sb.AppendLine($"        /// Struct providing fluent methods to register extensions for the {scopeName} scope regions.<br/>");
+                sb.AppendLine($"        /// Note: This struct should not be used directly. Use the extension method to access it instead (e.g., UiService.ExtensionManager.{scopeName}()).");
+                sb.AppendLine("        /// </summary>");
+                sb.AppendLine($"        public partial struct {structName}");
+                sb.AppendLine("        {");
+                sb.AppendLine("            private readonly IUiExtensionManager _manager;");
+                sb.AppendLine($"            public {structName}(IUiExtensionManager manager) => _manager = manager;");
+                if (generatedContexts.Contains($"{scopeName}Context"))
+                {
+                    // If there's a context that matches the scope name, we create a method to register extensions with that context: ui.ExtensionManager.Editor(callback)
+                    sb.AppendLine("            /// <summary>");
+                    sb.AppendLine($"            /// Registers an extension for the {scopeName} scope with a strongly-typed context callback.<br/>");
+                    sb.AppendLine($"            /// This will apply to all regions under the {scopeName} scope.");
+                    sb.AppendLine("            /// </summary>");
+                    sb.AppendLine("             /// <param name=\"callback\">The callback to execute when the extension is applied. Provides the target control and a typed context.</param>");
+                    sb.AppendLine();
+                    sb.AppendLine($"            public {structName} Configure(Action<object, {scopeName}Context> callback)");
+                    sb.AppendLine("            {");
+                    sb.AppendLine($"                _manager.RegisterExtension(UIRegion.{scopeName}, (target, context) => {{");
+                    sb.AppendLine($"                    if (context is {scopeName}Context typedContext) {{");
+                    sb.AppendLine("                         callback(target, typedContext);");
+                    sb.AppendLine("                    }");
+                    sb.AppendLine("                });");
+                    sb.AppendLine("                return this;");
+                    sb.AppendLine("            }");
+                }
+                else
+                {
+                    sb.AppendLine("            /// <summary>");
+                    sb.AppendLine($"            /// Registers an extension for the {scopeName} scope with a context callback.<br/>");
+                    sb.AppendLine($"            /// This will apply to all regions under the {scopeName} scope.<br/>");
+                    sb.AppendLine("             /// <remarks>");
+                    sb.AppendLine("             /// No strongly-typed context is available for this scope, the context parameter will be an <see cref=\"object\"/> typed.<br/>");
+                    sb.AppendLine("             /// To correct this, use the [ExposeToPlugin](<see cref=\"ExposeToPluginAttribute\"/>) attribute on at least one method/property/event of the scope with the scope name as region to generate a context class and get a typed context in this callback.");
+                    sb.AppendLine("             /// </remarks>");
+                    sb.AppendLine("            /// </summary>");
+                    sb.AppendLine("             /// <param name=\"callback\">The callback to execute when the extension is applied. Provides the target control and a typed context.</param>");
+                    sb.AppendLine();
+                    sb.AppendLine($"            public {structName} Configure(Action<object, object?> callback)");
+                    sb.AppendLine("            {");
+                    sb.AppendLine($"                _manager.RegisterExtension(UIRegion.{scopeName}, (target, context) => {{");
+                    sb.AppendLine("                    callback(target, context);");
+                    sb.AppendLine("                });");
+                    sb.AppendLine("                return this;");
+                    sb.AppendLine("            }");
+                }
+
+                // For each region in the scope, we create a method: ui.ExtensionManager.Editor().LeftPanel_Components(callback)
+                foreach (var regionId in scopeGroup)
+                {
+                    // Cleaning the region name to create a valid method name (e.g., "EditorLeftPanel.Components" becomes "LeftPanel_Components")
+                    var methodName = regionId.Contains(".") 
+                        ? regionId.Substring(regionId.IndexOf('.') + 1).Replace(".", "_") 
+                        : "Register";
+
+                    string safeRegionName = regionId.Replace(".", "").Replace(" ", "");
+                    string contextName = $"{safeRegionName}Context";
+
+                    if (generatedContexts.Contains(contextName))
+                    {
+                        sb.AppendLine("            /// <summary>");
+                        sb.AppendLine($"            /// Registers an extension for the {regionId} region with a strongly-typed context callback.");
+                        sb.AppendLine("            /// </summary>");
+                        sb.AppendLine("             /// <param name=\"callback\">The callback to execute when the extension is applied. Provides the target control and a typed context.</param>");
+                        sb.AppendLine($"            public {structName} {methodName}(Action<object, {contextName}> callback)");
+                        sb.AppendLine("            {");
+                        sb.AppendLine($"                _manager.RegisterExtension(UIRegion.{safeRegionName}, (target, context) => {{");
+                        sb.AppendLine($"                    if (context is {contextName} typedContext) {{");
+                        sb.AppendLine("                         callback(target, typedContext);");
+                        sb.AppendLine("                    }");
+                        sb.AppendLine("                });");
+                        sb.AppendLine("                return this;");
+                        sb.AppendLine("            }");
+                    }
+                }
+                sb.AppendLine("        }");
+            }
+
+            sb.AppendLine("    }");
+            sb.AppendLine("}");
             return sb.ToString();
         }
     }

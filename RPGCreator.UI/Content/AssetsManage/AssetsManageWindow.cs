@@ -27,10 +27,11 @@ using RPGCreator.UI.Content.AssetsManage.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
-using RPGCreator.SDK.Contexts;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
+using RPGCreator.SDK.EditorUI.Contexts;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutoLayerEditor;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor;
 using RPGCreator.UI.Content.AssetsManage.Components.Skills;
@@ -89,8 +90,9 @@ namespace RPGCreator.UI.Content.AssetsManage
             Content = Body;
             LoadAssetsMenuOptions();
             Instance = this;
-            UIExtensionManager.ApplyExtensions(UIRegion.AssetsManager, this);
+            UiServices.ExtensionManager.ApplyExtensions(UIRegion.AssetsManager, this);
         }
+        
 
         protected void CreateComponents()
         {
@@ -117,7 +119,7 @@ namespace RPGCreator.UI.Content.AssetsManage
                 RegisterAssetsMenuSeparator = RegisterAssetsMenuSeparator,
             };
             
-            UIExtensionManager.ApplyExtensions(UIRegion.AssetsManagerMenu, MenuPanel, new AssetsManagerMenuContext(config));
+            UiServices.ExtensionManager.ApplyExtensions(UIRegion.AssetsManagerMenu, MenuPanel, new AssetsManagerMenuContext(config));
         }
 
         protected void LoadAssetsMenuOptions()

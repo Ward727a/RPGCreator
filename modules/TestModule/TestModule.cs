@@ -1,7 +1,6 @@
 ﻿using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules;
-using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types;
 
 [assembly: ModuleManifest(
@@ -33,16 +32,27 @@ public class TestModule : BaseModule
         //
         // You can even add your own custom regions in the engine's UI using the UIExtensionManager.RegisterRegion method.
         // Just make sure to choose unique region names to avoid conflicts with other modules.
-        UIExtensionManager.RegisterExtension(UIRegion.AssetsManager, (control, o) =>
-        {
-            // Customize the control in the Assets Manager region
-            // For example, here we change the background color and edit the title
-            //if (control is Window window)
-            //{
-            //    window.Title = "Test Module";
-            //    window.Background = Avalonia.Media.Brushes.LightGray;
-            //}
-        });
+        // 
+        // Important note: Here we are using the UiServices.OnceServiceReady method to be sure that this code is executed only on the editor
+        // and not while the game is running (or else it would cause crashes since the UI services and Avalonia are not available in the game).
+        // UiServices.OnceServiceReady((IUiExtensionManager extensionManager) =>
+        // {
+        //     extensionManager.AssetsManager().Configure((o, context) =>
+        //     {
+        //         if (o is Window window)
+        //         {
+        //             window.Background = Brushes.Aqua;
+        //         }
+        //     }).Menu((o, context) =>
+        //     {
+        //         context.RegisterAssetsMenuSeparator();
+        //         context.RegisterAssetsMenuOption("test_option", () =>
+        //         {
+        //             Logger.Info("Test option clicked!");
+        //             return new UserControl();
+        //         });
+        //     });
+        // });
 
         EngineServices.ModulePathResolver.RegisterPath(new URN("Ward727", "module", "TestModule/Folder"),
             Path.GetDirectoryName(typeof(TestModule).Assembly.Location));

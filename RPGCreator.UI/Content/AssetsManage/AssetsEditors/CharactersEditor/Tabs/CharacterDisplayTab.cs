@@ -19,6 +19,7 @@ using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
+using RPGCreator.SDK.UiService;
 using RPGCreator.UI.Common;
 using Ursa.Controls;
 using Size = Avalonia.Size;
@@ -206,6 +207,10 @@ public class CharacterDisplayTab : UserControl
 
         AnimationBulkImportButton.Click += (_, _) =>
         {
+            
+            UiServices.NotificationService.Error("WIP Feature", "This feature is currently unavailable as it is still in development. We apologize for the inconvenience.", new NotificationOptions(5000));
+            return;
+            
             var bulkImportDialog = new ConfirmDialog()
             {
                 Title = "Bulk Import Animations",
@@ -241,7 +246,7 @@ public class CharacterDisplayTab : UserControl
                     
                     if(existingAnimationNames.Contains(animName))
                     {
-                        // If it's already existing we need to get the ListBoxItem and update it
+                        // If it already exists we need to get the ListBoxItem and update it
                         foreach (ListBoxItem? existingItem in AnimationList.Items.ToList())
                         {
                             if(existingItem?.Content == null)

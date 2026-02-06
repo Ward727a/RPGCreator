@@ -29,11 +29,11 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
-using RPGCreator.SDK.Contexts;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Extensions;
 using RPGCreator.SDK.Modules.UIModule;
+using RPGCreator.SDK.EditorUI.Contexts;
 
 namespace RPGCreator.UI.Common.Modal.Browser;
 
@@ -53,7 +53,7 @@ public class EntitiesBrowser : UserControl
         CreateComponents();
         RegisterEvents();
 
-        UIExtensionManager.ApplyExtensions(UIRegion.EntitiesBrowser, this);
+        UiServices.ExtensionManager.ApplyExtensions(UIRegion.EntitiesBrowser, this);
     }
 
     private void CreateComponents()
@@ -189,7 +189,7 @@ public class EntityBrowserItem : UserControl
             GetItemName = () => ItemName,
         };
         
-        UIExtensionManager.ApplyExtensions(UIRegion.EntitiesBrowserItem, this, new EntitiesBrowserItemContext(config));
+        UiServices.ExtensionManager.ApplyExtensions(UIRegion.EntitiesBrowserItem, this, new EntitiesBrowserItemContext(config));
     }
 
     private void CreateComponents()

@@ -18,6 +18,7 @@ using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types;
+using RPGCreator.SDK.UI.UiService;
 using RPGCreator.SDK.UiService;
 using RPGCreator.UI.Common.Modal.Browser;
 using Ursa.Controls;
@@ -272,7 +273,7 @@ public class FeatureItemControl : UserControl
         LoadProperties();
         RegisterEvents();
         
-        UIExtensionManager.ApplyExtensions(UIRegion.CharacterFeaturesEditorFeatureItem, this, Feature);
+        UiServices.ExtensionManager.ApplyExtensions(UIRegion.CharacterFeaturesEditorFeatureItem, this, Feature);
     }
 
     private void CreateComponents()
@@ -283,6 +284,7 @@ public class FeatureItemControl : UserControl
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
             Margin = new Avalonia.Thickness(0, 0, 0, 5)
         };
+        
         ExpanderBodyGrid = new Grid
         {
             ColumnDefinitions = new ColumnDefinitions("Auto, *, Auto"),
@@ -318,7 +320,6 @@ public class FeatureItemControl : UserControl
             FontWeight = Avalonia.Media.FontWeight.Bold,
             FontSize = 18,
         };
-        
         LeftExpanderContentPanel.Children.Add(FeatureNameLabel);
         
         FeatureDeleteButton = new Button
@@ -337,6 +338,7 @@ public class FeatureItemControl : UserControl
             Margin = new Thickness(5),
             HorizontalAlignment = HorizontalAlignment.Stretch
         };
+        PropExpander.Content = ExpanderContent;
         
         FeatureDescription = new TextBlock()
         {
@@ -345,7 +347,6 @@ public class FeatureItemControl : UserControl
         FeatureDescription.Inlines.Add(new Run {Text = "Description: ", Foreground = Avalonia.Media.Brushes.Gray, FontWeight = Avalonia.Media.FontWeight.Bold});
         FeatureDescription.Inlines.Add(new Run { Text = Feature.FeatureDescription });
         ExpanderContent.Children.Add(FeatureDescription);
-        PropExpander.Content = ExpanderContent;
         
         Content = PropExpander;
 

@@ -1,5 +1,7 @@
 using Avalonia.Controls;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Modules.UIModule;
+using RPGCreator.SDK.UI.UiService;
 
 namespace RPGCreator.UI.Content.Editor.LeftPanel.NonePanel;
 
@@ -12,7 +14,7 @@ public class NonePanelControl : UserControl
     {
         CreateComponents();
         Content = textBlock;
-        UIExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelNonePanel, this);
+        UiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelNonePanel, this);
     }
 
     private void CreateComponents()

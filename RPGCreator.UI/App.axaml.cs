@@ -33,6 +33,7 @@ using RPGCreator.UI.Styles;
 using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.MaterialDesign;
 using RPGCreator.SDK;
+using RPGCreator.SDK.UI.UiService;
 using RPGCreator.UI.Ressources;
 using RPGCreator.UI.Services;
 using IResourceService = RPGCreator.SDK.Resources.IResourceService;
@@ -52,6 +53,7 @@ public partial class App : Application
         UiServices.DialogService = new DialogService();
         UiServices.MenuService = new MenuService();
         UiServices.NotificationService = new NotificationService();
+        UiServices.ExtensionManager = new UiExtensionManager();
         EngineServices.OnceServiceReady((IResourceService ResourcesService) =>
         {
             ResourcesService.RegisterLoader<Avalonia.Media.Imaging.Bitmap>(new AvaloniaBitmapLoader());

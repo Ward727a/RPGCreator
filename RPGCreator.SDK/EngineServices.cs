@@ -232,6 +232,12 @@ public static class EngineServices
         get => GetService<IFeaturesManager>();
         set => RegisterService(value);
     }
+
+    public static IGlobalPathData GlobalPathData
+    {
+        get => GetService<IGlobalPathData>();
+        set => RegisterService(value);
+    }
     
     /// <summary>
     /// Checks if a service is ready (registered) in the runtime services provider.

@@ -6,6 +6,7 @@ namespace RPGCreator.SDK.Modules.Features.Entity;
 
 public interface IEntityFeature : IDisposable
 {
+    
     /// <summary>
     /// The display name of this feature.<br/>
     /// This is used in the editor and UI to represent this feature type.

@@ -27,8 +27,28 @@ using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.SDK.RuntimeService;
 
+    
+public struct RenderCommand()
+{
+    public string TexturePath;
+    public Vector2 Position;
+    public Rectangle? SourceRect;
+    public Color Color;
+    public float Rotation;
+    public Vector2 Origin;
+    public Vector2 Scale = Vector2.One;
+    public SpriteEffects Effects;
+    public float SortY;
+}
+
 public interface IRenderService : IService
 {
+
+    public int GetStackSize();
+    public void SubmitToQueue(RenderCommand command);
+
+    public void DrawSortedQueue();
+    
     /// <summary>
     /// Draws a tile at the specified world position.<br/>
     /// This method uses the provided tile definition to render the tile correctly in the game world.
@@ -137,4 +157,6 @@ public interface IRenderService : IService
     /// Inside the game, this method will usually call the SpriteBatch.End method or equivalent rendering function.
     /// </summary>
     void FinishDrawing();
+
+    Rectangle GetTileSourceRect(ITileDef tileDef);
 }

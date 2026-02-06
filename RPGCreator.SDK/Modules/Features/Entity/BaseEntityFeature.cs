@@ -58,6 +58,12 @@ public abstract class BaseEntityFeature : IEntityFeature
     /// This is mainly a constant to avoid hardcoding the string everywhere.
     /// </summary>
     protected const string FeatureUrnModule = "entity_features";
+    
+    /// <summary>
+    /// Just the module URN where all entity feature tags are stored.<br/>
+    /// This is mainly a constant to avoid hardcoding the string everywhere.
+    /// </summary>
+    protected const string TagsUrnModule = "tags";
 
     /// <summary>
     /// If this feature depends on other features to function correctly.<br/>

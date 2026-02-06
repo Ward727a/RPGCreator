@@ -1,10 +1,13 @@
 ﻿using _BaseModule.Features.Entity;
 using _BaseModule.Features.Game;
 using _BaseModule.MacroFeatures;
+using _BaseModule.UI.StatsFeature;
 using RPGCreator.SDK;
+using RPGCreator.SDK.EditorUI.Extensions;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules;
 using RPGCreator.SDK.Types;
+using RPGCreator.SDK.UiService;
 
 [assembly: ModuleManifest(
     urn: "rpgc://module/base_module",
@@ -39,10 +42,26 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
         else
             EngineServices.ModulePathResolver.RegisterPath(FolderUrn, folderPath);
         
+        
+        // We register all entity features and game features provided by the base module.
         EngineServices.FeaturesManager.RegisterEntityFeature<MovementFeature>();
         EngineServices.FeaturesManager.RegisterEntityFeature<AnimationFeature>();
         EngineServices.FeaturesManager.RegisterEntityFeature<LivingBeingMacroFeature>();
         EngineServices.FeaturesManager.RegisterGameFeature<StandardControlFeature>();
+        
+        // Then we can set up the custom assets menu for stats management.
+        // We are doing that here, simply to allow us to 'order' the menu option in a specific way.
+        // If we were to add another button like 'Items' we could want it to be before 'Stats' for example, so we would add it here before the 'Stats' button.
+        UiServices.OnceServiceReady((IUiExtensionManager extensionManager) =>
+        {
+            extensionManager.AssetsManager().Menu((o, context) =>
+            {
+                context.RegisterAssetsMenuOption("Stats", () =>
+                {
+                    return new StatsManagement();
+                });
+            });
+        });
         
         Logger.Info("BaseModule initialized.");
     }

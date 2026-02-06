@@ -191,7 +191,7 @@ public class GamePlayer : Game, IGameRunner
         RuntimeServices.LayerService = new LayerService();
         RuntimeServices.ChunkService = new ChunkService();
         RuntimeServices.CameraService = new CameraService();
-        RuntimeServices.RenderService = new RenderService(GraphicsDevice, _spriteBatch);
+        RuntimeServices.RenderService = new RenderService(_spriteBatch);
         RuntimeServices.PlayerController = new BasePlayerController();
         RuntimeServices.GameSession = new DefaultGameSession();
 
@@ -204,6 +204,8 @@ public class GamePlayer : Game, IGameRunner
         RuntimeServices.CameraService.SetCameraEntity(RuntimeServices.GameSession.ActiveEcsWorld.EntityManager.CreateCameraEntity());
         
         RuntimeServices.GameSession.ActiveEcsWorld.SystemManager.AddSystem(new MapDrawingSystem());
+        ((RenderService)RuntimeServices.RenderService).AddSystemToWorld(RuntimeServices.GameSession.ActiveEcsWorld);
+        RuntimeServices.GameSession.ActiveEcsWorld.SystemManager.AddSystem(new MapForegroundSystem());
         
         base.Initialize();
     }

@@ -10,13 +10,14 @@ using RPGCreator.SDK.Serializer;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 
+
 public abstract class LayerWithElements<TDef> : BaseLayerDef
     where TDef : class, ILayerElem
 {
     protected static readonly ScopedLogger Logger = Logging.Logger.ForContext<LayerWithElements<TDef>>();
     
     protected Dictionary<long, LayerChunk<TDef>> _chunks = new();
-    protected readonly HashSet<Vector2> _surroundingElementsToIgnore = new();
+
     
     public record struct LayerElementEventArgs(long ChunkId, Vector2 Location, TDef? Element);
     

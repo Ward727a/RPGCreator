@@ -78,6 +78,21 @@ public class RenderService : IRenderService
         );
     }
 
+    public int GetStackSize()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SubmitToQueue(RenderCommand command)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void DrawSortedQueue()
+    {
+        throw new NotImplementedException();
+    }
+
     public void DrawTile(ITileDef tileDef, Vector2 tilePositionInChunk)
     {
         var texture = GetTilesetTexture(tileDef.TilesetDef);
@@ -286,6 +301,11 @@ public class RenderService : IRenderService
     public void FinishDrawing()
     {
         spriteBatch.End();
+    }
+
+    public System.Drawing.Rectangle GetTileSourceRect(ITileDef tileDef)
+    {
+        throw new NotImplementedException();
     }
     //
     // public void DrawDebugString(string text, Vector2 position, Color? color = null, float scale = 1f)

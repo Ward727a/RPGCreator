@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>RPGCreator.SDK.UI</RootNamespace>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <ProjectReference Include="..\RPGCreator.Generators\RPGCreator.Generators.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false" />
+
+        <AdditionalFiles Include="..\RPGCreator.UI\**\*.cs" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="Avalonia" Version="11.3.6" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\RPGCreator.SDK\RPGCreator.SDK.csproj" />
+    </ItemGroup>
+</Project>

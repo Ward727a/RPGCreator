@@ -4,14 +4,13 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Layout;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Attributes;
-using RPGCreator.SDK.Contexts;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.EditorUI.Contexts;
 using RPGCreator.UI.Content.Editor.LeftPanel.EntitiesPanel;
 using RPGCreator.UI.Content.Editor.LeftPanel.NonePanel;
 using RPGCreator.UI.Content.Editor.LeftPanel.TilingPanel;
@@ -37,7 +36,7 @@ public class EditorLeftPanelControl : UserControl
         CreateComponents();
         RegisterEvents();
         Content = _tabControl;
-        UIExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanel, this);
+        UiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanel, this);
     }
     
     private void CreateComponents()
@@ -113,7 +112,7 @@ public class EditorLeftPanelControl : UserControl
             HideComponent = HideComponent
         };
         
-        UIExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelComponents, _body, new EditorLeftPanelComponentsContext(config));
+        UiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelComponents, _body, new EditorLeftPanelComponentsContext(config));
     }
     
     [ExposeToPlugin("EditorLeftPanel.Components")]

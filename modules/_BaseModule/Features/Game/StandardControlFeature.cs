@@ -64,7 +64,7 @@ public class StandardControlFeature : BaseGameFeature
             IS.RegisterAction("left", HandleMovementLeft, true);
             IS.RegisterAction("right", HandleMovementRight, true);
             IS.SetAxisBinding("horizontal",  KeyboardKeys.D, KeyboardKeys.Q);
-            IS.SetAxisBinding("vertical", KeyboardKeys.Z, KeyboardKeys.S);
+            IS.SetAxisBinding("vertical", KeyboardKeys.S, KeyboardKeys.Z);
         });
     }
 
