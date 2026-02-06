@@ -511,7 +511,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
         #region Events
 
         public event Action? OnSelectedTilesetChanged;
-        public event Action? OnNeedRefresh;
+        public event Action?  OnNeedRefresh;
 
         #endregion
 

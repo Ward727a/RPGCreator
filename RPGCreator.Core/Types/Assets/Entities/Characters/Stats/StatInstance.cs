@@ -3,7 +3,7 @@ using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Stats;
 
-namespace RPGCreator.Core.Types.Assets.Characters.Stats;
+namespace RPGCreator.Core.Types.Assets.Entities.Characters.Stats;
 
 public sealed class StatInstance : IReloadable<IStatDef>
 {
@@ -22,13 +22,13 @@ public sealed class StatInstance : IReloadable<IStatDef>
     /// It is the value that will be modified by modifiers, such as items, effects, or any other object that can modify the stat.<br/>
     /// BUT it should not be modified by any modifier, as it is the base value of the stat. (Except for resources based stats, such as health or mana, which can be modified by effects or items that restore or consume resources.)
     /// </summary>
-    public float BaseValue;
+    public double BaseValue;
     /// <summary>
     /// The current value of the stat.<br/>
     /// This value is the one that will be used by the character to perform actions, such as attacking, defending, or casting spells.<br/>
     /// It can be modified by modifiers, such as items, effects, or any other object that can modify the stat.
     /// </summary>
-    public float CurrentValue { get; private set; }
+    public double CurrentValue { get; private set; }
 
     private IStatDef _statDefinition;
     public IStatDef StatDefinition => _statDefinition;
@@ -73,7 +73,7 @@ public sealed class StatInstance : IReloadable<IStatDef>
     {
         // For now we use the statCapValue directly from the definition.
         // In the future we might want to calculate it based on the other cap type.
-        CurrentValue = Math.Clamp(newValue, StatDefinition.StatMinValue, _statDefinition.StatCapValue);
+        CurrentValue = Math.Clamp(newValue, StatDefinition.StatMinValue, _statDefinition.StatCapSettings.StatCapValue);
         TryRunEvent(IStatDef.OnValueChangedEvent);
     }
 }

@@ -20,6 +20,9 @@
 
 using _BaseModule.UI.StatsFeature;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Stats;
+using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Types;
@@ -54,9 +57,22 @@ public class StatsFeature : BaseEntityFeature
                     (MakePath("health"), Ulid.NewUlid()),
                     (MakePath("mana"), Ulid.NewUlid()),
                     (MakePath("stamina"), Ulid.NewUlid())
-                ]));
+                ]), StatsTag);
             }
 
         });
     }
+}
+
+public struct StatComponent : IComponent
+{
+    /// <summary>
+    /// Reference to the stat definition, which contains the stat's name, description, icon, etc.
+    /// </summary>
+    public Ulid StatDefId;
+    
+    /// <summary>
+    /// The current value of the stat. This can be modified by the game logic, such as when the entity takes damage or uses a skill that consumes mana.
+    /// </summary>
+    public double CurrentValue;
 }

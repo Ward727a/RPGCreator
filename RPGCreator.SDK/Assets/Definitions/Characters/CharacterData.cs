@@ -25,55 +25,59 @@ public class CharacterStats(IStatDef def) : ISerializable, IDeserializable
 {
     public Ulid Unique => StatDef.Unique;
     public IStatDef StatDef { get; private set; } = def;
-    public float CurrentValue { get; set; } = def.DefaultValue;
-    public float MaxValue { get; set; } = def.StatCapValue;
-    public float MinValue { get; set; } = def.StatMinValue;
+    public double CurrentValue { get; set; } = def.DefaultValue;
+    public double MaxValue { get; set; } = def.StatCapSettings.StatCapValue;
+    public double MinValue { get; set; } = def.StatMinValue;
 
     public IStatDef GenerateDefinition()
     {
-        if(Math.Abs(CurrentValue - def.DefaultValue) < 0.001 && Math.Abs(MaxValue - def.StatCapValue) < 0.001 && Math.Abs(MinValue - def.StatMinValue) < 0.001)
+        return null;
+        if(Math.Abs(CurrentValue - def.DefaultValue) < 0.001 && Math.Abs(MaxValue - def.StatCapSettings.StatCapValue) < 0.001 && Math.Abs(MinValue - def.StatMinValue) < 0.001)
         {
             return StatDef;
         }
         
-        var statDef = new StatDefinition
-        {
-            Name = StatDef.Name,
-            Description = StatDef.Description,
-            DefaultValue = CurrentValue,
-            StatTypeKind = StatDef.StatTypeKind,
-            StatMinValue = MinValue,
-            StatCapType = EStatTypeCap.ByValue,
-            StatCapValue = MaxValue,
-            IsVisible = StatDef.IsVisible,
-            StatCapStatUnique = StatDef.StatCapStatUnique,
-            PackId = StatDef.PackId,
-            StatCompiledFormula = StatDef.StatCompiledFormula,
-            StatNonCompiledFormula = StatDef.StatNonCompiledFormula,
-            SavePath = StatDef.SavePath
-        };
-
-        foreach (var graphDocumentCompiled in StatDef.GetAllEvents())
-        {
-            statDef.AddEvent(graphDocumentCompiled.Key, graphDocumentCompiled.Value);
-        }
-        
-        return statDef;
+        // var statDef = new BaseStatDefinition
+        // {
+        //     Name = StatDef.Name,
+        //     Description = StatDef.Description,
+        //     DefaultValue = CurrentValue,
+        //     StatTypeKind = StatDef.StatTypeKind,
+        //     StatMinValue = MinValue,
+        //     StatCapSettings = new CapSettings()
+        //     {
+        //         StatCapType = EStatTypeCap.ByValue,
+        //         StatCapValue = MaxValue,
+        //         StatCapStatUnique = StatDef.StatCapSettings.StatCapStatUnique,
+        //     },
+        //     IsVisible = StatDef.IsVisible,
+        //     PackId = StatDef.PackId,
+        //     StatCompiledFormula = StatDef.StatCompiledFormula,
+        //     StatNonCompiledFormula = StatDef.StatNonCompiledFormula,
+        //     SavePath = StatDef.SavePath
+        // };
+        //
+        // foreach (var graphDocumentCompiled in StatDef.GetAllEvents())
+        // {
+        //     statDef.AddEvent(graphDocumentCompiled.Key, graphDocumentCompiled.Value);
+        // }
+        //
+        // return statDef;
     }
 
     public bool IsStatDefDifferent(IStatDef otherDef)
     {
         if(otherDef.Unique != StatDef.Unique) return false;
         if(Math.Abs(otherDef.DefaultValue - StatDef.DefaultValue) > 0.001) return true;
-        if(Math.Abs(otherDef.StatCapValue - StatDef.StatCapValue) > 0.001) return true;
+        if(Math.Abs(otherDef.StatCapSettings.StatCapValue - StatDef.StatCapSettings.StatCapValue) > 0.001) return true;
         if(Math.Abs(otherDef.StatMinValue - StatDef.StatMinValue) > 0.001) return true;
         if(otherDef.IsVisible != StatDef.IsVisible) return true;
         if(otherDef.PackId != StatDef.PackId) return true;
         if(otherDef.Name != StatDef.Name) return true;
         if(otherDef.Description != StatDef.Description) return true;
         if(otherDef.StatTypeKind != StatDef.StatTypeKind) return true;
-        if(otherDef.StatCapType != StatDef.StatCapType) return true;
-        if(otherDef.StatCapStatUnique != StatDef.StatCapStatUnique) return true;
+        if(otherDef.StatCapSettings.StatCapType != StatDef.StatCapSettings.StatCapType) return true;
+        if(otherDef.StatCapSettings.StatCapStatUnique != StatDef.StatCapSettings.StatCapStatUnique) return true;
         if(otherDef.StatNonCompiledFormula != StatDef.StatNonCompiledFormula) return true;
         if(otherDef.GetAllEvents() != StatDef.GetAllEvents()) return true;
         return false;
@@ -88,9 +92,9 @@ public class CharacterStats(IStatDef def) : ISerializable, IDeserializable
         var oldDef = StatDef;
         StatDef = newDef;
         
-        if(Math.Abs(MaxValue - oldDef.StatCapValue) < 0.001)
+        if(Math.Abs(MaxValue - oldDef.StatCapSettings.StatCapValue) < 0.001)
         {
-            MaxValue = newDef.StatCapValue;
+            MaxValue = newDef.StatCapSettings.StatCapValue;
         }
 
         if (Math.Abs(MinValue - oldDef.StatMinValue) < 0.001)

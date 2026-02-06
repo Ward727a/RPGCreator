@@ -7,35 +7,30 @@ using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Stats;
 
-[SerializingType("Stat")]
-public class StatDefinition : IStatDef
+public abstract class BaseStatDefinition : IStatDef
 {
     public string SavePath { get; set; }
     public Ulid? PackId { get; set; }
     public Ulid Unique { get; private set; }
-    public URN Urn { get; }
+    public URN Urn { get; private set; }
     public string Name { get; set; }
     public string Description { get; set; }
-    public float DefaultValue { get; set; }
+    public double DefaultValue { get; set; }
     public EStatTypeKind StatTypeKind { get; set; }
-    public float StatMinValue { get; set; }
-    public EStatTypeCap StatCapType { get; set; }
-    public float StatCapValue { get; set; }
-    public Ulid? StatCapStatUnique { get; set; }
+    public double StatMinValue { get; set; }
+    public CapSettings StatCapSettings { get; set; }
     public bool IsVisible { get; set; }
-    
-    public StatDefinition()
+
+    public BaseStatDefinition()
     {
         Unique = Ulid.NewUlid();
-        Urn = new URN("stat", $"{Unique}");
+        Urn = new URN("entity_stat", $"{Unique}");
         Name = string.Empty;
         Description = string.Empty;
-        DefaultValue = 0f;
+        DefaultValue = 0d;
         StatTypeKind = EStatTypeKind.Resource;
-        StatMinValue = 0f;
-        StatCapType = EStatTypeCap.ByValue;
-        StatCapValue = 0f;
-        StatCapStatUnique = null;
+        StatMinValue = 0d;
+        StatCapSettings = new CapSettings();
         IsVisible = true;
     }
 
@@ -43,43 +38,42 @@ public class StatDefinition : IStatDef
     {
         if (Unique != Ulid.Empty) return;
         Unique = id;
+        Urn = new URN("entity_stat", $"{Unique}");
     }
     
     public IPrattFormula? StatCompiledFormula { get; set; }
     public string StatNonCompiledFormula { get; set; } = string.Empty;
     private readonly Dictionary<string, IGraphScript> _statGraphEvents = new();
 
-    public void AddEvent(string eventName, IGraphScript eventDocumentCompiled)
+    public virtual void AddEvent(string eventName, IGraphScript eventDocumentCompiled)
     {
         _statGraphEvents[eventName] = eventDocumentCompiled;
     }
 
-    public bool TryGetEvent(string eventName, out IGraphScript? eventCompiled)
+    public virtual bool TryGetEvent(string eventName, out IGraphScript? eventCompiled)
     {
         return _statGraphEvents.TryGetValue(eventName, out eventCompiled);
     }
-    public Dictionary<string, IGraphScript> GetAllEvents()
+    public virtual Dictionary<string, IGraphScript> GetAllEvents()
     {
         return new Dictionary<string, IGraphScript>(_statGraphEvents);
     }
 
-    public SerializationInfo GetObjectData()
+    public virtual SerializationInfo GetObjectData()
     {
-        return new SerializationInfo(typeof(StatDefinition))
+        return new SerializationInfo(this.GetType())
             .AddValue(nameof(Unique), Unique)
             .AddValue(nameof(Name), Name)
             .AddValue(nameof(Description), Description)
             .AddValue(nameof(DefaultValue), DefaultValue)
             .AddValue(nameof(StatTypeKind), StatTypeKind)
             .AddValue(nameof(StatMinValue), StatMinValue)
-            .AddValue(nameof(StatCapType), StatCapType)
-            .AddValue(nameof(StatCapValue), StatCapValue)
-            .AddValue(nameof(StatCapStatUnique), StatCapStatUnique)
+            .AddValue(nameof(StatCapSettings), StatCapSettings)
             .AddValue(nameof(StatNonCompiledFormula), StatNonCompiledFormula)
             .AddValue(nameof(_statGraphEvents), _statGraphEvents.ToDictionary(kv => kv.Key, kv => kv.Value.DocumentPath));
     }
 
-    public void SetObjectData(DeserializationInfo info)
+    public virtual void SetObjectData(DeserializationInfo info)
     {
         ArgumentNullException.ThrowIfNull(info);
 
@@ -95,12 +89,8 @@ public class StatDefinition : IStatDef
         StatTypeKind = statTypeKind;
         info.TryGetValue(nameof(StatMinValue), out var statMinValue, 0f);
         StatMinValue = statMinValue;
-        info.TryGetValue(nameof(StatCapType), out var statCapType, EStatTypeCap.ByValue);
-        StatCapType = statCapType;
-        info.TryGetValue(nameof(StatCapValue), out var statCapValue, 0f);
-        StatCapValue = statCapValue;
-        info.TryGetValue(nameof(StatCapStatUnique), out var statCapStatUnique, null as Ulid?);
-        StatCapStatUnique = statCapStatUnique;
+        info.TryGetValue(nameof(StatCapSettings), out var statCapSettings, new CapSettings());
+        StatCapSettings = statCapSettings;
         info.TryGetValue(nameof(StatNonCompiledFormula), out var statNonCompiledFormula, string.Empty);
         StatNonCompiledFormula = statNonCompiledFormula;
         info.TryGetValue(nameof(_statGraphEvents), out Dictionary<string, string> statGraphEventsPaths, new());

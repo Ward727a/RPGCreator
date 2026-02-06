@@ -78,7 +78,7 @@ public class CharacterStatsTab : UserControl
             accordion.Content = panel;
             Body.Children.Add(accordion);
             
-            var initialValue = new NumericFloatUpDown
+            var initialValue = new NumericDoubleUpDown
             {
                 Minimum = 0,
                 Value = keyValuePair.Value.CurrentValue,
@@ -96,7 +96,7 @@ public class CharacterStatsTab : UserControl
                 }
             };
             panel.Children.Add(new InputLabel("Initial Value", initialValue));
-            var maxValue = new NumericFloatUpDown
+            var maxValue = new NumericDoubleUpDown
             {
                 Minimum = 1,
                 Value = keyValuePair.Value.MaxValue,
@@ -115,9 +115,9 @@ public class CharacterStatsTab : UserControl
             };
             panel.Children.Add(new InputLabel("Max Value", maxValue));
             
-            maxValue.IsEnabled = keyValuePair.Value.StatDef.StatCapType.Equals(EStatTypeCap.ByValue);
+            maxValue.IsEnabled = keyValuePair.Value.StatDef.StatCapSettings.StatCapType.Equals(EStatTypeCap.ByValue);
             
-            var minValue = new NumericFloatUpDown
+            var minValue = new NumericDoubleUpDown
             {
                 Minimum = 0,
                 Value = keyValuePair.Value.MinValue,

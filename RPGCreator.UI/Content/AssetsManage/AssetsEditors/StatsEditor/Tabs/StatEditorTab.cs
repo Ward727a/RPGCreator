@@ -10,6 +10,8 @@ using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Logging;
 using TextMateSharp.Grammars;
+using Ursa.Controls;
+using NumericUpDown = Avalonia.Controls.NumericUpDown;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor.Tabs;
 
@@ -35,7 +37,7 @@ public class StatEditorTab : UserControl
     private NumericUpDown _statDefaultValue;
     private NumericUpDown _statMinValue;
     private ComboBox _statTypeCap;
-    private NumericUpDown _statMaxValue;
+    private NumericDoubleUpDown _statMaxValue;
     private ToggleSwitch _statIsVisible;
     private TextEditor _statFormulaEditor;
     #endregion
@@ -169,7 +171,7 @@ public class StatEditorTab : UserControl
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = App.style.Margin,
-            SelectedItem = StatDef.StatCapType.ToString()
+            SelectedItem = StatDef.StatCapSettings.StatCapType.ToString()
         };
         var inputStatTypeCap = new InputLabel("Stat Max Type", _statTypeCap);
         _bodyPanel.Children.Add(inputStatTypeCap);
@@ -182,19 +184,19 @@ public class StatEditorTab : UserControl
             _statTypeCap.Items.Add(capType.ToString());
         }
 
-        _statTypeCap.SelectedIndex = StatDef.StatCapType switch
+        _statTypeCap.SelectedIndex = StatDef.StatCapSettings.StatCapType switch
         {
             EStatTypeCap.ByValue => 0,
             EStatTypeCap.ByStat => 1,
             _ => 0
         };
         
-        _statMaxValue = new NumericUpDown
+        _statMaxValue = new NumericDoubleUpDown
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = App.style.Margin,
-            Value = (decimal)StatDef.StatCapValue
+            Value = StatDef.StatCapSettings.StatCapValue
         };
         _bodyPanel.Children.Add(new InputLabel("Maximum Value", _statMaxValue));
         
@@ -286,14 +288,14 @@ public class StatEditorTab : UserControl
                 return;
             if (!Enum.TryParse<EStatTypeCap>(_statTypeCap.SelectedItem.ToString(), out var capType)) return;
             
-            StatDef.StatCapType = capType;
+            // StatDef.StatCapSettings.StatCapType = capType;
 
             _statMaxValue.IsEnabled = capType != EStatTypeCap.ByStat;
         };
         
         _statMaxValue.ValueChanged += (sender, args) =>
         {
-            StatDef.StatCapValue = (float)(_statMaxValue.Value ?? 0);
+            // StatDef.StatCapSettings.StatCapValue = (float)(_statMaxValue.Value ?? 0);
         };
         
         _statIsVisible.IsCheckedChanged += (sender, args) =>

@@ -30,7 +30,7 @@ public class StatsEditorWindowControl : UserControl
     #region Constructors
     public StatsEditorWindowControl(IStatDef? statDef)
     {
-        statDef ??= new StatDefinition();
+        // statDef ??= new BaseStatDefinition();
         StatDef = statDef;
         CreateComponents();
         Content = _bodyGrid;

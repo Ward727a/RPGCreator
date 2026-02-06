@@ -1,4 +1,5 @@
-﻿using _BaseModule.Features.Entity;
+﻿using _BaseModule.AssetDefinitions;
+using _BaseModule.Features.Entity;
 using _BaseModule.Features.Game;
 using _BaseModule.MacroFeatures;
 using _BaseModule.UI.StatsFeature;
@@ -42,10 +43,12 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
         else
             EngineServices.ModulePathResolver.RegisterPath(FolderUrn, folderPath);
         
+        EngineServices.AssetTypeRegistry.ScanCurrentAssembly(true);
         
         // We register all entity features and game features provided by the base module.
         EngineServices.FeaturesManager.RegisterEntityFeature<MovementFeature>();
         EngineServices.FeaturesManager.RegisterEntityFeature<AnimationFeature>();
+        EngineServices.FeaturesManager.RegisterEntityFeature<StatsFeature>();
         EngineServices.FeaturesManager.RegisterEntityFeature<LivingBeingMacroFeature>();
         EngineServices.FeaturesManager.RegisterGameFeature<StandardControlFeature>();
         
