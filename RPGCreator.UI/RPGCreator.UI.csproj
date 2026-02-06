@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>14</LangVersion>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <Version>1.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -26,9 +26,6 @@
         <Content Include="Assets\rpgc-logo.ico">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
-    </ItemGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\RPGCreator.SDK.EditorUI\RPGCreator.SDK.EditorUI.csproj" />
     </ItemGroup>
     
   <ItemGroup>
@@ -63,6 +60,7 @@
 
   <ItemGroup>
     <Folder Include="Assets\Icons\" />
+    <Folder Include="Attributes\" />
     <Folder Include="Common\AnimEditor\" />
     <Folder Include="Content\AssetsManage\Components\Items\" />
     <Folder Include="Content\Editor\RightPanel\" />
@@ -70,6 +68,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RPGCreator.Generators\RPGCreator.Generators.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\RPGCreator.RTP\RPGCreator.RTP.csproj" />
   </ItemGroup>
 

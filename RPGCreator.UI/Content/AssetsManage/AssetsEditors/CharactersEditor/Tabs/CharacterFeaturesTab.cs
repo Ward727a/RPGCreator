@@ -18,7 +18,6 @@ using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types;
-using RPGCreator.SDK.UI.UiService;
 using RPGCreator.SDK.UiService;
 using RPGCreator.UI.Common.Modal.Browser;
 using Ursa.Controls;

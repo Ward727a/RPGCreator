@@ -18,54 +18,13 @@ namespace RPGCreator.Generators
     {
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-            var languageVersion = context.CompilationProvider.Select((c, _) => 
-                (c as Microsoft.CodeAnalysis.CSharp.CSharpCompilation)?.LanguageVersion ?? Microsoft.CodeAnalysis.CSharp.LanguageVersion.Latest);
+            var classDeclarations = context.SyntaxProvider
+                .CreateSyntaxProvider(
+                    predicate: static (s, _) => s is ClassDeclarationSyntax { Members.Count: > 0 },
+                    transform: static (ctx, token) => GetSemanticTargetForGeneration(ctx, token))
+                .Where(static m => m is not null);
 
-            var additionalTexts = context.AdditionalTextsProvider
-                .Where(file => file.Path.EndsWith(".cs"))
-                .Select((text, token) => text.GetText(token)?.ToString())
-                .Where(t => t != null);
-
-            var provider = context.CompilationProvider
-                .Combine(additionalTexts.Collect())
-                .Combine(languageVersion);
-
-            var classSymbols = provider.SelectMany((combined, token) =>
-            {
-                var compilation = combined.Left.Left;
-                var texts = combined.Left.Right;
-                var version = combined.Right;
-
-                var symbols = new List<INamedTypeSymbol>();
-                
-                var parseOptions = new Microsoft.CodeAnalysis.CSharp.CSharpParseOptions(version);
-
-                foreach (var text in texts)
-                {
-                    if (string.IsNullOrEmpty(text)) continue;
-
-                    var syntaxTree = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(
-                        text!, 
-                        options: parseOptions, 
-                        cancellationToken: token);
-                    
-                    var newCompilation = compilation.AddSyntaxTrees(syntaxTree);
-                    var semanticModel = newCompilation.GetSemanticModel(syntaxTree);
-
-                    var declarations = syntaxTree.GetRoot(token).DescendantNodes().OfType<ClassDeclarationSyntax>();
-                    foreach (var decl in declarations)
-                    {
-                        var symbol = semanticModel.GetDeclaredSymbol(decl, token) as INamedTypeSymbol;
-                        if (symbol != null && IsTargetSymbol(symbol))
-                        {
-                            symbols.Add(symbol);
-                        }
-                    }
-                }
-                return symbols;
-            });
-
-            context.RegisterSourceOutput(classSymbols.Collect(), (spc, sources) => Execute(spc, sources));
+            context.RegisterSourceOutput(classDeclarations.Collect(), static (spc, sources) => Execute(spc, sources));
         }
         
         private static bool IsTargetSymbol(INamedTypeSymbol symbol)
@@ -81,32 +40,19 @@ namespace RPGCreator.Generators
             return node is ClassDeclarationSyntax c && c.Members.Count > 0;
         }
 
-        private static INamedTypeSymbol? GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
+        private static INamedTypeSymbol? GetSemanticTargetForGeneration(GeneratorSyntaxContext context, System.Threading.CancellationToken token)
         {
             var classDeclaration = (ClassDeclarationSyntax)context.Node;
+            var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclaration, token) as INamedTypeSymbol;
+    
+            if (classSymbol == null) return null;
 
-            var hasAttribute = classDeclaration.Members.OfType<MethodDeclarationSyntax>()
-                .Any(m => m.AttributeLists.Count > 0) ||
-                classDeclaration.Members.OfType<PropertyDeclarationSyntax>()
-                .Any(p => p.AttributeLists.Count > 0) ||
-                classDeclaration.Members.OfType<EventDeclarationSyntax>()
-                .Any(e => e.AttributeLists.Count > 0);
+            bool containsTargetAttribute = classSymbol.GetMembers().Any(m => m.GetAttributes().Any(a => 
+                a.AttributeClass?.Name.Contains("ExposeToPlugin") == true ||
+                a.AttributeClass?.Name.Contains("ExposePropToPlugin") == true ||
+                a.AttributeClass?.Name.Contains("ExposeEventToPlugin") == true));
 
-            if (!hasAttribute) return null;
-
-            var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclaration);
-            
-            if (classSymbol is not INamedTypeSymbol namedSymbol) return null;
-
-            bool containsTargetAttribute = 
-                namedSymbol.GetMembers().OfType<IMethodSymbol>()
-                .Any(m => m.GetAttributes().Any(a => a.AttributeClass?.Name is "ExposeToPluginAttribute")) ||
-                namedSymbol.GetMembers().OfType<IPropertySymbol>()
-                    .Any(p => p.GetAttributes().Any(a => a.AttributeClass?.Name is "ExposePropToPluginAttribute")) ||
-                namedSymbol.GetMembers().OfType<IEventSymbol>()
-                    .Any(e => e.GetAttributes().Any(a => a.AttributeClass?.Name is "ExposeEventToPluginAttribute"));
-
-            return containsTargetAttribute ? namedSymbol : null;
+            return containsTargetAttribute ? classSymbol : null;
         }
 
         private static void Execute(SourceProductionContext context, System.Collections.Immutable.ImmutableArray<INamedTypeSymbol?> classSymbols)
@@ -139,7 +85,7 @@ namespace RPGCreator.Generators
         private static (string sourceCode, HashSet<string> regions) GenerateContextClasses(INamedTypeSymbol classSymbol)
         {
             var sb = new StringBuilder();
-            var baseNamespace = "RPGCreator.SDK.EditorUI.Contexts";
+            var baseNamespace = "RPGCreator.UI.Contexts";
             
             HashSet<string> regions = new();
 
@@ -481,8 +427,8 @@ namespace RPGCreator.Generators
         private static string GenerateFluentExtensions(IEnumerable<string> regions, HashSet<string> generatedContexts)
         {
             var sb = new StringBuilder();
-            var ns = "RPGCreator.SDK.EditorUI.Extensions";
-            var contextNs = "RPGCreator.SDK.EditorUI.Contexts";
+            var ns = "RPGCreator.UI.Extensions";
+            var contextNs = "RPGCreator.UI.Contexts";
             
             sb.AppendLine("// <auto-generated/>");
             sb.AppendLine("#nullable enable");

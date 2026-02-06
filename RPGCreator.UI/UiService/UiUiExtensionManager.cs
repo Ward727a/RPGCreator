@@ -1,7 +1,9 @@
+using System;
+using System.Collections.Generic;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.UiService;
 
-namespace RPGCreator.SDK.UI.UiService;
+namespace RPGCreator.UI.UiService;
 
 public class UiExtensionManager : IUiExtensionManager
 {

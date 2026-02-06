@@ -1,14 +1,13 @@
-﻿using _BaseModule.AssetDefinitions;
-using _BaseModule.Features.Entity;
+﻿using _BaseModule.Features.Entity;
 using _BaseModule.Features.Game;
 using _BaseModule.MacroFeatures;
 using _BaseModule.UI.StatsFeature;
 using RPGCreator.SDK;
-using RPGCreator.SDK.EditorUI.Extensions;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.UiService;
+using RPGCreator.UI.Extensions;
 
 [assembly: ModuleManifest(
     urn: "rpgc://module/base_module",

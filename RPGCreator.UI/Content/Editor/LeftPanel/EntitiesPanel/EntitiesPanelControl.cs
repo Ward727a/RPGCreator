@@ -12,7 +12,6 @@ using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
-using RPGCreator.SDK.UI.UiService;
 using RPGCreator.SDK.UiService;
 using RPGCreator.UI.Common.Modal.Browser;
 using Ursa.Controls;

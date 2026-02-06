@@ -12,7 +12,6 @@ using RPGCreator.SDK.Extensions;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types.Collections;
-using RPGCreator.SDK.UI.UiService;
 using RPGCreator.UI.Common;
 using Ursa.Controls;
 using Size = System.Drawing.Size;

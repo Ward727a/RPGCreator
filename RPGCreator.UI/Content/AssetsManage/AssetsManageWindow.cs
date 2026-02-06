@@ -31,9 +31,8 @@ using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
-using RPGCreator.SDK.EditorUI.Contexts;
+using RPGCreator.UI.Contexts;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutoLayerEditor;
-using RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor;
 using RPGCreator.UI.Content.AssetsManage.Components.Skills;
 
 namespace RPGCreator.UI.Content.AssetsManage

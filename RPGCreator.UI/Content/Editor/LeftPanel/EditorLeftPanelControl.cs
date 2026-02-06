@@ -10,7 +10,7 @@ using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.RuntimeService;
-using RPGCreator.SDK.EditorUI.Contexts;
+using RPGCreator.UI.Contexts;
 using RPGCreator.UI.Content.Editor.LeftPanel.EntitiesPanel;
 using RPGCreator.UI.Content.Editor.LeftPanel.NonePanel;
 using RPGCreator.UI.Content.Editor.LeftPanel.TilingPanel;

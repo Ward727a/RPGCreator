@@ -23,7 +23,6 @@
 // 
 #endregion
 
-using System.ComponentModel.Design;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
@@ -33,9 +32,9 @@ using RPGCreator.UI.Styles;
 using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.MaterialDesign;
 using RPGCreator.SDK;
-using RPGCreator.SDK.UI.UiService;
 using RPGCreator.UI.Ressources;
 using RPGCreator.UI.Services;
+using RPGCreator.UI.UiService;
 using IResourceService = RPGCreator.SDK.Resources.IResourceService;
 
 namespace RPGCreator.UI;

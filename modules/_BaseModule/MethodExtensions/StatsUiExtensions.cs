@@ -21,10 +21,11 @@
 
 using _BaseModule.UI.StatsFeature;
 using Avalonia.Controls;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.UiService;
 
-namespace RPGCreator.SDK.EditorUI.Extensions;
+namespace RPGCreator.UI.Extensions;
 
 public class StatsUiContext
 {

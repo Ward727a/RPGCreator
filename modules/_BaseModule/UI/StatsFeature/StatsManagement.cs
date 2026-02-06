@@ -24,9 +24,8 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using RPGCreator.SDK;
-using RPGCreator.SDK.EditorUI.Extensions;
 using RPGCreator.SDK.Modules.UIModule;
-using RPGCreator.SDK.Types;
+using RPGCreator.UI.Extensions;
 
 namespace _BaseModule.UI.StatsFeature;
 
