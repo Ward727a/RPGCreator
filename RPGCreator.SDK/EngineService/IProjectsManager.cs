@@ -26,6 +26,8 @@ namespace RPGCreator.SDK.EngineService;
 
 public interface IProjectsManager : IService
 {
+    public event Action<IBaseProject>? OnProjectOpened;
+    
     List<BaseProjectLink> GetAllProjects();
     public IBaseProject? CreateProject(string projectName, string projectPath);
     public bool TryGetProject(string configPath, [NotNullWhen(true)] out IBaseProject? project);

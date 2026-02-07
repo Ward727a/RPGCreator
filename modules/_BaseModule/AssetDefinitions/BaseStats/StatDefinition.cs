@@ -21,9 +21,14 @@
 using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Attributes;
 
-namespace _BaseModule.AssetDefinitions;
+namespace _BaseModule.AssetDefinitions.BaseStats;
+
 
 [SerializingType("Stat")]
 public class StatDefinition : BaseStatDefinition
 {
+    public override string Name { get; set; } = "New Stat";
+    public override string Description { get; set; } = "Description of the stat.";
+    public override double DefaultValue { get; set; } = 0;
+    public override double MinValue { get; set; } = 0;
 }

@@ -38,13 +38,14 @@ public interface IAssetsManager : IService
     public bool TryResolveRegistry(System.Type type, [NotNullWhen(true)] out IAssetRegistry? registry);
     public bool TryResolveAsset<T>(URN urn, [NotNullWhen(true)] out T? result) where T : class, IHasUniqueId;
     public bool TryResolveAsset<T>(Ulid uniqueId, [NotNullWhen(true)] out T? result) where T : class, IHasUniqueId;
-    public T CreateAsset<T>() where T : IAssetDef, new();
+    public T CreateAsset<T>() where T : IAssetDef, IHasUniqueId, new();
     public T CreateTransientAsset<T>(IAssetScope? scope = null) where T : IAssetDef, new();
     public void DestroyTransientAsset<T>(T asset) where T : IAssetDef;
     public IAssetScope CreateAssetScope(string? name = null);
     public void AddPack(string dbPath);
     public void RegisterPack(IAssetsPack pack);
     public void UnregisterPack(Ulid packId);
+    public IAssetsPack GetDefaultPack();
     public bool TryGetPack(string? packName, [NotNullWhen(true)] out IAssetsPack? pack);
     public bool TryGetPack(Ulid packId, [NotNullWhen(true)] out IAssetsPack? pack);
     public IAssetsPack GetPack(Ulid packId);

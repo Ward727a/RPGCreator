@@ -1,3 +1,4 @@
+using System.Reflection;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Logging;
 
@@ -41,19 +42,18 @@ public class AssetsTypeMapping : IAssetTypeRegistry
     }
 
     public bool HasKey(string key) => _keyToType.ContainsKey(key);
-    public void ScanCurrentAssembly(bool overrideExisting = false)
+    public void ScanAssembly(System.Reflection.Assembly asm, bool overrideExisting = false)
     {
-        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-        var types = assembly.GetTypes();
+        var types = asm.GetTypes();
 
         foreach (var type in types)
         {
-            var attrs = type.GetCustomAttributes(typeof(SerializingTypeAttribute), false);
-            if (attrs.Length > 0)
+            var attr = type.GetCustomAttribute<SerializingTypeAttribute>();
+            if (attr != null)
             {
-                var attr = (SerializingTypeAttribute)attrs[0];
                 if(HasKey(attr.TypeId) && !overrideExisting) continue;
                 RegisterMapping(attr.TypeId, type);
+                Logger.Debug("[TypeMapping] Registered {0} to {1}", args:[attr.TypeId, type.Name]);
             }
         }
     }

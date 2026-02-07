@@ -1,6 +1,6 @@
-﻿using RPGCreator.SDK.Projects;
+﻿using RPGCreator.SDK.EngineService;
 
-namespace RPGCreator.SDK.Types.Interfaces;
+namespace RPGCreator.SDK.Projects;
 
 public interface IBaseProject
 {
@@ -12,5 +12,6 @@ public interface IBaseProject
     List<string> Authors { get; }
     List<string> AssetsPackPath { get; }
     ProjectGameData GameData { get; }
+    IGlobalPathData GlobalPathData { get; }
     void Save();
 }

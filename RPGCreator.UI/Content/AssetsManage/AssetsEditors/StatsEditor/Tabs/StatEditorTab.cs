@@ -162,7 +162,7 @@ public class StatEditorTab : UserControl
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = App.style.Margin,
-            Value = (decimal)StatDef.StatMinValue
+            Value = (decimal)StatDef.MinValue
         };
         _bodyPanel.Children.Add(new InputLabel("Minimum Value", _statMinValue));
         
@@ -279,7 +279,7 @@ public class StatEditorTab : UserControl
         
         _statMinValue.ValueChanged += (sender, args) =>
         {
-            StatDef.StatMinValue = (float)(_statMinValue.Value ?? 0);
+            StatDef.MinValue = (float)(_statMinValue.Value ?? 0);
         };
         
         _statTypeCap.SelectionChanged += (sender, args) =>

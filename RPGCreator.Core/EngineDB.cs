@@ -41,6 +41,18 @@ public class EngineDB
         public string TypeName { get; set; } = string.Empty;
         public DateTime LastIndexed { get; set; }
     }
+
+    public class ModuleAuthRecord()
+    {
+        [BsonId]
+        public Ulid ModuleKey { get; set; }
+        public string ModuleHash { get; set; } = string.Empty;
+        
+        public string ModuleUrn { get; set; } = string.Empty;
+        public DateTime GrantedAt { get; set; } = DateTime.UtcNow;
+        public DateTime LastUsedAt { get; set; }
+        public bool IsAllowed { get; set; } = false;
+    }
     
     const string DbHashExtension = ".dbhash";
 
@@ -50,7 +62,8 @@ public class EngineDB
     private static readonly Dictionary<string, string> EngineReservedDatabase  = new Dictionary<string, string>()
     {
         { "@settings", "engine_settings.db" },
-        { "@projects", "engine_projects.db" }
+        { "@projects", "engine_projects.db" },
+        { "@auth", "engine_auth.db" },
     };
     
     private enum ERegisterDbStatus

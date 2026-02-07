@@ -27,7 +27,10 @@ using RPGCreator.SDK.UiService;
 
 namespace RPGCreator.UI.Extensions;
 
-public class StatsUiContext
+using AssetManagerScope = UiExtensionExtensions_Generated.AssetsManagerScope;
+
+#region Context
+public class StatsManagerContext
 {
     private readonly Config _config;
     public Grid StatsGrid => _config.GetStatsGrid();
@@ -36,24 +39,61 @@ public class StatsUiContext
     public class Config
     {
         public Func<Grid> GetStatsGrid { get; init; } = null!;
+        public Func<AutoCompleteBox> GetSearchBar { get; init; } = null!;
+        public Func<ScrollViewer> GetGridScroller { get; init; } = null!;
+        public Func<ListBox> GetListBox { get; init; } = null!;
+        public Func<StackPanel> GetButtonsPanel { get; init; } = null!;
+        public Func<Button> GetAddButton { get; init; } = null!;
+        public Func<Button> GetEditButton { get; init; } = null!;
+        public Func<Button> GetRemoveButton { get; init; } = null!;
+        public Action ApplyFilters { get; init; } = null!;
     }
     
-    public StatsUiContext(Config config)
+    public StatsManagerContext(Config config)
     {
         _config = config;
     }
 }
 
+public class StatEditorContext
+{
+    private readonly Config _config;
+    
+    public Grid EditorGrid => _config.GetEditorGrid();
+
+    public class Config
+    {
+        public Func<Grid> GetEditorGrid { get; init; } = null!;
+    }
+    
+    public StatEditorContext(Config config)
+    {
+        _config = config;
+    }
+}
+#endregion
+
 public static class StatsUiExtensions
 {
-    private static IUiExtensionManager _manager = UiServices.ExtensionManager;
-    public static UiExtensionExtensions_Generated.AssetsManagerScope Stats(
-        this UiExtensionExtensions_Generated.AssetsManagerScope context, Action<StatsManagement, StatsUiContext> callback)
+    private static IUiExtensionManager Manager => UiServices.ExtensionManager;
+    public static AssetManagerScope StatsManager(
+        this AssetManagerScope context, Action<StatsManagement, StatsManagerContext> callback)
     {
-        _manager.RegisterExtension(new UIRegion("BaseModule.StatsManagement"), (target, ctx) =>
+        Manager.RegisterExtension(new UIRegion("BaseModule.StatsManagement"), (target, ctx) =>
         {
-            if (ctx is StatsUiContext typedContext && target is StatsManagement statsManagement)
+            if (ctx is StatsManagerContext typedContext && target is StatsManagement statsManagement)
                 callback(statsManagement, typedContext);
+        });
+        return context;
+    }
+
+    public static AssetManagerScope StatEditor(
+        this AssetManagerScope context, Action<StatEditor, StatEditorContext> callback)
+    {
+        Manager.RegisterExtension(new UIRegion("BaseModule.StatEditor"), (target, ctx) =>
+        {
+            if (ctx is StatEditorContext typedContext && target is StatEditor statEditor)
+                callback(statEditor, typedContext);
         });
         return context;
     }

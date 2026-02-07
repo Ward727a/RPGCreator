@@ -1,4 +1,7 @@
-﻿namespace RPGCreator.SDK.Assets;
+﻿using LiteDB;
+using RPGCreator.SDK.Modules;
+
+namespace RPGCreator.SDK.Assets;
 
 public interface IAssetsPack
 {
@@ -7,7 +10,6 @@ public interface IAssetsPack
     public string? Description { get; }
 
     public object LoadAsset(Ulid assetId);
-
     public IEnumerable<IAssetIndexRecord> SearchIndex(Func<IAssetIndexRecord, bool> predicate);
     public IEnumerable<IAssetIndexRecord> SearchIndexByType(Type type);
     public void AddOrUpdateAsset(object asset, string relativeFolderPath = "");

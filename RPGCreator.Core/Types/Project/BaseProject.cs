@@ -26,8 +26,11 @@
 using RPGCreator.Core.Configs.Helpers;
 using RPGCreator.Core.Types.Map;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Projects;
 using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types;
+using RPGCreator.SDK.Types.Collections;
 using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.Core.Types.Project
@@ -53,21 +56,17 @@ namespace RPGCreator.Core.Types.Project
         private MapInstance? _EditMap = null;
 
         public ProjectGameData GameData { get; set; }
-
-        #region PropertyEvent
-
-
-        #endregion
+        public IGlobalPathData GlobalPathData { get; private set; }
 
         public BaseProject()
         {
             GameData = new ProjectGameData(this);
+            GlobalPathData = new EngineGlobalPathData();
         }
         
-        public BaseProject(string name)
+        public BaseProject(string name) : this()
         {
             Name = name;
-            GameData = new ProjectGameData(this);
             Id = Ulid.NewUlid();
         }
 
@@ -93,6 +92,7 @@ namespace RPGCreator.Core.Types.Project
             info.AddValue("authors", Authors);
             info.AddValue("assetsPackPath", AssetsPackPath);
             info.AddValue("gameData", GameData);
+            info.AddValue(nameof(GlobalPathData), GlobalPathData);
             return info;
         }
 
@@ -116,6 +116,7 @@ namespace RPGCreator.Core.Types.Project
             info.TryGetList("authors", out List<string> authors);
             info.TryGetList("assetsPackPath", out List<string> assetsPackPath);
             info.TryGetValue("gameData", out ProjectGameData gameData, new ProjectGameData(this));
+            info.TryGetValue(nameof(GlobalPathData), out EngineGlobalPathData globalPathData, new EngineGlobalPathData());
 
             Id = id;
             Name = name;
@@ -130,6 +131,7 @@ namespace RPGCreator.Core.Types.Project
             Authors = authors;
             AssetsPackPath = assetsPackPath;
             GameData = gameData;
+            GlobalPathData = globalPathData;
         }
     }
 }

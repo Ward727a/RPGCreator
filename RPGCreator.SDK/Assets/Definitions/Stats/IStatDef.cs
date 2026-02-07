@@ -45,7 +45,7 @@ public interface IStatDef : ISerializable, IDeserializable, IHasSavePath, IAsset
     /// <summary>
     /// Define the minimum value of the stat, used to prevent the stat from going below a certain threshold.
     /// </summary>
-    public double StatMinValue { get; set; }
+    public double MinValue { get; set; }
     
     /// <summary>
     /// Stat capping settings, used to define how the stat is capped, either by a fixed value or by another stat.<br/>

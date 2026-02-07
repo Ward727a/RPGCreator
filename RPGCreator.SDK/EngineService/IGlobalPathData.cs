@@ -107,7 +107,7 @@ public interface IGlobalPathData : IService
     /// True if the path exists and has an associated value.<br/>
     /// False otherwise.
     /// </returns>
-    public bool TryGetPaths(URN tag, [NotNullWhen(true)] out IEnumerable<URN>? path);
+    public bool TryGetValues(URN tag, [NotNullWhen(true)] out IEnumerable<Ulid>? path);
     
     /// <summary>
     /// Remove a path and its associated value from the global path data.
@@ -129,21 +129,21 @@ public interface IGlobalPathData : IService
     /// </summary>
     /// <param name="tag">The URN tag to be registered. This tag can be used to group related paths together for easier retrieval.</param>
     /// <param name="pathToValue">The URN path to the value that should be associated with the tag. This allows for easier retrieval of related paths.</param>
-    public void RegisterTag(URN tag, URN pathToValue);
+    public void RegisterTag(URN tag, Ulid pathToValue);
     
     /// <summary>
     /// Register a tag with multiple paths to group them together. This allows for easier retrieval of related paths.
     /// </summary>
     /// <param name="tag">The URN tag to be registered. This tag can be used to group related paths together for easier retrieval.</param>
     /// <param name="pathsToValues">A list of URN paths to the values that should be associated with the tag. This allows for easier retrieval of related paths.</param>
-    public void RegisterTag(URN tag, List<URN> pathsToValues);
+    public void RegisterTag(URN tag, List<Ulid> pathsToValues);
     
     /// <summary>
     /// Register multiple tags with their associated paths to group them together. This allows for easier retrieval of related paths.<br/>
     /// This is a more efficient way to register multiple tags at once, especially if they share the same paths.
     /// </summary>
     /// <param name="tagsToPaths">A list of tuples, where each tuple contains a URN tag and a list of URN paths to the values that should be associated with that tag. This allows for easier retrieval of related paths.</param>
-    public void RegisterTags(List<(URN tag, List<URN> pathsToValues)> tagsToPaths);
+    public void RegisterTags(List<(URN tag, List<Ulid> values)> tagsToPaths);
     
     /// <summary>
     /// Remove a tag and its associated paths from the global path data.<br/>
@@ -190,7 +190,7 @@ public interface IGlobalPathData : IService
     /// <param name="tag">The URN tag.</param>
     /// <param name="pathToValue">The URN path to check for association with the tag.</param>
     /// <returns></returns>
-    public bool TagHasPath(URN tag, URN pathToValue);
+    public bool TagHasValue(URN tag, Ulid pathToValue);
     
     /// <summary>
     /// Check if a given path is registered in the global path data.

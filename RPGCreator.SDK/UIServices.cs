@@ -20,6 +20,8 @@
 
 using System.Diagnostics.CodeAnalysis;
 using RPGCreator.SDK.Exceptions;
+using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.UiService;
 
 namespace RPGCreator.SDK;
@@ -109,14 +111,21 @@ public static class UiServices
         
         ServiceProvider.RegisterService(service, groupName);
     }
-    public static T GetService<T>(string groupName = "default") where T : class, IService
+    public static T GetService<T>(string groupName = "default", T? defaultInstance = null) where T : class, IService
     {
         if (ServiceProvider.TryGetService<T>(out var service, groupName))
         {
             return service;
         }
 
+        #if !DEBUG
+        if(defaultInstance == null)
+            throw new InvalidOperationException($"[UI] Critical Service Missing: {typeof(T).Name}. Make sure it's registered during UI initialization.");
+
+        return defaultInstance;
+        #else
         throw new InvalidOperationException($"[UI] Critical Service Missing: {typeof(T).Name}. Make sure it's registered during UI initialization.");
+        #endif
     }
     
     private static void RegisterService<T>(T service) where T : class, IService
@@ -143,27 +152,119 @@ public static class UiServices
 
     public static IMenuService MenuService
     {
-        get => GetService<IMenuService>();
+        get => GetService<IMenuService>(defaultInstance: field);
         set => RegisterService(value);
-    }
+    } = new DefaultMenuService();
 
     public static IDialogService DialogService
     {
-        get => GetService<IDialogService>();
+        get => GetService<IDialogService>(defaultInstance: field);
         set => RegisterService(value);
-    }
+    } = new DefaultDialogService();
 
     public static INotificationService NotificationService
     {
-        get => GetService<INotificationService>();
+        get => GetService<INotificationService>(defaultInstance: field);
         set => RegisterService(value);
-    }
-    
+    } = new DefaultNotificationService();
+
     public static IUiExtensionManager ExtensionManager
     {
-        get => GetService<IUiExtensionManager>();
+        get => GetService<IUiExtensionManager>(defaultInstance: field);
         set => RegisterService(value);
+    } = new DefaultUiExtensionManager();
+
+
+    #region DefaultInstance
+    // All instances here SHOULD NOT be used!
+    // They are only here to avoid null reference exceptions in case a service is not registered.
+    
+    public class DefaultMenuService : IMenuService
+    {
+        public void OpenContextMenu(object host, IEnumerable<MenuAction> actions)
+        {
+            Logger.Error("[UI] No IMenuService registered. Cannot open context menu.");
+        }
+
+        public void OpenContextMenu(object host, object menu)
+        {
+            Logger.Error("[UI] No IMenuService registered. Cannot open context menu.");
+        }
     }
+    
+    public class DefaultDialogService : IDialogService
+    {
+        public Task<string?> PromptTextAsync(string title, string message, string defaultText = "", DialogStyle style = new DialogStyle(),
+            bool selectAllText = true)
+        {
+            Logger.Error("[UI] No IDialogService registered. Cannot show prompt dialog.");
+            return Task.FromResult<string?>(null);
+        }
+
+        public Task<string?> PromptTextAsync(string title, object content, string defaultText = "", DialogStyle style = new DialogStyle(),
+            bool selectAllText = true)
+        {
+            Logger.Error("[UI] No IDialogService registered. Cannot show prompt dialog.");
+            return Task.FromResult<string?>(null);
+        }
+
+        public Task<bool> ConfirmAsync(string title, string message, DialogStyle style = new DialogStyle(), string confirmButtonText = "OK",
+            string cancelButtonText = "Cancel")
+        {
+            Logger.Error("[UI] No IDialogService registered. Cannot show confirmation dialog.");
+            return Task.FromResult(false);
+        }
+
+        public Task<bool> ConfirmAsync(string title, object content, DialogStyle style = new DialogStyle(), string confirmButtonText = "OK",
+            string cancelButtonText = "Cancel")
+        {
+            Logger.Error("[UI] No IDialogService registered. Cannot show confirmation dialog.");
+            return Task.FromResult(false);
+        }
+
+        public Task ShowMessageAsync(string title, string message, DialogStyle style = new DialogStyle())
+        {
+            Logger.Error("[UI] No IDialogService registered. Cannot show message dialog.");
+            return Task.CompletedTask;
+        }
+
+        public Task ShowErrorAsync(string title, string message, DialogStyle style = new DialogStyle())
+        {
+            Logger.Error("[UI] No IDialogService registered. Cannot show error dialog.");
+            return Task.CompletedTask;
+        }
+    }
+    
+    public class DefaultNotificationService : INotificationService
+    {
+        public void ShowNotification(string title, string message, NotificationType type = NotificationType.Info,
+            NotificationOptions options = default)
+        {
+            Logger.Error("[UI] No INotificationService registered. Cannot show notification.");
+        }
+
+        public void ShowCustomNotification(object? content, NotificationType type = NotificationType.Info,
+            NotificationOptions options = default)
+        {
+            Logger.Error("[UI] No INotificationService registered. Cannot show notification.");
+        }
+    }
+    
+    public class DefaultUiExtensionManager : IUiExtensionManager
+    {
+        public void RegisterExtension(UIRegion region, Action<object, object?> extension)
+        {
+            Logger.Error("[UI] No IUiExtensionManager registered. Cannot register UI extension.");
+        }
+
+        public void ApplyExtensions(UIRegion region, object targetControl, object? context = null)
+        {
+            Logger.Error("[UI] No IUiExtensionManager registered. Cannot apply UI extensions.");
+        }
+    }
+    
+    
+    #endregion
     
     /// <summary>
     /// Checks if a service is ready (registered) in the runtime services provider.

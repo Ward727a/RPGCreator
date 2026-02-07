@@ -70,6 +70,8 @@ namespace RPGCreator.Core.Managers.ProjectsManager
             return newProject;
         }
 
+        public event Action<IBaseProject>? OnProjectOpened;
+
         public List<BaseProjectLink> GetAllProjects()
         {
             return ProjectsConf.Instance.ProjectLinks;
@@ -113,6 +115,10 @@ namespace RPGCreator.Core.Managers.ProjectsManager
                     continue; // Skip this pack and continue with the next one
                 }
             }
+
+            EngineServices.GlobalPathData = project.GlobalPathData;
+            
+            OnProjectOpened?.Invoke(project);
         }
 
         public void CloseCurrentProject()

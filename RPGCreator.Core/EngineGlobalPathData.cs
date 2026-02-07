@@ -19,22 +19,26 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.EngineService;
+using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.Core;
 
-public class EngineGlobalPathData : IGlobalPathData
+[SerializingType("EngineGlobalPathData")]
+public class EngineGlobalPathData : IGlobalPathData, ISerializable, IDeserializable
 {
-    private readonly Dictionary<URN, Ulid> _pathToValue = new();
-    private readonly Dictionary<URN, List<URN>> _tagToPaths = new();
-    
+    private Dictionary<URN, Ulid> _pathToValue = new();
+    private Dictionary<URN, HashSet<Ulid>> _tagToIds = new();
+    private Dictionary<Ulid, URN> _idToTag = new();
     
     public void RegisterPath(URN pathToValue, Ulid idValue, URN? tag = null)
     {
         _pathToValue[pathToValue] = idValue;
         if (tag != null)         
-            RegisterTag(tag.Value, pathToValue);
+            RegisterTag(tag.Value, idValue);
     }
 
     public void RegisterPaths(List<(URN pathToValue, Ulid idValue)> pathsToValues, URN? tag = null)
@@ -45,9 +49,9 @@ public class EngineGlobalPathData : IGlobalPathData
         }
     }
 
-    public bool TryGetPaths(URN tag, [NotNullWhen(true)] out IEnumerable<URN>? path)
+    public bool TryGetValues(URN tag, [NotNullWhen(true)] out IEnumerable<Ulid>? path)
     {
-        if (_tagToPaths.TryGetValue(tag, out var paths))
+        if (_tagToIds.TryGetValue(tag, out var paths))
         {
             path = paths;
             return true;
@@ -59,55 +63,67 @@ public class EngineGlobalPathData : IGlobalPathData
 
     public void RemovePath(URN pathToValue)
     {
+        var value = _pathToValue[pathToValue];
         _pathToValue.Remove(pathToValue);
-         foreach (var paths in _tagToPaths.Values)
-         {
-             paths.Remove(pathToValue);
-         }
+        
+        if (_idToTag.Remove(value, out var tag))
+        {
+            if (_tagToIds.TryGetValue(tag, out var paths))
+            {
+                paths.Remove(value);
+            }
+        }
+    }
+    
+    private static HashSet<Ulid> GetOrCreateTagToId(Dictionary<URN, HashSet<Ulid>> dict, URN key)
+    {
+        ref var set = ref CollectionsMarshal.GetValueRefOrAddDefault(dict, key, out bool exists);
+        if (!exists) set = new HashSet<Ulid>();
+        return set!;
     }
 
     public void RegisterTag(URN tag)
     {
-        if (!_tagToPaths.ContainsKey(tag))
+        
+        if (!_tagToIds.ContainsKey(tag))
         {
-            _tagToPaths[tag] = new List<URN>();
+            _tagToIds[tag] = new HashSet<Ulid>();
         }
     }
 
-    public void RegisterTag(URN tag, URN pathToValue)
+    public void RegisterTag(URN tag, Ulid value)
     {
-        if (!_tagToPaths.ContainsKey(tag))
+        var tagToId = GetOrCreateTagToId(_tagToIds, tag);
+        if (tagToId.Add(value))
         {
-            _tagToPaths[tag] = new List<URN>();
-        }
-        if(!TagHasPath(tag, pathToValue))
-            _tagToPaths[tag].Add(pathToValue);
-    }
-
-    public void RegisterTag(URN tag, List<URN> pathsToValues)
-    {
-        if (!_tagToPaths.ContainsKey(tag))
-        {
-            _tagToPaths[tag] = new List<URN>();
-        }
-        foreach (var path in pathsToValues)
-        {
-            if(!TagHasPath(tag, path))
-                _tagToPaths[tag].Add(path);
+            _idToTag[value] = tag;
         }
     }
 
-    public void RegisterTags(List<(URN tag, List<URN> pathsToValues)> tagsToPaths)
+    public void RegisterTag(URN tag, List<Ulid> values)
     {
-        foreach (var (tag, pathsToValues) in tagsToPaths)
+        if (!_tagToIds.ContainsKey(tag))
         {
-            RegisterTag(tag, pathsToValues);
+            _tagToIds[tag] = new HashSet<Ulid>();
+        }
+        foreach (var value in values)
+        {
+            if(!TagHasValue(tag, value))
+                _tagToIds[tag].Add(value);
+        }
+    }
+
+    public void RegisterTags(List<(URN tag, List<Ulid> values)> tagsToPaths)
+    {
+        foreach (var (tag, values) in tagsToPaths)
+        {
+            RegisterTag(tag, values);
         }
     }
 
     public void RemoveTag(URN tag)
     {
-        _tagToPaths.Remove(tag);
+        _tagToIds.Remove(tag);
     }
 
     public bool TryGetValue(URN path, out Ulid value)
@@ -117,21 +133,46 @@ public class EngineGlobalPathData : IGlobalPathData
 
     public IEnumerable<URN> GetAllTags()
     {
-        return _tagToPaths.Keys;
+        return _tagToIds.Keys;
     }
 
     public bool HasTag(URN tag)
     {
-        return _tagToPaths.ContainsKey(tag);
+        return _tagToIds.ContainsKey(tag);
     }
 
-    public bool TagHasPath(URN tag, URN pathToValue)
+    public bool TagHasValue(URN tag, Ulid value)
     {
-        return _tagToPaths.TryGetValue(tag, out var paths) && paths.Contains(pathToValue);
+        return _tagToIds.TryGetValue(tag, out var paths) && paths.Contains(value);
     }
 
     public bool HasPath(URN path)
     {
         return _pathToValue.ContainsKey(path);
+    }
+
+    public SerializationInfo GetObjectData()
+    {
+        var info = new SerializationInfo(this.GetType());
+        info.AddValue(nameof(_pathToValue), _pathToValue);
+        info.AddValue(nameof(_tagToIds), _tagToIds);
+        info.AddValue(nameof(_idToTag), _idToTag);
+        return info;
+    }
+
+    public void SetObjectData(DeserializationInfo info)
+    {
+        if (info == null)
+        {
+            throw new ArgumentNullException(nameof(info), "DeserializationInfo cannot be null.");
+        }
+
+        info.TryGetValue(nameof(_pathToValue), out Dictionary<URN, Ulid> pathToValue, new());
+        info.TryGetValue(nameof(_tagToIds), out Dictionary<URN, HashSet<Ulid>> tagToIds, new());
+        info.TryGetValue(nameof(_idToTag), out Dictionary<Ulid, URN> idToTag, new());
+
+        _pathToValue = pathToValue;
+        _tagToIds = tagToIds;
+        _idToTag = idToTag;
     }
 }

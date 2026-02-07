@@ -443,7 +443,7 @@ namespace RPGCreator.Core
                 incompatibilities.UnionWith(candidate.Value.Incompatibilities);
                 foreach (var depUrn in candidate.Value.Dependencies)
                 {
-                    if (!URN.TryParse(depUrn, out var resolvedUrn) || resolvedUrn is { IsEmpty: true }) continue;
+                    if (!URN.TryParse(depUrn, out var resolvedUrn) || resolvedUrn == URN.Empty) continue;
                     VisitAndCheck(new URN(depUrn), startOrder, visiting, incompatibilities);
                 }
             }

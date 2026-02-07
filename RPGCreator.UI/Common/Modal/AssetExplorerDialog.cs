@@ -165,7 +165,7 @@ public class AssetExplorerDialog : Window
         {
             var assetButton = new Button
             {
-                Content = $"{EngineServices.AssetTypeRegistry.GetKey(asset.GetType())} : {asset.Urn.Name.Split('@').First()}",
+                Content = $"{EngineServices.AssetTypeRegistry.GetKey(asset.GetType())} : {asset.Urn.Name}",
                 Margin = new Avalonia.Thickness(5),
                 HorizontalAlignment = HorizontalAlignment.Stretch
             };

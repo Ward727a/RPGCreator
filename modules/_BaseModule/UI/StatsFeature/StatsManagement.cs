@@ -22,9 +22,14 @@ using System.Collections.ObjectModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Stats;
+using RPGCreator.SDK.Extensions;
 using RPGCreator.SDK.Modules.UIModule;
+using RPGCreator.UI.Contexts;
 using RPGCreator.UI.Extensions;
 
 namespace _BaseModule.UI.StatsFeature;
@@ -47,31 +52,45 @@ public class StatsManagement : UserControl
     #endregion
     
     #region Properties
-    
+
+    private readonly AssetsManagerMenuContext _context;
     private ObservableCollection<string> _availableNames = new();
+    private HashSet<BaseStatDefinition> _allStats = new();
+    private ObservableCollection<BaseStatDefinition> _availableStats = new();
+
+    private BaseStatDefinition? _selectedStat = null;
     
     #endregion
     
-    public StatsManagement()
+    public StatsManagement(AssetsManagerMenuContext context)
     {
+        _context = context;
         CreateComponents();
         RegisterEvents();
 
-        var config = new StatsUiContext.Config()
+        var config = new StatsManagerContext.Config()
         {
             GetStatsGrid = () => _statsGrid,
+            GetSearchBar = () => _searchBar,
+            GetGridScroller = () => _gridScroller,
+            GetListBox = () => _listBox,
+            GetButtonsPanel = () => _buttonsPanel,
+            GetAddButton = () => _addButton,
+            GetEditButton = () => _editButton,
+            GetRemoveButton = () => _removeButton,
+            ApplyFilters = ApplyFilter
         };
         
-        UiServices.ExtensionManager.ApplyExtensions(new UIRegion("BaseModule.StatsManagement"), this, new StatsUiContext(config));
+        UiServices.ExtensionManager.ApplyExtensions(new UIRegion("BaseModule.StatsManagement"), this, new StatsManagerContext(config));
     }
 
     private void CreateComponents()
     {
-
         _statsGrid = new Grid()
         {
             RowDefinitions = new RowDefinitions("Auto, *, Auto"),
-            RowSpacing = 10
+            RowSpacing = 10,
+            Margin = new Thickness(10)
         };
         this.Content = _statsGrid;
 
@@ -91,7 +110,18 @@ public class StatsManagement : UserControl
         _statsGrid.Children.Add(_gridScroller);
         Grid.SetRow(_gridScroller, 1);
 
-        _listBox = new ListBox();
+        _listBox = new ListBox()
+        {
+            ItemsSource = _availableStats,
+            ItemTemplate = new FuncDataTemplate<BaseStatDefinition>((definition, _) =>
+            {
+                if (definition == null) return null;
+                return new TextBlock()
+                {
+                    Text = definition.DisplayName
+                };
+            })
+        };
         _gridScroller.Content = _listBox;
         
         _buttonsPanel = new StackPanel()
@@ -114,14 +144,16 @@ public class StatsManagement : UserControl
         _editButton = new Button()
         {
             Content = "Edit",
-            Margin = buttonMargin
+            Margin = buttonMargin,
+            IsEnabled = false
         };
         _buttonsPanel.Children.Add(_editButton);
         
         _removeButton = new Button()
         {
             Content = "Remove",
-            Margin = buttonMargin
+            Margin = buttonMargin,
+            IsEnabled = false
         };
         _buttonsPanel.Children.Add(_removeButton);
         
@@ -129,15 +161,97 @@ public class StatsManagement : UserControl
 
     private void RegisterEvents()
     {
-        Loaded += StatsManagement_Loaded;
+        Loaded += OnLoaded;
+        
+        _searchBar.TextChanged += OnFilter;
+        _listBox.SelectionChanged += OnSelect;
+        
+        _addButton.Click += AddButton_Click;
+        _editButton.Click += EditButton_Click;
+        _removeButton.Click += RemoveButton_Click;
     }
 
-    private void StatsManagement_Loaded(object? sender, RoutedEventArgs e)
+    private void AddButton_Click(object? sender, RoutedEventArgs e)
     {
-        if (!EngineServices.GlobalPathData.TryGetPaths(Features.Entity.StatsFeature.StatsTag, out var paths)) return;
-        foreach (var path in paths)
+        _context.OpenCustom(new StatEditor(_context));
+    }
+
+    private void EditButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_selectedStat == null) return;
+        
+        _context.OpenCustom(new StatEditor(_context, _selectedStat));
+    }
+    
+    private async void RemoveButton_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_selectedStat == null) return;
+
+        var result = await UiServices.DialogService.ConfirmAsync("Are you sure?",
+            $"This will permanently delete the stat definition ({_selectedStat.DisplayName}) and all references to it.\n" +
+            $"This action cannot be undone!!!",
+            confirmButtonText: "Delete", cancelButtonText: "Cancel");
+
+        if (!result) return;
+        
+        var pack = EngineServices.AssetsManager.GetDefaultPack();
+        pack.RemoveAsset(_selectedStat.Unique);
+        _allStats.Remove(_selectedStat);
+        ApplyFilter();
+    }
+
+    private void OnLoaded(object? sender, RoutedEventArgs e)
+    {
+        var values = EngineServices.AssetsManager.GetAssets<BaseStatDefinition>();
+        foreach (var statDef in values)
         {
-            _listBox.Items.Add(path);
+            _availableNames.Add(statDef.DisplayName);
+            _allStats.Add(statDef);
+            _availableStats.Add(statDef);
         }
+    }
+
+    private void OnFilter(object? sender, TextChangedEventArgs e)
+    {
+        Dispatcher.UIThread.Post(ApplyFilter, DispatcherPriority.Normal);
+    }
+
+    private void ApplyFilter()
+    {
+        var searchQuery = _searchBar.Text?.Trim() ?? "";
+
+        if (string.IsNullOrEmpty(searchQuery))
+        {
+            if (_availableStats.Count == _allStats.Count) return;
+
+            _availableStats.Clear();
+            foreach (var stat in _allStats) _availableStats.Add(stat);
+            return;
+        }
+
+        _availableStats.Clear();
+
+        var query = searchQuery.ToLower();
+
+        foreach (var stat in _allStats)
+        {
+            if (stat.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
+            {
+                _availableStats.Add(stat);
+            }
+        }
+    }
+    
+    private void OnSelect(object? sender, SelectionChangedEventArgs e)
+    {
+        _selectedStat = _listBox.SelectedItem as BaseStatDefinition;
+        UpdateButtonsState();
+    }
+    
+    private void UpdateButtonsState()
+    {
+        bool hasSelection = _selectedStat != null;
+        _editButton.IsEnabled = hasSelection;
+        _removeButton.IsEnabled = hasSelection;
     }
 }

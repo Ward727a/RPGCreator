@@ -73,7 +73,7 @@ public sealed class StatInstance : IReloadable<IStatDef>
     {
         // For now we use the statCapValue directly from the definition.
         // In the future we might want to calculate it based on the other cap type.
-        CurrentValue = Math.Clamp(newValue, StatDefinition.StatMinValue, _statDefinition.StatCapSettings.StatCapValue);
+        CurrentValue = Math.Clamp(newValue, StatDefinition.MinValue, _statDefinition.StatCapSettings.StatCapValue);
         TryRunEvent(IStatDef.OnValueChangedEvent);
     }
 }

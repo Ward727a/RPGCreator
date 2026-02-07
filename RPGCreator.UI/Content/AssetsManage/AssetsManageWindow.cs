@@ -116,6 +116,8 @@ namespace RPGCreator.UI.Content.AssetsManage
             {
                 RegisterAssetsMenuOption = RegisterAssetsMenuOption,
                 RegisterAssetsMenuSeparator = RegisterAssetsMenuSeparator,
+                ShowAssetsPanel = ShowAssetsPanel,
+                OpenCustom = OpenCustom
             };
             
             UiServices.ExtensionManager.ApplyExtensions(UIRegion.AssetsManagerMenu, MenuPanel, new AssetsManagerMenuContext(config));
@@ -186,6 +188,7 @@ namespace RPGCreator.UI.Content.AssetsManage
             Logger.Debug("Registered assets menu separator: {key}", separatorKey);
         }
         
+        [ExposeToPlugin("AssetsManager.Menu")]
         public void ShowAssetsPanel(string key)
         {
             if (_AssetsMenuOptions.TryGetValue(key, out var panel))
@@ -205,6 +208,7 @@ namespace RPGCreator.UI.Content.AssetsManage
             }
         }
 
+        [ExposeToPlugin("AssetsManager.Menu")]
         public void OpenCustom(UserControl control)
         {
             if(control == null)

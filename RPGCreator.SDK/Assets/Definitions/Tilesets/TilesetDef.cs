@@ -55,7 +55,7 @@ public sealed class TilesetDef : BaseTilesetDef
         Unique = unique;
         Name = name;
         Urn = urn;
-        if (Urn.IsEmpty)
+        if (Urn == URN.Empty)
         {
             Urn = new URN("tileset" , $"{name}@{Unique}");
         }

@@ -29,6 +29,7 @@ using RPGCreator.UI.Content.ProjectCreator;
 using System;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Projects;
 using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.UI.Content.Launcher

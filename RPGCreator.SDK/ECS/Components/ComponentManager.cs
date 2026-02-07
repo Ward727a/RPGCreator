@@ -94,12 +94,12 @@ public struct ComponentMask
     public void Clear() => _b0 = _b1 = _b2 = _b3 = 0;
 }
 
-public class ComponentManager(ECSEventBus eventBus)
+public class ComponentManager(EcsEventBus eventBus)
 {
     
     public const int MaxComponents = 256;
     
-    private ECSEventBus _eventBus { get; } = eventBus;
+    private EcsEventBus _eventBus { get; } = eventBus;
     private EntityManager _entityManager = null!;
     private Dictionary<System.Type, object> _sparseSets = new();
     private Dictionary<System.Type, Action<int>> _removeActions = new();
@@ -147,7 +147,6 @@ public class ComponentManager(ECSEventBus eventBus)
         GetEntityComponentMask(entityId).Set(bit, true);
     
         MarkDirty<T>(entityId);
-        _eventBus.Publish(new ComponentChangedEvent<T>(entityId, ChangeType.Added, default, component));
         return ref component;
     }
     
@@ -168,7 +167,6 @@ public class ComponentManager(ECSEventBus eventBus)
         GetEntityComponentMask(entityId).Set(bit, true);
     
         MarkDirty<T>(entityId);
-        _eventBus.Publish(new ComponentChangedEvent<T>(entityId, ChangeType.Added, default, component));
     }
     
     public void RegisterEntityComponentBits(int entityId)
@@ -247,7 +245,6 @@ public class ComponentManager(ECSEventBus eventBus)
         var bit = ComponentTypeIdRegistry.GetBit<T>();
         GetEntityComponentMask(entityId).Set(bit, false);
         MarkDirty<T>(entityId);
-        _eventBus.Publish(new ComponentChangedEvent<T>(entityId, ChangeType.Removed));
     }
 
     public IEnumerable<(int entityId, T component)> GetAll<T>() where T : struct, IComponent
@@ -286,6 +283,90 @@ public class ComponentManager(ECSEventBus eventBus)
         where T3 : IComponent
     {
         return QueryDirty(typeof(T1), typeof(T2), typeof(T3));
+    }
+    
+    public IEnumerable<int> QueryDirty<T1, T2, T3, T4>()
+        where T1 : IComponent
+        where T2 : IComponent
+        where T3 : IComponent
+        where T4 : IComponent
+    {
+        return QueryDirty(typeof(T1), typeof(T2), typeof(T3), typeof(T4));
+    }
+    
+    public IEnumerable<int> QueryDirty<T1, T2, T3, T4, T5>()
+        where T1 : IComponent
+        where T2 : IComponent
+        where T3 : IComponent
+        where T4 : IComponent
+        where T5 : IComponent
+    {
+        return QueryDirty(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5));
+    }
+    
+    public IEnumerable<int> QueryDirty<T1, T2, T3, T4, T5, T6>()
+        where T1 : IComponent
+        where T2 : IComponent
+        where T3 : IComponent
+        where T4 : IComponent
+        where T5 : IComponent
+        where T6 : IComponent
+    {
+        return QueryDirty(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6));
+    }
+    
+    public IEnumerable<int> QueryDirty<T1, T2, T3, T4, T5, T6, T7>()
+        where T1 : IComponent
+        where T2 : IComponent
+        where T3 : IComponent
+        where T4 : IComponent
+        where T5 : IComponent
+        where T6 : IComponent
+        where T7 : IComponent
+    {
+        return QueryDirty(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7));
+    }
+    
+    public IEnumerable<int> QueryDirty<T1, T2, T3, T4, T5, T6, T7, T8>()
+        where T1 : IComponent
+        where T2 : IComponent
+        where T3 : IComponent
+        where T4 : IComponent
+        where T5 : IComponent
+        where T6 : IComponent
+        where T7 : IComponent
+        where T8 : IComponent
+    {
+        return QueryDirty(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7), typeof(T8));
+    }
+    
+    public IEnumerable<int> QueryDirty<T1, T2, T3, T4, T5, T6, T7, T8, T9>()
+        where T1 : IComponent
+        where T2 : IComponent
+        where T3 : IComponent
+        where T4 : IComponent
+        where T5 : IComponent
+        where T6 : IComponent
+        where T7 : IComponent
+        where T8 : IComponent
+        where T9 : IComponent
+    {
+        return QueryDirty(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7), typeof(T8), typeof(T9));
+    }
+    
+    public IEnumerable<int> GetDirtyEntities(params System.Type[] componentTypes)
+    {
+        if (componentTypes == null || componentTypes.Length == 0)
+            return Array.Empty<int>();
+
+        if (componentTypes.Length == 1)
+        {
+            if (_dirtyEntities.TryGetValue(componentTypes[0], out var list))
+                return list;
+            return Array.Empty<int>();
+        }
+
+        return QueryDirty(componentTypes);
     }
     
     public IEnumerable<int> QueryDirty(params System.Type[] componentTypes)

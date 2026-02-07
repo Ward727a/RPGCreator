@@ -23,12 +23,16 @@
 // 
 #endregion
 
+using System.Reflection;
 using LiteDB;
+using RPGCreator.Core.Common;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Modules;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types.Internals;
+using RPGCreator.SDK.UiService;
 using Serilog;
 
 namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
@@ -55,6 +59,7 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
 
     private Ulid _dbId = Ulid.Empty;
     private const string INDEX_COLLECTION = "asset_index";
+    private const string MODULES_AUTH_COLLECTION = "authorized_modules";
 
     public BaseAssetsPack(string dbPath)
     {
@@ -304,13 +309,23 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
 
             if (File.Exists(fullPath))
             {
-                File.Delete(fullPath);
-                Log.Information("[Pack {PackName}] Asset file at path {FilePath} deleted.", Name, fullPath);
+                try
+                {
+                    File.Delete(fullPath);
+                    Log.Information("[Pack {PackName}] Asset file at path {FilePath} deleted.", Name, fullPath);
+                }
+                catch (Exception ex)
+                {
+                    UiServices.NotificationService.Error("Engine Error!",
+                        $"Failed to delete asset file at path {fullPath}. Please check the file permissions and try again.\nError details (Written into logs!): {ex.Message}");
+                    Logger.Error(ex, "[Pack {PackName}] Failed to delete asset file at path {FilePath}.", Name, fullPath);
+                }
             }
 
             indexCollection.Delete(assetId.ToString());
             Log.Information("[Pack {PackName}] Asset {AssetId} removed from index.", Name, assetId);
         }
+        UiServices.NotificationService.Error("Asset Not Found!", $"No asset with ID {assetId} was found in the pack index. Unable to remove.");
     }
 
     public IEnumerable<IAssetIndexRecord> SearchIndex(Func<IAssetIndexRecord, bool> predicate)

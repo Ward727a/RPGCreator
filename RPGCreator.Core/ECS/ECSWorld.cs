@@ -13,14 +13,14 @@ public class EcsWorld : IEcsWorld
     public EntityManager EntityManager { get; }
     public ComponentManager ComponentManager { get; }
     public SystemManager SystemManager { get; }
-    public ECSEventBus EventBus { get; }
+    public EcsEventBus EventBus { get; }
     public IEntityFactory EntityFactory { get; }
     
     public IEcsCommandBuffer CommandBuffer { get; }
 
     public EcsWorld()
     {
-        EventBus = new ECSEventBus();
+        EventBus = new EcsEventBus();
         ComponentManager = new ComponentManager(EventBus);
         EntityManager = new EntityManager(ComponentManager);
         ComponentManager.Initialize(EntityManager);

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using CommunityToolkit.HighPerformance;
 using RPGCreator.SDK.Logging;
 
 namespace RPGCreator.SDK.Types;
@@ -8,18 +9,31 @@ namespace RPGCreator.SDK.Types;
 [DebuggerDisplay("{ToString()}")]
 public readonly record struct URN
 {
-    
-    public string Namespace { get; }
-    public string Module { get; }
-    public string Name { get; }
+    public readonly ReadOnlyMemory<char> Namespace;
+    public readonly ReadOnlyMemory<char> Module;
+    public readonly ReadOnlyMemory<char> Name;
     
     public string FullName => $"{Namespace}://{Module}/{Name}".ToLowerInvariant().Trim();
 
-    public static URN Empty => new ("", "", "");
+    public static URN Empty => new ();
+    
+    public URN(ReadOnlyMemory<char> @namespace, ReadOnlyMemory<char> module, ReadOnlyMemory<char> name)
+    {
+        Namespace = @namespace;
+        Module = module;
+        Name = name;
+    }
     
     private string Normalize(string value)
     {
         return value.ToLowerInvariant().Trim();
+    }
+
+    public URN()
+    {
+        Namespace = ReadOnlyMemory<char>.Empty;
+        Module = ReadOnlyMemory<char>.Empty;
+        Name = ReadOnlyMemory<char>.Empty;
     }
     
     /// <summary>
@@ -36,15 +50,16 @@ public readonly record struct URN
     /// <param name="name">The name part of the URN.</param>
     public URN(string @namespace, string module, string name)
     {
-        Namespace = Normalize(@namespace);
-        Module = Normalize(module);
-        Name = Normalize(name);
-        
-        if (string.IsNullOrWhiteSpace(Namespace) || string.IsNullOrWhiteSpace(Module) || string.IsNullOrWhiteSpace(Name))
+        if (string.IsNullOrWhiteSpace(@namespace) || string.IsNullOrWhiteSpace(module) || string.IsNullOrWhiteSpace(name))
         {
-            Logger.Error("URN cannot have empty namespace, module, or name.");
+            Logger.Error("URN cannot have empty parts.");
+            this = Empty;
             return;
         }
+
+        Namespace = @namespace.AsMemory().Trim();
+        Module = module.AsMemory().Trim();
+        Name = name.AsMemory().Trim();
     }
 
     /// <summary>
@@ -53,72 +68,71 @@ public readonly record struct URN
     /// </summary>
     /// <param name="module">The module part of the URN.</param>
     /// <param name="name">The name part of the URN.</param>
-    public URN(string module, string name)
+    public URN(string module, string name) : this("rpgc", module, name) { }
+
+    public bool Equals(URN other)
     {
-        string @namespace = "rpgc";
-        Namespace = Normalize(@namespace);
-        Module = Normalize(module);
-        Name = Normalize(name);
-        if (string.IsNullOrWhiteSpace(Namespace) || string.IsNullOrWhiteSpace(Module) || string.IsNullOrWhiteSpace(Name))
-        {
-            Logger.Error("URN cannot have empty namespace, module, or name.");
-            return;
-        }
+        return Namespace.Span.Equals(other.Namespace.Span, StringComparison.OrdinalIgnoreCase) &&
+               Module.Span.Equals(other.Module.Span, StringComparison.OrdinalIgnoreCase) &&
+               Name.Span.Equals(other.Name.Span, StringComparison.OrdinalIgnoreCase);
     }
     
     public URN(string fullUrn)
     {
         if (!TryParse(fullUrn, out var result))
         {
-            Namespace = "";
-            Module = "";
-            Name = "";
+            Namespace = ReadOnlyMemory<char>.Empty;
+            Module = ReadOnlyMemory<char>.Empty;
+            Name = ReadOnlyMemory<char>.Empty;
+        
             Logger.Error("Failed to parse URN from string: {FullUrn}", fullUrn);
             return;
         }
 
-        Namespace = result.Value.Namespace;
-        Module = result.Value.Module;
-        Name = result.Value.Name;
+        Namespace = result.Namespace;
+        Module = result.Module;
+        Name = result.Name;
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override string ToString() => $"{Namespace}://{Module}/{Name}";
+    public override string ToString() => $"{Namespace.Span}://{Module.Span}/{Name.Span}";
 
-    
-    public bool IsEmpty => string.IsNullOrEmpty(Namespace) || string.IsNullOrEmpty(Module) || string.IsNullOrEmpty(Name);
-    
-    public void Deconstruct(out string @namespace, out string module, out string name)
-    { @namespace = Namespace; module = Module; name = Name; }
-    
-    public static bool TryParse(string urn, [NotNullWhen(true)]out URN? result)
+    public override int GetHashCode()
     {
-        result = null;
-        if (string.IsNullOrWhiteSpace(urn))
-        {
-            Logger.Error("URN cannot be null or empty.");
-            return false;
-        }
+        var h = new HashCode();
+        h.AddBytes(Namespace.Span.AsBytes());
+        h.AddBytes(Module.Span.AsBytes());
+        h.AddBytes(Name.Span.AsBytes());
+        return h.ToHashCode();
+    }
 
-        var parts = urn.Split(new[] { "://", "/" }, StringSplitOptions.RemoveEmptyEntries);
+    public static bool TryParse(string? input, out URN result)
+    {
+        result = default;
+        if (string.IsNullOrEmpty(input)) return false;
 
-        if (parts.Length >= 3)
-        {
-            var leftover = string.Join("/", parts, 2, parts.Length - 2);
-            result = new URN(parts[0], parts[1], leftover);
-            return true;
-        }
-        
-        Logger.Error("URN must be in the format 'namespace://module/name'.");
-        return false;
+        ReadOnlySpan<char> span = input.AsSpan();
 
+        int protoIdx = span.IndexOf("://".AsSpan());
+        if (protoIdx <= 0) return false;
+
+        ReadOnlySpan<char> afterProto = span.Slice(protoIdx + 3);
+        int pathIdx = afterProto.IndexOf('/');
+        if (pathIdx <= 0) return false;
+
+        result = new URN(
+            input.AsMemory(0, protoIdx),
+            input.AsMemory(protoIdx + 3, pathIdx),
+            input.AsMemory(protoIdx + 3 + pathIdx + 1)
+        );
+
+        return true;
     }
 
     public static URN Parse(string urn)
     {
-        if (TryParse(urn, out var result)) return result.Value;
+        if (TryParse(urn, out var result)) return result;
         
-        Logger.Error("URN parsing failed: expected \"namespace://module/name\" got {URN} ", urn);
         return Empty;
     }
     

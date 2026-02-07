@@ -13,11 +13,14 @@ public abstract class BaseStatDefinition : IStatDef
     public Ulid? PackId { get; set; }
     public Ulid Unique { get; private set; }
     public URN Urn { get; private set; }
-    public string Name { get; set; }
-    public string Description { get; set; }
-    public double DefaultValue { get; set; }
+    public abstract string Name { get; set; }
+    
+    public string DisplayName => string.IsNullOrEmpty(Name) ? $"Stat_{Unique}" : Name;
+    
+    public abstract string Description { get; set; }
+    public abstract double DefaultValue { get; set; }
     public EStatTypeKind StatTypeKind { get; set; }
-    public double StatMinValue { get; set; }
+    public abstract double MinValue { get; set; }
     public CapSettings StatCapSettings { get; set; }
     public bool IsVisible { get; set; }
 
@@ -29,7 +32,7 @@ public abstract class BaseStatDefinition : IStatDef
         Description = string.Empty;
         DefaultValue = 0d;
         StatTypeKind = EStatTypeKind.Resource;
-        StatMinValue = 0d;
+        MinValue = 0d;
         StatCapSettings = new CapSettings();
         IsVisible = true;
     }
@@ -67,7 +70,7 @@ public abstract class BaseStatDefinition : IStatDef
             .AddValue(nameof(Description), Description)
             .AddValue(nameof(DefaultValue), DefaultValue)
             .AddValue(nameof(StatTypeKind), StatTypeKind)
-            .AddValue(nameof(StatMinValue), StatMinValue)
+            .AddValue(nameof(MinValue), MinValue)
             .AddValue(nameof(StatCapSettings), StatCapSettings)
             .AddValue(nameof(StatNonCompiledFormula), StatNonCompiledFormula)
             .AddValue(nameof(_statGraphEvents), _statGraphEvents.ToDictionary(kv => kv.Key, kv => kv.Value.DocumentPath));
@@ -87,8 +90,8 @@ public abstract class BaseStatDefinition : IStatDef
         DefaultValue = defaultValue;
         info.TryGetValue(nameof(StatTypeKind), out var statTypeKind, EStatTypeKind.Resource);
         StatTypeKind = statTypeKind;
-        info.TryGetValue(nameof(StatMinValue), out var statMinValue, 0f);
-        StatMinValue = statMinValue;
+        info.TryGetValue(nameof(MinValue), out var statMinValue, 0f);
+        MinValue = statMinValue;
         info.TryGetValue(nameof(StatCapSettings), out var statCapSettings, new CapSettings());
         StatCapSettings = statCapSettings;
         info.TryGetValue(nameof(StatNonCompiledFormula), out var statNonCompiledFormula, string.Empty);

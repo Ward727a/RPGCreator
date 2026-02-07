@@ -140,7 +140,7 @@ public interface IEcsWorld
     /// <summary>
     /// The event bus for this world.
     /// </summary>
-    ECSEventBus EventBus { get; }
+    EcsEventBus EventBus { get; }
     
     /// <summary>
     /// The entity factory for this world.

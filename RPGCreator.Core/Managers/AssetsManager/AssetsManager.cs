@@ -102,6 +102,8 @@ namespace RPGCreator.Core.Managers.AssetsManager
 
         public void RegisterAsset(object asset)
         {
+            Guard.IsAssignableToType(asset, typeof(IHasUniqueId));
+            Guard.IsAssignableToType(asset, typeof(IAssetDef));
             var type = asset.GetType();
             if (TryResolveRegistry(type, out var assetRegistry))
             {
@@ -111,7 +113,24 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 Logger.Info("Registered asset of type {AssetType} in registry {RegistryName}",  args: [type.FullName, assetRegistry.ModuleName]);
                 return;
             }
-            Logger.Warning("No registry found for asset type {AssetType}", args: type.FullName);
+            
+            // Check if the asset has a inheritance relationship with any of the supported types of the registries
+            var inherited = type.BaseType;
+
+            if (inherited != null)
+            {
+                if (TryResolveRegistry(inherited, out var inheritedRegistry))
+                {
+                    Guard.IsAssignableToType(asset, typeof(IHasUniqueId));
+                    inheritedRegistry.RegisterUntyped((IHasUniqueId)asset, true);
+                    Guard.IsAssignableToType(asset, typeof(IAssetDef));
+                    OnAssetRegistered?.Invoke((IAssetDef)asset);
+                    Logger.Info("Registered asset of type {AssetType} in registry {RegistryName} with inherited type {inherited}",  args: [type.FullName, inheritedRegistry.ModuleName, inherited.FullName]);
+                    return;
+                }
+            }
+            
+            Logger.Warning("No registry found for asset type {AssetType} - inherited: {inherited}", args: [type.FullName, inherited?.FullName ?? "NONE"]);
         }
         
         public void UnregisterAsset(object asset)
@@ -167,12 +186,33 @@ namespace RPGCreator.Core.Managers.AssetsManager
             }
             return false;
         }
+
+        public string GetRegistryFromTypeOrInherited(Type type)
+        {
+            if (_registryTypeToName.TryGetValue(type, out var registryName))
+            {
+                return registryName;
+            }
+            
+            var baseType = type.BaseType;
+            
+            if(baseType != null)
+            {
+                if (_registryTypeToName.TryGetValue(baseType, out registryName))
+                {
+                    return registryName;
+                }
+            }
+
+            return "";
+        }
         
         [Obsolete("Use 'AssetScope.Load()' instead for better scope management.", false)]
         public bool TryResolveAsset<T>(Ulid uniqueId, [NotNullWhen(true)] out T? result) where T : class, IHasUniqueId
         {
             result = null;
-            if (_registryTypeToName.TryGetValue(typeof(T), out var registryName))
+            var registryName = GetRegistryFromTypeOrInherited(typeof(T));
+            if (!string.IsNullOrEmpty(registryName))
             {
                 if (_registries.TryGetValue(registryName, out var registry))
                 {
@@ -207,7 +247,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             return false;
         }
 
-        public T CreateAsset<T>() where T : IAssetDef, new()
+        public T CreateAsset<T>() where T : IAssetDef, IHasUniqueId, new()
         {
             var newAsset = new T();
             
@@ -215,7 +255,6 @@ namespace RPGCreator.Core.Managers.AssetsManager
             newAsset.Init(Ulid.NewUlid());
             
             RegisterAsset(newAsset);
-            
             
             Logger.Debug("Created asset of type {AssetType} with ID {AssetID}", args:[typeof(T).FullName, newAsset.Unique]);
             
@@ -492,6 +531,14 @@ namespace RPGCreator.Core.Managers.AssetsManager
             {
                 Logger.Warning("No assets pack found with ID: {PackID}", args: packId);
             }
+        }
+
+        public IAssetsPack GetDefaultPack()
+        {
+            if(AssetsPacksMapping.TryGetValue("assets_pack", out Ulid packId))
+                return AssetsPacks[packId];
+            throw new CriticalEngineException("Default assets pack with name 'assets_pack' not found. Make sure it is included in the project and loaded correctly.",
+                (AssetsPacksMapping, AssetsPacks));
         }
         
         public bool TryGetPack(string? packName, [NotNullWhen(true)] out IAssetsPack? pack)

@@ -83,6 +83,33 @@ public abstract class BaseModule : IEngineModuleInfo {
         (_manifest?.Dependencies ?? []).Select(urnStr => new URN(urnStr)).ToArray();
     public URN[] Incompatibilities => 
         (_manifest?.Incompatibilities ?? []).Select(urnStr => new URN(urnStr)).ToArray();
+
+    public bool IsFirstTime = false;
+    
+    /// <summary>
+    /// Check if this is the first time the module is initialized by looking for a specific file in the module folder.<br/>
+    /// This can be used to run some initialization code only the first time the module is initialized, such as creating default assets or folders.
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="DirectoryNotFoundException"></exception>
+    public bool IsFirstTimeInitialization()
+    {
+        var moduleFolder = Path.GetDirectoryName(this.GetType().Assembly.Location);
+        
+        if (Directory.Exists(moduleFolder))
+        {
+            var firstTimeFilePath = Path.Combine(moduleFolder, ".initialized");
+            if (File.Exists(firstTimeFilePath))
+            {
+                return false;
+            }
+
+            File.Create(firstTimeFilePath).Close();
+            return true;
+        }
+
+        throw new DirectoryNotFoundException($"Module folder not found: {moduleFolder}");
+    }
     
     protected abstract void OnInitialize();
     protected abstract void OnShutdown();
@@ -97,6 +124,10 @@ public abstract class BaseModule : IEngineModuleInfo {
         }
         
         Logger.Info("Initializing module: {ModuleName} v{ModuleVersion} by {ModuleAuthor}, from asm: {asm}", Name, Version, Author, callingMethod?.DeclaringType?.Assembly.FullName ?? "UNKNOWN");
+        if (IsFirstTimeInitialization())
+        {
+            IsFirstTime = true;
+        }
         
         OnInitialize();
     }

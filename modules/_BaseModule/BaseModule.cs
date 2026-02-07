@@ -1,4 +1,5 @@
-﻿using _BaseModule.Features.Entity;
+﻿using System.Reflection;
+using _BaseModule.Features.Entity;
 using _BaseModule.Features.Game;
 using _BaseModule.MacroFeatures;
 using _BaseModule.UI.StatsFeature;
@@ -33,16 +34,25 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
     
     private static readonly ScopedLogger Logger = RPGCreator.SDK.Logging.Logger.ForContext<BaseModule>();
 
+    public static bool FirstTime = false;
+
     protected override void OnInitialize()
     {
-        var folderPath = Path.GetDirectoryName(typeof(BaseModule).Assembly.Location);
+        FirstTime = IsFirstTime;
+        var asm = Assembly.GetExecutingAssembly();
         
+        var folderPath = Path.GetDirectoryName(asm.Location);
+        
+        // We register the module folder path, so other part of the module can use it to reference assets inside the base module for example.
         if(string.IsNullOrEmpty(folderPath))
             Logger.Error("Failed to register BaseModule path: folderPath is null or empty.");
         else
             EngineServices.ModulePathResolver.RegisterPath(FolderUrn, folderPath);
         
-        EngineServices.AssetTypeRegistry.ScanCurrentAssembly(true);
+        // We start by scanning the assembly for assets types, so we, and the engine more generally, can be aware of all the custom assets provided by this module, such as the stats definitions.
+        // This is VERY important if you have any custom type of asset that need to be serialized, or deserialized (saved or loaded) in any way.
+        // Without scanning the assembly, the engine won't be aware of these assets and won't be able to handle them properly.
+        EngineServices.AssetTypeRegistry.ScanAssembly(asm);
         
         // We register all entity features and game features provided by the base module.
         EngineServices.FeaturesManager.RegisterEntityFeature<MovementFeature>();
@@ -60,7 +70,7 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
             {
                 context.RegisterAssetsMenuOption("Stats", () =>
                 {
-                    return new StatsManagement();
+                    return new StatsManagement(context);
                 });
             });
         });

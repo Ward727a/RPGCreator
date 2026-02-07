@@ -25,6 +25,7 @@
 using Avalonia.Controls;
 using Avalonia.Media;
 using System;
+using RPGCreator.SDK.Projects;
 using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.UI.Content.Launcher
