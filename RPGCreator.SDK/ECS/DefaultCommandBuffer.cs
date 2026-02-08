@@ -106,6 +106,16 @@ public sealed class RemoveComponentCommand<T>(int entityId) : ICommand where T :
     }
 }
 
+public sealed class ExecuteOnceCreatedCommand(int entityId, Action<int>? onCreated) : ICommand
+{
+    public int EntityId { get; } = entityId;
+    public Action<int>? OnCreated { get; } = onCreated;
+    public void Execute(IEcsWorld world, int finalId)
+    {
+        OnCreated?.Invoke(finalId);
+    }
+}
+
 
 public sealed class DefaultCommandBuffer(IEcsWorld world) : IEcsCommandBuffer
 {
@@ -141,6 +151,11 @@ public sealed class DefaultCommandBuffer(IEcsWorld world) : IEcsCommandBuffer
     public void RemoveComponent<T>(int entityId) where T : struct, IComponent
     {
         _commands.Add(new RemoveComponentCommand<T>(entityId));
+    }
+
+    public void ExecuteOnceCreated(int entityId, Action<int> onCreated)
+    {
+        _commands.Add(new ExecuteOnceCreatedCommand(entityId, onCreated));
     }
 
     public void Execute(IEcsWorld? world = null)

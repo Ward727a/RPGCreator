@@ -18,19 +18,13 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.Numerics;
-using RPGCreator.SDK.ECS.Entities;
-using RPGCreator.SDK.Types;
+using _BaseModule.AssetDefinitions.BaseStats;
+using RPGCreator.SDK.Attributes;
 
-namespace RPGCreator.SDK.ECS.Components;
+namespace _BaseModule.AssetDefinitions.BaseResistance;
 
-public struct CameraComponent : IComponent
+[SerializingType("Regeneration")]
+public class RegenerationDefinition : StatDefinition
 {
-    public float Zoom;
-    public float Rotation;
-    public Vector2 Offset;
-    public Vector2 Position;
-    public Size ViewportSize;
-    public bool IsFollowingEntity;
-    public int FollowedEntity;
+    public Ulid TargetStat { get; set; }
 }

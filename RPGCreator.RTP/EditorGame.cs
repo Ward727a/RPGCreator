@@ -137,10 +137,10 @@ namespace RPGCreator.RTP
             
             RuntimeServices.CameraService.PropertyChanged += (_, args) =>
             {
-                if (args.PropertyName == nameof(ICameraService.CameraEntity))
-                {
-                    _cameraEntity = RuntimeServices.CameraService.CameraEntity;
-                }
+                // if (args.PropertyName == nameof(ICameraService.CameraEntityId))
+                // {
+                //     _cameraEntity = RuntimeServices.CameraService.CameraEntityId;
+                // }
             };
 
             Gum.Initialize(this);
@@ -196,7 +196,7 @@ namespace RPGCreator.RTP
 
             var cam = _ecsWorld.EntityManager.CreateCameraEntity();
             
-            RuntimeServices.CameraService.SetCameraEntity(cam);
+            RuntimeServices.CameraService.SetCameraEntity(cam.Id);
             
             _ecsWorld.SystemManager.AddSystem(new CameraSystem());
             _ecsWorld.SystemManager.AddSystem(new MapDrawingSystem(GraphicsDevice));

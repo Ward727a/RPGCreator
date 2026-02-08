@@ -26,13 +26,13 @@ public class CharacterStats(IStatDef def) : ISerializable, IDeserializable
     public Ulid Unique => StatDef.Unique;
     public IStatDef StatDef { get; private set; } = def;
     public double CurrentValue { get; set; } = def.DefaultValue;
-    public double MaxValue { get; set; } = def.StatCapSettings.StatCapValue;
+    public double MaxValue { get; set; } = def.CapSettings.CapValue;
     public double MinValue { get; set; } = def.MinValue;
 
     public IStatDef GenerateDefinition()
     {
         return null;
-        if(Math.Abs(CurrentValue - def.DefaultValue) < 0.001 && Math.Abs(MaxValue - def.StatCapSettings.StatCapValue) < 0.001 && Math.Abs(MinValue - def.MinValue) < 0.001)
+        if(Math.Abs(CurrentValue - def.DefaultValue) < 0.001 && Math.Abs(MaxValue - def.CapSettings.CapValue) < 0.001 && Math.Abs(MinValue - def.MinValue) < 0.001)
         {
             return StatDef;
         }
@@ -69,15 +69,15 @@ public class CharacterStats(IStatDef def) : ISerializable, IDeserializable
     {
         if(otherDef.Unique != StatDef.Unique) return false;
         if(Math.Abs(otherDef.DefaultValue - StatDef.DefaultValue) > 0.001) return true;
-        if(Math.Abs(otherDef.StatCapSettings.StatCapValue - StatDef.StatCapSettings.StatCapValue) > 0.001) return true;
+        if(Math.Abs(otherDef.CapSettings.CapValue - StatDef.CapSettings.CapValue) > 0.001) return true;
         if(Math.Abs(otherDef.MinValue - StatDef.MinValue) > 0.001) return true;
         if(otherDef.IsVisible != StatDef.IsVisible) return true;
         if(otherDef.PackId != StatDef.PackId) return true;
         if(otherDef.Name != StatDef.Name) return true;
         if(otherDef.Description != StatDef.Description) return true;
-        if(otherDef.StatTypeKind != StatDef.StatTypeKind) return true;
-        if(otherDef.StatCapSettings.StatCapType != StatDef.StatCapSettings.StatCapType) return true;
-        if(otherDef.StatCapSettings.StatCapStatUnique != StatDef.StatCapSettings.StatCapStatUnique) return true;
+        if(otherDef.TypeKind != StatDef.TypeKind) return true;
+        if(otherDef.CapSettings.CapType != StatDef.CapSettings.CapType) return true;
+        if(otherDef.CapSettings.CapStatUnique != StatDef.CapSettings.CapStatUnique) return true;
         if(otherDef.StatNonCompiledFormula != StatDef.StatNonCompiledFormula) return true;
         if(otherDef.GetAllEvents() != StatDef.GetAllEvents()) return true;
         return false;
@@ -92,9 +92,9 @@ public class CharacterStats(IStatDef def) : ISerializable, IDeserializable
         var oldDef = StatDef;
         StatDef = newDef;
         
-        if(Math.Abs(MaxValue - oldDef.StatCapSettings.StatCapValue) < 0.001)
+        if(Math.Abs(MaxValue - oldDef.CapSettings.CapValue) < 0.001)
         {
-            MaxValue = newDef.StatCapSettings.StatCapValue;
+            MaxValue = newDef.CapSettings.CapValue;
         }
 
         if (Math.Abs(MinValue - oldDef.MinValue) < 0.001)

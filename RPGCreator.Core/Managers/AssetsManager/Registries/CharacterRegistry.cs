@@ -1,3 +1,4 @@
+using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.SDK.ECS;
 

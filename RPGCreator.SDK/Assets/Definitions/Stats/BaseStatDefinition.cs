@@ -19,9 +19,13 @@ public abstract class BaseStatDefinition : IStatDef
     
     public abstract string Description { get; set; }
     public abstract double DefaultValue { get; set; }
-    public EStatTypeKind StatTypeKind { get; set; }
+    /// <summary>
+    /// Whether the stat can have negative values or not, used to determine if the stat can go below zero or not.
+    /// </summary>
+    public bool CanBeNegative { get; set; }
+    public EStatTypeKind TypeKind { get; set; }
     public abstract double MinValue { get; set; }
-    public CapSettings StatCapSettings { get; set; }
+    public StatCapSettings CapSettings { get; set; }
     public bool IsVisible { get; set; }
 
     public BaseStatDefinition()
@@ -31,9 +35,9 @@ public abstract class BaseStatDefinition : IStatDef
         Name = string.Empty;
         Description = string.Empty;
         DefaultValue = 0d;
-        StatTypeKind = EStatTypeKind.Resource;
+        TypeKind = EStatTypeKind.Resource;
         MinValue = 0d;
-        StatCapSettings = new CapSettings();
+        CapSettings = new StatCapSettings();
         IsVisible = true;
     }
 
@@ -69,9 +73,9 @@ public abstract class BaseStatDefinition : IStatDef
             .AddValue(nameof(Name), Name)
             .AddValue(nameof(Description), Description)
             .AddValue(nameof(DefaultValue), DefaultValue)
-            .AddValue(nameof(StatTypeKind), StatTypeKind)
+            .AddValue(nameof(TypeKind), TypeKind)
             .AddValue(nameof(MinValue), MinValue)
-            .AddValue(nameof(StatCapSettings), StatCapSettings)
+            .AddValue(nameof(CapSettings), CapSettings)
             .AddValue(nameof(StatNonCompiledFormula), StatNonCompiledFormula)
             .AddValue(nameof(_statGraphEvents), _statGraphEvents.ToDictionary(kv => kv.Key, kv => kv.Value.DocumentPath));
     }
@@ -88,12 +92,12 @@ public abstract class BaseStatDefinition : IStatDef
         Description = description;
         info.TryGetValue(nameof(DefaultValue), out var defaultValue, 0f);
         DefaultValue = defaultValue;
-        info.TryGetValue(nameof(StatTypeKind), out var statTypeKind, EStatTypeKind.Resource);
-        StatTypeKind = statTypeKind;
+        info.TryGetValue(nameof(TypeKind), out var statTypeKind, EStatTypeKind.Resource);
+        TypeKind = statTypeKind;
         info.TryGetValue(nameof(MinValue), out var statMinValue, 0f);
         MinValue = statMinValue;
-        info.TryGetValue(nameof(StatCapSettings), out var statCapSettings, new CapSettings());
-        StatCapSettings = statCapSettings;
+        info.TryGetValue(nameof(CapSettings), out var statCapSettings, new StatCapSettings());
+        CapSettings = statCapSettings;
         info.TryGetValue(nameof(StatNonCompiledFormula), out var statNonCompiledFormula, string.Empty);
         StatNonCompiledFormula = statNonCompiledFormula;
         info.TryGetValue(nameof(_statGraphEvents), out Dictionary<string, string> statGraphEventsPaths, new());

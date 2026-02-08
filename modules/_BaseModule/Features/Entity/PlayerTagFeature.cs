@@ -18,6 +18,7 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.Modules.Features.Entity;
@@ -43,6 +44,10 @@ public class PlayerTagFeature : BaseEntityFeature
     public override void OnInject(BufferedEntity entity, IEntityDefinition entityDefinition)
     {
         entity.AddComponent(new PlayerTagComponent());
+        entity.ExecuteOnceCreated((int entityId) =>
+        {
+            RuntimeServices.CameraService.LinkToEntity(entityId);
+        });
     }
 }
 

@@ -34,7 +34,9 @@ public interface IAssetsManager : IService
     event Action<IAssetDef>? OnAssetUnregistered;
     public void RegisterRegistry(IAssetRegistry registry);
     public void RegisterAsset(object asset);
-    public bool TryResolveRegistry(string ModuleName, [NotNullWhen(true)] out IAssetRegistry? registry);
+    public bool TryResolveRegistry<T>(string moduleName, [NotNullWhen(true)] out T? registry) where T : IAssetRegistry;
+    public bool TryResolveRegistry<T>(System.Type type, [NotNullWhen(true)] out T? registry) where T : IAssetRegistry;
+    public bool TryResolveRegistry(string moduleName, [NotNullWhen(true)] out IAssetRegistry? registry);
     public bool TryResolveRegistry(System.Type type, [NotNullWhen(true)] out IAssetRegistry? registry);
     public bool TryResolveAsset<T>(URN urn, [NotNullWhen(true)] out T? result) where T : class, IHasUniqueId;
     public bool TryResolveAsset<T>(Ulid uniqueId, [NotNullWhen(true)] out T? result) where T : class, IHasUniqueId;
@@ -52,4 +54,5 @@ public interface IAssetsManager : IService
     public void AddNewAssetLocation(Ulid assetId, IAssetsPack? pack, string relativePath, string typeName, bool isTransient = false);
     public List<IAssetsPack> GetLoadedPacks();
     public IEnumerable<PackSearchResult> SearchAllPacks<T>();
+    public IEnumerable<T> GetAssetsOfType<T>() where T : class, IAssetDef, IHasUniqueId;
 }

@@ -200,8 +200,8 @@ public class GamePlayer : Game, IGameRunner
         RuntimeServices.GameSession.ActiveEcsWorld = EngineServices.ECS.CreateWorld();
         if(!LoadingValue.success)
             throw new CriticalEngineException("[GamePlayer] Failed to load game data.", this);
-
-        RuntimeServices.CameraService.SetCameraEntity(RuntimeServices.GameSession.ActiveEcsWorld.EntityManager.CreateCameraEntity());
+        var cameraEntity = RuntimeServices.GameSession.ActiveEcsWorld.EntityManager.CreateCameraEntity();
+        RuntimeServices.CameraService.SetCameraEntity(cameraEntity.Id);
         
         RuntimeServices.GameSession.ActiveEcsWorld.SystemManager.AddSystem(new MapDrawingSystem());
         ((RenderService)RuntimeServices.RenderService).AddSystemToWorld(RuntimeServices.GameSession.ActiveEcsWorld);

@@ -126,7 +126,7 @@ public class StatEditorTab : UserControl
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = App.style.Margin,
-            SelectedItem = StatDef.StatTypeKind
+            SelectedItem = StatDef.TypeKind
         };
         var inputStatTypeKind = new InputLabel("Stat Type Kind", _statTypeKind);
         _bodyPanel.Children.Add(inputStatTypeKind);
@@ -140,7 +140,7 @@ public class StatEditorTab : UserControl
             _statTypeKind.Items.Add(kind.ToString());
         }
 
-        _statTypeKind.SelectedIndex = StatDef.StatTypeKind switch
+        _statTypeKind.SelectedIndex = StatDef.TypeKind switch
         {
             EStatTypeKind.Resource => 0,
             EStatTypeKind.Attribute => 1,
@@ -171,7 +171,7 @@ public class StatEditorTab : UserControl
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = App.style.Margin,
-            SelectedItem = StatDef.StatCapSettings.StatCapType.ToString()
+            SelectedItem = StatDef.CapSettings.CapType.ToString()
         };
         var inputStatTypeCap = new InputLabel("Stat Max Type", _statTypeCap);
         _bodyPanel.Children.Add(inputStatTypeCap);
@@ -184,7 +184,7 @@ public class StatEditorTab : UserControl
             _statTypeCap.Items.Add(capType.ToString());
         }
 
-        _statTypeCap.SelectedIndex = StatDef.StatCapSettings.StatCapType switch
+        _statTypeCap.SelectedIndex = StatDef.CapSettings.CapType switch
         {
             EStatTypeCap.ByValue => 0,
             EStatTypeCap.ByStat => 1,
@@ -196,7 +196,7 @@ public class StatEditorTab : UserControl
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = App.style.Margin,
-            Value = StatDef.StatCapSettings.StatCapValue
+            Value = StatDef.CapSettings.CapValue
         };
         _bodyPanel.Children.Add(new InputLabel("Maximum Value", _statMaxValue));
         
@@ -268,7 +268,7 @@ public class StatEditorTab : UserControl
                 return;
             if (Enum.TryParse<EStatTypeKind>(_statTypeKind.SelectedItem.ToString(), out var kind))
             {
-                StatDef.StatTypeKind = kind;
+                StatDef.TypeKind = kind;
             }
         };
         

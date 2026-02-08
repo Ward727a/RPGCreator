@@ -115,7 +115,7 @@ public class CharacterStatsTab : UserControl
             };
             panel.Children.Add(new InputLabel("Max Value", maxValue));
             
-            maxValue.IsEnabled = keyValuePair.Value.StatDef.StatCapSettings.StatCapType.Equals(EStatTypeCap.ByValue);
+            maxValue.IsEnabled = keyValuePair.Value.StatDef.CapSettings.CapType.Equals(EStatTypeCap.ByValue);
             
             var minValue = new NumericDoubleUpDown
             {

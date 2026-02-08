@@ -146,16 +146,15 @@ namespace RPGCreator.Core.Managers.AssetsManager
             }
             Logger.Warning("No registry found for asset type {AssetType}", args: type.FullName);
         }
-        
-        public bool TryResolveRegistry(string ModuleName, [NotNullWhen(true)] out IAssetRegistry? registry)
+
+        public bool TryResolveRegistry(string moduleName, [NotNullWhen(true)] out IAssetRegistry? registry)
         {
-            return _registries.TryGetValue(ModuleName, out registry);
+            return _registries.TryGetValue(moduleName, out registry);
         }
         
-        public bool TryResolveRegistry(System.Type type, [NotNullWhen(true)] out IAssetRegistry? registry)
+        public bool TryResolveRegistry(Type type, [NotNullWhen(true)] out IAssetRegistry? registry)
         {
             registry = null;
-
             if (type == null)
             {
                 Logger.Critical("TryResolveRegistry called with null type.");
@@ -165,6 +164,38 @@ namespace RPGCreator.Core.Managers.AssetsManager
             if (_registryTypeToName.TryGetValue(type, out var registryName))
             {
                 return _registries.TryGetValue(registryName, out registry);
+            }
+            return false;
+        }
+
+        public bool TryResolveRegistry<T>(string moduleName, [NotNullWhen(true)] out T? registry) where T : IAssetRegistry
+        {
+            registry = default;
+            if (_registries.TryGetValue(moduleName, out var _registry) && _registry is T typedRegistry)
+            {
+                registry = typedRegistry;
+                return true;
+            }
+            return false;
+        }
+        
+        public bool TryResolveRegistry<T>(System.Type type, [NotNullWhen(true)] out T? registry) where T : IAssetRegistry
+        {
+            registry = default;
+
+            if (type == null)
+            {
+                Logger.Critical("TryResolveRegistry called with null type.");
+                return false;
+            }
+            
+            if (_registryTypeToName.TryGetValue(type, out var registryName))
+            {
+                if (_registries.TryGetValue(registryName, out var _registry) && _registry is T typedRegistry)
+                {
+                    registry = typedRegistry;
+                    return true;
+                }
             }
             return false;
         }
@@ -598,6 +629,17 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 foreach (var asset in pack.SearchIndexByType(targetType))
                 {
                     yield return new PackSearchResult(asset.Id, pack.Id, asset.TypeName, asset.RelativePath);
+                }
+            }
+        }
+        
+        public IEnumerable<T> GetAssetsOfType<T>() where T : class, IAssetDef, IHasUniqueId
+        {
+            foreach (var result in SearchAllPacks<T>())
+            {
+                if (TryResolveAsset(result.AssetId, out T? asset))
+                {
+                    yield return asset;
                 }
             }
         }

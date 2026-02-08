@@ -1,3 +1,4 @@
+using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions.Skills;
 
 namespace RPGCreator.Core.Managers.AssetsManager.Registries;

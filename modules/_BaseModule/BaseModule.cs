@@ -2,6 +2,7 @@
 using _BaseModule.Features.Entity;
 using _BaseModule.Features.Game;
 using _BaseModule.MacroFeatures;
+using _BaseModule.Registry;
 using _BaseModule.UI.StatsFeature;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
@@ -53,6 +54,10 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
         // This is VERY important if you have any custom type of asset that need to be serialized, or deserialized (saved or loaded) in any way.
         // Without scanning the assembly, the engine won't be aware of these assets and won't be able to handle them properly.
         EngineServices.AssetTypeRegistry.ScanAssembly(asm);
+        
+        // We register the registry for the stats modifiers, which is used to store all the modifiers that can be applied to stats, such as buffs and debuffs.
+        // This registry is then used by the StatsFeature to apply the modifiers to the stats of the entities.
+        EngineServices.AssetsManager.RegisterRegistry(new StatModifierRegistry());
         
         // We register all entity features and game features provided by the base module.
         EngineServices.FeaturesManager.RegisterEntityFeature<MovementFeature>();

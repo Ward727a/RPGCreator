@@ -22,6 +22,7 @@ using System;
 using System.Numerics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using RPGCreator.SDK;
+using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.RuntimeService;
@@ -42,26 +43,27 @@ public class CameraService : ObservableObject, ICameraService
             _cellSize = new(loadedMapData.CellWidth, loadedMapData.CellHeight);
         };
     }
-    
-    private IEntity? _cameraEntity;
-    public IEntity? CameraEntity
+
+    public int? CameraEntityId
     {
-        get => _cameraEntity;
+        get;
         private set
         {
             OnPropertyChanging();
-            _cameraEntity = value;
+            field = value;
             OnPropertyChanged();
         }
     }
-    
-    public IEntity? LinkedEntity 
+
+    public int? LinkedEntityId 
     {
         get => GetCameraComponent().FollowedEntity;
         private set
         {
+            if (!value.HasValue)
+                return;
             OnPropertyChanging();
-            GetCameraComponent().FollowedEntity = value;
+            GetCameraComponent().FollowedEntity = value.Value;
             OnPropertyChanged();
         }
     }
@@ -137,9 +139,24 @@ public class CameraService : ObservableObject, ICameraService
         }
     }
     
-    public void SetCameraEntity(IEntity cameraEntity, bool preserveSettings = false)
+    public void SetCameraEntity(int cameraEntityId, bool preserveSettings = false)
     {
-        CameraEntity = cameraEntity;
+        if (CameraEntityId == cameraEntityId)
+            return;
+
+        (Vector2, float, Vector2, bool, int?, Size, float) oldSettings = (Vector2.Zero, 1.0f, Vector2.Zero, false, null, new Size(800, 600), 0.0f);
+
+        CameraEntityId = cameraEntityId;
+        
+        if (!preserveSettings || !CameraEntityId.HasValue) return;
+        
+        Position = oldSettings.Item1;
+        ZoomLevel = oldSettings.Item2;
+        Offset = oldSettings.Item3;
+        IsLinkedToEntity = oldSettings.Item4;
+        LinkedEntityId = oldSettings.Item5;
+        ViewportSize = oldSettings.Item6;
+        Rotation = oldSettings.Item7;
     }
 
     public void ResetCamera()
@@ -148,7 +165,7 @@ public class CameraService : ObservableObject, ICameraService
         ZoomLevel = 1.0f;
         Offset = Vector2.Zero;
         IsLinkedToEntity = false;
-        LinkedEntity = null;
+        LinkedEntityId = null;
         ViewportSize = new Size(800, 600); // Default size, it should be set properly later (e.g., from the window size)
         Rotation = 0.0f;
     }
@@ -187,15 +204,15 @@ public class CameraService : ObservableObject, ICameraService
         ZoomLevel += amount;
     }
 
-    public void LinkToEntity(IEntity entity)
+    public void LinkToEntity(int entityId)
     {
-        LinkedEntity = entity;
+        LinkedEntityId = entityId;
         IsLinkedToEntity = true;
     }
 
     public void UnlinkFromEntity()
     {
-        LinkedEntity = null;
+        LinkedEntityId = null;
         IsLinkedToEntity = false;
     }
 
@@ -227,20 +244,25 @@ public class CameraService : ObservableObject, ICameraService
     
     public void Dispose()
     {
-        CameraEntity = null;
     }
     
     #region Helpers
     
     private ref CameraComponent GetCameraComponent()
     {
-        if (CameraEntity == null)
+
+        ComponentManager components;
+        if (RuntimeServices.GameSession.ActiveEcsWorld == null)
+            throw new InvalidOperationException("No active ECS world found.");
+        components = RuntimeServices.GameSession.ActiveEcsWorld.ComponentManager;
+        
+        if (!CameraEntityId.HasValue)
             throw new InvalidOperationException("Camera entity is not set.");
         
-        if (!CameraEntity.HasComponent<CameraComponent>())
+        if (!components.HasComponent<CameraComponent>(CameraEntityId.Value))
             throw new InvalidOperationException("Camera entity does not have a CameraComponent.");
         
-        return ref CameraEntity.GetComponent<CameraComponent>();
+        return ref components.GetComponent<CameraComponent>(CameraEntityId.Value);
     }
     
     #endregion

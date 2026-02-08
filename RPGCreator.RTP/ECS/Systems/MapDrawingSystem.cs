@@ -47,7 +47,7 @@ public class MapDrawingSystem(GraphicsDevice graphicsDevice) : BaseMapDrawingSys
 
     public override void Update(TimeSpan deltaTime)
     {
-        if(CameraService.CameraEntity == null)
+        if(CameraService.CameraEntityId == null)
             return;
         
         if(MapService.CurrentLoadedMapDefinition == null)

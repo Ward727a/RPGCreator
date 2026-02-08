@@ -35,12 +35,17 @@ public interface IStatDef : ISerializable, IDeserializable, IHasSavePath, IAsset
     public double DefaultValue { get; set; }
     
     /// <summary>
+    /// Whether the stat can have negative values or not, used to determine if the stat can go below zero or not.
+    /// </summary>
+    public bool CanBeNegative { get; set; }
+    
+    /// <summary>
     /// Define the kind of this stat:<br/>
     /// <see cref="EStatTypeKind"/>.<see cref="EStatTypeKind.Resource"/> for health, mana, etc.<br/>
     /// <see cref="EStatTypeKind"/>.<see cref="EStatTypeKind.Attribute"/> for strength, agility, etc.<br/>
     /// <see cref="EStatTypeKind"/>.<see cref="EStatTypeKind.Derived"/> for stats that are calculated based via other stats).
     /// </summary>
-    public EStatTypeKind StatTypeKind { get; set; }
+    public EStatTypeKind TypeKind { get; set; }
     
     /// <summary>
     /// Define the minimum value of the stat, used to prevent the stat from going below a certain threshold.
@@ -51,7 +56,7 @@ public interface IStatDef : ISerializable, IDeserializable, IHasSavePath, IAsset
     /// Stat capping settings, used to define how the stat is capped, either by a fixed value or by another stat.<br/>
     /// This is used to prevent the stat from exceeding a certain threshold, either by a fixed value or by another stat.
     /// </summary>
-    public CapSettings StatCapSettings { get; set; }
+    public StatCapSettings CapSettings { get; set; }
 
     /// <summary>
     /// If the stat is visible in the game, such as in the UI or in a character sheet.<br/>
@@ -68,7 +73,7 @@ public interface IStatDef : ISerializable, IDeserializable, IHasSavePath, IAsset
     public IPrattFormula? StatCompiledFormula { get; set; }
 
     /// <summary>
-    /// The non-compiled formula used to calculate the stat value, if applicable (<see cref="StatTypeKind"/> == <see cref="EStatTypeKind"/>.<see cref="EStatTypeKind.Derived"/>).<br/>
+    /// The non-compiled formula used to calculate the stat value, if applicable (<see cref="TypeKind"/> == <see cref="EStatTypeKind"/>.<see cref="EStatTypeKind.Derived"/>).<br/>
     /// This is a string representation of the formula that can be parsed and compiled later.<br/>
     /// It can be used to define how the stat value is calculated based on other stats or conditions.<br/>
     /// For example, a derived stat like "Attack Power" could be defined as a non-compiled formula like "AttackPower = (Strength * 1.5) + (Agility * 0.5)" or similar expressions.
@@ -81,22 +86,22 @@ public interface IStatDef : ISerializable, IDeserializable, IHasSavePath, IAsset
     public abstract Dictionary<string, IGraphScript> GetAllEvents();
 }
 
-public record struct CapSettings()
+public record struct StatCapSettings()
 {
     /// <summary>
     /// Define how the stat is capped, either by a fixed value or by another stat.
     /// </summary>
-    public EStatTypeCap StatCapType { get; set; } = EStatTypeCap.ByValue;
+    public EStatTypeCap CapType { get; set; } = EStatTypeCap.ByValue;
 
     /// <summary>
-    /// If <see cref="StatCapType"/> is <see cref="EStatTypeCap.ByValue"/> then this value is used to cap the stat.
-    /// Else, check <see cref="StatCapStatUnique"/> if <see cref="StatCapType"/> is <see cref="EStatTypeCap.ByStat"/>.
+    /// If <see cref="CapType"/> is <see cref="EStatTypeCap.ByValue"/> then this value is used to cap the stat.
+    /// Else, check <see cref="CapStatUnique"/> if <see cref="CapType"/> is <see cref="EStatTypeCap.ByStat"/>.
     /// </summary>
-    public double StatCapValue { get; set; } = 0d;
+    public double CapValue { get; set; } = 0d;
 
     /// <summary>
-    /// If <see cref="StatCapType"/> is <see cref="EStatTypeCap.ByStat"/>, then this value is used to reference the stat that will cap this stat.<br/>
-    /// Else, check <see cref="StatCapValue"/> if <see cref="StatCapType"/> is <see cref="EStatTypeCap.ByValue"/>.
+    /// If <see cref="CapType"/> is <see cref="EStatTypeCap.ByStat"/>, then this value is used to reference the stat that will cap this stat.<br/>
+    /// Else, check <see cref="CapValue"/> if <see cref="CapType"/> is <see cref="EStatTypeCap.ByValue"/>.
     /// </summary>
-    public Ulid StatCapStatUnique { get; set; } = Ulid.Empty;
+    public Ulid CapStatUnique { get; set; } = Ulid.Empty;
 }

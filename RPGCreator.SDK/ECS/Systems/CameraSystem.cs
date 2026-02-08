@@ -29,33 +29,54 @@ public class CameraSystem : ISystem
     public override bool IsDrawingSystem => false;
     
     private ICameraService _cameraService;
+    private ComponentManager _componentManager;
+    private EcsEventBus _eventBus;
     
     public override void Initialize(IEcsWorld ecsWorld)
     {
         _cameraService = RuntimeServices.CameraService;
+        _componentManager = ecsWorld.ComponentManager;
+        _eventBus = ecsWorld.EventBus;
+        _eventBus.Subscribe<CameraFollowEvent>(OnCameraFollowEvent);
+    }
+
+    private void OnCameraFollowEvent(CameraFollowEvent obj)
+    {
+        var cameraEntityId = _cameraService.CameraEntityId! ?? -1;
+        if(cameraEntityId == -1) return;
+        
+        if(!_componentManager.HasComponent<CameraComponent, TransformComponent>(cameraEntityId))
+            return;
+
+        ref var cameraData = ref _componentManager.GetComponent<CameraComponent>(cameraEntityId);
+        cameraData.FollowedEntity = obj.Target;
     }
 
     public override void Update(TimeSpan deltaTime)
     {
         _cameraService.Update(deltaTime);
-        var cameraEntity = _cameraService.CameraEntity;
-        if (cameraEntity == null)
+        var cameraEntityId = _cameraService.CameraEntityId! ?? -1;
+        
+        if(cameraEntityId == -1) return;
+        
+        if(_componentManager.HasComponent<CameraComponent, TransformComponent>(cameraEntityId))
             return;
         
-        if(!cameraEntity.HasComponent<CameraComponent>() || !cameraEntity.HasComponent<TransformComponent>())
-            return;
-        
-        ref var cameraData = ref cameraEntity.GetComponent<CameraComponent>();
-        ref var transformData = ref cameraEntity.GetComponent<TransformComponent>();
+        ref var cameraData = ref _componentManager.GetComponent<CameraComponent>(cameraEntityId);
+        ref var transformData = ref _componentManager.GetComponent<TransformComponent>(cameraEntityId);
 
-        if (cameraData is not { IsFollowingEntity: true, FollowedEntity: not null }) return;
+        if (!cameraData.IsFollowingEntity || cameraData.FollowedEntity == -1) return;
         
-        var cameraTarget = cameraData.FollowedEntity;
-        
-        if (cameraTarget == null || !cameraTarget.HasComponent<TransformComponent>()) return;
-        
-        var targetPosition = cameraTarget.GetComponent<TransformComponent>().Position;
-        var targetWithOffset = targetPosition + cameraData.Offset;
-        transformData.Position = targetWithOffset;
+        var cameraTargetId = cameraData.FollowedEntity;
+
+        if (_componentManager.HasComponent<TransformComponent>(cameraTargetId))
+        {
+            ref var transformTargetComponent = ref _componentManager.GetComponent<TransformComponent>(cameraTargetId);
+            var targetPosition = transformTargetComponent.Position;
+            var targetWithOffset = targetPosition + cameraData.Offset;
+            transformData.Position = targetWithOffset;
+        }
     }
+
+    public readonly record struct CameraFollowEvent(int Target);
 }

@@ -1,13 +1,12 @@
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
 using RPGCreator.SDK.Types.Internals;
-using Serilog;
 
-namespace RPGCreator.Core.Managers.AssetsManager.Registries;
+namespace RPGCreator.SDK.Assets;
 
 public abstract class RegistryBase <T> : IAssetRegistry<T> where T : class, IHasUniqueId
 {
-    
     protected readonly Dictionary<Ulid, T> _assets = new();
     private readonly Dictionary<Ulid, int> _refCounts = new();
     protected readonly Dictionary<URN, Ulid> _uniqueIds = new();
@@ -46,7 +45,7 @@ public abstract class RegistryBase <T> : IAssetRegistry<T> where T : class, IHas
         }
         else
         {
-            Log.Error("Registry {ModuleName} cannot register asset of type {AssetType}", ModuleName, asset.GetType().FullName);
+            Logger.Error("Registry {ModuleName} cannot register asset of type {AssetType}", ModuleName, asset.GetType().FullName);
         }
     }
 
@@ -58,7 +57,7 @@ public abstract class RegistryBase <T> : IAssetRegistry<T> where T : class, IHas
         }
         else
         {
-            Log.Error("Registry {ModuleName} cannot unregister asset of type {AssetType}", ModuleName, asset.GetType().FullName);
+            Logger.Error("Registry {ModuleName} cannot unregister asset of type {AssetType}", ModuleName, asset.GetType().FullName);
         }
     }
 
@@ -106,14 +105,14 @@ public abstract class RegistryBase <T> : IAssetRegistry<T> where T : class, IHas
     {
         if (!_refCounts.ContainsKey(id))
         {
-            Log.Warning("[{ModuleName}] Attempted to release asset {Id} which is not tracked.", ModuleName, id);
+            Logger.Warning("[{ModuleName}] Attempted to release asset {Id} which is not tracked.", ModuleName, id);
             return;
         }
 
         _refCounts[id]--;
         int newCount = _refCounts[id];
     
-        Log.Debug("[{ModuleName}] Released {Id}. New Count: {Count}", ModuleName, id, newCount);
+        Logger.Debug("[{ModuleName}] Released {Id}. New Count: {Count}", ModuleName, id, newCount);
 
         if (newCount <= 0)
         {
@@ -122,7 +121,7 @@ public abstract class RegistryBase <T> : IAssetRegistry<T> where T : class, IHas
                 if (asset is IDisposable disposable)
                 {
                     disposable.Dispose();
-                    Log.Debug("[{ModuleName}] Disposed asset {Id}", ModuleName, id);
+                    Logger.Debug("[{ModuleName}] Disposed asset {Id}", ModuleName, id);
                 }
 
                 Unregister(asset);
@@ -130,13 +129,13 @@ public abstract class RegistryBase <T> : IAssetRegistry<T> where T : class, IHas
 
             _refCounts.Remove(id);
         
-            Log.Information("[{ModuleName}] Asset {Id} unloaded form RAM.", ModuleName, id);
+            Logger.Info("[{ModuleName}] Asset {Id} unloaded form RAM.", ModuleName, id);
         }
     }
 
     public event EventHandler<T>? AssetRegistered;
     public event EventHandler<T>? AssetUnregistered;
-    public void Register(T asset, bool overwrite = false)
+    public virtual void Register(T asset, bool overwrite = false)
     {
         if (_assets.TryGetValue(asset.Unique, out var existingAsset))
         {
@@ -146,14 +145,14 @@ public abstract class RegistryBase <T> : IAssetRegistry<T> where T : class, IHas
             }
             else
             {
-                Log.Error("Asset with unique ID {assetUnique} already exists in the {ModuleName} registry.", asset.Unique, ModuleName);
+                Logger.Error("Asset with unique ID {assetUnique} already exists in the {ModuleName} registry.", asset.Unique, ModuleName);
                 return;
             }
         }
 
         if (_uniqueIds.ContainsKey(asset.Urn))
         {
-            Log.Error("Asset with URN {assetUrn} already exists in the {ModuleName} registry.", asset.Urn, ModuleName);
+            Logger.Error("Asset with URN {assetUrn} already exists in the {ModuleName} registry.", asset.Urn, ModuleName);
             return;
         }
 
@@ -165,7 +164,7 @@ public abstract class RegistryBase <T> : IAssetRegistry<T> where T : class, IHas
         AssetRegistered?.Invoke(this, asset);
     }
 
-    public void Unregister(T asset)
+    public virtual void Unregister(T asset)
     {
         if (_assets.Remove(asset.Unique))
         {

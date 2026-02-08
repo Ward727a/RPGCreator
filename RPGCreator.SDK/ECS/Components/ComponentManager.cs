@@ -1,10 +1,55 @@
 using System.Collections;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.Types.Collections;
 
 namespace RPGCreator.SDK.ECS;
+
+public readonly ref struct DirtyQueryView
+{
+    private readonly ReadOnlySpan<int> _entities;
+    private readonly ComponentMask _queryMask;
+    private readonly ComponentManager _manager;
+
+    public DirtyQueryView(ReadOnlySpan<int> entities, ComponentMask queryMask, ComponentManager manager)
+    {
+        _entities = entities;
+        _queryMask = queryMask;
+        _manager = manager;
+    }
+
+    public DirtyQueryEnumerator GetEnumerator() => new DirtyQueryEnumerator(_entities, _queryMask, _manager);
+}
+public ref struct DirtyQueryEnumerator
+{
+    private readonly ReadOnlySpan<int> _dirtyEntities;
+    private readonly ComponentMask _queryMask;
+    private readonly ComponentManager _manager;
+    private int _index;
+
+    public DirtyQueryEnumerator(ReadOnlySpan<int> entities, ComponentMask queryMask, ComponentManager manager)
+    {
+        _dirtyEntities = entities;
+        _queryMask = queryMask;
+        _manager = manager;
+        _index = -1;
+    }
+
+    public int Current => _dirtyEntities[_index];
+
+    public bool MoveNext()
+    {
+        while (++_index < _dirtyEntities.Length)
+        {
+            // On vérifie si l'entité dirty possède bien les composants demandés par la query
+            if (_manager.IsMatch(_dirtyEntities[_index], _queryMask))
+                return true;
+        }
+        return false;
+    }
+}
 
 public readonly ref struct QueryView
 {
@@ -21,6 +66,7 @@ public readonly ref struct QueryView
 
     public QueryEnumerator GetEnumerator() => new QueryEnumerator(_entities, _queryMask, _manager);
 }
+
 public ref struct QueryEnumerator
 {
     private readonly ReadOnlySpan<int> _entities;
@@ -49,6 +95,10 @@ public ref struct QueryEnumerator
     }
 }
 
+/// <summary>
+/// The componentsMask is a struct that holds a bitmask representing which components an entity has.<br/>
+/// The max number of components is 256, so we can use 4 ulong (64 bits each) to store the mask. Each bit represents whether the entity has a specific component or not.
+/// </summary>
 public struct ComponentMask
 {
     private ulong _b0, _b1, _b2, _b3;
@@ -103,7 +153,7 @@ public class ComponentManager(EcsEventBus eventBus)
     private EntityManager _entityManager = null!;
     private Dictionary<System.Type, object> _sparseSets = new();
     private Dictionary<System.Type, Action<int>> _removeActions = new();
-    private readonly Dictionary<System.Type, HashSet<int>> _dirtyEntities = new();
+    private Dictionary<Type, List<int>> _dirtyEntities = new();
     private Dictionary<System.Type, Action<int, object>> _cleanupActions = new();
     
     private ComponentMask[] _entityMasks = new ComponentMask[1024];
@@ -190,19 +240,68 @@ public class ComponentManager(EcsEventBus eventBus)
         if (entityId >= _entityMasks.Length) return ref Unsafe.NullRef<ComponentMask>();
         return ref _entityMasks[entityId];
     }
-    
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool HasComponent<T>(int entityId) where T : IComponent
+
+    private bool HasComponent(int entityId, params Type[] componentTypes)
     {
+        if(componentTypes.Length == 0 || componentTypes.Length > MaxComponents) return false;
         if (entityId >= _entityMasks.Length || entityId < 0) return false;
-        
-        var bit = ComponentTypeIdRegistry.GetBit<T>();
+
         var checkMask = new ComponentMask();
-        checkMask.Set(bit, true);
+        foreach (var type in componentTypes)
+        {
+            var bit = ComponentTypeIdRegistry.GetBit(type);
+            checkMask.Set(bit, true);
+        }
         
         return _entityMasks[entityId].Matches(checkMask);
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool HasComponent<T>(int entityId) where T : IComponent
+    {
+        return HasComponent(entityId, typeof(T));
+    }
     
+    public bool HasComponent<T1, T2>(int entityId) where T1 : IComponent where T2 : IComponent
+    {
+        return HasComponent(entityId, typeof(T1), typeof(T2));
+    }
+
+    public bool HasComponent<T1, T2, T3>(int entityId) where T1 : IComponent where T2 : IComponent where T3 : IComponent
+    {
+        return HasComponent(entityId, typeof(T1), typeof(T2), typeof(T3));
+    }
+    
+    public bool HasComponent<T1, T2, T3, T4>(int entityId) where T1 : IComponent where T2 : IComponent where T3 : IComponent where T4 : IComponent
+    {
+        return HasComponent(entityId, typeof(T1), typeof(T2), typeof(T3), typeof(T4));
+    }
+    
+    public bool HasComponent<T1, T2, T3, T4, T5>(int entityId) where T1 : IComponent where T2 : IComponent where T3 : IComponent where T4 : IComponent where T5 : IComponent
+    {
+        return HasComponent(entityId, typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5));
+    }
+    
+    public bool HasComponent<T1, T2, T3, T4, T5, T6>(int entityId) where T1 : IComponent where T2 : IComponent where T3 : IComponent where T4 : IComponent where T5 : IComponent where T6 : IComponent
+    {
+        return HasComponent(entityId, typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6));
+    }
+    
+    public bool HasComponent<T1, T2, T3, T4, T5, T6, T7>(int entityId) where T1 : IComponent where T2 : IComponent where T3 : IComponent where T4 : IComponent where T5 : IComponent where T6 : IComponent where T7 : IComponent
+    {
+        return HasComponent(entityId, typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7));
+    }
+    
+    public bool HasComponent<T1, T2, T3, T4, T5, T6, T7, T8>(int entityId) where T1 : IComponent where T2 : IComponent where T3 : IComponent where T4 : IComponent where T5 : IComponent where T6 : IComponent where T7 : IComponent where T8 : IComponent
+    {
+        return HasComponent(entityId, typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7), typeof(T8));
+    }
+    
+    public bool HasComponent<T1, T2, T3, T4, T5, T6, T7, T8, T9>(int entityId) where T1 : IComponent where T2 : IComponent where T3 : IComponent where T4 : IComponent where T5 : IComponent where T6 : IComponent where T7 : IComponent where T8 : IComponent where T9 : IComponent
+    {
+        return HasComponent(entityId, typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7), typeof(T8), typeof(T9));
+    }
+
     public ref T GetComponent<T>(int entityId) where T : struct, IComponent
     {
         var set = GetOrCreateSparseSet<T>();
@@ -265,19 +364,19 @@ public class ComponentManager(EcsEventBus eventBus)
         return Array.Empty<int>();
     }
     
-    public IEnumerable<int> QueryDirty<T>() where T : IComponent
+    public DirtyQueryView QueryDirty<T>() where T : IComponent
     {
         return QueryDirty(typeof(T));
     }
     
-    public IEnumerable<int> QueryDirty<T1, T2>()
+    public DirtyQueryView QueryDirty<T1, T2>()
         where T1 : IComponent
         where T2 : IComponent
     {
         return QueryDirty(typeof(T1), typeof(T2));
     }
     
-    public IEnumerable<int> QueryDirty<T1, T2, T3>()
+    public DirtyQueryView QueryDirty<T1, T2, T3>()
         where T1 : IComponent
         where T2 : IComponent
         where T3 : IComponent
@@ -285,7 +384,7 @@ public class ComponentManager(EcsEventBus eventBus)
         return QueryDirty(typeof(T1), typeof(T2), typeof(T3));
     }
     
-    public IEnumerable<int> QueryDirty<T1, T2, T3, T4>()
+    public DirtyQueryView QueryDirty<T1, T2, T3, T4>()
         where T1 : IComponent
         where T2 : IComponent
         where T3 : IComponent
@@ -294,7 +393,7 @@ public class ComponentManager(EcsEventBus eventBus)
         return QueryDirty(typeof(T1), typeof(T2), typeof(T3), typeof(T4));
     }
     
-    public IEnumerable<int> QueryDirty<T1, T2, T3, T4, T5>()
+    public DirtyQueryView QueryDirty<T1, T2, T3, T4, T5>()
         where T1 : IComponent
         where T2 : IComponent
         where T3 : IComponent
@@ -304,7 +403,7 @@ public class ComponentManager(EcsEventBus eventBus)
         return QueryDirty(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5));
     }
     
-    public IEnumerable<int> QueryDirty<T1, T2, T3, T4, T5, T6>()
+    public DirtyQueryView QueryDirty<T1, T2, T3, T4, T5, T6>()
         where T1 : IComponent
         where T2 : IComponent
         where T3 : IComponent
@@ -315,7 +414,7 @@ public class ComponentManager(EcsEventBus eventBus)
         return QueryDirty(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6));
     }
     
-    public IEnumerable<int> QueryDirty<T1, T2, T3, T4, T5, T6, T7>()
+    public DirtyQueryView QueryDirty<T1, T2, T3, T4, T5, T6, T7>()
         where T1 : IComponent
         where T2 : IComponent
         where T3 : IComponent
@@ -327,7 +426,7 @@ public class ComponentManager(EcsEventBus eventBus)
         return QueryDirty(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7));
     }
     
-    public IEnumerable<int> QueryDirty<T1, T2, T3, T4, T5, T6, T7, T8>()
+    public DirtyQueryView QueryDirty<T1, T2, T3, T4, T5, T6, T7, T8>()
         where T1 : IComponent
         where T2 : IComponent
         where T3 : IComponent
@@ -340,7 +439,7 @@ public class ComponentManager(EcsEventBus eventBus)
         return QueryDirty(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7), typeof(T8));
     }
     
-    public IEnumerable<int> QueryDirty<T1, T2, T3, T4, T5, T6, T7, T8, T9>()
+    public DirtyQueryView QueryDirty<T1, T2, T3, T4, T5, T6, T7, T8, T9>()
         where T1 : IComponent
         where T2 : IComponent
         where T3 : IComponent
@@ -354,52 +453,19 @@ public class ComponentManager(EcsEventBus eventBus)
         return QueryDirty(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7), typeof(T8), typeof(T9));
     }
     
-    public IEnumerable<int> GetDirtyEntities(params System.Type[] componentTypes)
+    public DirtyQueryView QueryDirty(params System.Type[] componentTypes)
     {
         if (componentTypes == null || componentTypes.Length == 0)
-            return Array.Empty<int>();
+            return new DirtyQueryView(ReadOnlySpan<int>.Empty, new ComponentMask(), this);
 
-        if (componentTypes.Length == 1)
+        var queryMask = GenerateQueryMask(componentTypes);
+
+        if (_dirtyEntities.TryGetValue(componentTypes[0], out var dirtyList))
         {
-            if (_dirtyEntities.TryGetValue(componentTypes[0], out var list))
-                return list;
-            return Array.Empty<int>();
+            return new DirtyQueryView(CollectionsMarshal.AsSpan(dirtyList), queryMask, this);
         }
 
-        return QueryDirty(componentTypes);
-    }
-    
-    public IEnumerable<int> QueryDirty(params System.Type[] componentTypes)
-    {
-        if (componentTypes == null || componentTypes.Length == 0)
-            yield break;
-
-        HashSet<int>? result = null;
-
-        foreach (var type in componentTypes)
-        {
-            if (!_dirtyEntities.TryGetValue(type, out var currentDirty) || currentDirty.Count == 0)
-            {
-                yield break;
-            }
-
-            if (result == null)
-            {
-                result = new HashSet<int>(currentDirty);
-            }
-            else
-            {
-                result.IntersectWith(currentDirty);
-                if (result.Count == 0)
-                    yield break;
-            }
-        }
-
-        if (result == null)
-            yield break;
-
-        foreach (var entityId in result.ToArray())
-            yield return entityId;
+        return new DirtyQueryView(ReadOnlySpan<int>.Empty, queryMask, this);
     }
     
     public void ClearDirty<T>() where T : IComponent
@@ -572,10 +638,28 @@ public class ComponentManager(EcsEventBus eventBus)
         var type = typeof(T);
         if (!_dirtyEntities.TryGetValue(type, out var list))
         {
-            list = new HashSet<int>();
+            list = new List<int>();
             _dirtyEntities[type] = list;
         }
         list.Add(entityId);
+    }
+    
+    public void ClearDirty(int entityId)
+    {
+        if (entityId >= _entityMasks.Length || entityId < 0) return;
+        
+        var mask = GetEntityComponentMask(entityId);
+        for (int i = 0; i < MaxComponents; i++)
+        {
+            if (mask.IsSet(i))
+            {
+                var type = ComponentTypeIdRegistry.GetType(i);
+                if (type != null && _dirtyEntities.TryGetValue(type, out var list))
+                {
+                    list.Remove(entityId);
+                }
+            }
+        }
     }
     
     // Called by EntityManager to remove all components of an entity

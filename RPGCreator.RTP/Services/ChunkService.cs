@@ -56,7 +56,7 @@ public partial class ChunkService : ObservableObject, IChunkService
     private bool _internalIsLoadFrozen;
     public bool IsLoadFrozen { get; private set; }
     
-    private bool CanUpdateLoadedChunks => !_internalIsLoadFrozen && !IsLoadFrozen && RuntimeServices.CameraService.CameraEntity != null && _hasMapLoaded;
+    private bool CanUpdateLoadedChunks => !_internalIsLoadFrozen && !IsLoadFrozen && RuntimeServices.CameraService.CameraEntityId != null && _hasMapLoaded;
     
     public ChunkService()
     {

@@ -30,12 +30,23 @@ using System;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Projects;
+using RPGCreator.SDK.Types.Collections;
 using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.UI.Content.Launcher
 {
     public class LauncherWindowControl : UserControl
     {
+
+        public class TestSlab : ISlabItem
+        {
+            public int? SlabPointerIndex { get; set; }
+        }
+        
+        private readonly Slabs<TestSlab> _testSlabs = new Slabs<TestSlab>(4);
+        
+        private int _slabPointerCounter = 0;
+        
         private Window _Host => (Window)this.GetVisualRoot()!;
 
         private IBaseProject? _selectedProject;
@@ -155,6 +166,73 @@ namespace RPGCreator.UI.Content.Launcher
 
             ContentGrid.Children.Add(projectDetailsPanel);
             Grid.SetColumn(projectDetailsPanel, 1);
+            
+            var TestAddSlabButton = new Button
+            {
+                Content = "Test Add Slab",
+                FontSize = App.style.TextFontSize,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            };
+            
+            var TestAddTo0Button = new Button
+            {
+                Content = "Test Add To 1",
+                FontSize = App.style.TextFontSize,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            };
+            projectDetailsPanel.Children.Add(TestAddTo0Button);
+            TestAddTo0Button.Click += (sender, args) =>
+            {
+                var newSlab = new TestSlab();
+                _testSlabs.AddItem(1, newSlab);
+                Logger.Info($"Added new slab to index 0. Pointer index: {newSlab.SlabPointerIndex}");
+            };
+            
+            projectDetailsPanel.Children.Add(TestAddSlabButton);
+            TestAddSlabButton.Click += (sender, args) =>
+            {
+                var newSlab = new TestSlab();
+                _testSlabs.Allocate(newSlab);
+                _slabPointerCounter++;
+                Logger.Info($"Added new slab. Pointer index: {newSlab.SlabPointerIndex}");
+            };
+            
+            var TestDebugSlabsButton = new Button
+            {
+                Content = "Test Debug Slabs",
+                FontSize = App.style.TextFontSize,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            };
+            projectDetailsPanel.Children.Add(TestDebugSlabsButton);
+            TestDebugSlabsButton.Click += (sender, args) =>
+            {
+                Logger.Info("Debugging slabs:");
+                _testSlabs.DEBUG_PRINT_SCHEMA_BLOCKS();
+            };
+            
+            var TestDebugRemoveRandomSlabButton = new Button
+            {
+                Content = "Test Remove 0",
+                FontSize = App.style.TextFontSize,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            };
+            projectDetailsPanel.Children.Add(TestDebugRemoveRandomSlabButton);
+            TestDebugRemoveRandomSlabButton.Click += (sender, args) =>
+            {
+                if (_slabPointerCounter == 0)                
+                {
+                    Logger.Warning("No slabs to remove.");
+                    return;
+                }
+                var random = new Random();
+                int randomIndex = random.Next(0, _slabPointerCounter);
+                _testSlabs.DeallocateBlock(0);
+                Logger.Info($"Removed slab at pointer index: {randomIndex}");
+            };
 
             _ProjectName = new TextBlock
             {

@@ -5,7 +5,6 @@ public static class ComponentTypeIdRegistry
     private static readonly Dictionary<System.Type, int> _componentTypeToId = new();
     private static int _nextId = 0;
     
-    
     /// <summary>
     /// This method returns a unique integer ID for each component type T.
     /// The ID is generated the first time a component type is requested and is stored in a dictionary for future reference.

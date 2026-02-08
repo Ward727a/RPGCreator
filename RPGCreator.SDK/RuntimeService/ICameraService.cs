@@ -36,13 +36,13 @@ public interface ICameraService : INotifyPropertyChanged, INotifyPropertyChangin
     /// This entity represents the camera in the game world.<br/>
     /// It can be set to other camera entities if presents, for example for cutscenes.
     /// </summary>
-    IEntity? CameraEntity { get; }
+    int? CameraEntityId { get; }
     
     /// <summary>
     /// Gets the entity that the camera is linked to.<br/>
     /// When linked, the camera will follow the entity's position in the game world.
     /// </summary>
-    IEntity? LinkedEntity { get; }
+    int? LinkedEntityId { get; }
     
     /// <summary>
     /// Gets or sets a value indicating whether the camera is linked to an entity.<br/>
@@ -84,7 +84,7 @@ public interface ICameraService : INotifyPropertyChanged, INotifyPropertyChangin
     /// If true, preserves the current camera settings when changing the entity.<br/>
     /// >>> <b>IF TRUE</b> : THIS WILL OVERRIDE THE NEW ENTITY SETTINGS!
     /// </param>
-    void SetCameraEntity(IEntity cameraEntity, bool preserveSettings = false);
+    void SetCameraEntity(int cameraEntityId, bool preserveSettings = false);
     
     /// <summary>
     /// Resets the camera to its default position and zoom level.<br/>
@@ -148,9 +148,9 @@ public interface ICameraService : INotifyPropertyChanged, INotifyPropertyChangin
     /// Links the camera to the specified entity.<br/>
     /// The camera will follow the entity's position in the game world.
     /// </summary>
-    /// <param name="entity">The entity to link the camera to.</param>
+    /// <param name="entityId">The entity to link the camera to.</param>
     /// <exception cref="ArgumentNullException">Thrown if the provided entity is null.</exception>
-    void LinkToEntity(IEntity entity);
+    void LinkToEntity(int entityId);
     
     /// <summary>
     /// Unlinks the camera from the currently linked entity.<br/>

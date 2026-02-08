@@ -13,6 +13,11 @@ namespace RPGCreator.SDK.ECS;
 /// <param name="buffer">The command buffer where this entity is created.</param>
 public struct BufferedEntity(int temporaryId, IEcsCommandBuffer buffer)
 {
+    /// <summary>
+    /// The temporary entity ID assigned by the command buffer.<br/>
+    /// This ID is used to reference the entity in buffered commands!<br/>
+    /// As such, it <b>should NOT be used</b> as an actual entity ID in the world!
+    /// </summary>
     public readonly int Id = temporaryId;
     
     /// <summary>
@@ -57,6 +62,16 @@ public struct BufferedEntity(int temporaryId, IEcsCommandBuffer buffer)
     public void Destroy()
     {
         buffer.DestroyEntity(Id);
+    }
+    
+    /// <summary>
+    /// Allow executing an action once the entity is created in the world and has a valid ID.<br/>
+    /// This is useful for cases where you need to perform additional setup on the entity immediately after creation, such as adding components that require the actual entity ID or registering it in some way.
+    /// </summary>
+    /// <param name="onCreated">The action to execute once the entity is created, receiving the new entity ID.</param>
+    public void ExecuteOnceCreated(Action<int> onCreated)
+    {
+        onCreated?.Invoke(Id);
     }
 }
 

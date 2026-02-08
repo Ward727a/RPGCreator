@@ -23,7 +23,6 @@ using RPGCreator.SDK.Attributes;
 
 namespace _BaseModule.AssetDefinitions.BaseStats;
 
-
 [SerializingType("Stat")]
 public class StatDefinition : BaseStatDefinition
 {

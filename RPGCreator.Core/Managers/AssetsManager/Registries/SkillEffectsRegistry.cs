@@ -1,4 +1,5 @@
 using System.Reflection;
+using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions.Skills;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Logging;
