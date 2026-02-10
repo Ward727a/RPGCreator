@@ -1,7 +1,5 @@
-﻿#region LICENSE
-//
-// RPG Creator - Open-source RPG Engine.
-// (c) 2025 Ward
+﻿// RPG Creator - Open-source RPG Engine.
+// (c) 2026 Ward
 // 
 // This file is part of RPG Creator and is distributed under the Apache 2.0 License.
 // You are free to use, modify, and distribute this file under the terms of the Apache 2.0 License.
@@ -19,32 +17,23 @@
 // => Discord: ward727
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
-// 
-// 
-#endregion
 
-using RPGCreator.SDK.Serializer;
-using static RPGCreator.Core.Configs.EngineConfigs;
+using System.Reflection;
 
-namespace RPGCreator.Core.Configs.Helpers
+namespace RPGCreator.Core.Module;
+
+public static class AssemblyExtension
 {
-    public class AssetsConf : ConfHelper
+    public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
     {
-        public override string ConfigName { get; set; } = "AssetsConf";
-
-        public override void LoadConfig()
+        try
         {
-            return;
+            return assembly.GetTypes();
         }
-
-        public override SerializationInfo GetObjectData()
+        catch (ReflectionTypeLoadException e)
         {
-            throw new NotImplementedException();
-        }
-
-        public override void SetObjectData(DeserializationInfo info)
-        {
-            throw new NotImplementedException();
+            // On ne garde que les types qui ne sont pas null (ceux qui ont pu être chargés)
+            return e.Types.Where(t => t != null)!;
         }
     }
 }

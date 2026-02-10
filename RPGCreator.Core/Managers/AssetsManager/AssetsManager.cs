@@ -64,8 +64,8 @@ namespace RPGCreator.Core.Managers.AssetsManager
         
         private readonly Dictionary<Ulid, AssetLocation> _assetLocations = new();
 
-        readonly Dictionary<Ulid, IAssetsPack> AssetsPacks = [];
-        readonly Dictionary<string, Ulid> AssetsPacksMapping = [];
+        readonly Dictionary<Ulid, IAssetsPack> _assetsPacks = [];
+        private readonly Dictionary<string, Ulid> _assetsPacksMapping = [];
 
         
         #region Registries
@@ -98,12 +98,24 @@ namespace RPGCreator.Core.Managers.AssetsManager
             {
                 _registryTypeToName[supportedType] = registry.ModuleName;
             }
+            
+            Logger.Debug("Registered asset registry {RegistryName} for types: {SupportedTypes}", args: [registry.ModuleName, string.Join(", ", registry.SupportedTypes.Select(t => t.FullName))]);
         }
 
         public void RegisterAsset(object asset)
         {
             Guard.IsAssignableToType(asset, typeof(IHasUniqueId));
             Guard.IsAssignableToType(asset, typeof(IAssetDef));
+
+            if (asset is IHasUniqueId uniqueIdAsset)
+            {
+                if(uniqueIdAsset.Unique == Ulid.Empty)
+                {
+                    uniqueIdAsset.Init(Ulid.NewUlid());
+                    Logger.Warning("Registered asset of type {AssetType} had an empty Unique ID. A new ID has been generated: {NewID}", args: [asset.GetType().FullName, uniqueIdAsset.Unique]);
+                }
+            }
+            
             var type = asset.GetType();
             if (TryResolveRegistry(type, out var assetRegistry))
             {
@@ -456,13 +468,13 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 {
                     if (EngineStates.ProjectState.CurrentProject == null)
                     {
-                        var copyPacks = AssetsPacks.ToArray();
+                        var copyPacks = _assetsPacks.ToArray();
                         foreach (var pack in copyPacks)
                         {
                             pack.Value.Dispose();
                         }
-                        AssetsPacks.Clear();
-                        AssetsPacksMapping.Clear();
+                        _assetsPacks.Clear();
+                        _assetsPacksMapping.Clear();
                         _assetLocations.Clear();
                         Logger.Info("Unloaded all assets packs due to project change.");
                     }
@@ -477,8 +489,8 @@ namespace RPGCreator.Core.Managers.AssetsManager
                                 BaseAssetsPack pack = new(packPath);
 
                                 // RegisterPack(pack, false, false);
-                                AssetsPacks[pack.Id] = pack;
-                                AssetsPacksMapping[pack.Name] = pack.Id;
+                                _assetsPacks[pack.Id] = pack;
+                                _assetsPacksMapping[pack.Name] = pack.Id;
 
                                 foreach (var record in pack.EnumerateIndexOnly())
                                 {
@@ -509,8 +521,8 @@ namespace RPGCreator.Core.Managers.AssetsManager
         {
             BaseAssetsPack pack = new(dbPath);
 
-            AssetsPacks[pack.Id] = pack;
-            AssetsPacksMapping[pack.Name] = pack.Id;
+            _assetsPacks[pack.Id] = pack;
+            _assetsPacksMapping[pack.Name] = pack.Id;
 
             foreach (var record in pack.EnumerateIndexOnly())
             {
@@ -527,17 +539,17 @@ namespace RPGCreator.Core.Managers.AssetsManager
 
         public void RegisterPack(IAssetsPack pack)
         {
-            if (AssetsPacks.ContainsKey(pack.Id))
+            if (_assetsPacks.ContainsKey(pack.Id))
             {
                 Logger.Warning("Assets pack with ID {PackID} is already registered.", args: pack.Id);
                 return;
             }
             
-            AssetsPacks[pack.Id] = pack;
+            _assetsPacks[pack.Id] = pack;
 
-            if (!AssetsPacksMapping.ContainsKey(pack.Name))
+            if (!_assetsPacksMapping.ContainsKey(pack.Name))
             {
-                AssetsPacksMapping[pack.Name] = pack.Id;
+                _assetsPacksMapping[pack.Name] = pack.Id;
             }
             else
             {
@@ -549,10 +561,10 @@ namespace RPGCreator.Core.Managers.AssetsManager
         
         public void UnregisterPack(Ulid packId)
         {
-            if (AssetsPacks.TryGetValue(packId, out IAssetsPack? pack))
+            if (_assetsPacks.TryGetValue(packId, out IAssetsPack? pack))
             {
-                AssetsPacks.Remove(packId);
-                AssetsPacksMapping.Remove(pack.Name);
+                _assetsPacks.Remove(packId);
+                _assetsPacksMapping.Remove(pack.Name);
                 
                 pack.Dispose();
                 
@@ -566,10 +578,10 @@ namespace RPGCreator.Core.Managers.AssetsManager
 
         public IAssetsPack GetDefaultPack()
         {
-            if(AssetsPacksMapping.TryGetValue("assets_pack", out Ulid packId))
-                return AssetsPacks[packId];
+            if(_assetsPacksMapping.TryGetValue("assets_pack", out Ulid packId))
+                return _assetsPacks[packId];
             throw new CriticalEngineException("Default assets pack with name 'assets_pack' not found. Make sure it is included in the project and loaded correctly.",
-                (AssetsPacksMapping, AssetsPacks));
+                (_assetsPacksMapping, _assetsPacks));
         }
         
         public bool TryGetPack(string? packName, [NotNullWhen(true)] out IAssetsPack? pack)
@@ -577,21 +589,21 @@ namespace RPGCreator.Core.Managers.AssetsManager
             pack = null;
             if(packName == null)
                 return false;
-            if (AssetsPacksMapping.TryGetValue(packName, out Ulid packId))
+            if (_assetsPacksMapping.TryGetValue(packName, out Ulid packId))
             {
-                return AssetsPacks.TryGetValue(packId, out pack);
+                return _assetsPacks.TryGetValue(packId, out pack);
             }
             return false;
         }
         
         public bool TryGetPack(Ulid packId, [NotNullWhen(true)] out IAssetsPack? pack)
         {
-            return AssetsPacks.TryGetValue(packId, out pack);
+            return _assetsPacks.TryGetValue(packId, out pack);
         }
 
         public IAssetsPack GetPack(Ulid packId)
         {
-            if (AssetsPacks.TryGetValue(packId, out IAssetsPack? pack))
+            if (_assetsPacks.TryGetValue(packId, out IAssetsPack? pack))
             {
                 return pack;
             }
@@ -612,7 +624,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
 
         public List<IAssetsPack> GetLoadedPacks()
         {
-            return AssetsPacks.Values.ToList();
+            return _assetsPacks.Values.ToList();
         }
 
         
@@ -624,7 +636,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
         public IEnumerable<PackSearchResult> SearchAllPacks<T>()
         {
             var targetType = typeof(T);
-            foreach (var pack in AssetsPacks.Values)
+            foreach (var pack in _assetsPacks.Values)
             {
                 foreach (var asset in pack.SearchIndexByType(targetType))
                 {
@@ -643,7 +655,12 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 }
             }
         }
-        
+
+        public IEnumerable<T> GetAssetsOfType<T>(T valueForType) where T : class, IAssetDef, IHasUniqueId
+        {
+            return GetAssetsOfType<T>();
+        }
+
         #endregion
     }
 }

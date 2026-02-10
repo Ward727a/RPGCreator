@@ -100,7 +100,7 @@ public abstract class BaseGameFeature : IGameFeature
     /// <returns> The configuration value associated with the key, or the default value if the key does not exist.</returns>
     protected T GetConfig<T>(T defaultValue, [CallerMemberName] string key = "")
     {
-        return Configuration.GetOrDefault(key, defaultValue);
+        return Configuration.GetAsOrDefault(key, defaultValue);
     }
 
     /// <summary>

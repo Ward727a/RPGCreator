@@ -63,7 +63,7 @@ public class SystemManager(IEcsWorld world)
 
             var targetList = sys.IsDrawingSystem ? _drawingSystems : _updateSystems;
             targetList.Add(sys);
-            targetList.Sort((a, b) => b.Priority.CompareTo(a.Priority));
+            targetList.Sort((a, b) => a.Priority.CompareTo(b.Priority));
             
             sys.OnEnable?.Invoke();
         }

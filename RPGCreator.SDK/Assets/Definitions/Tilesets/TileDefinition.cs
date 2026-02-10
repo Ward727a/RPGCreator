@@ -73,6 +73,16 @@ public class TileDefinition : ITileDef
         return info;
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        List<Ulid> referencedIds = new List<Ulid>();
+        if (TilesetDef != null)
+        {
+            referencedIds.Add(TilesetDef.Unique);
+        }
+        return referencedIds;
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         if (info == null)

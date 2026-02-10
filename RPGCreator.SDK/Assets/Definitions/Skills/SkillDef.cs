@@ -72,6 +72,16 @@ public class SkillDef : ISkillDef
         return info;
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        var referencedIds = new List<Ulid>();
+        foreach (var statDef in Cost.Keys)
+        {
+            referencedIds.Add(statDef.Unique);
+        }
+        return referencedIds;
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue("SavePath", out string? savePath);

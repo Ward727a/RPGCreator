@@ -179,6 +179,17 @@ public interface IDialogService : IService
     Task ShowMessageAsync(string title, string message, DialogStyle style = new());
     
     /// <summary>
+    /// Show a message dialog to the user, with custom content.<br/>
+    /// As content, you can provide any Avalonia control or object that can be rendered in the dialog.<br/>
+    /// </summary>
+    /// <param name="title">The title of the message dialog.</param>
+    /// <param name="content">The content to display in the message dialog.</param>
+    /// <param name="style">The style of the dialog.</param>
+    /// <exception cref="NotImplementedException">Thrown if the UI framework does not support this operation.</exception>
+    /// <returns></returns>
+    Task ShowPromptAsync(string title, object content, DialogStyle style = new());
+    
+    /// <summary>
     /// Show an error dialog to the user.
     /// </summary>
     /// <param name="title">The title of the error dialog.</param>
@@ -187,5 +198,21 @@ public interface IDialogService : IService
     /// <returns>A task that represents the asynchronous operation.</returns>
     /// <exception cref="NotImplementedException">Thrown if the UI framework does not support this operation.</exception>
     Task ShowErrorAsync(string title, string message, DialogStyle style = new());
+    
+    /// <summary>
+    /// Show a dialog allowing the user to select an item from a list of items.
+    /// </summary>
+    /// <param name="title">The title of the selection dialog.</param>
+    /// <param name="message">The message to display in the selection dialog.</param>
+    /// <param name="items">The list of items to select from.</param>
+    /// <param name="labelSelector">A function to select the label to display for each item. If null, the ToString() method of the item will be used.</param>
+    /// <param name="style">The style of the dialog.</param>
+    /// <param name="confirmButtonText">The text to display on the confirm button.</param>
+    /// <param name="cancelButtonText">The text to display on the cancel button.</param>
+    /// <typeparam name="T">The type of the items to select from.</typeparam>
+    /// <returns>
+    /// The item selected by the user, or default(T) if the user canceled the selection.
+    /// </returns>
+    Task<T?> ShowSelectAsync<T>(string title, string message, IEnumerable<T> items, Func<T, string>? labelSelector = null, DialogStyle style = new(), string confirmButtonText = "OK", string cancelButtonText = "Cancel");
     
 }

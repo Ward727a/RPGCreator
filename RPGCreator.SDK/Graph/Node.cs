@@ -144,6 +144,23 @@ public abstract class Node : ISerializable, IDeserializable
         return info;
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        List<Ulid> referencedIds = new List<Ulid>();
+        foreach (var property in Properties.Values)
+        {
+            if (property is Ulid ulidValue)
+            {
+                referencedIds.Add(ulidValue);
+            }
+            else if (property is IEnumerable<Ulid> ulidEnumerable)
+            {
+                referencedIds.AddRange(ulidEnumerable);
+            }
+        }
+        return referencedIds;
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue(nameof(Id), out var id, string.Empty);

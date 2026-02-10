@@ -314,6 +314,8 @@ namespace RPGCreator.Core.Configs
                 Save(ConfigPath);
             }
             public abstract SerializationInfo GetObjectData();
+            public abstract List<Ulid> GetReferencedAssetIds();
+
             public abstract void SetObjectData(DeserializationInfo info);
         }
     }

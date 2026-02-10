@@ -180,6 +180,12 @@ public static class RuntimeServices
         get => GetService<IPlayerController>();
         set => RegisterService(value);
     }
+
+    public static ISimpleEventExecutor SimpleEventExecutor
+    {
+        get => GetService<ISimpleEventExecutor>();
+        set => RegisterService(value);
+    }
     
     /// <summary>
     /// Checks if a service is ready (registered) in the runtime services provider.

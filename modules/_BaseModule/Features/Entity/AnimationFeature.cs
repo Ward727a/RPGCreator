@@ -33,7 +33,7 @@ namespace _BaseModule.Features.Entity;
 [EntityFeature(MaxInstancesPerCharacter = 1)]
 public class AnimationFeature : BaseEntityFeature
 {
-    public static URN Urn = new URN("rpgc", FeatureUrnModule, "animation_feature");
+    public static URN Urn = FeatureUrnModule.CreateUrnModule("rpgc").ToUrn("animation_feature");
     public override string FeatureName => "Animation Feature";
     public override string FeatureDescription => "Adds animation capabilities to the entity.";
     public override URN FeatureUrn => Urn;

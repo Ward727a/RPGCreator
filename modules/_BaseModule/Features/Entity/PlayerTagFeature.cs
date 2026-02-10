@@ -34,7 +34,7 @@ namespace _BaseModule.Features.Entity;
 [EntityFeature]
 public class PlayerTagFeature : BaseEntityFeature
 {
-    public static URN Urn = new URN("rpgc", FeatureUrnModule, "player_tag_feature");
+    public static URN Urn = FeatureUrnModule.CreateUrnModule("rpgc").ToUrn("player_tag_feature");
     
     public override string FeatureName => "Player Tag";
     public override string FeatureDescription => "Tags the entity as a player-controlled entity.\n" +

@@ -160,6 +160,11 @@ public class EngineGlobalPathData : IGlobalPathData, ISerializable, IDeserializa
         return info;
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return _pathToValue.Values.ToList();
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         if (info == null)

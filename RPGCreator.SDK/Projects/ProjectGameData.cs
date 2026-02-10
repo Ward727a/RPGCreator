@@ -63,6 +63,13 @@ namespace RPGCreator.SDK.Projects
             return info;
         }
 
+        public List<Ulid> GetReferencedAssetIds()
+        {
+            List<Ulid> referencedIds = new List<Ulid>();
+            // Add logic to collect referenced asset IDs from properties
+            return referencedIds;
+        }
+
         public void SetObjectData(DeserializationInfo info)
         {
             if (info == null) throw new ArgumentNullException(nameof(info));

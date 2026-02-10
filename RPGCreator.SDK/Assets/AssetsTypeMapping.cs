@@ -1,4 +1,5 @@
 using System.Reflection;
+using RPGCreator.Core.Module;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Logging;
 
@@ -44,7 +45,7 @@ public class AssetsTypeMapping : IAssetTypeRegistry
     public bool HasKey(string key) => _keyToType.ContainsKey(key);
     public void ScanAssembly(System.Reflection.Assembly asm, bool overrideExisting = false)
     {
-        var types = asm.GetTypes();
+        var types = asm.GetLoadableTypes();
 
         foreach (var type in types)
         {

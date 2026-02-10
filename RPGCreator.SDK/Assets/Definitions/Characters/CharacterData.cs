@@ -21,21 +21,21 @@ namespace RPGCreator.SDK.Assets.Definitions.Characters;
 /// Basic character stats structure. <br/>
 /// This structure is just a simple container for now, but it will be changed and extended in the future.
 /// </summary>
-public class CharacterStats(IStatDef def) : ISerializable, IDeserializable
+public class CharacterStats : ISerializable, IDeserializable
 {
     public Ulid Unique => StatDef.Unique;
-    public IStatDef StatDef { get; private set; } = def;
-    public double CurrentValue { get; set; } = def.DefaultValue;
-    public double MaxValue { get; set; } = def.CapSettings.CapValue;
-    public double MinValue { get; set; } = def.MinValue;
+    public IStatDef StatDef { get; private set; }
+    public double CurrentValue { get; set; } 
+    public double MaxValue { get; set; } 
+    public double MinValue { get; set; } 
 
     public IStatDef GenerateDefinition()
     {
         return null;
-        if(Math.Abs(CurrentValue - def.DefaultValue) < 0.001 && Math.Abs(MaxValue - def.CapSettings.CapValue) < 0.001 && Math.Abs(MinValue - def.MinValue) < 0.001)
-        {
-            return StatDef;
-        }
+        // if(Math.Abs(CurrentValue - def.DefaultValue) < 0.001 && Math.Abs(MaxValue - def.CapSettings.CapValue) < 0.001 && Math.Abs(MinValue - def.MinValue) < 0.001)
+        // {
+        //     return StatDef;
+        // }
         
         // var statDef = new BaseStatDefinition
         // {
@@ -65,6 +65,10 @@ public class CharacterStats(IStatDef def) : ISerializable, IDeserializable
         // return statDef;
     }
 
+    public CharacterStats()
+    {
+    }
+    
     public bool IsStatDefDifferent(IStatDef otherDef)
     {
         if(otherDef.Unique != StatDef.Unique) return false;
@@ -115,6 +119,11 @@ public class CharacterStats(IStatDef def) : ISerializable, IDeserializable
             .AddValue("MinValue", MinValue);
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return [StatDef.Unique];
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue("CurrentValue", out float current, 0);
@@ -157,6 +166,11 @@ public class CharacterSkill(ISkillDef def) : ISerializable, IDeserializable
             .AddValue("MaxSkillLevel", MaxSkillLevel);
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return [SkillDef.Unique];
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue("SkillLevel", out int level, 1);
@@ -175,70 +189,6 @@ public class CharacterSkill(ISkillDef def) : ISerializable, IDeserializable
                 SkillDef = def;
             }
         }
-    }
-}
-
-/// <summary>
-/// This structure contains the basic features of a character. <br/>
-/// It is used to define the character's capabilities and behaviors in the game. <br/>
-/// Each feature can be enabled or disabled, allowing for flexible character design. <br/>
-/// For now, this structure is just a simple container for the features, but it will be changed and extended in the future.
-/// </summary>
-public struct CharacterFeatures() : ISerializable, IDeserializable
-{
-    public bool CanFight { get; set; } = true;
-    public bool CanBeRecruited { get; set; } = true;
-    public bool CanMove { get; set; } = true;
-    public bool CanDie { get; set; } = true;
-    public bool CanBeTalkedTo { get; set; } = true;
-    public bool IsUnique { get; set; } = false;
-    public bool IsPlayable { get; set; } = false;
-    public bool IsBoss { get; set; } = false;
-    public bool CanTrade { get; set; } = false;
-    public bool CanTriggerEvents { get; set; } = true;
-    public SerializationInfo GetObjectData()
-    {
-        return new SerializationInfo(typeof(CharacterFeatures))
-            .AddValue("CanFight", CanFight)
-            .AddValue("CanBeRecruited", CanBeRecruited)
-            .AddValue("CanMove", CanMove)
-            .AddValue("CanDie", CanDie)
-            .AddValue("CanBeTalkedTo", CanBeTalkedTo)
-            .AddValue("IsUnique", IsUnique)
-            .AddValue("IsPlayable", IsPlayable)
-            .AddValue("IsBoss", IsBoss)
-            .AddValue("CanTrade", CanTrade)
-            .AddValue("CanTriggerEvents", CanTriggerEvents);
-    }
-
-    public void SetObjectData(DeserializationInfo info)
-    {
-        if (info == null)
-        {
-            throw new ArgumentNullException(nameof(info), "SerializationInfo cannot be null.");
-        }
-
-        info.TryGetValue("CanFight", out bool canFight, true);
-        info.TryGetValue("CanBeRecruited", out bool canBeRecruited, true);
-        info.TryGetValue("CanMove", out bool canMove, true);
-        info.TryGetValue("CanDie", out bool canDie, true);
-        info.TryGetValue("CanBeTalkedTo", out bool canBeTalkedTo, true);
-        info.TryGetValue("IsUnique", out bool isUnique, false);
-        info.TryGetValue("IsPlayable", out bool isPlayable, false);
-        info.TryGetValue("IsBoss", out bool isBoss, false);
-        info.TryGetValue("CanTrade", out bool canTrade, false);
-        info.TryGetValue("CanTriggerEvents", out bool canTriggerEvents, true);
-
-        CanFight = canFight;
-        CanBeRecruited = canBeRecruited;
-        CanMove = canMove;
-        CanDie = canDie;
-        CanBeTalkedTo = canBeTalkedTo;
-        IsUnique = isUnique;
-        IsPlayable = isPlayable;
-        IsBoss = isBoss;
-        CanTrade = canTrade;
-        CanTriggerEvents = canTriggerEvents;
     }
 }
 
@@ -281,7 +231,12 @@ public class DirectionalAnimationSet : ISerializable, IDeserializable
         return new SerializationInfo(typeof(DirectionalAnimationSet))
             .AddValue("Animations", Animations);
     }
-    
+
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return Animations.Values.ToList();
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         if (info == null)
@@ -336,6 +291,11 @@ public struct CharacterRolePlayInfo() : ISerializable, IDeserializable
             .AddValue("Alignment", Alignment);
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return new List<Ulid>();
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         if (info == null)
@@ -382,6 +342,11 @@ public struct CharacterEquipSlot(string slotName, int slotIndex, string itemType
             .AddValue("SlotIndex", SlotIndex)
             .AddValue("ItemId", ItemId)
             .AddValue("ItemType", ItemType);
+    }
+
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return [];
     }
 
     public void SetObjectData(DeserializationInfo info)
@@ -436,6 +401,11 @@ public class EntityFeatureData() : ISerializable, IDeserializable
             .AddValue("Configuration", Configuration)
             .AddValue(nameof(IsSubFeature), IsSubFeature)
             .AddValue(nameof(ParentFeatureId), ParentFeatureId);
+    }
+
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return new List<Ulid>();
     }
 
     public void SetObjectData(DeserializationInfo info)
@@ -591,7 +561,7 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
         }
     }
 
-    public Dictionary<Ulid, CharacterStats> Stats { get; private set; } = new();
+    public HashSet<Ulid> Stats { get; private set; } = new();
     
     public Dictionary<Ulid, CharacterSkill> Skills { get; private set; } = new();
     
@@ -628,17 +598,7 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
 
         foreach (var statDef in allStats)
         {
-            if (!Stats.ContainsKey(statDef.Unique))
-            {
-                Stats[statDef.Unique] = new CharacterStats(statDef);
-                continue;
-            }
-            
-            var charStat = Stats[statDef.Unique];
-            if (charStat.IsStatDefDifferent(statDef))
-            {
-                Stats[statDef.Unique].SetDef(statDef);
-            }
+            Stats.Add(statDef.Unique);
         }
     }
     
@@ -752,6 +712,26 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
             .AddValue("RolePlayInfo", RolePlayInfo);
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        var assetIds = new List<Ulid>();
+        
+        if (ClassId != Ulid.Empty)
+        {
+            assetIds.Add(ClassId);
+        }
+
+        assetIds.AddRange(Stats);
+        assetIds.AddRange(Skills.Values.Select(s => s.SkillDef.Unique));
+        
+        foreach (var animationSet in AnimationsMapping.Values)
+        {
+            assetIds.AddRange(animationSet.Animations.Values);
+        }
+        
+        return assetIds;
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         if (info == null)
@@ -766,7 +746,7 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
         info.TryGetValue("CurrentLevel", out int currentLevel, 1);
         info.TryGetValue("MaxLevel", out int maxLevel, 99);
         info.TryGetValue("ClassId", out Ulid classId, Ulid.Empty);
-        info.TryGetValue("Stats", out Dictionary<Ulid, CharacterStats>? stats);
+        info.TryGetValue("Stats", out HashSet<Ulid>? stats);
         info.TryGetValue(nameof(AnimationsMapping), out Dictionary<int, DirectionalAnimationSet>? animationsMapping);
         info.TryGetValue("Features", out ObservableCollection<EntityFeatureData> features, new ObservableCollection<EntityFeatureData>());
         info.TryGetValue("RolePlayInfo", out CharacterRolePlayInfo rolePlayInfo, new CharacterRolePlayInfo());
@@ -783,7 +763,7 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
         CurrentLevel = currentLevel;
         MaxLevel = maxLevel;
         ClassId = classId;
-        Stats = stats ?? new Dictionary<Ulid, CharacterStats>();
+        Stats = stats ?? new HashSet<Ulid>();
         _features = features;
         RolePlayInfo = rolePlayInfo;
         Urn = new URN("character", $"{Name}@{Unique}");

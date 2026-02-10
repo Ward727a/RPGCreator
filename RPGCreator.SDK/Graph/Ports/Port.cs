@@ -41,6 +41,11 @@ public class Port : ISerializable, IDeserializable
         return info;
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return new List<Ulid>();
+    }
+
     public virtual void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue(nameof(Id), out var id, string.Empty);

@@ -117,6 +117,20 @@ public sealed class GraphDocument : ISerializable, IDeserializable
                 .AddValue(nameof(Outputs), Outputs);
             return info;
         }
+
+        public List<Ulid> GetReferencedAssetIds()
+        {
+            var assetIds = new List<Ulid>();
+            foreach (var port in Inputs)
+            {
+                assetIds.AddRange(port.GetReferencedAssetIds());
+            }
+            foreach (var port in Outputs)
+            {
+                assetIds.AddRange(port.GetReferencedAssetIds());
+            }
+            return assetIds;
+        }
     }
 
     public struct PortData() : IDeserializable, ISerializable
@@ -151,6 +165,15 @@ public sealed class GraphDocument : ISerializable, IDeserializable
                 .AddValue(nameof(Value), Value);
             return info;
         }
+
+        public List<Ulid> GetReferencedAssetIds()
+        {
+            if (Value is ISerializable serializableValue)
+            {
+                return serializableValue.GetReferencedAssetIds();
+            }
+            return [];
+        }
     }
     
     public SerializationInfo GetObjectData()
@@ -162,6 +185,11 @@ public sealed class GraphDocument : ISerializable, IDeserializable
             .AddValue(nameof(Nodes), nodesData)
             .AddValue(nameof(Links), Links);
         return info;
+    }
+
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return [];
     }
 
     public void SetObjectData(DeserializationInfo info)

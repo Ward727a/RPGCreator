@@ -438,6 +438,10 @@ public abstract class LayerChunk : ISerializable, IDeserializable
     }
 
     public abstract SerializationInfo GetObjectData();
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return new List<Ulid>();
+    }
 
     public abstract void SetObjectData(DeserializationInfo info);
 }

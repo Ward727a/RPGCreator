@@ -74,6 +74,11 @@ public abstract class BaseLayerDef : IAssetDef, ISerializable, IDeserializable
         return info;
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return new List<Ulid>();
+    }
+
     public virtual void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue(nameof(Unique), out Ulid unique);

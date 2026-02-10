@@ -73,6 +73,14 @@ public interface IEntityFeature : IDisposable
     public void SetConfiguration(CustomData configuration, EngineSecurityToken token);
 
     /// <summary>
+    /// Called before this feature is added to an entity definition.<br/>
+    /// This is called once when the feature is added to the definition, allowing it to perform any necessary validation or preparation before being added to the definition.
+    /// </summary>
+    /// <param name="definition">The entity definition to which this feature is being added.</param>
+    /// <param name="itemControl">The item control associated with this feature in the editor, allowing it to modify the control or add additional controls if necessary.</param>
+    void OnAddingToDefinition(IEntityDefinition definition, object itemControlOrContext);
+    
+    /// <summary>
     /// Called when this feature is added to an entity definition.<br/>
     /// This is called once when the feature is added to the definition, allowing it to perform any necessary setup or registration.
     /// </summary>
@@ -101,10 +109,12 @@ public interface IEntityFeature : IDisposable
     public void OnWorldSetup(IEcsWorld world);
 
     /// <summary>
-    /// When this feature is injected (added on runtime) on an entity.
+    /// When this feature is injected (added on runtime) on an entity.<br/>
+    /// This is called in a separate feature for each entity that has this feature injected, allowing it to perform any necessary setup or initialization related to the specific entity.<br/>
+    /// Note: This is called for EACH entity that has this feature injected.
     /// </summary>
     /// <param name="entity">The entity on which this feature is being injected.</param>
-    /// <param name="entityDefinition"></param>
+    /// <param name="entityDefinition">The entity definition of the entity on which this feature is being injected. This can be used to access other features or data on the entity.</param>
     void OnInject(BufferedEntity entity, IEntityDefinition entityDefinition);
 
     /// <summary>
@@ -113,7 +123,6 @@ public interface IEntityFeature : IDisposable
     /// </summary>
     /// <param name="entity"></param>
     void OnDestroy(BufferedEntity entity);
-
 
     public IEntityFeature Clone();
     public void Reset();

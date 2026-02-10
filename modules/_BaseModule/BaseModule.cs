@@ -3,13 +3,11 @@ using _BaseModule.Features.Entity;
 using _BaseModule.Features.Game;
 using _BaseModule.MacroFeatures;
 using _BaseModule.Registry;
-using _BaseModule.UI.StatsFeature;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.UiService;
-using RPGCreator.UI.Extensions;
 
 [assembly: ModuleManifest(
     urn: "rpgc://module/base_module",
@@ -63,21 +61,41 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
         EngineServices.FeaturesManager.RegisterEntityFeature<MovementFeature>();
         EngineServices.FeaturesManager.RegisterEntityFeature<AnimationFeature>();
         EngineServices.FeaturesManager.RegisterEntityFeature<StatsFeature>();
+        EngineServices.FeaturesManager.RegisterEntityFeature<StatsModifierFeature>();
         EngineServices.FeaturesManager.RegisterEntityFeature<LivingBeingMacroFeature>();
         EngineServices.FeaturesManager.RegisterGameFeature<StandardControlFeature>();
         
         // Then we can set up the custom assets menu for stats management.
         // We are doing that here, simply to allow us to 'order' the menu option in a specific way.
         // If we were to add another button like 'Items' we could want it to be before 'Stats' for example, so we would add it here before the 'Stats' button.
+        
+        UiServices.OnceServiceReady((IDocService docService) =>
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            Logger.Info("Embedded resources in assembly: {0}", args: assembly.FullName);
+            foreach (var name in assembly.GetManifestResourceNames()) 
+            {
+                Logger.Info("Resource found: {0}", args: name);
+                if(name.EndsWith(".md"))
+                {
+                    var nameWithoutExtension = Path.GetFileNameWithoutExtension(name).Split('.').Last();
+                    using Stream? stream = assembly.GetManifestResourceStream(name);
+                    if (stream == null)            
+                    {
+                        Logger.Error("Failed to load embedded documentation resource: {ResourceName}", args: name);
+                        return;
+                    }
+                    using StreamReader reader = new StreamReader(stream);
+                    string markdownContent = reader.ReadToEnd();
+                    docService.AddDocumentation(new URN("rpgc", "docs", nameWithoutExtension), markdownContent);
+                    Logger.Debug("Loaded embedded documentation resource: {ResourceName} as {key}", args: [name, nameWithoutExtension]);
+                }
+            }
+        });
+        
         UiServices.OnceServiceReady((IUiExtensionManager extensionManager) =>
         {
-            extensionManager.AssetsManager().Menu((o, context) =>
-            {
-                context.RegisterAssetsMenuOption("Stats", () =>
-                {
-                    return new StatsManagement(context);
-                });
-            });
+            BaseModuleUi.Register(extensionManager);
         });
         
         Logger.Info("BaseModule initialized.");

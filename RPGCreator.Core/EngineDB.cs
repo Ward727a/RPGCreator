@@ -18,7 +18,19 @@ public class EngineDB
     {
         BsonMapper.Global.RegisterType(
             serialize: (ulid) => ulid.ToString(),
-            deserialize: (bson) => Ulid.Parse(bson.AsString)
+            deserialize: (bson) => 
+            {
+                if (bson.IsString) return Ulid.Parse(bson.AsString);
+                
+                if (bson.IsDocument)
+                {
+                    var idValue = bson.AsDocument["_id"] ?? bson.AsDocument["$value"];
+                    if (idValue != null && idValue.IsString)
+                        return Ulid.Parse(idValue.AsString);
+                }
+                
+                return Ulid.Parse(bson.ToString().Trim('"'));
+            }
         );
     }
     
@@ -28,6 +40,13 @@ public class EngineDB
         public string FilePath { get; set; } = string.Empty;
         public DateTime LastModified { get; set; }
         public Dictionary<string, string> MetaDatas { get; set; } = new Dictionary<string, string>();
+    }
+
+    public class AssetRefrenceIdsRecord()
+    {
+        [BsonId]
+        public Ulid AssetId { get; set; }
+        public List<Ulid> RefrencedIds { get; set; } = new List<Ulid>();
     }
 
     public class AssetIndexRecord() : IAssetIndexRecord

@@ -20,6 +20,7 @@ using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.UiService;
 using RPGCreator.UI.Common.Modal.Browser;
+using RPGCreator.UI.Contexts;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;
@@ -158,6 +159,7 @@ public class CharacterFeaturesTab : UserControl
         public void Execute()
         {
             _featureControl ??= new FeatureItemControl(_feature);
+            _feature.OnAddingToDefinition(_characterData, _featureControl.context);
             _featuresList.Children.Add(_featureControl);
             FeatureInstanceId = _characterData.AddFeatureConfig(_feature);
             _feature.OnAddedToDefinition(_characterData);
@@ -252,18 +254,29 @@ public class CharacterFeaturesTab : UserControl
 
 public class FeatureItemControl : UserControl
 {
+    [ExposePropToPlugin("CharacterFeaturesEditor.FeatureItem")]
     public IEntityFeature Feature { get; set; }
     
+    [ExposePropToPlugin("CharacterFeaturesEditor.FeatureItem")]
     public Expander PropExpander { get; set; }
     
+    [ExposePropToPlugin("CharacterFeaturesEditor.FeatureItem")]
     public StackPanel ExpanderContent { get; set; }
     
+    [ExposePropToPlugin("CharacterFeaturesEditor.FeatureItem")]
     private Grid ExpanderBodyGrid { get; set; }
+    [ExposePropToPlugin("CharacterFeaturesEditor.FeatureItem")]
     private StackPanel LeftExpanderContentPanel { get; set; }
+    [ExposePropToPlugin("CharacterFeaturesEditor.FeatureItem")]
     private Image? FeatureIconImage { get; set; }
+    [ExposePropToPlugin("CharacterFeaturesEditor.FeatureItem")]
     private TextBlock FeatureNameLabel { get; set; }
+    [ExposePropToPlugin("CharacterFeaturesEditor.FeatureItem")]
     private Button FeatureDeleteButton { get; set; }
+    [ExposePropToPlugin("CharacterFeaturesEditor.FeatureItem")]
     private TextBlock FeatureDescription { get; set; }
+
+    public CharacterFeaturesEditorFeatureItemContext context;
 
     public FeatureItemControl(IEntityFeature feature)
     {
@@ -271,8 +284,27 @@ public class FeatureItemControl : UserControl
         CreateComponents();
         LoadProperties();
         RegisterEvents();
+
+        var config = new CharacterFeaturesEditorFeatureItemContext.Config()
+        {
+            GetFeature = () => Feature,
+            GetPropExpander = () => PropExpander,
+            GetExpanderContent = () => ExpanderContent,
+            GetExpanderBodyGrid = () => ExpanderBodyGrid,
+            GetLeftExpanderContentPanel = () => LeftExpanderContentPanel,
+            GetFeatureIconImage = () => FeatureIconImage,
+            GetFeatureNameLabel = () => FeatureNameLabel,
+            GetFeatureDeleteButton = () => FeatureDeleteButton,
+            GetFeatureDescription = () => FeatureDescription,
+            CreatePropertyControl = CreatePropertyControl,
+            GetOrCreateCategory = GetOrCreateCategory,
+            CreateValidInput = CreateValidInput,
+            LoadProperties = LoadProperties
+        };
         
-        UiServices.ExtensionManager.ApplyExtensions(UIRegion.CharacterFeaturesEditorFeatureItem, this, Feature);
+        context = new CharacterFeaturesEditorFeatureItemContext(config);
+        
+        UiServices.ExtensionManager.ApplyExtensions(UIRegion.CharacterFeaturesEditorFeatureItem, this, new CharacterFeaturesEditorFeatureItemContext(config));
     }
 
     private void CreateComponents()
@@ -387,6 +419,7 @@ public class FeatureItemControl : UserControl
         
     }
 
+    [ExposeToPlugin("CharacterFeaturesEditor.FeatureItem")]
     private void LoadProperties()
     {
         Dictionary<string, Expander> propCategories = new();
@@ -398,6 +431,7 @@ public class FeatureItemControl : UserControl
         }
     }
 
+    [ExposeToPlugin("CharacterFeaturesEditor.FeatureItem")]
     private void CreatePropertyControl(EntityFeaturePropertyMetadata propertyMetadata, Dictionary<string, Expander> propCategories)
     {
         var categoryPanel = GetOrCreateCategory(propertyMetadata.Attribute.Category, propCategories);
@@ -452,6 +486,7 @@ public class FeatureItemControl : UserControl
     /// <param name="categoryPath">The category path, separated by '/'.</param>
     /// <param name="propCategories">The dictionary of existing categories.</param>
     /// <returns>The StackPanel for the category.</returns>
+    [ExposeToPlugin("CharacterFeaturesEditor.FeatureItem")]
     private StackPanel GetOrCreateCategory(string categoryPath, Dictionary<string, Expander> propCategories)
     {
         var categories = categoryPath.Split('/');
@@ -498,6 +533,7 @@ public class FeatureItemControl : UserControl
     /// </summary>
     /// <param name="propertyMetadata">The property metadata.</param>
     /// <returns>The created input control.</returns>
+    [ExposeToPlugin("CharacterFeaturesEditor.FeatureItem")]
     private Control CreateValidInput(EntityFeaturePropertyMetadata propertyMetadata)
     {
         var propType = propertyMetadata.PropertyType;
@@ -536,7 +572,7 @@ public class FeatureItemControl : UserControl
                     {
                         if (propName == propertyMetadata.PropertyInfo.Name)
                         {
-                            var newValue = Feature.Configuration.Get<int>(propName);
+                            var newValue = Feature.Configuration.GetAs<int>(propName);
                             if(numericUpDown.Value != newValue)
                                 numericUpDown.Value = newValue;
                         }
@@ -547,7 +583,7 @@ public class FeatureItemControl : UserControl
                         {
                             if (propName == propertyMetadata.PropertyInfo.Name)
                             {
-                                var newValue = Feature.SharedMemoryConfiguration.Get<int>(propName);
+                                var newValue = Feature.SharedMemoryConfiguration.GetAs<int>(propName);
                                 if(numericUpDown.Value != newValue)
                                     numericUpDown.Value = newValue;
                             }
@@ -578,7 +614,7 @@ public class FeatureItemControl : UserControl
                     {
                         if (propName == propertyMetadata.PropertyInfo.Name)
                         {
-                            var newValue = Feature.Configuration.Get<float>(propName);
+                            var newValue = Feature.Configuration.GetAs<float>(propName);
                             if(numericUpDown.Value != newValue)
                                 numericUpDown.Value = newValue;
                         }
@@ -589,7 +625,7 @@ public class FeatureItemControl : UserControl
                         {
                             if (propName == propertyMetadata.PropertyInfo.Name)
                             {
-                                var newValue = Feature.SharedMemoryConfiguration.Get<float>(propName);
+                                var newValue = Feature.SharedMemoryConfiguration.GetAs<float>(propName);
                                 if(numericUpDown.Value != newValue)
                                     numericUpDown.Value = newValue;
                             }
@@ -611,7 +647,7 @@ public class FeatureItemControl : UserControl
                     {
                         if (propName == propertyMetadata.PropertyInfo.Name)
                         {
-                            var newValue = Feature.Configuration.Get<string>(propName);
+                            var newValue = Feature.Configuration.GetAs<string>(propName);
                             if (textBox.Text != newValue)
                                 textBox.Text = newValue;
                         }
@@ -622,7 +658,7 @@ public class FeatureItemControl : UserControl
                         {
                             if (propName == propertyMetadata.PropertyInfo.Name)
                             {
-                                var newValue = Feature.SharedMemoryConfiguration.Get<string>(propName);
+                                var newValue = Feature.SharedMemoryConfiguration.GetAs<string>(propName);
                                 if (textBox.Text != newValue)
                                     textBox.Text = newValue;
                             }
@@ -647,7 +683,7 @@ public class FeatureItemControl : UserControl
                     {
                         if (propName == propertyMetadata.PropertyInfo.Name)
                         {
-                            var newValue = Feature.Configuration.Get<bool>(propName);
+                            var newValue = Feature.Configuration.GetAs<bool>(propName);
                             if(checkBox.IsChecked != newValue)
                                 checkBox.IsChecked = newValue;
                         }
@@ -658,7 +694,7 @@ public class FeatureItemControl : UserControl
                         {
                             if (propName == propertyMetadata.PropertyInfo.Name)
                             {
-                                var newValue = Feature.SharedMemoryConfiguration.Get<bool>(propName);
+                                var newValue = Feature.SharedMemoryConfiguration.GetAs<bool>(propName);
                                 if(checkBox.IsChecked != newValue)
                                     checkBox.IsChecked = newValue;
                             }
@@ -705,7 +741,7 @@ public class FeatureItemControl : UserControl
                     {
                         if (propName == propertyMetadata.PropertyInfo.Name)
                         {
-                            var enumName = Feature.Configuration.Get<string>(propName);
+                            var enumName = Feature.Configuration.GetAs<string>(propName);
         
                             if (!string.IsNullOrEmpty(enumName))
                             {
@@ -727,7 +763,7 @@ public class FeatureItemControl : UserControl
                         {
                             if (propName == propertyMetadata.PropertyInfo.Name)
                             {
-                                var enumName = Feature.SharedMemoryConfiguration.Get<string>(propName);
+                                var enumName = Feature.SharedMemoryConfiguration.GetAs<string>(propName);
             
                                 if (!string.IsNullOrEmpty(enumName))
                                 {

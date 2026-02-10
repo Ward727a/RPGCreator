@@ -125,6 +125,10 @@ namespace RPGCreator.Core
             EngineResourcesService resService = new EngineResourcesService();
             
             EngineServices.ResourcesService = resService;
+            EngineServices.SimpleEventRegistry = new EngineSimpleEventRegistry();
+            EngineServices.EventsRegisterService = new EngineEventsRegister();
+            EngineServices.GlobalContextProvider = new GlobalContextProvider();
+            EngineServices.SignalRegistry = new EngineSignalRegistry();
             
             Instance = this;
 

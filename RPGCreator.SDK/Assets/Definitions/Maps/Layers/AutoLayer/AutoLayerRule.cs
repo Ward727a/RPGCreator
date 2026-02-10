@@ -91,4 +91,9 @@ public class AutoLayerRule : IDeserializable, ISerializable
             .AddValue(nameof(MaxXOffset), MaxXOffset)
             .AddValue(nameof(MaxYOffset), MaxYOffset);
     }
+
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return OutputTiles.Select(t => t.TilesetId).ToList();
+    }
 }

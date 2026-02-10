@@ -38,7 +38,7 @@ public class Entity : IEntity, ICleanable
         _componentManager.RemoveComponent<T>(Id);
     }
 
-    public ComponentMask ComponentMask => _componentManager?.GetEntityComponentMask(Id) ??
+    public Bitmask256 ComponentMask => _componentManager?.GetEntityComponentMask(Id) ??
                                      throw new CriticalEngineException("Entity's ComponentManager is null.", this);
 
     public void Clean()

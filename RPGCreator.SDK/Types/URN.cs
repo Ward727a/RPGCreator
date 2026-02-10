@@ -23,11 +23,6 @@ public readonly record struct URN
         Module = module;
         Name = name;
     }
-    
-    private string Normalize(string value)
-    {
-        return value.ToLowerInvariant().Trim();
-    }
 
     public URN()
     {
@@ -138,4 +133,118 @@ public readonly record struct URN
     
     public static implicit operator string(URN urn) => urn.ToString();
     public static implicit operator URN(string urn) => Parse(urn);
+}
+
+public record UrnNamespace(ReadOnlyMemory<char> Namespace);
+public record UrnModule(UrnNamespace @Ns, ReadOnlyMemory<char> Module);
+public record UrnName(UrnModule Module, ReadOnlyMemory<char> Name);
+
+public record UrnSingleModule(ReadOnlyMemory<char> Module);
+
+public static class UrnExtensions
+{
+    public static UrnNamespace CreateUrnNamespace(this string @namespace)
+    {
+        if  (string.IsNullOrWhiteSpace(@namespace))  
+        {
+            Logger.Error("Namespace cannot be empty.");
+            return new UrnNamespace(ReadOnlyMemory<char>.Empty);
+        }
+        
+        return new UrnNamespace(@namespace.AsMemory().Trim());
+    }
+    
+    public static UrnSingleModule CreateUrnSingleModule(this string module)
+    {
+        if (string.IsNullOrWhiteSpace(module))
+        {
+            Logger.Error("Module cannot be empty.");
+            return new UrnSingleModule(ReadOnlyMemory<char>.Empty);
+        }
+        
+        return new UrnSingleModule(module.AsMemory().Trim());
+    }
+
+    public static UrnModule CreateUrnModule(this UrnSingleModule singleModule, string @namespace)
+    {
+        if (string.IsNullOrWhiteSpace(@namespace))
+        {
+            Logger.Error("Namespace cannot be empty.");
+            return new UrnModule(new UrnNamespace(ReadOnlyMemory<char>.Empty), singleModule.Module);
+        }
+        
+        return new UrnModule(new UrnNamespace(@namespace.AsMemory().Trim()), singleModule.Module);
+    }
+
+    public static UrnModule CreateUrnModule(this UrnNamespace @namespace, string module)
+    {
+        if (string.IsNullOrWhiteSpace(module))
+        {
+            Logger.Error("Module cannot be empty.");
+            return new UrnModule(@namespace, ReadOnlyMemory<char>.Empty);
+        }
+        
+        return new UrnModule(@namespace, module.AsMemory().Trim());
+    }
+
+    public static UrnName CreateUrnName(this UrnModule module, string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            Logger.Error("Name cannot be empty.");
+            return new UrnName(module, ReadOnlyMemory<char>.Empty);
+        }
+        
+        return new UrnName(module, name.AsMemory().Trim());
+    }
+    public static UrnModule ToUrnModule(this UrnName name) => name.Module;
+    public static UrnNamespace ToUrnNamespace(this UrnModule module) => module.Ns;
+    public static UrnNamespace ToUrnNamespace(this UrnName name) => name.Module.Ns;
+    public static UrnModule CreateUrn(this UrnName name, out URN urn)
+    {
+        urn = new URN(name.Module.Ns.Namespace, name.Module.Module, name.Name);
+        return name.Module;
+    }
+    public static UrnModule CreateUrn(this UrnModule module, string name, out URN urn)
+    {
+        if(string.IsNullOrWhiteSpace(name))
+        {
+            Logger.Error("Name cannot be empty.");
+            urn = URN.Empty;
+            return module;
+        }
+        urn = new URN(module.Ns.Namespace, module.Module, name.AsMemory().Trim());
+        
+        return module;
+    }
+    
+    public static URN ToUrn(this UrnModule module, string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            Logger.Error("Name cannot be empty.");
+            return URN.Empty;
+        }
+        
+        return new URN(module.Ns.Namespace, module.Module, name.AsMemory().Trim());
+    }
+    public static URN ToUrn(this UrnName name)
+    {
+        return new URN(name.Module.Ns.Namespace, name.Module.Module, name.Name);
+    }
+
+    public static UrnNamespace ToUrnNamespace(this URN urn)
+    {
+        return new UrnNamespace(urn.Namespace);
+    }
+    
+    public static UrnModule ToUrnModule(this URN urn)
+    {
+        return new UrnModule(urn.ToUrnNamespace(), urn.Module);
+    }
+
+    public static UrnName ToUrnName(this URN urn)
+    {
+        return new UrnName(urn.ToUrnModule(), urn.Name);
+    }
 }

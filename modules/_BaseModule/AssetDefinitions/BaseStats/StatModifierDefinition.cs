@@ -20,6 +20,7 @@
 
 using _BaseModule.Features.Entity;
 using RPGCreator.SDK.Assets.Definitions;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Internals;
@@ -49,6 +50,7 @@ public enum StatStackingPolicy
     Ignore
 }
 
+[SerializingType("StatModifier")]
 public class StatModifierDefinition : IAssetDef, IHasSavePath, ISerializable, IDeserializable
 {
     public Ulid Unique { get; private set; }
@@ -89,6 +91,12 @@ public class StatModifierDefinition : IAssetDef, IHasSavePath, ISerializable, ID
             .AddValue(nameof(Description), Description);
         return info;
     }
+
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return [StatId];
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue(nameof(Unique), out var unique, Ulid.Empty);

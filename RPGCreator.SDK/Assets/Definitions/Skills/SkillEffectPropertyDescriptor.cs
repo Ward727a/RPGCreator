@@ -83,6 +83,28 @@ public record SkillEffectPropertyDescriptor : ISerializable, IDeserializable
         
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        // If the property is a reference type, we might want to track it as a referenced asset
+        if (Type == EffectPropertyType.SkillReference ||
+            Type == EffectPropertyType.ItemReference ||
+            Type == EffectPropertyType.StatReference ||
+            Type == EffectPropertyType.AnimationReference ||
+            Type == EffectPropertyType.SoundReference)
+        {
+            if (DefaultValue is URN urn && urn != URN.Empty)
+            {
+                // Assuming the URN format is "type:subtype:id"
+                var parts = urn.ToString().Split(':');
+                if (parts.Length == 3 && Ulid.TryParse(parts[2], out var assetId))
+                {
+                    return [assetId];
+                }
+            }
+        }
+        return [];
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue(nameof(Name), out string name, string.Empty);

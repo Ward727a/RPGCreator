@@ -27,6 +27,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Loader;
 using RPGCreator.Core.Common;
+using RPGCreator.Core.Module;
 using RPGCreator.SDK;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
@@ -302,7 +303,7 @@ namespace RPGCreator.Core
             var context = new ModuleContext(copy);
             var assembly = context.LoadFromAssemblyPath(copy);
 
-            var moduleType = assembly.GetTypes().FirstOrDefault(t => 
+            var moduleType = assembly.GetLoadableTypes().FirstOrDefault(t => 
                 typeof(BaseModule).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
             
             if (moduleType == null)

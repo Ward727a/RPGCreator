@@ -118,6 +118,11 @@ public class IntGridLayerDefinition : IMapLayerDef<int>
             .AddValue(nameof(ValueRefs), ValueRefs);
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return [];
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         return;

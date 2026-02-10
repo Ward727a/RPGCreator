@@ -96,6 +96,16 @@ namespace RPGCreator.Core.Types.Project
             return info;
         }
 
+        public List<Ulid> GetReferencedAssetIds()
+        {
+            List<Ulid> referencedIds = new List<Ulid>();
+            if (GameData != null)
+            {
+                referencedIds.AddRange(GameData.GetReferencedAssetIds());
+            }
+            return referencedIds;
+        }
+
         public void SetObjectData(DeserializationInfo info)
         {
             if (info == null)

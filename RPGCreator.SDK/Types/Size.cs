@@ -55,6 +55,11 @@ public record struct Size : ISerializable, IDeserializable
     public SerializationInfo GetObjectData() 
         => new SerializationInfo(typeof(Size)).AddValue("W", Width).AddValue("H", Height);
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return [];
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue("W", out float w, 0f);

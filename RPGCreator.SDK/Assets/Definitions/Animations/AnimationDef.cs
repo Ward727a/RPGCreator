@@ -54,6 +54,14 @@ public partial class AnimationDef : ObservableObject, IAssetDef, ISerializable, 
         return info;
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        var referencedIds = new List<Ulid>();
+        if (SpritesheetId != Ulid.Empty)
+            referencedIds.Add(SpritesheetId);
+        return referencedIds;
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue("Unique", out Ulid unique, Ulid.Empty);

@@ -32,6 +32,11 @@ public class BaseProjectLink : IBaseProjectLink, ISerializable, IDeserializable
         return info;
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return [ProjectID];
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue("id", out Ulid _ProjectID);

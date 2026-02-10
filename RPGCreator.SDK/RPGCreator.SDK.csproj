@@ -19,6 +19,7 @@
 
     <ItemGroup>
       <Folder Include="Modules\ECS\" />
+      <Folder Include="Types\Enums\" />
     </ItemGroup>
 
     <ItemGroup>

@@ -26,6 +26,11 @@ public struct SGridParameter : ISerializable, IDeserializable
         
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return new List<Ulid>();
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         ArgumentNullException.ThrowIfNull(info);

@@ -87,7 +87,7 @@ public class StatsModifierFeature : BaseEntityFeature
         "Allows the entity to modify stats of other entities (e.g. buffs, debuffs, etc.).\n" +
         "The actual logic of how the stats are modified is not implemented by this feature, it simply adds the necessary component for other systems to work with.\n" +
         "Note: This feature is dependent on the Stats Feature, and will not work properly if the target entity does not have the Stats Feature.";
-    public override URN FeatureUrn => new URN("rpgc", FeatureUrnModule, "stats_modifier_feature");
+    public override URN FeatureUrn => FeatureUrnModule.CreateUrnModule("rpgc").ToUrn("stats_modifier_feature");
 
     public override URN[] DependentFeatures => [StatsFeature.Urn];
 
@@ -120,9 +120,9 @@ public struct StatBlocks()
 
     public StatBlocks(Slabs<BaseStatFlatModifier> slabsFlat, Slabs<BaseStatPercentModifier> slabsPercent, Slabs<BaseStatMultiplierModifier> slabsMutliplier) : this()
     {
-        FlatModifiersIdx = slabsFlat.Allocate().slabPointerIndex;
-        PercentModifiersIdx = slabsPercent.Allocate().slabPointerIndex;
-        MultiplierModifiersIdx = slabsMutliplier.Allocate().slabPointerIndex;
+        FlatModifiersIdx = slabsFlat.AllocateEmpty();
+        PercentModifiersIdx = slabsPercent.AllocateEmpty();
+        MultiplierModifiersIdx = slabsMutliplier.AllocateEmpty();
     }
 }
 
@@ -314,6 +314,8 @@ public class StatsModifierSystem : ISystem
                 break;
             
         }
+        
+        _componentManager.MarkDirty<StatComponent>(targetEntityId);
     }
 
     private static (int spanId, long instanceId) SpanExistingId<T>(StatModifierDefinition definition, Span<T> span) where T : IStatsModifier
@@ -360,14 +362,17 @@ public class StatsModifierSystem : ISystem
         {
             case BaseStatFlatModifier flatModifier:
                 FlatModifiers.AddItem(slabIdx, flatModifier);
+                flatModifier.SlabPointerIndex = slabIdx;
                 ApplyExpirationModifierData(flatModifier, StatModifierType.Flat, entityId);
                 break;
             case BaseStatPercentModifier percentModifier:
                 PercentModifiers.AddItem(slabIdx, percentModifier);
+                percentModifier.SlabPointerIndex = slabIdx;
                 ApplyExpirationModifierData(percentModifier, StatModifierType.Percent, entityId);
                 break;
             case BaseStatMultiplierModifier multiplierModifier:
                 MultiplierModifiers.AddItem(slabIdx, multiplierModifier);
+                multiplierModifier.SlabPointerIndex = slabIdx;
                 ApplyExpirationModifierData(multiplierModifier, StatModifierType.Multiplier, entityId);
                 break;
             default:

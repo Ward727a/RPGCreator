@@ -25,5 +25,5 @@ public interface IEntity
     /// If a bit is set to 0, it indicates that the entity does not have that component.
     /// This allows for efficient storage and quick checks of component presence using bitwise operations.
     /// </summary>
-    public ComponentMask ComponentMask { get; }
+    public Bitmask256 ComponentMask { get; }
 }

@@ -10,10 +10,10 @@ namespace RPGCreator.SDK.ECS;
 public readonly ref struct DirtyQueryView
 {
     private readonly ReadOnlySpan<int> _entities;
-    private readonly ComponentMask _queryMask;
+    private readonly Bitmask256 _queryMask;
     private readonly ComponentManager _manager;
 
-    public DirtyQueryView(ReadOnlySpan<int> entities, ComponentMask queryMask, ComponentManager manager)
+    public DirtyQueryView(ReadOnlySpan<int> entities, Bitmask256 queryMask, ComponentManager manager)
     {
         _entities = entities;
         _queryMask = queryMask;
@@ -25,11 +25,11 @@ public readonly ref struct DirtyQueryView
 public ref struct DirtyQueryEnumerator
 {
     private readonly ReadOnlySpan<int> _dirtyEntities;
-    private readonly ComponentMask _queryMask;
+    private readonly Bitmask256 _queryMask;
     private readonly ComponentManager _manager;
     private int _index;
 
-    public DirtyQueryEnumerator(ReadOnlySpan<int> entities, ComponentMask queryMask, ComponentManager manager)
+    public DirtyQueryEnumerator(ReadOnlySpan<int> entities, Bitmask256 queryMask, ComponentManager manager)
     {
         _dirtyEntities = entities;
         _queryMask = queryMask;
@@ -54,10 +54,10 @@ public ref struct DirtyQueryEnumerator
 public readonly ref struct QueryView
 {
     private readonly ReadOnlySpan<int> _entities;
-    private readonly ComponentMask _queryMask;
+    private readonly Bitmask256 _queryMask;
     private readonly ComponentManager _manager;
 
-    public QueryView(ReadOnlySpan<int> entities, ComponentMask queryMask, ComponentManager manager)
+    public QueryView(ReadOnlySpan<int> entities, Bitmask256 queryMask, ComponentManager manager)
     {
         _entities = entities;
         _queryMask = queryMask;
@@ -70,11 +70,11 @@ public readonly ref struct QueryView
 public ref struct QueryEnumerator
 {
     private readonly ReadOnlySpan<int> _entities;
-    private readonly ComponentMask _queryMask;
+    private readonly Bitmask256 _queryMask;
     private readonly ComponentManager _manager;
     private int _index;
 
-    public QueryEnumerator(ReadOnlySpan<int> entities, ComponentMask queryMask, ComponentManager manager)
+    public QueryEnumerator(ReadOnlySpan<int> entities, Bitmask256 queryMask, ComponentManager manager)
     {
         _entities = entities;
         _queryMask = queryMask;
@@ -99,7 +99,7 @@ public ref struct QueryEnumerator
 /// The componentsMask is a struct that holds a bitmask representing which components an entity has.<br/>
 /// The max number of components is 256, so we can use 4 ulong (64 bits each) to store the mask. Each bit represents whether the entity has a specific component or not.
 /// </summary>
-public struct ComponentMask
+public struct Bitmask256
 {
     private ulong _b0, _b1, _b2, _b3;
 
@@ -116,12 +116,21 @@ public struct ComponentMask
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Matches(ComponentMask queryMask)
+    public bool Matches(Bitmask256 queryMask)
     {
         return (_b0 & queryMask._b0) == queryMask._b0 &&
                (_b1 & queryMask._b1) == queryMask._b1 &&
                (_b2 & queryMask._b2) == queryMask._b2 &&
                (_b3 & queryMask._b3) == queryMask._b3;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool HasAny(Bitmask256 interestMask)
+    {
+        return (_b0 & interestMask._b0) != 0 ||
+               (_b1 & interestMask._b1) != 0 ||
+               (_b2 & interestMask._b2) != 0 ||
+               (_b3 & interestMask._b3) != 0;
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -156,7 +165,7 @@ public class ComponentManager(EcsEventBus eventBus)
     private Dictionary<Type, List<int>> _dirtyEntities = new();
     private Dictionary<System.Type, Action<int, object>> _cleanupActions = new();
     
-    private ComponentMask[] _entityMasks = new ComponentMask[1024];
+    private Bitmask256[] _entityMasks = new Bitmask256[1024];
     
     public void Initialize(EntityManager entityManager)
     {
@@ -235,9 +244,9 @@ public class ComponentManager(EcsEventBus eventBus)
         }
     }
     
-    public ref ComponentMask GetEntityComponentMask(int entityId)
+    public ref Bitmask256 GetEntityComponentMask(int entityId)
     {
-        if (entityId >= _entityMasks.Length) return ref Unsafe.NullRef<ComponentMask>();
+        if (entityId >= _entityMasks.Length) return ref Unsafe.NullRef<Bitmask256>();
         return ref _entityMasks[entityId];
     }
 
@@ -246,7 +255,7 @@ public class ComponentManager(EcsEventBus eventBus)
         if(componentTypes.Length == 0 || componentTypes.Length > MaxComponents) return false;
         if (entityId >= _entityMasks.Length || entityId < 0) return false;
 
-        var checkMask = new ComponentMask();
+        var checkMask = new Bitmask256();
         foreach (var type in componentTypes)
         {
             var bit = ComponentTypeIdRegistry.GetBit(type);
@@ -456,7 +465,7 @@ public class ComponentManager(EcsEventBus eventBus)
     public DirtyQueryView QueryDirty(params System.Type[] componentTypes)
     {
         if (componentTypes == null || componentTypes.Length == 0)
-            return new DirtyQueryView(ReadOnlySpan<int>.Empty, new ComponentMask(), this);
+            return new DirtyQueryView(ReadOnlySpan<int>.Empty, new Bitmask256(), this);
 
         var queryMask = GenerateQueryMask(componentTypes);
 
@@ -585,9 +594,9 @@ public class ComponentManager(EcsEventBus eventBus)
         return Query(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7), typeof(T8), typeof(T9));
     }
     
-    private ComponentMask GenerateQueryMask(params Type[] types)
+    private Bitmask256 GenerateQueryMask(params Type[] types)
     {
-        var mask = new ComponentMask();
+        var mask = new Bitmask256();
         foreach (var type in types)
         {
             var bit = ComponentTypeIdRegistry.GetBit(type);
@@ -597,7 +606,7 @@ public class ComponentManager(EcsEventBus eventBus)
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsMatch(int entityId, ComponentMask queryMask)
+    public bool IsMatch(int entityId, Bitmask256 queryMask)
     {
         return _entityMasks[entityId].Matches(queryMask);
     }

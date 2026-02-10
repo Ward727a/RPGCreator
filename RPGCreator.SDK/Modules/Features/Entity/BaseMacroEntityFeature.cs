@@ -185,7 +185,7 @@ public abstract class BaseMacroEntityFeature : BaseEntityFeature
     public T GetConfigurationValue<T>(URN featureUrn, T defaultValue, [CallerMemberName] string key = "")
     {
         var featureData = GetRequiredFeatureData(featureUrn);
-        return featureData.GetOrDefault(key, defaultValue);
+        return featureData.GetAsOrDefault(key, defaultValue);
     }
     
     public void SetSharedConfigurationValue<T>(URN featureUrn, T value, [CallerMemberName] string key = "")

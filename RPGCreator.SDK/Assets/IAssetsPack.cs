@@ -9,6 +9,8 @@ public interface IAssetsPack
     public string Name { get; }
     public string? Description { get; }
 
+
+    public List<Ulid> GetWhoPointsToAsset(Ulid assetId);
     public object LoadAsset(Ulid assetId);
     public IEnumerable<IAssetIndexRecord> SearchIndex(Func<IAssetIndexRecord, bool> predicate);
     public IEnumerable<IAssetIndexRecord> SearchIndexByType(Type type);

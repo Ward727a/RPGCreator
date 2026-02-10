@@ -1,22 +1,31 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using _BaseModule.AssetDefinitions.BaseStats;
+using _BaseModule.Features.Entity;
+using Gum.DataTypes.Variables;
 using Gum.Forms;
 using Gum.Forms.Controls;
+using Gum.Forms.DefaultVisuals;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGameGum;
+using MonoGameGum.GueDeriving;
 using RPGCreator.Core;
 using RPGCreator.Player.ECS.Systems;
 using RPGCreator.Player.Services;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
+using RPGCreator.SDK.Assets.Definitions.Stats;
+using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.Exceptions;
 using RPGCreator.SDK.GameRunner;
 using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Types;
 
 namespace RPGCreator.Player;
 
@@ -57,6 +66,8 @@ public class GamePlayer : Game, IGameRunner
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
     }
+    
+    private TextRuntime _healthTextInstance;
 
     protected override void Initialize()
     {
@@ -155,6 +166,14 @@ public class GamePlayer : Game, IGameRunner
                 startButton.IsVisible = false;
             });
         };
+
+        _healthTextInstance = new TextRuntime()
+        {
+            Text = "Health: 100",
+            X = 10,
+            Y = 10,
+        };
+        mainPanel.AddChild(_healthTextInstance);
         mainPanel.AddChild(startButton);
         
         EngineServices.ResourcesService.RegisterLoader<Texture2D>(new Texture2DLoader(GraphicsDevice));
@@ -207,6 +226,24 @@ public class GamePlayer : Game, IGameRunner
         ((RenderService)RuntimeServices.RenderService).AddSystemToWorld(RuntimeServices.GameSession.ActiveEcsWorld);
         RuntimeServices.GameSession.ActiveEcsWorld.SystemManager.AddSystem(new MapForegroundSystem());
         
+        RuntimeServices.GameSession.ActiveEcsWorld?.EventBus.Subscribe(new BaseSubscriber(new URN("rpgc", "events", "on_stat_changed"), 0,
+            @event =>
+            {
+                var statId = @event.Data.GetAsOrDefault("statDefId", Ulid.Empty);
+                var statFinalValue = @event.Data.GetAsOrDefault("finalValue", 0d);
+                var statActualValue = @event.Data.GetAsOrDefault("actualValue", 0d);
+                var statDef = EngineServices.AssetsManager.TryResolveAsset(statId, out BaseStatDefinition? StatDef) ? StatDef : null;
+                if (statDef != null && statDef.Name == "Health")
+                {
+                    _healthTextInstance.Text =
+                        $"Stat: (Health) {statActualValue} / {statFinalValue}";
+                    Logger.Debug("Received stat changed event: stat new value: {Value}", args:
+                    [
+                        @event.Data.GetAsOrDefault<double>("value", 0d).ToString(CultureInfo.InvariantCulture)
+                    ]);
+                }
+            }));
+        
         base.Initialize();
     }
 
@@ -239,7 +276,10 @@ public class GamePlayer : Game, IGameRunner
 
         EngineProviders.KeyboardProvider?.Update(rawData);
     }
-
+    
+    private TimeSpan _30Seconds = TimeSpan.FromSeconds(30);
+    private double _accumulatedTime = 0;
+    
     protected override void Update(GameTime gameTime)
     {
         OnUpdate?.Invoke(gameTime.ElapsedGameTime);
@@ -247,6 +287,14 @@ public class GamePlayer : Game, IGameRunner
             Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
+        
+        _accumulatedTime += gameTime.ElapsedGameTime.TotalSeconds;
+        if (_accumulatedTime >= 10)
+        {
+            _accumulatedTime = 0;
+            RuntimeServices.GameSession.ActiveEcsWorld?.EventBus.Publish(new URN("rpgc", "events", "test"));
+        }
+        
         UpdateKeyboard();
         EngineServices.InputsService.Update();
         
@@ -254,7 +302,7 @@ public class GamePlayer : Game, IGameRunner
         Gum.Update(gameTime);
         
         EngineServices.InputsService.ResetInputAxis();
-
+        RuntimeServices.GameSession.ActiveEcsWorld?.EventBus.TickEndOfFrame();
         base.Update(gameTime);
     }
 

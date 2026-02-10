@@ -105,7 +105,21 @@ public class MapDefinition : IMapDef
             .AddValue(nameof(GridParameter), GridParameter)
             .AddValue(nameof(BackgroundColor), BackgroundColor);
     }
-    
+
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        var referencedIds = new List<Ulid>();
+        foreach (var mapDef in _mapDefs)
+        {
+            referencedIds.AddRange(mapDef.GetReferencedAssetIds());
+        }
+        foreach (var layer in _tileLayers)
+        {
+            referencedIds.AddRange(layer.GetReferencedAssetIds());
+        }
+        return referencedIds.Distinct().ToList();
+    }
+
     // public void AddLayer(TileLayer layer)
 
     public void SetObjectData(DeserializationInfo info)

@@ -21,6 +21,11 @@
 using System.Runtime.InteropServices;
 using _BaseModule.AssetDefinitions.BaseResistance;
 using _BaseModule.AssetDefinitions.BaseStats;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Layout;
+using Avalonia.Media;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Attributes;
@@ -30,6 +35,8 @@ using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Types;
+using RPGCreator.UI.Contexts;
+using Ursa.Controls;
 
 namespace _BaseModule.Features.Entity;
 
@@ -37,17 +44,138 @@ namespace _BaseModule.Features.Entity;
 public class StatsFeature : BaseEntityFeature
 {
     public static readonly URN StatsTag = new URN("rpgc", TagsUrnModule, "stats");
-    public static readonly URN Urn = new URN("rpgc", FeatureUrnModule, "stats");
+    public static readonly URN Urn = FeatureUrnModule.CreateUrnModule("rpgc").ToUrn("stats");
     
     public override string FeatureName => "Stats Feature";
-    public override string FeatureDescription => "Adds basic stats to the entity, such as health, mana, and stamina.\n" +
-                                                 "This will also enable a custom assets menu for stats management.";
-
+    public override string FeatureDescription => "Adds basic stats to the entity, such as health, mana, and stamina.";
     public override URN FeatureUrn => Urn;
 
     private URN MakePath(string statName) => new URN("rpgc", "stats", statName);
 
     private readonly List<BaseStatDefinition> _statDefinitions = [];
+
+    private HashSet<Ulid> _usingStats
+    {
+        get => GetConfig(new HashSet<Ulid>());
+        set => SetConfig(value);
+    }
+
+    private Dictionary<Ulid, double> _statCustomDefaultValueCache
+    {
+        get => GetConfig(new Dictionary<Ulid, double>());
+        set => SetConfig(value);
+    }
+
+    private Dictionary<Ulid, int> _statDefIdToIndexCache = new Dictionary<Ulid, int>();
+    private Dictionary<URN, int> _resistanceDefIdToIndexCache = new Dictionary<URN, int>();
+    private Dictionary<Ulid, Ulid> _regenerationStatToTargetStatCache = new Dictionary<Ulid, Ulid>();
+    private Dictionary<int, int> _regenerationStatIndexToTargetStatIndexCache = new Dictionary<int, int>();
+    
+    public class StatToggleItem : UserControl
+    {
+        public event Action<Ulid, bool>? OnToggleChanged;
+        public event Action<Ulid, double>? OnValueChanged;
+        private StackPanel _panel = null!;
+        private CheckBox _checkBox = null!;
+        private TextBlock _textBlock = null!;
+        private NumericDoubleUpDown _valueInput = null!;
+        private Ulid? _statDefId = null;
+        private string _statName = string.Empty;
+        private double _currentValue = 0;
+        private double _minValue = 0;
+        private bool _isDerived;
+
+        public StatToggleItem(BaseStatDefinition statDef, bool isToggled = false)
+        {
+            _statDefId = statDef.Unique;
+            _statName = statDef.DisplayName;
+            _currentValue = statDef.DefaultValue;
+            _minValue = statDef.MinValue;
+            _isDerived = statDef.TypeKind == EStatTypeKind.Derived;
+            CreateComponents(isToggled);
+            RegisterEvents();
+        }
+
+        private void CreateComponents(bool toggle)
+        {
+            
+            _panel = new StackPanel() { Orientation = Orientation.Horizontal, Margin = new Thickness(5) };
+            _checkBox = new CheckBox()
+            {
+                IsChecked = toggle,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            _textBlock = new TextBlock()
+            {
+                Text = _statName,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(5, 0, 0, 0),
+                Cursor = new Cursor(StandardCursorType.Hand)
+            };
+            _valueInput = new NumericDoubleUpDown()
+            {
+                Minimum = _minValue,
+                Value = _currentValue,
+                Margin = new Thickness(10, 0, 0, 0),
+                VerticalAlignment = VerticalAlignment.Center,
+                IsEnabled = toggle
+            };
+            var label = new Label
+            {
+                Content = _textBlock,
+                Target = _checkBox,
+                Background = Brushes.Transparent
+            };
+            _textBlock.PointerPressed += (s, e) =>
+            {
+                _checkBox.IsChecked = !_checkBox.IsChecked;
+            };
+
+            _panel.Children.Add(_checkBox);
+            _panel.Children.Add(label);
+            if(!_isDerived)
+                _panel.Children.Add(_valueInput);
+            else
+            {
+                _panel.Children.Add(new TextBlock()
+                {
+                    Text="(Derived Stat - Default value can't be set)",
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(10, 0, 0, 0),
+                    FontStyle = FontStyle.Italic,
+                    Foreground = Brushes.Gray
+                });
+            }
+            this.Content = _panel;
+        }
+
+        private void RegisterEvents()
+        {
+            _checkBox.IsCheckedChanged += (s, e) =>
+            {
+                if (_statDefId == null) return;
+                OnToggleChanged?.Invoke(_statDefId.Value, _checkBox.IsChecked == true);
+                
+                _textBlock.TextDecorations = _checkBox.IsChecked == false ? TextDecorations.Strikethrough : null;
+                _textBlock.Foreground = _checkBox.IsChecked == false ? Brushes.Gray : Brushes.White;
+                _valueInput.IsEnabled = _checkBox.IsChecked == true;
+            };
+
+            _valueInput.ValueChanged += (s, e) =>
+            {
+                if (_statDefId == null) return;
+                double newValue = _valueInput.Value ?? 0;
+                if (newValue < _minValue)
+                {
+                    _valueInput.Value = _minValue;
+                    newValue = _minValue;
+                }
+
+                OnValueChanged?.Invoke(_statDefId.Value, newValue);
+            };
+        }
+
+    }
     
     public override void OnSetup()
     {
@@ -71,10 +199,12 @@ public class StatsFeature : BaseEntityFeature
                             hpStatDef.Name = "Health";
                             hpStatDef.Description = "The health stat represents the amount of damage an entity can take before being defeated.";
                             hpStatDef.DefaultValue = 100;
+                            
                             var mpStatDef = assetManager.CreateAsset<StatDefinition>();
                             mpStatDef.Name = "Mana";
                             mpStatDef.Description = "The mana stat, used for casting spells and using special abilities.";
                             mpStatDef.DefaultValue = 50;
+                            
                             var spStatDef = assetManager.CreateAsset<StatDefinition>();
                             spStatDef.Name = "Stamina";
                             spStatDef.Description = "The stamina stat, used for performing physical actions like running or attacking.";
@@ -89,9 +219,60 @@ public class StatsFeature : BaseEntityFeature
                             pack.AddOrUpdateAsset(spStatDef);
                         });
                     }
+                    else
+                    {
+                        GetAllStats();
+                    }
                 });
             };
         });
+    }
+
+    // When this feature is added to an entity definition, we want to add a toggle for each stat definition, allowing the user to choose which stats they want to use for this entity.
+    // As the actual API of the editor doesn't allow us to put a specific UI for a property, we have to do it in this method, which is called when the feature is added to the definition, and we have access to the item control of the feature in the editor, which is a StackPanel that we can add controls to.
+    public override void OnAddingToDefinition(IEntityDefinition definition, object controlOrContext)
+    {
+        var tempUsingStats = new HashSet<Ulid>(_usingStats);
+        foreach (var statDef in _statDefinitions)
+        {
+            tempUsingStats.Add(statDef.Unique);
+        }
+        _usingStats = tempUsingStats;
+
+        if (controlOrContext is not CharacterFeaturesEditorFeatureItemContext ctx) return;
+        
+        StackPanel panel = ctx.ExpanderContent;
+                
+        Expander statsExpander = new Expander() { Header = "Stats", IsExpanded = true };
+        StackPanel statsPanel = new StackPanel() { Margin = new Thickness(10) };
+        statsExpander.Content = statsPanel;
+        panel.Children.Add(statsExpander);
+                
+        foreach (var stat in _statDefinitions)
+        {
+            var toggleItem = new StatToggleItem(stat, _usingStats.Contains(stat.Unique));
+            statsPanel.Children.Add(toggleItem);
+            toggleItem.OnToggleChanged += (statDefId, isToggled) =>
+            {
+                var tempUsingStats = new HashSet<Ulid>(_usingStats);
+                switch (isToggled)
+                {
+                    case true:
+                        tempUsingStats.Add(statDefId);
+                        break;
+                    case false:
+                        tempUsingStats.Remove(statDefId);
+                        break;
+                }
+                _usingStats = tempUsingStats;
+            };
+            toggleItem.OnValueChanged += (statDefId, newDefaultValue) =>
+            {
+                var tempCache = new Dictionary<Ulid, double>(_statCustomDefaultValueCache);
+                tempCache[statDefId] = newDefaultValue;
+                _statCustomDefaultValueCache = tempCache;
+            };
+        }
     }
 
     public override void OnWorldSetup(IEcsWorld world)
@@ -99,12 +280,23 @@ public class StatsFeature : BaseEntityFeature
         GetAllStats();
         PopulateStatDefIdToIndexCache();
         world.SystemManager.AddSystem(new StatSystem(_statDefIdToIndexCache, _resistanceDefIdToIndexCache, _regenerationStatIndexToTargetStatIndexCache));
-    }
+        world.EventBus.Subscribe(new BaseSubscriber(new URN("rpgc", "events", "test"), 0, @event =>
+        {
+            var modifier = EngineServices.AssetsManager.GetAssetsOfType<StatModifierDefinition>().ToList();
 
-    private Dictionary<Ulid, int> _statDefIdToIndexCache = new Dictionary<Ulid, int>();
-    private Dictionary<URN, int> _resistanceDefIdToIndexCache = new Dictionary<URN, int>();
-    private Dictionary<Ulid, Ulid> _regenerationStatToTargetStatCache = new Dictionary<Ulid, Ulid>();
-    private Dictionary<int, int> _regenerationStatIndexToTargetStatIndexCache = new Dictionary<int, int>();
+            if (modifier.Count == 0)
+            {
+                Logger.Debug("No StatModifierDefinition found, skipping test event.");
+                return;
+            }
+            
+            foreach (var entityId in world.ComponentManager.Query<PlayerTagComponent>())
+            {
+                world.SystemManager.GetSystem<StatsModifierSystem>(out var statsModifierSystem);
+                statsModifierSystem?.ApplyStatModifier(entityId, modifier.First());
+            }
+        }));
+    }
     
     private void PopulateStatDefIdToIndexCache()
     {
@@ -134,11 +326,23 @@ public class StatsFeature : BaseEntityFeature
     
     public override void OnInject(BufferedEntity entity, IEntityDefinition entityDefinition)
     {
-        var comp = new StatComponent();
+        var tempStats = new List<StatData>(_statDefinitions.Count); 
+    
         foreach (var stat in _statDefinitions)
         {
-            comp.Stats.Add(new StatData(stat.Unique, stat.DefaultValue, stat.DefaultValue, stat.CanBeNegative, stat.CapSettings, stat.TypeKind, stat.MinValue, stat.DefaultValue));
+            if (!_usingStats.Contains(stat.Unique)) continue;
+        
+            var defaultValue = _statCustomDefaultValueCache.TryGetValue(stat.Unique, out var customDefault) 
+                ? customDefault 
+                : stat.DefaultValue;
+        
+            tempStats.Add(new StatData(stat.Unique, defaultValue, defaultValue, stat.CanBeNegative, 
+                stat.CapSettings, stat.TypeKind, stat.MinValue, defaultValue));
         }
+        var comp = new StatComponent();
+        
+        comp.Stats = tempStats.ToArray(); 
+    
         entity.AddComponent(comp);
     }
     
@@ -153,16 +357,11 @@ public class StatsFeature : BaseEntityFeature
         _statDefinitions.Clear();
         _statDefinitions.AddRange(stats);
     }
-
-    public void AddStat(BaseStatDefinition stat)
-    {
-        _statDefinitions.Add(stat);
-    }
 }
 
 public struct StatComponent : IComponent
 {
-    public List<StatData> Stats { get; set; } // Key is the stat definition unique ID, value is the current value of the stat. It can be null if the stat is not initialized yet.
+    public StatData[] Stats { get; set; } // Key is the stat definition unique ID, value is the current value of the stat. It can be null if the stat is not initialized yet.
 }
 
 public record struct StatData(Ulid StatDefId, double BaseValue, double FinalValue, bool CanBeNegative, StatCapSettings CapSettings, EStatTypeKind TypeKind, double MinValue = 0, double ActualValue = 0);
@@ -175,6 +374,7 @@ public class StatSystem : ISystem
     private ComponentManager _componentManager = null!;
     private StatsModifierSystem? _statsModifierSystem = null!;
     private EcsEventBus _eventBus = null!;
+    private SystemManager _systemManager = null!;
 
     private Dictionary<Ulid, int> _statDefIdToIndexCache;
     private Dictionary<URN, int> _resistanceDefIdToIndexCache;
@@ -194,12 +394,8 @@ public class StatSystem : ISystem
     {
         _componentManager = ecsWorld.ComponentManager;
         _eventBus = ecsWorld.EventBus;
-        ecsWorld.SystemManager.GetSystem<StatsModifierSystem>(out _statsModifierSystem);
-        
-        ecsWorld.EventBus.Subscribe((DamageEvent damageEvent) =>
-        {
-            Logger.Debug("Received DamageEvent for entity {0} with damage amount {1} and damage type {2}", damageEvent.TargetEntityId, damageEvent.DamageAmount, damageEvent.DamageType);
-        });
+        _systemManager = ecsWorld.SystemManager;
+        _systemManager.GetSystem<StatsModifierSystem>(out _statsModifierSystem);
     }
     
     public override void Update(TimeSpan deltaTime)
@@ -217,6 +413,7 @@ public class StatSystem : ISystem
             }
             ApplyCapSettings(entityId, statComponent);
             ApplyChangeToStat(entityId, statComponent);
+            
         }
         double seconds = deltaTime.TotalSeconds;
 
@@ -234,7 +431,7 @@ public class StatSystem : ISystem
     {
         ref var modifierComponent = ref _componentManager.GetComponent<StatsModifierComponent>(entityId);
 
-        foreach (ref var stat in CollectionsMarshal.AsSpan(statComponent.Stats))
+        foreach (ref var stat in statComponent.Stats.AsSpan())
         {
             var statId = stat.StatDefId;
             double baseValue = stat.BaseValue;
@@ -266,7 +463,9 @@ public class StatSystem : ISystem
     {
         if (_statsModifierSystem == null)
         {
-            Logger.Error("StatsModifierSystem is not initialized. Cannot sum flat modifiers.");
+            _systemManager.GetSystem<StatsModifierSystem>(out _statsModifierSystem);
+            if(_statsModifierSystem == null)
+                Logger.Error("StatsModifierSystem is not initialized. Cannot sum flat modifiers.");
             return 0;
         }
         var span = _statsModifierSystem.FlatModifiers.GetSpan(flatModifiersIdx);
@@ -337,7 +536,7 @@ public class StatSystem : ISystem
     
     private void ApplyCapSettings(int entityId, StatComponent statComponent)
     {
-        var statSpan = CollectionsMarshal.AsSpan(statComponent.Stats);
+        var statSpan = statComponent.Stats.AsSpan();
         
         foreach (ref var stat in statSpan)
         {
@@ -345,6 +544,10 @@ public class StatSystem : ISystem
             
             var capStatId = stat.CapSettings.CapStatUnique;
             var capStatIndex = _statDefIdToIndexCache[capStatId];
+            if(statSpan.Length <= capStatIndex)
+            {
+                continue;
+            }
             var capValue = statSpan[capStatIndex].FinalValue;
             
             stat.FinalValue = Math.Min(stat.FinalValue, capValue);
@@ -353,7 +556,7 @@ public class StatSystem : ISystem
 
     private void ApplyChangeToStat(int entityId, StatComponent statComponent)
     {
-        var statSpan = CollectionsMarshal.AsSpan(statComponent.Stats);
+        var statSpan = statComponent.Stats.AsSpan();
 
         foreach (ref var stat in statSpan)
         {
@@ -369,7 +572,12 @@ public class StatSystem : ISystem
                     
                     if (stat.ActualValue <= stat.MinValue)
                     {
-                        _eventBus.Publish(new ResourceReachedLimitEvent(entityId, stat.StatDefId));
+                        var id = stat.StatDefId;
+                        _eventBus.Publish(Events.OnResourceReachedLimitEvent.EventId, entityId, data =>
+                        {
+                            data.Set("target", entityId);
+                            data.Set("statId", id);
+                        });
                     }
                     break;
                 }
@@ -384,12 +592,21 @@ public class StatSystem : ISystem
                     break;
                 }
             }
+            var statDefId = stat.StatDefId;
+            var finalValue = stat.FinalValue;
+            var actualValue = stat.ActualValue;
+            _eventBus.Publish(new URN("rpgc", "events", "on_stat_changed"), entityId, data =>
+            {
+                data.Set("statDefId", statDefId);
+                data.Set("finalValue", finalValue);
+                data.Set("actualValue", actualValue);
+            });
         }
     }
 
     private void ApplyRegeneration(int entityId, StatComponent statComponent, double seconds)
     {
-        var span = CollectionsMarshal.AsSpan(statComponent.Stats);
+        var span = statComponent.Stats.AsSpan();
 
         foreach (var (regenIdx, resourceIdx) in _regenerationStatIndexToTargetStatIndexCache)
         {

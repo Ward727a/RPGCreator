@@ -18,6 +18,7 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using RPGCreator.SDK.Assets.Definitions.SimpleEvent;
 using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Attributes;
 
@@ -30,4 +31,6 @@ public class StatDefinition : BaseStatDefinition
     public override string Description { get; set; } = "Description of the stat.";
     public override double DefaultValue { get; set; } = 0;
     public override double MinValue { get; set; } = 0;
+
+    public List<Ulid> SimpleEventsIds = new();
 }

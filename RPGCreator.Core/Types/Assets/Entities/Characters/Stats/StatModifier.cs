@@ -23,6 +23,13 @@ public class StatModifier : IStatModifier
         return info;
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        var referencedIds = new List<Ulid>();
+        if (StatsUnique != Ulid.Empty) referencedIds.Add(StatsUnique);
+        return referencedIds;
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         ArgumentNullException.ThrowIfNull(info);

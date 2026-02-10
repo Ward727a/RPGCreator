@@ -55,4 +55,5 @@ public interface IAssetsManager : IService
     public List<IAssetsPack> GetLoadedPacks();
     public IEnumerable<PackSearchResult> SearchAllPacks<T>();
     public IEnumerable<T> GetAssetsOfType<T>() where T : class, IAssetDef, IHasUniqueId;
+    public IEnumerable<T> GetAssetsOfType<T>(T valueForType) where T : class, IAssetDef, IHasUniqueId;
 }

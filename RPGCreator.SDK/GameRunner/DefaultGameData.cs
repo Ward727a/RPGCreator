@@ -45,6 +45,11 @@ public class DefaultGameData : IGameData
         return info;
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return new List<Ulid> { MainMapId };
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue(nameof(ProjectPath), out string? projectPath);

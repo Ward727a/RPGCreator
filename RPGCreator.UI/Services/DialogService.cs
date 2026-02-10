@@ -18,12 +18,22 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
+using Avalonia.Data;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Threading;
+using AvaloniaEdit.Utils;
+using MonoGame.Extended.Collections;
 using RPGCreator.SDK.UiService;
 using RPGCreator.UI.Content.Editor;
 
@@ -203,6 +213,38 @@ public class DialogService : IDialogService
         return messageWindow.ShowDialog(GetParent());
     }
 
+    public Task ShowPromptAsync(string title, object content, DialogStyle style = new())
+    {
+        var promptWindow = new Window { Title = title };
+        ApplyStyle(promptWindow, style);
+
+        var stackPanel = new Grid { Margin = new Thickness(15), RowSpacing = 20, RowDefinitions = new RowDefinitions("*, Auto")};
+        promptWindow.Content = stackPanel;
+        
+        if (content is Control avaloniaContent)
+        {
+            stackPanel.Children.Add(avaloniaContent);
+        }
+        else
+        {
+            var textContent =
+                new TextBlock()
+                {
+                    Text = content?.ToString() ?? "EMPTY CONTENT PROVIDED",
+                    TextWrapping = Avalonia.Media.TextWrapping.Wrap
+                };
+            stackPanel.Children.Add(textContent);
+        }
+
+        var okButton = new Button { Content = "OK", IsDefault = true, HorizontalAlignment = HorizontalAlignment.Right };
+        stackPanel.Children.Add(okButton);
+        Grid.SetRow(okButton, 1);
+
+        okButton.Click += (_, _) => promptWindow.Close();
+
+        return promptWindow.ShowDialog(GetParent());
+    }
+
     public Task ShowErrorAsync(string title, string message, DialogStyle style = new())
     {
         var errorWindow = new Window { Title = title };
@@ -227,12 +269,188 @@ public class DialogService : IDialogService
         return errorWindow.ShowDialog(GetParent());
     }
 
+    public Task<T?> ShowSelectAsync<T>(string title, string message, IEnumerable<T> items, Func<T, string>? labelSelector = null,
+        DialogStyle style = new DialogStyle(), string confirmButtonText = "OK", string cancelButtonText = "Cancel")
+    {
+        var window = new Window { Title = title };
+        ApplyStyle(window, style);
+        window.Content = new SelectWindow<T>(window, message, items, labelSelector, style, confirmButtonText, cancelButtonText);
+        return window.ShowDialog<T?>(GetParent());
+    }
+    
+    public class SelectWindow<T> : UserControl
+    {
+        private Grid _windowGrid;
+        private TextBlock _messageBlock;
+
+        private Grid _listGrid;
+        private AutoCompleteBox _searchBox;
+        
+        private ScrollViewer _scrollViewer;
+        private ListBox _listBox;
+        
+        private StackPanel _buttonPanel;
+        private Button _confirmButton;
+        private Button _cancelButton;
+        
+        private List<T> _items;
+        
+        private ObservableCollection<T> _observableItems = new();
+        private ObservableCollection<string> _displayItems = new();
+
+        private readonly Window _window;
+        
+        private readonly string _message;
+        private readonly string _confirmButtonText;
+        private readonly string _cancelButtonText;
+        
+        private readonly Func<T, string>? _labelSelector;
+        
+        public T? SelectedItem { get; private set; }
+
+        public SelectWindow(Window window, string message, IEnumerable<T> items, Func<T, string>? labelSelector, DialogStyle style, string confirmButtonText, string cancelButtonText)
+        {
+            _window = window;
+            _message = string.IsNullOrWhiteSpace(message) ? "Please select an item:" : message;
+            var enumerable = items.ToList();
+            _items = enumerable;
+            _confirmButtonText = confirmButtonText;
+            _cancelButtonText = cancelButtonText;
+            _labelSelector = labelSelector;
+            
+            foreach (var item in _items)
+            {
+                var label = _labelSelector != null ? _labelSelector(item) : item?.ToString() ?? "NULL";
+                _displayItems.Add(label);
+                _observableItems.Add(item);
+            }
+
+            CreateComponents();
+            RegisterEvents();
+        }
+
+        private void CreateComponents()
+        {
+            _windowGrid = new Grid
+            {
+                Margin = new Thickness(15), 
+                RowSpacing = 10, 
+                RowDefinitions = new RowDefinitions("Auto, *, Auto")
+            };
+            Content = _windowGrid;
+
+            _messageBlock = new TextBlock { Text = _message, TextWrapping = TextWrapping.Wrap};
+            _windowGrid.Children.Add(_messageBlock);
+            Grid.SetRow(_messageBlock, 0);
+
+            _listGrid = new Grid { RowDefinitions = new RowDefinitions("Auto, *") };
+            _windowGrid.Children.Add(_listGrid);
+            Grid.SetRow(_listGrid, 1);
+
+            _searchBox = new AutoCompleteBox
+            {
+                Watermark = "Search...", 
+                Margin = new Thickness(0, 0, 0, 5),
+                ItemsSource = _displayItems,
+            };
+            _listGrid.Children.Add(_searchBox);
+            Grid.SetRow(_searchBox, 0);
+            
+            _scrollViewer = new ScrollViewer { VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
+            _listGrid.Children.Add(_scrollViewer);
+            Grid.SetRow(_scrollViewer, 1);
+
+            _listBox = new ListBox()
+            {
+                ItemsSource = _observableItems,
+                ItemTemplate = new FuncDataTemplate<T>((item, _) =>
+                {
+                    if (item == null) return new TextBlock { Text = "NULL" };;
+                    var text = _labelSelector != null ? _labelSelector(item) : item?.ToString() ?? "NULL";
+                    return new TextBlock { Text = text };
+                })
+            };
+            _scrollViewer.Content = _listBox;
+
+            _buttonPanel = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Spacing = 10 };
+            _windowGrid.Children.Add(_buttonPanel);
+            Grid.SetRow(_buttonPanel, 2);
+
+            _confirmButton = new Button { Content = _confirmButtonText, IsDefault = true };
+            _buttonPanel.Children.Add(_confirmButton);
+
+            _cancelButton = new Button { Content = _cancelButtonText, IsCancel = true };
+            _buttonPanel.Children.Add(_cancelButton);
+        }
+        
+        private void RegisterEvents()
+        {
+            _searchBox.KeyUp +=  (_, _) => SearchTextChanged(null, null!);
+            _searchBox.SelectionChanged += (_, _) => SearchTextChanged(null, null!);
+            _confirmButton.Click += ConfirmClicked;
+            _cancelButton.Click += CancelClicked;
+        }
+
+        private void SearchTextChanged(object? sender, TextChangedEventArgs e)
+        {
+            if(_searchBox.SelectedItem != null)
+                _searchBox.Text = _searchBox.SelectedItem as string;
+            Dispatcher.UIThread.Post(OnFilter, DispatcherPriority.Normal);
+        }
+
+        private void OnFilter()
+        {
+            // This is an ugly workaround to force the ListBox to refresh its items when the ObservableCollection is cleared and repopulated,
+            // as it doesn't seem to update properly otherwise.
+            //
+            // Don't ask me why.
+            if (_listBox.ItemsSource?.Equals(_observableItems) ?? true)
+            {
+                _listBox.ItemsSource = null;
+                _listBox.ItemsSource = _observableItems;
+            }
+
+            var searchQuery = _searchBox.Text?.Trim() ?? "";
+
+            if (string.IsNullOrEmpty(searchQuery))
+            {
+                if (_observableItems.Count == _items.Count) return;
+
+                _observableItems.Clear();
+                foreach (var item in _items) _observableItems.Add(item);
+                return;
+            }
+
+            _observableItems.Clear();
+
+            foreach (var item in _items)
+            {
+                var label = _labelSelector != null ? _labelSelector(item) : item?.ToString() ?? "NULL";
+                if (label.Contains(searchQuery, StringComparison.InvariantCultureIgnoreCase))
+                    _observableItems.Add(item);
+            }
+        }
+
+        private void ConfirmClicked(object? sender, RoutedEventArgs e)
+        {
+            if (_listBox.SelectedIndex >= 0)
+                SelectedItem = (T) _listBox.SelectedItem!;
+            _window.Close(SelectedItem);
+        }
+
+        private void CancelClicked(object? sender, RoutedEventArgs e)
+        {
+            SelectedItem = default;
+            _window.Close(SelectedItem);
+        }
+    }
+
     /// <summary>
     /// Applies the given DialogStyle to the specified Window.
     /// </summary>
     /// <param name="window">The window to style.</param>
     /// <param name="styleToApply">The DialogStyle to apply.</param>
-    private void ApplyStyle(Window window, DialogStyle styleToApply)
+    internal static void ApplyStyle(Window window, DialogStyle styleToApply)
     {
         if (styleToApply.IsDefault)
         {

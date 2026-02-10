@@ -20,6 +20,7 @@
 
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.ECS.Systems;
 
@@ -37,10 +38,10 @@ public class CameraSystem : ISystem
         _cameraService = RuntimeServices.CameraService;
         _componentManager = ecsWorld.ComponentManager;
         _eventBus = ecsWorld.EventBus;
-        _eventBus.Subscribe<CameraFollowEvent>(OnCameraFollowEvent);
+        _eventBus.Subscribe(new BaseSubscriber(new URN("rpgc", "events", "on_camera_follow"), 0, OnCameraFollowEvent));
     }
 
-    private void OnCameraFollowEvent(CameraFollowEvent obj)
+    private void OnCameraFollowEvent(IEcsEvent obj)
     {
         var cameraEntityId = _cameraService.CameraEntityId! ?? -1;
         if(cameraEntityId == -1) return;
@@ -49,7 +50,7 @@ public class CameraSystem : ISystem
             return;
 
         ref var cameraData = ref _componentManager.GetComponent<CameraComponent>(cameraEntityId);
-        cameraData.FollowedEntity = obj.Target;
+        cameraData.FollowedEntity = obj.Data.GetAsOrDefault("target", -1);
     }
 
     public override void Update(TimeSpan deltaTime)

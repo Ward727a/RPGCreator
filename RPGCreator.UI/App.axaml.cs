@@ -27,11 +27,13 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
+using LiveMarkdown.Avalonia;
 using RPGCreator.UI.Content.Launcher;
 using RPGCreator.UI.Styles;
 using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.MaterialDesign;
 using RPGCreator.SDK;
+using RPGCreator.SDK.EngineService;
 using RPGCreator.UI.Ressources;
 using RPGCreator.UI.Services;
 using RPGCreator.UI.UiService;
@@ -53,6 +55,7 @@ public partial class App : Application
         UiServices.MenuService = new MenuService();
         UiServices.NotificationService = new NotificationService();
         UiServices.ExtensionManager = new UiExtensionManager();
+        UiServices.DocService = new DocService();
         EngineServices.OnceServiceReady((IResourceService ResourcesService) =>
         {
             ResourcesService.RegisterLoader<Avalonia.Media.Imaging.Bitmap>(new AvaloniaBitmapLoader());
@@ -64,6 +67,8 @@ public partial class App : Application
         // Line below is needed to remove Avalonia data validation.
         // Without this line you will get duplicate validations from both Avalonia and CT
         BindingPlugins.DataValidators.RemoveAt(0);
+        MarkdownNode.Register<MathInlineNode>();
+        MarkdownNode.Register<MathBlockNode>();
         IconProvider.Current
             .Register<MaterialDesignIconProvider>();
 

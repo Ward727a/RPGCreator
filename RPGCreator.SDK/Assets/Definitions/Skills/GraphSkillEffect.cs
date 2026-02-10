@@ -155,6 +155,11 @@ public class GraphSkillEffect : ISkillEffect, IHasSavePath, ISerializable, IDese
             .AddValue(nameof(_graphEvent), graphEventPath);
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return [];
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue(nameof(Unique), out Ulid unique, Ulid.NewUlid());

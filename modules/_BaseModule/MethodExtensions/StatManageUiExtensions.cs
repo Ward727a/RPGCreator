@@ -73,7 +73,7 @@ public class StatEditorContext
 }
 #endregion
 
-public static class StatsUiExtensions
+public static class StatManageUiExtensions
 {
     private static IUiExtensionManager Manager => UiServices.ExtensionManager;
     public static AssetManagerScope StatsManager(

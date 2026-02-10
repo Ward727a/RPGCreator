@@ -11,6 +11,10 @@ public readonly struct UIRegion : IEquatable<UIRegion>
     
     #region Predefined Regions
     
+    // COMMON
+    public static UIRegion HelpButton => new("HelpButton");
+    public static UIRegion HelpButtonHelpWindow => new("HelpButton.HelpWindow");
+    
     // ENTITIES BROWSER
     public static UIRegion EntitiesBrowser => new("EntitiesBrowser");
     public static UIRegion EntitiesBrowserItem => new("EntitiesBrowser.Item");

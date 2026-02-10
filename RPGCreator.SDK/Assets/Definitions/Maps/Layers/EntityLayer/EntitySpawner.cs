@@ -65,6 +65,16 @@ public class EntitySpawner : ILayerElem, IDisposable, ISerializable, IDeserializ
         return info;
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        var referencedIds = new List<Ulid>();
+        if (EntityUnique.HasValue)
+        {
+            referencedIds.Add(EntityUnique.Value);
+        }
+        return referencedIds;
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue(nameof(EntityUnique), out EntityUnique);

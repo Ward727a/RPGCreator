@@ -53,6 +53,14 @@ public abstract class BaseTilesetDef : ISerializable, IDeserializable, IAssetDef
         return info;
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        var referencedIds = new List<Ulid>();
+        if (Pack != null)
+            referencedIds.Add(Pack.Id);
+        return referencedIds;
+    }
+
     public virtual void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue("Unique", out Ulid unique, Ulid.Empty);

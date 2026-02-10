@@ -33,6 +33,12 @@ public sealed class Link : ISerializable, IDeserializable
         return info;
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        // Links do not reference any assets, so we return an empty list
+        return new List<Ulid>();
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue(nameof(FromNodeId), out var fromNodeId, string.Empty);

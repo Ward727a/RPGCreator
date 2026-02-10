@@ -98,6 +98,11 @@ namespace RPGCreator.Core.Configs.Helpers
             return info;
         }
 
+        public override List<Ulid> GetReferencedAssetIds()
+        {
+            return new List<Ulid>();
+        }
+
         public override void SetObjectData(DeserializationInfo info)
         {
             if (info == null)

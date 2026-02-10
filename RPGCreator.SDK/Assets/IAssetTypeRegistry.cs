@@ -15,14 +15,3 @@ public interface IAssetTypeRegistry : IService
     /// <param name="overrideExisting">If true, will override existing mappings with the same key.</param>
     public void ScanAssembly(System.Reflection.Assembly asm, bool overrideExisting = false);
 }
-
-public static class AssetTypeKeys
-{
-    public const string Character = "Character";
-    public const string Item = "Item";
-    public const string Stat = "Stat";
-    public const string Skill = "Skill";
-    public const string Map = "Map";
-    public const string Tileset = "Tileset";
-    public const string AutoTileset = "AutoTileset";
-}

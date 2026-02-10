@@ -1,7 +1,5 @@
-﻿#region LICENSE
-//
-// RPG Creator - Open-source RPG Engine.
-// (c) 2025 Ward
+﻿// RPG Creator - Open-source RPG Engine.
+// (c) 2026 Ward
 // 
 // This file is part of RPG Creator and is distributed under the Apache 2.0 License.
 // You are free to use, modify, and distribute this file under the terms of the Apache 2.0 License.
@@ -19,32 +17,24 @@
 // => Discord: ward727
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
-// 
-// 
-#endregion
 
-using RPGCreator.SDK.Serializer;
-using static RPGCreator.Core.Configs.EngineConfigs;
+using RPGCreator.SDK.Types;
 
-namespace RPGCreator.Core.Configs.Helpers
+namespace RPGCreator.SDK.EngineService;
+
+public struct EventRegistration
 {
-    public class StyleConf : ConfHelper
-    {
-        public override string ConfigName { get; set; } = "StyleConf";
+    public URN EventId { get; set; }
+    public string DisplayName { get; set; }
+    public string Description { get; set; }
+    public Dictionary<string, Type> Schema { get; set; }
+}
 
-        public override void LoadConfig()
-        {
-            return;
-        }
-
-        public override SerializationInfo GetObjectData()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void SetObjectData(DeserializationInfo info)
-        {
-            throw new NotImplementedException();
-        }
-    }
+public interface IEventsRegisterService : IService
+{
+    public void Register(EventRegistration registration);
+    
+    public EventRegistration? GetEventRegistration(URN eventId);
+    public IEnumerable<EventRegistration> GetAllEventRegistrations();
+    public IEnumerable<URN> GetAllRegisteredEventIds();
 }

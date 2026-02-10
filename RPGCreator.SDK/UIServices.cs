@@ -22,6 +22,7 @@ using System.Diagnostics.CodeAnalysis;
 using RPGCreator.SDK.Exceptions;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
+using RPGCreator.SDK.Types;
 using RPGCreator.SDK.UiService;
 
 namespace RPGCreator.SDK;
@@ -173,6 +174,12 @@ public static class UiServices
         get => GetService<IUiExtensionManager>(defaultInstance: field);
         set => RegisterService(value);
     } = new DefaultUiExtensionManager();
+    
+    public static IDocService DocService
+    {
+        get => GetService<IDocService>(defaultInstance: field);
+        set => RegisterService(value);
+    } = new DefaultDocService();
 
 
     #region DefaultInstance
@@ -228,10 +235,23 @@ public static class UiServices
             return Task.CompletedTask;
         }
 
+        public Task ShowPromptAsync(string title, object content, DialogStyle style = new DialogStyle())
+        {
+            Logger.Error("[UI] No IDialogService registered. Cannot show prompt dialog.");
+            return Task.CompletedTask;
+        }
+
         public Task ShowErrorAsync(string title, string message, DialogStyle style = new DialogStyle())
         {
             Logger.Error("[UI] No IDialogService registered. Cannot show error dialog.");
             return Task.CompletedTask;
+        }
+
+        public Task<T?> ShowSelectAsync<T>(string title, string message, IEnumerable<T> items, Func<T, string>? labelSelector = null,
+            DialogStyle style = new DialogStyle(), string confirmButtonText = "OK", string cancelButtonText = "Cancel")
+        {
+            Logger.Error("[UI] No IDialogService registered. Cannot show selection dialog.");
+            return Task.FromResult<T?>(default);
         }
     }
     
@@ -262,7 +282,27 @@ public static class UiServices
             Logger.Error("[UI] No IUiExtensionManager registered. Cannot apply UI extensions.");
         }
     }
-    
+
+    public class DefaultDocService : IDocService
+    {
+        public string GetDocumentation(URN topicUrn)
+        {
+            Logger.Error("[UI] No IDocService registered. Cannot get documentation.");
+            return string.Empty;
+        }
+
+        public bool AddDocumentation(URN topicUrn, string content)
+        {
+            Logger.Error("[UI] No IDocService registered. Cannot add documentation.");
+            return false;
+        }
+
+        public bool AddDocumentationFromPath(URN topicUrn, string path)
+        {
+            Logger.Error("[UI] No IDocService registered. Cannot add documentation from path.");
+            return false;
+        }
+    }
     
     #endregion
     

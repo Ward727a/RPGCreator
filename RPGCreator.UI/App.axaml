@@ -31,11 +31,12 @@
 
     <Application.Resources>
 	    <ResourceDictionary>
-		    <ResourceDictionary.MergedDictionaries>
-		    </ResourceDictionary.MergedDictionaries>
 
 		    <SolidColorBrush x:Key="Warning">Yellow</SolidColorBrush>
 		    <SolidColorBrush x:Key="Error">Red</SolidColorBrush>
+		    <ResourceDictionary.MergedDictionaries>
+			    <ResourceInclude Source="avares://LiveMarkdown.Avalonia/Defaults.axaml"/>
+		    </ResourceDictionary.MergedDictionaries>
 	    </ResourceDictionary>
     </Application.Resources>
 	<Application.Styles>
@@ -45,5 +46,6 @@
 		<StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
 		<StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
 		<StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+		<StyleInclude Source="avares://LiveMarkdown.Avalonia/Styles.axaml"/>
 	</Application.Styles>
 </Application>

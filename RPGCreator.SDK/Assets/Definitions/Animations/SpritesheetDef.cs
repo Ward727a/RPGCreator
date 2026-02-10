@@ -72,6 +72,11 @@ public class SpritesheetDef : IAssetDef, ISerializable, IDeserializable, IHasSav
         return info;
     }
 
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return [];
+    }
+
     public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue("Unique", out Ulid unique, Ulid.Empty);

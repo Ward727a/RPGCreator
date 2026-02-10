@@ -80,6 +80,11 @@ public abstract class BaseStatDefinition : IStatDef
             .AddValue(nameof(_statGraphEvents), _statGraphEvents.ToDictionary(kv => kv.Key, kv => kv.Value.DocumentPath));
     }
 
+    public virtual List<Ulid> GetReferencedAssetIds()
+    {
+        return [CapSettings.CapStatUnique];
+    }
+
     public virtual void SetObjectData(DeserializationInfo info)
     {
         ArgumentNullException.ThrowIfNull(info);

@@ -47,7 +47,7 @@ public enum MovementType
 public class MovementFeature : BaseEntityFeature
 {
 
-    public static URN Urn = new("rpgc", FeatureUrnModule, "movement_feature");
+    public static URN Urn = FeatureUrnModule.CreateUrnModule("rpgc").ToUrn("movement_feature");
     
     private static readonly URN WalkUrn = new("rpgc://entity_animations/walk");
     private static readonly URN IdleUrn = new("rpgc://entity_animations/idle");

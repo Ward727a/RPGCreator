@@ -59,7 +59,7 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
 
     private Ulid _dbId = Ulid.Empty;
     private const string INDEX_COLLECTION = "asset_index";
-    private const string MODULES_AUTH_COLLECTION = "authorized_modules";
+    private const string INDEX_REFERENCES = "asset_references";
 
     public BaseAssetsPack(string dbPath)
     {
@@ -218,6 +218,19 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
         }
     }
 
+    public List<Ulid> GetWhoPointsToAsset(Ulid assetId)
+    {
+        var db = EngineDB.GetDB(_dbId);
+        if (db == null) return new List<Ulid>();
+
+        var collection = db.GetCollection<EngineDB.AssetRefrenceIdsRecord>(INDEX_REFERENCES);
+
+        return collection.Query()
+            .Where(x => x.RefrencedIds.Any(id => id == assetId))
+            .Select(x => x.AssetId)
+            .ToList();
+    }
+    
     public void AddOrUpdateAsset(object asset, string relativeFolderPath = "")
     {
         if (asset is not IHasUniqueId idAsset)
@@ -244,6 +257,12 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
 
         var db = EngineDB.GetDB(_dbId);
         if (db == null) return;
+        
+        if(idAsset.Unique == Ulid.Empty)
+        {
+            idAsset.Init(Ulid.NewUlid());
+            Log.Warning("[Pack {PackName}] Asset had an empty Unique ID. Generated new ID: {AssetId}.", Name, idAsset.Unique);
+        }
 
         if (string.IsNullOrEmpty(savePathAsset.SavePath))
         {
@@ -288,11 +307,56 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
 
         indexCollection.Upsert(record);
 
+        if(asset is ISerializable serializableAssetRef and IHasUniqueId)
+        {
+            RegisterReference(serializableAssetRef);
+        }
+        
         EngineCore.Instance.Managers.Assets.AddNewAssetLocation(idAsset.Unique, this, relativePath,
             record.TypeName);
 
         Log.Information("[Pack {PackName}] Asset {AssetId} saved to path {FilePath} and indexed.", Name,
             idAsset.Unique, fullPath);
+    }
+
+    public void RegisterReference<T>(T serializableAsset) where T : ISerializable
+    {
+        var db = EngineDB.GetDB(_dbId);
+        if (db == null) return;
+        
+        if(serializableAsset is not IHasUniqueId idAsset)
+        {
+            Logger.Error(
+                "[Pack {PackName}] Attempted to register references for an asset that does not implement IHasUniqueId. Asset type: {AssetType}.",
+                Name, serializableAsset.GetType().FullName ?? "Unknown");
+            return;
+        };
+
+        var referencesCollection = db.GetCollection<EngineDB.AssetRefrenceIdsRecord>(INDEX_REFERENCES);
+        var record = referencesCollection.FindById(idAsset.Unique.ToString());
+        if (record == null)
+        {
+            record = new EngineDB.AssetRefrenceIdsRecord()
+            {
+                AssetId = idAsset.Unique,
+                RefrencedIds = serializableAsset.GetReferencedAssetIds()
+            };
+        }
+        else
+        {
+            record.RefrencedIds = serializableAsset.GetReferencedAssetIds();
+        }
+        
+        referencesCollection.Upsert(record);
+    }
+    
+    public void UnregisterReference(Ulid assetId)
+    {
+        var db = EngineDB.GetDB(_dbId);
+        if (db == null) return;
+
+        var referencesCollection = db.GetCollection<EngineDB.AssetRefrenceIdsRecord>(INDEX_REFERENCES);
+        referencesCollection.Delete(assetId.ToString());
     }
 
     public void RemoveAsset(Ulid assetId)
@@ -321,6 +385,8 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
                     Logger.Error(ex, "[Pack {PackName}] Failed to delete asset file at path {FilePath}.", Name, fullPath);
                 }
             }
+            
+            UnregisterReference(assetId);
 
             indexCollection.Delete(assetId.ToString());
             Log.Information("[Pack {PackName}] Asset {AssetId} removed from index.", Name, assetId);
@@ -355,9 +421,13 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
 
         var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
         
-        var validNames = Common.TypeUtil.GetInheritance(type); // Doit retourner ["TilesetDef", "BaseTilesetDef", etc.]
+        var validNames = Common.TypeUtil.GetInheritance(type);
         
         var queries = validNames.Select(name => Query.Contains("TypeName", name));
+        if(queries.Count() == 0)
+        {
+            yield break;
+        }
         var finalQuery = Query.Or(queries.ToArray());
 
         var allIndexed = indexCollection.Find(finalQuery);
@@ -401,6 +471,20 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
             .AddValue(nameof(RootFolder), RootFolder);
 
         return info;
+    }
+
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        var db = EngineDB.GetDB(_dbId);
+        if (db == null)
+        {
+            return new List<Ulid>();
+        }
+
+        var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
+        var allIndexed = indexCollection.FindAll();
+
+        return allIndexed.Select(record => record.Id).ToList();
     }
 
     public void SetObjectData(DeserializationInfo info)

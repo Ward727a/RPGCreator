@@ -46,7 +46,7 @@ public static class SharedDataFeatures
     internal static T GetValueShared<T>(URN featureUrn, string key, T defaultValue)
     {
         var customData = GetSharedCustomData(featureUrn);
-        return customData.GetOrDefault(key, defaultValue);
+        return customData.GetAsOrDefault(key, defaultValue);
     }
 }
 
@@ -57,7 +57,7 @@ public abstract class BaseEntityFeature : IEntityFeature
     /// Just the module URN where all entity features are stored.<br/>
     /// This is mainly a constant to avoid hardcoding the string everywhere.
     /// </summary>
-    protected const string FeatureUrnModule = "entity_features";
+    protected static UrnSingleModule FeatureUrnModule => "entity_features".CreateUrnSingleModule();
     
     /// <summary>
     /// Just the module URN where all entity feature tags are stored.<br/>
@@ -149,6 +149,10 @@ public abstract class BaseEntityFeature : IEntityFeature
         Configuration = configuration;
     }
 
+    public virtual void OnAddingToDefinition(IEntityDefinition definition, object itemControl)
+    {
+    }
+
     /// <summary>
     /// Called when this feature is added to an entity definition.<br/>
     /// This is called once when the feature is added to the definition, allowing it to perform any necessary setup or registration.
@@ -196,7 +200,8 @@ public abstract class BaseEntityFeature : IEntityFeature
 
     /// <summary>
     /// Accessor for configuration values with a default fallback.<br/>
-    /// Uses the caller member name as the key if none is provided.
+    /// Uses the caller member name as the key if none is provided.<br/>
+    /// Each config is unique for each feature, for each entity!
     /// </summary>
     /// <param name="defaultValue"> The default value to return if the key does not exist.</param>
     /// <param name="key"> The configuration key. Defaults to the caller member name.</param>
@@ -217,12 +222,13 @@ public abstract class BaseEntityFeature : IEntityFeature
     /// <returns> The configuration value associated with the key, or the default value if the key does not exist.</returns>
     protected T GetConfig<T>(T defaultValue, [CallerMemberName] string key = "")
     {
-        return Configuration.GetOrDefault(key, defaultValue);
+        return Configuration.GetAsOrDefault(key, defaultValue);
     }
 
     /// <summary>
     /// Sets a configuration value.<br/>
-    /// Uses the caller member name as the key if none is provided.
+    /// Uses the caller member name as the key if none is provided.<br/>
+    /// Each config is unique for each feature, for each entity!
     /// </summary>
     /// <param name="value"> The value to set.</param>
     /// <param name="key"> The configuration key. Defaults to the caller member name.</param>
@@ -260,7 +266,7 @@ public abstract class BaseEntityFeature : IEntityFeature
     /// </returns>
     protected T GetShared<T>(T defaultValue, [CallerMemberName] string key = "")
     {
-        return SharedMemoryConfiguration.GetOrDefault(key, defaultValue);
+        return SharedMemoryConfiguration.GetAsOrDefault(key, defaultValue);
     }
     
     /// <summary>

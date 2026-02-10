@@ -34,7 +34,11 @@
         <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.*"/>
     </ItemGroup>
     <ItemGroup>
+      <ProjectReference Include="..\modules\_BaseModule\_BaseModule.csproj" />
       <ProjectReference Include="..\RPGCreator.Core\RPGCreator.Core.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Modules\" />
     </ItemGroup>
 
     <Target Name="CopyUIAssets" AfterTargets="Build">
