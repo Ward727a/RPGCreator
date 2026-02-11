@@ -18,14 +18,20 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGCreator.SDK.ECS;
-using RPGCreator.SDK.Types;
+using System.Drawing;
+using RPGCreator.SDK.Editor.Rendering;
 
-namespace RPGCreator.SDK.EngineService;
+namespace RPGCreator.SDK.EditorUiService;
 
-public interface ISignalRegistry : IService
+public interface IMonogameViewport : IService
 {
-    public void RegisterSignal(URN signal);
-    public int GetSignalMask(URN signal);
-    public bool TryGetSignalMask(URN signal, out int mask);
+    public bool IsCoreReady { get; }
+    public event Action? OnCoreReady;
+    public void Initialize();
+    public void CreateNewViewport(string viewportId, IntPtr bitmapControlAddress, Size sizeWanted);
+    public void ResizeViewport(string viewportId, int width, int height);
+    public BaseGameViewport GetViewport(string viewportId);
+    public void DestroyViewport(string viewportId);
+    public void Tick();
+    public void AttachToWindow(IntPtr avaloniaWindowHandle);
 }

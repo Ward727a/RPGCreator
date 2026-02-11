@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
+using RPGCreator.SDK.Assets.Definitions;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
@@ -10,26 +12,16 @@ using RPGCreator.SDK.Types;
 namespace RPGCreator.Core.Types.Map;
 
 [SerializingType("IntGridLayerDefinition")]
-public class IntGridLayerDefinition : IMapLayerDef<int>
+public class IntGridLayerDefinition : BaseAssetDef, IMapLayerDef<int>
 {
     public event EventHandler<(Vector2, int)>? ElementAdded;
     public event EventHandler<(Vector2, int)>? ElementRemoved;
-    public Ulid Unique { get; private set; }
-    public URN Urn { get; private set; }
-    public string Name { get; set; }
     public int ZIndex { get; set; }
     public bool VisibleByDefault { get; set; } = false;
     private Dictionary<Vector2, int> _elements = new();
     public ReadOnlyDictionary<Vector2, int> Elements { get; }
     
     public List<IntGridValueRef> ValueRefs { get; set; }
-
-
-    public void Init(Ulid id)
-    {
-        if (Unique != Ulid.Empty) return;
-        Unique = id;
-    }
     
     public void SetValue(Vector2 location, int value)
     {
@@ -110,7 +102,6 @@ public class IntGridLayerDefinition : IMapLayerDef<int>
     {
         return new SerializationInfo(typeof(IntGridLayerDefinition))
             .AddValue(nameof(Unique), Unique)
-            .AddValue(nameof(Urn), Urn)
             .AddValue(nameof(Name), Name)
             .AddValue(nameof(ZIndex), ZIndex)
             .AddValue(nameof(VisibleByDefault), VisibleByDefault)
@@ -128,6 +119,5 @@ public class IntGridLayerDefinition : IMapLayerDef<int>
         return;
     }
 
-    public bool IsDirty { get; set; }
-    public bool IsTransient { get; set; }
+    public override UrnSingleModule UrnModule => "intgrid_layer".ToUrnSingleModule();
 }

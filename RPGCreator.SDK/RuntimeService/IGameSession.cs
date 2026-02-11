@@ -29,4 +29,6 @@ public interface IGameSession : IService, INotifyPropertyChanged, INotifyPropert
     public IEcsWorld? ActiveEcsWorld { get; set; }
     
     public bool IsPaused { get; set; }
+    
+    public int CurrentPlayerId { get; set; }
 }

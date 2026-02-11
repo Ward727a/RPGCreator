@@ -32,7 +32,7 @@ public class SpriteFeature : BaseEntityFeature
 {
     public override string FeatureName { get; } = "Sprite Feature";
     public override string FeatureDescription { get; } = "Adds a sprite to the entity for rendering.";
-    public override URN FeatureUrn => FeatureUrnModule.CreateUrnModule("rpgc").ToUrn("sprite");
+    public override URN FeatureUrn => FeatureUrnModule.ToUrnModule("rpgc").ToUrn("sprite");
 
     public override void OnWorldSetup(IEcsWorld world)
     {

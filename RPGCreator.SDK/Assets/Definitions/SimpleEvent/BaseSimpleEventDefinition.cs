@@ -43,7 +43,7 @@ public class SimpleEventActionEntry
 }
 
 [SerializingType("SimpleEventDefinition")]
-public class BaseSimpleEventDefinition : IAssetDef, IHasUniqueId, ISerializable, IDeserializable
+public class BaseSimpleEventDefinition : BaseAssetDef, ISerializable, IDeserializable
 {
     #region SAVED PROPERTIES
     /// <summary>
@@ -74,21 +74,12 @@ public class BaseSimpleEventDefinition : IAssetDef, IHasUniqueId, ISerializable,
     
     #endregion
     
-    public Ulid Unique { get; private set; }
-    public URN Urn { get; private set; }
-    public void Init(Ulid id)
-    {
-        if (Unique != Ulid.Empty) return;
-        Unique = id;
-    }
+    public override UrnSingleModule UrnModule => "simple_event".ToUrnSingleModule();
 
-    public bool IsDirty { get; set; }
-    public bool IsTransient { get; set; }
     public SerializationInfo GetObjectData()
     {
         return new SerializationInfo(typeof(BaseSimpleEventDefinition))
             .AddValue(nameof(Unique), Unique)
-            .AddValue(nameof(Urn), Urn)
             .AddValue(nameof(Conditions), Conditions)
             .AddValue(nameof(ThenActions), ThenActions)
             .AddValue(nameof(ElseActions), ElseActions);
@@ -104,7 +95,7 @@ public class BaseSimpleEventDefinition : IAssetDef, IHasUniqueId, ISerializable,
         
         if (!_conditionsByUrnCache.TryGetValue(condition, out expectedCondition))
         {
-            if (EngineServices.SimpleEventRegistry.TryGetSimpleEventCondition(condition, out expectedCondition))
+            if (RegistryServices.SimpleEventRegistry.TryGetSimpleEventCondition(condition, out expectedCondition))
             {
                 expectedCondition.Parameters = entry?.Parameters ?? new CustomData();
                 _conditionsByUrnCache.Add(condition, expectedCondition);
@@ -125,7 +116,7 @@ public class BaseSimpleEventDefinition : IAssetDef, IHasUniqueId, ISerializable,
         
         if (!_thenActionsByUrnCache.TryGetValue(action, out actionDefinition))
         {
-            if (EngineServices.SimpleEventRegistry.TryGetSimpleEventAction(action, out actionDefinition))
+            if (RegistryServices.SimpleEventRegistry.TryGetSimpleEventAction(action, out actionDefinition))
             {
                 actionDefinition.Parameters = entry?.Parameters ?? new CustomData();
                 _thenActionsByUrnCache.Add(action, actionDefinition);
@@ -145,7 +136,7 @@ public class BaseSimpleEventDefinition : IAssetDef, IHasUniqueId, ISerializable,
         
         if (!_elseActionsByUrnCache.TryGetValue(action, out actionDefinition))
         {
-            if (EngineServices.SimpleEventRegistry.TryGetSimpleEventAction(action, out actionDefinition))
+            if (RegistryServices.SimpleEventRegistry.TryGetSimpleEventAction(action, out actionDefinition))
             {
                 actionDefinition.Parameters = entry?.Parameters ?? new CustomData();
                 _elseActionsByUrnCache.Add(action, actionDefinition);
@@ -181,10 +172,8 @@ public class BaseSimpleEventDefinition : IAssetDef, IHasUniqueId, ISerializable,
     public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue(nameof(Unique), out Ulid unique);
-        info.TryGetValue(nameof(Urn), out URN urn);
         
         Unique = unique;
-        Urn = urn;
 
         info.TryGetValue(nameof(Tag), out string? tag);
         if (tag != null) Tag = tag;
@@ -204,7 +193,7 @@ public class BaseSimpleEventDefinition : IAssetDef, IHasUniqueId, ISerializable,
 
         foreach (var conditionsKey in Conditions.Keys)
         {
-            if(EngineServices.SignalRegistry.TryGetSignalMask(conditionsKey, out var conditionMask))
+            if(RegistryServices.SignalRegistry.TryGetSignalMask(conditionsKey, out var conditionMask))
             {
                 SignalInterestsMask.Set(conditionMask, true);
             }

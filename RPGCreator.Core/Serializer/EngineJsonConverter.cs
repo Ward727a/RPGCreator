@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
+using RPGCreator.SDK.Assets.Definitions;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
@@ -18,7 +19,7 @@ public class EngineJsonConverter : JsonConverter
 
             writer.WriteStartObject();
 
-            string? typeKey = EngineServices.AssetTypeRegistry.GetKey(value.GetType());
+            string? typeKey = RegistryServices.AssetTypeRegistry.GetKey(value.GetType());
 
             if (typeKey != null)
             {
@@ -59,10 +60,10 @@ public class EngineJsonConverter : JsonConverter
         var typeKeyToken = jsonObject["$type"];
         if (typeKeyToken != null)
         {
-            actualType = EngineServices.AssetTypeRegistry.GetType(typeKeyToken.ToString());
+            actualType = RegistryServices.AssetTypeRegistry.GetType(typeKeyToken.ToString());
         }
 
-        if (actualType == null || actualType == typeof(GenericAssetStub))
+        if (actualType == null || actualType == typeof(GenericBaseAssetStub))
         {
             var typeToken = jsonObject["$type"];
 
@@ -109,10 +110,22 @@ public class EngineJsonConverter : JsonConverter
 
         var instance = (IDeserializable)Activator.CreateInstance(actualType)!;
 
+        var assetDef = instance as IBaseAssetDef;
+        if (assetDef != null)
+        {
+            assetDef.SuspendTracking();
+        }
+
         var info = new DeserializationInfo(new JsonDataReader(jsonObject, serializer)); 
 
         instance.SetObjectData(info);
 
+        
+        if (assetDef != null)
+        {
+            assetDef.ResumeTracking();
+        }
+        
         return instance;
     }
 

@@ -19,15 +19,17 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Diagnostics.CodeAnalysis;
+using RPGCreator.SDK.Editor.Rendering;
+using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Exceptions;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types;
-using RPGCreator.SDK.UiService;
+using Size = System.Drawing.Size;
 
 namespace RPGCreator.SDK;
 
-public class UiServicesProvider : IServiceProvider
+public class EditorUiServicesProvider : IServiceProvider
 {
     private readonly Dictionary<Type, Dictionary<string, IService>> _services = new();
 
@@ -96,9 +98,9 @@ public class UiServicesProvider : IServiceProvider
 /// It's up to the implementer to cast them to the correct types.<br/>
 /// Failing to do so will result in runtime exceptions.
 /// </summary>
-public static class UiServices
+public static class EditorUiServices
 {
-    private static readonly UiServicesProvider ServiceProvider = new();
+    private static readonly EditorUiServicesProvider ServiceProvider = new();
     private static readonly Dictionary<Type, List<Action<IService>>> ServiceReadyCallbacks = new();
     private static readonly object ServiceReadyLock = new object();
     
@@ -181,6 +183,11 @@ public static class UiServices
         set => RegisterService(value);
     } = new DefaultDocService();
 
+    public static IMonogameViewport MonogameViewport
+    {
+        get => GetService<IMonogameViewport>(defaultInstance: field);
+        set => RegisterService(value);
+    } = new DefaultMonogameViewport();
 
     #region DefaultInstance
     // All instances here SHOULD NOT be used!
@@ -301,6 +308,47 @@ public static class UiServices
         {
             Logger.Error("[UI] No IDocService registered. Cannot add documentation from path.");
             return false;
+        }
+    }
+    
+    public class DefaultMonogameViewport : IMonogameViewport
+    {
+        public bool IsCoreReady { get; } = false;
+        public event Action? OnCoreReady;
+
+        public void Initialize()
+        {
+            Logger.Error("[UI] No IMonogameViewport registered. Cannot initialize viewport.");
+        }
+        public void CreateNewViewport(string viewportId, IntPtr bitmapControlAddress, Size sizeWanted)
+        {
+            Logger.Error("[UI] No IMonogameViewport registered. Cannot create new viewport.");
+        }
+
+        public void ResizeViewport(string viewportId, int width, int height)
+        {
+            Logger.Error("[UI] No IMonogameViewport registered. Cannot resize viewport.");
+        }
+
+        public BaseGameViewport GetViewport(string viewportId)
+        {
+            Logger.Error("[UI] No IMonogameViewport registered. Cannot get viewport.");
+            return null!;
+        }
+
+        public void DestroyViewport(string viewportId)
+        {
+            Logger.Error("[UI] No IMonogameViewport registered. Cannot destroy viewport.");
+        }
+
+        public void Tick()
+        {
+            Logger.Error("[UI] No IMonogameViewport registered. Cannot tick viewports.");
+        }
+
+        public void AttachToWindow(IntPtr avaloniaWindowHandle)
+        {
+            Logger.Error("[UI] No IMonogameViewport registered. Cannot attach to window.");
         }
     }
     

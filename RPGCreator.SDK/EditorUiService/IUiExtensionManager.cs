@@ -20,7 +20,7 @@
 
 using RPGCreator.SDK.Modules.UIModule;
 
-namespace RPGCreator.SDK.UiService;
+namespace RPGCreator.SDK.EditorUiService;
 
 public interface IUiExtensionManager : IService
 {

@@ -62,7 +62,6 @@
 
   <ItemGroup>
     <Folder Include="Assets\Icons\" />
-    <Folder Include="Attributes\" />
     <Folder Include="Common\AnimEditor\" />
     <Folder Include="Content\AssetsManage\Components\Items\" />
     <Folder Include="Content\Editor\RightPanel\" />

@@ -31,6 +31,7 @@ using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 
 namespace RPGCreator.UI.Content.Editor.LayersListComponents

@@ -109,7 +109,7 @@ public class LevelItem : StackPanel
             
         e.Handled = true; 
                 
-        UiServices.MenuService.OpenContextMenu(this, [
+        EditorUiServices.MenuService.OpenContextMenu(this, [
             new("Remove Level", OnRemoveLevel)
         ]);
     }
@@ -128,7 +128,7 @@ public class LevelItem : StackPanel
     {
         try
         {
-            var confirmed = await UiServices.DialogService.ConfirmAsync("Remove Level",
+            var confirmed = await EditorUiServices.DialogService.ConfirmAsync("Remove Level",
                 $"Are you sure you want to remove this level ({LevelName})?");
 
             if (!confirmed) return;
@@ -138,7 +138,7 @@ public class LevelItem : StackPanel
         }
         catch (Exception e)
         {
-            await UiServices.DialogService.ShowErrorAsync("Error", $"An error occurred while trying to remove the level:\n{e.Message}");
+            await EditorUiServices.DialogService.ShowErrorAsync("Error", $"An error occurred while trying to remove the level:\n{e.Message}");
         }
     }
     

@@ -9,14 +9,8 @@ using Size = RPGCreator.SDK.Types.Size;
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets;
 
 [SerializingType("TileDefinition")]
-public class TileDefinition : ITileDef
+public class TileDefinition : BaseAssetDef, ITileDef
 {
-
-    public Ulid Unique { get; private set; }
-    public URN Urn { get; }
-    public bool IsDirty { get; set; }
-    public bool IsTransient { get; set; } = false;
-    
     public Vector2 Position { get; set; }
     public Size SizeInTileset { get; private set; }
     public Vector2 PositionInTileset { get; private set; }
@@ -36,11 +30,7 @@ public class TileDefinition : ITileDef
         TilesetDef = tilesetDef;
     }
 
-    public void Init(Ulid id)
-    {
-        if (Unique != Ulid.Empty) return;
-        Unique = id;
-    }
+    public override UrnSingleModule UrnModule => "tile".ToUrnSingleModule();
 
     public void UpdateTileset(BaseTilesetDef newTilesetDefinition)
     {

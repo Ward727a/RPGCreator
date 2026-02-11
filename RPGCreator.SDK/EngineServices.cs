@@ -165,12 +165,6 @@ public static class EngineServices
         set => RegisterService(value);
     }
 
-    public static IAssetTypeRegistry AssetTypeRegistry
-    {
-        get => GetService<IAssetTypeRegistry>();
-        set => RegisterService(value);
-    }
-    
     public static IResourceService ResourcesService
     {
         get => GetService<IResourceService>();
@@ -239,30 +233,12 @@ public static class EngineServices
         set => RegisterService(value);
     }
 
-    public static IEventsRegisterService EventsRegisterService
-    {
-        get => GetService<IEventsRegisterService>();
-        set => RegisterService(value);
-    }
-
     public static IGlobalContextProvider GlobalContextProvider
     {
         get => GetService<IGlobalContextProvider>();
         set => RegisterService(value);
     }
-    
-    public static ISimpleEventRegistry SimpleEventRegistry
-    {
-        get => GetService<ISimpleEventRegistry>();
-        set => RegisterService(value);
-    }
 
-    public static ISignalRegistry SignalRegistry
-    {
-        get => GetService<ISignalRegistry>();
-        set => RegisterService(value);
-    }
-    
     /// <summary>
     /// Checks if a service is ready (registered) in the runtime services provider.
     /// </summary>

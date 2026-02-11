@@ -35,7 +35,7 @@ public class SimpleEventExecutor : ISimpleEventExecutor
 
     public SimpleEventExecutor()
     {
-        _registry = EngineServices.SimpleEventRegistry;
+        _registry = RegistryServices.SimpleEventRegistry;
     }
     
     public void Execute(BaseSimpleEventDefinition definition, CustomData localContext)

@@ -435,7 +435,7 @@ namespace RPGCreator.Generators
             sb.AppendLine("using System;");
             sb.AppendLine($"using {contextNs};");
             sb.AppendLine("using RPGCreator.SDK.Attributes;");
-            sb.AppendLine("using RPGCreator.SDK.UiService;");
+            sb.AppendLine("using RPGCreator.SDK.EditorUiService;");
             sb.AppendLine("using RPGCreator.SDK.Modules.UIModule;");
             sb.AppendLine();
             sb.AppendLine($"namespace {ns}");

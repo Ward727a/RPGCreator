@@ -38,7 +38,7 @@ public class CameraSystem : ISystem
         _cameraService = RuntimeServices.CameraService;
         _componentManager = ecsWorld.ComponentManager;
         _eventBus = ecsWorld.EventBus;
-        _eventBus.Subscribe(new BaseSubscriber(new URN("rpgc", "events", "on_camera_follow"), 0, OnCameraFollowEvent));
+        new BaseSubscriber(new URN("rpgc", "events", "on_camera_follow"), 0, OnCameraFollowEvent).Subscribe();
     }
 
     private void OnCameraFollowEvent(IEcsEvent obj)

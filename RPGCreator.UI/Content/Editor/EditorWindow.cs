@@ -24,33 +24,37 @@
 #endregion
 using Avalonia.Controls;
 using System;
+using System.Diagnostics;
 using Avalonia.Input;
+using Avalonia.Threading;
 using RPGCreator.RTP;
 using RPGCreator.SDK;
-using RPGCreator.SDK.UiService;
+using RPGCreator.SDK.EditorUiService;
 
 namespace RPGCreator.UI.Content.Editor
 {
-    internal class EditorWindow : Window
+    internal sealed class EditorWindow : Window
     {
+
         private EditorWindow() : base()
         {
-            new EditorGame();
             Closing += OnClosing;
             Opened += OnOpening;
-
+            
             Width = 1500;
             Height = 900;
             Title = "RPGCreator - Editor";
             // For now we will use the default avalonia icon, but you can replace it with your own icon.
             Icon = new WindowIcon("Assets/rpgc-logo.ico");
-            WindowStartupLocation = WindowStartupLocation.Manual;
-                Position = Position.WithX(this.Screens.Primary.WorkingArea.Center.X-1500/2)
-                .WithY(this.Screens.Primary.WorkingArea.Center.Y-900/2);
-
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
             Content = new EditorWindowControl();
             //InitializeIfNeeded();
-            this.Show(); // Show the window immediately
+            Show(); // Show the window immediately
+
+
+            var topLevel = TopLevel.GetTopLevel(this);
+
+            
             
             GotFocus += OnGotFocus;
         }
@@ -58,7 +62,7 @@ namespace RPGCreator.UI.Content.Editor
         private void OnGotFocus(object? sender, GotFocusEventArgs e)
         {
             
-            UiServices.NotificationService.Warn(
+            EditorUiServices.NotificationService.Warn(
                 "Welcome to RPG Creator Editor!",
                 "This is a pre-release (and alpha) version of the editor, there might be bugs, and there is still a lot of features to implement." +
                 "\nThank you for testing and helping us improve RPG Creator!" +

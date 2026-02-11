@@ -1,6 +1,7 @@
 using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using RPGCreator.SDK.Editor;
 

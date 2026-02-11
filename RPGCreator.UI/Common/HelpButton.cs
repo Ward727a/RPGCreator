@@ -25,9 +25,9 @@ using Avalonia.Interactivity;
 using LiveMarkdown.Avalonia;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types;
-using RPGCreator.SDK.UiService;
 using RPGCreator.UI.Contexts;
 
 namespace RPGCreator.UI.Common;
@@ -56,7 +56,7 @@ public class HelpButton : UserControl
             Set_helpDocsKey = (newKey) => _helpDocsKey = newKey
         };
         
-        UiServices.ExtensionManager.ApplyExtensions(UIRegion.HelpButton, this, new HelpButtonContext(config));
+        EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.HelpButton, this, new HelpButtonContext(config));
     }
 
     private void CreateComponent()
@@ -86,15 +86,15 @@ public class HelpButton : UserControl
     /// </summary>
     public void OpenHelp()
     {
-        var helpContent = UiServices.DocService.GetDocumentation(_helpDocsKey);
+        var helpContent = EditorUiServices.DocService.GetDocumentation(_helpDocsKey);
 
         if (string.IsNullOrWhiteSpace(helpContent))
         {
-            UiServices.NotificationService.Error("No help available for this item.", $"The documentation for '{_helpDocsKey}' is missing or empty.");
+            EditorUiServices.NotificationService.Error("No help available for this item.", $"The documentation for '{_helpDocsKey}' is missing or empty.");
             return;
         }
 
-        UiServices.DialogService.ShowPromptAsync(
+        EditorUiServices.DialogService.ShowPromptAsync(
             "Help window", 
             new HelpWindow(helpContent),
             new DialogStyle(800, 600, CanResize:true, SizeToContent:DialogSizeToContent.None)
@@ -142,6 +142,6 @@ public class HelpWindow : UserControl
             Get_markdownViewer = () => _markdownViewer,
             GetmkBuilder = () => mkBuilder
         };
-        UiServices.ExtensionManager.ApplyExtensions(UIRegion.HelpButtonHelpWindow, this, new HelpButtonHelpWindowContext(config));
+        EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.HelpButtonHelpWindow, this, new HelpButtonHelpWindowContext(config));
     }
 }

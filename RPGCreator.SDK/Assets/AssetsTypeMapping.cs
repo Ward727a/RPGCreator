@@ -24,14 +24,14 @@ public class AssetsTypeMapping : IAssetTypeRegistry
         if (_keyToType.TryGetValue(key, out var type)) return type;
 
         Logger.Error("Unknown asset type: {key}, returning GenericAssetStub.", args: key);
-        return typeof(GenericAssetStub);
+        return typeof(GenericBaseAssetStub);
     }
 
     public string? GetKey(Type type) 
     {
         if (_typeToKey.TryGetValue(type, out var key)) return key;
     
-        if(type == typeof(GenericAssetStub)) return "GenericStub";
+        if(type == typeof(GenericBaseAssetStub)) return "GenericStub";
 
         var foundKey = _typeToKey.FirstOrDefault(x => x.Key.IsAssignableFrom(type)).Value;
     

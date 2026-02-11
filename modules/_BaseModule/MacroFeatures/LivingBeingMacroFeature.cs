@@ -46,11 +46,11 @@ public class LivingBeingMacroFeature : BaseMacroEntityFeature
     [EntityFeatureProperty("Player Controlled", "If enabled, this entity can be controlled by the player.", Category = "Control")]
     public bool ShouldBePlayerControlled
     {
-        get => GetConfig(true);
-        set => SetConfig(value);
+        get => GetConfigurationValue(PlayerTagFeature.Urn, true);
+        set => GetConfigurationValue(PlayerTagFeature.Urn, value);
     }
 
-    
+
     [EntityFeatureProperty("Speed", "Defines the movement speed of the entity.", MinValue = 0, Category = "Movement")]
     public int Speed
     {
@@ -64,15 +64,7 @@ public class LivingBeingMacroFeature : BaseMacroEntityFeature
         
         fm.OnceEntityFeaturesRegistered(MovementFeature.Urn, RegisterSubFeature);
         fm.OnceEntityFeaturesRegistered(AnimationFeature.Urn, RegisterSubFeature);
+        fm.OnceEntityFeaturesRegistered(PlayerTagFeature.Urn, RegisterSubFeature);
         // More to come...
-    }
-
-    public override void OnInject(BufferedEntity entity, IEntityDefinition entityDefinition)
-    {
-        base.OnInject(entity, entityDefinition);
-        if (ShouldBePlayerControlled)
-        {
-            entity.AddComponent(new PlayerTagComponent());
-        }
     }
 }

@@ -87,7 +87,7 @@ public class StatsModifierFeature : BaseEntityFeature
         "Allows the entity to modify stats of other entities (e.g. buffs, debuffs, etc.).\n" +
         "The actual logic of how the stats are modified is not implemented by this feature, it simply adds the necessary component for other systems to work with.\n" +
         "Note: This feature is dependent on the Stats Feature, and will not work properly if the target entity does not have the Stats Feature.";
-    public override URN FeatureUrn => FeatureUrnModule.CreateUrnModule("rpgc").ToUrn("stats_modifier_feature");
+    public override URN FeatureUrn => FeatureUrnModule.ToUrnModule("rpgc").ToUrn("stats_modifier_feature");
 
     public override URN[] DependentFeatures => [StatsFeature.Urn];
 

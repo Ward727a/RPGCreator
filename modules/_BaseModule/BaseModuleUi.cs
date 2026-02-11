@@ -21,7 +21,7 @@
 using System.Runtime.CompilerServices;
 using _BaseModule.UI.StatsFeature;
 using _BaseModule.UI.StatsModifier;
-using RPGCreator.SDK.UiService;
+using RPGCreator.SDK.EditorUiService;
 using RPGCreator.UI.Extensions;
 
 namespace _BaseModule;

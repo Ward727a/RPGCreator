@@ -446,19 +446,12 @@ public class EntityFeatureData() : ISerializable, IDeserializable
 /// This class represents a character in the game.
 /// </summary>
 [SerializingType("Character")]
-public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDeserializable
+public class CharacterData : BaseAssetDef, IEntityDefinition, ICharacter, ISerializable, IDeserializable
 {
     public event Action? OnFeaturesChanged;
     
-    public string SavePath { get; set; }
-    public bool IsDirty { get; set; }
-    public bool IsTransient { get; set; }
-    public void Init(Ulid id)
-    {
-        Unique = id;
-        Urn = new URN("character", $"{Name}@{Unique}");
-    }
-    
+    public string SavePath { get; set; } = null!;
+
     #region Events
 
     public event EventHandler<string>? PortraitChanged;
@@ -472,8 +465,7 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
     #region Properties
 
     public string SpritePath => _portraitPath;
-    public Ulid Unique { get; set; } = Ulid.NewUlid();
-    public URN Urn { get; private set; }
+    public override UrnSingleModule UrnModule => "character".ToUrnSingleModule();
     public CustomData Properties { get; } = new CustomData();
 
     public ObservableCollection<EntityFeatureData> Features => _features;
@@ -501,9 +493,7 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
     
     private Ulid _classId = Ulid.Empty;
     private ObservableCollection<EntityFeatureData> _features;
-
-    public string Name { get; set; }
-
+    
     [NotNull]
     public string? PortraitPath
     {
@@ -574,8 +564,8 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
     // Needed for serialization
     public CharacterData()
     {
+        SuspendTracking();
         Name = "UNKNOWN";
-        Urn = new URN("character", $"UNKNOWN@{Unique}");
         _features = new ObservableCollection<EntityFeatureData>();
         Tags = new List<string>();
     }
@@ -584,7 +574,6 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
     {
         Name = name;
         RefreshStats();
-        Urn = new URN("character", $"{name}@{Unique}");
     }
     
     #endregion
@@ -766,7 +755,6 @@ public class CharacterData : IEntityDefinition, ICharacter, ISerializable, IDese
         Stats = stats ?? new HashSet<Ulid>();
         _features = features;
         RolePlayInfo = rolePlayInfo;
-        Urn = new URN("character", $"{Name}@{Unique}");
         RefreshStats();
     }
     

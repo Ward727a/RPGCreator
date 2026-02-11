@@ -31,6 +31,7 @@ using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.RuntimeService;
 
@@ -150,7 +151,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
         {
             if(!RuntimeServices.MapService.HasLoadedMap)
             {
-                UiServices.NotificationService.Error("No Map Loaded", "Please load a map before adding layers.");
+                EditorUiServices.NotificationService.Error("No Map Loaded", "Please load a map before adding layers.");
                 return;
             }
 
@@ -177,7 +178,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
             promptContent.Children.Add(layerNameTextBox);
             promptContent.Children.Add(layerTypeComboBox);
 
-            var result = await UiServices.DialogService.ConfirmAsync(
+            var result = await EditorUiServices.DialogService.ConfirmAsync(
                 "Add Layer", 
                 promptContent,
                 confirmButtonText: "Add");
@@ -193,7 +194,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
             
             if (string.IsNullOrWhiteSpace(resultText))
             {
-                UiServices.NotificationService.Warn("Invalid Layer Name", "Layer name cannot be empty.");
+                EditorUiServices.NotificationService.Warn("Invalid Layer Name", "Layer name cannot be empty.");
                 return;
             }
             
@@ -216,7 +217,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                         newLayer = EngineServices.AssetsManager.CreateAsset<EntityLayerDefinition>();
                         break;
                     default:
-                        UiServices.NotificationService.Error("Error Adding Layer", "Invalid layer type selected.");
+                        EditorUiServices.NotificationService.Error("Error Adding Layer", "Invalid layer type selected.");
                         return;
                 }
                 
@@ -245,7 +246,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                     return;
                 }
                 
-                UiServices.NotificationService.Error("Error Adding Layer", "Could not add the new layer. It may already exist?");
+                EditorUiServices.NotificationService.Error("Error Adding Layer", "Could not add the new layer. It may already exist?");
             }
         }
 

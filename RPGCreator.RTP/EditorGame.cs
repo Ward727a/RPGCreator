@@ -16,8 +16,6 @@ using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
 
-// WORKING PROGRESS PART - THIS IS NOT READY YET, AND NEED **MASSIVE** REFACTORING TO WORK WITH THE NEW ECS AND RENDERING SYSTEMS.
-
 namespace RPGCreator.RTP
 {
     public class EditorGame : Game, IGameRunner
@@ -34,14 +32,13 @@ namespace RPGCreator.RTP
         private IEntity? _cameraEntity;
         
         public GraphicsDeviceManager Graphics;
+        public GraphicsDevice GraphicsDevice => base.GraphicsDevice;
 
         private IEcsWorld _ecsWorld = EngineServices.ECS.CreateWorld();
 
         private SpriteBatch _spriteBatch = null!;
 
         GumService Gum => GumService.Default;
-
-        
 
         public EditorGame()
         {

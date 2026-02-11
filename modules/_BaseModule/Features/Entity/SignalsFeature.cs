@@ -28,11 +28,16 @@ using RPGCreator.SDK.Types;
 
 namespace _BaseModule.Features.Entity;
 
+/// <summary>
+/// The signal system should not be confused with the EventBus.<br/>
+/// The signal system is for "local" event, thing that happened to a specific entity, and that other entities can react to.<br/>
+/// The EventBus is for "global" events, that are not tied to a specific entity, can be listened by everything.
+/// </summary>
 public class SignalsFeature : BaseEntityFeature
 {
     public override string FeatureName => "Signals";
     public override string FeatureDescription => "Allows the entity to emit and react to signals. Signals are a powerful way to create interactions between entities without tight coupling. They can be used for a wide variety of purposes, such as triggering events, communicating between entities, and creating complex behaviors.";
-    public override URN FeatureUrn { get; } = FeatureUrnModule.CreateUrnModule("rpgc").ToUrn("signals");
+    public override URN FeatureUrn { get; } = FeatureUrnModule.ToUrnModule("rpgc").ToUrn("signals");
 
     public override void OnWorldSetup(IEcsWorld world)
     {
@@ -55,12 +60,22 @@ public struct SignalsComponent : IComponent
     /// Those will be used and cleared at the end of the current frame, after ALL systems have been executed by the SignalsSystem.
     /// </summary>
     public Bitmask256 PendingSignals;
+    
+    public void EmitSignal(int signalIndex)
+    {
+        PendingSignals.Set(signalIndex, true);
+    }
+
+    public void EmitSignal(URN signalUrn)
+    {
+        PendingSignals.Set(RegistryServices.SignalRegistry.GetSignalMask(signalUrn), true);
+    }
 }
 
-public struct SimpleEventStorageComponent : IComponent
+public struct SimpleEventStorageComponent() : IComponent
 {
-    public List<SimpleEventRuntimeInstance> AttachedEvents;
-    public CustomData LocalVariables;
+    public List<SimpleEventRuntimeInstance> AttachedEvents = new List<SimpleEventRuntimeInstance>();
+    public CustomData LocalVariables { get; set; } = new CustomData();
 }
 
 public struct SimpleEventRuntimeInstance
@@ -126,5 +141,14 @@ public class SignalsSystem : ISystem
             signalsComponent.PendingSignals.Clear();
         }
         _componentManager.ClearDirty<SignalsComponent>();
+    }
+    
+    public void EmitSignal(int entityId, int signalIndex)
+    {
+        if (!_componentManager.HasComponent<SignalsComponent>(entityId)) return;
+        
+        ref var signalsComponent = ref _componentManager.GetComponent<SignalsComponent>(entityId);
+        signalsComponent.EmitSignal(signalIndex);
+        
     }
 }

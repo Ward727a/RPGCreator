@@ -20,9 +20,9 @@
 
 using System.Collections.Generic;
 using System.IO;
+using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types;
-using RPGCreator.SDK.UiService;
 
 namespace RPGCreator.UI.UiService;
 

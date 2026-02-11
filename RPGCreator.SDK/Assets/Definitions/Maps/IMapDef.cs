@@ -6,16 +6,12 @@ using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps;
 
-public interface IMapDef : IHasUniqueId, ISerializable, IDeserializable, IAssetDef, IHasSavePath
+public interface IMapDef : IBaseAssetDef, ISerializable, IDeserializable, IHasSavePath
 {
     public Ulid PackId { get; set; }
     
     event Action<BaseLayerDef> TileLayerAdded;
     event Action<BaseLayerDef> TileLayerRemoved;
-    /// <summary>
-    /// Name of the map.
-    /// </summary>
-    public string Name { get; set; }
     /// <summary>
     /// Description of the map.
     /// </summary>

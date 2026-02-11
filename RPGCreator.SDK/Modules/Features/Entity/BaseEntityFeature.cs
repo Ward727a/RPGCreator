@@ -57,7 +57,7 @@ public abstract class BaseEntityFeature : IEntityFeature
     /// Just the module URN where all entity features are stored.<br/>
     /// This is mainly a constant to avoid hardcoding the string everywhere.
     /// </summary>
-    protected static UrnSingleModule FeatureUrnModule => "entity_features".CreateUrnSingleModule();
+    protected static UrnSingleModule FeatureUrnModule => "entity_features".ToUrnSingleModule();
     
     /// <summary>
     /// Just the module URN where all entity feature tags are stored.<br/>

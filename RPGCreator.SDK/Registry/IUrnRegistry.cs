@@ -20,11 +20,18 @@
 
 using RPGCreator.SDK.Types;
 
-namespace RPGCreator.SDK.UiService;
+namespace RPGCreator.SDK.Registry;
 
-public interface IDocService : IService
+public interface IUrnRegistry : IService
 {
-    public string GetDocumentation(URN topicUrn);
-    public bool AddDocumentation(URN topicUrn, string content);
-    public bool AddDocumentationFromPath(URN topicUrn, string path);
+    bool RegisterUrn(ref URN urn, UrnCollisionStrategy collisionStrategy = UrnCollisionStrategy.RenameWithUlidSuffix);
+    bool UnregisterUrn(URN urn);
+    bool IsUrnRegistered(URN urn);
+}
+
+public enum UrnCollisionStrategy
+{
+    Fail,
+    RenameWithUlidSuffix,
+    Ignore
 }

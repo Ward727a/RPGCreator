@@ -29,10 +29,10 @@ using Avalonia.Media;
 using Avalonia.VisualTree;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Stats;
+using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types;
-using RPGCreator.SDK.UiService;
 using RPGCreator.UI.Common;
 using RPGCreator.UI.Contexts;
 using RPGCreator.UI.Extensions;
@@ -129,7 +129,7 @@ public class StatEditor : UserControl
             GetEditorGrid = () => _editorGrid,
         };
         
-        UiServices.ExtensionManager.ApplyExtensions(new UIRegion("BaseModule.StatEditor"), this, new StatEditorContext(config));
+        EditorUiServices.ExtensionManager.ApplyExtensions(new UIRegion("BaseModule.StatEditor"), this, new StatEditorContext(config));
     }
 
     private void CreateComponents()
@@ -350,7 +350,7 @@ public class StatEditor : UserControl
         // Sort stats to remove itself, and all stats that have a cap stat that is this one (to avoid circular references)
         stats = GetAvailableCapStats(_stat, stats.ToList());
 
-        var selectedStat = await UiServices.DialogService.ShowSelectAsync(
+        var selectedStat = await EditorUiServices.DialogService.ShowSelectAsync(
             "Select Stat for Cap",
             "Select the stat that will be used as a cap for this stat. The value of the capped stat will not be able to exceed the value of the cap stat.\n" +
             "\n" +
@@ -413,7 +413,7 @@ public class StatEditor : UserControl
         
         if(_stat.CapSettings.CapType == EStatTypeCap.ByStat && _stat.CapSettings.CapStatUnique == Ulid.Empty)
         {
-            UiServices.NotificationService.Error("Invalid Cap Stat", "You have selected 'ByStat' as the cap type, but you haven't selected a stat to use as a cap.\n" +
+            EditorUiServices.NotificationService.Error("Invalid Cap Stat", "You have selected 'ByStat' as the cap type, but you haven't selected a stat to use as a cap.\n" +
                                                                      "Please select a stat to use as a cap or change the cap type to 'ByValue'.", new NotificationOptions(10000));
             return;
         }

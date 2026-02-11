@@ -7,12 +7,8 @@ using RPGCreator.SDK.Types.Internals;
 namespace RPGCreator.SDK.Assets.Definitions.Animations;
 
 [SerializingType("AnimationDef")]
-public partial class AnimationDef : ObservableObject, IAssetDef, ISerializable, IDeserializable, IHasSavePath
+public partial class AnimationDef : BaseObservableAssetDef, ISerializable, IDeserializable, IHasSavePath
 {
-    public string Name { get; set; } = "New Animation";
-    public Ulid Unique { get; private set; }
-    public URN Urn { get; set; }
-    
     [ObservableProperty]
     private Ulid _spritesheetId;
 
@@ -27,21 +23,12 @@ public partial class AnimationDef : ObservableObject, IAssetDef, ISerializable, 
         get => FrameDuration > 0 ? (int)(1000 / FrameDuration) : 0;
         set => FrameDuration = value > 0 ? 1000.0 / value : 0;
     }
-
-    public bool IsDirty { get; set; }
-    public bool IsTransient { get; set; } = false;
     
     public AnimationDef()
     {
-        Unique = Ulid.NewUlid();
-        Urn = new URN("rpgcreator", "animation", Unique.ToString());
     }
 
-    public void Init(Ulid id)
-    {
-        if (Unique != Ulid.Empty) return;
-        Unique = id;
-    }
+    public override UrnSingleModule UrnModule => "animation".ToUrnSingleModule();
 
     public SerializationInfo GetObjectData()
     {
@@ -66,7 +53,6 @@ public partial class AnimationDef : ObservableObject, IAssetDef, ISerializable, 
     {
         info.TryGetValue("Unique", out Ulid unique, Ulid.Empty);
         Unique = unique;
-        Urn = new URN("rpgcreator", "animation", Unique.ToString());
         info.TryGetValue("Name", out string name, "New Animation");
         Name = name;
         info.TryGetValue("SpriteSheetId", out Ulid spriteSheetId, Ulid.Empty);
@@ -77,5 +63,5 @@ public partial class AnimationDef : ObservableObject, IAssetDef, ISerializable, 
         FrameDuration = frameDuration;
     }
 
-    public string SavePath { get; set; }
+    public string SavePath { get; set; } = null!;
 }

@@ -5,7 +5,7 @@ using System.Numerics;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types.Internals;
 
-namespace RPGCreator.SDK.Assets.Definitions.Maps;
+namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 
 public interface IMapLayerDef<TLayerElement> : IMapLayerDef
 {
@@ -104,7 +104,7 @@ public interface IMapLayerDef<TLayerElement> : IMapLayerDef
     public void ClearElements();
 }
 
-public interface IMapLayerDef : IHasUniqueId, ISerializable, IDeserializable, IAssetDef
+public interface IMapLayerDef : IHasUniqueId, ISerializable, IDeserializable
 {
     string Name { get; set; }
     int ZIndex { get; }

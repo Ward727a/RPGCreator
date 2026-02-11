@@ -23,7 +23,9 @@
 // 
 #endregion
 
+using System.Diagnostics;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
@@ -32,6 +34,7 @@ using RPGCreator.UI.Content.Launcher;
 using RPGCreator.UI.Styles;
 using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.MaterialDesign;
+using RPGCreator.RTP.Services;
 using RPGCreator.SDK;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.UI.Ressources;
@@ -46,22 +49,23 @@ public partial class App : Application
 
     // TODO: Move this style static variable to a more appropriate place, like a StylesManager or similar.
     public static readonly BaseStyle style = new DefaultStyle();
-
-
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
-        UiServices.DialogService = new DialogService();
-        UiServices.MenuService = new MenuService();
-        UiServices.NotificationService = new NotificationService();
-        UiServices.ExtensionManager = new UiExtensionManager();
-        UiServices.DocService = new DocService();
+        EditorUiServices.DialogService = new DialogService();
+        EditorUiServices.MenuService = new MenuService();
+        EditorUiServices.NotificationService = new NotificationService();
+        EditorUiServices.ExtensionManager = new UiExtensionManager();
+        EditorUiServices.DocService = new DocService();
+        EditorUiServices.MonogameViewport = new MonogameViewportService();
         EngineServices.OnceServiceReady((IResourceService ResourcesService) =>
         {
             ResourcesService.RegisterLoader<Avalonia.Media.Imaging.Bitmap>(new AvaloniaBitmapLoader());
         });
     }
 
+    
+    
     public override void OnFrameworkInitializationCompleted()
     {
         // Line below is needed to remove Avalonia data validation.

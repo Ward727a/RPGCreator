@@ -2,9 +2,6 @@
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using _BaseModule.AssetDefinitions.BaseStats;
-using _BaseModule.Features.Entity;
-using Gum.DataTypes.Variables;
 using Gum.Forms;
 using Gum.Forms.Controls;
 using Gum.Forms.DefaultVisuals;
@@ -225,24 +222,26 @@ public class GamePlayer : Game, IGameRunner
         RuntimeServices.GameSession.ActiveEcsWorld.SystemManager.AddSystem(new MapDrawingSystem());
         ((RenderService)RuntimeServices.RenderService).AddSystemToWorld(RuntimeServices.GameSession.ActiveEcsWorld);
         RuntimeServices.GameSession.ActiveEcsWorld.SystemManager.AddSystem(new MapForegroundSystem());
+
         
-        RuntimeServices.GameSession.ActiveEcsWorld?.EventBus.Subscribe(new BaseSubscriber(new URN("rpgc", "events", "on_stat_changed"), 0,
-            @event =>
+        
+        new BaseSubscriber(new URN("rpgc", "events", "on_stat_changed"), 0,
+        @event =>
+        {
+            var statId = @event.Data.GetAsOrDefault("statDefId", Ulid.Empty);
+            var statFinalValue = @event.Data.GetAsOrDefault("finalValue", 0d);
+            var statActualValue = @event.Data.GetAsOrDefault("actualValue", 0d);
+            var statDef = EngineServices.AssetsManager.TryResolveAsset(statId, out BaseStatDefinition? StatDef) ? StatDef : null;
+            if (statDef != null && statDef.Name == "Health")
             {
-                var statId = @event.Data.GetAsOrDefault("statDefId", Ulid.Empty);
-                var statFinalValue = @event.Data.GetAsOrDefault("finalValue", 0d);
-                var statActualValue = @event.Data.GetAsOrDefault("actualValue", 0d);
-                var statDef = EngineServices.AssetsManager.TryResolveAsset(statId, out BaseStatDefinition? StatDef) ? StatDef : null;
-                if (statDef != null && statDef.Name == "Health")
-                {
-                    _healthTextInstance.Text =
-                        $"Stat: (Health) {statActualValue} / {statFinalValue}";
-                    Logger.Debug("Received stat changed event: stat new value: {Value}", args:
-                    [
-                        @event.Data.GetAsOrDefault<double>("value", 0d).ToString(CultureInfo.InvariantCulture)
-                    ]);
-                }
-            }));
+                _healthTextInstance.Text =
+                    $"Stat: (Health) {statActualValue} / {statFinalValue}";
+                Logger.Debug("Received stat changed event: stat new value: {Value}", args:
+                [
+                    @event.Data.GetAsOrDefault<double>("value", 0d).ToString(CultureInfo.InvariantCulture)
+                ]);
+            }
+        }).Subscribe();
         
         base.Initialize();
     }
@@ -287,12 +286,18 @@ public class GamePlayer : Game, IGameRunner
             Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
+        if (Keyboard.GetState().IsKeyDown(Keys.G))
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
         
         _accumulatedTime += gameTime.ElapsedGameTime.TotalSeconds;
         if (_accumulatedTime >= 10)
         {
             _accumulatedTime = 0;
             RuntimeServices.GameSession.ActiveEcsWorld?.EventBus.Publish(new URN("rpgc", "events", "test"));
+            
         }
         
         UpdateKeyboard();
@@ -311,8 +316,6 @@ public class GamePlayer : Game, IGameRunner
         GraphicsDevice.Clear(Color.CornflowerBlue);
         OnDraw?.Invoke(gameTime.ElapsedGameTime);
 
-        // TODO: Add your drawing code here
-        
         RuntimeServices.GameSession.ActiveEcsWorld.Draw(gameTime.ElapsedGameTime);
         Gum.Draw();
         base.Draw(gameTime);

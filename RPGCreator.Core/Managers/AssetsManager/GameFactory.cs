@@ -14,11 +14,11 @@ public class GameFactory : IGameFactory
 {
     private class FactoryStrategy
     {
-        public Func<IAssetDef, object> Create { get; init; } = null!;
-        public Func<IAssetDef, CancellationToken, ValueTask<object>> CreateAsync { get; init; } = null!;
+        public Func<IBaseAssetDef, object> Create { get; init; } = null!;
+        public Func<IBaseAssetDef, CancellationToken, ValueTask<object>> CreateAsync { get; init; } = null!;
         public Action<object> ReleaseInstance { get; init; } = null!;
-        public Action<IAssetDef> Refresh { get; init; } = null!;
-        public Action<IAssetDef> Release { get; init; } = null!;
+        public Action<IBaseAssetDef> Refresh { get; init; } = null!;
+        public Action<IBaseAssetDef> Release { get; init; } = null!;
     }
     
     private readonly Dictionary<Type, FactoryStrategy> _defFactoryStrategies = new();
@@ -46,7 +46,7 @@ public class GameFactory : IGameFactory
     
     public void Register<TInst, TDef>(IAssetFactory<TInst, TDef> factory) 
     where TInst : class
-    where TDef : IAssetDef
+    where TDef : IBaseAssetDef
     {
         var type = typeof(TDef);
         var instType = typeof(TInst);
@@ -71,7 +71,7 @@ public class GameFactory : IGameFactory
 
         _clearActions.Add(factory.Clear);
     }
-    public TInst CreateInstance<TInst>(IAssetDef def) where TInst : class
+    public TInst CreateInstance<TInst>(IBaseAssetDef def) where TInst : class
     {
         if (_defFactoryStrategies.TryGetValue(def.GetType(), out var strategy))
         {
@@ -80,7 +80,7 @@ public class GameFactory : IGameFactory
         throw new InvalidOperationException($"No factory registered for definition type {def.GetType().Name}");
     }
 
-    public async ValueTask<TInst> CreateInstanceAsync<TInst>(IAssetDef def, CancellationToken ct = default) where TInst : class
+    public async ValueTask<TInst> CreateInstanceAsync<TInst>(IBaseAssetDef def, CancellationToken ct = default) where TInst : class
     {
         if (_defFactoryStrategies.TryGetValue(def.GetType(), out var strategy))
         {
@@ -102,7 +102,7 @@ public class GameFactory : IGameFactory
         Log.Warning($"Tried to release instance of type {instance.GetType().Name} but no factory was found.");
     }
 
-    public void Release(IAssetDef def)
+    public void Release(IBaseAssetDef def)
     {
         if (_defFactoryStrategies.TryGetValue(def.GetType(), out var strategy))
         {
@@ -112,7 +112,7 @@ public class GameFactory : IGameFactory
         Log.Warning($"Tried to release asset {def.Unique} but no factory was found.");
     }
 
-    public void Refresh(IAssetDef def)
+    public void Refresh(IBaseAssetDef def)
     {
         if (_defFactoryStrategies.TryGetValue(def.GetType(), out var strategy))
         {

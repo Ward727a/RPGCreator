@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+using Newtonsoft.Json.Linq;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Logging;
@@ -7,18 +9,19 @@ using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Stats;
 
-public abstract class BaseStatDefinition : IStatDef
+public abstract class BaseStatDefinition : BaseAssetDef, IStatDef
 {
-    public string SavePath { get; set; }
+    // Note: We use JsonExtensionData to store any "old" or "extra" data that might be present in the JSON but is not defined in the current version of the class, to avoid losing data when deserializing and re-serializing with a newer version of the class.
+    [JsonExtensionData]
+    public IDictionary<string, JToken> ExtraData { get; set; }
+    public string SavePath { get; set; } = null!;
     public Ulid? PackId { get; set; }
-    public Ulid Unique { get; private set; }
-    public URN Urn { get; private set; }
-    public abstract string Name { get; set; }
-    
+
     public string DisplayName => string.IsNullOrEmpty(Name) ? $"Stat_{Unique}" : Name;
     
     public abstract string Description { get; set; }
     public abstract double DefaultValue { get; set; }
+    
     /// <summary>
     /// Whether the stat can have negative values or not, used to determine if the stat can go below zero or not.
     /// </summary>
@@ -30,22 +33,15 @@ public abstract class BaseStatDefinition : IStatDef
 
     public BaseStatDefinition()
     {
+        SuspendTracking();
         Unique = Ulid.NewUlid();
-        Urn = new URN("entity_stat", $"{Unique}");
-        Name = string.Empty;
+        Name = "New Stat";
         Description = string.Empty;
         DefaultValue = 0d;
         TypeKind = EStatTypeKind.Resource;
         MinValue = 0d;
         CapSettings = new StatCapSettings();
         IsVisible = true;
-    }
-
-    public void Init(Ulid id)
-    {
-        if (Unique != Ulid.Empty) return;
-        Unique = id;
-        Urn = new URN("entity_stat", $"{Unique}");
     }
     
     public IPrattFormula? StatCompiledFormula { get; set; }
@@ -119,7 +115,4 @@ public abstract class BaseStatDefinition : IStatDef
             }
         }
     }
-
-    public bool IsDirty { get; set; }
-    public bool IsTransient { get; set; } = false;
 }

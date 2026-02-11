@@ -52,7 +52,7 @@ public class IntRefListMenu : Grid
         HorizontalAlignment = HorizontalAlignment.Stretch;
         CreateComponents();
         RegisterEvents();
-        UiServices.ExtensionManager.ApplyExtensions(UIRegion.AutoLayerEditorIntRefListMenu, this);
+        EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.AutoLayerEditorIntRefListMenu, this);
     }
     
     private void CreateComponents()
@@ -222,7 +222,7 @@ public class IntRefListCreateModal : Window
             RemoveOnCreateIntRefConfirmed = (handler) => OnCreateIntRefConfirmed -= handler
         };
         
-        UiServices.ExtensionManager.ApplyExtensions(UIRegion.AutoLayerEditorIntRefListCreateModal, this, config);
+        EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.AutoLayerEditorIntRefListCreateModal, this, config);
     }
     
     private void CreateComponents()
@@ -1294,7 +1294,7 @@ public class IntRefListItemControl : UserControl
                 RefreshDisplay = RefreshDisplay,
             };
         
-        UiServices.ExtensionManager.ApplyExtensions(UIRegion.AutoLayerEditorIntRefListItem, this, config);
+        EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.AutoLayerEditorIntRefListItem, this, config);
     }
     
     private void CreateComponents()
@@ -1652,7 +1652,7 @@ public class IntRefListControl : UserControl
             RemoveRemovedIntRef = (handler) => RemovedIntRef -= handler,
         };
         
-        UiServices.ExtensionManager.ApplyExtensions(UIRegion.AutoLayerEditorIntRefList, this, new AutoLayerEditorIntRefListContext(config));
+        EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.AutoLayerEditorIntRefList, this, new AutoLayerEditorIntRefListContext(config));
     }
 
     private void CreateComponents()

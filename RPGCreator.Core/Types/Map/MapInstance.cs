@@ -28,6 +28,7 @@ using RPGCreator.Core.Types.Map.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 
 namespace RPGCreator.Core.Types.Map
 {

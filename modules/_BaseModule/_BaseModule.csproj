@@ -41,4 +41,8 @@
       <PackageReference Include="Irihi.Ursa" Version="1.14.1" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="AssetDefinitions\BaseItems\" />
+    </ItemGroup>
+
 </Project>

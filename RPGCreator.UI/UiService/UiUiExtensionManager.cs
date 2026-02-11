@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using RPGCreator.SDK.Modules.UIModule;
-using RPGCreator.SDK.UiService;
+using RPGCreator.SDK.EditorUiService;
 
 namespace RPGCreator.UI.UiService;
 

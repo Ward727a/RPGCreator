@@ -71,7 +71,7 @@ public struct BufferedEntity(int temporaryId, IEcsCommandBuffer buffer)
     /// <param name="onCreated">The action to execute once the entity is created, receiving the new entity ID.</param>
     public void ExecuteOnceCreated(Action<int> onCreated)
     {
-        onCreated?.Invoke(Id);
+        buffer.ExecuteOnceCreated(Id, onCreated);
     }
 }
 
@@ -122,6 +122,8 @@ public interface IEcsCommandBuffer
     /// If you didn't modify the engine, this should never happen.
     /// </exception>
     void RemoveComponent<T>(int entity) where T : struct, IComponent;
+
+    public void ExecuteOnceCreated(int entityId, Action<int> onCreated);
     
     /// <summary>
     /// Execute all buffered commands on the given ECS world.<br/>

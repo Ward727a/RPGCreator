@@ -87,8 +87,8 @@ namespace RPGCreator.Core.Managers.AssetsManager
         
         #region RegistryHelpers
 
-        public event Action<IAssetDef>? OnAssetRegistered;
-        public event Action<IAssetDef>? OnAssetUnregistered;
+        public event Action<IBaseAssetDef>? OnAssetRegistered;
+        public event Action<IBaseAssetDef>? OnAssetUnregistered;
 
         public void RegisterRegistry(IAssetRegistry registry)
         {
@@ -105,10 +105,11 @@ namespace RPGCreator.Core.Managers.AssetsManager
         public void RegisterAsset(object asset)
         {
             Guard.IsAssignableToType(asset, typeof(IHasUniqueId));
-            Guard.IsAssignableToType(asset, typeof(IAssetDef));
+            Guard.IsAssignableToType(asset, typeof(IBaseAssetDef));
 
             if (asset is IHasUniqueId uniqueIdAsset)
             {
+
                 if(uniqueIdAsset.Unique == Ulid.Empty)
                 {
                     uniqueIdAsset.Init(Ulid.NewUlid());
@@ -120,9 +121,9 @@ namespace RPGCreator.Core.Managers.AssetsManager
             if (TryResolveRegistry(type, out var assetRegistry))
             {
                 assetRegistry.RegisterUntyped((IHasUniqueId)asset, true);
-                Guard.IsAssignableToType(asset, typeof(IAssetDef));
-                OnAssetRegistered?.Invoke((IAssetDef)asset);
-                Logger.Info("Registered asset of type {AssetType} in registry {RegistryName}",  args: [type.FullName, assetRegistry.ModuleName]);
+                Guard.IsAssignableToType(asset, typeof(IBaseAssetDef));
+                OnAssetRegistered?.Invoke((IBaseAssetDef)asset);
+                Logger.Info("Registered asset {unique} ({URN}) of type {AssetType} in registry {RegistryName}",  args: [((IHasUniqueId)asset).Unique, ((IHasUniqueId)asset).Urn, type.FullName, assetRegistry.ModuleName]);
                 return;
             }
             
@@ -135,8 +136,8 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 {
                     Guard.IsAssignableToType(asset, typeof(IHasUniqueId));
                     inheritedRegistry.RegisterUntyped((IHasUniqueId)asset, true);
-                    Guard.IsAssignableToType(asset, typeof(IAssetDef));
-                    OnAssetRegistered?.Invoke((IAssetDef)asset);
+                    Guard.IsAssignableToType(asset, typeof(IBaseAssetDef));
+                    OnAssetRegistered?.Invoke((IBaseAssetDef)asset);
                     Logger.Info("Registered asset of type {AssetType} in registry {RegistryName} with inherited type {inherited}",  args: [type.FullName, inheritedRegistry.ModuleName, inherited.FullName]);
                     return;
                 }
@@ -151,8 +152,8 @@ namespace RPGCreator.Core.Managers.AssetsManager
             if (TryResolveRegistry(type, out var assetRegistry))
             {
                 assetRegistry.UnregisterUntyped((IHasUniqueId)asset);
-                Guard.IsAssignableToType(asset, typeof(IAssetDef));
-                OnAssetUnregistered?.Invoke((IAssetDef)asset);
+                Guard.IsAssignableToType(asset, typeof(IBaseAssetDef));
+                OnAssetUnregistered?.Invoke((IBaseAssetDef)asset);
                 Logger.Info("Unregistered asset of type {AssetType} from registry {RegistryName}", args:[type.FullName, assetRegistry.ModuleName]);
                 return;
             }
@@ -266,6 +267,10 @@ namespace RPGCreator.Core.Managers.AssetsManager
                     }
                 }
             }
+            else
+            {
+                Logger.Error("No registry found for asset type {AssetType} or its direct inherited type.", args: typeof(T).FullName);
+            }
 
             if (_assetLocations.TryGetValue(uniqueId, out AssetLocation location))
             {
@@ -290,7 +295,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             return false;
         }
 
-        public T CreateAsset<T>() where T : IAssetDef, IHasUniqueId, new()
+        public T CreateAsset<T>() where T : IBaseAssetDef, IHasUniqueId, new()
         {
             var newAsset = new T();
             
@@ -298,6 +303,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             newAsset.Init(Ulid.NewUlid());
             
             RegisterAsset(newAsset);
+            newAsset.ResumeTracking();
             
             Logger.Debug("Created asset of type {AssetType} with ID {AssetID}", args:[typeof(T).FullName, newAsset.Unique]);
             
@@ -313,9 +319,9 @@ namespace RPGCreator.Core.Managers.AssetsManager
             return new AssetScope(this, name);
         }
         
-        public T CreateTransientAsset<T>(IAssetScope? scope = null) where T : IAssetDef, new()
+        public T CreateTransientAsset<T>(IAssetScope? scope = null) where T : IBaseAssetDef, new()
         {
-            var typeKey = EngineServices.AssetTypeRegistry.GetKey(typeof(T));
+            var typeKey = RegistryServices.AssetTypeRegistry.GetKey(typeof(T));
             if(typeKey == null)
             {
                 Logger.Error("Cannot create transient asset of type {AssetType} because it is not registered in the AssetTypeRegistry.", args: typeof(T).FullName);
@@ -337,7 +343,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             return newAsset;
         }
 
-        public void DestroyTransientAsset<T>(T asset) where T : IAssetDef
+        public void DestroyTransientAsset<T>(T asset) where T : IBaseAssetDef
         {
             if (!asset.IsTransient)
             {
@@ -349,23 +355,23 @@ namespace RPGCreator.Core.Managers.AssetsManager
             UnregisterAsset(asset);
         }
 
-        public void CommitAsset(IAssetDef asset, string packName, AssetScope? fromScope = null)
+        public void CommitAsset(BaseAssetDef baseAsset, string packName, AssetScope? fromScope = null)
         {
-            if (!asset.IsTransient)
+            if (!baseAsset.IsTransient)
             {
                 Logger.Warning("Attempted to commit a non-transient asset of type {AssetType} with ID {AssetID}",
-                    args: [asset.GetType().FullName, asset.Unique]);
+                    args: [baseAsset.GetType().FullName, baseAsset.Unique]);
                 return;
             }
             
-            fromScope?.Untrack(asset);
+            fromScope?.Untrack(baseAsset);
             
             if (TryGetPack(packName, out var pack))
             {
-                asset.IsTransient = false;
-                pack.AddOrUpdateAsset(asset);
+                baseAsset.IsTransient = false;
+                pack.AddOrUpdateAsset(baseAsset);
                 Logger.Info("Commited transient asset of type {AssetType} with ID {AssetID} to pack {PackName}",
-                    args:[asset.GetType().FullName, asset.Unique, packName]);
+                    args:[baseAsset.GetType().FullName, baseAsset.Unique, packName]);
             }
             else
             {
@@ -384,7 +390,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             if (_assetLocations.TryGetValue(id, out var location))
             {
                 
-                Type? type = EngineServices.AssetTypeRegistry.GetType(location.TypeName);
+                Type? type = RegistryServices.AssetTypeRegistry.GetType(location.TypeName);
                 if(type == null)
                     type = Type.GetType(location.TypeName)!;
                 
@@ -422,7 +428,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
         {
             if (_assetLocations.TryGetValue(id, out var location))
             {
-                Type? type = EngineServices.AssetTypeRegistry.GetType(location.TypeName);
+                Type? type = RegistryServices.AssetTypeRegistry.GetType(location.TypeName);
                 
                 if(type == null)
                     type = Type.GetType(location.TypeName);
@@ -645,7 +651,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             }
         }
         
-        public IEnumerable<T> GetAssetsOfType<T>() where T : class, IAssetDef, IHasUniqueId
+        public IEnumerable<T> GetAssetsOfType<T>() where T : class, IBaseAssetDef, IHasUniqueId
         {
             foreach (var result in SearchAllPacks<T>())
             {
@@ -656,7 +662,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             }
         }
 
-        public IEnumerable<T> GetAssetsOfType<T>(T valueForType) where T : class, IAssetDef, IHasUniqueId
+        public IEnumerable<T> GetAssetsOfType<T>(T valueForType) where T : class, IBaseAssetDef, IHasUniqueId
         {
             return GetAssetsOfType<T>();
         }

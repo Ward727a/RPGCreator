@@ -81,7 +81,7 @@ public class StatsManagement : UserControl
             ApplyFilters = ApplyFilter
         };
         
-        UiServices.ExtensionManager.ApplyExtensions(new UIRegion("BaseModule.StatsManagement"), this, new StatsManagerContext(config));
+        EditorUiServices.ExtensionManager.ApplyExtensions(new UIRegion("BaseModule.StatsManagement"), this, new StatsManagerContext(config));
     }
 
     private void CreateComponents()
@@ -187,7 +187,7 @@ public class StatsManagement : UserControl
     {
         if (_selectedStat == null) return;
 
-        var result = await UiServices.DialogService.ConfirmAsync("Are you sure?",
+        var result = await EditorUiServices.DialogService.ConfirmAsync("Are you sure?",
             $"This will permanently delete the stat definition ({_selectedStat.DisplayName}) and all references to it.\n" +
             $"This action cannot be undone!!!",
             confirmButtonText: "Delete", cancelButtonText: "Cancel");

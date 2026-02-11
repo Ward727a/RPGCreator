@@ -21,8 +21,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Controls;
+using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.UiService;
 
 namespace RPGCreator.UI.Services;
 

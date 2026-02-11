@@ -42,4 +42,6 @@ public class DefaultGameSession : ObservableObject, IGameSession
     }
 
     public bool IsPaused { get; set; } = true;
+
+    public int CurrentPlayerId { get; set; } = -1;
 }

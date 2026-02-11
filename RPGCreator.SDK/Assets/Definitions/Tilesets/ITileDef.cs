@@ -16,7 +16,7 @@ public enum TileFlip
     Both = Horizontal | Vertical
 }
 
-public interface ITileDef : ILayerElem, IAssetDef, ISerializable, IDeserializable
+public interface ITileDef : ILayerElem, ISerializable, IDeserializable
 {
     public Size SizeInTileset { get; }
     public Vector2 PositionInTileset { get; } // Position in the tileset grid (row by column)

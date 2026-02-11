@@ -32,7 +32,7 @@ using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types.Internals;
-using RPGCreator.SDK.UiService;
+using RPGCreator.SDK.EditorUiService;
 using Serilog;
 
 namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
@@ -289,7 +289,7 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
         {
             Id = idAsset.Unique,
             RelativePath = relativePath,
-            TypeName = EngineServices.AssetTypeRegistry.GetKey(asset.GetType()) ?? asset.GetType().FullName ?? "Unknown",
+            TypeName = RegistryServices.AssetTypeRegistry.GetKey(asset.GetType()) ?? asset.GetType().FullName ?? "Unknown",
             LastIndexed = DateTime.UtcNow,
         };
         
@@ -380,7 +380,7 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
                 }
                 catch (Exception ex)
                 {
-                    UiServices.NotificationService.Error("Engine Error!",
+                    EditorUiServices.NotificationService.Error("Engine Error!",
                         $"Failed to delete asset file at path {fullPath}. Please check the file permissions and try again.\nError details (Written into logs!): {ex.Message}");
                     Logger.Error(ex, "[Pack {PackName}] Failed to delete asset file at path {FilePath}.", Name, fullPath);
                 }
@@ -391,7 +391,7 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
             indexCollection.Delete(assetId.ToString());
             Log.Information("[Pack {PackName}] Asset {AssetId} removed from index.", Name, assetId);
         }
-        UiServices.NotificationService.Error("Asset Not Found!", $"No asset with ID {assetId} was found in the pack index. Unable to remove.");
+        EditorUiServices.NotificationService.Error("Asset Not Found!", $"No asset with ID {assetId} was found in the pack index. Unable to remove.");
     }
 
     public IEnumerable<IAssetIndexRecord> SearchIndex(Func<IAssetIndexRecord, bool> predicate)
@@ -423,7 +423,7 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
         
         var validNames = Common.TypeUtil.GetInheritance(type);
         
-        var queries = validNames.Select(name => Query.Contains("TypeName", name));
+        var queries = validNames.Select(name => Query.EQ("TypeName", name));
         if(queries.Count() == 0)
         {
             yield break;

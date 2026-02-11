@@ -10,9 +10,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
-using RPGCreator.SDK.UiService;
 using RPGCreator.UI.Common.Modal.Browser;
 using Ursa.Controls;
 
@@ -39,7 +39,7 @@ public partial class EntitiesPanelControl : UserControl
     {
         CreateComponents();
         RegisterEvents();
-        UiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelEntitiesPanel, this, MainBody);
+        EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelEntitiesPanel, this, MainBody);
     }
     
     private void CreateComponents()
@@ -118,7 +118,7 @@ public partial class EntitiesPanelControl : UserControl
     {
         var entityBrowser = new EntitiesBrowser();
 
-        var result = await UiServices.DialogService.ConfirmAsync("Select Entity", entityBrowser,
+        var result = await EditorUiServices.DialogService.ConfirmAsync("Select Entity", entityBrowser,
             new DialogStyle((128 + 50) * 3, (128 + 50) * 3 + 100, SizeToContent: DialogSizeToContent.WidthOnly));
 
         if (result && entityBrowser.SelectedEntityDefinition != null)

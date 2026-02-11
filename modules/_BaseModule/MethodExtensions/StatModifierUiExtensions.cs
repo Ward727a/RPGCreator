@@ -22,7 +22,7 @@ using _BaseModule.AssetDefinitions.BaseStats;
 using _BaseModule.UI.StatsModifier;
 using Avalonia.Controls;
 using RPGCreator.SDK;
-using RPGCreator.SDK.UiService;
+using RPGCreator.SDK.EditorUiService;
 using RPGCreator.UI.Common;
 using Ursa.Controls;
 
@@ -110,7 +110,7 @@ public class StatModifierEditorContext
 
 public static class StatModifierUiExtensions
 {
-    private static IUiExtensionManager Manager => UiServices.ExtensionManager;
+    private static IUiExtensionManager Manager => EditorUiServices.ExtensionManager;
 
     public static AssetManagerScope StatModifierEditor(
         this AssetManagerScope context, Action<StatModifierEditor, StatModifierEditorContext> callBack)

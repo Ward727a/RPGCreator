@@ -9,7 +9,7 @@ using Size = RPGCreator.SDK.Types.Size;
 namespace RPGCreator.SDK.Assets.Definitions.Maps;
 
 [SerializingType("Map")]
-public class MapDefinition : IMapDef
+public class MapDefinition : BaseAssetDef, IMapDef
 {
     private readonly List<IMapDef> _mapDefs = new List<IMapDef>();
     [JsonProperty(ItemTypeNameHandling = TypeNameHandling.All)]
@@ -19,9 +19,7 @@ public class MapDefinition : IMapDef
     public event Action<BaseLayerDef>? TileLayerAdded;
     public event Action<BaseLayerDef>? TileLayerRemoved;
     
-    public Ulid Unique { get; private set; }
-    public URN Urn => new URN("maps", $"{Name}@{Unique}");
-    public string Name { get; set; }
+    public override UrnSingleModule UrnModule => "maps".ToUrnSingleModule();
     public string Description { get; set; }
     public IReadOnlyList<IMapDef> MapDefs => _mapDefs;
     
@@ -39,6 +37,7 @@ public class MapDefinition : IMapDef
     
     public MapDefinition()
     {
+        SuspendTracking();
         Unique = Ulid.NewUlid();
         Name = "New Map";
         Description = "";
@@ -51,12 +50,6 @@ public class MapDefinition : IMapDef
         Description = mapDescription;
     }
 
-    public void Init(Ulid id)
-    {
-        if (Unique != Ulid.Empty) return;
-        Unique = id;
-    }
-    
     public bool AddMap(IMapDef mapDef)
     {
         if (mapDef == null || _mapDefs.Contains(mapDef))
@@ -146,7 +139,5 @@ public class MapDefinition : IMapDef
         BackgroundColor = backgroundColor;
     }
 
-    public bool IsDirty { get; set; }
-    public bool IsTransient { get; set; } = false;
     public string SavePath { get; set; }
 }

@@ -4,10 +4,10 @@ using _BaseModule.Features.Game;
 using _BaseModule.MacroFeatures;
 using _BaseModule.Registry;
 using RPGCreator.SDK;
+using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules;
 using RPGCreator.SDK.Types;
-using RPGCreator.SDK.UiService;
 
 [assembly: ModuleManifest(
     urn: "rpgc://module/base_module",
@@ -51,7 +51,7 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
         // We start by scanning the assembly for assets types, so we, and the engine more generally, can be aware of all the custom assets provided by this module, such as the stats definitions.
         // This is VERY important if you have any custom type of asset that need to be serialized, or deserialized (saved or loaded) in any way.
         // Without scanning the assembly, the engine won't be aware of these assets and won't be able to handle them properly.
-        EngineServices.AssetTypeRegistry.ScanAssembly(asm);
+        RegistryServices.AssetTypeRegistry.ScanAssembly(asm);
         
         // We register the registry for the stats modifiers, which is used to store all the modifiers that can be applied to stats, such as buffs and debuffs.
         // This registry is then used by the StatsFeature to apply the modifiers to the stats of the entities.
@@ -62,6 +62,9 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
         EngineServices.FeaturesManager.RegisterEntityFeature<AnimationFeature>();
         EngineServices.FeaturesManager.RegisterEntityFeature<StatsFeature>();
         EngineServices.FeaturesManager.RegisterEntityFeature<StatsModifierFeature>();
+        EngineServices.FeaturesManager.RegisterEntityFeature<PlayerTagFeature>();
+        EngineServices.FeaturesManager.RegisterEntityFeature<SignalsFeature>();
+        EngineServices.FeaturesManager.RegisterEntityFeature<AccessorFeature>();
         EngineServices.FeaturesManager.RegisterEntityFeature<LivingBeingMacroFeature>();
         EngineServices.FeaturesManager.RegisterGameFeature<StandardControlFeature>();
         
@@ -69,7 +72,7 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
         // We are doing that here, simply to allow us to 'order' the menu option in a specific way.
         // If we were to add another button like 'Items' we could want it to be before 'Stats' for example, so we would add it here before the 'Stats' button.
         
-        UiServices.OnceServiceReady((IDocService docService) =>
+        EditorUiServices.OnceServiceReady((IDocService docService) =>
         {
             var assembly = Assembly.GetExecutingAssembly();
             Logger.Info("Embedded resources in assembly: {0}", args: assembly.FullName);
@@ -93,7 +96,7 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
             }
         });
         
-        UiServices.OnceServiceReady((IUiExtensionManager extensionManager) =>
+        EditorUiServices.OnceServiceReady((IUiExtensionManager extensionManager) =>
         {
             BaseModuleUi.Register(extensionManager);
         });

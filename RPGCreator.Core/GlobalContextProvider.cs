@@ -28,7 +28,7 @@ public class GlobalContextProvider : IGlobalContextProvider
 {
     private readonly ConcurrentDictionary<URN, Func<object>> _providers = new();
 
-    public UrnSingleModule ModuleForContext => "global_context".CreateUrnSingleModule();
+    public UrnSingleModule ModuleForContext => "global_context".ToUrnSingleModule();
 
     public void RegisterProvider(URN key, Func<object> resolver)
     {

@@ -7,6 +7,7 @@ using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 
@@ -267,4 +268,5 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
 public class TileLayerDefinition : LayerWithElements<ITileDef>
 {
     protected override LayerChunk<ITileDef> CreateChunkInstance() => new TileLayerChunk();
+    public override UrnSingleModule UrnModule => "tile_layer".ToUrnSingleModule();
 }

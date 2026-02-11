@@ -13,14 +13,9 @@ namespace RPGCreator.SDK.ECS;
 ///
 /// This should be used to create an IEntity instance via an EntityFactory.
 /// </summary>
-public interface IEntityDefinition : IAssetDef
+public interface IEntityDefinition : IBaseAssetDef
 {
-    public string Name { get; set; }
-    
     public string SpritePath { get; }
-    
-    public Ulid Unique { get; protected set; }
-    public URN Urn => new("entity", Unique.ToString());
     
     public CustomData Properties { get; }
     public ObservableCollection<EntityFeatureData> Features { get; }

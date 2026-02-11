@@ -40,7 +40,7 @@ public class SetOptionItem : UserControl
         if (_previewImage != null)
             _previewImage.Source = EngineServices.ResourcesService.Load<Bitmap>(definition.ImagePath);
         Content = _body;
-        UiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelTilingPanelTilesetItem, this);
+        EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelTilingPanelTilesetItem, this);
     }
     
     private void CreateComponents()
@@ -159,7 +159,7 @@ public class TilingPanelControl : UserControl
         CreateComponents();
         RegisterEvents();
         Content = _body;
-        UiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelTilingPanel, this);
+        EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelTilingPanel, this);
     }
     
     private void CreateComponents()

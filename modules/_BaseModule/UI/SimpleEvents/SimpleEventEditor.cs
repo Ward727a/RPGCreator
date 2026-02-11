@@ -189,9 +189,9 @@ public class SimpleEventEntry : UserControl
                     return;
                 }
 
-                if (obj.GetType().IsAssignableTo(typeof(IAssetDef)))
+                if (obj.GetType().IsAssignableTo(typeof(BaseAssetDef)))
                 {
-                    CurrentParameters.Set(prop.Key, (obj as IAssetDef)?.Unique ?? Ulid.Empty);
+                    CurrentParameters.Set(prop.Key, (obj as BaseAssetDef)?.Unique ?? Ulid.Empty);
                     ShowEdit();
                     return;
                 }

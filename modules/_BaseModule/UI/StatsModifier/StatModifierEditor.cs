@@ -174,7 +174,7 @@ public class StatModifierEditor : UserControl
             GetStatModifier = () => _definition
         };
         
-        UiServices.ExtensionManager.ApplyExtensions(new UIRegion("BaseModule.StatModifierEditor"), this, new StatModifierEditorContext(config));
+        EditorUiServices.ExtensionManager.ApplyExtensions(new UIRegion("BaseModule.StatModifierEditor"), this, new StatModifierEditorContext(config));
     }
 
     private void CreateComponents()
@@ -447,7 +447,7 @@ public class StatModifierEditor : UserControl
     private async void OnSelectStat(object? sender, RoutedEventArgs e)
     {
         var stats = EngineServices.AssetsManager.GetAssetsOfType<BaseStatDefinition>();
-        var selectedStat = await UiServices.DialogService.ShowSelectAsync(
+        var selectedStat = await EditorUiServices.DialogService.ShowSelectAsync(
             "Select stat",
             "Select the stat to which this modifier will be applied.",
             stats,

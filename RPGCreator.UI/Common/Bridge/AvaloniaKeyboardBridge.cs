@@ -5,6 +5,7 @@ using Avalonia.Input;
 using AvaloniaInside.MonoGame;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Inputs;
+using RPGCreator.UI.Test;
 
 namespace RPGCreator.UI.Common.Bridge;
 
@@ -48,7 +49,7 @@ public class AvaloniaKeyboardBridge
         
         EngineProviders.KeyboardProvider?.Update(raw);
         
-        if (control is MonoGameControl)
+        if (control is MonoGameControlTest)
         {
             EngineProviders.KeyboardProvider?.UpdateViewport(raw);
         }

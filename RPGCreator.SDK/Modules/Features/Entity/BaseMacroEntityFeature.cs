@@ -142,6 +142,17 @@ public abstract class BaseMacroEntityFeature : BaseEntityFeature
         _featureToIndex.Add(feature.FeatureUrn, index);
     }
 
+    public void UnregisterSubFeature(URN featureUrn)
+    {
+        if (!_featureToIndex.TryGetValue(featureUrn, out var index))
+            throw new KeyNotFoundException($"The feature URN '{featureUrn}' is not registered as a required feature in the macro feature '{FeatureUrn}'.");
+
+        var feature = _requiredFeatures[index];
+        _featureData.Remove(feature);
+        _requiredFeatures.Remove(index);
+        _featureToIndex.Remove(featureUrn);
+    }
+    
     public IEntityFeature GetRequiredFeature(URN featureUrn)
     {
         if (!_featureToIndex.TryGetValue(featureUrn, out var index))
@@ -243,12 +254,6 @@ public abstract class BaseMacroEntityFeature : BaseEntityFeature
 
     public override void OnInject(BufferedEntity entity, IEntityDefinition entityDefinition)
     {
-        foreach (var feature in _requiredFeatures.Values)
-        {
-            feature.SetConfiguration(_featureData[feature], new EngineSecurityToken());
-            feature.OnInject(entity, entityDefinition);
-            _activeFeatures.Add(feature);
-        }
         entity.AddComponent(new CharStateComponent
         {
             AnimationsMapping = entityDefinition.AnimationsMapping

@@ -53,7 +53,7 @@ public class EntitiesBrowser : UserControl
         CreateComponents();
         RegisterEvents();
 
-        UiServices.ExtensionManager.ApplyExtensions(UIRegion.EntitiesBrowser, this);
+        EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.EntitiesBrowser, this);
     }
 
     private void CreateComponents()
@@ -189,7 +189,7 @@ public class EntityBrowserItem : UserControl
             GetItemName = () => ItemName,
         };
         
-        UiServices.ExtensionManager.ApplyExtensions(UIRegion.EntitiesBrowserItem, this, new EntitiesBrowserItemContext(config));
+        EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.EntitiesBrowserItem, this, new EntitiesBrowserItemContext(config));
     }
 
     private void CreateComponents()

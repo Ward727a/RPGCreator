@@ -27,18 +27,18 @@ public interface IGameFactory : IService
 {
     public void Register<TInst, TDef>(IAssetFactory<TInst, TDef> factory)
         where TInst : class
-        where TDef : IAssetDef;
+        where TDef : IBaseAssetDef;
 
-    public TInst CreateInstance<TInst>(IAssetDef def) where TInst : class;
+    public TInst CreateInstance<TInst>(IBaseAssetDef def) where TInst : class;
 
-    public ValueTask<TInst> CreateInstanceAsync<TInst>(IAssetDef def, CancellationToken ct = default)
+    public ValueTask<TInst> CreateInstanceAsync<TInst>(IBaseAssetDef def, CancellationToken ct = default)
         where TInst : class;
 
     public void ReleaseInstance<TInst>(TInst instance) where TInst : class;
 
-    public void Release(IAssetDef def);
+    public void Release(IBaseAssetDef def);
     
-    public void Refresh(IAssetDef def);
+    public void Refresh(IBaseAssetDef def);
 
     public void ClearAll();
 }

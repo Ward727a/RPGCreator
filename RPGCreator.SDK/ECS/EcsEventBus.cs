@@ -62,6 +62,10 @@ public class BaseSubscriber : IEcsSubscriber, IDisposable
         Priority = priority;
         _onEvent = onEvent;
         _onUnsubscribe = onUnsubscribe;
+    }
+    
+    public virtual void Subscribe()
+    {
         RuntimeServices.GameSession.ActiveEcsWorld?.EventBus.Subscribe(this);
     }
     

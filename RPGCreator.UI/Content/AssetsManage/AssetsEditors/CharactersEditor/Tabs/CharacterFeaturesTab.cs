@@ -13,12 +13,12 @@ using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Commands;
+using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types;
-using RPGCreator.SDK.UiService;
 using RPGCreator.UI.Common.Modal.Browser;
 using RPGCreator.UI.Contexts;
 using Ursa.Controls;
@@ -197,7 +197,7 @@ public class CharacterFeaturesTab : UserControl
             Logger.Debug("Add Feature button clicked");
 
             var dialog = new FeatureLibraryExplorerDialog();
-            var result = await UiServices.DialogService.ConfirmAsync("Add Feature", dialog, new DialogStyle(Height: 450, Width:500, CanResize: true, SizeToContent:DialogSizeToContent.None));
+            var result = await EditorUiServices.DialogService.ConfirmAsync("Add Feature", dialog, new DialogStyle(Height: 450, Width:500, CanResize: true, SizeToContent:DialogSizeToContent.None));
 
             if (result && dialog.HasFeature)
             {
@@ -242,7 +242,7 @@ public class CharacterFeaturesTab : UserControl
                 {
                     Logger.Warning("Feature {feature} is missing dependency {dependency}", entityFeature.FeatureUrn, dependency);
                     // Here you could also notify the user via UI
-                    UiServices.NotificationService.Error("Feature Dependency Missing", 
+                    EditorUiServices.NotificationService.Error("Feature Dependency Missing", 
                         $"The feature '{entityFeature.FeatureName}' is missing the required dependency feature '{dependency}'.", new NotificationOptions(30000));
                 }
             }
@@ -304,7 +304,7 @@ public class FeatureItemControl : UserControl
         
         context = new CharacterFeaturesEditorFeatureItemContext(config);
         
-        UiServices.ExtensionManager.ApplyExtensions(UIRegion.CharacterFeaturesEditorFeatureItem, this, new CharacterFeaturesEditorFeatureItemContext(config));
+        EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.CharacterFeaturesEditorFeatureItem, this, new CharacterFeaturesEditorFeatureItemContext(config));
     }
 
     private void CreateComponents()

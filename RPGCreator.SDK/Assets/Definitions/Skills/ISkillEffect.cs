@@ -5,7 +5,7 @@ namespace RPGCreator.SDK.Assets.Definitions.Skills;
 /// <summary>
 /// Native C# implementation of a skill effect.
 /// </summary>
-public interface ISkillEffect : IAssetDef, ICloneable
+public interface ISkillEffect : IBaseAssetDef, ICloneable
 {
     public string DisplayName { get; }
     /// <summary>

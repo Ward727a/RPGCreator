@@ -8,9 +8,6 @@ namespace RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 [SerializingType("IntGridTileset")]
 public class IntGridTilesetDef : BaseTilesetDef, IAutotileDef
 {
-    public override Ulid Unique { get; protected set; } = Ulid.NewUlid();
-    public override URN Urn => new URN("tileset", $"{Name}@{Unique}");
-
     public List<IntGridValueRef> IntRefs { get; set; } = new();
     public List<AutoLayerRule> Rules { get; set; } = new();
     
@@ -30,4 +27,6 @@ public class IntGridTilesetDef : BaseTilesetDef, IAutotileDef
         info.TryGetValue("IntRefs", out List<IntGridValueRef> intRefs);
         IntRefs = intRefs ?? new();
     }
+
+    public override UrnSingleModule UrnModule => "int_grid_tileset".ToUrnSingleModule();
 }

@@ -429,9 +429,9 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
             Console.WriteLine("Root tileset canvas position reset.");
         }
 
-        private void OnAssetChanges(IAssetDef newAssetDef)
+        private void OnAssetChanges(IBaseAssetDef newBaseAssetDef)
         {
-            if(newAssetDef is TilesetDef)
+            if(newBaseAssetDef is TilesetDef)
                 RefreshComponent();
         }
 

@@ -13,7 +13,7 @@ public class NonePanelControl : UserControl
     {
         CreateComponents();
         Content = textBlock;
-        UiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelNonePanel, this);
+        EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelNonePanel, this);
     }
 
     private void CreateComponents()

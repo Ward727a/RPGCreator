@@ -30,8 +30,8 @@ namespace RPGCreator.SDK.EngineService;
 
 public interface IAssetsManager : IService
 {
-    event Action<IAssetDef>? OnAssetRegistered;
-    event Action<IAssetDef>? OnAssetUnregistered;
+    event Action<IBaseAssetDef>? OnAssetRegistered;
+    event Action<IBaseAssetDef>? OnAssetUnregistered;
     public void RegisterRegistry(IAssetRegistry registry);
     public void RegisterAsset(object asset);
     public bool TryResolveRegistry<T>(string moduleName, [NotNullWhen(true)] out T? registry) where T : IAssetRegistry;
@@ -40,9 +40,9 @@ public interface IAssetsManager : IService
     public bool TryResolveRegistry(System.Type type, [NotNullWhen(true)] out IAssetRegistry? registry);
     public bool TryResolveAsset<T>(URN urn, [NotNullWhen(true)] out T? result) where T : class, IHasUniqueId;
     public bool TryResolveAsset<T>(Ulid uniqueId, [NotNullWhen(true)] out T? result) where T : class, IHasUniqueId;
-    public T CreateAsset<T>() where T : IAssetDef, IHasUniqueId, new();
-    public T CreateTransientAsset<T>(IAssetScope? scope = null) where T : IAssetDef, new();
-    public void DestroyTransientAsset<T>(T asset) where T : IAssetDef;
+    public T CreateAsset<T>() where T : IBaseAssetDef, IHasUniqueId, new();
+    public T CreateTransientAsset<T>(IAssetScope? scope = null) where T : IBaseAssetDef, new();
+    public void DestroyTransientAsset<T>(T asset) where T : IBaseAssetDef;
     public IAssetScope CreateAssetScope(string? name = null);
     public void AddPack(string dbPath);
     public void RegisterPack(IAssetsPack pack);
@@ -54,6 +54,6 @@ public interface IAssetsManager : IService
     public void AddNewAssetLocation(Ulid assetId, IAssetsPack? pack, string relativePath, string typeName, bool isTransient = false);
     public List<IAssetsPack> GetLoadedPacks();
     public IEnumerable<PackSearchResult> SearchAllPacks<T>();
-    public IEnumerable<T> GetAssetsOfType<T>() where T : class, IAssetDef, IHasUniqueId;
-    public IEnumerable<T> GetAssetsOfType<T>(T valueForType) where T : class, IAssetDef, IHasUniqueId;
+    public IEnumerable<T> GetAssetsOfType<T>() where T : class, IBaseAssetDef, IHasUniqueId;
+    public IEnumerable<T> GetAssetsOfType<T>(T valueForType) where T : class, IBaseAssetDef, IHasUniqueId;
 }

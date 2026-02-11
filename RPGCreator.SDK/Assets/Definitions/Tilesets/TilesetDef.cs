@@ -8,8 +8,6 @@ namespace RPGCreator.SDK.Assets.Definitions.Tilesets;
 [SerializingType("Tileset")]
 public sealed class TilesetDef : BaseTilesetDef
 {
-    public override URN Urn => new URN("tileset", $"{Name}@{Unique}");
-
     public TilesetDef()
     {
     }
@@ -18,7 +16,6 @@ public sealed class TilesetDef : BaseTilesetDef
     {
         Unique = Ulid.NewUlid();
         Name = name;
-        Urn = new URN("tileset" , $"{name}@{Unique}");
         ImagePath = imagePath;
         TileWidth = tileWidth;
         TileHeight = tileHeight;
@@ -30,7 +27,6 @@ public sealed class TilesetDef : BaseTilesetDef
 
         info.AddValue(nameof(Unique), Unique)
             .AddValue(nameof(Name), Name)
-            .AddValue(nameof(Urn), Urn)
             .AddValue(nameof(ImagePath), ImagePath)
             .AddValue(nameof(TileWidth), TileWidth)
             .AddValue(nameof(TileHeight), TileHeight);
@@ -47,18 +43,12 @@ public sealed class TilesetDef : BaseTilesetDef
 
         info.TryGetValue(nameof(Unique), out Ulid unique, Ulid.Empty);
         info.TryGetValue(nameof(Name), out string name, string.Empty);
-        info.TryGetValue(nameof(Urn), out URN urn, URN.Empty);
         info.TryGetValue("ImagePath", out string imagePath, string.Empty);
         info.TryGetValue("TileWidth", out int tileWidth, 32);
         info.TryGetValue("TileHeight", out int tileHeight, 32);
 
         Unique = unique;
         Name = name;
-        Urn = urn;
-        if (Urn == URN.Empty)
-        {
-            Urn = new URN("tileset" , $"{name}@{Unique}");
-        }
         ImagePath = imagePath;
         TileWidth = tileWidth;
         TileHeight = tileHeight;
@@ -66,4 +56,5 @@ public sealed class TilesetDef : BaseTilesetDef
         Logger.Debug("[TilesetDef] SetObjectData ({0}, {1})", Unique, Name);
     }
 
+    public override UrnSingleModule UrnModule => "tileset".ToUrnSingleModule();
 }

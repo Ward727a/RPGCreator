@@ -575,7 +575,7 @@ public class SkillEffectTab : UserControl
             {
                 if (selectedItem.Tag is URN selectedUrn)
                 {
-                    SkillDef.EffectsURN.Add(selectedUrn);
+                    SkillDef.EffectsUrn.Add(selectedUrn);
                     AddEffect(selectedUrn);
                 }
             }

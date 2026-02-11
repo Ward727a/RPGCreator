@@ -26,8 +26,8 @@ namespace RPGCreator.SDK.EngineService;
 
 public interface ISimpleEventRegistry : IService
 {
-    public static UrnSingleModule ConditionModule => "simple_events_conditions".CreateUrnSingleModule();
-    public static UrnSingleModule ActionModule => "simple_events_actions".CreateUrnSingleModule();
+    public static UrnSingleModule ConditionModule => "simple_events_conditions".ToUrnSingleModule();
+    public static UrnSingleModule ActionModule => "simple_events_actions".ToUrnSingleModule();
     
     public bool RegisterSimpleEventCondition(BaseSimpleEventCondition condition, bool overwriteIfExists = false);
     public bool RegisterSimpleEventAction(BaseSimpleEventAction action, bool overwriteIfExists = false);

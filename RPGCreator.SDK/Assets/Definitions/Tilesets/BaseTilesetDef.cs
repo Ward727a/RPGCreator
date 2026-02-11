@@ -8,36 +8,21 @@ using RPGCreator.SDK.Types.Internals;
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets;
 
 [SerializingType("BaseTilesetDef")]
-public abstract class BaseTilesetDef : ISerializable, IDeserializable, IAssetDef, IHasSavePath
+public abstract class BaseTilesetDef : BaseAssetDef, ISerializable, IDeserializable, IHasSavePath
 {
     
     public event Action? ImageChanged;
-
-    public virtual Ulid Unique { get; protected set; }
-    public virtual URN Urn { get; protected set; }
-    
-    public virtual bool IsDirty { get; set; }
-    public virtual bool IsTransient { get; set; }
-    public string SavePath { get; set; }
+    public string SavePath { get; set; } = null!;
 
     public string PackName { get; set; } = "";
-    public virtual IAssetsPack Pack { get; set; }
-    public virtual string ImagePath { get; set; }
-    public virtual string Name { get; set; }
+    public virtual IAssetsPack Pack { get; set; } = null!;
+    public virtual string ImagePath { get; set; } = null!;
     public virtual int ImageWidth { get; set; }
     public virtual int ImageHeight { get; set; }
     public virtual int TileWidth { get; set; }
     public virtual int TileHeight { get; set; }
     
     public RuntimeBag Tags { get; } = new RuntimeBag();
-    
-
-    
-    public void Init(Ulid id)
-    {
-        if (Unique != Ulid.Empty) return;
-        Unique = id;
-    }
     
     public virtual SerializationInfo GetObjectData()
     {

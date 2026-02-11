@@ -25,8 +25,8 @@ using Avalonia.Input;
 using CommunityToolkit.Diagnostics;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.UiService;
 
 namespace RPGCreator.UI.Content.Editor.Tabs;
 public class MapItem : StackPanel
@@ -197,7 +197,7 @@ public class MapItem : StackPanel
     
     private void OnRightPressed()
     {
-        UiServices.MenuService.OpenContextMenu(this, [
+        EditorUiServices.MenuService.OpenContextMenu(this, [
             new MenuAction("Open Map in Editor", OnOpenMap),
             new MenuAction("Add Level", OnAddLevel),
             new MenuAction("Rename Map", OnRenameMap),
@@ -225,7 +225,7 @@ public class MapItem : StackPanel
     private void OnAddLevel()
     {
         
-        UiServices.DialogService.PromptTextAsync("Add Level", "Enter the name of the new level:", "Level Name")
+        EditorUiServices.DialogService.PromptTextAsync("Add Level", "Enter the name of the new level:", "Level Name")
             .ContinueWith(task =>
             {
                 if (task.IsCompletedSuccessfully)
@@ -321,7 +321,7 @@ public class MapItem : StackPanel
     {
         try
         {
-            var confirmed = await UiServices.DialogService.ConfirmAsync("Remove Map",
+            var confirmed = await EditorUiServices.DialogService.ConfirmAsync("Remove Map",
                 $"Are you sure you want to remove this map ({MapName})?");
         
             if(confirmed)
@@ -336,7 +336,7 @@ public class MapItem : StackPanel
         catch (Exception e)
         {
             Logger.Error(e, "Error while trying to remove map: {MapName}", args: MapName);
-            await UiServices.DialogService.ShowErrorAsync("Error", $"An error occurred while trying to remove the map:\n{e.Message}");
+            await EditorUiServices.DialogService.ShowErrorAsync("Error", $"An error occurred while trying to remove the map:\n{e.Message}");
         }
     }
     private void OnRenameMap()

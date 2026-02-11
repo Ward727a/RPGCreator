@@ -143,7 +143,7 @@ public record UrnSingleModule(ReadOnlyMemory<char> Module);
 
 public static class UrnExtensions
 {
-    public static UrnNamespace CreateUrnNamespace(this string @namespace)
+    public static UrnNamespace ToUrnNamespace(this string @namespace)
     {
         if  (string.IsNullOrWhiteSpace(@namespace))  
         {
@@ -154,7 +154,7 @@ public static class UrnExtensions
         return new UrnNamespace(@namespace.AsMemory().Trim());
     }
     
-    public static UrnSingleModule CreateUrnSingleModule(this string module)
+    public static UrnSingleModule ToUrnSingleModule(this string module)
     {
         if (string.IsNullOrWhiteSpace(module))
         {
@@ -165,7 +165,7 @@ public static class UrnExtensions
         return new UrnSingleModule(module.AsMemory().Trim());
     }
 
-    public static UrnModule CreateUrnModule(this UrnSingleModule singleModule, string @namespace)
+    public static UrnModule ToUrnModule(this UrnSingleModule singleModule, string @namespace)
     {
         if (string.IsNullOrWhiteSpace(@namespace))
         {
@@ -176,7 +176,7 @@ public static class UrnExtensions
         return new UrnModule(new UrnNamespace(@namespace.AsMemory().Trim()), singleModule.Module);
     }
 
-    public static UrnModule CreateUrnModule(this UrnNamespace @namespace, string module)
+    public static UrnModule ToUrnModule(this UrnNamespace @namespace, string module)
     {
         if (string.IsNullOrWhiteSpace(module))
         {
@@ -187,7 +187,18 @@ public static class UrnExtensions
         return new UrnModule(@namespace, module.AsMemory().Trim());
     }
 
-    public static UrnName CreateUrnName(this UrnModule module, string name)
+    public static UrnModule ToUrnModule(this UrnNamespace @namespace, UrnSingleModule singleModule)
+    {
+        if (singleModule.Module.Span.IsWhiteSpace() || singleModule.Module.IsEmpty)
+        {
+            Logger.Error("Module cannot be empty.");
+            return new UrnModule(@namespace, ReadOnlyMemory<char>.Empty);
+        }
+        
+        return new UrnModule(@namespace, singleModule.Module);
+    }
+
+    public static UrnName ToUrnName(this UrnModule module, string name)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -200,12 +211,12 @@ public static class UrnExtensions
     public static UrnModule ToUrnModule(this UrnName name) => name.Module;
     public static UrnNamespace ToUrnNamespace(this UrnModule module) => module.Ns;
     public static UrnNamespace ToUrnNamespace(this UrnName name) => name.Module.Ns;
-    public static UrnModule CreateUrn(this UrnName name, out URN urn)
+    public static UrnModule ToUrn(this UrnName name, out URN urn)
     {
         urn = new URN(name.Module.Ns.Namespace, name.Module.Module, name.Name);
         return name.Module;
     }
-    public static UrnModule CreateUrn(this UrnModule module, string name, out URN urn)
+    public static UrnModule ToUrn(this UrnModule module, string name, out URN urn)
     {
         if(string.IsNullOrWhiteSpace(name))
         {

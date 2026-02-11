@@ -8,44 +8,35 @@ using RPGCreator.SDK.Types;
 namespace RPGCreator.SDK.Assets.Definitions.Skills;
 
 [SerializingType("SkillDef")]
-public class SkillDef : ISkillDef
+public class SkillDef : BaseAssetDef, ISkillDef
 {
     public string SavePath { get; set; }
-    public Ulid Unique { get; private set; }
-    public URN Urn { get; private set; }
+    public override UrnSingleModule UrnModule => "skill".ToUrnSingleModule();
     public Ulid? PackId { get; set; }
-    public string Name { get; private set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string IconPath { get; set; } = string.Empty;
     public Dictionary<IStatDef, float> Cost { get; set; } = new();
     public float Cooldown { get; set; }
     public ESkillTargetType TargetType { get; set; }
     public float Range { get; set; }
-    public List<URN> EffectsURN { get; set; } = new();
+    public List<URN> EffectsUrn { get; set; } = new();
     public IPrattFormula? SkillScalingFormula { get; set; }
     public string SkillNonCompiledFormula { get; set; } = string.Empty;
     
     public SkillDef()
     {
+        SuspendTracking();
     }
 
     public SkillDef(string name) : this()
     {
         Unique = Ulid.NewUlid();
         Name = name;
-        Urn = new URN("skill", $"{Name}@{Unique}");
-    }
-
-    public void Init(Ulid id)
-    {
-        if (Unique != Ulid.Empty) return;
-        Unique = id;
     }
     
     public void SetName(string name)
     {
         Name = name;
-        Urn = new URN("skill", $"{Name}@{Unique}");
     }
 
     public SerializationInfo GetObjectData()
@@ -58,12 +49,6 @@ public class SkillDef : ISkillDef
         info.AddValue("Description", Description);
         info.AddValue("IconPath", IconPath);
         
-        var costDict = new Dictionary<string, float>();
-        foreach (var (stat, amount) in Cost)
-        {
-            costDict[stat.Urn.ToString()] = amount;
-        }
-        info.AddValue("Cost", costDict);
         info.AddValue("Cooldown", Cooldown);
         info.AddValue("TargetType", (int)TargetType);
         info.AddValue("Range", Range);
@@ -108,14 +93,6 @@ public class SkillDef : ISkillDef
             Cost.Clear();
             foreach (var (statUrnStr, amount) in costDict)
             {
-                var statUrn = URN.Parse(statUrnStr);
-                if(EngineServices.AssetsManager.TryResolveAsset(statUrn, out IStatDef? resolvedStatDef))
-                {
-                    Cost[resolvedStatDef] = amount;
-                } else
-                {
-                    Logger.Warning("[SkillDef] Failed to resolve StatDef for Cost with URN: " + statUrnStr);
-                }
             }
         }
         info.TryGetValue("Cooldown", out float cooldown);
@@ -134,7 +111,6 @@ public class SkillDef : ISkillDef
                 SkillScalingFormula = compiledFormula;
             }
         }
-        Urn = new URN("skill", $"{Name}@{Unique}");
     }
 
     public bool IsDirty { get; set; }

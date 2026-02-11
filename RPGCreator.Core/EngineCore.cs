@@ -32,6 +32,7 @@ using RPGCreator.Core.Inputs.Mouse;
 using RPGCreator.Core.Module;
 using RPGCreator.Core.Parser.Graph;
 using RPGCreator.Core.Parser.PRATT;
+using RPGCreator.Core.Registry;
 using RPGCreator.Core.Scheduler;
 using RPGCreator.Core.Types.Editor.Context;
 using RPGCreator.Core.Types.Map.Layers.AutoLayer;
@@ -120,15 +121,16 @@ namespace RPGCreator.Core
             
             typeMapping.ScanAllEngineAssemblies();
             
-            EngineServices.AssetTypeRegistry = typeMapping;
+            RegistryServices.AssetTypeRegistry = typeMapping;
             
             EngineResourcesService resService = new EngineResourcesService();
             
             EngineServices.ResourcesService = resService;
-            EngineServices.SimpleEventRegistry = new EngineSimpleEventRegistry();
-            EngineServices.EventsRegisterService = new EngineEventsRegister();
+            RegistryServices.SimpleEventRegistry = new EngineSimpleEventRegistry();
+            RegistryServices.EventsRegisterService = new EngineEventsRegister();
             EngineServices.GlobalContextProvider = new GlobalContextProvider();
-            EngineServices.SignalRegistry = new EngineSignalRegistry();
+            RegistryServices.SignalRegistry = new EngineSignalRegistry();
+            RegistryServices.UrnRegistry = new UrnRegistry();
             
             Instance = this;
 

@@ -44,7 +44,7 @@ namespace _BaseModule.Features.Entity;
 public class StatsFeature : BaseEntityFeature
 {
     public static readonly URN StatsTag = new URN("rpgc", TagsUrnModule, "stats");
-    public static readonly URN Urn = FeatureUrnModule.CreateUrnModule("rpgc").ToUrn("stats");
+    public static readonly URN Urn = FeatureUrnModule.ToUrnModule("rpgc").ToUrn("stats");
     
     public override string FeatureName => "Stats Feature";
     public override string FeatureDescription => "Adds basic stats to the entity, such as health, mana, and stamina.";
@@ -226,6 +226,8 @@ public class StatsFeature : BaseEntityFeature
                 });
             };
         });
+        var urn = ISignalRegistry.SignalModuleUrn.ToUrnModule("rpgc").ToUrn("stat_changed");
+        RegistryServices.SignalRegistry.RegisterSignal(urn);
     }
 
     // When this feature is added to an entity definition, we want to add a toggle for each stat definition, allowing the user to choose which stats they want to use for this entity.
@@ -280,7 +282,7 @@ public class StatsFeature : BaseEntityFeature
         GetAllStats();
         PopulateStatDefIdToIndexCache();
         world.SystemManager.AddSystem(new StatSystem(_statDefIdToIndexCache, _resistanceDefIdToIndexCache, _regenerationStatIndexToTargetStatIndexCache));
-        world.EventBus.Subscribe(new BaseSubscriber(new URN("rpgc", "events", "test"), 0, @event =>
+        new BaseSubscriber(new URN("rpgc", "events", "test"), 0, @event =>
         {
             var modifier = EngineServices.AssetsManager.GetAssetsOfType<StatModifierDefinition>().ToList();
 
@@ -289,13 +291,13 @@ public class StatsFeature : BaseEntityFeature
                 Logger.Debug("No StatModifierDefinition found, skipping test event.");
                 return;
             }
-            
+
             foreach (var entityId in world.ComponentManager.Query<PlayerTagComponent>())
             {
                 world.SystemManager.GetSystem<StatsModifierSystem>(out var statsModifierSystem);
                 statsModifierSystem?.ApplyStatModifier(entityId, modifier.First());
             }
-        }));
+        }).Subscribe();
     }
     
     private void PopulateStatDefIdToIndexCache()
@@ -305,10 +307,7 @@ public class StatsFeature : BaseEntityFeature
         _regenerationStatToTargetStatCache.Clear();
         for (int i = 0; i < _statDefinitions.Count; i++)
         {
-            if(_statDefinitions[i] is ResistanceDefinition resistanceDef)
-            {
-                _resistanceDefIdToIndexCache[resistanceDef.DamageType] = i;
-            }
+            _resistanceDefIdToIndexCache[_statDefinitions[i].Urn] = i;
             if(_statDefinitions[i] is RegenerationDefinition regenerationDef)
             {
                 _regenerationStatToTargetStatCache[regenerationDef.Unique] = regenerationDef.TargetStat;
@@ -368,6 +367,7 @@ public record struct StatData(Ulid StatDefId, double BaseValue, double FinalValu
 
 public class StatSystem : ISystem
 {
+    private URN SignalChanged = ISignalRegistry.SignalModuleUrn.ToUrnModule("rpgc").ToUrn("stat_changed");
     public override int Priority => 100; // Priority can be adjusted based on when you want this system to run in the update loop.
     public override bool IsDrawingSystem => false; // This system is not responsible for drawing, it's purely for logic updates.
     
@@ -377,16 +377,16 @@ public class StatSystem : ISystem
     private SystemManager _systemManager = null!;
 
     private Dictionary<Ulid, int> _statDefIdToIndexCache;
-    private Dictionary<URN, int> _resistanceDefIdToIndexCache;
+    private Dictionary<URN, int> _statDefUrnToIndexCache;
     private Dictionary<int, int> _regenerationStatIndexToTargetStatIndexCache;
     
     public StatSystem(
         Dictionary<Ulid, int> statDefIdToIndexCache,
-        Dictionary<URN, int> resistanceDefIdToIndexCache,
+        Dictionary<URN, int> statDefUrnToIndexCache,
         Dictionary<int, int> regenerationStatIndexToTargetStatIndexCache)
     {
         _statDefIdToIndexCache = statDefIdToIndexCache;
-        _resistanceDefIdToIndexCache = resistanceDefIdToIndexCache;
+        _statDefUrnToIndexCache = statDefUrnToIndexCache;
         _regenerationStatIndexToTargetStatIndexCache = regenerationStatIndexToTargetStatIndexCache;
     }
     
@@ -406,6 +406,7 @@ public class StatSystem : ISystem
         foreach (var entityId in _componentManager.QueryDirty<StatComponent>())
         {
             ref var statComponent = ref _componentManager.GetComponent<StatComponent>(entityId);
+            
 
             if (_componentManager.HasComponent<StatsModifierComponent>(entityId))
             {
@@ -413,7 +414,13 @@ public class StatSystem : ISystem
             }
             ApplyCapSettings(entityId, statComponent);
             ApplyChangeToStat(entityId, statComponent);
-            
+
+            if (_componentManager.HasComponent<SignalsComponent>(entityId))
+            {
+                ref var signalComponent = ref _componentManager.GetComponent<SignalsComponent>(entityId);
+                signalComponent.EmitSignal(SignalChanged);
+                _componentManager.MarkDirty<SignalsComponent>(entityId);
+            }
         }
         double seconds = deltaTime.TotalSeconds;
 
@@ -471,18 +478,11 @@ public class StatSystem : ISystem
         var span = _statsModifierSystem.FlatModifiers.GetSpan(flatModifiersIdx);
         double totalFlat = 0;
 
-        // Utiliser une boucle for avec ref readonly évite la copie des structs
         for (int i = 0; i < span.Length; i++)
         {
-            // On accède directement à la mémoire du Slab par référence
             ref readonly var modifier = ref span[i];
         
-            // On ignore les slots vides (ModifierId == 0) si tu as désactivé le Swap-and-Pop
-            // ou si tu as des "trous" dans tes Slabs.
-            if (modifier.ModifierId != 0)
-            {
-                totalFlat += modifier.FlatValue;
-            }
+            totalFlat += modifier.FlatValue;
         }
     
         return totalFlat;
@@ -557,7 +557,6 @@ public class StatSystem : ISystem
     private void ApplyChangeToStat(int entityId, StatComponent statComponent)
     {
         var statSpan = statComponent.Stats.AsSpan();
-
         foreach (ref var stat in statSpan)
         {
             switch (stat.TypeKind)
@@ -595,6 +594,7 @@ public class StatSystem : ISystem
             var statDefId = stat.StatDefId;
             var finalValue = stat.FinalValue;
             var actualValue = stat.ActualValue;
+            Logger.Debug("Stat changed for entity {0}, statDefId {1}: finalValue={2}, actualValue={3}", args: [entityId, statDefId, finalValue, actualValue]);
             _eventBus.Publish(new URN("rpgc", "events", "on_stat_changed"), entityId, data =>
             {
                 data.Set("statDefId", statDefId);
@@ -626,9 +626,9 @@ public class StatSystem : ISystem
         
     }
 
-    public int GetResistance(URN damageType)
+    public int GetStatIndex(URN statUrn)
     {
-        return _resistanceDefIdToIndexCache.GetValueOrDefault(damageType, -1); // No resistance found for this damage type, we return -1 as default (which means no resistance).
+        return _statDefUrnToIndexCache.GetValueOrDefault(statUrn, -1); // No stat found for this urn, we return -1 as default (which means no stat found).
     }
 }
 

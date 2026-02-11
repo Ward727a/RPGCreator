@@ -29,11 +29,11 @@ using System.Runtime.Loader;
 using RPGCreator.Core.Common;
 using RPGCreator.Core.Module;
 using RPGCreator.SDK;
+using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules;
 using RPGCreator.SDK.Types;
-using RPGCreator.SDK.UiService;
 
 namespace RPGCreator.Core
 {
@@ -90,7 +90,7 @@ namespace RPGCreator.Core
                         {
                             _logger.Critical("UnauthorizedAccessException detected: {Message}", args: UAE.Message);
                             _logger.Critical("This may indicate a security violation within the module!!!");
-                            UiServices.NotificationService.Error("SECURITY_ALERT!", $"Security Alert: A module attempted an unauthorized operation. The engine remains stable, but please review module usage.", new NotificationOptions(60000));
+                            EditorUiServices.NotificationService.Error("SECURITY_ALERT!", $"Security Alert: A module attempted an unauthorized operation. The engine remains stable, but please review module usage.", new NotificationOptions(60000));
                             
                         }
                     }

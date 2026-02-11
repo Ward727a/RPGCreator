@@ -174,7 +174,7 @@ public class StatsModifierManagement : UserControl
     {
         if (_selectedModifier == null) return;
 
-        var result = await UiServices.DialogService.ConfirmAsync("Are you sure?",
+        var result = await EditorUiServices.DialogService.ConfirmAsync("Are you sure?",
             $"This will permanently delete the stat modifier ({_selectedModifier.DisplayName}) and all references to it.\n" +
             $"This action cannot be undone!!!",
             confirmButtonText: "Delete", cancelButtonText: "Cancel");

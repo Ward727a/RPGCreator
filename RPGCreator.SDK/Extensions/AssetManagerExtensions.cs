@@ -5,7 +5,7 @@ namespace RPGCreator.SDK.Extensions;
 
 public static class AssetManagerExtensions
 {
-    public static IEnumerable<T> GetAssets<T>(this IAssetsManager manager) where T : class, IAssetDef
+    public static IEnumerable<T> GetAssets<T>(this IAssetsManager manager) where T : class, IBaseAssetDef
     {
         foreach (var result in manager.SearchAllPacks<T>())
         {

@@ -23,7 +23,7 @@ using _BaseModule.UI.StatsFeature;
 using Avalonia.Controls;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Modules.UIModule;
-using RPGCreator.SDK.UiService;
+using RPGCreator.SDK.EditorUiService;
 
 namespace RPGCreator.UI.Extensions;
 
@@ -75,7 +75,7 @@ public class StatEditorContext
 
 public static class StatManageUiExtensions
 {
-    private static IUiExtensionManager Manager => UiServices.ExtensionManager;
+    private static IUiExtensionManager Manager => EditorUiServices.ExtensionManager;
     public static AssetManagerScope StatsManager(
         this AssetManagerScope context, Action<StatsManagement, StatsManagerContext> callback)
     {

@@ -13,18 +13,17 @@ namespace RPGCreator.SDK.Assets.Definitions.Skills;
 /// Used to allow users to create custom skill effects using the graph visual scripting system.
 /// </summary>
 [SerializingType("GraphSkillEffect")]
-public class GraphSkillEffect : ISkillEffect, IHasSavePath, ISerializable, IDeserializable
+public class GraphSkillEffect : BaseAssetDef, ISkillEffect, IHasSavePath, ISerializable, IDeserializable
 {
     
-    public Ulid Unique { get; private set; }
-    public URN Urn { get; private set; }
+    public override UrnSingleModule UrnModule => "graph_skill_effect".ToUrnSingleModule();
     /// <summary>
     /// The pack identifier that this stat belongs to.
     /// </summary>
     public Ulid? PackId { get; set; }
     
-    private IGraphScript _graphEvent;
-    public IReadOnlyList<SkillEffectPropertyDescriptor> PropertyDescriptors { get; private set; }
+    private IGraphScript _graphEvent = null!;
+    public IReadOnlyList<SkillEffectPropertyDescriptor> PropertyDescriptors { get; private set; } = null!;
 
     public void SetEvent(IGraphScript graphEvent)
     {
@@ -43,15 +42,8 @@ public class GraphSkillEffect : ISkillEffect, IHasSavePath, ISerializable, IDese
     public GraphSkillEffect(string name)
     {
         Unique = Ulid.NewUlid();
-        Urn = new URN("skill_effect", $"{name}@{Unique}");
         DisplayName = name;
         Properties = new Dictionary<string, object>();
-    }
-
-    public void Init(Ulid id)
-    {
-        if (Unique != Ulid.Empty) return;
-        Unique = id;
     }
 
     public void SetPropertiesDescriptors(List<SkillEffectPropertyDescriptor> descriptors)
@@ -84,8 +76,9 @@ public class GraphSkillEffect : ISkillEffect, IHasSavePath, ISerializable, IDese
         return clone;
     }
 
-    public string DisplayName { get; private set; }
-    public Dictionary<string, object> Properties { get; set; }
+    public string DisplayName { get; private set; } = null!;
+    public Dictionary<string, object> Properties { get; set; } = null!;
+
     public void ApplyEffect(Entity caster, List<Entity> target)
     {
         var env = EngineServices.GraphService.CreateEnvironment();
@@ -100,7 +93,7 @@ public class GraphSkillEffect : ISkillEffect, IHasSavePath, ISerializable, IDese
         EngineServices.GraphService.Run(GetEvent(), env);
     }
 
-    public string SavePath { get; set; }
+    public string SavePath { get; set; } = null!;
 
     // public void Save()
     // {
@@ -125,7 +118,7 @@ public class GraphSkillEffect : ISkillEffect, IHasSavePath, ISerializable, IDese
     
     public SerializationInfo GetObjectData()
     {
-        var graphEventPath = _graphEvent?.DocumentPath ?? string.Empty;
+        var graphEventPath = _graphEvent.DocumentPath;
 
         // // Check if the document path from graph event is still inside the temp folder
         // if (_graphEvent.DocumentPath.StartsWith(Path.GetTempPath()))
@@ -171,7 +164,6 @@ public class GraphSkillEffect : ISkillEffect, IHasSavePath, ISerializable, IDese
         // We can only set them in the constructor.
         // However, since we need to set them here, we will use reflection to set them.
         Unique = unique;
-        Urn = new URN("skill_effect", $"{displayName}@{Unique}");
         DisplayName = displayName;
         SetPropertiesDescriptors(propertyDescriptors);
 
@@ -189,7 +181,4 @@ public class GraphSkillEffect : ISkillEffect, IHasSavePath, ISerializable, IDese
             }
         }
     }
-
-    public bool IsDirty { get; set; }
-    public bool IsTransient { get; set; }
 }

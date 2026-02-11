@@ -6,6 +6,7 @@ using Avalonia.Layout;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Modules.UIModule;
@@ -36,7 +37,7 @@ public class EditorLeftPanelControl : UserControl
         CreateComponents();
         RegisterEvents();
         Content = _tabControl;
-        UiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanel, this);
+        EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanel, this);
     }
     
     private void CreateComponents()
@@ -112,7 +113,7 @@ public class EditorLeftPanelControl : UserControl
             HideComponent = HideComponent
         };
         
-        UiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelComponents, _body, new EditorLeftPanelComponentsContext(config));
+        EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelComponents, _body, new EditorLeftPanelComponentsContext(config));
     }
     
     [ExposeToPlugin("EditorLeftPanel.Components")]

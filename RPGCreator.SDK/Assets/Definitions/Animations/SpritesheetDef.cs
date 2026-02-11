@@ -10,37 +10,27 @@ using Rectangle = System.Drawing.Rectangle;
 namespace RPGCreator.SDK.Assets.Definitions.Animations;
 
 [SerializingType("SpritesheetDef")]
-public class SpritesheetDef : IAssetDef, ISerializable, IDeserializable, IHasSavePath
+public class SpritesheetDef : BaseAssetDef, ISerializable, IDeserializable, IHasSavePath
 {
     
-    private Rectangle[] _frames;
-    public Ulid Unique { get; private set; }
-    public URN Urn { get; private set; }
-    public bool IsDirty { get; set; }
-    public bool IsTransient { get; set; } = false;
+    private Rectangle[] _frames = null!;
+    public override UrnSingleModule UrnModule => "spritesheet".ToUrnSingleModule();
 
-    public string ImagePath { get; set; }
+    public string ImagePath { get; set; } = null!;
     public int ImageWidth { get; set; }
     public int ImageHeight { get; set; }
     
     public int FrameWidth { get; set; }
     public int FrameHeight { get; set; }
 
-    public int Columns = 0;
-    public int Rows = 0;
+    public int Columns;
+    public int Rows;
 
     public Vector2 FeetOrigin { get; private set; }
     
     public SpritesheetDef()
     {
         Unique = Ulid.NewUlid();
-        Urn = new URN("rpgcreator", "spritesheet", Unique.ToString());
-    }
-
-    public void Init(Ulid id)
-    {
-        if (Unique != Ulid.Empty) return;
-        Unique = id;
     }
 
     public Rectangle GetFrameRect(int index)
@@ -92,7 +82,6 @@ public class SpritesheetDef : IAssetDef, ISerializable, IDeserializable, IHasSav
         info.TryGetValue("FrameHeight", out int frameHeight, 0);
         FrameHeight = frameHeight;
 
-        Urn = new URN("rpgcreator", "spritesheet", Unique.ToString());
         CalculateValues();
     }
 
@@ -134,5 +123,5 @@ public class SpritesheetDef : IAssetDef, ISerializable, IDeserializable, IHasSav
         }
     }
 
-    public string SavePath { get; set; }
+    public string SavePath { get; set; } = null!;
 }

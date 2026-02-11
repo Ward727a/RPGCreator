@@ -35,13 +35,17 @@ using RPGCreator.UI.Content.Preferences;
 using System;
 using System.Diagnostics;
 using System.Numerics;
+using Avalonia.Media.Imaging;
 using RPGCreator.Core.Types.Windows;
 using RPGCreator.RTP;
+using RPGCreator.RTP.Services;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.UiService;
 using RPGCreator.UI.Common.Bridge;
 using RPGCreator.UI.Content.Editor.LeftPanel;
+using RPGCreator.UI.Test;
+using Size = System.Drawing.Size;
+using Vector = Avalonia.Vector;
 
 namespace RPGCreator.UI.Content.Editor
 {
@@ -49,8 +53,8 @@ namespace RPGCreator.UI.Content.Editor
     {
         private Window _Host => (Window)this.GetVisualRoot()!;
 
-        private EditorGame? game = (EditorGame)RuntimeServices.GameRunner;
-        private AvaloniaInside.MonoGame.MonoGameControl MonoGameScreen;
+        // private EditorGame? game = (EditorGame)RuntimeServices.GameRunner;
+        private MonoGameControlTest MonoGameScreen;
 
         private TilesetSelector tilesetSelector;
         private Vector2 _LastTilePlacePos;
@@ -60,17 +64,42 @@ namespace RPGCreator.UI.Content.Editor
         private Grid _mainGrid;
         private Menu _menuBar;
 
+        
+        
+        private WriteableBitmap TestWrittableBitmap = new WriteableBitmap(new PixelSize(800, 600), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
+        
+        
         public EditorWindowControl()
         {
 
-            if (game == null)
-            {
-                throw new InvalidOperationException("EditorGame is not initialized. Make sure to initialize the game before using this control.");
-            }
+            // if (game == null)
+            // {
+            //     throw new InvalidOperationException("EditorGame is not initialized. Make sure to initialize the game before using this control.");
+            // }
 
             CreateComponents();
             RegisterEvents();
             Content = _mainGrid;
+            if (EditorUiServices.MonogameViewport.IsCoreReady)
+            {
+                if (TestWrittableBitmap.Lock().Address is IntPtr ptr)
+                {
+                    EditorUiServices.MonogameViewport.CreateNewViewport("Editor MonoGame Viewport", ptr,
+                        new Size(800, 600));
+                }
+            }
+            else
+            {
+                EditorUiServices.MonogameViewport.OnCoreReady += () =>
+                {
+                    using (var buf = TestWrittableBitmap.Lock())
+                    {
+                        EditorUiServices.MonogameViewport.CreateNewViewport("Editor MonoGame Viewport", buf.Address,
+                            new Size(800, 600));
+                        
+                    }
+                };
+            }
         }
 
         private void CreateComponents()
@@ -81,6 +110,19 @@ namespace RPGCreator.UI.Content.Editor
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
                 RowDefinitions = new RowDefinitions("Auto, *, 1, Auto")
             };
+            EditorUiServices.MonogameViewport.Initialize();
+            var RenderCore = ((MonogameViewportService)EditorUiServices.MonogameViewport)._core;
+            var mgBrain = new MonoGameControlTest()
+            {
+                Game = RenderCore,
+                Opacity = 0, // Make the control invisible
+                IsHitTestVisible = false,
+                Focusable = false,
+                IsTabStop = false,
+                Width = 1,
+                Height = 1,
+            };
+            _mainGrid.Children.Add(mgBrain);
 
             #region MenuBar
             _menuBar = new Menu
@@ -271,6 +313,18 @@ namespace RPGCreator.UI.Content.Editor
                 Header = "Report Issue"
             };
             helpMenuItem.Items.Add(reportIssueMenuItem);
+            var uiEditorMenuItem = new MenuItem
+            {
+                Header = "UI Editor"
+            };
+            uiEditorMenuItem.Click += (_, _) =>
+            {
+                if (GameUiEditor.UiEditorWindow.IsOpen) return;
+                var uiEditorWindow = new GameUiEditor.UiEditorWindow();
+                uiEditorWindow.Show();
+            };
+            _menuBar.Items.Add(uiEditorMenuItem);
+
             #endregion
 
             var ContentGrid = new Grid
@@ -390,11 +444,22 @@ namespace RPGCreator.UI.Content.Editor
             CenterGrid.Children.Add(monogameGrid);
             Grid.SetRow(monogameGrid, 1);
 
-            MonoGameScreen = new AvaloniaInside.MonoGame.MonoGameControl
+            var image = new Image
             {
-                Game = game,
+                Source = TestWrittableBitmap,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+                IsHitTestVisible = false,
+                IsEnabled = false,
+                IsTabStop = false
             };
-            monogameGrid.Children.Add(MonoGameScreen);
+            monogameGrid.Children.Add(image);
+
+            // MonoGameScreen = new AvaloniaInside.MonoGame.MonoGameControl
+            // {
+            //     Game = game,
+            // };
+            // monogameGrid.Children.Add(MonoGameScreen);
         }
 
         
@@ -403,40 +468,40 @@ namespace RPGCreator.UI.Content.Editor
         
         private void RegisterEvents()
         {
-            _keyboardBridge.RegisterEvents(MonoGameScreen);
-            _mouseBridge.RegisterEvents(MonoGameScreen);
+            // _keyboardBridge.RegisterEvents(MonoGameScreen);
+            // _mouseBridge.RegisterEvents(MonoGameScreen);
 
-            MonoGameScreen.PointerPressed += MonoGameScreen_PointerPressed;
-            MonoGameScreen.PointerReleased += MonoGameScreen_PointerReleased;
-            MonoGameScreen.PointerMoved += MonoGameScreen_PointerMoved;
-            MonoGameScreen.PointerExited += MonoGameScreen_PointerExited;
-            MonoGameScreen.KeyDown += MonoGameScreenOnKeyDown;
-
-            game.OnDraw += (_) =>
-            {
-                var visualPosition = (MonoGameScreen.TransformToVisual(_Host)?.Transform(new Avalonia.Point(0, 0))).GetValueOrDefault();
-    
-                int newWidth = (int)MonoGameScreen.Bounds.Width;
-                int newHeight = (int)MonoGameScreen.Bounds.Height;
-                var newPos = new Microsoft.Xna.Framework.Point(
-                    (int)(_Host.Position.X + 8 + 300), 
-                    (int)(visualPosition.Y + _Host.Position.Y + 1 + _menuBar.Bounds.Height)
-                );
-
-                if (game.GraphicsDevice.PresentationParameters.BackBufferWidth != newWidth || 
-                    game.GraphicsDevice.PresentationParameters.BackBufferHeight != newHeight)
-                {
-                    game.GraphicsDevice.PresentationParameters.BackBufferWidth = newWidth;
-                    game.GraphicsDevice.PresentationParameters.BackBufferHeight = newHeight;
-                    game.Graphics.ApplyChanges();
-                }
-
-                if (game.Window.Position != newPos)
-                {
-                    game.Window.Position = newPos;
-                }
-                
-            };
+            // MonoGameScreen.PointerPressed += MonoGameScreen_PointerPressed;
+            // MonoGameScreen.PointerReleased += MonoGameScreen_PointerReleased;
+            // MonoGameScreen.PointerMoved += MonoGameScreen_PointerMoved;
+            // MonoGameScreen.PointerExited += MonoGameScreen_PointerExited;
+            // MonoGameScreen.KeyDown += MonoGameScreenOnKeyDown;
+            //
+            // game.OnDraw += (_) =>
+            // {
+            //     var visualPosition = (MonoGameScreen.TransformToVisual(_Host)?.Transform(new Avalonia.Point(0, 0))).GetValueOrDefault();
+            //
+            //     int newWidth = (int)MonoGameScreen.Bounds.Width;
+            //     int newHeight = (int)MonoGameScreen.Bounds.Height;
+            //     var newPos = new Microsoft.Xna.Framework.Point(
+            //         (int)(_Host.Position.X + 8 + 300), 
+            //         (int)(visualPosition.Y + _Host.Position.Y + 1 + _menuBar.Bounds.Height)
+            //     );
+            //
+            //     if (game.GraphicsDevice.PresentationParameters.BackBufferWidth != newWidth || 
+            //         game.GraphicsDevice.PresentationParameters.BackBufferHeight != newHeight)
+            //     {
+            //         game.GraphicsDevice.PresentationParameters.BackBufferWidth = newWidth;
+            //         game.GraphicsDevice.PresentationParameters.BackBufferHeight = newHeight;
+            //         game.Graphics.ApplyChanges();
+            //     }
+            //
+            //     if (game.Window.Position != newPos)
+            //     {
+            //         game.Window.Position = newPos;
+            //     }
+            //     
+            // };
 
         }
 

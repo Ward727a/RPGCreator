@@ -15,7 +15,7 @@ internal class AssetScope : IAssetScope
     private readonly AssetsManager _manager;
 
     private readonly HashSet<Ulid> _borrowedAssets;
-    private readonly HashSet<IAssetDef> _scopes;
+    private readonly HashSet<IBaseAssetDef> _scopes;
     
     public string Name { get; }
     
@@ -24,27 +24,27 @@ internal class AssetScope : IAssetScope
         Name = name;
         Logger.SetCustomPrefix(Name);
         _manager = manager;
-        _scopes = new HashSet<IAssetDef>();
+        _scopes = new HashSet<IBaseAssetDef>();
         _borrowedAssets = new HashSet<Ulid>();
     }
 
-    public void Track(IAssetDef asset)
+    public void Track(IBaseAssetDef baseAsset)
     {
-        _scopes.Add(asset);
+        _scopes.Add(baseAsset);
     }
 
-    public void Untrack(IAssetDef asset)
+    public void Untrack(IBaseAssetDef baseAsset)
     {
-        _scopes.Remove(asset);
+        _scopes.Remove(baseAsset);
     }
     
-    public void TransferTo(IAssetScope targetScope, IAssetDef asset)
+    public void TransferTo(IAssetScope targetScope, IBaseAssetDef baseAsset)
     {
-        if (!_scopes.Contains(asset)) return;
-        Untrack(asset);
-        targetScope.Track(asset);
+        if (!_scopes.Contains(baseAsset)) return;
+        Untrack(baseAsset);
+        targetScope.Track(baseAsset);
         
-        Logger.Debug("Transferred asset {0} from scope {1} to scope {2}", args:[asset.Urn, Name, targetScope.Name]);
+        Logger.Debug("Transferred asset {0} from scope {1} to scope {2}", args:[baseAsset.Urn, Name, targetScope.Name]);
     }
     
     public void Dispose()
@@ -64,7 +64,7 @@ internal class AssetScope : IAssetScope
         GC.SuppressFinalize(this);
     }
 
-    public T Load<T>(Ulid assetId) where T : class, IAssetDef
+    public T Load<T>(Ulid assetId) where T : class, IBaseAssetDef
     {
         try
         {
@@ -89,19 +89,19 @@ internal class AssetScope : IAssetScope
         }
     }
 
-    public IAssetDef? Load(Ulid assetId, out Type assetType)
+    public BaseAssetDef? Load(Ulid assetId, out Type assetType)
     {
         try
         {
             var asset = _manager.RetainAsset(assetId);
             assetType = asset.GetType();
             
-            if (!typeof(IAssetDef).IsAssignableFrom(assetType))
+            if (!typeof(BaseAssetDef).IsAssignableFrom(assetType))
                 return null;
             
             _borrowedAssets.Add(assetId);
             
-            return asset as IAssetDef;
+            return asset as BaseAssetDef;
         }
         catch (InvalidOperationException e)
         {
@@ -111,7 +111,7 @@ internal class AssetScope : IAssetScope
         }
     }
 
-    public void Unload<T>(T asset) where T : class, IAssetDef
+    public void Unload<T>(T asset) where T : class, IBaseAssetDef
     {
         if (_borrowedAssets.Contains(asset.Unique))
         {

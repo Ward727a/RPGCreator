@@ -34,7 +34,7 @@ namespace _BaseModule.SimpleEvents.Conditions;
 
 public class StatValueSimpleCondition : BaseSimpleEventCondition
 {
-    public override URN Urn => Module.CreateUrnModule("rpgc").ToUrn("stat_value_condition");
+    public override URN Urn => Module.ToUrnModule("rpgc").ToUrn("stat_value_condition");
     public override string Name => "Stat Value Condition";
     public override string Description => "Checks if a stat value meets a certain condition.";
     public override bool ResultExpected => true;
@@ -143,7 +143,7 @@ public class StatValueSimpleCondition : BaseSimpleEventCondition
                 {
                     var assets = EngineServices.AssetsManager.GetAssetsOfType<BaseStatDefinition>();
                     
-                    var result = await UiServices.DialogService.ShowSelectAsync("Select a stat",
+                    var result = await EditorUiServices.DialogService.ShowSelectAsync("Select a stat",
                         "Select the stat to check in the condition.",
                         assets,
                         asset => asset.DisplayName,

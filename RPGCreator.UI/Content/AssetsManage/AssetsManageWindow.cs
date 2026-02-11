@@ -89,7 +89,7 @@ namespace RPGCreator.UI.Content.AssetsManage
             Content = Body;
             LoadAssetsMenuOptions();
             Instance = this;
-            UiServices.ExtensionManager.ApplyExtensions(UIRegion.AssetsManager, this);
+            EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.AssetsManager, this);
         }
         
 
@@ -120,7 +120,7 @@ namespace RPGCreator.UI.Content.AssetsManage
                 OpenCustom = OpenCustom
             };
             
-            UiServices.ExtensionManager.ApplyExtensions(UIRegion.AssetsManagerMenu, MenuPanel, new AssetsManagerMenuContext(config));
+            EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.AssetsManagerMenu, MenuPanel, new AssetsManagerMenuContext(config));
         }
 
         protected void LoadAssetsMenuOptions()

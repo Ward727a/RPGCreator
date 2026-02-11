@@ -4,18 +4,11 @@ using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets;
 
-public class GenericAssetStub : IAssetDef, IDeserializable
+public class GenericBaseAssetStub : BaseAssetDef, IDeserializable
 {
     public Ulid Unique { get; set; }
-    public URN Urn { get; set; }
-    public void Init(Ulid id)
-    {
-        if (Unique != Ulid.Empty) return;
-        Unique = id;
-    }
+    public override UrnSingleModule UrnModule => "generic_asset".ToUrnSingleModule();
 
-    public bool IsDirty { get; set; }
-    public bool IsTransient { get; set; }
     public Dictionary<string, object> RawData { get; } = new Dictionary<string, object>();
     public void SetObjectData(DeserializationInfo info)
     {

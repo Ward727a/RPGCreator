@@ -5,7 +5,7 @@ using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.SDK.Assets.Definitions.Stats;
 
-public interface IStatDef : ISerializable, IDeserializable, IHasSavePath, IAssetDef
+public interface IStatDef : IBaseAssetDef, ISerializable, IDeserializable, IHasSavePath
 {
     public const string OnValueChangedEvent = "OnValueChanged";
     
@@ -13,16 +13,6 @@ public interface IStatDef : ISerializable, IDeserializable, IHasSavePath, IAsset
     /// The pack identifier that this stat belongs to.
     /// </summary>
     public Ulid? PackId { get; set; }
-    
-    /// <summary>
-    /// The unique identifier for the stat type used for identification.
-    /// </summary>
-    public Ulid Unique { get; }
-    
-    /// <summary>
-    /// The name of the stat, used for display purposes.
-    /// </summary>
-    public string Name { get; set; }
     
     /// <summary>
     /// The description of the stat, used for display purposes.

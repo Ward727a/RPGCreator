@@ -24,10 +24,10 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Notifications;
 using Avalonia.Threading;
-using RPGCreator.SDK.UiService;
+using RPGCreator.SDK.EditorUiService;
 using RPGCreator.UI.Content.Editor;
 using Notification = Ursa.Controls.Notification;
-using NotificationType = RPGCreator.SDK.UiService.NotificationType;
+using NotificationType = RPGCreator.SDK.EditorUiService.NotificationType;
 using WindowNotificationManager = Ursa.Controls.WindowNotificationManager;
 
 namespace RPGCreator.UI.Services;

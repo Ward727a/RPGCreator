@@ -1,11 +1,12 @@
 using System.Numerics;
 using RPGCreator.Core.Types.Map;
-using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
+using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Types;
 
-namespace RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
+namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 
 [SerializingType("AutoLayerDefinition")]
 public class AutoLayerDefinition : BaseLayerDef
@@ -187,4 +188,6 @@ public class AutoLayerDefinition : BaseLayerDef
 
         return context;
     }
+
+    public override UrnSingleModule UrnModule => "autolayer".ToUrnSingleModule();
 }

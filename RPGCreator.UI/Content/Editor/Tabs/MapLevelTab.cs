@@ -26,10 +26,10 @@ using CommunityToolkit.Diagnostics;
 using RPGCreator.Core.Types;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Extensions;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types.Collections;
-using RPGCreator.SDK.UiService;
 
 namespace RPGCreator.UI.Content.Editor.Tabs
 {
@@ -178,7 +178,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
         private async Task OnCreateNewMap()
         {
-            var result = await UiServices.DialogService.PromptTextAsync("Add Map", "Map Name:", "New Map", new(SizeToContent: DialogSizeToContent.HeightOnly));
+            var result = await EditorUiServices.DialogService.PromptTextAsync("Add Map", "Map Name:", "New Map", new(SizeToContent: DialogSizeToContent.HeightOnly));
             if (result == null)
                 return;
 

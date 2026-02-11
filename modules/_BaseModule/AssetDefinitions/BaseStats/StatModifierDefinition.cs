@@ -19,6 +19,7 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using _BaseModule.Features.Entity;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
@@ -51,13 +52,10 @@ public enum StatStackingPolicy
 }
 
 [SerializingType("StatModifier")]
-public class StatModifierDefinition : IAssetDef, IHasSavePath, ISerializable, IDeserializable
+public class StatModifierDefinition : BaseAssetDef, IHasSavePath, ISerializable, IDeserializable
 {
-    public Ulid Unique { get; private set; }
-    public URN Urn { get; private set; }
+    public override UrnSingleModule UrnModule => "stats_modifiers".ToUrnSingleModule();
     public string SavePath { get; set; } = "";
-    public bool IsDirty { get; set; }
-    public bool IsTransient { get; set; }
 
     public int RegistryId { get; set; } = -1;
     
@@ -66,17 +64,9 @@ public class StatModifierDefinition : IAssetDef, IHasSavePath, ISerializable, ID
     public StatStackingPolicy StackingPolicy { get; set; }
     public float Value { get; set; }
     public TimeSpan Duration { get; set; }
-
-    public string Name = "";
     public string DisplayName => string.IsNullOrEmpty(Name) ? $"Stat_Modifier-{StatId}" : Name;
 
     public string Description = "";
-
-    public void Init(Ulid id)
-    {
-        if (Unique != Ulid.Empty) return;
-        Unique = id;
-    }
 
     public SerializationInfo GetObjectData()
     {
@@ -116,6 +106,5 @@ public class StatModifierDefinition : IAssetDef, IHasSavePath, ISerializable, ID
         Duration = duration;
         Name = name;
         Description = description;
-        Urn = new URN("rpgc", "stats_modifiers", $"{Name}@{Unique.ToString()}");
     }
 }
