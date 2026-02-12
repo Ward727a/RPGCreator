@@ -19,21 +19,26 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System;
-using System.Runtime.InteropServices;
-using Gum.Forms.Controls;
-using Gum.Wireframe;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoGameGum;
+using RPGCreator.RTP.GameUI;
+using RPGCreator.RTP.GameUI.BaseControls;
+using RPGCreator.RTP.GameUI.BaseControls.Box;
 using RPGCreator.RTP.Services;
 using RPGCreator.RTP.Viewport;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Editor.Rendering;
+using SpriteFontPlus;
 
 namespace RPGCreator.RTP;
 
 public sealed class RenderCore : Game, IGameRenderCore
 {
-
+    public event Action? OnInitialize;
+    public event Action? OnLoad;
+    public event Action<TimeSpan>? OnUpdate;
+    public event Action<TimeSpan>? OnDraw;
+    
     public event Action? DeviceReady;
     
     private MonogameViewportService _parentService;
@@ -41,22 +46,22 @@ public sealed class RenderCore : Game, IGameRenderCore
     private SpriteBatch _spriteBatch;
     private Texture2D _pixelTexture;
 
+    private UiRenderer _uiRenderer = new UiRenderer();
     
-    GumService Gum => GumService.Default;
-
     public RenderCore(MonogameViewportService parentService)
     {
         _parentService = parentService;
         Graphics = new GraphicsDeviceManager(this);
         // Sous DesktopGL (OpenGL), on peut souvent cacher la fenêtre via le handle
         this.IsMouseVisible = true;
-
+        RuntimeServices.GameRunner = this;
+        
     }
 
     protected override void Initialize()
     {
         base.Initialize();
-        Gum.Initialize(this);
+        OnInitialize?.Invoke();
     }
 
     public GraphicsDeviceManager Graphics { get; set; }
@@ -66,6 +71,9 @@ public sealed class RenderCore : Game, IGameRenderCore
         base.LoadContent();
         GraphicsDevice.Reset();
         _spriteBatch = new SpriteBatch(GraphicsDevice);
+        _uiRenderer.Initialize(GraphicsDevice);
+        SdfColorBox.LoadSdfEffect(GraphicsDevice);
+        OnLoad?.Invoke();
     }
 
 
@@ -76,17 +84,17 @@ public sealed class RenderCore : Game, IGameRenderCore
 
     public void LoadContent(GameViewport viewport)
     {
-        viewport.LoadContent(GraphicsDevice, _spriteBatch, Gum, this);
+        viewport.LoadContent(GraphicsDevice, _spriteBatch, this, _uiRenderer);
     }
 
     protected override void Draw(GameTime gameTime)
     {
         DeviceReady?.Invoke();
         DeviceReady = null;
+        OnDraw?.Invoke(gameTime.ElapsedGameTime);
         base.Draw(gameTime);
         
         if (GraphicsDevice == null) return;
-        Gum.Draw();
         var viewports = _parentService.GetAllViewports();
         
         for (int i = 0; i < viewports.Length; i++)
@@ -98,7 +106,6 @@ public sealed class RenderCore : Game, IGameRenderCore
             if (viewport is GameViewport gv && gv.RenderTarget != null)
             {
                 GraphicsDevice.SetRenderTarget(gv.RenderTarget);
-                GraphicsDevice.Clear(Color.Blue);
                 viewport.DrawViewport(gameTime.ElapsedGameTime);
             }
         }
@@ -107,6 +114,7 @@ public sealed class RenderCore : Game, IGameRenderCore
 
     protected override void Update(GameTime gameTime)
     {
+        OnUpdate?.Invoke(gameTime.ElapsedGameTime);
         var viewports = _parentService.GetAllViewports();
         var deltaTime = gameTime.ElapsedGameTime;
 
@@ -119,7 +127,6 @@ public sealed class RenderCore : Game, IGameRenderCore
             viewport.UpdateViewport(deltaTime);
         }
 
-        Gum.Update(gameTime);
         base.Update(gameTime);
     }
     
@@ -127,5 +134,4 @@ public sealed class RenderCore : Game, IGameRenderCore
     {
         base.Dispose(disposing);
     }
-
 }

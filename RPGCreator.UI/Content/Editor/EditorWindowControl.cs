@@ -35,7 +35,9 @@ using RPGCreator.UI.Content.Preferences;
 using System;
 using System.Diagnostics;
 using System.Numerics;
+using System.Threading;
 using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using RPGCreator.Core.Types.Windows;
 using RPGCreator.RTP;
 using RPGCreator.RTP.Services;
@@ -66,8 +68,9 @@ namespace RPGCreator.UI.Content.Editor
 
         
         
-        private WriteableBitmap TestWrittableBitmap = new WriteableBitmap(new PixelSize(800, 600), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
-        
+        private WriteableBitmap TestWrittableBitmap = new WriteableBitmap(new PixelSize(836, 627), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
+
+        private Image mgImage;
         
         public EditorWindowControl()
         {
@@ -80,26 +83,35 @@ namespace RPGCreator.UI.Content.Editor
             CreateComponents();
             RegisterEvents();
             Content = _mainGrid;
-            if (EditorUiServices.MonogameViewport.IsCoreReady)
+            EditorUiServices.MonogameViewport.OnCoreReady += () =>
             {
-                if (TestWrittableBitmap.Lock().Address is IntPtr ptr)
+                using (var buf = TestWrittableBitmap.Lock())
                 {
-                    EditorUiServices.MonogameViewport.CreateNewViewport("Editor MonoGame Viewport", ptr,
-                        new Size(800, 600));
-                }
-            }
-            else
-            {
-                EditorUiServices.MonogameViewport.OnCoreReady += () =>
-                {
-                    using (var buf = TestWrittableBitmap.Lock())
+                    EditorUiServices.MonogameViewport.CreateNewViewport("Editor MonoGame Viewport", buf.Address,
+                        new Size(836, 627));
+                    mgImage.SizeChanged += (_, _) =>
                     {
-                        EditorUiServices.MonogameViewport.CreateNewViewport("Editor MonoGame Viewport", buf.Address,
-                            new Size(800, 600));
-                        
-                    }
-                };
-            }
+                        TestWrittableBitmap = new WriteableBitmap(new PixelSize((int)mgImage.Bounds.Width, (int)mgImage.Bounds.Height), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
+                        EditorUiServices.MonogameViewport.GetViewport("Editor MonoGame Viewport")
+                            ?.Resize(new Size((int)mgImage.Bounds.Width, (int)mgImage.Bounds.Height));
+                        mgImage.Source = TestWrittableBitmap;
+                    };
+                    EditorUiServices.MonogameViewport.GetViewport("Editor MonoGame Viewport")?.OnceUpdatedDo(()=>
+                    {
+                        Dispatcher.UIThread.Post(()=>
+                        {
+                            mgImage.InvalidateVisual();
+                        }, priority: DispatcherPriority.Render);
+                    });
+                    EditorUiServices.MonogameViewport.GetViewport("Editor MonoGame Viewport")?.DoNewFrameAction += () =>
+                    {
+                        using (var buf = TestWrittableBitmap.Lock())
+                        {
+                            return buf.Address;
+                        }
+                    };
+                }
+            };
         }
 
         private void CreateComponents()
@@ -444,16 +456,14 @@ namespace RPGCreator.UI.Content.Editor
             CenterGrid.Children.Add(monogameGrid);
             Grid.SetRow(monogameGrid, 1);
 
-            var image = new Image
+            mgImage = new Image
             {
                 Source = TestWrittableBitmap,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-                IsHitTestVisible = false,
-                IsEnabled = false,
-                IsTabStop = false
             };
-            monogameGrid.Children.Add(image);
+            monogameGrid.Children.Add(mgImage);
+            _mouseBridge.RegisterEvents(mgImage);
 
             // MonoGameScreen = new AvaloniaInside.MonoGame.MonoGameControl
             // {

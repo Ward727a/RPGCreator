@@ -21,10 +21,8 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoGameGum;
 using RPGCreator.RTP.Extensions;
 using RPGCreator.SDK.GameUI;
-using RPGCreator.SDK.RuntimeService;
 
 namespace RPGCreator.RTP;
 
@@ -41,7 +39,6 @@ public class GameUiPreviewer : Game, IGameUiRunner
     public GraphicsDeviceManager Graphics;
     private SpriteBatch _spriteBatch = null!;
     
-    GumService Gum => GumService.Default;
     
     #region Default Methods
     public GameUiPreviewer()
@@ -55,7 +52,6 @@ public class GameUiPreviewer : Game, IGameUiRunner
     {
         base.Initialize();
         OnInitialize?.Invoke();
-        Gum.Initialize(this);
     }
 
     protected override void LoadContent()

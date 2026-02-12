@@ -18,11 +18,22 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGCreator.SDK.RuntimeService;
+using System;
 
-namespace RPGCreator.SDK.Editor.Rendering;
+namespace RPGCreator.RTP.GameUI.Enums;
 
-public interface IGameRenderCore : IGameRunner
+[Flags]
+public enum ControlAnchors
 {
-    
+    None = 0,
+    AnchorLeft = 1 << 0,
+    AnchorTop = 1 << 1,
+    AnchorRight = 1 << 2,
+    AnchorBottom = 1 << 3,
+    AnchorCenterHorizontal = 1 << 4,
+    AnchorCenterVertical = 1 << 5,
+    AnchorCenter = AnchorCenterHorizontal | AnchorCenterVertical,
+    AnchorFullHorizontal = AnchorLeft | AnchorRight,
+    AnchorFullVertical = AnchorTop | AnchorBottom,
+    AnchorFull = AnchorFullHorizontal | AnchorFullVertical
 }

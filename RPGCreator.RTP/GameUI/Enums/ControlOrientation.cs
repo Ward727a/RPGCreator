@@ -18,11 +18,10 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGCreator.SDK.RuntimeService;
+namespace RPGCreator.RTP.GameUI.Enums;
 
-namespace RPGCreator.SDK.Editor.Rendering;
-
-public interface IGameRenderCore : IGameRunner
+public enum ControlOrientation
 {
-    
+    Horizontal,
+    Vertical
 }

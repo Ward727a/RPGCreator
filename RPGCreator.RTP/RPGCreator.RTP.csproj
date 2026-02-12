@@ -29,16 +29,24 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Gum.MonoGame" Version="2025.11.15.1" />
+    <PackageReference Include="FontStashSharp.MonoGame" Version="1.5.3" />
     <PackageReference Include="MonoGame.Extended" Version="4.0.4" />
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.3" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.3" />
+    <PackageReference Include="SpriteFontPlus" Version="0.9.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RPGCreator.SDK\RPGCreator.SDK.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="EditorGame.cs" />
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
     <Message Text="Restoring dotnet tools" Importance="High" />
     <Exec Command="dotnet tool restore" />
   </Target>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources/**" />
+  </ItemGroup>
 </Project>

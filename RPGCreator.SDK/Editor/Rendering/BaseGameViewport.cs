@@ -27,6 +27,8 @@ public abstract class BaseGameViewport : IDisposable
     public Ulid Id { get; } = Ulid.NewUlid();
     
     public Size Size { get; set; }
+
+    public event Func<IntPtr>? DoNewFrameAction;
     
     public event EventHandler? ViewportFocused;
     public event EventHandler? ViewportClosed;
@@ -48,6 +50,8 @@ public abstract class BaseGameViewport : IDisposable
     
     public bool InternalIsDrawingPaused { get; private set; } = false;
     public bool InternalIsUpdatingPaused { get; private set; } = false;
+    
+    protected bool _inDrawing = false;
 
     public void DrawViewport(TimeSpan deltaTime)
     {
@@ -67,7 +71,19 @@ public abstract class BaseGameViewport : IDisposable
     {
         if (InternalIsDrawingPaused || IsDrawingPaused) return;
         FrameAsked = true;
-        AskForNewFrame();
+        var ptr = DoNewFrameAction?.Invoke();
+        if (ptr.HasValue)
+        {
+            UpdateAvaloniaControl(ptr.Value);
+            AskForNewFrame();
+        }
+    }
+
+    protected Action OnceUpdatedAction;
+    
+    public void OnceUpdatedDo(Action action)
+    {
+        OnceUpdatedAction = action;
     }
     
     public void PauseDrawing()
@@ -98,6 +114,7 @@ public abstract class BaseGameViewport : IDisposable
     
     public void Resize(Size newSize)
     {
+
         PauseDrawing();
         PauseUpdating();
         Size = newSize;
