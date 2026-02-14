@@ -1,4 +1,0 @@
-{
-    "description": "Third-party libraries used in the engine",
-    "ignore_dir": ["Gum"]
-}
