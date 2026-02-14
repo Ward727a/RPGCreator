@@ -56,7 +56,7 @@ public class TestFeature : BaseEntityFeature
     // If this change, and the "FeatureUrnModule" is obligatory, then I will make it so the engine will automatically change it to the correct one,
     // Just be aware that it could cause issues if you are using a different module urn.
     //
-    public override URN FeatureUrn => FeatureUrnModule.CreateUrnModule("rpgc").ToUrn("TestFeature");
+    public override URN FeatureUrn => FeatureUrnModule.ToUrnModule("rpgc").ToUrn("TestFeature");
 
     public override string FeatureIcon => EngineServices.ModulePathResolver.ResolveFilePath(new URN("Ward727", "module", "TestModule/Folder"), "feature_icon.png");
 

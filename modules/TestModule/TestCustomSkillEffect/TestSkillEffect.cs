@@ -6,6 +6,17 @@ using RPGCreator.SDK.Types;
 
 namespace TestModule.TestCustomSkillEffect;
 
+
+/*
+ *
+ * This is a test implementation.
+ * For now, this should not be used, as the API is still in development, and this file is meant to be used for testing and development purposes.
+ * Note: This implementation is NOT FUNCTIONAL, and a lots of thing are not implemented.
+ * If you want / need to use a custom skill effect, please wait until the API is finalized, as custom skill effect API is being reworked.
+ * 
+ */
+
+
 [SkillEffect]
 public class TestSkillEffect : ISkillEffect
 {
@@ -72,8 +83,25 @@ public class TestSkillEffect : ISkillEffect
         };
     }
 
+    public string Name { get; set; }
     public bool IsDirty { get; set; }
     public bool IsTransient { get; set; }
+    public UrnSingleModule UrnModule { get; }
+    public void SuspendTracking()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ResumeTracking()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void UpdateUrn()
+    {
+        throw new NotImplementedException();
+    }
+
     public void Init(Ulid id)
     {
         Unique = id;
