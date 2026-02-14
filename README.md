@@ -1,7 +1,7 @@
 # ⚔ RPGCreator 🏹
 ## This project is still in development, so it's not at all ready to be used, I created this repository mainly for me to be able to keep the code in a safeplace
 
-*A free, open-source, fully editable RPG Maker alternative made in Monogame.*
+*A free, open-source, fully editable RPG engine made in Monogame.*
 
 Join us:
 <a rel="me" href="https://mastodon.social/@RPGCreator">Mastodon</a>
