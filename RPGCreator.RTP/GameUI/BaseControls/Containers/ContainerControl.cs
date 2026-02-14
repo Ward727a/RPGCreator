@@ -20,16 +20,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace RPGCreator.RTP.GameUI.BaseControls.Containers;
 
-public class ContainerControl : BaseControl
+public abstract class ContainerControl : BaseControl
 {
     #region Events
-    
-    public event EventHandler<BaseControl>? OnAddedChildren;
-    public event EventHandler<BaseControl>? OnRemovedChildren;
     
     public event EventHandler<ControlPropertyChangingEventArgs<bool>>? OnClipsToBoundsChanging;
     public event EventHandler<ControlPropertyChangedEventArgs<bool>>? OnClipsToBoundsChanged;
@@ -37,10 +36,45 @@ public class ContainerControl : BaseControl
     #endregion
     
     protected override string _Name { get; set; } = "ContainerControl";
-    protected virtual bool _canHaveChildren { get; set; } = true;
-    public List<BaseControl> Children { get; } = new();
-
-    public bool ClipsToBounds
+    
+    private readonly List<BaseControl> _internalComponents = new();
+    
+    internal void AddInternalComponent(BaseControl component)
+    {
+        _internalComponents.Add(component);
+        component.Parent = (this);
+        UpdateChildrenBounds();
+    }
+    
+    internal void InsertInternalComponent(int index, BaseControl component)
+    {
+        _internalComponents.Insert(index, component);
+        component.Parent = (this);
+        UpdateChildrenBounds();
+    }
+    
+    internal void RemoveInternalComponent(BaseControl? component = null)
+    {
+        if (component != null)
+        {
+            if (_internalComponents.Remove(component))
+            {
+                component.Parent = (null);
+                UpdateChildrenBounds();
+            }
+        }
+        else
+        {
+            foreach (var internalComponent in _internalComponents)
+            {
+                internalComponent.Parent = (null);
+            }
+            _internalComponents.Clear();
+            UpdateChildrenBounds();
+        }
+    }
+    
+    public bool ClipToBounds
     {
         get;
         set
@@ -53,80 +87,168 @@ public class ContainerControl : BaseControl
         }
     } = false;
 
+    public override void UpdateAnchoredBounds()
+    {
+        base.UpdateAnchoredBounds();
+
+        foreach (var internalComponent in _internalComponents)
+        {
+            internalComponent.UpdateAnchoredBounds();
+        }
+    }
+
     protected virtual void UpdateChildrenBounds()
     {
-        foreach (var child in Children)
+        foreach (var internalComponent in _internalComponents)
         {
-            child.RefreshControl();
+            internalComponent.RefreshControl();
         }
     }
+
     public override BaseControl? GetControlAt(Vector2 worldPosition)
     {
-        if (!CanReceiveMouseEvents) return null;
+        if (IgnoreMouseEvents) return null;
         
-        if (!AbsoluteVisibility || !GlobalsBounds.Contains(worldPosition.ToPoint()))
-            return null;
-        
-        if(ClipsToBounds && !GlobalsBounds.Contains(worldPosition.ToPoint()))
-            return null;
+        var self = base.GetControlAt(worldPosition);
 
-        for (int i = Children.Count - 1; i >= 0; i--)
+        if (self != this) return self;
+        
+        for (int i = _internalComponents.Count - 1; i >= 0; i--)
         {
-            var found = Children[i].GetControlAt(worldPosition);
-            if (found != null) return found;
+            var childResult = _internalComponents[i].GetControlAt(worldPosition);
+            if (childResult != null) return childResult;
         }
-
+            
         return this;
-    }
 
-    public override void Measure()
-    {
-        base.Measure();
-
-        foreach (var child in Children)
-        {
-            child.Measure();
-            
-            if (!GlobalsBounds.Intersects(child.GlobalsBounds))
-            {
-                child.ShouldDrawn = false;
-                continue;
-            }
-            
-            child.ShouldDrawn = true;
-            
-            if(!child.AbsoluteVisibility)
-                child.ShouldDrawn = false;
-        }
     }
 
     public override void Arrange()
     {
         base.Arrange();
-        
-        foreach (var child in Children)
+        foreach (var internalComponent in _internalComponents)
         {
-            child.Arrange();
+            internalComponent.Arrange();
         }
     }
 
-    public override void RefreshControl()
+    public override void Measure()
     {
-        Measure();
-        Arrange();
+        base.Measure();
+        foreach (var internalComponent in _internalComponents)
+        {
+            internalComponent.Measure();
+        }
+    }
+
+    private Rectangle LastScissor { get; set; }
+    
+    protected void BeginContainerDraw()
+    {
+        LastScissor = Renderer.GraphicsDevice.ScissorRectangle;
+        
+        if (!ClipToBounds)
+        {
+            if (Parent == null)
+            {
+                Renderer.SpriteBatch.Begin(rasterizerState: Renderer.ClippingRasterizerState, transformMatrix: Renderer.TransformMatrix);
+                
+                Renderer.DrawDebugBounds(Renderer.SpriteBatch, this);
+            }
+
+            return;
+        };
+        
+        Rectangle contentArea = new Rectangle(
+            GlobalsBounds.X + Padding.Left,
+            GlobalsBounds.Y + Padding.Top,
+            Math.Max(0, GlobalsBounds.Width - Padding.Width),
+            Math.Max(0, GlobalsBounds.Height - Padding.Height)
+        );
+        
+        Rectangle newScissor;
+        if (Parent == null || LastScissor.Width == 0) {
+            newScissor = contentArea;
+        } else {
+            newScissor = Rectangle.Intersect(LastScissor, contentArea);
+        }
+        
+        if (newScissor == LastScissor) return;
+        
+        if(Parent != null)
+            Renderer.SpriteBatch.End();
+        Renderer.GraphicsDevice.ScissorRectangle = newScissor;
+        Renderer.SpriteBatch.Begin(rasterizerState: Renderer.ClippingRasterizerState, transformMatrix: Matrix.Identity);
     }
     
-    public virtual void RemoveChild(BaseControl child)
+    protected void EndContainerDraw()
     {
-        child.SetParent(null);
-        RefreshControl();
-        OnRemovedChildren?.Invoke(this, child);
+        if(Parent == null)
+        {
+            Renderer.SpriteBatch.End();
+            return;
+        }
+        if (!ClipToBounds || Renderer.GraphicsDevice.ScissorRectangle == LastScissor) return;
+        
+        Renderer.SpriteBatch.End();
+        
+        Renderer.GraphicsDevice.ScissorRectangle = LastScissor;
+        
+        if(Parent != null)
+            Renderer.SpriteBatch.Begin(rasterizerState: Renderer.ClippingRasterizerState, transformMatrix: Matrix.Identity);
     }
     
-    public virtual void AddChild(BaseControl child)
+    public override void Draw(bool shouldEndDraw = true)
     {
-        child.SetParent(this);
-        RefreshControl();
-        OnAddedChildren?.Invoke(this, child);
+        base.Draw(false);
+
+        foreach (var internalNonAffectedByPadding in _internalComponents.Where(c => !c.IsAffectedByParentPadding))
+        {
+            internalNonAffectedByPadding.Draw(false);
+        }
+        
+        BeginContainerDraw();
+        foreach (var internalAffectedByPadding in _internalComponents.Where(c => c.IsAffectedByParentPadding))
+        {
+            internalAffectedByPadding.Draw(false);
+        }
+        if(shouldEndDraw && Parent != null)
+            EndContainerDraw();
     }
+
+    public override void Update(TimeSpan deltaTime)
+    {
+        base.Update(deltaTime);
+        foreach (var internalComponent in _internalComponents)
+        {
+            internalComponent.Update(deltaTime);
+        }
+    }
+
+    public override void UpdateInput(Vector2 mousePosition, bool isLeftButtonDown, bool isMiddleButtonDown, bool isRightButtonDown,
+        ref int verticalWheelDelta, ref int horizontalWheelDelta, ref bool isHandled)
+    {
+        foreach (var internalComponent in _internalComponents)
+        {
+            internalComponent.UpdateInput(mousePosition, isLeftButtonDown, isMiddleButtonDown, isRightButtonDown, ref verticalWheelDelta, ref horizontalWheelDelta, ref isHandled);
+            if (isHandled) break;
+        }
+        
+        if(IgnoreMouseEvents || isHandled) return;
+        
+        base.UpdateInput(mousePosition, isLeftButtonDown, isMiddleButtonDown, isRightButtonDown, ref verticalWheelDelta, ref horizontalWheelDelta, ref isHandled);
+    }
+
+    public override string ToString()
+    {
+        var baseString = base.ToString();
+        if (_internalComponents.Count == 0) return baseString;
+        baseString = baseString.TrimEnd(')');
+        baseString += $", InternalComponents({_internalComponents.Count})=[{string.Join(", ", _internalComponents.Select(c => c.ToString()))}])";
+        return baseString;
+    }
+
+    internal abstract void AddChildInternal(BaseControl child);
+    
+    internal abstract void RemoveChildInternal(BaseControl? child = null);
 }

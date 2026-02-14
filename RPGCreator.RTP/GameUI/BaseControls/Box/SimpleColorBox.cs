@@ -20,11 +20,11 @@
 
 using System;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using RPGCreator.RTP.GameUI.BaseControls.Containers;
 
 namespace RPGCreator.RTP.GameUI.BaseControls.Box;
 
-public class SimpleColorBox : BaseControl
+public class SimpleColorBox : SingleChildrenContainerControl
 {
     #region Events
     
@@ -34,8 +34,6 @@ public class SimpleColorBox : BaseControl
     #endregion
 
     protected override string _Name { get; set; } = "SimpleColorBox";
-
-    protected override bool _canReceiveMouseEvents { get; set; } = false;
 
     public Color BackgroundColor
     {
@@ -49,13 +47,35 @@ public class SimpleColorBox : BaseControl
             OnBackgroundColorChanged?.Invoke(this, new (old, value));
             Invalidate();
         }
-    } = Color.White;
+    }
 
-    public override void Draw(SpriteBatch sb)
+    public SimpleColorBox(Color backgroundColor)
+    {
+        BackgroundColor = backgroundColor;
+    }
+    
+    public SimpleColorBox() : this(Color.White)
+    {
+    }
+    
+    public override void Draw(bool shouldEndDraw = true)
     {
         if (!ShouldDrawn || !AbsoluteVisibility || OwningLayer == null)
             return;
+        
+        Renderer.SpriteBatch.Draw(Renderer.PixelTexture, GlobalsBounds, BackgroundColor * (AbsoluteAlpha / 255f));
+        
+        base.Draw(false);
+        
+        
+        if (shouldEndDraw)
+            EndContainerDraw();
+    }
 
-        sb.Draw(OwningLayer.PixelTexture, GlobalsBounds, BackgroundColor * (AbsoluteAlpha / 255f));
+    public override string ToString()
+    {
+        var baseString = base.ToString();
+        baseString = baseString.TrimEnd(')');
+        return $"{baseString}, BackgroundColor: {BackgroundColor})";
     }
 }

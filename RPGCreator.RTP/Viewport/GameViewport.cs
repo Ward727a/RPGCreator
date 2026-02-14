@@ -19,6 +19,7 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System;
+using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.RTP.Extensions;
@@ -26,7 +27,7 @@ using RPGCreator.RTP.GameUI;
 using RPGCreator.RTP.GameUI.BaseControls;
 using RPGCreator.RTP.GameUI.BaseControls.Box;
 using RPGCreator.RTP.GameUI.BaseControls.Containers;
-using RPGCreator.RTP.GameUI.DefaultControls;
+using RPGCreator.RTP.GameUI.BaseControls.Inputs;
 using RPGCreator.RTP.GameUI.Enums;
 using RPGCreator.RTP.GameUI.Layers;
 using RPGCreator.SDK;
@@ -49,12 +50,12 @@ public class GameViewport : BaseGameViewport
     
     private GraphicsDevice _graphicsDevice;
     private SpriteBatch _spriteBatch;
-    private RenderCore _core;
     private UiRenderer _uiRenderer;
 
     private BaseLayer UiLayer;
-    private ContainerControl simpleTestControl;
+    private Panel simpleTestControl;
     private ContainerControl simpleChildControl;
+    private TextButton simpleTextControl;
     
     public GameViewport(RenderTarget2D renderTarget)
     {
@@ -62,65 +63,111 @@ public class GameViewport : BaseGameViewport
     }
 
     private static bool IsFormsInitialized = false;
+    private StackPanel stackPanel;
+    private TextButton buttonTest;
     
-    public void LoadContent(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch, RenderCore core, UiRenderer uiRenderer)
+    private RenderTarget2D _UiCache;
+    
+    public void LoadContent(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch, FontSystem fontSystem)
     {
         _graphicsDevice = graphicsDevice;
         _spriteBatch = spriteBatch;
-        _core = core;
-        _uiRenderer = uiRenderer;
         
-        UiLayer = new BaseLayer("MainUILayer", _graphicsDevice, _spriteBatch);
+        UiLayer = new BaseLayer("MainUILayer", _graphicsDevice, _spriteBatch, fontSystem);
         UiLayer.SetParentViewport(this);
         
-        simpleTestControl = new ContainerControl()
+        simpleTestControl = new Panel()
         {
             Position = new Vector2(50, 50),
-            Size = new Size(200, 100),
-            ClipsToBounds = true
+            Size = new Size(600, 300),
+            ClipToBounds = true,
+            BackgroundColor = new Color(255, 0, 0, 128)
         };
         UiLayer.SetRootControl(simpleTestControl);
         
-        simpleChildControl = new ContainerControl()
-        {
-            Name = "ChildControl",
-            Position = new Vector2(20, 20),
-            Size = new Size(100, 50)
-        };
-        simpleChildControl.Origin = new Vector2(simpleChildControl.Width / 2, simpleChildControl.Height / 2);
-        simpleTestControl.AddChild(simpleChildControl);
+        // simpleChildControl = new ContainerControl()
+        // {
+        //     Name = "ChildControl",
+        //     Position = new Vector2(20, 20),
+        //     Size = new Size(100, 50)
+        // };
+        // simpleChildControl.Origin = new Vector2(simpleChildControl.Width / 2, simpleChildControl.Height / 2);
+        // simpleTestControl.AddChild(simpleChildControl);
+        //
+        // var testTextControl = new TextControl()
+        // {
+        //     Position = new Vector2(10, 10),
+        //     Size = new Size(180, 80),
+        // };
+        // simpleTestControl.AddChild(testTextControl);
+        // testTextControl.Text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+        //
+        // var testSimpleColorBox2 = new SimpleColorBox()
+        // {
+        //     BackgroundColor = Color.Beige,
+        //     Anchors = ControlAnchors.AnchorFull,
+        // };
+        // simpleTestControl.AddChild(testSimpleColorBox2);
+        //
+        // simpleTextControl = new TextButton()
+        // {
+        //     Size = new Size(0, 20),
+        //     Anchors = ControlAnchors.AnchorFullHorizontal,
+        // };
+        // simpleTestControl.AddChild(simpleTextControl);
+        // simpleTextControl.OnClicked += () =>
+        // {
+        //     Logger.Debug("Button clicked!");
+        //     simpleTextControl.Text = "Clicked!";
+        // };
 
-        var testTextControl = new TextControl()
+        stackPanel = new StackPanel()
         {
-            Position = new Vector2(10, 10),
-            Size = new Size(180, 80),
+            AutoSize = true,
+            BackgroundColor = Color.Transparent,
+            ClipToBounds = true
         };
-        simpleTestControl.AddChild(testTextControl);
-        testTextControl.Text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-
-        var testSimpleColorBox2 = new SimpleColorBox()
+        simpleTestControl.AddChild(stackPanel);
+        text = new TextControl()
         {
-            BackgroundColor = Color.Beige,
-            Anchors = ControlAnchors.AnchorFull,
-        };
-        simpleTestControl.AddChild(testSimpleColorBox2);
-        
-        var testSimpleColorBox = new TextButton()
-        {
-            Size = new Size(0, 20),
+            Text = "Hello!",
+            Wrapping = TextWrapping.Wrap,
             Anchors = ControlAnchors.AnchorFullHorizontal,
+            Position = new(10, 50)
         };
-        simpleTestControl.AddChild(testSimpleColorBox);
-        testSimpleColorBox.OnClicked += () =>
+        stackPanel.AddChild(new TextControl()
+        {
+            Text = "World!"
+        });
+        buttonTest = new TextButton()
+        {
+            Size = new Size(100, 20),
+            Text = "Click me!",
+        };
+        buttonTest.OnLeftClicked += () =>
         {
             Logger.Debug("Button clicked!");
+            buttonTest.Text = "Clicked!";
+            text.Text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+            simpleTestControl.Position = new Vector2(simpleTestControl.Position.X + 10, simpleTestControl.Position.Y + 10);
+        }; 
+        stackPanel.AddChild(buttonTest);
+        
+        testScroll = new ScrollContainer()
+        {
+            Position = new Vector2(300, 20),
+            Size = new Size(200, 100)
         };
+        simpleTestControl.AddChild(testScroll);
+        testScroll.SetContent(text);
         
         _pixelTexture = new Texture2D(RenderTarget.GraphicsDevice, 1, 1);
         _pixelTexture.SetData(new[] { Color.White });
     }
     
     private Color bgColor = Color.CornflowerBlue;
+        ScrollContainer testScroll;
+        TextControl text;
     
     
     public override void UpdateAvaloniaControl(IntPtr bitmapControlAddress)
@@ -128,12 +175,62 @@ public class GameViewport : BaseGameViewport
         _bitmapControlAddress = bitmapControlAddress;
     }
 
+    public void RefreshUiCache()
+    {
+        bool needsRedraw = false;
+        if (_UiCache == null)
+        {
+            _UiCache = new RenderTarget2D(_graphicsDevice, RenderTarget.Width, RenderTarget.Height);
+            needsRedraw = true;
+        }
+        else
+        {
+            if (_UiCache.Width != RenderTarget.Width || _UiCache.Height != RenderTarget.Height)
+            {
+                _UiCache.Dispose();
+                _UiCache = new RenderTarget2D(_graphicsDevice, RenderTarget.Width, RenderTarget.Height);
+                needsRedraw = true;
+            }
+        }
+
+        if (UiLayer.RootControl.IsDirty || needsRedraw)
+        {
+            _graphicsDevice.SetRenderTarget(_UiCache);
+            _graphicsDevice.Clear(Color.Transparent);
+            UiLayer.Draw();
+            _graphicsDevice.SetRenderTarget(null);
+        }
+    }
+
     public void Draw(TimeSpan deltaTime)
     {
-        var rs = new RasterizerState { ScissorTestEnable = true };
+        RefreshUiCache();
+        _graphicsDevice.SetRenderTarget(RenderTarget);
         _graphicsDevice.Clear(bgColor);
-        UiLayer.Draw();
         
+        _spriteBatch.Begin();
+        
+        _spriteBatch.Draw(_UiCache, Vector2.Zero, Color.White);
+
+        if (_uiRenderer.CursorTexture == null)
+        {
+            _uiRenderer.CursorTexture = _pixelTexture;
+        }
+        _spriteBatch.Draw(_uiRenderer.CursorTexture, UiLayer._mousePosition, Color.White);
+        
+        _uiRenderer.DrawDebugBounds(_spriteBatch, text);
+        // _uiRenderer.DrawDebugBounds(_spriteBatch, testScroll.ContentPresenter);
+        // _uiRenderer.DrawDebugBounds(_spriteBatch, testScroll.ScrollBarThumb);
+        // _uiRenderer.DrawDebugBounds(_spriteBatch, testScroll.ScrollBarBackground);
+        // Logger.Debug(testScroll.ToString());
+        
+        _spriteBatch.End();
+    }
+    
+    public void SetRenderer(UiRenderer renderer)
+    {
+        _uiRenderer = renderer;
+        _uiRenderer.GraphicsDevice.ScissorRectangle = _spriteBatch.GraphicsDevice.Viewport.Bounds;
     }
 
     public void Update(TimeSpan deltaTime)

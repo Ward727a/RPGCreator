@@ -37,6 +37,7 @@ using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Types;
 using RPGCreator.UI.Contexts;
 using Ursa.Controls;
+using Thickness = Avalonia.Thickness;
 
 namespace _BaseModule.Features.Entity;
 

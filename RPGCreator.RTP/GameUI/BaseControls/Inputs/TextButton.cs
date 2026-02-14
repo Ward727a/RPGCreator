@@ -20,18 +20,15 @@
 
 
 using Microsoft.Xna.Framework;
-using RPGCreator.RTP.GameUI.BaseControls;
-using RPGCreator.RTP.GameUI.BaseControls.Box;
 using RPGCreator.RTP.GameUI.Enums;
-using RPGCreator.RTP.GameUI.InteractableControls;
+using Size = MonoGame.Extended.Size;
 
-namespace RPGCreator.RTP.GameUI.DefaultControls;
+namespace RPGCreator.RTP.GameUI.BaseControls.Inputs;
 
-public class TextButton : InteractableControl
+public class TextButton : ButtonControl
 {
     protected override string _Name { get; set; } = "TextButton";
-    protected override bool _canReceiveMouseEvents { get; set; } = true;
-    protected SimpleColorBox InternalBackground { get; set; }
+    public override bool IgnoreMouseEvents { get; set; } = false;
     protected TextControl InternalText { get; set; }
     
     public string Text
@@ -71,35 +68,9 @@ public class TextButton : InteractableControl
         get;
         set;
     } = Color.White;
-
-    public Color BackgroundNormalColor
-    {
-        get;
-        set;
-    } = Color.Gainsboro;
-
-    public Color BackgroundPressedColor
-    {
-        get;
-        set;
-    } = Color.Red;
-    
-    public Color BackgroundHoverColor
-    {
-        get;
-        set;
-    } = Color.Blue;
     
     public TextButton() : base()
     {
-        InternalBackground = new SimpleColorBox
-        {
-            Name = "Internal_Background",
-            Anchors = ControlAnchors.AnchorFull,
-            IsInternal = true,
-            BackgroundColor = BackgroundNormalColor
-        };
-        
         InternalText = new TextControl
         {
             Name = "Internal_Text",
@@ -107,20 +78,28 @@ public class TextButton : InteractableControl
             IsInternal = true,
             FontSize = 16,
             FontColor = FontNormalColor,
-            Text = "Button"
+            Text = "This is a button!"
         };
         
-        this.AddChild(InternalBackground);
-        this.AddChild(InternalText);
-        
-        RefreshControl();
+        SetContent(InternalText);
         
         OnPressed += PressedState;
         OnReleased += HoveredState;
         OnMouseEnter += HoveredState;
         OnMouseLeave += NormalState;
     }
-    
+
+    public override void Measure()
+    {
+        base.Measure();
+
+        if (!Autosize || InternalText == null)
+            return;
+        
+        var textSize = InternalText.GlobalsBounds.Size;
+        Size = new Size(textSize.X + Padding.Width, textSize.Y + Padding.Height);
+    }
+
     private void PressedState()
     {
         InternalBackground.BackgroundColor = BackgroundPressedColor;
@@ -137,5 +116,12 @@ public class TextButton : InteractableControl
     {
         InternalBackground.BackgroundColor = BackgroundNormalColor;
         InternalText.FontColor = FontNormalColor;
+    }
+
+    public override string ToString()
+    {
+        var baseString = base.ToString();
+        baseString = baseString.TrimEnd(')');
+        return $"{baseString}, FontNormalColor: {FontNormalColor}, FontPressedColor: {FontPressedColor}, FontHoverColor: {FontHoverColor})";
     }
 }

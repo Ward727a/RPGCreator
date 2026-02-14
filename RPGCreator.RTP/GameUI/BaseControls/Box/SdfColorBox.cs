@@ -94,25 +94,25 @@ public class SdfColorBox : SimpleColorBox
         }
     } = Color.Black;
 
-    public override void Draw(SpriteBatch sb)
+    public override void Draw(bool shouldEndDraw = false)
     {
-        if (!AbsoluteVisibility && OwningLayer == null) return;
+        if (!AbsoluteVisibility || OwningLayer == null) return;
         
         _sdfEffect.Parameters["Size"].SetValue(new Vector2(GlobalsBounds.Width, GlobalsBounds.Height));
         _sdfEffect.Parameters["Radius"].SetValue(Radius);
         _sdfEffect.Parameters["Thickness"]?.SetValue(BorderThickness);
         _sdfEffect.Parameters["OutlineColor"]?.SetValue(BorderColor.ToVector4());
         
-        sb.End();
+        Renderer.SpriteBatch.End();
 
         {
-            sb.Begin(effect: _sdfEffect, rasterizerState: OwningLayer!.ClippingRasterizerState);
+            Renderer.SpriteBatch.Begin(effect: _sdfEffect, rasterizerState: OwningLayer!.ClippingRasterizerState);
 
-            sb.Draw(OwningLayer!.PixelTexture, GlobalsBounds, BackgroundColor * (AbsoluteAlpha / 255f));
+            Renderer.SpriteBatch.Draw(Renderer.PixelTexture, GlobalsBounds, BackgroundColor * (AbsoluteAlpha / 255f));
 
-            sb.End();
+            Renderer.SpriteBatch.End();
         }
 
-        sb.Begin(rasterizerState: new RasterizerState { ScissorTestEnable = true });
+        Renderer.SpriteBatch.Begin(rasterizerState: new RasterizerState { ScissorTestEnable = true });
     }
 }

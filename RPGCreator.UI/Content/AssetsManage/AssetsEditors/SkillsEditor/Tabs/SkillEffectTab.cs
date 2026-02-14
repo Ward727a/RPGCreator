@@ -11,6 +11,7 @@ using RPGCreator.SDK.Extensions;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types;
 using Ursa.Controls;
+using Thickness = Avalonia.Thickness;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEditor.Tabs;
 

@@ -20,9 +20,11 @@
 
 using System;
 using FontStashSharp;
+using FontStashSharp.RichText;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
+using RPGCreator.RTP.GameUI.Enums;
 
 namespace RPGCreator.RTP.GameUI.BaseControls;
 
@@ -39,24 +41,25 @@ public class TextControl : BaseControl
     public event EventHandler<ControlPropertyChangingEventArgs<Color>>? OnFontColorChanging;
     public event EventHandler<ControlPropertyChangedEventArgs<Color>>? OnFontColorChanged;
     
+    public event EventHandler<ControlPropertyChangingEventArgs<TextWrapping>>? OnWrappingChanging;
+    public event EventHandler<ControlPropertyChangedEventArgs<TextWrapping>>? OnWrappingChanged;
+    
     #endregion
 
     protected override string _Name { get; set; } = "TextControl";
-    protected override bool _canReceiveMouseEvents { get; set; } = false;
 
     public string Text
     {
-        get;
+        get => _textLayout.Text;
         set
         {
-            OnTextChanging?.Invoke(this, new (field, value));
-            field = value;
-            Measure(); 
-            Arrange();
-            OnTextChanged?.Invoke(this, new (field, value));
-            Invalidate();
+            var oldValue = _textLayout.Text;
+            OnTextChanging?.Invoke(this, new (oldValue, value));
+            _textLayout.Text = value;
+            RefreshControl();
+            OnTextChanged?.Invoke(this, new (oldValue, value));
         }
-    } = "My Text";
+    }
 
     public int FontSize
     {
@@ -83,29 +86,84 @@ public class TextControl : BaseControl
         }
     } = Color.White;
 
-    private DynamicSpriteFont? _font;
-    
-    public override void Draw(SpriteBatch sb)
+    public TextWrapping Wrapping
     {
+        get;
+        set
+        {
+            if (Equals(field, value))
+            {
+                return;
+            }
+
+            var old = field;
+            OnWrappingChanging?.Invoke(this, new (old, value));
+            field = value;
+            OnWrappingChanged?.Invoke(this, new (old, value));
+            RefreshControl();
+        }
+    } = TextWrapping.NoWrap;
+
+    private DynamicSpriteFont? _font;
+    private RichTextLayout _textLayout;
+    private Size? DefaultSize = null;
+
+    public TextControl()
+    {
+        if(_font == null)
+            RefreshFont();
+        _textLayout = new RichTextLayout()
+        {
+            Font = _font,
+            Text = "My text",
+            Width = Wrapping == TextWrapping.Wrap ? (Size.Width > 0 ? Size.Width : null) : null
+        };
+    }
+    
+    public override void Draw(bool shouldEndDraw = true)
+    {
+        
         if (_font == null)
         {
             RefreshFont();
         }
-
-        _font!.DrawText(sb, Text, GlobalsBounds.Location.ToVector2() + Origin, FontColor * (AbsoluteAlpha / 255f), origin: Origin);
-        sb.DrawCircle(Origin + GlobalsBounds.Location.ToVector2(), 2, 16, Color.Red * .2f, 2);
+        
+        _textLayout.Draw(Renderer.SpriteBatch, GlobalsBounds.Location.ToVector2(), FontColor * (AbsoluteAlpha / 255f));
     }
 
     public override void Measure()
     {
+        if (!DefaultSize.HasValue)
+        {
+            DefaultSize = Size;
+        }
+
+        if (Anchors.HasFlag(ControlAnchors.AnchorFullHorizontal) && GlobalsBounds.Width != DefaultSize.Value.Width)
+        {
+            DefaultSize = new Size(GlobalsBounds.Width, DefaultSize.Value.Height);
+        }
+        if (Anchors.HasFlag(ControlAnchors.AnchorFullVertical) && GlobalsBounds.Height != DefaultSize.Value.Height)
+        {
+            DefaultSize = new Size(DefaultSize.Value.Width, GlobalsBounds.Height);
+        }
+        
         if (_font == null) RefreshFont();
 
         if (_font != null && !string.IsNullOrEmpty(Text))
         {
-            var size = _font.MeasureString(Text);
-        
-            Size = new Size((int)size.X, (int)size.Y);
-            Origin = new Vector2(Size.Width / 2f, Size.Height / 2f);
+            var size = _textLayout.Measure(null);
+
+            if (Wrapping == TextWrapping.Wrap)
+            {
+                _textLayout.Width = DefaultSize.Value.Width > 0 ? DefaultSize.Value.Width : null;
+                var sizeP = _textLayout.Measure(DefaultSize.Value.Width > 0 ? DefaultSize.Value.Width : null);
+
+                Size = new Size(sizeP.X, sizeP.Y);
+            }
+            else
+            {
+                Size = new Size((int)size.X, (int)size.Y);
+            }
         }
 
         base.Measure();
@@ -114,13 +172,15 @@ public class TextControl : BaseControl
     public override void Arrange()
     {
         base.Arrange();
+
     }
 
     private void RefreshFont()
     {
         if (OwningLayer == null) return;
-        _font = OwningLayer.FontSystem.GetFont(FontSize);
+        _font = Renderer.FontSystem.GetFont(FontSize);
         if(_font == null)
             throw new Exception($"Failed to get font with size {FontSize} from the FontSystem.");
+        _textLayout.Font = _font;
     }
 }

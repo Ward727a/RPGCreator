@@ -37,6 +37,7 @@ using RPGCreator.UI.Common;
 using RPGCreator.UI.Contexts;
 using RPGCreator.UI.Extensions;
 using Ursa.Controls;
+using Thickness = Avalonia.Thickness;
 
 namespace _BaseModule.UI.StatsFeature;
 

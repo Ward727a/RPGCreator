@@ -20,14 +20,14 @@
 
 using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.RTP.GameUI.BaseControls.Box;
 using RPGCreator.RTP.GameUI.Enums;
 
 namespace RPGCreator.RTP.GameUI.BaseControls.Containers;
 
-public class Panel : ContainerControl
+public class Panel : MultiChildrenContainerControl
 {
-    
     #region Events
     
     public event EventHandler<ControlPropertyChangingEventArgs<SimpleColorBox?>>? OnBackgroundChanging;
@@ -58,7 +58,7 @@ public class Panel : ContainerControl
             IsInternal = true
         };
         
-        base.AddChild(Background);
+        AddInternalComponent(Background);
     }
 
     public override void AddChild(BaseControl child)
@@ -72,12 +72,13 @@ public class Panel : ContainerControl
         if (child == Background) return;
         base.RemoveChild(child);
     }
-    
+
     public void SetBackground<T>(T newBackground) where T : SimpleColorBox
     {
         if (Equals(newBackground, Background)) return;
         
-        base.RemoveChild(Background);
+        RemoveInternalComponent(Background);
+        Background.SetParent(null);
         
         newBackground.Anchors = ControlAnchors.AnchorFull;
         newBackground.Position = Vector2.Zero;
@@ -86,10 +87,8 @@ public class Panel : ContainerControl
         var old = Background;
         OnBackgroundChanging?.Invoke(this, new (old, newBackground));
         Background = newBackground;
-        base.AddChild(Background);
         OnBackgroundChanged?.Invoke(this, new (old, Background));
         
-        Children.Insert(0, newBackground);
-        Background.SetParent(this);
+        InsertInternalComponent(0, newBackground);
     }
 }

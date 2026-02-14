@@ -20,6 +20,7 @@
 
 using System;
 using System.IO;
+using System.Numerics;
 using System.Reflection;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
@@ -27,10 +28,11 @@ using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.RTP.Extensions;
 using RPGCreator.RTP.GameUI.BaseControls;
 using RPGCreator.RTP.GameUI.BaseControls.Containers;
-using RPGCreator.RTP.GameUI.Enums;
-using RPGCreator.RTP.GameUI.InteractableControls;
+using RPGCreator.RTP.Viewport;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Editor.Rendering;
+using RPGCreator.SDK.Logging;
+using Vector2 = Microsoft.Xna.Framework.Vector2;
 
 namespace RPGCreator.RTP.GameUI.Layers;
 
@@ -70,92 +72,42 @@ public class BaseLayer
     
     public readonly RasterizerState ClippingRasterizerState = new RasterizerState { ScissorTestEnable = true };
     
-    public readonly Texture2D PixelTexture;
-    
-    public FontSystem FontSystem { get; private init; }
     
     private readonly GraphicsDevice _graphicsDevice;
     private readonly SpriteBatch sb;
 
     private BaseGameViewport ParentViewport;
     
+    private UiRenderer _uiRenderer;
+    
     public void SetParentViewport(BaseGameViewport viewport)
     {
         ParentViewport = viewport;
+        (ParentViewport as GameViewport).SetRenderer(_uiRenderer);
     }
     
-    public BaseLayer(string name, GraphicsDevice graphicsDevice, SpriteBatch spriteBatch, FontSystem? fontSystem = null)
+    public BaseLayer(string name, GraphicsDevice graphicsDevice, SpriteBatch spriteBatch, FontSystem fontSystem)
     {
         Name = name;
         _graphicsDevice = graphicsDevice;
         sb = spriteBatch;
         
-        PixelTexture = new Texture2D(graphicsDevice, 1, 1);
-        PixelTexture.SetData(new[] { Color.White });
-        
-        if(fontSystem != null)
-            FontSystem = fontSystem;
-        else
-        {
-            var settings = new FontSystemSettings()
-            {
-                FontResolutionFactor = 2f,
-                KernelWidth = 2,
-                KernelHeight = 2,
-            };
-            FontSystem = new FontSystem(settings);
-            FontSystem.AddFont(File.ReadAllBytes(@"C:\\Windows\Fonts\arial.ttf"));
-        }
+        _uiRenderer = new UiRenderer(_graphicsDevice, sb, fontSystem, Matrix4x4.Identity);
     }
     
     public virtual void Draw()
     {
         if(RootControl == null || !IsVisible) return;
         
-        sb.Begin(rasterizerState: ClippingRasterizerState, transformMatrix: TransformMatrix);
-        DrawControl(RootControl);
-        sb.End();
+        RootControl.Draw();
     }
 
-    public virtual void DrawControl(BaseControl control)
-    {
-        if (!control.AbsoluteVisibility) return;
-        
-        Rectangle currentScissor = _graphicsDevice.ScissorRectangle;
-        bool mustClip = ((control as ContainerControl)?.ClipsToBounds) ?? false;
-        
-        control.Draw(sb);
-        
-        if(mustClip)
-        {
-            var newScissor = Rectangle.Intersect(currentScissor, control.GlobalsBounds);
-            
-            if (newScissor != currentScissor)
-            {
-                sb.End();
-                _graphicsDevice.ScissorRectangle = newScissor;
-                sb.Begin(rasterizerState: ClippingRasterizerState, transformMatrix: TransformMatrix);
-            }
-        }
-        
-        if(control is ContainerControl container)
-        {
-            foreach (var child in container.Children)
-            {
-                DrawControl(child);
-            }
-
-            if (mustClip && _graphicsDevice.ScissorRectangle != currentScissor)
-            {
-                sb.End();
-                _graphicsDevice.ScissorRectangle = currentScissor;
-                sb.Begin(rasterizerState: ClippingRasterizerState, transformMatrix: TransformMatrix);
-            }
-        }
-    }
-
-    private Vector2 _mousePosition;
+    private int _verticalWheelDelta = 0;
+    private int _horizontalWheelDelta = 0;
+    internal Vector2 _mousePosition;
     private bool _isLeftButtonDown;
+    private bool _isMiddleButtonDown;
+    private bool _isRightButtonDown;
     
     public virtual void Update(TimeSpan deltaTime)
     {
@@ -163,6 +115,10 @@ public class BaseLayer
         var mouseState = EngineStates.ViewportMouseState;
         _mousePosition = mouseState.Position.ToXnaFast();
         _isLeftButtonDown = mouseState.LeftButtonPressed;
+        _isMiddleButtonDown = mouseState.MiddleButtonPressed;
+        _isRightButtonDown = mouseState.RightButtonPressed;
+        _verticalWheelDelta = mouseState.WheelDelta;
+        _horizontalWheelDelta = mouseState.HorizontalWheelDelta;
         
         UpdateControl(RootControl, deltaTime);
     }
@@ -171,26 +127,18 @@ public class BaseLayer
     {
         if (!control.AbsoluteEnabled) return;
         
+        var isHandled = false;
         control.Update(deltaTime);
-        if (control is InteractableControl interactable)
-        {
-            interactable.UpdateInput(_mousePosition, _isLeftButtonDown);
-        }
-
-        if (control is ContainerControl container)
-        {
-            foreach (var child in container.Children)
-            {
-                UpdateControl(child, deltaTime);
-            }
-        }
+        control.UpdateInput(_mousePosition, _isLeftButtonDown, _isMiddleButtonDown, _isRightButtonDown, ref _verticalWheelDelta, ref _horizontalWheelDelta, ref isHandled);
     }
     
     public void SetRootControl(BaseControl root)
     {
         RootControl?.OnInvalidate -= RefreshTarget;
         RootControl?.OwningLayer = null;
+        RootControl?.Renderer = null;
         RootControl = root;
+        RootControl.Renderer = _uiRenderer;
         RootControl.OwningLayer = this;
         RootControl?.OnInvalidate += RefreshTarget;
     }

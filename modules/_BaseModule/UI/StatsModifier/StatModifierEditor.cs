@@ -34,6 +34,7 @@ using RPGCreator.UI.Contexts;
 using RPGCreator.UI.Extensions;
 using Ursa.Controls;
 using AutoCompleteBox = Avalonia.Controls.AutoCompleteBox;
+using Thickness = Avalonia.Thickness;
 
 namespace _BaseModule.UI.StatsModifier;
 

@@ -49,4 +49,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources/**" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="GameUI\DefaultControls\" />
+  </ItemGroup>
 </Project>

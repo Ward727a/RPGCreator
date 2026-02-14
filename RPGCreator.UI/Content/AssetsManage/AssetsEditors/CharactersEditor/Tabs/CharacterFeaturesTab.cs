@@ -22,6 +22,7 @@ using RPGCreator.SDK.Types;
 using RPGCreator.UI.Common.Modal.Browser;
 using RPGCreator.UI.Contexts;
 using Ursa.Controls;
+using Thickness = Avalonia.Thickness;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;
 

@@ -29,6 +29,7 @@ using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types;
 using RPGCreator.UI.Contexts;
+using Thickness = Avalonia.Thickness;
 
 namespace RPGCreator.UI.Common;
 

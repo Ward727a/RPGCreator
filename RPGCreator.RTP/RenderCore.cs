@@ -19,6 +19,8 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System;
+using System.IO;
+using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.RTP.GameUI;
@@ -46,14 +48,11 @@ public sealed class RenderCore : Game, IGameRenderCore
     private SpriteBatch _spriteBatch;
     private Texture2D _pixelTexture;
 
-    private UiRenderer _uiRenderer = new UiRenderer();
-    
     public RenderCore(MonogameViewportService parentService)
     {
         _parentService = parentService;
         Graphics = new GraphicsDeviceManager(this);
-        // Sous DesktopGL (OpenGL), on peut souvent cacher la fenêtre via le handle
-        this.IsMouseVisible = true;
+        this.IsMouseVisible = false;
         RuntimeServices.GameRunner = this;
         
     }
@@ -66,13 +65,25 @@ public sealed class RenderCore : Game, IGameRenderCore
 
     public GraphicsDeviceManager Graphics { get; set; }
 
+    FontSystem? FontSystem { get; set; } = null!;
     protected override void LoadContent()
     {
         base.LoadContent();
         GraphicsDevice.Reset();
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-        _uiRenderer.Initialize(GraphicsDevice);
         SdfColorBox.LoadSdfEffect(GraphicsDevice);
+        if (FontSystem == null)
+        {
+            var settings = new FontSystemSettings()
+            {
+                FontResolutionFactor = 2f,
+                KernelWidth = 2,
+                KernelHeight = 2,
+            };
+            FontSystem = new FontSystem(settings);
+            FontSystem.AddFont(File.ReadAllBytes(@"C:\\Windows\Fonts\arial.ttf"));
+        }
+
         OnLoad?.Invoke();
     }
 
@@ -81,10 +92,9 @@ public sealed class RenderCore : Game, IGameRenderCore
     {
         return new RenderTarget2D(GraphicsDevice, width, height);
     }
-
     public void LoadContent(GameViewport viewport)
     {
-        viewport.LoadContent(GraphicsDevice, _spriteBatch, this, _uiRenderer);
+        viewport.LoadContent(GraphicsDevice, _spriteBatch, FontSystem!);
     }
 
     protected override void Draw(GameTime gameTime)
@@ -105,7 +115,6 @@ public sealed class RenderCore : Game, IGameRenderCore
 
             if (viewport is GameViewport gv && gv.RenderTarget != null)
             {
-                GraphicsDevice.SetRenderTarget(gv.RenderTarget);
                 viewport.DrawViewport(gameTime.ElapsedGameTime);
             }
         }
