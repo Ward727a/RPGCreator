@@ -18,22 +18,18 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+namespace RPGCreator.RTP.GameUI.Enums;
 
-namespace RPGCreator.RTP.GameUI.BaseControls.Containers;
-
-/// <summary>
-/// A container control is a control that can contain other controls.
-/// </summary>
-public abstract class ContainerControl : BaseComplexControl
+public enum HorizontalAlignment
 {
-    protected override string _Name { get; set; } = "ContainerControl";
+    Left,
+    Center,
+    Right
+}
 
-    internal abstract void AddChildInternal(BaseControl child);
-    
-    internal abstract void RemoveChildInternal(BaseControl? child = null);
+public enum VerticalAlignment
+{
+    Top,
+    Center,
+    Bottom
 }

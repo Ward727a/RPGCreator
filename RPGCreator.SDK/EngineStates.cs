@@ -53,6 +53,8 @@ public static class EngineStates
     /// The name of the application.
     /// </summary>
     public static string ApplicationName => "RPG Creator";
+    public static TimeSpan ElapsedTime { get; set; }
+    public static TimeSpan TotalTime { get; set; }
     /// <summary>
     /// The current version of the engine.
     /// </summary>

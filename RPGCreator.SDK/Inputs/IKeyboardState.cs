@@ -354,6 +354,52 @@ public enum KeyboardKeys
     OemClear = 254, // 0x000000FE
 }
 
+public static class KeyboardKeysExtensions
+{
+    /// <summary>
+    /// Indicates whether the specified key is a modifier key (SHIFT, CONTROL, ALT).
+    /// </summary>
+    public static bool IsModifierKey(this KeyboardKeys key)
+    {
+        return key == KeyboardKeys.LeftShift || key == KeyboardKeys.RightShift ||
+               key == KeyboardKeys.LeftControl || key == KeyboardKeys.RightControl ||
+               key == KeyboardKeys.LeftAlt || key == KeyboardKeys.RightAlt;
+    }
+    
+    public static char? ToChar(this KeyboardKeys key, bool shiftPressed)
+    {
+        if (key >= KeyboardKeys.A && key <= KeyboardKeys.Z)
+        {
+            char c = (char)('A' + (key - KeyboardKeys.A));
+            return shiftPressed ? c : char.ToLower(c);
+        }
+        
+        if (key >= KeyboardKeys.D0 && key <= KeyboardKeys.D9)
+        {
+            char c = (char)('0' + (key - KeyboardKeys.D0));
+            if (shiftPressed)
+            {
+                return key switch
+                {
+                    KeyboardKeys.D1 => '!',
+                    KeyboardKeys.D2 => '@',
+                    KeyboardKeys.D3 => '#',
+                    KeyboardKeys.D4 => '$',
+                    KeyboardKeys.D5 => '%',
+                    KeyboardKeys.D6 => '^',
+                    KeyboardKeys.D7 => '&',
+                    KeyboardKeys.D8 => '*',
+                    KeyboardKeys.D9 => '(',
+                    _ => c
+                };
+            }
+            return c;
+        }
+
+        return null;
+    }
+}
+
 public readonly ref struct RawKeyboardData
 {
     public readonly ReadOnlySpan<KeyboardKeys> PressedKeys;
@@ -370,10 +416,13 @@ public readonly ref struct RawKeyboardData
 
 public interface IKeyboardState
 {
+    event Action<char> TextInput;
     event Action<KeyboardKeys> KeyDown;
     event Action<KeyboardKeys> KeyUp;
     
     void Update(RawKeyboardData data);
+
+    void UpdateInput(char text);
 
     /// <summary>
     /// Indicates whether the specified key is currently pressed.

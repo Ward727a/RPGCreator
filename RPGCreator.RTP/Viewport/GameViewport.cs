@@ -25,7 +25,7 @@ using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.RTP.Extensions;
 using RPGCreator.RTP.GameUI;
 using RPGCreator.RTP.GameUI.BaseControls;
-using RPGCreator.RTP.GameUI.BaseControls.Box;
+using RPGCreator.RTP.GameUI.BaseControls.BackgroundBox;
 using RPGCreator.RTP.GameUI.BaseControls.Containers;
 using RPGCreator.RTP.GameUI.BaseControls.Inputs;
 using RPGCreator.RTP.GameUI.Enums;
@@ -78,51 +78,17 @@ public class GameViewport : BaseGameViewport
         
         simpleTestControl = new Panel()
         {
+            Name = "Panel1 (ROOT CONTROL)",
             Position = new Vector2(50, 50),
             Size = new Size(600, 300),
             ClipToBounds = true,
             BackgroundColor = new Color(255, 0, 0, 128)
         };
         UiLayer.SetRootControl(simpleTestControl);
-        
-        // simpleChildControl = new ContainerControl()
-        // {
-        //     Name = "ChildControl",
-        //     Position = new Vector2(20, 20),
-        //     Size = new Size(100, 50)
-        // };
-        // simpleChildControl.Origin = new Vector2(simpleChildControl.Width / 2, simpleChildControl.Height / 2);
-        // simpleTestControl.AddChild(simpleChildControl);
-        //
-        // var testTextControl = new TextControl()
-        // {
-        //     Position = new Vector2(10, 10),
-        //     Size = new Size(180, 80),
-        // };
-        // simpleTestControl.AddChild(testTextControl);
-        // testTextControl.Text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-        //
-        // var testSimpleColorBox2 = new SimpleColorBox()
-        // {
-        //     BackgroundColor = Color.Beige,
-        //     Anchors = ControlAnchors.AnchorFull,
-        // };
-        // simpleTestControl.AddChild(testSimpleColorBox2);
-        //
-        // simpleTextControl = new TextButton()
-        // {
-        //     Size = new Size(0, 20),
-        //     Anchors = ControlAnchors.AnchorFullHorizontal,
-        // };
-        // simpleTestControl.AddChild(simpleTextControl);
-        // simpleTextControl.OnClicked += () =>
-        // {
-        //     Logger.Debug("Button clicked!");
-        //     simpleTextControl.Text = "Clicked!";
-        // };
 
         stackPanel = new StackPanel()
         {
+            Name = "StackPanel",
             AutoSize = true,
             BackgroundColor = Color.Transparent,
             ClipToBounds = true
@@ -130,6 +96,7 @@ public class GameViewport : BaseGameViewport
         simpleTestControl.AddChild(stackPanel);
         text = new TextControl()
         {
+            Name = "HelloText",
             Text = "Hello!",
             Wrapping = TextWrapping.Wrap,
             Anchors = ControlAnchors.AnchorFullHorizontal,
@@ -137,10 +104,12 @@ public class GameViewport : BaseGameViewport
         };
         stackPanel.AddChild(new TextControl()
         {
+            Name = "WorldText",
             Text = "World!"
         });
         buttonTest = new TextButton()
         {
+            Name = "ButtonTest",
             Size = new Size(100, 20),
             Text = "Click me!",
         };
@@ -155,11 +124,31 @@ public class GameViewport : BaseGameViewport
         
         testScroll = new ScrollContainer()
         {
+            Name = "ScrollContainer",
             Position = new Vector2(300, 20),
             Size = new Size(200, 100)
         };
         simpleTestControl.AddChild(testScroll);
         testScroll.SetContent(text);
+
+        textInput = new TextBox("Type something...")
+        {
+            Name = "textInput",
+            Position = new Vector2(50, 50),
+            Size = new Size(300, 40),
+            Height = 40,
+        };
+        simpleTestControl.AddChild(textInput);
+
+        var textInputBackground = new NineGridBox();
+        textInputBackground.Texture = Texture2D.FromFile(graphicsDevice,
+            "C:\\Users\\Admin\\Pictures\\01_TravelBookLite\\Sprites\\UI_TravelBook_Slot01a.png");
+        textInputBackground.Left = 4;
+        textInputBackground.Bottom = 4;
+        textInputBackground.Top = 4;
+        textInputBackground.Right = 4;
+        
+        textInput.SetBackground(textInputBackground);
         
         _pixelTexture = new Texture2D(RenderTarget.GraphicsDevice, 1, 1);
         _pixelTexture.SetData(new[] { Color.White });
@@ -169,13 +158,14 @@ public class GameViewport : BaseGameViewport
         ScrollContainer testScroll;
         TextControl text;
     
+        TextBox textInput;
     
     public override void UpdateAvaloniaControl(IntPtr bitmapControlAddress)
     {
         _bitmapControlAddress = bitmapControlAddress;
     }
 
-    public void RefreshUiCache()
+    public void RefreshUiCache(TimeSpan deltaTime)
     {
         bool needsRedraw = false;
         if (_UiCache == null)
@@ -197,14 +187,14 @@ public class GameViewport : BaseGameViewport
         {
             _graphicsDevice.SetRenderTarget(_UiCache);
             _graphicsDevice.Clear(Color.Transparent);
-            UiLayer.Draw();
+            UiLayer.Draw(deltaTime);
             _graphicsDevice.SetRenderTarget(null);
         }
     }
 
     public void Draw(TimeSpan deltaTime)
     {
-        RefreshUiCache();
+        RefreshUiCache(deltaTime);
         _graphicsDevice.SetRenderTarget(RenderTarget);
         _graphicsDevice.Clear(bgColor);
         
@@ -218,7 +208,7 @@ public class GameViewport : BaseGameViewport
         }
         _spriteBatch.Draw(_uiRenderer.CursorTexture, UiLayer._mousePosition, Color.White);
         
-        _uiRenderer.DrawDebugBounds(_spriteBatch, text);
+        // _uiRenderer.DrawDebugBounds(_spriteBatch, textInput);
         // _uiRenderer.DrawDebugBounds(_spriteBatch, testScroll.ContentPresenter);
         // _uiRenderer.DrawDebugBounds(_spriteBatch, testScroll.ScrollBarThumb);
         // _uiRenderer.DrawDebugBounds(_spriteBatch, testScroll.ScrollBarBackground);

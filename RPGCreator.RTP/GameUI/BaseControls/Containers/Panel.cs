@@ -21,7 +21,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using RPGCreator.RTP.GameUI.BaseControls.Box;
+using RPGCreator.RTP.GameUI.BaseControls.BackgroundBox;
 using RPGCreator.RTP.GameUI.Enums;
 
 namespace RPGCreator.RTP.GameUI.BaseControls.Containers;

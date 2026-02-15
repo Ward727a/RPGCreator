@@ -22,7 +22,7 @@ using System;
 using Microsoft.Xna.Framework;
 using RPGCreator.RTP.GameUI.BaseControls.Containers;
 
-namespace RPGCreator.RTP.GameUI.BaseControls.Box;
+namespace RPGCreator.RTP.GameUI.BaseControls.BackgroundBox;
 
 public class SimpleColorBox : SingleChildrenContainerControl
 {
@@ -58,18 +58,21 @@ public class SimpleColorBox : SingleChildrenContainerControl
     {
     }
     
-    public override void Draw(bool shouldEndDraw = true)
+    public override void Draw(TimeSpan deltaTime, bool shouldEndDraw = true)
     {
         if (!ShouldDrawn || !AbsoluteVisibility || OwningLayer == null)
             return;
         
         Renderer.SpriteBatch.Draw(Renderer.PixelTexture, GlobalsBounds, BackgroundColor * (AbsoluteAlpha / 255f));
         
-        base.Draw(false);
-        
+        base.Draw(deltaTime, false);
         
         if (shouldEndDraw)
             EndContainerDraw();
+    }
+    protected void DirectBaseDraw(TimeSpan deltaTime, bool shouldEndDraw = true)
+    {
+        base.Draw(deltaTime, shouldEndDraw);
     }
 
     public override string ToString()

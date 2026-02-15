@@ -31,6 +31,7 @@ using RPGCreator.RTP.GameUI.BaseControls.Containers;
 using RPGCreator.RTP.Viewport;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Editor.Rendering;
+using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Logging;
 using Vector2 = Microsoft.Xna.Framework.Vector2;
 
@@ -92,33 +93,36 @@ public class BaseLayer
         _graphicsDevice = graphicsDevice;
         sb = spriteBatch;
         
+        _mouseState = EngineStates.ViewportMouseState;
+        _keyboardState = EngineStates.ViewportKeyboardState;
         _uiRenderer = new UiRenderer(_graphicsDevice, sb, fontSystem, Matrix4x4.Identity);
     }
     
-    public virtual void Draw()
+    public virtual void Draw(TimeSpan deltaTime)
     {
         if(RootControl == null || !IsVisible) return;
         
-        RootControl.Draw();
+        RootControl.Draw(deltaTime);
     }
 
+    private readonly IMouseState _mouseState;
     private int _verticalWheelDelta = 0;
     private int _horizontalWheelDelta = 0;
     internal Vector2 _mousePosition;
     private bool _isLeftButtonDown;
     private bool _isMiddleButtonDown;
     private bool _isRightButtonDown;
+    private readonly IKeyboardState _keyboardState;
     
     public virtual void Update(TimeSpan deltaTime)
     {
         if(RootControl == null || !IsEnabled) return;
-        var mouseState = EngineStates.ViewportMouseState;
-        _mousePosition = mouseState.Position.ToXnaFast();
-        _isLeftButtonDown = mouseState.LeftButtonPressed;
-        _isMiddleButtonDown = mouseState.MiddleButtonPressed;
-        _isRightButtonDown = mouseState.RightButtonPressed;
-        _verticalWheelDelta = mouseState.WheelDelta;
-        _horizontalWheelDelta = mouseState.HorizontalWheelDelta;
+        _mousePosition = _mouseState.Position.ToXnaFast();
+        _isLeftButtonDown = _mouseState.LeftButtonPressed;
+        _isMiddleButtonDown = _mouseState.MiddleButtonPressed;
+        _isRightButtonDown = _mouseState.RightButtonPressed;
+        _verticalWheelDelta = _mouseState.WheelDelta;
+        _horizontalWheelDelta = _mouseState.HorizontalWheelDelta;
         
         UpdateControl(RootControl, deltaTime);
     }
@@ -129,7 +133,11 @@ public class BaseLayer
         
         var isHandled = false;
         control.Update(deltaTime);
-        control.UpdateInput(_mousePosition, _isLeftButtonDown, _isMiddleButtonDown, _isRightButtonDown, ref _verticalWheelDelta, ref _horizontalWheelDelta, ref isHandled);
+        control.UpdateMouseInput(_mousePosition, _isLeftButtonDown, _isMiddleButtonDown, _isRightButtonDown, ref _verticalWheelDelta, ref _horizontalWheelDelta, ref isHandled);
+        if (BaseControl.FocusedControl != null)
+        {
+            BaseControl.FocusedControl.UpdateKeyboardInput(_keyboardState);
+        }
     }
     
     public void SetRootControl(BaseControl root)

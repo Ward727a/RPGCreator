@@ -28,7 +28,6 @@ namespace RPGCreator.RTP.GameUI.BaseControls.Inputs;
 public class TextButton : ButtonControl
 {
     protected override string _Name { get; set; } = "TextButton";
-    public override bool IgnoreMouseEvents { get; set; } = false;
     protected TextControl InternalText { get; set; }
     
     public string Text

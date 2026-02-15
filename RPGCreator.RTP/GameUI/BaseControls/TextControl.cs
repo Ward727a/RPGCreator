@@ -25,6 +25,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using RPGCreator.RTP.GameUI.Enums;
+using RPGCreator.SDK.Logging;
 
 namespace RPGCreator.RTP.GameUI.BaseControls;
 
@@ -43,6 +44,12 @@ public class TextControl : BaseControl
     
     public event EventHandler<ControlPropertyChangingEventArgs<TextWrapping>>? OnWrappingChanging;
     public event EventHandler<ControlPropertyChangedEventArgs<TextWrapping>>? OnWrappingChanged;
+    
+    public event EventHandler<ControlPropertyChangingEventArgs<HorizontalAlignment>>? OnHorizontalAlignmentChanging;
+    public event EventHandler<ControlPropertyChangedEventArgs<HorizontalAlignment>>? OnHorizontalAlignmentChanged;
+    
+    public event EventHandler<ControlPropertyChangingEventArgs<VerticalAlignment>>? OnVerticalAlignmentChanging;
+    public event EventHandler<ControlPropertyChangedEventArgs<VerticalAlignment>>? OnVerticalAlignmentChanged;
     
     #endregion
 
@@ -105,8 +112,38 @@ public class TextControl : BaseControl
     } = TextWrapping.NoWrap;
 
     private DynamicSpriteFont? _font;
-    private RichTextLayout _textLayout;
+    internal RichTextLayout _textLayout;
     private Size? DefaultSize = null;
+
+    public HorizontalAlignment HorizontalAlignment
+    {
+        get;
+        set
+        {
+            if (Equals(field, value)) return;
+            var old = field;
+            OnHorizontalAlignmentChanging?.Invoke(this, new (old, value));
+            field = value;
+            OnHorizontalAlignmentChanged?.Invoke(this, new (old, value));
+            Invalidate();
+        }
+    } = HorizontalAlignment.Left;
+
+    public VerticalAlignment VerticalAlignment
+    {
+        get;
+        set
+        {
+            if (Equals(field, value)) return;
+            var old = field;
+            OnVerticalAlignmentChanging?.Invoke(this, new (old, value));
+            field = value;
+            OnVerticalAlignmentChanged?.Invoke(this, new (old, value));
+            Invalidate();
+        }
+    } = VerticalAlignment.Top;
+
+    public Vector2 TextOffset => CalculateTextOffset();
 
     public TextControl()
     {
@@ -120,15 +157,16 @@ public class TextControl : BaseControl
         };
     }
     
-    public override void Draw(bool shouldEndDraw = true)
+    public override void Draw(TimeSpan deltaTime, bool shouldEndDraw = true)
     {
-        
         if (_font == null)
         {
             RefreshFont();
         }
         
-        _textLayout.Draw(Renderer.SpriteBatch, GlobalsBounds.Location.ToVector2(), FontColor * (AbsoluteAlpha / 255f));
+        var finalPos = GlobalsBounds.Location.ToVector2() + TextOffset;
+        
+        _textLayout.Draw(Renderer.SpriteBatch, finalPos, FontColor * (AbsoluteAlpha / 255f));
     }
 
     public override void Measure()
@@ -173,6 +211,47 @@ public class TextControl : BaseControl
     {
         base.Arrange();
 
+    }
+    
+    private Vector2 CalculateTextOffset()
+    {
+        if (_textLayout == null) return Vector2.Zero;
+
+        var textSize = _textLayout.Measure(DefaultSize.Value.Width > 0 ? DefaultSize.Value.Width : null);
+        var bounds = Parent?.GlobalsBounds ?? GlobalsBounds;
+
+        float offsetX = 0;
+        float offsetY = 0;
+
+        switch (HorizontalAlignment)
+        {
+            case HorizontalAlignment.Center:
+                offsetX = (bounds.Width - textSize.X) / 2f;
+                break;
+            case HorizontalAlignment.Right:
+                offsetX = bounds.Width - textSize.X;
+                break;
+            case HorizontalAlignment.Left:
+            default:
+                offsetX = 0;
+                break;
+        }
+
+        switch (VerticalAlignment)
+        {
+            case VerticalAlignment.Center:
+                offsetY = (bounds.Height - textSize.Y) / 2f;
+                break;
+            case VerticalAlignment.Bottom:
+                offsetY = bounds.Height - textSize.Y;
+                break;
+            case VerticalAlignment.Top:
+            default:
+                offsetY = 0;
+                break;
+        }
+
+        return new Vector2(offsetX, offsetY);
     }
 
     private void RefreshFont()

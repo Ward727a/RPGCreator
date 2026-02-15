@@ -23,7 +23,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Microsoft.Xna.Framework;
 using MonoGame.Extended;
-using RPGCreator.RTP.GameUI.BaseControls.Box;
+using RPGCreator.RTP.GameUI.BaseControls.BackgroundBox;
 using RPGCreator.RTP.GameUI.Enums;
 
 namespace RPGCreator.RTP.GameUI.BaseControls.Containers;
@@ -66,6 +66,7 @@ public class ScrollContainer : SingleChildrenContainerControl
     {
         base.ClipToBounds = false;
         ScrollBarVerticalBackground = new SimpleColorBox(Color.DimGray);
+        ScrollBarVerticalBackground.Name = "ScrollBarVerticalBackground";
         ScrollBarVerticalBackground.Size = _scrollbarSize;
         ScrollBarVerticalBackground.IgnoreMouseEvents = false;
         ScrollBarVerticalBackground.Anchors = ControlAnchors.AnchorRight | ControlAnchors.AnchorFullVertical;
@@ -75,6 +76,7 @@ public class ScrollContainer : SingleChildrenContainerControl
         AddInternalComponent(ScrollBarVerticalBackground);
         
         ScrollBarVerticalThumb = new SimpleColorBox(Color.Green);
+        ScrollBarVerticalThumb.Name = "ScrollBarVerticalThumb";
         ScrollBarVerticalThumb.IgnoreMouseEvents = false;
         ScrollBarVerticalThumb.Size = VerticalThumbSize;
         ScrollBarVerticalThumb.SizingMode = ControlSizingMode.Manual; 
@@ -83,6 +85,7 @@ public class ScrollContainer : SingleChildrenContainerControl
         ScrollBarVerticalBackground.AddInternalComponent(ScrollBarVerticalThumb);
         
         ScrollBarHorizontalBackground = new SimpleColorBox(Color.DimGray);
+        ScrollBarHorizontalBackground.Name = "ScrollBarHorizontalBackground";
         ScrollBarHorizontalBackground.Size = new Size(GlobalsBounds.Width, ScrollBarSize);
         ScrollBarHorizontalBackground.IgnoreMouseEvents = false;
         ScrollBarHorizontalBackground.Anchors = ControlAnchors.AnchorBottom | ControlAnchors.AnchorFullHorizontal;
@@ -92,6 +95,7 @@ public class ScrollContainer : SingleChildrenContainerControl
         AddInternalComponent(ScrollBarHorizontalBackground);
         
         ScrollBarHorizontalThumb = new SimpleColorBox(Color.Green);
+        ScrollBarHorizontalThumb.Name = "ScrollBarHorizontalThumb";
         ScrollBarHorizontalThumb.IgnoreMouseEvents = false;
         ScrollBarHorizontalThumb.Size = HorizontalThumbSize;
         ScrollBarHorizontalThumb.SizingMode = ControlSizingMode.Manual;

@@ -28,6 +28,7 @@ using MonoGame.Extended;
 using RPGCreator.RTP.GameUI.BaseControls.Containers;
 using RPGCreator.RTP.GameUI.Enums;
 using RPGCreator.RTP.GameUI.Layers;
+using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types;
 using Size = MonoGame.Extended.Size;
@@ -54,159 +55,30 @@ public record struct ControlPropertyChangingEventArgs<T>(T OldValue, T NewValue)
 /// <typeparam name="T"></typeparam>
 public record struct ControlPropertyChangedEventArgs<T>(T OldValue, T NewValue);
 
-public class ControlPropertyReadOnly<T>(T value)
-{
-    private T Value { get; set; } = value;
-    public T Get() => Value;
-    
-    public static implicit operator ControlPropertyReadOnly<T>(T value) => new(value);
-    
-    // Equals and GetHashCode should be based on the Value property to ensure correct behavior when used in collections or compared.
-    public override bool Equals(object? obj)    {
-        if (obj is ControlPropertyReadOnly<T> other)
-            return EqualityComparer<T>.Default.Equals(Value, other.Value);
-        if (obj is T otherValue)
-            return EqualityComparer<T>.Default.Equals(Value, otherValue);
-        return false;
-    }
-    
-    public override int GetHashCode() => EqualityComparer<T>.Default.GetHashCode(Value);
-    
-    // Implicit for == and != operators to compare the Value property directly.
-    public static bool operator ==(ControlPropertyReadOnly<T?>? left, T? right)
-    {
-        if (left is null || left.Value is null) return right == null;
-        if (right is null) return left.Value == null;
-        return Equals(left.Value, right);
-    }
-
-    public static bool operator !=(ControlPropertyReadOnly<T?>? left, T? right)
-    {
-        if (left is null || left.Value is null) return right != null;
-        if (right is null) return left.Value != null;
-        return !Equals(left.Value, right);
-    }
-
-    public static bool operator ==(T? left, ControlPropertyReadOnly<T?>? right)
-    {
-        if (right is null || right.Value is null) return left == null;
-        if (left is null) return right.Value == null;
-        return Equals(left, right.Value);
-    }
-
-    public static bool operator !=(T? left, ControlPropertyReadOnly<T?>? right)
-    {
-        if (right is null || right.Value is null) return left != null;
-        if (left is null) return right.Value != null;
-        return !Equals(left, right.Value);
-    }
-    
-    public static implicit operator T(ControlPropertyReadOnly<T> property) => property.Value;
-    
-    internal void ForceSet(T newValue)
-    {
-        Value = newValue;
-    }
-}
-
-public class ControlProperty<T>(T defaultValue)
-{
-    private event Action? _changedCallback;
-    private event Action<T, T>? _onChanging;
-    private event Action<T, T>? _onChanged;
-    
-    private T DefaultValue { get; init; } = defaultValue;
-    private T Value { get; set; } = defaultValue;
-
-    public ControlProperty(T defaultValue, Action changedCallback) : this(defaultValue)
-    {
-        DefaultValue = defaultValue;
-        _changedCallback = changedCallback;
-    }
-    
-    public void Set(T newValue)
-    {
-        if (Equals(newValue, Value)) return;
-        var old = Value;
-        _onChanging?.Invoke(old, newValue);
-        Value = newValue;
-        _changedCallback?.Invoke();
-        _onChanged?.Invoke(old, newValue);
-    }
-    
-    public static implicit operator T(ControlProperty<T> property) => property.Get();
-    public static implicit operator ControlProperty<T>(T value) => new(value);
-    
-    internal void ForceSet(T newValue)
-    {
-        Value = newValue;
-    }
-    
-    public T Get() => Value;
-    
-    public void OnChanged(Action<T, T> callback)
-    {
-        _onChanged += callback;
-    }
-    
-    public void OnChanging(Action<T, T> callback)
-    {
-        _onChanging += callback;
-    }
-    
-    public void UnsetChanged(Action<T, T> callback)
-    {
-        _onChanged -= callback;
-    }
-    
-    public void UnsetChanging(Action<T, T> callback)
-    {
-        _onChanging -= callback;
-    }
-    
-    internal void Reset(bool events = false)
-    {
-        if (events)
-        {
-            var old = Value;
-            _onChanging?.Invoke(old, DefaultValue);
-            Value = DefaultValue;
-            _onChanged?.Invoke(old, DefaultValue);
-        }
-        else
-        {
-            Value = DefaultValue;
-        }
-    }
-}
-
 public class BaseControl
 {
-    private UiRenderer? _renderer;
-
     internal UiRenderer? Renderer
     {
         get
         {
-            if(Parent != null)
+            if (Parent != null)
                 return Parent.Renderer;
-            return _renderer;
+            return field;
         }
-        set
-        {
-            _renderer = value;
-        }
+        set;
     }
-    
+
     #region Events
-    
+
+    public event Action? OnFocusGained;
+    public event Action? OnFocusLost;
     public event Action? OnInvalidate;
     
     public event EventHandler<ControlPropertyChangingEventArgs<string>>? OnNameChanging;
     public event EventHandler<ControlPropertyChangedEventArgs<string>>? OnNameChanged;
     
-    public event EventHandler<ControlPropertyChangingEventArgs<ContainerControl?>>? OnParentChanging;
-    public event EventHandler<ControlPropertyChangedEventArgs<ContainerControl?>>? OnParentChanged;
+    public event EventHandler<ControlPropertyChangingEventArgs<BaseComplexControl?>>? OnParentChanging;
+    public event EventHandler<ControlPropertyChangedEventArgs<BaseComplexControl?>>? OnParentChanged;
     
     public event EventHandler<ControlPropertyChangingEventArgs<Vector2>>? OnPositionChanging;
     public event EventHandler<ControlPropertyChangedEventArgs<Vector2>>? OnPositionChanged;
@@ -262,6 +134,23 @@ public class BaseControl
     
     public bool IsDirty { get; protected set; } = true;
 
+    protected bool HasFocus
+    {
+        get;
+        set
+        {
+            if(Equals(field, value)) return;
+            field = value;
+            if(field)
+                OnFocusGained?.Invoke();
+            else
+                OnFocusLost?.Invoke();
+        }
+    } = false;
+
+    public virtual bool CanBeFocused { get; set; } = false;
+    public static BaseControl? FocusedControl { get; private set; }
+
     public virtual void Invalidate()
     {
         IsDirty = true;
@@ -269,7 +158,7 @@ public class BaseControl
         if(Parent == null)
             OnInvalidate?.Invoke();
     }
-    public bool IsInternal { get; internal set; } = false;
+    public bool IsInternal { get; internal init; }
     
     protected virtual string _Name { get; set; } = "BaseControl";
     public string Name { get => _Name; set
@@ -283,6 +172,8 @@ public class BaseControl
     }
     
     // If the object is fully hidden, or outside the viewport, it won't be drawn, but it will still be able to receive events and update itself.
+    // Note: Should it be kept? I don't know, in fact this is not used much, and it can be easily achieved by setting IsVisible to false.
+    //       Need to think about it.
     public bool ShouldDrawn { get; set; } = true;
 
     public BaseLayer? OwningLayer
@@ -296,7 +187,7 @@ public class BaseControl
         set;
     }
 
-    public ContainerControl? Parent
+    public BaseComplexControl? Parent
     {
         get;
         internal set
@@ -560,6 +451,20 @@ public class BaseControl
     
     public Size DesiredSize { get; protected set; } = Size.Empty;
 
+    public Vector2 LocalOffset
+    {
+        get;
+        set
+        {
+            if (Equals(field, value)) return;
+            var old = field;
+            OnPositionChanging?.Invoke(this, new(old, value));
+            field = value;
+            OnPositionChanged?.Invoke(this, new(old, field));
+            RefreshControl();
+        }
+    } = Vector2.Zero;
+
     internal bool IsAffectedByParentPadding = true;
 
     public bool AbsoluteVisibility => IsVisible && (Parent?.AbsoluteVisibility ?? true);
@@ -568,7 +473,7 @@ public class BaseControl
 
     protected void RecalculateBounds()
     {
-        var offset = (Position - Origin).ToPoint();
+        var offset = (Position - Origin + LocalOffset).ToPoint();
         LocalBounds = new Rectangle(offset, Size);
         var parentPos = Parent?.GlobalsBounds.Location ?? Point.Zero;
         GlobalsBounds = new Rectangle(parentPos + offset, Size);
@@ -656,14 +561,14 @@ public class BaseControl
         }
         
         GlobalsBounds = new Rectangle(
-            (int)(startX + finalX),
-            (int)(startY + finalY),
+            (int)(startX + finalX + LocalOffset.X),
+            (int)(startY + finalY + LocalOffset.Y),
             (int)Math.Max(0, finalW),
             (int)Math.Max(0, finalH)
         );
         
-        LocalBounds = new Rectangle((int)(pPadding.Left + Margin.Left + finalX), 
-            (int)(pPadding.Top + Margin.Top + finalY), 
+        LocalBounds = new Rectangle((int)(pPadding.Left + Margin.Left + LocalOffset.X + finalX), 
+            (int)(pPadding.Top + Margin.Top + LocalOffset.Y + finalY), 
             (int)finalW, (int)finalH);
     }
 
@@ -679,13 +584,15 @@ public class BaseControl
         Parent?.RefreshControl();
     }
 
-    public void SetParent(ContainerControl? newParent)
+    public void SetParent(BaseComplexControl? newParent)
     {
         if (Equals(Parent, newParent)) return;
         if(Equals(this, newParent)) return;
-        Parent?.RemoveChildInternal(this);
+        if(Parent is ContainerControl oldContainerParent)
+            oldContainerParent?.RemoveChildInternal(this);
         Parent = newParent;
-        Parent?.AddChildInternal(this);
+        if(Parent is ContainerControl newContainerParent)
+            newContainerParent?.AddChildInternal(this);
     }
 
     /// <summary>
@@ -751,9 +658,12 @@ public class BaseControl
     
     private bool _leftButtonDown, _middleButtonDown, _rightButtonDown;
     
+    /// <summary>
+    /// Default on true.
+    /// </summary>
     public virtual bool IgnoreMouseEvents { get; set; } = true;
     
-    public virtual void UpdateInput(Vector2 mousePosition, bool isLeftButtonDown, bool isMiddleButtonDown,
+    public virtual void UpdateMouseInput(Vector2 mousePosition, bool isLeftButtonDown, bool isMiddleButtonDown,
         bool isRightButtonDown, ref int verticalWheelDelta, ref int horizontalWheelDelta, ref bool isHandled)
     {
         if (IgnoreMouseEvents)
@@ -800,6 +710,13 @@ public class BaseControl
             if (anyClick && !anyLastClick)
             {
                 IsPressed = true;
+                if (CanBeFocused)
+                {
+                    if (FocusedControl != null)
+                        FocusedControl.HasFocus = false;
+                    HasFocus = true;
+                    FocusedControl = this;
+                }
                 OnPressed?.Invoke();
             }
 
@@ -836,12 +753,38 @@ public class BaseControl
         _middleButtonDown = isMiddleButtonDown;
         _rightButtonDown = isRightButtonDown;
     }
+
+    /// <summary>
+    /// Default on true.
+    /// </summary>
+    public virtual bool IgnoreKeyboardEvents { get; set; } = true;
+    public virtual void UpdateKeyboardInput(IKeyboardState keyboardState)
+    {
+    }
+
+
+    protected void InvokeMouseClick(MouseButton button)
+    {
+        switch (button)
+        {
+            case MouseButton.Left:
+                OnLeftClicked?.Invoke();
+                break;
+            case MouseButton.Middle:
+                OnMiddleClicked?.Invoke();
+                break;
+            case MouseButton.Right:
+                OnRightClicked?.Invoke();
+                break;
+        }
+    }
+    
     #endregion
 
     #region Rendering
 
 
-    public virtual void Draw(bool shouldEndDraw = true)
+    public virtual void Draw(TimeSpan deltaTime, bool shouldEndDraw = true)
     {
     }
 

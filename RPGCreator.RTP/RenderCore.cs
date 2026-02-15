@@ -25,7 +25,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.RTP.GameUI;
 using RPGCreator.RTP.GameUI.BaseControls;
-using RPGCreator.RTP.GameUI.BaseControls.Box;
+using RPGCreator.RTP.GameUI.BaseControls.BackgroundBox;
 using RPGCreator.RTP.Services;
 using RPGCreator.RTP.Viewport;
 using RPGCreator.SDK;
@@ -123,6 +123,8 @@ public sealed class RenderCore : Game, IGameRenderCore
 
     protected override void Update(GameTime gameTime)
     {
+        EngineStates.ElapsedTime = gameTime.ElapsedGameTime;
+        EngineStates.TotalTime = gameTime.TotalGameTime;
         OnUpdate?.Invoke(gameTime.ElapsedGameTime);
         var viewports = _parentService.GetAllViewports();
         var deltaTime = gameTime.ElapsedGameTime;

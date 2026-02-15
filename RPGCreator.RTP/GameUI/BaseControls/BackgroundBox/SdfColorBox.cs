@@ -23,7 +23,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.RTP.GameUI.Layers;
 
-namespace RPGCreator.RTP.GameUI.BaseControls.Box;
+namespace RPGCreator.RTP.GameUI.BaseControls.BackgroundBox;
 
 public class SdfColorBox : SimpleColorBox
 {
@@ -94,10 +94,9 @@ public class SdfColorBox : SimpleColorBox
         }
     } = Color.Black;
 
-    public override void Draw(bool shouldEndDraw = false)
+    public override void Draw(TimeSpan deltaTime, bool shouldEndDraw = true)
     {
-        if (!AbsoluteVisibility || OwningLayer == null) return;
-        
+        if (!AbsoluteVisibility || !ShouldDrawn || OwningLayer == null) return;
         _sdfEffect.Parameters["Size"].SetValue(new Vector2(GlobalsBounds.Width, GlobalsBounds.Height));
         _sdfEffect.Parameters["Radius"].SetValue(Radius);
         _sdfEffect.Parameters["Thickness"]?.SetValue(BorderThickness);
@@ -114,5 +113,9 @@ public class SdfColorBox : SimpleColorBox
         }
 
         Renderer.SpriteBatch.Begin(rasterizerState: new RasterizerState { ScissorTestEnable = true });
+        DirectBaseDraw(deltaTime, false);
+        
+        if (shouldEndDraw)
+            EndContainerDraw();
     }
 }

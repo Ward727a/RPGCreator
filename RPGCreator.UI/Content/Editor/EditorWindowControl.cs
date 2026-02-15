@@ -461,9 +461,12 @@ namespace RPGCreator.UI.Content.Editor
                 Source = TestWrittableBitmap,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+                Focusable = true,
+                Name = "MonoGameImage",
             };
             monogameGrid.Children.Add(mgImage);
             _mouseBridge.RegisterEvents(mgImage);
+            _keyboardBridge.RegisterEvents(mgImage);
 
             // MonoGameScreen = new AvaloniaInside.MonoGame.MonoGameControl
             // {

@@ -22,7 +22,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace RPGCreator.RTP.GameUI.BaseControls.Box;
+namespace RPGCreator.RTP.GameUI.BaseControls.BackgroundBox;
 
 public class NineGridBox : SimpleColorBox
 {
@@ -136,7 +136,7 @@ public class NineGridBox : SimpleColorBox
 
     private bool _isInit;
     
-    public override void Draw(bool shouldEndDraw = false)
+    public override void Draw(TimeSpan deltaTime, bool shouldEndDraw = true)
     {
         if(Texture == null || !AbsoluteVisibility) return;
 
@@ -178,6 +178,11 @@ public class NineGridBox : SimpleColorBox
     
         // Bottom right corner
         DrawPart(_destBottomRight, _srcBottomRight);
+        
+        DirectBaseDraw(deltaTime, false);
+        
+        if (shouldEndDraw)
+            EndContainerDraw();
     }
     
     private void DrawPart(Rectangle dest, Rectangle source)
@@ -187,6 +192,7 @@ public class NineGridBox : SimpleColorBox
 
     protected void RefreshSlices()
     {
+        if (Texture == null) return;
         Rectangle dest = GlobalsBounds;
         int pathWidth = Texture.Width;
         int pathHeight = Texture.Height;

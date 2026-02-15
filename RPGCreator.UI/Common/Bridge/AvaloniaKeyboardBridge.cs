@@ -18,11 +18,27 @@ public class AvaloniaKeyboardBridge
     {
         control.KeyDown += (s, e) => HandleKey(e, true);
         control.KeyUp += (s, e) => HandleKey(e, false);
+        control.TextInput += TextInput;
         control.LostFocus += (s, e) =>
         {
             _activeKeys.Clear();
             PushState(control);
         };
+    }
+
+    private void TextInput(object? sender, TextInputEventArgs e)
+    {
+        if (sender != null && sender is Control control)
+        {
+            if (control.Name == "MonoGameImage")
+            {
+                e.Handled = true;
+                foreach (char c in e.Text)
+                {
+                    EngineProviders.KeyboardProvider?.UpdateInputViewport(c);
+                }
+            }
+        }
     }
 
     private void HandleKey(KeyEventArgs e, bool isDown)
@@ -49,7 +65,7 @@ public class AvaloniaKeyboardBridge
         
         EngineProviders.KeyboardProvider?.Update(raw);
         
-        if (control is MonoGameControlTest)
+        if (control?.Name == "MonoGameImage")
         {
             EngineProviders.KeyboardProvider?.UpdateViewport(raw);
         }

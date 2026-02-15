@@ -125,12 +125,12 @@ public abstract class MultiChildrenContainerControl : ContainerControl
         }
     }
 
-    public override void Draw(bool shouldEndDraw = true)
+    public override void Draw(TimeSpan deltaTime, bool shouldEndDraw = true)
     {
-        base.Draw(false);
+        base.Draw(deltaTime, false);
         foreach (var child in _childrens)
         {
-            child.Draw();
+            child.Draw(deltaTime);
         }
         
         if(shouldEndDraw)
@@ -146,18 +146,18 @@ public abstract class MultiChildrenContainerControl : ContainerControl
         }
     }
 
-    public override void UpdateInput(Vector2 mousePosition, bool isLeftButtonDown, bool isMiddleButtonDown, bool isRightButtonDown,
+    public override void UpdateMouseInput(Vector2 mousePosition, bool isLeftButtonDown, bool isMiddleButtonDown, bool isRightButtonDown,
         ref int verticalWheelDelta, ref int horizontalWheelDelta, ref bool isHandled)
     {
         foreach (var child in _childrens)
         {
-            child.UpdateInput(mousePosition, isLeftButtonDown, isMiddleButtonDown, isRightButtonDown, ref verticalWheelDelta, ref horizontalWheelDelta, ref isHandled);
+            child.UpdateMouseInput(mousePosition, isLeftButtonDown, isMiddleButtonDown, isRightButtonDown, ref verticalWheelDelta, ref horizontalWheelDelta, ref isHandled);
             if (isHandled) break;
         }
         
         if(IgnoreMouseEvents || isHandled) return;
         
-        base.UpdateInput(mousePosition, isLeftButtonDown, isMiddleButtonDown, isRightButtonDown, ref verticalWheelDelta, ref horizontalWheelDelta, ref isHandled);
+        base.UpdateMouseInput(mousePosition, isLeftButtonDown, isMiddleButtonDown, isRightButtonDown, ref verticalWheelDelta, ref horizontalWheelDelta, ref isHandled);
 
     }
 

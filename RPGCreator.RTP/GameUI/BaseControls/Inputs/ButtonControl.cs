@@ -20,14 +20,16 @@
 
 using System;
 using Microsoft.Xna.Framework;
-using RPGCreator.RTP.GameUI.BaseControls.Box;
+using RPGCreator.RTP.GameUI.BaseControls.BackgroundBox;
 using RPGCreator.RTP.GameUI.BaseControls.Containers;
 using RPGCreator.RTP.GameUI.Enums;
+using RPGCreator.RTP.GameUI.Interface;
+using RPGCreator.SDK.Inputs;
 using Size = MonoGame.Extended.Size;
 
 namespace RPGCreator.RTP.GameUI.BaseControls.Inputs;
 
-public class ButtonControl : SingleChildrenContainerControl
+public class ButtonControl : SingleChildrenContainerControl, IMouseInputControl
 {
     
     #region Events
@@ -59,6 +61,8 @@ public class ButtonControl : SingleChildrenContainerControl
     } = Color.Blue;
     
     public bool Autosize { get; set; } = true;
+    public override bool IgnoreMouseEvents { get; set; } = false;
+    public override bool CanBeFocused { get; set; } = true;
     
     public ButtonControl()
     {
@@ -136,5 +140,10 @@ public class ButtonControl : SingleChildrenContainerControl
         var baseString = base.ToString();
         baseString = baseString.TrimEnd(')');
         return $"{baseString}, BackgroundNormalColor: {BackgroundNormalColor}, BackgroundPressedColor: {BackgroundPressedColor}, BackgroundHoverColor: {BackgroundHoverColor})";
+    }
+
+    public void OnMouseClick(MouseButton button)
+    {
+        InvokeMouseClick(button);
     }
 }

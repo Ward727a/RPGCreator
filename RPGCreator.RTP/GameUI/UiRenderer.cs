@@ -42,6 +42,7 @@ public class UiRenderer
     public readonly FontSystem FontSystem;
     public readonly Matrix4x4 TransformMatrix;
     public readonly RasterizerState ClippingRasterizerState = new RasterizerState { ScissorTestEnable = true };
+    
     public Texture2D? CursorTexture { get; set; }
     public Dictionary<Cursors, Texture2D> CursorTextures { get; } = new Dictionary<Cursors, Texture2D>();
     public Dictionary<string, Texture2D> CustomTextures { get; } = new Dictionary<string, Texture2D>();

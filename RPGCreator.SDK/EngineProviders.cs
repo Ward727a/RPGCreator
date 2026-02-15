@@ -61,11 +61,26 @@ public interface IKeyboardProvider
     /// </summary>
     /// <param name="data"></param>
     void Update(RawKeyboardData data);
+    
+    /// <summary>
+    /// Update the keyboard input data.<br/>
+    /// This is used for text input, and is separate from the regular keyboard data update to avoid issues with key repeat and to allow for better handling of input methods (like IME).
+    /// </summary>
+    /// <param name="text">The text input to update.</param>
+    void UpdateInput(char text);
+    
     /// <summary>
     /// Specialized update for viewport keyboard data.
     /// </summary>
     /// <param name="data"></param>
     void UpdateViewport(RawKeyboardData data);
+
+    /// <summary>
+    /// Specialized update for viewport keyboard input data.<br/>
+    /// This is used for text input in the viewport, and is separate from the regular keyboard input update to avoid issues with key repeat and to allow for better handling of input methods (like IME).
+    /// </summary>
+    /// <param name="text">The text input to update.</param>
+    void UpdateInputViewport(char text);
 }
 
 public class DefaultKeyboardProvider : IKeyboardProvider
@@ -74,10 +89,20 @@ public class DefaultKeyboardProvider : IKeyboardProvider
     {
         EngineStates.KeyboardState.Update(data);
     }
-    
+
+    public void UpdateInput(char text)
+    {
+        EngineStates.KeyboardState.UpdateInput(text);
+    }
+
     public void UpdateViewport(RawKeyboardData data)
     {
         EngineStates.ViewportKeyboardState.Update(data);
+    }
+
+    public void UpdateInputViewport(char text)
+    {
+        EngineStates.ViewportKeyboardState.UpdateInput(text);
     }
 }
 

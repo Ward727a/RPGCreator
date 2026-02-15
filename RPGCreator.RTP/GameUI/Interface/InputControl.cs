@@ -18,22 +18,24 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using RPGCreator.SDK.Inputs;
 
-namespace RPGCreator.RTP.GameUI.BaseControls.Containers;
+namespace RPGCreator.RTP.GameUI.Interface;
 
 /// <summary>
-/// A container control is a control that can contain other controls.
+/// This is a marker interface for controls that can receive input from the user, such as TextBox, Button, etc.
 /// </summary>
-public abstract class ContainerControl : BaseComplexControl
+public interface IInputControl
 {
-    protected override string _Name { get; set; } = "ContainerControl";
-
-    internal abstract void AddChildInternal(BaseControl child);
     
-    internal abstract void RemoveChildInternal(BaseControl? child = null);
+}
+
+public interface IMouseInputControl : IInputControl
+{
+    public void OnMouseClick(MouseButton button);
+}
+
+public interface IKeyboardInputControl : IInputControl
+{
+    public void OnKeyboardInput();
 }

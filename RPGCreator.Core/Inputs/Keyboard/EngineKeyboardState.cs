@@ -12,6 +12,8 @@ public class EngineKeyboardState : IKeyboardState
     public bool IsNumLockActive { get; protected set; }
     public event Action<KeyboardKeys>? KeyDown;
     public event Action<KeyboardKeys>? KeyUp;
+    
+    public event Action<char>? TextInput;
 
     public virtual void Update(RawKeyboardData data)
     {
@@ -39,6 +41,11 @@ public class EngineKeyboardState : IKeyboardState
     
         IsCapsLockActive = data.CapsLock;
         IsNumLockActive = data.NumLock;
+    }
+
+    public void UpdateInput(char text)
+    {
+        TextInput?.Invoke(text);
     }
 
     protected void OnKeyDown(KeyboardKeys key)

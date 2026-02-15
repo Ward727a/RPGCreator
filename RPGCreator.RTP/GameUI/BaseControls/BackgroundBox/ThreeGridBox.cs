@@ -23,7 +23,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.RTP.GameUI.Enums;
 
-namespace RPGCreator.RTP.GameUI.BaseControls.Box;
+namespace RPGCreator.RTP.GameUI.BaseControls.BackgroundBox;
 
 public class ThreeGridBox : SimpleColorBox
 {
@@ -91,9 +91,10 @@ public class ThreeGridBox : SimpleColorBox
 
     private bool _isInit;
     
-    public override void Draw(bool shouldEndDraw = true)
+    public override void Draw(TimeSpan deltaTime, bool shouldEndDraw = true)
     {
-        if(Texture == null || !AbsoluteVisibility) return;
+        if (Texture == null || !ShouldDrawn || !AbsoluteVisibility || OwningLayer == null)
+            return;
         
         if (!_isInit)
         {
@@ -104,6 +105,11 @@ public class ThreeGridBox : SimpleColorBox
         DrawPart(_destLeft, _srcLeft);
         DrawPart(_destCenter, _srcCenter);
         DrawPart(_destRight, _srcRight);
+        
+        DirectBaseDraw(deltaTime, false);
+        
+        if (shouldEndDraw)
+            EndContainerDraw();
     }
     
     private void DrawPart(Rectangle dest, Rectangle source)
@@ -113,6 +119,7 @@ public class ThreeGridBox : SimpleColorBox
 
     protected void RefreshSlices()
     {
+        if(Texture == null) return;
         Rectangle dest = GlobalsBounds;
         int pathWidth = Texture.Width;
         int pathHeight = Texture.Height;
@@ -144,7 +151,13 @@ public class ThreeGridBox : SimpleColorBox
             _destCenter = new Rectangle(dest.X, dest.Y + LeftSlice, dest.Width, Math.Max(0, dest.Height - LeftSlice - RightSlice));
         }
     }
-    
+
+    public override void Arrange()
+    {
+        base.Arrange();
+        RefreshSlices();
+    }
+
     public override void Invalidate()
     {
         RefreshSlices();
