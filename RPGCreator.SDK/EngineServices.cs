@@ -141,6 +141,12 @@ public static class EngineServices
         }
     }
 
+    public static IEngineConfig EngineConfig
+    {
+        get => GetService<IEngineConfig>();
+        set => RegisterService(value);
+    }
+    
     public static IGameFactory GameFactory
     {
         get => GetService<IGameFactory>();

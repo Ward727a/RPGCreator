@@ -41,6 +41,10 @@
 
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.11" />
+    <PackageReference Include="Dock.Avalonia" Version="11.3.11.13" />
+    <PackageReference Include="Dock.Avalonia.Themes.Fluent" Version="11.3.11.13" />
+    <PackageReference Include="Dock.Model.Avalonia" Version="11.3.11.13" />
+    <PackageReference Include="Dock.Serializer.Newtonsoft" Version="11.3.11.13" />
     <PackageReference Include="Irihi.Ursa" Version="1.14.1" />
     <PackageReference Include="Irihi.Ursa.Themes.Semi" Version="1.14.1" />
     <PackageReference Include="LiveMarkdown.Avalonia" Version="1.7.0" />

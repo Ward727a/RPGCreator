@@ -24,9 +24,12 @@ public class EditorLeftPanelControl : UserControl
     
     #region Components
 
+    private Grid? _bodyGrid;
     private TabControl? _tabControl;
     private ScrollViewer? _scrollViewer;
     private Grid? _body;
+
+    private ToolSettingsControl _toolSettings;
 
     private static Dictionary<string, Control> _components = new();
     
@@ -36,17 +39,26 @@ public class EditorLeftPanelControl : UserControl
     {
         CreateComponents();
         RegisterEvents();
-        Content = _tabControl;
+        Content = _bodyGrid;
         EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanel, this);
     }
     
     private void CreateComponents()
     {
+        _bodyGrid = new Grid
+        {
+            RowDefinitions = new RowDefinitions("*, Auto"),
+            ColumnDefinitions = new ColumnDefinitions("*"),
+            Width = 350,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+        };
         _tabControl = new TabControl
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
         };
+        _bodyGrid.Children.Add(_tabControl);
         
         _scrollViewer = new ScrollViewer
         {
@@ -54,11 +66,6 @@ public class EditorLeftPanelControl : UserControl
             VerticalAlignment = VerticalAlignment.Stretch,
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
         };
-        _tabControl.Items.Add(new TabItem()
-        {
-            Content = _scrollViewer,
-            Header = "Tool Properties"
-        });
         _body = new Grid
         {
             RowDefinitions = new RowDefinitions("Auto"),
@@ -73,12 +80,14 @@ public class EditorLeftPanelControl : UserControl
         _tabControl.Items.Add(new TabItem()
         {
             Content = new MapEditor(),
-            Header = "Map Editor"
+            Header = "Map Editor",
+            IsVisible = false
         });
         _tabControl.Items.Add(new TabItem()
         {
             Content = new MapLevelTab(),
-            Header = "Map Levels"
+            Header = "Maps",
+            IsVisible = true
         });
         
         
@@ -102,7 +111,11 @@ public class EditorLeftPanelControl : UserControl
                     ShowComponent("none");
             };
         });
-        ShowComponent("tiling");
+        ShowComponent("none");
+        
+        _toolSettings = new ToolSettingsControl();
+        _bodyGrid.Children.Add(_toolSettings);
+        Grid.SetRow(_toolSettings, 1);
         
         
         var config = new EditorLeftPanelComponentsContext.Config

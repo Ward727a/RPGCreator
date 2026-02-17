@@ -25,6 +25,11 @@ namespace RPGCreator.SDK.EngineService;
 public interface ICommandManager : IService
 {
     /// <summary>
+    /// Event triggered whenever the state of the command history changes (e.g., after executing, undoing, or redoing a command).
+    /// </summary>
+    public event Action? StateChanged;
+    
+    /// <summary>
     /// Indicates whether there are commands available to undo.
     /// </summary>
     public bool CanUndo { get; }

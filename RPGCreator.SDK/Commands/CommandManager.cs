@@ -51,7 +51,6 @@ public class CommandManager : ICommandManager
         _undoCommands.Count > 0 ? _undoCommands.Peek().Name : "No Undo Available";
     public string GetRedoCommandName() => 
         _redoCommands.Count > 0 ? _redoCommands.Peek().Name : "No Redo Available";
-    
     public bool CanUndo => _undoCommands.Count > 0;
     public bool CanRedo => _redoCommands.Count > 0;
 }

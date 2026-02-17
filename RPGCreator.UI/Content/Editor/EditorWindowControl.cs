@@ -64,14 +64,15 @@ namespace RPGCreator.UI.Content.Editor
 
         private bool _placingTile = false; // Flag to indicate if a tile is being placed
         private Grid _mainGrid;
-        private Menu _menuBar;
+        private EditorMenuBar _menuBar;
 
         
         
-        private WriteableBitmap TestWrittableBitmap = new WriteableBitmap(new PixelSize(836, 627), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
+        private WriteableBitmap TestWrittableBitmap = new WriteableBitmap(new PixelSize(1172, 827), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
 
         private Image mgImage;
         
+        Grid monogameGrid;
         public EditorWindowControl()
         {
 
@@ -83,17 +84,20 @@ namespace RPGCreator.UI.Content.Editor
             CreateComponents();
             RegisterEvents();
             Content = _mainGrid;
+            
+            Logger.Debug(((Grid)mgImage.Parent).DesiredSize.ToString());
+            
             EditorUiServices.MonogameViewport.OnCoreReady += () =>
             {
                 using (var buf = TestWrittableBitmap.Lock())
                 {
                     EditorUiServices.MonogameViewport.CreateNewViewport("Editor MonoGame Viewport", buf.Address,
-                        new Size(836, 627));
-                    mgImage.SizeChanged += (_, _) =>
+                        new Size(1172, 827));
+                    monogameGrid.SizeChanged += (_, _) =>
                     {
-                        TestWrittableBitmap = new WriteableBitmap(new PixelSize((int)mgImage.Bounds.Width, (int)mgImage.Bounds.Height), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
+                        TestWrittableBitmap = new WriteableBitmap(new PixelSize((int)monogameGrid.Bounds.Width, (int)monogameGrid.Bounds.Height), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
                         EditorUiServices.MonogameViewport.GetViewport("Editor MonoGame Viewport")
-                            ?.Resize(new Size((int)mgImage.Bounds.Width, (int)mgImage.Bounds.Height));
+                            ?.Resize(new Size((int)monogameGrid.Bounds.Width, (int)monogameGrid.Bounds.Height));
                         mgImage.Source = TestWrittableBitmap;
                     };
                     EditorUiServices.MonogameViewport.GetViewport("Editor MonoGame Viewport")?.OnceUpdatedDo(()=>
@@ -120,7 +124,10 @@ namespace RPGCreator.UI.Content.Editor
             {
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-                RowDefinitions = new RowDefinitions("Auto, *, 1, Auto")
+                RowDefinitions = new RowDefinitions("Auto, *"),
+                ColumnDefinitions = new ColumnDefinitions("Auto, *"),
+                RowSpacing = 4,
+                ColumnSpacing = 4
             };
             EditorUiServices.MonogameViewport.Initialize();
             var RenderCore = ((MonogameViewportService)EditorUiServices.MonogameViewport)._core;
@@ -137,217 +144,37 @@ namespace RPGCreator.UI.Content.Editor
             _mainGrid.Children.Add(mgBrain);
 
             #region MenuBar
-            _menuBar = new Menu
+            _menuBar = new EditorMenuBar()
             {
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
             };
             _mainGrid.Children.Add(_menuBar);
             Grid.SetRow(_menuBar, 0);
-
-            var fileMenuItem = new MenuItem
-            {
-                Header = "File"
-            };
-            _menuBar.Items.Add(fileMenuItem);
-
-            var newFileMenuItem = new MenuItem
-            {
-                Header = "New"
-            };
-            fileMenuItem.Items.Add(newFileMenuItem);
-            var openFileMenuItem = new MenuItem
-            {
-                Header = "Open..."
-            };
-            var openProjectFolderMenuItem = new MenuItem
-            {
-                Header = "Open Project Folder"
-            };
-            openProjectFolderMenuItem.Click += (_, _) =>
-            {
-                // Open the project folder in the file explorer
-                if(EngineStates.ProjectState.CurrentProject == null)
-                {
-                    Logger.Error("No project is currently loaded.");
-                    return;
-                }
-                var projectPath = EngineStates.ProjectState.CurrentProject.Path;
-                if (!string.IsNullOrEmpty(projectPath))
-                {
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = projectPath,
-                        UseShellExecute = true
-                    });
-                }
-                else
-                {
-                    Logger.Error("Project path is not set.");
-                }
-            };
-            openFileMenuItem.Items.Add(openProjectFolderMenuItem);
-            fileMenuItem.Items.Add(openFileMenuItem);
-            var saveFileMenuItem = new MenuItem
-            {
-                Header = "Save"
-            };
-            fileMenuItem.Items.Add(saveFileMenuItem);
-            saveFileMenuItem.Click += (_, _) =>
-            {
-                var loadingModal = new LoadDialog("Saving...", "Saving the current project, please wait...");
-                loadingModal.ShowDialog(_Host).ContinueWith(t =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        // Handle any errors that occurred while saving
-                        Console.WriteLine("Error saving project: " + t.Exception?.Message);
-                    }
-                    else
-                    {
-                        RuntimeServices.MapService.SaveMap();
-                        // Successfully saved the project
-                        Console.WriteLine("Project saved successfully.");
-                        foreach (var pack in EngineServices.AssetsManager.GetLoadedPacks())
-                        {
-                            pack.Save();
-                        }
-
-                        loadingModal.Hide();
-                    }
-                });
-                if(EngineStates.ProjectState.CurrentProject == null)
-                {
-                    Logger.Error("No project is currently loaded.");
-                    return;
-                }
-                EngineStates.ProjectState.CurrentProject.Save();
-            };
-            var closeFileMenuItem = new MenuItem
-            {
-                Header = "Close"
-            };
-            fileMenuItem.Items.Add(closeFileMenuItem);
-            var exportFileMenuItem = new MenuItem
-            {
-                Header = "Export"
-            };
-            fileMenuItem.Items.Add(exportFileMenuItem);
-
-            var editMenuItem = new MenuItem
-            {
-                Header = "Edit"
-            };
-            _menuBar.Items.Add(editMenuItem);
-            var openTestDialogMenuItem = new MenuItem
-            {
-                Header = "Open Test Dialog"
-            };
-            openTestDialogMenuItem.Click += (_, _) =>
-            {
-                // Open the testing dialog
-                var testDialog = new TestingDialog();
-                testDialog.ShowDialog(_Host).ContinueWith(t =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        // Handle any errors that occurred while showing the dialog
-                        Console.WriteLine("Error showing test dialog: " + t.Exception?.Message);
-                    }
-                });
-            };
-            editMenuItem.Items.Add(openTestDialogMenuItem);
-            var undoEditMenuItem = new MenuItem
-            {
-                Header = "Undo"
-            };
-            editMenuItem.Items.Add(undoEditMenuItem);
-            var redoEditMenuItem = new MenuItem
-            {
-                Header = "Redo"
-            };
-            editMenuItem.Items.Add(redoEditMenuItem);
-            var projectSettingsMenuItem = new MenuItem
-            {
-                Header = "Project Settings"
-            };
-            editMenuItem.Items.Add(projectSettingsMenuItem);
-            var preferencesMenuItem = new MenuItem
-            {
-                Header = "Preferences"
-            };
-            preferencesMenuItem.Click += PreferencesMenuItem_Click;
-            editMenuItem.Items.Add(preferencesMenuItem);
-
-            var assetsMenuItem = new MenuItem
-            {
-                Header = "Assets"
-            };
-            _menuBar.Items.Add(assetsMenuItem);
-            var addAssetMenuItem = new MenuItem
-            {
-                Header = "Add..."
-            };
-            assetsMenuItem.Items.Add(addAssetMenuItem);
-            var manageAssetsMenuItem = new MenuItem
-            {
-                Header = "Manage Assets"
-            };
-            manageAssetsMenuItem.Click += ManageAssetsMenuItem_Click;
-            assetsMenuItem.Items.Add(manageAssetsMenuItem);
-            var importAssetsMenuItem = new MenuItem
-            {
-                Header = "Import Assets"
-            };
-            assetsMenuItem.Items.Add(importAssetsMenuItem);
-            var exportAssetsMenuItem = new MenuItem
-            {
-                Header = "Export Assets"
-            };
-            assetsMenuItem.Items.Add(exportAssetsMenuItem);
-            var helpMenuItem = new MenuItem
-            {
-                Header = "Help"
-            };
-            _menuBar.Items.Add(helpMenuItem);
-            var aboutMenuItem = new MenuItem
-            {
-                Header = "About"
-            };
-            helpMenuItem.Items.Add(aboutMenuItem);
-            var documentationMenuItem = new MenuItem
-            {
-                Header = "Documentation"
-            };
-            helpMenuItem.Items.Add(documentationMenuItem);
-            var reportIssueMenuItem = new MenuItem
-            {
-                Header = "Report Issue"
-            };
-            helpMenuItem.Items.Add(reportIssueMenuItem);
-            var uiEditorMenuItem = new MenuItem
-            {
-                Header = "UI Editor"
-            };
-            uiEditorMenuItem.Click += (_, _) =>
-            {
-                if (GameUiEditor.UiEditorWindow.IsOpen) return;
-                var uiEditorWindow = new GameUiEditor.UiEditorWindow();
-                uiEditorWindow.Show();
-            };
-            _menuBar.Items.Add(uiEditorMenuItem);
-
             #endregion
+            
+            var shortcutsBar = new EditorShortcutsBar()
+            {
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
+                Margin = App.style.Margin
+            };
+            _mainGrid.Children.Add(shortcutsBar);
+            Grid.SetRow(shortcutsBar, 0);
+            Grid.SetColumn(shortcutsBar, 1);
 
             var ContentGrid = new Grid
             {
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-                ColumnDefinitions = new ColumnDefinitions("Auto, *, Auto"),
-                RowDefinitions = new RowDefinitions("*, Auto"),
+                ColumnDefinitions = new ColumnDefinitions("Auto, *"),
+                RowDefinitions = new RowDefinitions("*"),
+                RowSpacing = 4,
+                ColumnSpacing = 4
             };
             _mainGrid.Children.Add(ContentGrid);
             Grid.SetRow(ContentGrid, 1);
+            Grid.SetColumnSpan(ContentGrid, 2);
 
             #region LeftBar
             var LeftPanel = new Grid
@@ -389,73 +216,33 @@ namespace RPGCreator.UI.Content.Editor
 
             #endregion
 
-            var RightPanel = new StackPanel
-            {
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-                Width = 300,
-            };
-            ContentGrid.Children.Add(RightPanel);
-            Grid.SetColumn(RightPanel, 2);
-
-            var BottomPanel = new Grid
-            {
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Bottom,
-                Height = 200,
-                RowDefinitions = new RowDefinitions("*"),
-            };
-            ContentGrid.Children.Add(BottomPanel);
-            Grid.SetColumn(BottomPanel, 1);
-            Grid.SetColumnSpan(BottomPanel, 2);
-            Grid.SetRow(BottomPanel, 1);
-
-            var subBottomBorder = new Border
-            {
-                Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromArgb(60, 0, 0, 0)),
-                Margin = new Thickness(4),
-                Padding = new Thickness(4),
-                BorderThickness = new Thickness(1),
-                BorderBrush = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Gray),
-                CornerRadius = new CornerRadius(2),
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            };
-            BottomPanel.Children.Add(subBottomBorder);
-
-            var SubBottomPanel = new StackPanel
-            {
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-                Orientation = Avalonia.Layout.Orientation.Vertical,
-            };
-            subBottomBorder.Child = SubBottomPanel;
-
             var CenterGrid = new Grid
             {
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-                RowDefinitions = new("auto, *")
+                RowDefinitions = new("auto, *"),
+                RowSpacing = 4,
+                Margin = App.style.Margin
             };
             ContentGrid.Children.Add(CenterGrid);
             Grid.SetColumn(CenterGrid, 1);
 
-            var toolbar = new ToolbarControl();
+            var toolbar = new EditorToolsBar();
             CenterGrid.Children.Add(toolbar);
 
             // This is used to contain the MonoGame screen inside it's bounds.
             // If we don't do this, the MonoGame screen will not be able to resize properly and some dirty tricks would be needed.
             // AKA: Adding a margin to the MonoGame screen, then removing it "down" property to each position when needed, etc...
             // This is a cleaner way to do it.
-            var monogameGrid = new Grid
+            monogameGrid = new Grid
             {
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-                Margin = App.style.Margin,
             };
             CenterGrid.Children.Add(monogameGrid);
             Grid.SetRow(monogameGrid, 1);
 
+            
             mgImage = new Image
             {
                 Source = TestWrittableBitmap,
