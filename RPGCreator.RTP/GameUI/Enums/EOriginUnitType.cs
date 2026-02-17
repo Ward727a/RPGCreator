@@ -18,22 +18,10 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+namespace RPGCreator.RTP.GameUI.Enums;
 
-namespace RPGCreator.RTP.GameUI.BaseControls.Containers;
-
-/// <summary>
-/// A container control is a control that can contain other controls.
-/// </summary>
-public abstract class ContainerControl : BaseComplexControl
+public enum EOriginUnitType
 {
-    protected override string _Name { get; set; } = "ContainerControl";
-
-    internal abstract void AddChildInternal(BaseControl child);
-    
-    internal abstract void RemoveChildInternal(BaseControl? child = null);
+    Pixels, // The origin is defined in pixels, relative to the top-left corner of the UI element.
+    Percentage // The origin is defined as a percentage of the UI element's size (e.g., 0.5 for 50%).
 }

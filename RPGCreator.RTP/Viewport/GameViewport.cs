@@ -20,21 +20,13 @@
 
 using System;
 using FontStashSharp;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using RPGCreator.RTP.Extensions;
 using RPGCreator.RTP.GameUI;
-using RPGCreator.RTP.GameUI.BaseControls;
-using RPGCreator.RTP.GameUI.BaseControls.BackgroundBox;
-using RPGCreator.RTP.GameUI.BaseControls.Containers;
-using RPGCreator.RTP.GameUI.BaseControls.Inputs;
-using RPGCreator.RTP.GameUI.Enums;
-using RPGCreator.RTP.GameUI.Layers;
+using RPGCreator.RTP.GameUI.Controls;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Editor.Rendering;
 using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.Types;
-using Size = MonoGame.Extended.Size;
+using Color = Microsoft.Xna.Framework.Color;
 
 namespace RPGCreator.RTP.Viewport;
 
@@ -47,185 +39,46 @@ public class GameViewport : BaseGameViewport
     private uint[]? _internalBuffer;
     private IntPtr? _bitmapControlAddress;
     private Texture2D _pixelTexture;
-    
-    private GraphicsDevice _graphicsDevice;
-    private SpriteBatch _spriteBatch;
-    private UiRenderer _uiRenderer;
-
-    private BaseLayer UiLayer;
-    private Panel simpleTestControl;
-    private ContainerControl simpleChildControl;
-    private TextButton simpleTextControl;
+    GraphicsDevice _graphicsDevice;
+    private UiManager _uiManager;
     
     public GameViewport(RenderTarget2D renderTarget)
     {
         RenderTarget = renderTarget;
     }
 
-    private static bool IsFormsInitialized = false;
-    private StackPanel stackPanel;
-    private TextButton buttonTest;
-    
-    private RenderTarget2D _UiCache;
     
     public void LoadContent(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch, FontSystem fontSystem)
     {
         _graphicsDevice = graphicsDevice;
-        _spriteBatch = spriteBatch;
-        
-        UiLayer = new BaseLayer("MainUILayer", _graphicsDevice, _spriteBatch, fontSystem);
-        UiLayer.SetParentViewport(this);
-        
-        simpleTestControl = new Panel()
-        {
-            Name = "Panel1 (ROOT CONTROL)",
-            Position = new Vector2(50, 50),
-            Size = new Size(600, 300),
-            ClipToBounds = true,
-            BackgroundColor = new Color(255, 0, 0, 128)
-        };
-        UiLayer.SetRootControl(simpleTestControl);
+        _uiManager = new UiManager(this);
+        _uiManager.Initialize(EngineStates.ViewportMouseState);
+        _uiManager.InitializeRenderer(new UiRendererContext(spriteBatch));
 
-        stackPanel = new StackPanel()
-        {
-            Name = "StackPanel",
-            AutoSize = true,
-            BackgroundColor = Color.Transparent,
-            ClipToBounds = true
-        };
-        simpleTestControl.AddChild(stackPanel);
-        text = new TextControl()
-        {
-            Name = "HelloText",
-            Text = "Hello!",
-            Wrapping = TextWrapping.Wrap,
-            Anchors = ControlAnchors.AnchorFullHorizontal,
-            Position = new(10, 50)
-        };
-        stackPanel.AddChild(new TextControl()
-        {
-            Name = "WorldText",
-            Text = "World!"
-        });
-        buttonTest = new TextButton()
-        {
-            Name = "ButtonTest",
-            Size = new Size(100, 20),
-            Text = "Click me!",
-        };
-        buttonTest.OnLeftClicked += () =>
-        {
-            Logger.Debug("Button clicked!");
-            buttonTest.Text = "Clicked!";
-            text.Text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
-            simpleTestControl.Position = new Vector2(simpleTestControl.Position.X + 10, simpleTestControl.Position.Y + 10);
-        }; 
-        stackPanel.AddChild(buttonTest);
-        
-        testScroll = new ScrollContainer()
-        {
-            Name = "ScrollContainer",
-            Position = new Vector2(300, 20),
-            Size = new Size(200, 100)
-        };
-        simpleTestControl.AddChild(testScroll);
-        testScroll.SetContent(text);
-
-        textInput = new TextBox("Type something...")
-        {
-            Name = "textInput",
-            Position = new Vector2(50, 50),
-            Size = new Size(300, 40),
-            Height = 40,
-        };
-        simpleTestControl.AddChild(textInput);
-
-        var textInputBackground = new NineGridBox();
-        textInputBackground.Texture = Texture2D.FromFile(graphicsDevice,
-            "C:\\Users\\Admin\\Pictures\\01_TravelBookLite\\Sprites\\UI_TravelBook_Slot01a.png");
-        textInputBackground.Left = 4;
-        textInputBackground.Bottom = 4;
-        textInputBackground.Top = 4;
-        textInputBackground.Right = 4;
-        
-        textInput.SetBackground(textInputBackground);
+        var testroot = new TestControl();
+        _uiManager.AddRootControl(testroot);
+        testroot.AddChild(new TestControl(SDK.Types.Color.Green, SDK.Types.Color.Yellow));
         
         _pixelTexture = new Texture2D(RenderTarget.GraphicsDevice, 1, 1);
         _pixelTexture.SetData(new[] { Color.White });
     }
     
     private Color bgColor = Color.CornflowerBlue;
-        ScrollContainer testScroll;
-        TextControl text;
-    
-        TextBox textInput;
-    
     public override void UpdateAvaloniaControl(IntPtr bitmapControlAddress)
     {
         _bitmapControlAddress = bitmapControlAddress;
     }
 
-    public void RefreshUiCache(TimeSpan deltaTime)
-    {
-        bool needsRedraw = false;
-        if (_UiCache == null)
-        {
-            _UiCache = new RenderTarget2D(_graphicsDevice, RenderTarget.Width, RenderTarget.Height);
-            needsRedraw = true;
-        }
-        else
-        {
-            if (_UiCache.Width != RenderTarget.Width || _UiCache.Height != RenderTarget.Height)
-            {
-                _UiCache.Dispose();
-                _UiCache = new RenderTarget2D(_graphicsDevice, RenderTarget.Width, RenderTarget.Height);
-                needsRedraw = true;
-            }
-        }
-
-        if (UiLayer.RootControl.IsDirty || needsRedraw)
-        {
-            _graphicsDevice.SetRenderTarget(_UiCache);
-            _graphicsDevice.Clear(Color.Transparent);
-            UiLayer.Draw(deltaTime);
-            _graphicsDevice.SetRenderTarget(null);
-        }
-    }
-
     public void Draw(TimeSpan deltaTime)
     {
-        RefreshUiCache(deltaTime);
         _graphicsDevice.SetRenderTarget(RenderTarget);
         _graphicsDevice.Clear(bgColor);
-        
-        _spriteBatch.Begin();
-        
-        _spriteBatch.Draw(_UiCache, Vector2.Zero, Color.White);
-
-        if (_uiRenderer.CursorTexture == null)
-        {
-            _uiRenderer.CursorTexture = _pixelTexture;
-        }
-        _spriteBatch.Draw(_uiRenderer.CursorTexture, UiLayer._mousePosition, Color.White);
-        
-        // _uiRenderer.DrawDebugBounds(_spriteBatch, textInput);
-        // _uiRenderer.DrawDebugBounds(_spriteBatch, testScroll.ContentPresenter);
-        // _uiRenderer.DrawDebugBounds(_spriteBatch, testScroll.ScrollBarThumb);
-        // _uiRenderer.DrawDebugBounds(_spriteBatch, testScroll.ScrollBarBackground);
-        // Logger.Debug(testScroll.ToString());
-        
-        _spriteBatch.End();
-    }
-    
-    public void SetRenderer(UiRenderer renderer)
-    {
-        _uiRenderer = renderer;
-        _uiRenderer.GraphicsDevice.ScissorRectangle = _spriteBatch.GraphicsDevice.Viewport.Bounds;
+        _uiManager.Draw();
     }
 
     public void Update(TimeSpan deltaTime)
     {
-        UiLayer.Update(deltaTime);
+        _uiManager.Update(deltaTime.Milliseconds);
     }
 
     #region InternalMethods - DO NOT TOUCH

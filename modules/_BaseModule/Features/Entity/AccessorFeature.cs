@@ -40,7 +40,7 @@ public class AccessorFeature : BaseEntityFeature
 {
     public static UrnNamespace AccessorNamespace = "rpgc_runtime".ToUrnNamespace();
     public override string FeatureName => "Accessor Feature";
-    public override string FeatureDescription => "A feature that provides access to certain properties or methods of an entity.";
+    public override string FeatureDescription => "A feature that provides access to certain properties of an entity.";
     public override URN FeatureUrn => FeatureUrnModule.ToUrnModule("rpgc").ToUrn("accessor");
 
     public override void OnWorldSetup(IEcsWorld world)

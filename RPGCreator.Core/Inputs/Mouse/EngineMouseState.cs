@@ -23,7 +23,10 @@
 // 
 #endregion
 
+using RPGCreator.SDK.Editor.Rendering;
 using RPGCreator.SDK.Inputs;
+using RPGCreator.SDK.Logging;
+using Serilog;
 using MouseButton = RPGCreator.SDK.Inputs.MouseButton;
 using Vector2 = System.Numerics.Vector2;
 
@@ -34,10 +37,24 @@ namespace RPGCreator.Core.Inputs.Mouse
         
         protected RawMouseData MouseState;
         protected RawMouseData PreviousMouseState;
+        
+        private struct ButtonClickMetadata
+        {
+            public double LastPressTime;
+            public double LastReleaseTime;
+            public Vector2 LastClickPosition;
+        }
+
+        private readonly ButtonClickMetadata[] _clickTracker = new ButtonClickMetadata[AllButtons.Length];
+        
+        private const double DoubleClickInterval = 300.0;
+        private const float MaxDistance = 3.0f;
 
         public event Action<MouseButton>? ButtonDown;
         public event Action<MouseButton>? ButtonUp;
-        public event Action<int, int>? Moved;
+        public event Action<MouseButton>? Clicked;
+        public event Action<MouseButton>? DoubleClicked;
+        public event Action<Vector2>? Moved;
         public event Action<int>? WheelScrolled;
         public event Action<int>? HorizontalWheelScrolled;
         public event Action<object?>? HoveredObjectChanged;
@@ -45,8 +62,20 @@ namespace RPGCreator.Core.Inputs.Mouse
         public int X { get; private set; }
         public int Y { get; private set; }
         public bool LeftButtonPressed { get; private set; }
+        public double TimeSinceLastLeftPress { get; private set; }
+        public bool LeftButtonDoublePressed { get; private set; }
+        public bool LeftClicked { get; private set; }
+        public bool LeftDoubleClicked { get; private set; }
         public bool RightButtonPressed { get; private set; }
+        public double TimeSinceLastRightPress { get; private set; }
+        public bool RightButtonDoublePressed { get; private set; }
+        public bool RightClicked { get; private set; }
+        public bool RightDoubleClicked { get; private set; }
         public bool MiddleButtonPressed { get; private set; }
+        public double TimeSinceLastMiddlePress { get; private set; }
+        public bool MiddleButtonDoublePressed { get; private set; }
+        public bool MiddleClicked { get; private set; }
+        public bool MiddleDoubleClicked { get; private set; }
         public Vector2 Position { get; private set; } = Vector2.Zero;
         public Vector2 DeltaPosition { get; private set; } = Vector2.Zero;
         public int WheelDelta { get; private set; }
@@ -69,18 +98,19 @@ namespace RPGCreator.Core.Inputs.Mouse
         protected void RefreshLogic()
         {
             SetInsideWindow();
+            ResetFlags();
             SetPosition();
             SetButtons();
             SetWheel();
             SetCurrentObject();
         }
 
-        private void SetInsideWindow()
+        protected void SetInsideWindow()
         {
             IsInsideWindow = MouseState.IsInsideWindow;
         }
 
-        private void SetPosition()
+        protected void SetPosition()
         {
             X = MouseState.X;
             Y = MouseState.Y;
@@ -92,20 +122,29 @@ namespace RPGCreator.Core.Inputs.Mouse
             
             if (DeltaPosition.X != 0 || DeltaPosition.Y != 0)
             {
-                Moved?.Invoke((int)DeltaPosition.X, (int)DeltaPosition.Y);
+                Moved?.Invoke(DeltaPosition);
             }
         }
-        private static readonly MouseButton[] AllButtons = (MouseButton[])Enum.GetValues(typeof(MouseButton));
+        protected static readonly MouseButton[] AllButtons = (MouseButton[])Enum.GetValues(typeof(MouseButton));
+        public HashSet<MouseButton> PressedButtons { get; protected set; } = new();
 
-        private void SetButtons()
+        protected void ResetFlags()
+        {
+            LeftButtonDoublePressed = false;
+            RightButtonDoublePressed = false;
+            MiddleButtonDoublePressed = false;
+            ResetClick();
+            ResetDoubleClick();
+        }
+        
+        protected void SetButtons()
         {
             var currentButtons = MouseState.Buttons;
             var previousButtons = PreviousMouseState.Buttons;
 
-            LeftButtonPressed = currentButtons.HasFlag(MouseButton.Left);
-            RightButtonPressed = currentButtons.HasFlag(MouseButton.Right);
-            MiddleButtonPressed = currentButtons.HasFlag(MouseButton.Middle);
-    
+
+            double currentTime = DateTime.UtcNow.TimeOfDay.TotalMilliseconds;
+
             for (int i = 0; i < AllButtons.Length; i++)
             {
                 var button = AllButtons[i];
@@ -113,19 +152,74 @@ namespace RPGCreator.Core.Inputs.Mouse
 
                 bool isDown = currentButtons.HasFlag(button);
                 bool wasDown = previousButtons.HasFlag(button);
+                ref var meta = ref _clickTracker[i];
 
                 if (isDown && !wasDown)
                 {
+                    PressedButtons.Add(button);
                     ButtonDown?.Invoke(button);
+
+                    float distance = Vector2.Distance(Position, meta.LastClickPosition);
+                    bool isWithinTime = (currentTime - meta.LastPressTime) < DoubleClickInterval;
+
+                    if (isWithinTime && distance < MaxDistance)
+                    {
+                        SetDoublePressedFlag(button, true);
+                        meta.LastPressTime = 0;
+                    }
+                    else
+                    {
+                        meta.LastPressTime = currentTime;
+                    }
+                    
+                    meta.LastClickPosition = Position;
                 }
                 else if (!isDown && wasDown)
                 {
+                    PressedButtons.Remove(button);
                     ButtonUp?.Invoke(button);
+
+                    float distance = Vector2.Distance(Position, meta.LastClickPosition);
+                    bool isWithinTime = (currentTime - meta.LastReleaseTime) < 5000;
+
+                    if (isWithinTime && distance < MaxDistance)
+                    {
+                        OnDoubleClick(button);
+                        meta.LastReleaseTime = 0;
+                    }
+                    else
+                    {
+                        OnClick(button);
+                        meta.LastReleaseTime = currentTime;
+                    }
                 }
+            }
+
+            UpdateTimeSinceLastPress(currentTime);
+            
+            LeftButtonPressed = currentButtons.HasFlag(MouseButton.Left);
+            RightButtonPressed = currentButtons.HasFlag(MouseButton.Right);
+            MiddleButtonPressed = currentButtons.HasFlag(MouseButton.Middle);
+        }
+        
+        private void SetDoublePressedFlag(MouseButton button, bool value)
+        {
+            switch (button)
+            {
+                case MouseButton.Left: LeftButtonDoublePressed = value; break;
+                case MouseButton.Right: RightButtonDoublePressed = value; break;
+                case MouseButton.Middle: MiddleButtonDoublePressed = value; break;
             }
         }
 
-        private void SetWheel()
+        private void UpdateTimeSinceLastPress(double currentTime)
+        {
+            TimeSinceLastLeftPress = LeftButtonPressed ? 0 : currentTime - _clickTracker[0].LastPressTime;
+            TimeSinceLastRightPress = RightButtonPressed ? 0 : currentTime - _clickTracker[1].LastPressTime;
+            TimeSinceLastMiddlePress = MiddleButtonPressed ? 0 : currentTime - _clickTracker[2].LastPressTime;
+        }
+
+        protected void SetWheel()
         {
             WheelDelta = MouseState.Scroll - PreviousMouseState.Scroll;
             HorizontalWheelDelta = MouseState.HScroll - PreviousMouseState.HScroll;
@@ -141,7 +235,7 @@ namespace RPGCreator.Core.Inputs.Mouse
             }
         }
 
-        private void SetCurrentObject()
+        protected void SetCurrentObject()
         {
             InObject = MouseState.InObject;
             
@@ -177,6 +271,58 @@ namespace RPGCreator.Core.Inputs.Mouse
         public bool WasButtonJustReleased(MouseButton buttonIndex)
         {
             return IsButtonReleased(buttonIndex) && WasButtonPressed(buttonIndex);
+        }
+        
+        public void OnClick(MouseButton button)
+        {
+            switch (button)
+            {
+                case MouseButton.Left:
+                    LeftClicked = true;
+                    Clicked?.Invoke(button);
+                    break;
+                case MouseButton.Right:
+                    RightClicked = true;
+                    Clicked?.Invoke(button);
+                    break;
+                case MouseButton.Middle:
+                    MiddleClicked = true;
+                    Clicked?.Invoke(button);
+                    break;
+            }
+        }
+        
+        public void OnDoubleClick(MouseButton button)
+        {
+            switch (button)
+            {
+                case MouseButton.Left:
+                    LeftDoubleClicked = true;
+                    DoubleClicked?.Invoke(button);
+                    break;
+                case MouseButton.Right:
+                    RightDoubleClicked = true;
+                    DoubleClicked?.Invoke(button);
+                    break;
+                case MouseButton.Middle:
+                    MiddleDoubleClicked = true;
+                    DoubleClicked?.Invoke(button);
+                    break;
+            }
+        }
+
+        public void ResetClick()
+        {
+            LeftClicked = false;
+            RightClicked = false;
+            MiddleClicked = false;
+        }
+
+        public void ResetDoubleClick()
+        {
+            LeftDoubleClicked = false;
+            RightDoubleClicked = false;
+            MiddleDoubleClicked = false;
         }
 
         public void ResetDeltas()

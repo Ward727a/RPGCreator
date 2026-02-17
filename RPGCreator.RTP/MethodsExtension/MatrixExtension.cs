@@ -18,11 +18,20 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-namespace RPGCreator.RTP.GameUI.Enums;
+using System.Numerics;
+using Microsoft.Xna.Framework;
 
-public enum TextWrapping
+namespace RPGCreator.RTP.Extensions;
+
+public static class MatrixExtension
 {
-    NoWrap,
-    Wrap,
-    WrapWithOverflow
+    public static Matrix ToXna(this Matrix3x2 m)
+    {
+        return new Matrix(
+            m.M11, m.M12, 0f, 0f, // Axe X (Scale/Rotation)
+            m.M21, m.M22, 0f, 0f, // Axe Y (Scale/Rotation)
+            0f,    0f,    1f, 0f, // Axe Z (Depth, not used here)
+            m.M31, m.M32, 0f, 1f  // Translation (X, Y)
+        );
+    }
 }

@@ -20,13 +20,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Numerics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using RPGCreator.Core.Types.Map.Chunks;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Types;
 using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.RTP.Services;
@@ -195,7 +195,7 @@ public partial class ChunkService : ObservableObject, IChunkService
             RuntimeServices.RenderService.DrawDebugRect(
                 chunkWorldPosition,
                 ChunkSizeInPixels,
-                Color.IndianRed
+                Color.Red
             );
             
         }
@@ -203,7 +203,7 @@ public partial class ChunkService : ObservableObject, IChunkService
 
     public void DebugDrawChunkItemsGrid()
     {
-        var gridColor = Color.FromArgb(100, Color.DarkOliveGreen);
+        var gridColor = Color.Green * 0.5f;
         var render = RuntimeServices.RenderService;
 
         foreach (var chunkId in ActiveChunks)

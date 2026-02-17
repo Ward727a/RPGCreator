@@ -20,16 +20,10 @@
 
 namespace RPGCreator.RTP.GameUI.Enums;
 
-public enum HorizontalAlignment
+public enum EBindingRefreshType
 {
-    Left,
-    Center,
-    Right
-}
-
-public enum VerticalAlignment
-{
-    Top,
-    Center,
-    Bottom
+    OneTime, // Refreshes the binding once when the UI element is created or when the binding is set.
+    EveryFrame, // Refreshes the binding every frame, ensuring it always reflects the current value.
+    Periodic, // Refreshes the binding at regular intervals (e.g., every second).
+    OnEvent // Refreshes the binding only when a specific event occurs (e.g., when a character's health changes).
 }

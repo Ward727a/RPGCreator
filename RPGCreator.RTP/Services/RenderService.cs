@@ -20,7 +20,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Numerics;
 using Microsoft.Xna.Framework.Graphics;
@@ -31,6 +30,7 @@ using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Types;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 using Size = RPGCreator.SDK.Types.Size;
 
@@ -69,12 +69,12 @@ public class RenderService : IRenderService
             texture,
             position.ToXnaFast(),
             null,
-            Microsoft.Xna.Framework.Color.White,
-            0f, // Rotation
-            Vector2.Zero, // Origin
+            Color.White.ToMgColor(),
+            0f,
+            Vector2.Zero,
             new Microsoft.Xna.Framework.Vector2(scaleX, scaleY),
             SpriteEffects.None,
-            0.4f              // LayerDepth
+            0.4f
         );
     }
 
@@ -117,11 +117,11 @@ public class RenderService : IRenderService
             tilePositionInChunk.ToXnaFast(),
             sourceRect,
             Microsoft.Xna.Framework.Color.White,
-            0f,             // Rotation
-            Vector2.Zero,   // Origin
+            0f,
+            Vector2.Zero,
             1f,
             SpriteEffects.None,
-            0.5f              // LayerDepth
+            0.5f
         );
     }
 
@@ -138,8 +138,8 @@ public class RenderService : IRenderService
         var w = (int)(size.Width);
         var h = (int)(size.Height);
 
-        var finalColor = color??Color.BlueViolet;
-        var xnaColor = finalColor.ToXnaFast();
+        var finalColor = color??Color.Violet;
+        var xnaColor = finalColor.ToMgColor();
 
         spriteBatch.DrawRectangle(
             new Rectangle(
@@ -160,7 +160,7 @@ public class RenderService : IRenderService
         var adjustedThickness = thickness / camera.ZoomLevel;
         
         var finalColor = color??Color.Red;
-        var xnaColor = finalColor.ToXnaFast();
+        var xnaColor = finalColor.ToMgColor();
         
         spriteBatch.DrawLine(
             startPos.ToXnaFast(),
@@ -176,8 +176,8 @@ public class RenderService : IRenderService
         var adjustedSize = size / camera.ZoomLevel;
         var adjustedThickness = thickness / camera.ZoomLevel;
         
-        var finalColor = color??Color.GreenYellow;
-        var xnaColor = finalColor.ToXnaFast();
+        var finalColor = color??Color.Yellow;
+        var xnaColor = finalColor.ToMgColor();
         
         spriteBatch.DrawCircle(
             position.ToXnaFast(),
@@ -274,7 +274,7 @@ public class RenderService : IRenderService
         Vector2? scale = null, float layerDepth = 0, SDK.ECS.Components.SpriteEffects effects = SDK.ECS.Components.SpriteEffects.None)
     {
         var texture = EngineServices.ResourcesService.Load<Texture2D>(texturePath);
-        var xnaColor = (tint ?? Color.White).ToXnaFast();
+        var xnaColor = (tint ?? Color.White).ToMgColor();
         var xnaEffects = SpriteEffects.None;
         if (effects.HasFlag(SDK.ECS.Components.SpriteEffects.FlipHorizontally))
             xnaEffects |= SpriteEffects.FlipHorizontally;

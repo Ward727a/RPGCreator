@@ -18,24 +18,11 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGCreator.SDK.Inputs;
+namespace RPGCreator.RTP.GameUI.Enums;
 
-namespace RPGCreator.RTP.GameUI.Interface;
-
-/// <summary>
-/// This is a marker interface for controls that can receive input from the user, such as TextBox, Button, etc.
-/// </summary>
-public interface IInputControl
+public enum EBindingMode
 {
-    
-}
-
-public interface IMouseInputControl : IInputControl
-{
-    public void OnMouseClick(MouseButton button);
-}
-
-public interface IKeyboardInputControl : IInputControl
-{
-    public void OnKeyboardInput();
+    OneWay, // Data flows from source to target, but not the other way around.
+    TwoWay, // Data flows in both directions, allowing changes in either the source or target to be reflected in the other.
+    OneWayToSource // Data flows from target to source, but not the other way around.
 }

@@ -18,10 +18,20 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-namespace RPGCreator.RTP.GameUI.Enums;
+using RPGRect = RPGCreator.SDK.Types.Rect;
+using MGRect = Microsoft.Xna.Framework.Rectangle;
 
-public enum ControlOrientation
+namespace RPGCreator.RTP.Extensions;
+
+public static class RectangleExtension
 {
-    Horizontal,
-    Vertical
+    public static MGRect ToMGRect(this RPGRect rect)
+    {
+        return new MGRect((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height);
+    }
+    
+    public static RPGRect ToRPGRect(this MGRect rect)
+    {
+        return new RPGRect(rect.X, rect.Y, rect.Width, rect.Height);
+    }
 }

@@ -23,14 +23,10 @@ using System.IO;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using RPGCreator.RTP.GameUI;
-using RPGCreator.RTP.GameUI.BaseControls;
-using RPGCreator.RTP.GameUI.BaseControls.BackgroundBox;
 using RPGCreator.RTP.Services;
 using RPGCreator.RTP.Viewport;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Editor.Rendering;
-using SpriteFontPlus;
 
 namespace RPGCreator.RTP;
 
@@ -71,7 +67,6 @@ public sealed class RenderCore : Game, IGameRenderCore
         base.LoadContent();
         GraphicsDevice.Reset();
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-        SdfColorBox.LoadSdfEffect(GraphicsDevice);
         if (FontSystem == null)
         {
             var settings = new FontSystemSettings()

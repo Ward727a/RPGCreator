@@ -2,7 +2,7 @@
 
 namespace RPGCreator.SDK.Inputs;
 
-public readonly record struct RawMouseData(int X, int Y, int Scroll, int HScroll, MouseButton Buttons, bool IsInsideWindow, object? InObject = null);
+public readonly record struct RawMouseData(int X, int Y, int Scroll, int HScroll, MouseButton Buttons, bool IsInsideWindow, object? InObject = null, bool IsNotDefault = true);
 
 [Flags]
 public enum MouseButton
@@ -17,13 +17,15 @@ public enum MouseButton
 
 public interface IMouseState
 {
-    
     event Action<MouseButton>? ButtonDown;
     event Action<MouseButton>? ButtonUp;
-    event Action<int, int>? Moved;
+    event Action<MouseButton>? Clicked;
+    event Action<MouseButton>? DoubleClicked;
+    event Action<Vector2>? Moved;
     event Action<int>? WheelScrolled;
     event Action<int>? HorizontalWheelScrolled;
     event Action<object?>? HoveredObjectChanged;
+    HashSet<MouseButton> PressedButtons { get; }
     
     /// <summary>
     /// The current X position of the mouse cursor.
@@ -37,14 +39,45 @@ public interface IMouseState
     /// Indicates whether the left mouse button is currently pressed.
     /// </summary>
     bool LeftButtonPressed { get; }
+    double TimeSinceLastLeftPress { get; }
+    bool LeftButtonDoublePressed { get; }
+    /// <summary>
+    /// Indicates whether the left mouse button was just clicked this frame.<br/>
+    /// </summary>
+    public bool LeftClicked { get; }
+    /// <summary>
+    /// Indicates whether the left mouse button was just double-clicked this frame.<br/>
+    /// </summary>
+    public bool LeftDoubleClicked { get; }
     /// <summary>
     /// Indicates whether the right mouse button is currently pressed.
     /// </summary>
     bool RightButtonPressed { get; }
+    double TimeSinceLastRightPress { get; }
+    bool RightButtonDoublePressed { get; }
+    /// <summary>
+    /// Indicates whether the right mouse button was just clicked this frame.<br/>
+    /// </summary>
+    public bool RightClicked { get; }
+    /// <summary>
+    /// Indicates whether the right mouse button was just double-clicked this frame.<br/>
+    /// </summary>
+    public bool RightDoubleClicked { get; }
     /// <summary>
     /// Indicates whether the middle mouse button is currently pressed.
     /// </summary>
     bool MiddleButtonPressed { get; }
+    double TimeSinceLastMiddlePress { get; }
+    bool MiddleButtonDoublePressed { get; }
+    /// <summary>
+    /// Indicates whether the middle mouse button was just clicked this frame.<br/>
+    /// </summary>
+    public bool MiddleClicked { get; }
+    /// <summary>
+    /// Indicates whether the middle mouse button was just double-clicked this frame.<br/>
+    /// </summary>
+    public bool MiddleDoubleClicked { get; }
+    
     
     /// <summary>
     /// The current mouse position.

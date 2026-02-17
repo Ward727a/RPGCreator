@@ -20,9 +20,14 @@
 
 namespace RPGCreator.RTP.GameUI.Enums;
 
-public enum ControlSizingMode
+public enum EPositionUnitType
 {
-    Manual,
-    ByAnchor,
-    ByContent
+    Pixels,
+    PixelsFromRight,
+    PixelsFromBottom,
+    PixelsFromCenter,
+    Percentage,
+    PercentageFromRight,
+    PercentageFromBottom,
+    PercentageFromCenter
 }

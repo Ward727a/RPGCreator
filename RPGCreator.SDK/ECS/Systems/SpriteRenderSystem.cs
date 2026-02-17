@@ -97,7 +97,7 @@ public class SpriteRenderSystem : ISystem
                 Rotation = transformComponent.Rotation,
                 Origin = spritesheet.FeetOrigin,
                 Scale = transformComponent.Scale * 2,
-                SortY = transformComponent.Position.Y // Pivot pieds
+                SortY = transformComponent.Position.Y // foot pivot
             });
         }
     }

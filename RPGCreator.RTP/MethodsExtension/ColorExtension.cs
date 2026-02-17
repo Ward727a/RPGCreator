@@ -18,22 +18,20 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-namespace RPGCreator.RTP.GameUI.Enums;
+using RPGColor = RPGCreator.SDK.Types.Color;
+using MGColor = Microsoft.Xna.Framework.Color;
 
-public enum Cursors
+namespace RPGCreator.RTP.Extensions;
+
+public static class ColorExtension
 {
-    Arrow,
-    Hand,
-    IBeam,
-    Crosshair,
-    Wait,
-    Help,
-    SizeAll,
-    SizeNESW,
-    SizeNS,
-    SizeNWSE,
-    SizeWE,
-    No,
-    AppStarting,
-    Default = Arrow
+    public static MGColor ToMgColor(this RPGColor color)
+    {
+        return new MGColor(color.R, color.G, color.B, color.A);
+    }
+    
+    public static RPGColor ToRpgColor(this MGColor color)
+    {
+        return new RPGColor(color.R, color.G, color.B, color.A);
+    }
 }

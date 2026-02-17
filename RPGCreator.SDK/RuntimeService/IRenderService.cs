@@ -23,6 +23,7 @@ using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.ECS.Components;
+using Color = RPGCreator.SDK.Types.Color;
 using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.SDK.RuntimeService;

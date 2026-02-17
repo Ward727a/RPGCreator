@@ -1,10 +1,8 @@
-using System.Drawing;
 using Newtonsoft.Json;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
-using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps;
 
