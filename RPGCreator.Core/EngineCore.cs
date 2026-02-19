@@ -41,6 +41,7 @@ using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.GameRunner;
+using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Graph.Nodes;
 using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Logging;
@@ -103,47 +104,54 @@ namespace RPGCreator.Core
 
             Logger.Implementation = new EngineLogger();
             
-            EngineStates.EditorState = new EditorState();
-            EngineStates.EditorState.InEditorMode = mode == EEngineMode.EditorMode;
-            EngineStates.ProjectState = new ProjectState();
-            EngineStates.BrushState = new BrushState();
+            #region GlobalStates Initialization
+            GlobalStates.EditorState = new EditorState();
+            GlobalStates.EditorState.InEditorMode = mode == EEngineMode.EditorMode;
+            GlobalStates.ProjectState = new ProjectState();
+            GlobalStates.BrushState = new BrushState();
+            GlobalStates.MapState = new MapState();
+            GlobalStates.ToolState = new BaseToolState();
             
-            EngineStates.MouseState = new EngineMouseState();
-            EngineStates.KeyboardState = new EngineKeyboardState();
+            GlobalStates.MouseState = new EngineMouseState();
+            GlobalStates.KeyboardState = new EngineKeyboardState();
 
-            if (EngineStates.EditorState.InEditorMode)
+            if (GlobalStates.EditorState.InEditorMode)
             {
-                EngineStates.ViewportMouseState = new ViewportMouseState();
-                EngineStates.ViewportKeyboardState = new ViewportKeyboardState();
+                GlobalStates.ViewportMouseState = new ViewportMouseState();
+                GlobalStates.ViewportKeyboardState = new ViewportKeyboardState();
             }
+            #endregion
             
+            // Doing this as "ScanAllEngineAssemblies" is not implemented inside the IAssetsTypeMapping interface.
+            // And we don't want that (or else all modules could do that, and it COULD be a problem...
+            // In fact, I didn't check if it could be a problem, but I prefer to not take the risk for now, and we can always change that later if we need to).
             var typeMapping = new AssetsTypeMapping();
-            
             typeMapping.ScanAllEngineAssemblies();
-            
             RegistryServices.AssetTypeRegistry = typeMapping;
             
-            EngineResourcesService resService = new EngineResourcesService();
-            
-            EngineServices.ResourcesService = resService;
+            EngineServices.ResourcesService = new EngineResourcesService();
             RegistryServices.SimpleEventRegistry = new EngineSimpleEventRegistry();
             RegistryServices.EventsRegisterService = new EngineEventsRegister();
+            
             EngineServices.GlobalContextProvider = new GlobalContextProvider();
             RegistryServices.SignalRegistry = new EngineSignalRegistry();
             RegistryServices.UrnRegistry = new UrnRegistry();
+            RegistryServices.ToolRegistry = new ToolRegistry();
             
             Instance = this;
 
             Scheduler = new EngineScheduler();
             Serializer = new EngineSerializer();
             EngineServices.SerializerService = Serializer;
-            Configs = new EngineConfigs();
+            Configs = new EngineConfigs(); // Should be removed!!
             Managers = new EngineManagers();
             #if DEBUG
             // In debug mode, we load the engine icons for debug tools (like IconsExplorer).
             Icons = new EngineIcons();
             #endif
-            
+            var config = new EngineConfig();
+            config.CreateOrLoadConfig();
+            EngineServices.EngineConfig = config;
             EngineServices.GraphService = new GraphService();
             EngineServices.PrattFormulaService = new PrattFormulaService();
             EngineServices.GraphNodeScanner = new GraphNodeScanner();

@@ -67,6 +67,9 @@ public sealed class RenderCore : Game, IGameRenderCore
         base.LoadContent();
         GraphicsDevice.Reset();
         _spriteBatch = new SpriteBatch(GraphicsDevice);
+        
+        EngineServices.ResourcesService.RegisterLoader<Texture2D>(new Texture2DLoader(GraphicsDevice));
+        
         if (FontSystem == null)
         {
             var settings = new FontSystemSettings()
@@ -87,9 +90,10 @@ public sealed class RenderCore : Game, IGameRenderCore
     {
         return new RenderTarget2D(GraphicsDevice, width, height);
     }
-    public void LoadContent(GameViewport viewport)
+
+    public void LoadContent(BaseMonogameViewport viewport)
     {
-        viewport.LoadContent(GraphicsDevice, _spriteBatch, FontSystem!);
+        viewport.LoadContent(GraphicsDevice, _spriteBatch);
     }
 
     protected override void Draw(GameTime gameTime)
@@ -100,26 +104,22 @@ public sealed class RenderCore : Game, IGameRenderCore
         base.Draw(gameTime);
         
         if (GraphicsDevice == null) return;
+        
         var viewports = _parentService.GetAllViewports();
         
-        for (int i = 0; i < viewports.Length; i++)
+        foreach (var viewport in viewports)
         {
-            var viewport = viewports[i];
-            
             if(viewport is { IsDrawingPaused: true, FrameAsked: false } || viewport.InternalIsDrawingPaused) continue;
 
-            if (viewport is GameViewport gv && gv.RenderTarget != null)
-            {
-                viewport.DrawViewport(gameTime.ElapsedGameTime);
-            }
+            viewport.DrawViewport(gameTime.ElapsedGameTime);
         }
         GraphicsDevice.SetRenderTarget(null);
     }
 
     protected override void Update(GameTime gameTime)
     {
-        EngineStates.ElapsedTime = gameTime.ElapsedGameTime;
-        EngineStates.TotalTime = gameTime.TotalGameTime;
+        GlobalStates.ElapsedTime = gameTime.ElapsedGameTime;
+        GlobalStates.TotalTime = gameTime.TotalGameTime;
         OnUpdate?.Invoke(gameTime.ElapsedGameTime);
         var viewports = _parentService.GetAllViewports();
         var deltaTime = gameTime.ElapsedGameTime;
@@ -133,6 +133,8 @@ public sealed class RenderCore : Game, IGameRenderCore
             viewport.UpdateViewport(deltaTime);
         }
 
+        GlobalStates.MouseState.ResetDeltas();
+        GlobalStates.ViewportMouseState.ResetDeltas();
         base.Update(gameTime);
     }
     

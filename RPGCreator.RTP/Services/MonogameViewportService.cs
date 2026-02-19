@@ -35,8 +35,8 @@ public sealed class MonogameViewportService : IMonogameViewport
     public RenderCore _core { get; private set; }
     public bool IsCoreReady { get; private set; } = false;
     public event Action? OnCoreReady;
-    private Dictionary<string, BaseGameViewport> ViewportsMap { get; } = new();
-    private readonly List<BaseGameViewport> _activeViewports = [];
+    private Dictionary<string, BaseMonogameViewport> ViewportsMap { get; } = new();
+    private readonly List<BaseMonogameViewport> _activeViewports = [];
 
     private Queue<(string ViewportId, IntPtr bitmapControlAddress, Size InitialSize)> _pendingViewports = new();
     private Queue<(string ViewportId, int Width, int Height)> _pendingResizes = new();
@@ -66,7 +66,7 @@ public sealed class MonogameViewportService : IMonogameViewport
         OnCoreReady?.Invoke();
     }
     
-    public void CreateNewViewport(string viewportId, IntPtr bitmapControlAddress, Size initialSize)
+    public void CreateNewViewport(string viewportId, IntPtr bitmapControlAddress, Size initialSize, ViewportType viewportType = ViewportType.Game)
     {
         if (ViewportsMap.ContainsKey(viewportId))
         {
@@ -79,24 +79,38 @@ public sealed class MonogameViewportService : IMonogameViewport
             return;
         }
 
-        var viewport = new GameViewport(_core.CreateNewRenderTarget2D(initialSize.Width, initialSize.Height));
+        BaseMonogameViewport viewport;
+        
+        switch (viewportType)
+        {
+            case ViewportType.Game:
+                viewport = new MonogameViewport(_core.CreateNewRenderTarget2D(initialSize.Width, initialSize.Height));
+                break;
+            case ViewportType.Ui:
+                viewport = new UiViewport(_core.CreateNewRenderTarget2D(initialSize.Width, initialSize.Height));
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(viewportType), $"Unsupported viewport type: {viewportType}");
+        }
+        
         _core.LoadContent(viewport);
         viewport.Size = initialSize;
         viewport.UpdateAvaloniaControl(bitmapControlAddress);
+        
         _activeViewports.Add(viewport);
+        
         viewport.ResumeUpdating();
         viewport.ResumeDrawing();
+        
         ViewportsMap[viewportId] = viewport;
         
         viewport.Resized += (sender, newSize) =>
         {
-            if (sender is GameViewport vp)
-            {
-                vp.RenderTarget?.Dispose();
-                vp.RenderTarget = _core.CreateNewRenderTarget2D(newSize.Width, newSize.Height);
-                vp.ResumeUpdating();
-                vp.ResumeDrawing();
-            }
+            if (sender is not BaseMonogameViewport vp) return;
+            
+            vp.SetNewRendertarget(_core.CreateNewRenderTarget2D(newSize.Width, newSize.Height));
+            vp.ResumeUpdating();
+            vp.ResumeDrawing();
         };
     }
 
@@ -116,7 +130,7 @@ public sealed class MonogameViewportService : IMonogameViewport
         viewport.Resize(new Size(width, height));
     }
 
-    public BaseGameViewport GetViewport(string viewportId)
+    public BaseMonogameViewport GetViewport(string viewportId)
     {
         if (!ViewportsMap.TryGetValue(viewportId, out var viewport))
         {
@@ -148,7 +162,7 @@ public sealed class MonogameViewportService : IMonogameViewport
         // return;
     }
 
-    internal ReadOnlySpan<BaseGameViewport> GetAllViewports()
+    internal ReadOnlySpan<BaseMonogameViewport> GetAllViewports()
     {
         return CollectionsMarshal.AsSpan(_activeViewports);
     }

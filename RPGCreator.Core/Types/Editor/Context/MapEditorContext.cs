@@ -18,7 +18,7 @@ public static class MapEditorContext
     
     public static void Initialize()
     {
-        EngineStates.BrushState.PropertyChanged += (s, e) =>
+        GlobalStates.BrushState.PropertyChanged += (s, e) =>
         {
             if (e.PropertyName == nameof(IBrushState.CurrentMode))
             {
@@ -47,15 +47,15 @@ public static class MapEditorContext
         var selectedLayer = RuntimeServices.LayerService.GetSelectedLayer();
         var map = RuntimeServices.MapService.CurrentLoadedMapDefinition;
 
-        if (EngineStates.BrushState.CurrentMode == BrushMode.Tiling && selectedLayer is TileLayerDefinition tileLayerDefinition)
+        if (GlobalStates.BrushState.CurrentMode == BrushMode.Tiling && selectedLayer is TileLayerDefinition tileLayerDefinition)
         {
             _activePaintTargetCache = new TileLayerTarget(tileLayerDefinition, map, 32, 32);
         }
-        else if (EngineStates.BrushState.CurrentMode == BrushMode.Tiling && selectedLayer is AutoLayerDefinition autoLayerDefinition)
+        else if (GlobalStates.BrushState.CurrentMode == BrushMode.Tiling && selectedLayer is AutoLayerDefinition autoLayerDefinition)
         {
             _activePaintTargetCache = new IntGridLayerTarget(autoLayerDefinition, map);
         }
-        else if (EngineStates.BrushState.CurrentMode == BrushMode.Entities && selectedLayer is EntityLayerDefinition entityLayerDefinition)
+        else if (GlobalStates.BrushState.CurrentMode == BrushMode.Entities && selectedLayer is EntityLayerDefinition entityLayerDefinition)
         {
             _activePaintTargetCache = new EntityLayerTarget(entityLayerDefinition, map, 32, 32);
         }
@@ -63,15 +63,15 @@ public static class MapEditorContext
         Log.Debug("Paint Target Rebuilt");
     }
     
-    public static object? SelectedObjectToPaint => EngineStates.BrushState.CurrentObjectToPaint;
+    public static object? SelectedObjectToPaint => GlobalStates.BrushState.CurrentObjectToPaint;
     
     #region Drawing State
-    public static ITileDef? SelectedTile => EngineStates.BrushState.CurrentObjectToPaint as ITileDef;
-    public static IntGridData? SelectedIntGridData => EngineStates.BrushState.CurrentObjectToPaint as IntGridData;
+    public static ITileDef? SelectedTile => GlobalStates.BrushState.CurrentObjectToPaint as ITileDef;
+    public static IntGridData? SelectedIntGridData => GlobalStates.BrushState.CurrentObjectToPaint as IntGridData;
     #endregion
 
     #region Placement State
-    public static EntitySpawner? SelectedEntity => EngineStates.BrushState.CurrentObjectToPaint as EntitySpawner;
+    public static EntitySpawner? SelectedEntity => GlobalStates.BrushState.CurrentObjectToPaint as EntitySpawner;
     #endregion
     
 }

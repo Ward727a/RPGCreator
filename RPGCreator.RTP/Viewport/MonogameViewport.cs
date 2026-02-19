@@ -19,51 +19,56 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System;
-using FontStashSharp;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using RPGCreator.RTP.GameUI;
-using RPGCreator.RTP.GameUI.Controls;
+using RPGCreator.RTP.ECS.Systems;
+using RPGCreator.RTP.Services;
 using RPGCreator.SDK;
+using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.ECS.Systems;
 using RPGCreator.SDK.Editor.Rendering;
 using RPGCreator.SDK.Logging;
-using Color = Microsoft.Xna.Framework.Color;
+using RPGCreator.SDK.RuntimeService;
 
 namespace RPGCreator.RTP.Viewport;
 
-public class GameViewport : BaseGameViewport
+public class MonogameViewport : BaseMonogameViewport
 {
-    private static ScopedLogger _logger = Logger.ForContext<GameViewport>();
-    
+    private static ScopedLogger _logger = Logger.ForContext<MonogameViewport>();
     
     public RenderTarget2D? RenderTarget { get; set; }
-    private uint[]? _internalBuffer;
-    private IntPtr? _bitmapControlAddress;
-    private Texture2D _pixelTexture;
-    GraphicsDevice _graphicsDevice;
-    private UiManager _uiManager;
     
-    public GameViewport(RenderTarget2D renderTarget)
+    private GraphicsDevice _graphicsDevice;
+    private SpriteBatch _spriteBatch;
+    private IEcsWorld _ecsWorld;
+    
+    private readonly Color _bgColor = Color.CornflowerBlue; // We do this for now, later on, it's the map selected that will determine the background color of the viewport.
+    
+    public MonogameViewport(RenderTarget2D renderTarget)
     {
         RenderTarget = renderTarget;
     }
 
-    
-    public void LoadContent(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch, FontSystem fontSystem)
+    public void LoadContent(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
     {
         _graphicsDevice = graphicsDevice;
-        _uiManager = new UiManager(this);
-        _uiManager.Initialize(EngineStates.ViewportMouseState);
-        _uiManager.InitializeRenderer(new UiRendererContext(spriteBatch));
-
-        var testroot = new TestControl();
-        _uiManager.AddRootControl(testroot);
-        testroot.AddChild(new TestControl(SDK.Types.Color.Green, SDK.Types.Color.Yellow));
+        _spriteBatch = spriteBatch;
+        _ecsWorld = EngineServices.ECS.CreateWorld();
+            
+        RuntimeServices.MapService = new MapService();
+        RuntimeServices.LayerService = new LayerService();
+        RuntimeServices.ChunkService = new ChunkService();
+        RuntimeServices.CameraService = new CameraService();
+        RuntimeServices.RenderService = new RenderService(graphicsDevice, _spriteBatch);
+        RuntimeServices.PlayerController = new BasePlayerController();
+        RuntimeServices.GameSession = new DefaultGameSession();
+        RuntimeServices.GameSession.ActiveEcsWorld = _ecsWorld;
+        RuntimeServices.CameraService.SetCameraEntity(_ecsWorld.EntityManager.CreateCameraEntity().Id);
         
-        _pixelTexture = new Texture2D(RenderTarget.GraphicsDevice, 1, 1);
-        _pixelTexture.SetData(new[] { Color.White });
+        _ecsWorld.SystemManager.AddSystem(new CameraSystem());
+        _ecsWorld.SystemManager.AddSystem(new MapDrawingSystem(graphicsDevice));
     }
-    
-    private Color bgColor = Color.CornflowerBlue;
+
     public override void UpdateAvaloniaControl(IntPtr bitmapControlAddress)
     {
         _bitmapControlAddress = bitmapControlAddress;
@@ -72,16 +77,43 @@ public class GameViewport : BaseGameViewport
     public void Draw(TimeSpan deltaTime)
     {
         _graphicsDevice.SetRenderTarget(RenderTarget);
-        _graphicsDevice.Clear(bgColor);
-        _uiManager.Draw();
+        _graphicsDevice.Clear(_bgColor);
+        
+        _ecsWorld.SystemManager.Draw(deltaTime);
     }
 
     public void Update(TimeSpan deltaTime)
     {
-        _uiManager.Update(deltaTime.Milliseconds);
+        RuntimeServices.ChunkService.UpdateLoadedChunk();
+        _ecsWorld.Update(deltaTime);
     }
 
     #region InternalMethods - DO NOT TOUCH
+    
+    private IntPtr? _bitmapControlAddress;
+    private uint[]? _internalBuffer;
+
+    public override void LoadContent(object graphicsDevice, object spriteBatch)
+    {
+        if (graphicsDevice is GraphicsDevice gd && spriteBatch is SpriteBatch sb)
+        {
+            LoadContent(gd, sb);
+        }
+        else
+        {
+            throw new ArgumentException("Invalid types for LoadContent. Expected GraphicsDevice and SpriteBatch.");
+        }
+    }
+
+    public override void SetNewRendertarget(object newRenderTarget)
+    {
+        if (newRenderTarget is RenderTarget2D rt)
+        {
+            RenderTarget?.Dispose();
+            RenderTarget = rt;
+        }
+    }
+
     protected override void UpdatingFrame(TimeSpan deltaTime)
     {
         Draw(deltaTime);

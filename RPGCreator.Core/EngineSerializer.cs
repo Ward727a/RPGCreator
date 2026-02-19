@@ -74,7 +74,7 @@ public class EngineSerializer : ISerializerService
         data = json;
     }
 
-    public void Deserialize<T>(string data, out T obj)
+    public void Deserialize<T>(string data, out T? obj)
     {
         obj = JsonConvert.DeserializeObject<T>(data, _settings)!;
     }

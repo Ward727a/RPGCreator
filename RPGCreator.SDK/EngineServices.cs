@@ -159,12 +159,6 @@ public static class EngineServices
         set => RegisterService(value);
     }
 
-    public static IBrushManager BrushManager
-    {
-        get => GetService<IBrushManager>();
-        set => RegisterService(value);
-    }
-
     public static ISerializerService SerializerService
     {
         get => GetService<ISerializerService>();

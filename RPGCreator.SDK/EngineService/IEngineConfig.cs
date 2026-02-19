@@ -18,12 +18,23 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Collections.ObjectModel;
 using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.EngineService;
 
 public interface IEngineConfig : IService, ISerializable, IDeserializable
 {
+    event Action? OnConfigChanged;
+    event Action? OnShortcutsChanged;
+    event Action? OnToolsShortcutsChanged;
+    
+    public bool IsDirty { get; }
+    
+    ObservableCollection<URN> Shortcuts { get; }
+    ObservableCollection<URN> ToolsShortcuts { get; }
+    
     public string GetString(string key, string defaultValue = "");
     public int GetInt(string key, int defaultValue = 0);
     public bool GetBool(string key, bool defaultValue = false);
@@ -37,4 +48,10 @@ public interface IEngineConfig : IService, ISerializable, IDeserializable
     public void SetFloat(string key, float value);
     public void SetDouble(string key, double value);
     public void Set<T>(string key, T value);
+
+    public bool SaveConfig();
+    public bool SaveConfigAt(string path);
+    
+    public bool LoadConfig();
+    public bool LoadConfigFrom(string path);
 }

@@ -18,14 +18,57 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System;
+using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types;
 
-namespace RPGCreator.UI.Content.Editor;
+namespace RPGCreator.SDK.Editor;
 
-public record struct ShortcutButtonInfo
+[SerializingType("ShortcutButtonInfo")]
+public record struct ShortcutButtonInfo : ISerializable, IDeserializable
 {
     public string Name { get; set; }
     public string Description { get; set; }
     public string Icon { get; set; }
-    public Action OnClick { get; set; }
+    public URN ActionUrn { get; set; }
+    private Action<object[]?>? Action { get; set; }
+    public Action<object[]?> GetAction()
+    {
+        var info = this;
+
+        Action ??= RegistryServices.ActionRegistry.GetAction(ActionUrn)?.Action ?? ((_) =>
+        {
+            Logger.Error("Action not found for shortcut: " + info.ActionUrn);
+        });
+
+        return Action;
+    }
+
+    public SerializationInfo GetObjectData()
+    {
+        return new SerializationInfo(typeof(ShortcutButtonInfo))
+            .AddValue(nameof(Name), Name)
+            .AddValue(nameof(Description), Description)
+            .AddValue(nameof(Icon), Icon)
+            .AddValue(nameof(ActionUrn), ActionUrn);
+    }
+
+    public List<Ulid> GetReferencedAssetIds()
+    {
+        return [];
+    }
+
+    public void SetObjectData(DeserializationInfo info)
+    {
+        info.TryGetValue(nameof(Name), out string? name);
+        info.TryGetValue(nameof(Description), out string? description);
+        info.TryGetValue(nameof(Icon), out string? icon);
+        info.TryGetValue(nameof(ActionUrn), out URN? actionUrn);
+        
+        Name = name ?? "Unnamed Shortcut";
+        Description = description ?? "No description.";
+        Icon = icon ?? "mdi-alert-circle";
+        ActionUrn = actionUrn ?? URN.Empty;
+    }
 }

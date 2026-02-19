@@ -22,7 +22,7 @@ using System.Drawing;
 
 namespace RPGCreator.SDK.Editor.Rendering;
 
-public abstract class BaseGameViewport : IDisposable
+public abstract class BaseMonogameViewport : IDisposable
 {
     public Ulid Id { get; } = Ulid.NewUlid();
     
@@ -53,6 +53,8 @@ public abstract class BaseGameViewport : IDisposable
     
     protected bool _inDrawing = false;
 
+    public abstract void LoadContent(object graphicsDevice, object spriteBatch);
+    
     public void DrawViewport(TimeSpan deltaTime)
     {
         if (InternalIsDrawingPaused || IsDrawingPaused) return;
@@ -120,6 +122,8 @@ public abstract class BaseGameViewport : IDisposable
         Size = newSize;
         Resized?.Invoke(this, Size);
     }
+
+    public abstract void SetNewRendertarget(object newRenderTarget);
     
     protected virtual void UpdatingFrame(TimeSpan deltaTime) { }
     protected virtual void UpdatingLoop(TimeSpan deltaTime) { }

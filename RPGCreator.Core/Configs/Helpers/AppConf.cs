@@ -38,7 +38,7 @@ namespace RPGCreator.Core.Configs.Helpers
         public struct SAppConfPath()
         {
             public string BaseFolder = AppDomain.CurrentDomain.BaseDirectory;
-            public string AppDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), EngineStates.ApplicationName);
+            public string AppDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), GlobalStates.ApplicationName);
             public string AssetsFolder = $"%APPDATA%/Assets";
             public string StyleFolder = $"%APPDATA%/Style";
             public string LogsFolder = $"%APPDATA%/Logs";
@@ -78,12 +78,12 @@ namespace RPGCreator.Core.Configs.Helpers
 
         private string FormatPath(string unformattedPath)
         {
-            return unformattedPath.Replace("%BASE_FOLDER%", Paths.BaseFolder).Replace("%APPDATA%", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), EngineStates.ApplicationName));
+            return unformattedPath.Replace("%BASE_FOLDER%", Paths.BaseFolder).Replace("%APPDATA%", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), GlobalStates.ApplicationName));
         }
         
         private string UnformatPath(string formattedPath)
         {
-            return formattedPath.Replace(Paths.BaseFolder, "%BASE_FOLDER%").Replace(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), EngineStates.ApplicationName), "%APPDATA%");
+            return formattedPath.Replace(Paths.BaseFolder, "%BASE_FOLDER%").Replace(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), GlobalStates.ApplicationName), "%APPDATA%");
         }
 
         public override SerializationInfo GetObjectData()
@@ -111,7 +111,7 @@ namespace RPGCreator.Core.Configs.Helpers
             }
 
             info.TryGetValue("base_folder", out Paths.BaseFolder!, AppDomain.CurrentDomain.BaseDirectory);
-            info.TryGetValue("appdata_folder", out Paths.AppDataFolder!, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), EngineStates.ApplicationName));
+            info.TryGetValue("appdata_folder", out Paths.AppDataFolder!, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), GlobalStates.ApplicationName));
             info.TryGetValue("assets_folder", out Paths.AssetsFolder!, string.Empty);
             info.TryGetValue("style_folder", out Paths.StyleFolder!, string.Empty);
             info.TryGetValue("logs_folder", out Paths.LogsFolder!, string.Empty);

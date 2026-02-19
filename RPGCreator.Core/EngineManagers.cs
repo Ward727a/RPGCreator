@@ -56,7 +56,7 @@ namespace RPGCreator.Core
             EngineServices.AssetsManager = Assets;
             EngineServices.GameFactory = GameFactory;
             EngineServices.ProjectsManager = Projects;
-            EngineServices.BrushManager = Brush;
+            // EngineServices.BrushManager = Brush;
             EngineServices.UndoRedoService = Commands;
             EngineServices.FeaturesManager = new FeatureManager();
             

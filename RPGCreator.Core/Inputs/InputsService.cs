@@ -45,8 +45,8 @@ public class InputsService : IInputsService
         if(_triggerBinding.Count <= 0 || _bindedActions.Count <= 0)
             return;
             
-        keyboardState ??= EngineStates.KeyboardState;
-        mouseState ??= EngineStates.MouseState;
+        keyboardState ??= GlobalStates.KeyboardState;
+        mouseState ??= GlobalStates.MouseState;
         
         var ctrlHeld = keyboardState.IsKeyPressed(KeyboardKeys.LeftControl) || keyboardState.IsKeyPressed(KeyboardKeys.RightControl);
         var altHeld = keyboardState.IsKeyPressed(KeyboardKeys.LeftAlt) || keyboardState.IsKeyPressed(KeyboardKeys.RightAlt);

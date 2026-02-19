@@ -38,7 +38,7 @@ public class DefaultMouseProvider : IMouseProvider
     /// <param name="data"></param>
     public void Update(RawMouseData data)
     {
-        EngineStates.MouseState.Update(data);
+        GlobalStates.MouseState.Update(data);
     }
     
     /// <summary>
@@ -50,7 +50,7 @@ public class DefaultMouseProvider : IMouseProvider
     /// <param name="data"></param>
     public void UpdateViewport(RawMouseData data)
     {
-        EngineStates.ViewportMouseState.Update(data);
+        GlobalStates.ViewportMouseState.Update(data);
     }
 }
 
@@ -87,22 +87,22 @@ public class DefaultKeyboardProvider : IKeyboardProvider
 {
     public void Update(RawKeyboardData data)
     {
-        EngineStates.KeyboardState.Update(data);
+        GlobalStates.KeyboardState.Update(data);
     }
 
     public void UpdateInput(char text)
     {
-        EngineStates.KeyboardState.UpdateInput(text);
+        GlobalStates.KeyboardState.UpdateInput(text);
     }
 
     public void UpdateViewport(RawKeyboardData data)
     {
-        EngineStates.ViewportKeyboardState.Update(data);
+        GlobalStates.ViewportKeyboardState.Update(data);
     }
 
     public void UpdateInputViewport(char text)
     {
-        EngineStates.ViewportKeyboardState.UpdateInput(text);
+        GlobalStates.ViewportKeyboardState.UpdateInput(text);
     }
 }
 

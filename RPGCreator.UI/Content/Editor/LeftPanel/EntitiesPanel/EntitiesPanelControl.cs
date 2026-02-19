@@ -124,8 +124,8 @@ public partial class EntitiesPanelControl : UserControl
         if (result && entityBrowser.SelectedEntityDefinition != null)
         {
             SelectedEntityDefinition = entityBrowser.SelectedEntityDefinition;
-            EngineStates.BrushState.CurrentMode = BrushMode.Entities;
-            EngineStates.BrushState.CurrentObjectToPaint = new EntitySpawner(SelectedEntityDefinition, Vector2.Zero);
+            GlobalStates.BrushState.CurrentMode = BrushMode.Entities;
+            GlobalStates.BrushState.CurrentObjectToPaint = new EntitySpawner(SelectedEntityDefinition, Vector2.Zero);
             Logger.Debug("Entity selected! {entityName}", args: SelectedEntityDefinition.Name);
             UpdateSelectedEntityText();
         }

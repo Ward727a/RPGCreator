@@ -19,6 +19,10 @@ public readonly struct UIRegion : IEquatable<UIRegion>
     public static UIRegion EntitiesBrowser => new("EntitiesBrowser");
     public static UIRegion EntitiesBrowserItem => new("EntitiesBrowser.Item");
     
+    // TOOLS EXPLORER
+    public static UIRegion ToolsExplorer => new("ToolsExplorer");
+    public static UIRegion ToolsExplorerItem => new("ToolsExplorer.Item");
+    
     // EDITOR
     public static UIRegion EditorMenuBar => new("EditorMenuBar");
     public static UIRegion EditorToolbar => new("EditorToolbar");

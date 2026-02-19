@@ -18,26 +18,38 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.Drawing;
-using RPGCreator.SDK.Editor.Rendering;
+namespace RPGCreator.SDK.Commands;
 
-namespace RPGCreator.SDK.EditorUiService;
-
-public enum ViewportType
+public abstract class BaseCommand : ICommand
 {
-    Game,
-    Ui,
-}
+    public event Action<BaseCommand>? Executed;
+    public event Action<BaseCommand>? Undone;
+    
+    public abstract string Name { get; }
+    protected abstract void OnExecute();
+    protected abstract void OnUndo();
+    
+    public void Execute()
+    {
+        OnExecute();
+        Executed?.Invoke(this);
+    }
 
-public interface IMonogameViewport : IService
-{
-    public bool IsCoreReady { get; }
-    public event Action? OnCoreReady;
-    public void Initialize();
-    public void CreateNewViewport(string viewportId, IntPtr bitmapControlAddress, Size sizeWanted, ViewportType viewportType = ViewportType.Game);
-    public void ResizeViewport(string viewportId, int width, int height);
-    public BaseMonogameViewport GetViewport(string viewportId);
-    public void DestroyViewport(string viewportId);
-    public void Tick();
-    public void AttachToWindow(IntPtr avaloniaWindowHandle);
+    public void Undo()
+    {
+        OnUndo();
+        Undone?.Invoke(this);
+    }
+    
+    public BaseCommand WhenUndone(Action<BaseCommand> action)
+    {
+        Undone += action;
+        return this;
+    }
+    
+    public BaseCommand WhenExecuted(Action<BaseCommand> action)
+    {
+        Executed += action;
+        return this;
+    }
 }

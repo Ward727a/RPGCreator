@@ -101,7 +101,7 @@ namespace RPGCreator.Core.Managers.ProjectsManager
                 throw new ArgumentNullException(nameof(project), "Project cannot be null.");
             }
 
-            EngineStates.ProjectState.CurrentProject = project;
+            GlobalStates.ProjectState.CurrentProject = project;
             
             foreach (string packPath in project.AssetsPackPath)
             {
@@ -123,12 +123,12 @@ namespace RPGCreator.Core.Managers.ProjectsManager
 
         public void CloseCurrentProject()
         {
-            EngineStates.ProjectState.CurrentProject = null;
+            GlobalStates.ProjectState.CurrentProject = null;
         }
         
         public IBaseProject? GetCurrentProject()
         {
-            return EngineStates.ProjectState.CurrentProject;
+            return GlobalStates.ProjectState.CurrentProject;
         }
     }
 }

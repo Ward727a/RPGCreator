@@ -176,10 +176,40 @@ public static class RegistryServices
         set => RegisterService(value);
     }
 
+    public static IActionRegistry ActionRegistry
+    {
+        get => GetService<IActionRegistry>();
+        set => RegisterService(value);
+    }
+
+    public static IToolRegistry ToolRegistry
+    {
+        get => GetService<IToolRegistry>();
+        set => RegisterService(value);
+    }
+    
     #region DefaultInstance
     // All instances here SHOULD NOT be used!
     // They are only here to avoid null reference exceptions in case a service is not registered.
-    
+
+    public class DefaultActionRegistry : IActionRegistry 
+    {
+        public void RegisterAction(ActionInfo actionInfo, bool overrideIfExists = false)
+        {
+            Logger.Error($"[Registry] Attempted to register action '{actionInfo.DisplayName}' but no IActionRegistry service is registered. Make sure to register an IActionRegistry implementation during UI initialization.");
+        }
+
+        public void UnregisterAction(URN urn)
+        {
+            Logger.Error($"[Registry] Attempted to unregister action with URN '{urn}' but no IActionRegistry service is registered. Make sure to register an IActionRegistry implementation during UI initialization.");
+        }
+
+        public ActionInfo? GetAction(URN urn)
+        {
+            Logger.Error($"[Registry] Attempted to get action with URN '{urn}' but no IActionRegistry service is registered. Make sure to register an IActionRegistry implementation during UI initialization.");
+            return null;
+        }
+    }
     
     #endregion
     

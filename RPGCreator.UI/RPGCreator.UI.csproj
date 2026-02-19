@@ -73,6 +73,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RPGCreator.Core\RPGCreator.Core.csproj" />
     <ProjectReference Include="..\RPGCreator.Generators\RPGCreator.Generators.csproj"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false" />

@@ -18,11 +18,15 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Controls.Primitives;
+using Avalonia.Layout;
 using Projektanker.Icons.Avalonia;
+using RPGCreator.SDK.Editor;
 using RPGCreator.SDK.Logging;
+using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.Editor;
 
@@ -61,16 +65,15 @@ public class EditorShortcutsBar : UserControl
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
             Orientation = Avalonia.Layout.Orientation.Horizontal,
+            Spacing = 4
         };
         _scroll.Content = _menuPanel;
         
-        AddShortcutButton(new ShortcutButtonInfo()
-        {
-            Name = "Add custom shortcut",
-            Description = "Add a custom shortcut to the bar.",
-            Icon = "mdi-plus",
-            OnClick = () => Logger.Info("Test button clicked!")
-        });
+        AddCustomButton("Add custom shortcut","Add a custom shortcut to the bar.","mdi-plus",
+            () => { Logger.Info("Add custom shortcut clicked."); }
+        );
+
+        AddSeparator();
     }
     
     private void RegisterEvents()
@@ -128,11 +131,40 @@ public class EditorShortcutsBar : UserControl
         
         button.Content = icon;
         button.FontSize = 24;
-        button.Click += (s, e) => info.OnClick?.Invoke();
+        button.Click += (s, e) => info.GetAction()?.Invoke([]);
         
         _menuPanel.Children.Add(button);
         
         ToolTip.SetTip(button, CreateButtonTip(info.Name, info.Description));
+    }
+
+    public void AddSeparator()
+    {
+        var separator = new Divider()
+        {
+            Orientation = Orientation.Vertical
+        };
+        _menuPanel.Children.Add(separator);
+    }
+    
+    public void AddCustomButton(string name, string description, string icon, Action action)
+    {
+        var button = CreateValidButton();
+
+        var iconControl = new Icon()
+        {
+            Value = icon,
+            Width = 32,
+            Height = 32,
+        };
+        
+        button.Content = iconControl;
+        button.FontSize = 24;
+        button.Click += (s, e) => action.Invoke();
+        
+        _menuPanel.Children.Add(button);
+        
+        ToolTip.SetTip(button, CreateButtonTip(name, description));
     }
     
 }

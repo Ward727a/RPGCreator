@@ -39,7 +39,7 @@ public interface IBrushManager : IService
     /// The current state of the brush manager.<br/>
     /// This includes information such as the selected brush and preview state.<br/>
     /// <br/>
-    /// In fact, this is just a reference to <see cref="EngineStates.BrushState"/>.<br/>
+    /// In fact, this is just a reference to <see cref="GlobalStates.BrushState"/>.<br/>
     /// </summary>
     IBrushState State { get; }
 

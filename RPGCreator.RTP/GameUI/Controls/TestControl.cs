@@ -72,12 +72,12 @@ public class TestControl : BaseControl
     }
     protected override void OnDragStart()
     {
-        _grabOffset = EngineStates.ViewportMouseState.Position - Visual.GlobalBounds.Position;
+        _grabOffset = GlobalStates.ViewportMouseState.Position - Visual.GlobalBounds.Position;
     }
 
     protected override void OnDragMove(Vector2 deltaPosition)
     {
-        Vector2 targetScreenPos = EngineStates.ViewportMouseState.Position - _grabOffset;
+        Vector2 targetScreenPos = GlobalStates.ViewportMouseState.Position - _grabOffset;
 
         if (Parent != null)
         {

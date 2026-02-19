@@ -35,7 +35,7 @@ public class UiManager : IUiManager
     
     #region Internal State
     
-    private GameViewport _owningViewport;
+    private UiViewport _owningViewport;
     private Rect _owningViewportRect;
     private IMouseState _mouseState;
     private bool _isMouseStateInitialized = false;
@@ -54,7 +54,7 @@ public class UiManager : IUiManager
     
     #endregion
 
-    public UiManager(GameViewport owningViewport)
+    public UiManager(UiViewport owningViewport)
     {
         _owningViewport = owningViewport;
         _owningViewport.Resized += (_, _) => UpdateViewportRect();

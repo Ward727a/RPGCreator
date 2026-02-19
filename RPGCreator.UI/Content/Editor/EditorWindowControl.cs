@@ -36,6 +36,7 @@ using System;
 using System.Diagnostics;
 using System.Numerics;
 using System.Threading;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using RPGCreator.Core.Types.Windows;
@@ -68,7 +69,7 @@ namespace RPGCreator.UI.Content.Editor
 
         
         
-        private WriteableBitmap TestWrittableBitmap = new WriteableBitmap(new PixelSize(1172, 827), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
+        private WriteableBitmap TestWrittableBitmap = new(new PixelSize(1172, 827), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
 
         private Image mgImage;
         
@@ -254,6 +255,13 @@ namespace RPGCreator.UI.Content.Editor
             monogameGrid.Children.Add(mgImage);
             _mouseBridge.RegisterEvents(mgImage);
             _keyboardBridge.RegisterEvents(mgImage);
+            
+            monogameGrid.Children.Add(new TextBlock()
+            {
+                Text = "PREVIEW - This is not the final design of the editor, lots of changes are still planned!",
+                FontWeight = FontWeight.Bold,
+                FontSize = 24
+            });
 
             // MonoGameScreen = new AvaloniaInside.MonoGame.MonoGameControl
             // {
@@ -311,7 +319,7 @@ namespace RPGCreator.UI.Content.Editor
 
         private void MonoGameScreen_PointerExited(object? sender, PointerEventArgs e)
         {
-            EngineServices.BrushManager.ClearPreview(); // Clear the preview when the mouse exits the MonoGame screen
+            // EngineServices.BrushManager.ClearPreview(); // Clear the preview when the mouse exits the MonoGame screen
         }
 
         private void ManageAssetsMenuItem_Click(object? sender, RoutedEventArgs e)
@@ -360,8 +368,8 @@ namespace RPGCreator.UI.Content.Editor
         {
             if (e.GetCurrentPoint(MonoGameScreen).Properties.IsLeftButtonPressed && _placingTile)
             {
-                EngineStates.BrushState.IsDrawing = false; // Reset the flag when the tile placement is done
-                EngineStates.BrushState.LastDrawAt = new(-1, -1); // Reset the last tile position
+                GlobalStates.BrushState.IsDrawing = false; // Reset the flag when the tile placement is done
+                GlobalStates.BrushState.LastDrawAt = new(-1, -1); // Reset the last tile position
             }
         }
 
@@ -373,39 +381,39 @@ namespace RPGCreator.UI.Content.Editor
             {
 
                 // Check if the mouse position has at least moved one tile from the last position
-                var normalizedCurrentPosition = EngineServices.BrushManager.NormalizedPositionToTile(position);
-
-                if(normalizedCurrentPosition != (_LastTilePlacePos))
-                {
-                    // If the position has changed, update the last position
-                    EngineStates.BrushState.LastDrawAt = normalizedCurrentPosition;
-                }
-                else
-                {
-                    // If the position hasn't changed, do not place a tile again
-                    return;
-                }
+                // var normalizedCurrentPosition = EngineServices.BrushManager.NormalizedPositionToTile(position);
+                //
+                // if(normalizedCurrentPosition != (_LastTilePlacePos))
+                // {
+                //     // If the position has changed, update the last position
+                //     GlobalStates.BrushState.LastDrawAt = normalizedCurrentPosition;
+                // }
+                // else
+                // {
+                //     // If the position hasn't changed, do not place a tile again
+                //     return;
+                // }
 
                 // Adjust the position to account for the MonoGameScreen's margin (12px)
-                EngineServices.BrushManager.DrawAt(position);
+                // EngineServices.BrushManager.DrawAt(position);
             }
             
             {
                 // Check if the mouse position has at least moved one tile from the last position
-                var normalizedCurrentPosition = EngineServices.BrushManager.NormalizedPositionToTile(position);
-
-                if (normalizedCurrentPosition != (EngineStates.BrushState.LastDrawAt))
-                {
-                    // If the position has changed, update the last position
-                    EngineStates.BrushState.LastDrawAt = normalizedCurrentPosition;
-                }
-                else
-                {
-                    // If the position hasn't changed, do not place a tile again
-                    return;
-                }
-
-                EngineServices.BrushManager.PreviewAt(position);
+                // var normalizedCurrentPosition = EngineServices.BrushManager.NormalizedPositionToTile(position);
+                //
+                // if (normalizedCurrentPosition != (GlobalStates.BrushState.LastDrawAt))
+                // {
+                //     // If the position has changed, update the last position
+                //     GlobalStates.BrushState.LastDrawAt = normalizedCurrentPosition;
+                // }
+                // else
+                // {
+                //     // If the position hasn't changed, do not place a tile again
+                //     return;
+                // }
+                //
+                // EngineServices.BrushManager.PreviewAt(position);
             }
 
         }

@@ -163,7 +163,7 @@ public class MapItem : StackPanel
         e.Handled = true; // Mark the event as handled to prevent further processing
         if (e.ClickCount == 2 && isLeftButton)
         {
-            OnDoubleLeftPressed();
+            OnOpenMap();
         } else if (isRightButton)
         {
             OnRightPressed();
@@ -181,18 +181,6 @@ public class MapItem : StackPanel
     private void OnLeftPressed()
     {
         _leftLine!.IsVisible = !_leftLine.IsVisible; // Toggle visibility of the levels list
-    }
-    
-    private void OnDoubleLeftPressed()
-    {
-        EngineStates.EditorState.CurrentMap = _mapDef; // Set the edited map to the current map
-        if (!RuntimeServices.MapService.LoadMap(_mapDef.Unique))
-        {
-            Logger.Error("Failed to load map: {MapName}", args: MapName);
-            return;
-        }
-
-        Logger.Info("Opening map editor for map: {MapName}", args: MapName);
     }
     
     private void OnRightPressed()
@@ -216,11 +204,13 @@ public class MapItem : StackPanel
 
     private void OnOpenMap()
     {
-        EngineStates.EditorState.CurrentMap = _mapDef; // Set the edited map to the current map
-        // Open the map editor
-        Logger.Debug("Opening map editor for map: {MapName}", args: MapName);
-        //EditorWindow.Instance.OpenMapEditor(Map);
-        RuntimeServices.MapService.LoadMap(_mapDef.Unique);
+        if (!RuntimeServices.MapService.LoadMap(_mapDef.Unique))
+        {
+            Logger.Error("Failed to load map: {MapName}", args: MapName);
+            return;
+        }
+
+        Logger.Info("Opening map editor for map: {MapName}", args: MapName);
     }
     private void OnAddLevel()
     {
@@ -326,7 +316,7 @@ public class MapItem : StackPanel
         
             if(confirmed)
             {
-                Guard.IsNotNull(EngineStates.ProjectState.CurrentProject, "CurrentProject");
+                Guard.IsNotNull(GlobalStates.ProjectState.CurrentProject, "CurrentProject");
 
                 EngineServices.AssetsManager.GetPack(_mapDef.PackId).RemoveAsset(_mapDef.Unique);
                 

@@ -182,7 +182,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
             if (result == null)
                 return;
 
-            Guard.IsNotNull(EngineStates.ProjectState.CurrentProject, "CurrentProject");
+            Guard.IsNotNull(GlobalStates.ProjectState.CurrentProject, "CurrentProject");
 
             var mapDef = EngineServices.AssetsManager.CreateTransientAsset<MapDefinition>();
             mapDef.Name = result;

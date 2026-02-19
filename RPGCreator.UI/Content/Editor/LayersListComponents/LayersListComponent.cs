@@ -33,6 +33,7 @@ using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
+using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.RuntimeService;
 
 namespace RPGCreator.UI.Content.Editor.LayersListComponents
@@ -129,9 +130,9 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
 
         protected void RegisterEvents()
         {
-            EngineStates.EditorState.PropertyChanged += (s, e) =>
+            GlobalStates.MapState.PropertyChanged += (s, e) =>
             {
-                if (e.PropertyName == nameof(IEditorState.CurrentMap))
+                if (e.PropertyName == nameof(IMapState.CurrentMapDef))
                 {
                     OnMapChanged();
                 }

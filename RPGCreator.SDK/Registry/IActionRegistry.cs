@@ -22,25 +22,18 @@ using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Registry;
 
-public interface IUrnRegistry : IService
+public record struct ActionInfo
 {
-    bool RegisterUrn(ref URN urn, UrnCollisionStrategy collisionStrategy = UrnCollisionStrategy.RenameWithUlidSuffix);
-    bool UnregisterUrn(URN urn);
-    bool IsUrnRegistered(URN urn);
+    public URN Urn { get; set; }
+    public PipedPath ActionPath { get; set; }
+    public string DisplayName { get; set; }
+    public string Description { get; set; }
+    public Action<object[]?> Action { get; set; }
 }
 
-public enum UrnCollisionStrategy
+public interface IActionRegistry : IService
 {
-    /// <summary>
-    /// Return false and do not register the new URN if it collides with an existing one.
-    /// </summary>
-    Fail,
-    /// <summary>
-    /// Rename the new URN by appending a ULID suffix if it collides with an existing one, and register it.
-    /// </summary>
-    RenameWithUlidSuffix,
-    /// <summary>
-    /// Ignore the collision and don't register the new URN if it collides with an existing one, but return true as if it was registered successfully.
-    /// </summary>
-    Ignore
+    public void RegisterAction(ActionInfo actionInfo, bool overrideIfExists = false);
+    public void UnregisterAction(URN urn);
+    public ActionInfo? GetAction(URN urn);
 }

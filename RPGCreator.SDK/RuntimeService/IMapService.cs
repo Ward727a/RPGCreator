@@ -2,7 +2,9 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Records;
 using Size = RPGCreator.SDK.Types.Size;
@@ -11,7 +13,7 @@ namespace RPGCreator.SDK.RuntimeService;
 
 public record struct MapData(Ulid MapId, string MapName, string MapDescription, Size MapSize, float CellWidth, float CellHeight, Color BackgroundColor);
 
-public interface IMapService : INotifyPropertyChanged, INotifyPropertyChanging, IService
+public interface IMapService : IService
 {
     /// <summary>
     /// Event called when a map is loaded.<br/>
@@ -29,6 +31,8 @@ public interface IMapService : INotifyPropertyChanged, INotifyPropertyChanging, 
     /// The float parameters are the X and Y coordinates of the edit.
     /// </summary>
     event Action<float, float>? OnMapEdited;
+    
+    IMapState MapState { get; }
     
     /// <summary>
     /// Is there any map loaded?
@@ -86,73 +90,6 @@ public interface IMapService : INotifyPropertyChanged, INotifyPropertyChanging, 
     /// </summary>
     /// <exception cref="NotImplementedException">Thrown if the RTP or game does not support this operation.</exception>
     void UnloadMap();
-
-    /// <summary>
-    /// A general purpose method to place an object at the given coordinates on the map.<br/>
-    /// It should be used with caution as it may not work for all object types.<br/>
-    /// The implementation is up to the RTP or game to decide how to handle the object placement.
-    /// </summary>
-    /// <param name="x">The X coordinate on the map.</param>
-    /// <param name="y">The Y coordinate on the map.</param>
-    /// <param name="objectToPlace">The object to place.</param>
-    /// <exception cref="NotImplementedException">Thrown if the RTP or game does not support this operation.</exception>
-    /// <exception cref="ArgumentException">Thrown if the object type is not supported for placement.</exception>
-    /// <exception cref="InvalidOperationException">Thrown if there is no map loaded or no layer selected.</exception>
-    void PlaceObjectAt(float x, float y, object objectToPlace);
-    
-    /// <summary>
-    /// A general purpose method to place an asset at the given coordinates on the map.<br/>
-    /// It should be used with caution as it may not work for all asset types. It is better than the <see cref="PlaceObjectAt"/>.<br/>
-    /// The implementation is up to the RTP or game to decide how to handle the asset placement.
-    /// </summary>
-    /// <param name="x">The X coordinate on the map.</param>
-    /// <param name="y">The Y coordinate on the map.</param>
-    /// <param name="assetId">The asset ID to place.</param>
-    /// <exception cref="NotImplementedException">Thrown if the RTP or game does not support this operation.</exception>
-    /// <exception cref="ArgumentException">Thrown if the asset type is not supported for placement.</exception>
-    /// <exception cref="ArgumentException">Thrown if the given assetId could not be loaded.</exception>
-    /// <exception cref="InvalidOperationException">Thrown if there is no map loaded or no layer selected.</exception>
-    void PlaceAssetAt(float x, float y, Ulid assetId);
-    
-    /// <summary>
-    /// This method will place a tile at the given coordinates on the map layer.
-    /// </summary>
-    /// <param name="x">The X coordinate on the map.</param>
-    /// <param name="y">The Y coordinate on the map.</param>
-    /// <param name="tileDef">The tile def to place.</param>
-    /// <exception cref="NotImplementedException">Thrown if the RTP or game does not support this operation.</exception>
-    /// <exception cref="InvalidOperationException">Thrown if there is no map loaded or no layer selected.</exception>
-    void PlaceTileAt(int x, int y, ITileDef tileDef);
-    
-    /// <summary>
-    /// A general purpose method to get an object at the given coordinates on the map.<br/>
-    /// It should be used with caution as it may not work for all object types.<br/>
-    /// The implementation is up to the RTP or game to decide how to handle the object retrieval.
-    /// </summary>
-    /// <param name="x">The X coordinate on the map.</param>
-    /// <param name="y">The Y coordinate on the map.</param>
-    /// <param name="foundObject">The found object at the given coordinates, or null if none found.</param>
-    /// <returns>
-    /// True: An object was found at the given coordinates.<br/>
-    /// False: No object was found at the given coordinates.
-    /// </returns>
-    /// <exception cref="NotImplementedException">Thrown if the RTP or game does not support this operation.</exception>
-    /// <exception cref="InvalidOperationException">Thrown if there is no map loaded or no layer selected.</exception>
-    bool TryGetObjectAt(float x, float y, [NotNullWhen(true)] out object? foundObject);
-    
-    /// <summary>
-    /// Try to get the tile data at the given coordinates on the map.
-    /// </summary>
-    /// <param name="x">The X coordinate on the map.</param>
-    /// <param name="y">The Y coordinate on the map.</param>
-    /// <param name="tileData">The tile data at the given coordinates, or default if none found.</param>
-    /// <returns>
-    /// True: A tile was found at the given coordinates.<br/>
-    /// False: No tile was found at the given coordinates.
-    /// </returns>
-    /// <exception cref="NotImplementedException">Thrown if the RTP or game does not support this operation.</exception>
-    /// <exception cref="InvalidOperationException">Thrown if there is no map loaded or no layer selected.</exception>
-    bool TryGetTileAt(int x, int y, out TileData tileData);
     
     /// <summary>
     /// Converts a world position to map coordinates.<br/>
@@ -163,5 +100,100 @@ public interface IMapService : INotifyPropertyChanged, INotifyPropertyChanging, 
     /// <param name="worldPosition">The world position to convert.</param>
     /// <returns>The corresponding map coordinates.</returns>
     Vector2 WorldToMapCoordinates(Vector2 worldPosition);
+
+    #region Layers
+
+    /// <summary>
+    /// Selects the layer at the given index, or last layer if the index is out of range.<br/>
+    /// In the case where the index is out of range, it will also log a warning message.
+    /// </summary>
+    /// <param name="layerIndex">The layer index to select.</param>
+    /// <exception cref="NotImplementedException">Thrown if the RTP or game does not support this operation.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if no layers can be loaded/selected (ex: No Map Loaded).</exception>
+    void SelectLayer(int layerIndex);
+    
+    /// <summary>
+    /// Is there a selected layer?
+    /// </summary>
+    bool HasSelectedLayer { get; }
+
+    /// <summary>
+    /// Can a layer be selected?<br/>
+    /// If false, no layer selecting actions should be allowed (in the case where no layers exist, or <see cref="IMapService.HasLoadedMap"/> is false).
+    /// </summary>
+    bool CanSelectLayer { get; }
+    
+    /// <summary>
+    /// The index of the currently selected layer.
+    /// </summary>
+    int CurrentLayerIndex { get; }
+    /// <summary>
+    /// The total number of layers available. (Starts at 1 => So if there is 0 layers, this will return 0, if there is 1 layer, this will return 1, etc...)
+    /// </summary>
+    int LayerCount { get; }
+    
+    /// <summary>
+    /// Returns the index of the previous layer.<br/>
+    /// If the current layer is the first one, it will return the index of the first layer.
+    /// </summary>
+    public int PreviousLayerIndex => Math.Max(CurrentLayerIndex - 1, GetFirstLayerIndex());
+    
+    /// <summary>
+    /// Returns the index of the next layer.<br/>
+    /// If the current layer is the last one, it will return the index of the last layer.
+    /// </summary>
+    public int NextLayerIndex => Math.Min(CurrentLayerIndex + 1, GetLastLayerIndex());
+    
+    /// <summary>
+    /// Selects the next layer (higher index) if possible.<br/>
+    /// If the current layer is the last one, it will do nothing.
+    /// </summary>
+    public void SelectNextLayer() => SelectLayer(NextLayerIndex);
+    
+    /// <summary>
+    /// Selects the previous layer (lower index) if possible.<br/>
+    /// If the current layer is the first one, it will do nothing.
+    /// </summary>
+    public void SelectPreviousLayer() => SelectLayer(PreviousLayerIndex);
+    
+    /// <summary>
+    /// Returns the index of the first layer.
+    /// </summary>
+    /// <returns>The index of the first layer.</returns>
+    public int GetFirstLayerIndex() => 0;
+    
+    /// <summary>
+    /// Returns the index of the last layer.
+    /// </summary>
+    /// <returns>The index of the last layer.</returns>
+    public int GetLastLayerIndex() => LayerCount - 1;
+    
+    /// <summary>
+    /// Tries to add a new layer with the given definition.<br/>
+    /// Returns true if the layer was added successfully, false otherwise.
+    /// </summary>
+    /// <param name="layerDef">The definition of the layer to add.</param>
+    /// <returns>
+    /// True if the layer was added successfully, false otherwise.
+    /// </returns>
+    bool TryAddLayer(BaseLayerDef layerDef);
+    
+    /// <summary>
+    /// Tries to remove the layer at the given index.<br/>
+    /// Returns true if the layer was removed successfully, false otherwise.
+    /// </summary>
+    /// <param name="layerIndex">The index of the layer to remove.</param>
+    /// <returns>
+    /// True if the layer was removed successfully, false otherwise.
+    /// </returns>
+    bool TryRemoveLayer(int layerIndex);
+
+    /// <summary>
+    /// Returns the definition of the currently selected layer.
+    /// </summary>
+    /// <returns>The definition of the currently selected layer.</returns>
+    BaseLayerDef GetSelectedLayer();
+
+    #endregion
     
 }

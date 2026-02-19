@@ -24,6 +24,7 @@
 #endregion
 
 using RPGCreator.SDK.Editor.Rendering;
+using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Logging;
 using Serilog;
@@ -32,7 +33,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace RPGCreator.Core.Inputs.Mouse
 {
-    public class EngineMouseState : IMouseState
+    public class EngineMouseState : BaseState, IMouseState
     {
         
         protected RawMouseData MouseState;
@@ -330,6 +331,11 @@ namespace RPGCreator.Core.Inputs.Mouse
             DeltaPosition = Vector2.Zero;
             WheelDelta = 0;
             HorizontalWheelDelta = 0;
+        }
+
+        public override void Reset()
+        {
+            // Do nothing.
         }
     }
 }

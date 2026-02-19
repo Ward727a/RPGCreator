@@ -17,11 +17,6 @@ public class CommandManager : ICommandManager
         StateChanged?.Invoke();
     }
 
-    public void ExecuteCommand(ECS.ICommand command)
-    {
-        throw new NotImplementedException();
-    }
-
     public void UndoLastCommand()
     {
         if (_undoCommands.Count <= 0) return;

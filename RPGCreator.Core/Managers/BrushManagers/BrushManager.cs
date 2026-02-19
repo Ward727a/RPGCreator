@@ -44,7 +44,7 @@ namespace RPGCreator.Core.Managers.BrushManagers
 
         }
 
-        public IBrushState State => EngineStates.BrushState;
+        public IBrushState State => GlobalStates.BrushState;
 
         public IBrushInfo? GetBrush(URN brushUrn)
         {
@@ -97,18 +97,18 @@ namespace RPGCreator.Core.Managers.BrushManagers
         {
             if (!HasBrush(brushUrn))
                 return false;
-            EngineStates.BrushState.CurrentBrush = _brushes[brushUrn];
+            GlobalStates.BrushState.CurrentBrush = _brushes[brushUrn];
             return true;
         }
 
         public void SelectBrush(IBrushInfo brush)
         {
-            EngineStates.BrushState.CurrentBrush = brush;
+            GlobalStates.BrushState.CurrentBrush = brush;
         }
 
         public IBrushInfo? GetSelectedBrush()
         {
-            return EngineStates.BrushState.CurrentBrush;
+            return GlobalStates.BrushState.CurrentBrush;
         }
 
         public bool IsBrushAbleTo<BrushFeature>(URN brushUrn) where BrushFeature : IBrushFeature
@@ -143,41 +143,38 @@ namespace RPGCreator.Core.Managers.BrushManagers
 
         public void DrawAt(Vector2 at)
         {
-            if(!EngineStates.BrushState.IsDrawing)
+            if(!GlobalStates.BrushState.IsDrawing)
             {
                 // Log.Error("Drawing is not enabled. Please enable drawing in the toolbar before clicking.");
                 return;
             }
 
-            // Convert the point to a valid position in the tile width and height
-            if (EngineStates.EditorState.CurrentTile == null && EngineStates.BrushState.CurrentObjectToPaint == null)
+            if (GlobalStates.EditorState.CurrentTile == null && GlobalStates.BrushState.CurrentObjectToPaint == null)
             {
                 // Log.Error("No tile is currently selected. Please select a tile before clicking.");
                 return;
             }
 
-            Guard.IsNotNull(EngineStates.EditorState.CurrentMap, "CurrentMap");
+            Guard.IsNotNull(GlobalStates.MapState.CurrentMapDef, "CurrentMap");
 
             at = RuntimeServices.MapService.WorldToMapCoordinates(at);
 
             // Handle the click at the specified point
             // This is where you would implement the logic for what happens when a brush is clicked at a specific point
             Log.Information($"Brush clicked at: {at}");
-            EngineStates.BrushState.CurrentBrush = new SimpleBrush();
-            if(EngineStates.BrushState.CurrentBrush == null || EngineStates.BrushState.CurrentBrush is not IBrush brush)
+            if(GlobalStates.ToolState.ActiveTool == null)
             {
                 // Log.Error("No brush type is currently selected. Please select a brush type before clicking.");
                 return;
             }
+            GlobalStates.ToolState.ActiveTool.UseAt(at);
 
-            brush.Draw(at);
-            
             // Event.OnClickedAt(at, EngineCore.Instance.Data.EditorSettings.BrushType);
         }
 
         public void PreviewAt(Vector2 at)
         {
-            if (!EngineStates.BrushState.IsDrawing)
+            if (!GlobalStates.BrushState.IsDrawing)
             {
                 //Console.ForegroundColor = ConsoleColor.Red;
                 //Console.WriteLine("Drawing is not enabled. Please enable drawing in the toolbar before clicking.");
@@ -186,15 +183,15 @@ namespace RPGCreator.Core.Managers.BrushManagers
             }
 
             // Convert the point to a valid position in the tile width and height
-            if (EngineStates.EditorState.CurrentTile == null)
+            if (GlobalStates.EditorState.CurrentTile == null)
             {
                 //Console.ForegroundColor = ConsoleColor.Red;
                 //Console.WriteLine("No tile is currently selected. Please select a tile before clicking.");
                 //Console.ResetColor();
                 return;
             }
-            var tileWidth = EngineStates.EditorState.CurrentTile.TilesetDef.TileWidth;
-            var tileHeight = EngineStates.EditorState.CurrentTile.TilesetDef.TileHeight;
+            var tileWidth = GlobalStates.EditorState.CurrentTile.TilesetDef.TileWidth;
+            var tileHeight = GlobalStates.EditorState.CurrentTile.TilesetDef.TileHeight;
 
             float tileX = (at.X / tileWidth) * tileWidth;
             float tileY = (at.Y / tileHeight) * tileHeight;
@@ -204,7 +201,7 @@ namespace RPGCreator.Core.Managers.BrushManagers
             // Handle the click at the specified point
             // This is where you would implement the logic for what happens when a brush is clicked at a specific point
             //Console.WriteLine($"Brush previewed at: {at}");
-            if (EngineStates.BrushState.CurrentBrush == null)
+            if (GlobalStates.BrushState.CurrentBrush == null)
             {
                 //Console.ForegroundColor = ConsoleColor.Red;
                 //Console.WriteLine("No brush type is currently selected. Please select a brush type before clicking.");
@@ -212,7 +209,7 @@ namespace RPGCreator.Core.Managers.BrushManagers
                 return;
             }
 
-            if(EngineStates.BrushState.CurrentBrush is IBrushPreview previewBrush && previewBrush.IsPreviewEnabled)
+            if(GlobalStates.BrushState.CurrentBrush is IBrushPreview previewBrush && previewBrush.IsPreviewEnabled)
             {
                 previewBrush.ShowPreview(at);
             }
@@ -230,13 +227,13 @@ namespace RPGCreator.Core.Managers.BrushManagers
 
         public Vector2 NormalizedPositionToTile(Vector2 position)
         {
-            if (EngineStates.EditorState.CurrentTile == null)
+            if (GlobalStates.EditorState.CurrentTile == null)
             {
                 // Log.Error("No tile is currently selected. Please select a tile before clicking.");
                 return Vector2.Zero;
             }
-            var tileWidth = EngineStates.EditorState.CurrentTile.TilesetDef.TileWidth;
-            var tileHeight = EngineStates.EditorState.CurrentTile.TilesetDef.TileHeight;
+            var tileWidth = GlobalStates.EditorState.CurrentTile.TilesetDef.TileWidth;
+            var tileHeight = GlobalStates.EditorState.CurrentTile.TilesetDef.TileHeight;
             float tileX = (position.X / tileWidth) * tileWidth;
             float tileY = (position.Y / tileHeight) * tileHeight;
             return new Vector2(tileX, tileY);

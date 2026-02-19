@@ -23,6 +23,7 @@ using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
 using RPGCreator.SDK.Types;
+using Color = Microsoft.Xna.Framework.Color;
 
 namespace RPGCreator.Player;
 

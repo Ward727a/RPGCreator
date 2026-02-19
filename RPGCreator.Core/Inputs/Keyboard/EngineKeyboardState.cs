@@ -1,8 +1,9 @@
-﻿using RPGCreator.SDK.Inputs;
+﻿using RPGCreator.SDK.GlobalState;
+using RPGCreator.SDK.Inputs;
 
 namespace RPGCreator.Core.Inputs.Keyboard;
 
-public class EngineKeyboardState : IKeyboardState
+public class EngineKeyboardState : BaseState, IKeyboardState
 {
     
     protected HashSet<KeyboardKeys> PreviousPressedKeys = new();
@@ -91,5 +92,10 @@ public class EngineKeyboardState : IKeyboardState
     public ReadOnlySpan<KeyboardKeys> GetPressedKeys()
     {
         return PressedKeys.ToArray().AsSpan();
+    }
+
+    public override void Reset()
+    {
+        // Do nothing.
     }
 }

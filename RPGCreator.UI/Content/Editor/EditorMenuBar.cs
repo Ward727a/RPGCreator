@@ -22,6 +22,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using Avalonia.Controls;
+using Avalonia.Controls.Documents;
 using Avalonia.Input;
 using RPGCreator.SDK;
 using RPGCreator.SDK.EngineService;
@@ -218,17 +219,28 @@ public class EditorMenuBar : UserControl
             undoRedoService.StateChanged += () =>
             {
                 _editUndoMenuItem.IsEnabled = undoRedoService.CanUndo;
-                ToolTip.SetTip(_editUndoMenuItem, undoRedoService.CanUndo ? $"Undo {undoRedoService.GetUndoCommandName()}" : "Nothing to Undo");
+                ToolTip.SetTip(_editUndoMenuItem, undoRedoService.CanUndo ? MakeUndoRedoTip(true, undoRedoService.GetUndoCommandName()) : "Nothing to Undo");
                 _editRedoMenuItem.IsEnabled = undoRedoService.CanRedo;
-                ToolTip.SetTip(_editRedoMenuItem, undoRedoService.CanRedo ? $"Redo {undoRedoService.GetRedoCommandName()}" : "Nothing to Redo");
+                ToolTip.SetTip(_editRedoMenuItem, undoRedoService.CanRedo ? MakeUndoRedoTip(false, undoRedoService.GetRedoCommandName()) : "Nothing to Redo");
             };
         });
+    }
+    
+    private TextBlock MakeUndoRedoTip(bool Undo, string commandName)
+    {
+        var text = new TextBlock() { Inlines = new InlineCollection()};
+        text.Inlines.Add(new Run() { Text = Undo ? "Undo - " : "Redo - ", FontWeight = Avalonia.Media.FontWeight.Bold });
+        text.Inlines.Add(new Run() { Text = commandName });
+        return text;
     }
     
     private MenuItem _helpMenu;
     private MenuItem _helpDocumentationMenuItem;
     private MenuItem _helpProposeFeaturesMenuItem;
     private MenuItem _helpReportIssuesMenuItem;
+    private MenuItem _helpCommunityMenuItem;
+        private MenuItem _communityDiscordMenuItem;
+        private MenuItem _communityWebsiteMenuItem;
     private MenuItem _helpAboutMenuItem;
     private void CreateHelpMenu()
     {
@@ -236,12 +248,20 @@ public class EditorMenuBar : UserControl
         _helpDocumentationMenuItem = new MenuItem() { Header = "Documentation", HotKey = new KeyGesture(Key.F1) };
         _helpProposeFeaturesMenuItem = new MenuItem() { Header = "Propose Features", HotKey = new KeyGesture(Key.F2) };
         _helpReportIssuesMenuItem = new MenuItem() { Header = "Report Issues", HotKey = new KeyGesture(Key.F3) };
+        
+        _helpCommunityMenuItem = new MenuItem() { Header = "Community" };
+        _communityDiscordMenuItem = new MenuItem() { Header = "Discord" };
+        _communityWebsiteMenuItem = new MenuItem() { Header = "Website" };
+        _helpCommunityMenuItem.Items.Add(_communityDiscordMenuItem);
+        _helpCommunityMenuItem.Items.Add(_communityWebsiteMenuItem);
+        
         _helpAboutMenuItem = new MenuItem() { Header = "About", HotKey = new KeyGesture(Key.F4) };
         
         _helpMenu.Items.Add(_helpDocumentationMenuItem);
         _helpMenu.Items.Add(_helpProposeFeaturesMenuItem);
         _helpMenu.Items.Add(_helpReportIssuesMenuItem);
         _helpMenu.Items.Add(new Separator());
+        _helpMenu.Items.Add(_helpCommunityMenuItem);
         _helpMenu.Items.Add(_helpAboutMenuItem);
         
     }
@@ -250,6 +270,8 @@ public class EditorMenuBar : UserControl
         _helpDocumentationMenuItem.Click += (s, e) => OpenUrl("https://doc.rpgcreator.dev/");
         _helpProposeFeaturesMenuItem.Click += (s, e) => OpenUrl("https://github.com/Ward727a/RPGCreator/issues");
         _helpReportIssuesMenuItem.Click += (s, e) => OpenUrl("https://github.com/Ward727a/RPGCreator/issues");
+        _communityDiscordMenuItem.Click += (s, e) => OpenUrl("https://discord.gg/4yfq4NNzs4");
+        _communityWebsiteMenuItem.Click += (s, e) => OpenUrl("https://rpgcreator.dev");
         _helpAboutMenuItem.Click += (s, e) => OpenUrl("https://github.com/Ward727a/RPGCreator/blob/Dev/README.md");
     }
 

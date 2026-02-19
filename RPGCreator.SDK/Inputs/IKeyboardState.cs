@@ -1,4 +1,6 @@
-﻿namespace RPGCreator.SDK.Inputs;
+﻿using RPGCreator.SDK.GlobalState;
+
+namespace RPGCreator.SDK.Inputs;
 
 /// <summary>
 /// Keyboard keys enumeration.<br/>
@@ -414,7 +416,7 @@ public readonly ref struct RawKeyboardData
     }
 }
 
-public interface IKeyboardState
+public interface IKeyboardState : IState
 {
     event Action<char> TextInput;
     event Action<KeyboardKeys> KeyDown;

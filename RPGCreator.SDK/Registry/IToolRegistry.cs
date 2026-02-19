@@ -18,29 +18,25 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Collections.ObjectModel;
+using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Registry;
 
-public interface IUrnRegistry : IService
+public interface IToolRegistry : IService
 {
-    bool RegisterUrn(ref URN urn, UrnCollisionStrategy collisionStrategy = UrnCollisionStrategy.RenameWithUlidSuffix);
-    bool UnregisterUrn(URN urn);
-    bool IsUrnRegistered(URN urn);
-}
-
-public enum UrnCollisionStrategy
-{
-    /// <summary>
-    /// Return false and do not register the new URN if it collides with an existing one.
-    /// </summary>
-    Fail,
-    /// <summary>
-    /// Rename the new URN by appending a ULID suffix if it collides with an existing one, and register it.
-    /// </summary>
-    RenameWithUlidSuffix,
-    /// <summary>
-    /// Ignore the collision and don't register the new URN if it collides with an existing one, but return true as if it was registered successfully.
-    /// </summary>
-    Ignore
+    
+    ObservableCollection<ToolLogic> RegisteredTools { get; }
+    
+    public void ActivateTool(URN toolUrn);
+    public void ActivateTool(ToolLogic toolLogic);
+    public void DeactivateTool(URN toolUrn);
+    public void DeactivateTool(ToolLogic toolLogic);
+    public ToolLogic? GetActiveTool();
+    
+    public void RegisterTool(ToolLogic toolLogic, bool overrideIfExists = false);
+    public void UnregisterTool(URN toolUrn);
+    public ToolLogic? GetTool(URN toolUrn);
+    public bool HasTool(URN toolUrn);
 }

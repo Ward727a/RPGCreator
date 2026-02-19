@@ -82,26 +82,6 @@ public interface ILayerService : INotifyPropertyChanged, INotifyPropertyChanging
     public int GetLastLayerIndex() => LayerCount - 1;
     
     /// <summary>
-    /// Returns the data of the currently selected layer.
-    /// </summary>
-    /// <returns>The data of the currently selected layer.</returns>
-    public LayerData GetCurrentLayerData() => GetLayerData(CurrentLayerIndex);
-    
-    /// <summary>
-    /// Returns the data of the next layer.<br/>
-    /// If the current layer is the last one, it will return the data of the current layer (last).
-    /// </summary>
-    /// <returns>The data of the next layer.</returns>
-    public LayerData GetNextLayerData() => GetLayerData(NextLayerIndex);
-    
-    /// <summary>
-    /// Returns the data of the previous layer.<br/>
-    /// If the current layer is the first one, it will return the data of the current layer (first).
-    /// </summary>
-    /// <returns>The data of the previous layer.</returns>
-    public LayerData GetPreviousLayerData() => GetLayerData(PreviousLayerIndex);
-    
-    /// <summary>
     /// Tries to add a new layer with the given definition.<br/>
     /// Returns true if the layer was added successfully, false otherwise.
     /// </summary>

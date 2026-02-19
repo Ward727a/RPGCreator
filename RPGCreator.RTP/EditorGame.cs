@@ -130,49 +130,6 @@ namespace RPGCreator.RTP
         {
             base.Initialize();
             OnInitialize?.Invoke();
-            
-            
-            RuntimeServices.CameraService.PropertyChanged += (_, args) =>
-            {
-                // if (args.PropertyName == nameof(ICameraService.CameraEntityId))
-                // {
-                //     _cameraEntity = RuntimeServices.CameraService.CameraEntityId;
-                // }
-            };
-
-            Gum.Initialize(this);
-
-            var mainPanel = new Panel(Gum.Root);
-            mainPanel.Width = GraphicalUiElement.CanvasWidth;
-            mainPanel.Height = GraphicalUiElement.CanvasHeight;
-            
-            // Add text box to display when no map is selected.
-            _noMapSelectedText = new TextBox()
-            {
-                IsReadOnly = true,
-                Text = "No map selected. Please select a map to edit.",
-            };
-            mainPanel.AddChild(_noMapSelectedText);
-            
-            _mousePointerText = new TextBox()
-            {
-                IsReadOnly = true,
-                Text = "Pos NONE",
-                X = 0,
-                Y = 30,
-                Width = 200
-            };
-            mainPanel.AddChild(_mousePointerText);
-            
-            _zoomLevelText = new TextBox()
-            {
-                IsReadOnly = true,
-                Text = "Zoom: 1.0",
-                X = 0,
-                Y = 60,
-                Width = 200
-            };
-            mainPanel.AddChild(_zoomLevelText);
         }
 
         protected override void LoadContent()

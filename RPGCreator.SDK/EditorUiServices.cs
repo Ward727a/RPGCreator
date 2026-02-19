@@ -320,7 +320,7 @@ public static class EditorUiServices
         {
             Logger.Error("[UI] No IMonogameViewport registered. Cannot initialize viewport.");
         }
-        public void CreateNewViewport(string viewportId, IntPtr bitmapControlAddress, Size sizeWanted)
+        public void CreateNewViewport(string viewportId, IntPtr bitmapControlAddress, Size sizeWanted, ViewportType viewportType)
         {
             Logger.Error("[UI] No IMonogameViewport registered. Cannot create new viewport.");
         }
@@ -330,7 +330,7 @@ public static class EditorUiServices
             Logger.Error("[UI] No IMonogameViewport registered. Cannot resize viewport.");
         }
 
-        public BaseGameViewport GetViewport(string viewportId)
+        public BaseMonogameViewport GetViewport(string viewportId)
         {
             Logger.Error("[UI] No IMonogameViewport registered. Cannot get viewport.");
             return null!;

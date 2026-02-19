@@ -25,6 +25,7 @@
 using Avalonia.Controls;
 using RPGCreator.Core.Types;
 using RPGCreator.SDK;
+using RPGCreator.SDK.GlobalState;
 using RPGCreator.UI.Content.Editor.LayersListComponents;
 
 namespace RPGCreator.UI.Content.Editor.Tabs
@@ -161,9 +162,9 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
         protected void RegisterEvents()
         {
-            EngineStates.EditorState.PropertyChanged += (s, e) =>
+            GlobalStates.MapState.PropertyChanged += (s, e) =>
             {
-                if (e.PropertyName == nameof(IEditorState.CurrentMap))
+                if (e.PropertyName == nameof(IMapState.CurrentMapDef))
                 {
                     Data_EditedMapChanged();
                 }
@@ -177,9 +178,9 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
         public void RefreshMapProperties()
         {
-            if(EngineStates.EditorState.CurrentMap == null)
+            if(GlobalStates.MapState.CurrentMapDef == null)
                 return;
-            var map = EngineStates.EditorState.CurrentMap;
+            var map = GlobalStates.MapState.CurrentMapDef;
             MapNameText.Text = $"Map Name: {map.Name}";
             MapSizeText.Text = $"Map Size: {map.Size.Width}x{map.Size.Height}";
             MapDescriptionText.Text = $"Map Description: {map.Description}";

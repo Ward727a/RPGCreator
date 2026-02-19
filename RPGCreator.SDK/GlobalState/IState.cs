@@ -18,26 +18,14 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.Drawing;
-using RPGCreator.SDK.Editor.Rendering;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
-namespace RPGCreator.SDK.EditorUiService;
+namespace RPGCreator.SDK.GlobalState;
 
-public enum ViewportType
+public interface IState : INotifyPropertyChanged, INotifyPropertyChanging
 {
-    Game,
-    Ui,
-}
-
-public interface IMonogameViewport : IService
-{
-    public bool IsCoreReady { get; }
-    public event Action? OnCoreReady;
-    public void Initialize();
-    public void CreateNewViewport(string viewportId, IntPtr bitmapControlAddress, Size sizeWanted, ViewportType viewportType = ViewportType.Game);
-    public void ResizeViewport(string viewportId, int width, int height);
-    public BaseMonogameViewport GetViewport(string viewportId);
-    public void DestroyViewport(string viewportId);
-    public void Tick();
-    public void AttachToWindow(IntPtr avaloniaWindowHandle);
+    bool SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = "");
+    
+    void Reset();
 }

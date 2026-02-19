@@ -66,6 +66,15 @@ public class CustomData : ISerializable, IDeserializable
         return default;
     }
     
+    public Type? GetTypeOf(string key)
+    {
+        if (_data.TryGetValue(key, out var value))
+        {
+            return value.GetType();
+        }
+        return null;
+    }
+    
     public T GetAsOrDefault<T>(string key, T defaultValue)
     {
         if (_data.TryGetValue(key, out var value))

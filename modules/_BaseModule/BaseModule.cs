@@ -3,6 +3,7 @@ using _BaseModule.Features.Entity;
 using _BaseModule.Features.Game;
 using _BaseModule.MacroFeatures;
 using _BaseModule.Registry;
+using _BaseModule.Tools;
 using RPGCreator.SDK;
 using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Logging;
@@ -67,6 +68,8 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
         EngineServices.FeaturesManager.RegisterEntityFeature<AccessorFeature>();
         EngineServices.FeaturesManager.RegisterEntityFeature<LivingBeingMacroFeature>();
         EngineServices.FeaturesManager.RegisterGameFeature<StandardControlFeature>();
+        
+        RegistryServices.ToolRegistry.RegisterTool(new SimplePen());
         
         // Then we can set up the custom assets menu for stats management.
         // We are doing that here, simply to allow us to 'order' the menu option in a specific way.
