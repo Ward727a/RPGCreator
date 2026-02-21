@@ -115,3 +115,8 @@ However if I do that, there will be some rules to respect to sell your thing as 
 What I mean by abuse: "MY SUPER ASSETS WITH 10 POTION TEXTURE FOR JUST 50$, BUY NOW!!! FOR THE SUMMER IT WILL ONLY COST 10$!!!" - Apart if the texture are of extremly good quality (animation, 4K, ...), no, I don't think it should cost 50$ for this.
 
 For now I don't want to start working on this, I want **first finish the engine**, then see if I can found someone trustworthy to work with me on the assets store (rules, moderation, ...), and MAYBE once I have all this, there will be a way to sell your assets. 
+
+### Third-party licenses
+This open-source project uses different libraries and packages, all licenses to those can be found in the [NOTICES](NOTICE.md) file.
+
+If your work is used inside the project, and you don't find any mention of your license or copyright in the NOTICES.md file, please open an issue, or contact us on Discord!
