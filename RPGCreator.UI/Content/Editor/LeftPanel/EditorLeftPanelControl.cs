@@ -15,6 +15,7 @@ using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.RuntimeService;
+using RPGCreator.UI.Common.CharacterCommonComponents;
 using RPGCreator.UI.Common.TilesetsCommonComponents;
 using RPGCreator.UI.Contexts;
 using RPGCreator.UI.Content.Editor.LeftPanel.EntitiesPanel;
@@ -41,6 +42,7 @@ public class EditorLeftPanelControl : UserControl
     private static Dictionary<string, Control> _components = new();
 
     private TilesetExplorer? _tilesetPayload;
+    private CharacterExplorer? _characterSelectorPayload;
     
     #endregion
     
@@ -63,15 +65,6 @@ public class EditorLeftPanelControl : UserControl
             VerticalAlignment = VerticalAlignment.Stretch,
         };
         
-        _scrollViewer = new ScrollViewer
-        {
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-        };
-        _contentBody.Children.Add(_scrollViewer);
-        Grid.SetRow(_scrollViewer, 1);
-        
         _scrollBody = new Grid
         {
             RowDefinitions = new RowDefinitions("Auto, *"),
@@ -81,7 +74,8 @@ public class EditorLeftPanelControl : UserControl
             VerticalAlignment = VerticalAlignment.Stretch,
             MinWidth = 300,
         };
-        _scrollViewer.Content = _scrollBody;
+        _contentBody.Children.Add(_scrollBody);
+        Grid.SetRow(_scrollBody, 1);
         
         _tabControl = new TabControl
         {
@@ -178,6 +172,21 @@ public class EditorLeftPanelControl : UserControl
                             };
                         }
                         
+                        if(_characterSelectorPayload == null)
+                        {
+                            _characterSelectorPayload = new CharacterExplorer(
+                                EngineServices.AssetsManager.CreateAssetScope("editor_left_panel"))
+                            {
+                                Margin = new Thickness(4, 0, 0, 0),
+                                HorizontalAlignment = HorizontalAlignment.Stretch,
+                                VerticalAlignment = VerticalAlignment.Stretch,
+                            };
+                            _characterSelectorPayload.CharacterSelected += def =>
+                            {
+                                GlobalStates.ToolState.Payload = def;
+                            };
+                        }
+                        
                         switch (activeTool.PayloadType)
                         {
                             case EPayloadType.SimpleTile:
@@ -191,6 +200,9 @@ public class EditorLeftPanelControl : UserControl
                             case EPayloadType.AllTiles:
                                 _tilesetPayload.SetTilesetType(TilesetExplorer.TilesetType.All);
                                 ShowPayloadControl(_tilesetPayload);
+                                break;
+                            case EPayloadType.Character:
+                                ShowPayloadControl(_characterSelectorPayload);
                                 break;
                             default:
                                 ShowPayloadControl(new TextBlock()

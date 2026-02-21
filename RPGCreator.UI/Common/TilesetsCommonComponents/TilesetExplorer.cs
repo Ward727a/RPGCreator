@@ -14,6 +14,14 @@ using RPGCreator.UI.Content.Editor.LeftPanel.TilingPanel;
 
 namespace RPGCreator.UI.Common.TilesetsCommonComponents;
 
+/*
+ *
+ * - Need to fix the autoTile type (it doesn't show the preview image, and it crash when clicking on the tile inside the tileset preview).
+ * > The crash is normal, it's due to the fact that an autotile DOESN'T have a tileset, so we need to handle this case.
+ * > We need to only show a itemsBox with each groupset available in the autoTiles group.
+ * 
+ */
+
 public class TilesetExplorer : UserControl
 {
     

@@ -41,9 +41,8 @@ using IResourceService = RPGCreator.SDK.Resources.IResourceService;
 
 namespace RPGCreator.UI;
 
-public partial class App : Application
+public class App : Application
 {
-
     // TODO: Move this style static variable to a more appropriate place, like a StylesManager or similar.
     public static readonly BaseStyle style = new DefaultStyle();
     public override void Initialize()
