@@ -2,6 +2,7 @@ using System;
 using Avalonia;
 using Avalonia.Animation;
 using Avalonia.Controls;
+using Avalonia.Controls.Documents;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Styling;
@@ -23,6 +24,7 @@ public class SetOptionItem : UserControl
 {
     public Ulid AssetId { get; set; }
     public string Name { get; set; }
+    public bool IsIntGrid { get; private set; }
 
     #region Components
     
@@ -36,8 +38,9 @@ public class SetOptionItem : UserControl
     {
         AssetId = definition.Unique;
         Name = definition.Name;
+        IsIntGrid = definition is IntGridTilesetDef;
         CreateComponents();
-        if (_previewImage != null)
+        if (_previewImage != null && !string.IsNullOrEmpty(definition.ImagePath))
             _previewImage.Source = EngineServices.ResourcesService.Load<Bitmap>(definition.ImagePath);
         Content = _body;
         EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelTilingPanelTilesetItem, this);
@@ -51,21 +54,45 @@ public class SetOptionItem : UserControl
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
         };
-        _previewImage = new Image
+        if(!IsIntGrid)
         {
-            Width = 32,
-            Height = 32,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-        };
-        _body.Children.Add(_previewImage);
-        Grid.SetColumn(_previewImage, 0);
+            _previewImage = new Image
+            {
+                Width = 32,
+                Height = 32,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            };
+            _body.Children.Add(_previewImage);
+            Grid.SetColumn(_previewImage, 0);
+        }
         
         _nameText = new TextBlock
         {
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            Inlines = new InlineCollection()
+        };
+        
+        
+        var nameRun = new Run
+        {
             Text = Name
         };
+
+        if (IsIntGrid)
+        {
+            var typeRun = new Run
+            {
+                Text = "(IntGrid Tileset)",
+                Foreground = Brushes.Gray,
+                FontStyle = FontStyle.Italic,
+                FontSize = 12
+            };
+            _nameText.Inlines.Add(typeRun);
+            _nameText.Inlines.Add(new LineBreak());
+        }
+        _nameText.Inlines.Add(nameRun);
+        
         _body.Children.Add(_nameText);
         Grid.SetColumn(_nameText, 2);
     }

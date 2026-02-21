@@ -77,12 +77,17 @@ public class AutoLayerDefinition : BaseLayerDef
                     InternalTileLayer.AddElement(newTile, position);
                     BakeDirtyTiles(CheckAround(position));
                 }
-                else if(InternalTileLayer.GetElement(position) == null)
+                else if(InternalTileLayer.GetElement(position) == null && SourceIntGrid.Elements != null && SourceIntGrid.HasElement(position))
                 {
                     var defaultTile = IntGridSet.IntRefs[SourceIntGrid.GetValue(position)].DefaultTileData;
                     var tile = defaultTile.ToTileDef();
 
                     InternalTileLayer.AddElement(tile, position);
+                    BakeDirtyTiles(CheckAround(position));
+                }
+                else
+                {
+                    InternalTileLayer.TryRemoveElement(position, out _);
                     BakeDirtyTiles(CheckAround(position));
                 }
             }

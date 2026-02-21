@@ -4,10 +4,12 @@ using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Numerics;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types.Collections;
 using RPGCreator.UI.Content.Editor.LeftPanel.TilingPanel;
@@ -16,8 +18,8 @@ namespace RPGCreator.UI.Common.TilesetsCommonComponents;
 
 /*
  *
- * - Need to fix the autoTile type (it doesn't show the preview image, and it crash when clicking on the tile inside the tileset preview).
- * > The crash is normal, it's due to the fact that an autotile DOESN'T have a tileset, so we need to handle this case.
+ * - Need to fix the autoTile type (it doesn't show the preview image, and it crashes when clicking on the tile inside the tileset preview).
+ * > The crash is logic, it's due to the fact that an autoTiles DOESN'T have a tileset, so we need to handle this case.
  * > We need to only show a itemsBox with each groupset available in the autoTiles group.
  * 
  */
@@ -26,6 +28,8 @@ public class TilesetExplorer : UserControl
 {
     
     private int _baseSelectedIndex = -1;
+    
+    private IntGridTilesetDef? intgrid;
 
     public enum TilesetType
     {
@@ -40,7 +44,7 @@ public class TilesetExplorer : UserControl
         Bottom
     }
     
-    public event Action<ITileDef?>? TileSelected;
+    public event Action<object?>? TileSelected;
     public event Action<int>? TilesetChanged;
     
     private TilesetType _type;
@@ -51,6 +55,7 @@ public class TilesetExplorer : UserControl
     private MoveableCanvas _canvas;
     private SelectionCursorControl _selectionCursor;
     private Image _previewImage;
+    private ListBox _intGridGroupsListBox;
     private WrapPanel _tileHistoryPanel;
     private IAssetScope _scope;
 
@@ -109,6 +114,22 @@ public class TilesetExplorer : UserControl
         };
         _body.Children.Add(_canvas);
         
+        _intGridGroupsListBox = new ListBox
+        {
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            IsVisible = false,
+            ItemTemplate = new FuncDataTemplate<IntGridData>((@ref, scope) =>
+            {
+                if (@ref == null) return null;
+                return new ListBoxItem()
+                {
+                    Content = $"Value: {@ref.IntGridRef.Value} - Name: {@ref.IntGridRef.Name}",
+                };
+            })
+        };
+        _body.Children.Add(_intGridGroupsListBox);
+        
         _previewImage = new Image
         {
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
@@ -145,6 +166,8 @@ public class TilesetExplorer : UserControl
             ITileDef? tileToPaint = null;
             if (_setSelector?.SelectedItem is SetOptionItem selectedItem)
             {
+                
+                
                 var def = _scope.Load<BaseTilesetDef>(selectedItem.AssetId);
                 
                 var tilePositionInTileset = new Point( // Row and Column in tileset
@@ -215,6 +238,14 @@ public class TilesetExplorer : UserControl
     private void RegisterEvents()
     {
         _setSelector.SelectionChanged += SetSelectorOnSelectionChanged;
+        _intGridGroupsListBox.SelectionChanged += (sender, args) =>
+        {
+            if (_intGridGroupsListBox.SelectedItem is IntGridData data)
+            {
+                Logger.Debug("[TilesetExplorer] Selected IntGrid group: {0}", data);
+                TileSelected?.Invoke(data);
+            }
+        };
     }
 
     public void AddTilesetOption(BaseTilesetDef definition)
@@ -236,8 +267,43 @@ public class TilesetExplorer : UserControl
         {
             Logger.Debug("[TilingPanel] Selected tileset: {0}", selectedItem.Name);
             var def = _scope.Load<BaseTilesetDef>(selectedItem.AssetId);
-            if (_previewImage != null)
-                _previewImage.Source = EngineServices.ResourcesService.Load<Bitmap>(def.ImagePath);
+            if (def is IntGridTilesetDef gridTilesetDef)
+            {
+                _intGridGroupsListBox.IsVisible = true;
+                _canvas.IsVisible = false;
+                intgrid = gridTilesetDef;
+                
+                var listData = new List<IntGridData>();
+                
+                foreach (var intGridValueRef in intgrid.IntRefs)
+                {
+                    var data = new IntGridData()
+                    {
+                        IntGridRef = intGridValueRef,
+                        IntGridTilesetDef = gridTilesetDef
+                    };
+                    listData.Add(data);
+                }
+
+                _intGridGroupsListBox.ItemsSource = listData;
+                
+                if (gridTilesetDef.IntRefs.Count <= 0)
+                {
+                    var noItem = new TextBlock
+                    {
+                        Text = $"No rules group found in this tileset."
+                    };
+                    _intGridGroupsListBox.Items.Add(noItem);
+                    _intGridGroupsListBox.IsEnabled = false;
+                }
+            }
+            else
+            {
+                _intGridGroupsListBox.IsVisible = false;
+                _canvas.IsVisible = true;
+                if (_previewImage != null)
+                    _previewImage.Source = EngineServices.ResourcesService.Load<Bitmap>(def.ImagePath);
+            }
         }
         
     }

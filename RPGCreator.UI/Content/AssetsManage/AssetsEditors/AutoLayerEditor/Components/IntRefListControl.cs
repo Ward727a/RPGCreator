@@ -153,9 +153,10 @@ public class IntRefListCreateModal : Window
 
         private void RegisterEvents()
         {
-            TilesetExplorer?.TileSelected += (tile) =>
+            TilesetExplorer?.TileSelected += (obj) =>
             {
-                _selectedTile = tile;
+                if(obj is ITileDef tile)
+                    _selectedTile = tile;
             };
             ConfirmButton?.Click += (_, _) =>
             {
@@ -459,9 +460,14 @@ public class AutoLayerRuleSelectOutputTileModal : Window
         if (TilesetExplorer == null || ConfirmButton == null || CancelButton == null)
             return;
         
-        TilesetExplorer.TileSelected += (tile) =>
+        TilesetExplorer.TileSelected += (obj) =>
         {
-            _selectedTile = tile;
+            if(obj is ITileDef tile)
+                _selectedTile = tile;
+            else if (obj is IntGridValueRef intRef)
+            {
+                
+            }
         };
         TilesetExplorer.TilesetChanged += (index) =>
         {

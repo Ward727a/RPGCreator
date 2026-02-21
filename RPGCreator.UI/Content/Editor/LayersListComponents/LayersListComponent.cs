@@ -221,13 +221,13 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                 
                 newLayer.Name = layerName;
                 newLayer.ZIndex = RuntimeServices.MapService.CurrentLoadedMapDefinition!.TileLayers.Count; // Set ZIndex to the last index
-
+                newLayer.LayerIndex = RuntimeServices.MapService.GetLastLayerIndex() + 1; // Set LayerIndex to the next available index
                 if(!RuntimeServices.MapService.HasLoadedMap)
                 {
                     return;
                 }
 
-                if (RuntimeServices.LayerService.TryAddLayer(newLayer))
+                if (RuntimeServices.MapService.TryAddLayer(newLayer))
                 {
                     LayerItem newLayerItem = new LayerItem(newLayer);
 
@@ -238,8 +238,8 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
 
                     SelectedLayerText.Text = $"Selected Layer: {layerName}";
 
-                    newLayer.LayerIndex = RuntimeServices.LayerService.GetLastLayerIndex();
-                    RuntimeServices.LayerService.SelectLayer(newLayer.LayerIndex);
+                    newLayer.LayerIndex = RuntimeServices.MapService.GetLastLayerIndex();
+                    RuntimeServices.MapService.SelectLayer(newLayer.LayerIndex);
 
                     return;
                 }
@@ -252,7 +252,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
         {
             if (LayersList.SelectedItem is not LayerItem layerItem) return;
             SelectedLayerText.Text = $"Selected Layer: {layerItem.Layer.Name}";
-            RuntimeServices.LayerService.SelectLayer(layerItem.Layer.LayerIndex);
+            RuntimeServices.MapService.SelectLayer(layerItem.Layer.LayerIndex);
         }
 
         #endregion

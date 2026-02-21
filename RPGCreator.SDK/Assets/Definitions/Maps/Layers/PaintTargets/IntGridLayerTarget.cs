@@ -38,7 +38,8 @@ public class IntGridLayerTarget : IPaintTarget
 
     public void EraseAt(Vector2 position)
     {
-        throw new NotImplementedException();
+        LayerDef.SourceIntGrid.TryRemoveElement(position, out _);
+        LayerDef.BakeRegion(position);
     }
 
     public void PreviewAt(Vector2 position, object objectToPreview)
