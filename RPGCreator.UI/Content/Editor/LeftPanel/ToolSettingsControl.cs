@@ -23,14 +23,17 @@ using System.ComponentModel;
 using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Documents;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Interactivity;
+using Avalonia.Layout;
 using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media;
 using RPGCreator.SDK;
 using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Logging;
+using RPGCreator.UI.Common;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.Editor.LeftPanel;
@@ -38,11 +41,13 @@ namespace RPGCreator.UI.Content.Editor.LeftPanel;
 public class ToolSettingsControl : UserControl
 {
 
+    private TextBlock _contentHeader = null!;
+    private HelpButton _contentHeaderToolHelpButton;
     private Expander _content = null!;
     private Grid? _body;
     private ScrollViewer? _scroll;
     private ItemsControl? _settingsPanel;
-    
+
     public ToolSettingsControl()
     {
         CreateComponents();
@@ -52,10 +57,38 @@ public class ToolSettingsControl : UserControl
 
     private void CreateComponents()
     {
+        
+        _contentHeader = new TextBlock()
+        {
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            Inlines = new InlineCollection()
+        };
+
+        _contentHeaderToolHelpButton = new HelpButton(ToolLogic.NoHelp)
+        {
+            VerticalAlignment = VerticalAlignment.Center,
+            IsEnabled = false
+        };
+        ToolTip.SetShowOnDisabled(_contentHeaderToolHelpButton, true);
+        ToolTip.SetTip( _contentHeaderToolHelpButton, "Sorry, no help available for this tool.");
+        
+        var contentHeaderUiContainer = new InlineUIContainer(_contentHeaderToolHelpButton);
+        var contentHeaderText = new Run("Tool Settings")
+        {
+            BaselineAlignment = BaselineAlignment.Center,
+            FontWeight = FontWeight.Bold,
+            FontSize = 14
+        };
+        
+        _contentHeader.Inlines.Add(contentHeaderUiContainer);
+        _contentHeader.Inlines.Add(new Border() { Margin = new Thickness(4, 0), Width = 1});
+        _contentHeader.Inlines.Add(contentHeaderText);
+        
         _content = new Expander()
         {
             IsExpanded = false,
-            Header = "Tool Settings",
+            Header = _contentHeader,
             ExpandDirection = ExpandDirection.Up
         };
         
@@ -113,6 +146,19 @@ public class ToolSettingsControl : UserControl
                 case nameof(IToolState.ActiveTool):
                     _content.IsExpanded = GlobalStates.ToolState.ActiveTool != null;
                     _settingsPanel!.ItemsSource = GlobalStates.ToolState.ActiveToolParameters;
+                    _contentHeaderToolHelpButton.IsEnabled = false;
+                    ToolTip.SetTip(_contentHeaderToolHelpButton, "Sorry, no help is available for this tool.");
+                    if (_content.IsExpanded)
+                    {
+                        var helpKey = GlobalStates.ToolState.ActiveTool?.HelpKey;
+
+                        if (helpKey != null && helpKey != ToolLogic.NoHelp && GlobalStates.ToolState.ActiveTool != null)
+                        {
+                            _contentHeaderToolHelpButton.SetHelpDocsKey(GlobalStates.ToolState.ActiveTool.HelpKey);
+                            ToolTip.SetTip(_contentHeaderToolHelpButton, "Click to view help documentation for this tool.");
+                            _contentHeaderToolHelpButton.IsEnabled = true;
+                        }
+                    }
                     break;
                 case nameof(IToolState.ActiveToolParameters):
                     _settingsPanel!.ItemsSource = GlobalStates.ToolState.ActiveToolParameters;

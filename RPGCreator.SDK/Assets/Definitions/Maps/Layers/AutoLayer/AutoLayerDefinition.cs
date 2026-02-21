@@ -1,8 +1,11 @@
 using System.Numerics;
+using RPGCreator.Core.Types.Editor.Visual.PaintTargets;
 using RPGCreator.Core.Types.Map;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers.PaintTargets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Editor;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types;
 
@@ -13,9 +16,27 @@ public class AutoLayerDefinition : BaseLayerDef
 {
     public IntGridLayerDefinition SourceIntGrid { get; set; } = new();
     public TileLayerDefinition InternalTileLayer { get; private set; } = new();
-    
-    public Ulid IntGridSetUnique { get; set; }
     public IntGridTilesetDef? IntGridSet { get; set; }
+
+    private IntGridLayerTarget? _paintTargetCache;
+
+    public override IPaintTarget? GetPaintTarget()
+    {
+        if(GlobalStates.MapState.CurrentMapDef == null)
+            return null;
+        var mapDef = GlobalStates.MapState.CurrentMapDef;
+        
+        if(_paintTargetCache != null && _paintTargetCache.MapDef == mapDef)
+            return _paintTargetCache;
+        
+        _paintTargetCache = new IntGridLayerTarget(this, mapDef);
+        return _paintTargetCache;
+    }
+
+    public override bool CanPaintObject(object? objectToPaint)
+    {
+        return objectToPaint is IntGridData;
+    }
 
     /// <summary>
     /// Bakes auto-tiles in the specified region.

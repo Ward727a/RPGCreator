@@ -70,6 +70,7 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
         EngineServices.FeaturesManager.RegisterGameFeature<StandardControlFeature>();
         
         RegistryServices.ToolRegistry.RegisterTool(new SimplePen());
+        RegistryServices.ToolRegistry.RegisterTool(new CharacterPlacer());
         
         // Then we can set up the custom assets menu for stats management.
         // We are doing that here, simply to allow us to 'order' the menu option in a specific way.

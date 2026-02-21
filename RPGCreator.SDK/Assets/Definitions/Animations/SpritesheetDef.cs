@@ -1,10 +1,10 @@
 using System.Numerics;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Helpers;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Internals;
-using SixLabors.ImageSharp;
 using Rectangle = System.Drawing.Rectangle;
 
 namespace RPGCreator.SDK.Assets.Definitions.Animations;
@@ -112,7 +112,7 @@ public class SpritesheetDef : BaseAssetDef, ISerializable, IDeserializable, IHas
         {
             if (!File.Exists(ImagePath)) return;
             
-            var info = Image.Identify(ImagePath);
+            var info = ImageHelper.GetImageDimensions(ImagePath);
                 
             ImageWidth = info.Width;
             ImageHeight = info.Height;

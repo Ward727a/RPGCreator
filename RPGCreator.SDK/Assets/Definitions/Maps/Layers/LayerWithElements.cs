@@ -3,8 +3,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using RPGCreator.Core.Types.Map.Chunks;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers.PaintTargets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Editor;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
@@ -103,9 +105,10 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
     public bool TryRemoveElement(Vector2 location, [NotNullWhen(true)] out TDef? removedElement)
     {
         var chunkId = LayerChunk.GetChunkId(location);
+        var chunkPosition = LayerChunk.GetChunkPosition(location);
         var chunk = GetChunk(chunkId);
         
-        removedElement = chunk.RemoveElement(location);
+        removedElement = chunk.RemoveElement(chunkPosition);
         
         if(removedElement == null)
         {
@@ -269,4 +272,24 @@ public class TileLayerDefinition : LayerWithElements<ITileDef>
 {
     protected override LayerChunk<ITileDef> CreateChunkInstance() => new TileLayerChunk();
     public override UrnSingleModule UrnModule => "tile_layer".ToUrnSingleModule();
+    
+    private TileLayerTarget? _paintTargetCache;
+    
+    public override IPaintTarget? GetPaintTarget()
+    {
+        if(GlobalStates.MapState.CurrentMapDef == null)
+            return null;
+        var mapDef = GlobalStates.MapState.CurrentMapDef;
+        
+        if(_paintTargetCache != null && _paintTargetCache.MapDef == mapDef)
+            return _paintTargetCache;
+        
+        _paintTargetCache = new TileLayerTarget(this, mapDef, (int)mapDef.GridParameter.CellWidth, (int)mapDef.GridParameter.CellHeight);
+        return _paintTargetCache;
+    }
+
+    public override bool CanPaintObject(object? objectToPaint)
+    {
+        return objectToPaint is ITileDef;
+    }
 }

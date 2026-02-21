@@ -47,7 +47,6 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
         #region Components
 
         public StackPanel LayersBody { get; private set; }
-        public Accordion Body { get; private set; }
         public Button AddLayerButton { get; private set; }
         public ListBox LayersList { get; private set; }
         public TextBlock SelectedLayerText { get; private set; }
@@ -57,7 +56,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
         public LayersListComponent()
         {
             CreateComponents();
-            Content = Body;
+            Content = LayersBody;
         }
 
         private void CreateComponents()
@@ -103,8 +102,6 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
             LayersList.SelectionChanged += OnLayerSelected;
 
             LayersBody.Children.Add(LayersList);
-
-            Body = new Accordion(LayersBody, "Layers");
 
             RefreshComponents();
             RegisterEvents();

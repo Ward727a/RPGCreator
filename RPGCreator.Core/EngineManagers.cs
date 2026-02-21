@@ -27,6 +27,7 @@ using RPGCreator.Core.Managers.BrushManagers;
 using RPGCreator.Core.Managers.BrushManagers.Brushs;
 using RPGCreator.Core.Managers.ProjectsManager;
 using RPGCreator.Core.Module;
+using RPGCreator.Core.Services;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Commands;
 using RPGCreator.SDK.Logging;
@@ -39,7 +40,7 @@ namespace RPGCreator.Core
         public AssetsManager Assets { get; private set; }
         public GameFactory GameFactory { get; private set; }
         public ProjectsManager Projects { get; private set; }
-        public BrushManager Brush { get; private set; }
+        public ToolService Brush { get; private set; }
         public CommandManager Commands { get; private set; }
         
         public FeaturesRulesManager FeaturesRules { get; private set; }
@@ -49,19 +50,16 @@ namespace RPGCreator.Core
             Assets = new AssetsManager();
             Projects = new ProjectsManager();
             GameFactory = new GameFactory();
-            Brush = new BrushManager();
+            Brush = new ToolService();
             FeaturesRules = new FeaturesRulesManager();
             Commands = new CommandManager();
             
             EngineServices.AssetsManager = Assets;
             EngineServices.GameFactory = GameFactory;
             EngineServices.ProjectsManager = Projects;
-            // EngineServices.BrushManager = Brush;
+            EngineServices.ToolService = Brush;
             EngineServices.UndoRedoService = Commands;
             EngineServices.FeaturesManager = new FeatureManager();
-            
-            Brush.AddBrush(new SimpleBrush());
-            Brush.AddBrush(new EraserBrush());
 
             _logger.Info($"EngineManagers initialized.");
         }

@@ -74,6 +74,7 @@ public class MapDefinition : BaseAssetDef, IMapDef
         TileLayerAdded?.Invoke(layer); // Notify subscribers that a new layer has been added
         return true;
     }
+    
     public bool RemoveLayer(BaseLayerDef layer)
     {
         if (layer == null || !_tileLayers.Exists(l => l.Unique == layer.Unique))

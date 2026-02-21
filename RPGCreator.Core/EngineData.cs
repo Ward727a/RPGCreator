@@ -42,36 +42,6 @@ namespace RPGCreator.Core
             set => SetProperty(ref field, value);
         } = false;
 
-        public bool InPlacingMode { 
-            get;
-            set => SetProperty(ref field, value);
-        } = false;
-
-        public bool InDrawingMode { 
-            get;
-            set => SetProperty(ref field, value);
-        } = false;
-
-        public bool ShowCollisionLayer { 
-            get;
-            set => SetProperty(ref field, value);
-        } = false;
-
-        public bool ShowEntityLayer { 
-            get;
-            set => SetProperty(ref field, value);
-        } = false;
-
-        public MapDefinition? CurrentMap { 
-            get;
-            set => SetProperty(ref field, value);
-        } = null;
-
-        public BaseLayerDef? CurrentLayer { 
-            get;
-            set => SetProperty(ref field, value);
-        } = null;
-
         public ITileDef? CurrentTile { 
             get;
             set => SetProperty(ref field, value);
@@ -83,50 +53,6 @@ namespace RPGCreator.Core
         }
     }
     
-    public class BrushState : BaseState, IBrushState
-    {
-        public IBrushInfo? CurrentBrush 
-        {
-            get;
-            set => SetProperty(ref field, value);
-        } = null;
-
-        public BrushMode CurrentMode 
-        {
-            get;
-            set => SetProperty(ref field, value);
-        } = BrushMode.Tiling;
-
-        public object? CurrentObjectToPaint 
-        {
-            get;
-            set => SetProperty(ref field, value);
-        }
-
-        public bool IsPlacing 
-        {
-            get;
-            set => SetProperty(ref field, value);
-        } = false;
-
-        public bool IsDrawing 
-        {
-            get;
-            set => SetProperty(ref field, value);
-        } = false;
-
-        public Vector2 LastDrawAt 
-        {
-            get;
-            set => SetProperty(ref field, value);
-        } = Vector2.Zero;
-
-        public override void Reset()
-        {
-            
-        }
-    }
-
     public class ProjectState : BaseState, IProjectState
     {
         public IBaseProject? CurrentProject { 

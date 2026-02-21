@@ -26,6 +26,7 @@
     <Folder Include="Types\Blueprint\Nodes\Entity\Position\" />
     <Folder Include="Types\Blueprint\Nodes\Entity\Stats\" />
     <Folder Include="Types\Editor\Interfaces\" />
+    <Folder Include="Types\Editor\Visual\" />
   </ItemGroup>
 
   <ItemGroup>

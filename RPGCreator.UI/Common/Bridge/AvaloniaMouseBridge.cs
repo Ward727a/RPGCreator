@@ -83,7 +83,7 @@ public class AvaloniaMouseBridge
             Scroll = _scrollAccumulatorY,
             HScroll = _scrollAccumulatorX,
             IsInsideWindow = true,
-            InObject = control is MonoGameControlTest ? RuntimeServices.GameRunner : null,
+            InObject = control is Image ? control.Name : null,
             Buttons = buttonsPressed
         };
 

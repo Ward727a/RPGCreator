@@ -21,6 +21,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Numerics;
+using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types;
 
@@ -195,8 +196,42 @@ public abstract class CustomObjectParameter<T>(
     public abstract object GetValidUiControl();
 }
 
+[Flags]
+public enum EPayloadType
+{
+    /// <summary>
+    /// Allow the user to select a tile from a tileset.<br/>
+    /// If you want to access the intgrid autotiles, use the <see cref="AutoTile"/>!
+    /// </summary>
+    SimpleTile = 1 << 0,
+    /// <summary>
+    /// Allow the user to select a tiles group from an intgrid autoTile set.<br/>
+    /// If you want to access a specific tile from a tileset, use the <see cref="SimpleTile"/>!
+    /// </summary>
+    AutoTile = 1 << 1,
+    /// <summary>
+    /// Allow the user to select either a simple tile or an autotile<br/>
+    /// This is just a combination of the <see cref="SimpleTile"/> and <see cref="AutoTile"/> flags, but it's provided for convenience.
+    /// </summary>
+    AllTiles = SimpleTile | AutoTile,
+    /// <summary>
+    /// Allow the user to select an object from the object palette.
+    /// </summary>
+    Object = 1 << 2,
+    /// <summary>
+    /// Allow the user to select a character from the character DB.
+    /// </summary>
+    Character = 1 << 3,
+    /// <summary>
+    /// Allow you to define a custom payload type, which can be used to create a custom UI for the payload selection.<br/>
+    /// If you select this option, you must provide a custom UI control for the payload selection by implementing the 
+    /// </summary>
+    Custom = 1 << 4
+}
+
 public abstract class ToolLogic : BaseState
 {
+    public static URN NoHelp = "rpgc".ToUrnNamespace().ToUrnModule("help").ToUrn("no_help_defined");
     protected static UrnSingleModule ToolUrnModule => "tools".ToUrnSingleModule();
     protected static PipedPath GeneralCategory => "General".ToPipedPath();
     protected static PipedPath MapCategory => "Map".ToPipedPath();
@@ -208,18 +243,51 @@ public abstract class ToolLogic : BaseState
     public abstract string Description { get; }
     public abstract string Icon { get; }
     public abstract PipedPath Category { get; }
+    public abstract EPayloadType PayloadType { get; }
+    public virtual URN HelpKey { get; } = NoHelp;
     
     public object? Payload { get; set => SetProperty(ref field, value); }
+    
     public abstract ObservableCollection<IToolParameter> GetParameters();
 
-    public abstract void UseAt(Vector2? absolutePosition = null);
+    /// <summary>
+    /// Return a custom payload UI control for this tool.<br/>
+    /// This is only useful if the PayloadType is set to <see cref="EPayloadType.Custom"/>, otherwise it will be ignored.<br/>
+    /// If you put the PayloadType to Custom, but didn't provide a valid UI control, the editor UI will give an error to the user.
+    /// </summary>
+    /// <returns>
+    /// A valid <b>AVALONIA</b> control!<br/>
+    /// If you return null, or any other type than a valid Avalonia control, the editor UI will give an error to the user when they try to use the tool.
+    /// </returns>
+    // Due to the fact that the SDK should not have a direct reference to Avalonia,
+    // we can't use Avalonia.Controls.Control as the return type of this method, otherwise it would create a hard dependency on Avalonia.
+    public virtual object? GetCustomPayloadUiControl()
+    {
+        return null;
+    }
+    
+    /// <summary>
+    /// Use the tool at the given absolute position.
+    /// </summary>
+    /// <param name="absolutePosition">The position in the world coordinates (pixels), not the map coordinates (tiles).</param>
+    /// <param name="button">The mouse button used to activate the tool. Defaults to MouseButton.Left.</param>
+    public abstract void UseAt(Vector2? absolutePosition = null, MouseButton button = MouseButton.Left);
 
-    public void OnActivate() { }
-    public void OnDeactivate() { }
+    /// <summary>
+    /// When the tool is active and the user moves the mouse inside the viewport, this method will be called with the current absolute position and the delta position since the last call.
+    /// </summary>
+    /// <param name="absolutePosition">The current position of the mouse in the world coordinates (pixels), not the map coordinates (tiles).</param>
+    /// <param name="deltaPosition">The change in position since the last call, in world coordinates (pixels).</param>
+    public virtual void MoveInsideViewport(Vector2 absolutePosition, Vector2 deltaPosition)
+    {
+    }
+
+    public virtual void OnActivate() { }
+    public virtual void OnDeactivate() { }
     
     public Vector2 AbsolutePositionToMapPosition(Vector2 absolutePosition)
     {
-        return RuntimeServices.MapService.WorldToMapCoordinates(absolutePosition);
+        return RuntimeServices.MapService.WorldToMapCoordinates(RuntimeServices.CameraService.ScreenToWorld(absolutePosition));
     }
     
     public override void Reset()
@@ -242,7 +310,8 @@ public class MockupTool : ToolLogic
     public override string Description => "This is a mockup tool used for testing and demonstration purposes.";
     public override string Icon => "mdi-test-tube";
     public override PipedPath Category => GeneralCategory;
-    
+    public override EPayloadType PayloadType => EPayloadType.SimpleTile;
+
     private IntParameter SizeParameter { get; } = new IntParameter(
         "int parameter",
         "int with 10 default, 1 min, 100 max, step 1.",
@@ -303,7 +372,7 @@ public class MockupTool : ToolLogic
         ];
     }
 
-    public override void UseAt(Vector2? absolutePosition = null)
+    public override void UseAt(Vector2? absolutePosition = null, MouseButton button = MouseButton.Left)
     {
         Logger.Debug("Mockup tool used at position: " + absolutePosition);
     }

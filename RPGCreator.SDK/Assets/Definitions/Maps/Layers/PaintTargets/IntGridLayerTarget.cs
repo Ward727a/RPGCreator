@@ -22,6 +22,11 @@ public class IntGridLayerTarget : IPaintTarget
         MapDef = mapDef;
     }
 
+    public bool CanAcceptObject(object objectToPaint)
+    {
+        return objectToPaint is IntGridData;
+    }
+
     public void PaintAt(Vector2 position, object objectToPaint)
     {
         if (objectToPaint is not IntGridData gridData) return;

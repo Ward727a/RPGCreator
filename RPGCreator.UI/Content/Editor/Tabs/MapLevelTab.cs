@@ -33,7 +33,7 @@ using RPGCreator.SDK.Types.Collections;
 
 namespace RPGCreator.UI.Content.Editor.Tabs
 {
-    public class MapLevelTab : UserControl, ITab
+    public class MapLevelTab : UserControl
     {
 
         private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<MapLevelTab>();
@@ -165,7 +165,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
         private void OnLoaded(object? sender, RoutedEventArgs e)
         {
             var project = EngineServices.ProjectsManager.GetCurrentProject();
-
+            _MapList.Children.Clear();
             if (project != null)
             {
                 var maps = EngineServices.AssetsManager.GetAssets<MapDefinition>();
@@ -199,21 +199,6 @@ namespace RPGCreator.UI.Content.Editor.Tabs
         {
             var map = new MapItem(mapDef);
             _MapList.Children.Add(map);
-        }
-        
-        public static TabItem CreateTab(Window host)
-        {
-            // Need to do this to avoid create "multiple" instances...
-            // In fact, even if we don't create multiple instances, it still crashes the application due to creating "multiple" instances of the same control.
-            // Weird issues, but well, this works for now.
-            var tab = new TabItem
-            {
-                Header = "Map/Level"
-            };
-
-            tab.Content = new MapLevelTab();
-
-            return tab;
         }
     }
 }

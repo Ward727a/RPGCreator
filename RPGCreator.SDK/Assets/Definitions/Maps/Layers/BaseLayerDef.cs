@@ -1,4 +1,5 @@
-﻿using RPGCreator.SDK.Serializer;
+﻿using RPGCreator.SDK.Editor;
+using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers;
@@ -21,6 +22,8 @@ public enum RenderingMode
 
 public abstract class BaseLayerDef : BaseAssetDef, ISerializable, IDeserializable
 {
+    public abstract IPaintTarget? GetPaintTarget();
+    public abstract bool CanPaintObject(object? objectToPaint);
     
     /// <summary>
     /// Define whether this layer is a foreground layer or not.<br/>

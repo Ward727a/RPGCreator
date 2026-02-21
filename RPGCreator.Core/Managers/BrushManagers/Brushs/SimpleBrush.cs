@@ -45,33 +45,33 @@ namespace RPGCreator.Core.Managers.BrushManagers.Brushs
 
         public void Draw(Vector2 clickPos)
         {
-            var target = MapEditorContext.GetActivePaintTarget();
+            var target = "null";
             if (target == null)
                 return;
             Guard.IsNotNull(target, nameof(target));
-            object? objectToPaint = MapEditorContext.SelectedObjectToPaint;
-
-            if (objectToPaint == null) return;
-
-            if (Size > 1)
-            {
-                int halfSize = Size / 2;
-                for (int x = -halfSize; x <= halfSize; x++)
-                {
-                    for (int y = -halfSize; y <= halfSize; y++)
-                    {
-                        float gridX = clickPos.X + (x * target.GridWidth);
-                        float gridY = clickPos.Y + (y * target.GridHeight);
-                        var paintPos = new Vector2(gridX, gridY);
-
-                        target.PaintAt(paintPos, objectToPaint);
-                    }
-                }
-            }
-            else
-            {
-                target.PaintAt(clickPos, objectToPaint);
-            }
+            // object? objectToPaint = MapEditorContext.SelectedObjectToPaint;
+            //
+            // if (objectToPaint == null) return;
+            //
+            // if (Size > 1)
+            // {
+            //     int halfSize = Size / 2;
+            //     for (int x = -halfSize; x <= halfSize; x++)
+            //     {
+            //         for (int y = -halfSize; y <= halfSize; y++)
+            //         {
+            //             float gridX = clickPos.X + (x * target.GridWidth);
+            //             float gridY = clickPos.Y + (y * target.GridHeight);
+            //             var paintPos = new Vector2(gridX, gridY);
+            //
+            //             target.PaintAt(paintPos, objectToPaint);
+            //         }
+            //     }
+            // }
+            // else
+            // {
+            //     target.PaintAt(clickPos, objectToPaint);
+            // }
         }
 
         public int GetBrushSize()

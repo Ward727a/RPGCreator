@@ -18,10 +18,12 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
+using CommunityToolkit.Mvvm.Input;
 using LiveMarkdown.Avalonia;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
@@ -59,6 +61,11 @@ public class HelpButton : UserControl
         
         EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.HelpButton, this, new HelpButtonContext(config));
     }
+    
+    public void SetHelpDocsKey(URN newKey)
+    {
+        _helpDocsKey = newKey;
+    }
 
     private void CreateComponent()
     {
@@ -67,7 +74,6 @@ public class HelpButton : UserControl
             Content = "?",
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
-            Margin = new Thickness(5, 0, 0, 0)
         };
     }
 
@@ -131,7 +137,8 @@ public class HelpWindow : UserControl
         
         _markdownViewer = new MarkdownRenderer
         {
-            Margin = new Thickness(10)
+            Margin = new Thickness(10),
+            LinkCommand = new RelayCommand<LinkClickedEventArgs>(OpenLinkCommand)
         };
         _markdownViewer.MarkdownBuilder = mkBuilder;
         mkBuilder.Append(content);
@@ -144,5 +151,50 @@ public class HelpWindow : UserControl
             GetmkBuilder = () => mkBuilder
         };
         EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.HelpButtonHelpWindow, this, new HelpButtonHelpWindowContext(config));
+    }
+
+    private async void OpenLinkCommand(LinkClickedEventArgs? url)
+    {
+        try
+        {
+            if(url == null)
+                EditorUiServices.NotificationService.Error("Invalid link", "The link you clicked is invalid.");
+            else
+            {
+                var urlText = url.HRef?.AbsoluteUri;
+
+                if (urlText == null)
+                {
+                    EditorUiServices.NotificationService.Error("Invalid link", "The link you clicked is invalid.");
+                    return;
+                }
+
+                try
+                {
+                    var confirm = await EditorUiServices.DialogService.ConfirmAsync(
+                        "Open Link",
+                        $"You are about to open the following link in your default web browser:\n\n{urlText}\n\nDo you want to proceed?\n\n(Note: Always be cautious when opening links from unknown sources.)",
+                        new DialogStyle(Width: 600, SizeToContent:DialogSizeToContent.HeightOnly, CanResize:true), confirmButtonText:"Yes, open this link");
+
+                    if (confirm)
+                    {
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = urlText,
+                            UseShellExecute = true
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    EditorUiServices.NotificationService.Error("Failed to open link",
+                        $"An error occurred while trying to open the link: {ex.Message}");
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            EditorUiServices.NotificationService.Error("Failed to open link", $"An error occurred while trying to open the link: {e.Message}");
+        }
     }
 }

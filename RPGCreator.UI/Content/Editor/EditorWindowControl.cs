@@ -45,6 +45,7 @@ using RPGCreator.RTP.Services;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
 using RPGCreator.UI.Common.Bridge;
+using RPGCreator.UI.Content.Editor.LayersListComponents;
 using RPGCreator.UI.Content.Editor.LeftPanel;
 using RPGCreator.UI.Test;
 using Size = System.Drawing.Size;
@@ -199,8 +200,16 @@ namespace RPGCreator.UI.Content.Editor
             };
             LeftPanel.Children.Add(tabControl);
 
-            tabControl.Items.Add(MapLevelTab.CreateTab(_Host));
-            tabControl.Items.Add(MapEditor.CreateTab(_Host));
+            tabControl.Items.Add(new TabItem()
+            {
+                Header = "Maps",
+                Content = new MapLevelTab()
+            });
+            tabControl.Items.Add(new TabItem()
+            {
+                Header = "Layers",
+                Content = new LayersListComponent()
+            });
 
             var separatorLeftPanel0 = new Separator
             {
@@ -253,8 +262,6 @@ namespace RPGCreator.UI.Content.Editor
                 Name = "MonoGameImage",
             };
             monogameGrid.Children.Add(mgImage);
-            _mouseBridge.RegisterEvents(mgImage);
-            _keyboardBridge.RegisterEvents(mgImage);
             
             monogameGrid.Children.Add(new TextBlock()
             {
@@ -270,47 +277,14 @@ namespace RPGCreator.UI.Content.Editor
             // monogameGrid.Children.Add(MonoGameScreen);
         }
 
-        
-        AvaloniaKeyboardBridge _keyboardBridge = new AvaloniaKeyboardBridge();
-        AvaloniaMouseBridge _mouseBridge = new AvaloniaMouseBridge();
+
+        private readonly AvaloniaKeyboardBridge _keyboardBridge = new();
+        private readonly AvaloniaMouseBridge _mouseBridge = new();
         
         private void RegisterEvents()
         {
-            // _keyboardBridge.RegisterEvents(MonoGameScreen);
-            // _mouseBridge.RegisterEvents(MonoGameScreen);
-
-            // MonoGameScreen.PointerPressed += MonoGameScreen_PointerPressed;
-            // MonoGameScreen.PointerReleased += MonoGameScreen_PointerReleased;
-            // MonoGameScreen.PointerMoved += MonoGameScreen_PointerMoved;
-            // MonoGameScreen.PointerExited += MonoGameScreen_PointerExited;
-            // MonoGameScreen.KeyDown += MonoGameScreenOnKeyDown;
-            //
-            // game.OnDraw += (_) =>
-            // {
-            //     var visualPosition = (MonoGameScreen.TransformToVisual(_Host)?.Transform(new Avalonia.Point(0, 0))).GetValueOrDefault();
-            //
-            //     int newWidth = (int)MonoGameScreen.Bounds.Width;
-            //     int newHeight = (int)MonoGameScreen.Bounds.Height;
-            //     var newPos = new Microsoft.Xna.Framework.Point(
-            //         (int)(_Host.Position.X + 8 + 300), 
-            //         (int)(visualPosition.Y + _Host.Position.Y + 1 + _menuBar.Bounds.Height)
-            //     );
-            //
-            //     if (game.GraphicsDevice.PresentationParameters.BackBufferWidth != newWidth || 
-            //         game.GraphicsDevice.PresentationParameters.BackBufferHeight != newHeight)
-            //     {
-            //         game.GraphicsDevice.PresentationParameters.BackBufferWidth = newWidth;
-            //         game.GraphicsDevice.PresentationParameters.BackBufferHeight = newHeight;
-            //         game.Graphics.ApplyChanges();
-            //     }
-            //
-            //     if (game.Window.Position != newPos)
-            //     {
-            //         game.Window.Position = newPos;
-            //     }
-            //     
-            // };
-
+            _mouseBridge.RegisterEvents(mgImage);
+            _keyboardBridge.RegisterEvents(mgImage);
         }
 
         private void MonoGameScreenOnKeyDown(object? sender, KeyEventArgs e)

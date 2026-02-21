@@ -1,6 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Drawing;
+using System.Numerics;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
@@ -21,6 +25,12 @@ public class TilesetExplorer : UserControl
         AutotileOnly,
         NonAutotileOnly
     }
+
+    public enum TileHistoryPosition
+    {
+        Top,
+        Bottom
+    }
     
     public event Action<ITileDef?>? TileSelected;
     public event Action<int>? TilesetChanged;
@@ -28,14 +38,20 @@ public class TilesetExplorer : UserControl
     private TilesetType _type;
     private Size _canvasSize = new Size(256, 256);
     
-    private MoveableCanvas _canvas;
-    private Image _previewImage;
     private Panel _body;
-    private SelectionCursorControl _selectionCursor;
     private ComboBox _setSelector;
+    private MoveableCanvas _canvas;
+    private SelectionCursorControl _selectionCursor;
+    private Image _previewImage;
+    private WrapPanel _tileHistoryPanel;
     private IAssetScope _scope;
 
-    public TilesetExplorer(IAssetScope scope, Panel? parentBody = null, Size? canvasSize = null, int baseSelectedIndex = -1, TilesetType tilesetType = TilesetType.All)
+    public TilesetExplorer(
+        IAssetScope scope, 
+        Panel? parentBody = null, 
+        Size? canvasSize = null, 
+        int baseSelectedIndex = -1, 
+        TilesetType tilesetType = TilesetType.All)
     {
         _scope = scope ?? throw new ArgumentNullException(nameof(scope), "Asset scope cannot be null.");
         _type = tilesetType;
@@ -62,7 +78,6 @@ public class TilesetExplorer : UserControl
 
     private void CreateComponents()
     {
-        
         _setSelector = new ComboBox
         {
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
@@ -132,9 +147,9 @@ public class TilesetExplorer : UserControl
                 var tilesetInstance = EngineServices.GameFactory.CreateInstance<ITilesetInstance>(def);
                 
                 tileToPaint = tilesetInstance.GetTileAt(tilePositionInTileset.X, tilePositionInTileset.Y);
-                Logger.Debug("[TilesetExplorer] Created tile definition at position {0} in tileset {1}", tilePositionInTileset, def.Name);
-                
+                Logger.Debug("[TilesetExplorer] Got tile definition at position {0} in tileset {1}", tilePositionInTileset, def.Name);
                 TileSelected?.Invoke(tileToPaint);
+                
             }
         };
     }
@@ -163,6 +178,30 @@ public class TilesetExplorer : UserControl
         }
         if(_baseSelectedIndex >= 0)
             _setSelector.SelectedIndex = _baseSelectedIndex;
+    }
+    
+    public void SetTilesetType(TilesetType type)
+    {
+        if(_type == type)
+            return;
+        _type = type;
+        ClearTilesetOptions();
+        Logger.Debug("[TilingPanel] Loading tileset options for type {0}...", type);
+        var searchResults = EngineServices.AssetsManager.SearchAllPacks<BaseTilesetDef>();
+        foreach (var result in searchResults)
+        {
+            var def = _scope.Load<BaseTilesetDef>(result.AssetId);
+
+            bool canAutotile = def is IAutotileDef;
+            
+            if (_type == TilesetType.AutotileOnly && !canAutotile)
+                continue;
+            if (_type == TilesetType.NonAutotileOnly && canAutotile)
+                continue;
+            
+            AddTilesetOption(def);
+            Logger.Debug("[TilingPanel] Added tileset option from search: {0}", def.Name);
+        }
     }
     
     private void RegisterEvents()

@@ -49,7 +49,6 @@
     <PackageReference Include="Irihi.Ursa.Themes.Semi" Version="1.14.1" />
     <PackageReference Include="LiveMarkdown.Avalonia" Version="1.7.0" />
     <PackageReference Include="LiveMarkdown.Avalonia.Math" Version="1.7.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
     <PackageReference Include="Projektanker.Icons.Avalonia" Version="9.6.2" />
     <PackageReference Include="Projektanker.Icons.Avalonia.MaterialDesign" Version="9.6.2" />
     <PackageReference Include="Semi.Avalonia" Version="11.3.7.2" />
@@ -68,7 +67,6 @@
     <Folder Include="Assets\Icons\" />
     <Folder Include="Common\AnimEditor\" />
     <Folder Include="Content\AssetsManage\Components\Items\" />
-    <Folder Include="Content\Editor\RightPanel\" />
     <Folder Include="Content\Preferences\Components\General\" />
   </ItemGroup>
 

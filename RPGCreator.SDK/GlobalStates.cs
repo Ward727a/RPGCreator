@@ -29,10 +29,6 @@ public interface IBrushState : IState
 public interface IEditorState : IState
 {
     bool InEditorMode { get; set; }
-    bool InPlacingMode { get; set; }
-    bool InDrawingMode { get; set; }
-    bool ShowCollisionLayer { get; set; }
-    bool ShowEntityLayer { get; set; }
     ITileDef? CurrentTile { get; set; }
 }
 
@@ -203,6 +199,7 @@ public static class GlobalStates
         get => GetState<IKeyboardState>();
         set => RegisterState(value);
     }
+    
     public static IMouseState ViewportMouseState
     {
         get => GetState<IMouseState>("viewport");

@@ -226,6 +226,12 @@ public static class EngineServices
         get => GetService<IFeaturesManager>();
         set => RegisterService(value);
     }
+    
+    public static IToolService ToolService
+    {
+        get => GetService<IToolService>();
+        set => RegisterService(value);
+    }
 
     public static IGlobalPathData GlobalPathData
     {

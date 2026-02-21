@@ -27,12 +27,18 @@ using Avalonia.VisualTree;
 using RPGCreator.Core.Types;
 using RPGCreator.Core.Types.Windows;
 using System;
+using Avalonia.Controls.Documents;
+using Avalonia.Media;
+using Projektanker.Icons.Avalonia;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
+using Ursa.Controls;
+using MenuItem = Avalonia.Controls.MenuItem;
+using NumericUpDown = Avalonia.Controls.NumericUpDown;
 
 namespace RPGCreator.UI.Content.Editor.LayersListComponents
 {
@@ -49,7 +55,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
         #region Components
 
         public StackPanel Body { get; private set; }
-        public NumericUpDown ZIndexSelector { get; private set; }
+        public NumericIntUpDown ZIndexSelector { get; private set; }
         public TextBlock LayerNameText { get; private set; }
 
         #endregion
@@ -71,7 +77,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                 Background = Avalonia.Media.Brushes.Transparent,
             };
 
-            ZIndexSelector = new NumericUpDown
+            ZIndexSelector = new NumericIntUpDown
             {
                 Value = Layer.ZIndex,
                 Minimum = -1000,
@@ -85,27 +91,36 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
             ToolTip.SetTip(ZIndexSelector, "Z-Index of the layer. This determines the rendering order of the layer.\nLayers with a higher Z-Index are rendered on top of layers with a lower Z-Index.");
             Body.Children.Add(ZIndexSelector);
 
-            string LayerTypeText;
+            Run LayerTypeText = new Run()
+            {
+                FontWeight = FontWeight.SemiBold,
+                FontSize = 12,
+            };
 
             switch (Layer)
             {
                 case TileLayerDefinition:
-                    LayerTypeText = "[TL] ";
+                    LayerTypeText.Text = "Tiles layer";
                     break;
                 case AutoLayerDefinition:
-                    LayerTypeText = "[AL] ";
+                    LayerTypeText.Text = "Auto-tiles layer";
                     break;
                 case EntityLayerDefinition:
-                    LayerTypeText = "[EL] ";
+                    LayerTypeText.Text = "Entity layer";
                     break;
                 default:
-                    LayerTypeText = "[??] ";
+                    LayerTypeText.Text = "Unknown layer type";
                     break;
             }
+            
+            Run LayerNameRun = new Run()
+            {
+                Text = $"{Layer.Name}",
+            };
 
             LayerNameText = new TextBlock
             {
-                Text = $"{LayerTypeText} {Layer.Name}",
+                Inlines = new InlineCollection { LayerTypeText, new LineBreak(), LayerNameRun },
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
             };
@@ -160,7 +175,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
 
         #region EventsHandlers
 
-        private void ZIndexSelector_ValueChanged(object? sender, NumericUpDownValueChangedEventArgs e)
+        private void ZIndexSelector_ValueChanged(object? sender, ValueChangedEventArgs<int> e)
         {
             if (Layer != null && e.NewValue.HasValue)
             {

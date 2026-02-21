@@ -108,7 +108,6 @@ namespace RPGCreator.Core
             GlobalStates.EditorState = new EditorState();
             GlobalStates.EditorState.InEditorMode = mode == EEngineMode.EditorMode;
             GlobalStates.ProjectState = new ProjectState();
-            GlobalStates.BrushState = new BrushState();
             GlobalStates.MapState = new MapState();
             GlobalStates.ToolState = new BaseToolState();
             
@@ -207,11 +206,6 @@ namespace RPGCreator.Core
             _logger.Info("Check above for any errors or warnings.");
             
             _logger.Info("EngineCore initialized at {Time}.", args: DateTime.Now);
-
-            // Managers.Projects.CreateProject("test project new config", "C:\\Users\\Ward\\Desktop\\Test");
-            
-            MapEditorContext.Initialize();
-
         }
 
         public static (bool success, Ulid mapId) LoadGameData(IGameData data)
