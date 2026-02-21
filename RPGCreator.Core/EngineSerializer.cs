@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RPGCreator.Core.Serializer;
+using RPGCreator.Core.Serializer.Binder;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Logging;
@@ -43,6 +44,7 @@ public class EngineSerializer : ISerializerService
     private readonly ScopedLogger _logger = Logger.ForContext<EngineSerializer>();
     
     private readonly JsonSerializerSettings _settings;
+    private readonly JsonSerializer _serializer;
     
     public EngineSerializer()
     {
@@ -51,6 +53,7 @@ public class EngineSerializer : ISerializerService
             TypeNameHandling = TypeNameHandling.Auto,
             Formatting = Formatting.Indented,
             NullValueHandling = NullValueHandling.Ignore,
+            SerializationBinder = new AssetTypeBinder(),
             Converters = { 
                 new EngineJsonConverter(),
                 new UlidJsonConverter(),
@@ -60,6 +63,7 @@ public class EngineSerializer : ISerializerService
             PreserveReferencesHandling = PreserveReferencesHandling.Objects,
             DefaultValueHandling = DefaultValueHandling.Ignore
         };
+        _serializer = JsonSerializer.Create(_settings);
     }
     
     public void Serialize<T>(T obj, out string data)
@@ -81,28 +85,25 @@ public class EngineSerializer : ISerializerService
     
     public void Deserialize<T>(string data, out T obj, out Type type)
     {
+        obj = JsonConvert.DeserializeObject<T>(data, _settings)!;
+        type = obj?.GetType() ?? typeof(T);
+    }
 
-        var dataType = GetTypeFromJsonData(data);
-        if(dataType == null && typeof(T) == typeof(object))
-        {
-            _logger.Warning("Could not determine the type from JSON data.");
-            dataType = typeof(object);
-        }
-        
-        // TODO: Check how to determine the actual type BEFORE deserializing with Newtonsoft.Json, as otherwise we are deserializing an object of type 'Object' and not of the actual type.
-        if(JsonConvert.DeserializeObject(data, dataType, _settings) is T deserializedObj)
-        {
-            _logger.Info("Successfully deserialized the object of type {type}.", args: dataType.Name);
-            obj = deserializedObj;
-        }
-        else
-        {
-            _logger.Error("[EngineSerializer.Deserialize] Could not deserialize object of type {DataType}.", args: dataType?.FullName);
-            obj = default!;
-        }
-        type = obj!.GetType();
+    public void Deserialize<T>(Stream stream, out T? obj)
+    {
+        using var sr = new StreamReader(stream);
+        using var reader = new JsonTextReader(sr);
+        obj = _serializer.Deserialize<T>(reader);
     }
     
+    public void Deserialize<T>(Stream stream, out T obj, out Type type)
+    {
+        using var sr = new StreamReader(stream);
+        using var reader = new JsonTextReader(sr);
+        obj = _serializer.Deserialize<T>(reader)!;
+        type = obj?.GetType() ?? typeof(T);
+    }
+
     #region Helpers
 
     private static Type? GetTypeFromJsonData(string data)
@@ -129,6 +130,12 @@ public class EngineSerializer : ISerializerService
             var parts = typeName.Split(',');
             var looseTypeName = $"{parts[0].Trim()}, {parts[1].Trim()}";
             type = Type.GetType(looseTypeName);
+        }
+
+        if (type is GenericBaseAssetStub)
+        {
+            Logger.Error("Failed to resolve type from JSON data: {typeName}, returning GenericBaseAssetStub as fallback.", args: typeName);
+            Logger.Error("Data: {@data}", args: data);
         }
 
         return type;

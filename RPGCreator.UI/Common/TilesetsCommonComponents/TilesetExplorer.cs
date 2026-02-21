@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Numerics;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
@@ -166,8 +168,6 @@ public class TilesetExplorer : UserControl
             ITileDef? tileToPaint = null;
             if (_setSelector?.SelectedItem is SetOptionItem selectedItem)
             {
-                
-                
                 var def = _scope.Load<BaseTilesetDef>(selectedItem.AssetId);
                 
                 var tilePositionInTileset = new Point( // Row and Column in tileset
@@ -192,47 +192,49 @@ public class TilesetExplorer : UserControl
         _canvas.SetGridCellSize(new Size(32, 32));
         ClearTilesetOptions();
         Logger.Debug("[TilingPanel] Loading tileset options...");
-        var searchResults = EngineServices.AssetsManager.SearchAllPacks<BaseTilesetDef>();
-        foreach (var result in searchResults)
+        _ = Task.Run(() =>
         {
-            var def = _scope.Load<BaseTilesetDef>(result.AssetId);
-
-            bool canAutotile = def is IAutotileDef;
+            var searchResults = EngineServices.AssetsManager.GetAssetsOfType<BaseTilesetDef>();
+            foreach (var def in searchResults)
+            {
+                bool canAutotile = def is IAutotileDef;
             
-            if (_type == TilesetType.AutotileOnly && !canAutotile)
-                continue;
-            if (_type == TilesetType.NonAutotileOnly && canAutotile)
-                continue;
+                if (_type == TilesetType.AutotileOnly && !canAutotile)
+                    continue;
+                if (_type == TilesetType.NonAutotileOnly && canAutotile)
+                    continue;
             
-            AddTilesetOption(def);
-            Logger.Debug("[TilingPanel] Added tileset option from search: {0}", def.Name);
-        }
-        if(_baseSelectedIndex >= 0)
-            _setSelector.SelectedIndex = _baseSelectedIndex;
+                Dispatcher.UIThread.Post(()=>AddTilesetOption(def));
+                Logger.Debug("[TilingPanel] Added tileset option from search: {0}", def.Name);
+            }
+            if(_baseSelectedIndex >= 0)
+                _setSelector.SelectedIndex = _baseSelectedIndex;
+        });
     }
     
     public void SetTilesetType(TilesetType type)
     {
-        if(_type == type)
-            return;
-        _type = type;
-        ClearTilesetOptions();
-        Logger.Debug("[TilingPanel] Loading tileset options for type {0}...", type);
-        var searchResults = EngineServices.AssetsManager.SearchAllPacks<BaseTilesetDef>();
-        foreach (var result in searchResults)
+        _ = Task.Run(() =>
         {
-            var def = _scope.Load<BaseTilesetDef>(result.AssetId);
+            if (_type == type)
+                return;
+            _type = type;
+            Dispatcher.UIThread.Post(ClearTilesetOptions);
+            Logger.Debug("[TilingPanel] Loading tileset options for type {0}...", type);
+            var searchResults = EngineServices.AssetsManager.GetAssetsOfType<BaseTilesetDef>();
+            foreach (var result in searchResults)
+            {
+                bool canAutotile = result is IAutotileDef;
 
-            bool canAutotile = def is IAutotileDef;
-            
-            if (_type == TilesetType.AutotileOnly && !canAutotile)
-                continue;
-            if (_type == TilesetType.NonAutotileOnly && canAutotile)
-                continue;
-            
-            AddTilesetOption(def);
-            Logger.Debug("[TilingPanel] Added tileset option from search: {0}", def.Name);
-        }
+                if (_type == TilesetType.AutotileOnly && !canAutotile)
+                    continue;
+                if (_type == TilesetType.NonAutotileOnly && canAutotile)
+                    continue;
+
+                Dispatcher.UIThread.Post(()=>AddTilesetOption(result));
+                Logger.Debug("[TilingPanel] Added tileset option from search: {0}", result.Name);
+            }
+        });
     }
     
     private void RegisterEvents()

@@ -11,9 +11,11 @@ public interface IAssetsPack
 
 
     public List<Ulid> GetWhoPointsToAsset(Ulid assetId);
+    public object LoadAssetDirect(string relativePath);
     public object LoadAsset(Ulid assetId);
     public IEnumerable<IAssetIndexRecord> SearchIndex(Func<IAssetIndexRecord, bool> predicate);
     public IEnumerable<IAssetIndexRecord> SearchIndexByType(Type type);
+    public IEnumerable<T> LoadAssetsByType<T>();
     public void AddOrUpdateAsset(object asset, string relativeFolderPath = "");
     public void RemoveAsset(Ulid assetId);
     public void Dispose();

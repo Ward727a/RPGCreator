@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Graph;
@@ -12,7 +12,7 @@ namespace RPGCreator.SDK.Assets.Definitions.Stats;
 public abstract class BaseStatDefinition : BaseAssetDef, IStatDef
 {
     // Note: We use JsonExtensionData to store any "old" or "extra" data that might be present in the JSON but is not defined in the current version of the class, to avoid losing data when deserializing and re-serializing with a newer version of the class.
-    [JsonExtensionData]
+    [System.Text.Json.Serialization.JsonExtensionData]
     public IDictionary<string, JToken> ExtraData { get; set; }
     public string SavePath { get; set; } = null!;
     public Ulid? PackId { get; set; }
@@ -31,6 +31,12 @@ public abstract class BaseStatDefinition : BaseAssetDef, IStatDef
     public StatCapSettings CapSettings { get; set; }
     public bool IsVisible { get; set; }
 
+    [JsonConstructor]
+    protected BaseStatDefinition(Ulid unique) : this()
+    {
+        Unique = unique;
+    }
+    
     public BaseStatDefinition()
     {
         SuspendTracking();

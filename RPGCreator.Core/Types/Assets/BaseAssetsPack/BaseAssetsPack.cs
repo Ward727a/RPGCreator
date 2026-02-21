@@ -105,6 +105,31 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
         }
     }
 
+    public object LoadAssetDirect(string relativePath)
+    {
+        string fullPath = Path.Combine(RootFolder, relativePath);
+
+        if (!File.Exists(fullPath))
+        {
+            throw new FileNotFoundException("Asset file not found at path " + fullPath);
+        }
+
+        object? loadedAsset = null;
+
+        try
+        {
+            using Stream stream = File.Open(fullPath, FileMode.Open);
+            EngineServices.SerializerService.Deserialize(stream, out loadedAsset);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "[Pack {PackName}] Failed to deserialize asset at path {FilePath}.", Name, fullPath);
+            throw;
+        }
+        
+        return loadedAsset ?? throw new InvalidOperationException("Failed to load asset from file " + fullPath);
+    }
+
     public object LoadAsset(Ulid assetId)
     {
         var db = EngineDB.GetDB(_dbId);
@@ -132,8 +157,8 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
 
         try
         {
-            string fileContent = File.ReadAllText(fullPath);
-            EngineServices.SerializerService.Deserialize(fileContent, out loadedAsset, out System.Type? _);
+            using Stream stream = File.Open(fullPath, FileMode.Open);
+            EngineServices.SerializerService.Deserialize(stream, out loadedAsset);
         }
         catch (Exception ex)
         {
@@ -408,6 +433,36 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
         foreach (var index in allIndexed.Where(predicate))
         {
             yield return index;
+        }
+    }
+    
+    public IEnumerable<T> LoadAssetsByType<T>()
+    {
+        var db = EngineDB.GetDB(_dbId);
+        if (db == null)
+        {
+            yield break;
+        }
+
+        var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
+        
+        var typeName = RegistryServices.AssetTypeRegistry.GetKey(typeof(T)) ?? typeof(T).FullName ?? "Unknown";
+        
+        var allIndexed = indexCollection.Find(Query.EQ("TypeName", typeName));
+
+        foreach (var index in allIndexed)
+        {
+            object loadedAsset = LoadAssetDirect(index.RelativePath);
+            if (loadedAsset is T typedAsset)
+            {
+                yield return typedAsset;
+            }
+            else
+            {
+                Log.Warning(
+                    "[Pack {PackName}] Asset with ID {AssetId} was indexed as type {TypeName} but failed to load as type {ExpectedType}.",
+                    Name, index.Id, index.TypeName, typeof(T).FullName);
+            }
         }
     }
 

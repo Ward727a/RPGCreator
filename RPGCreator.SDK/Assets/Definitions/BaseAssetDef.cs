@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Newtonsoft.Json;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Internals;
@@ -99,6 +100,7 @@ public abstract class BaseAssetDef : IBaseAssetDef
     public bool IsDirty { get; set; }
     public bool IsTransient { get; set; }
 
+    [JsonProperty("Unique")]
     public Ulid Unique { get; protected set; }
 
     public virtual UrnNamespace UrnNamespace => "rpgc".ToUrnNamespace();

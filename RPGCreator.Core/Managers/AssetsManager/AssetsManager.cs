@@ -23,6 +23,7 @@
 // 
 #endregion
 
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using CommunityToolkit.Diagnostics;
 using RPGCreator.Core.Managers.AssetsManager.Factories;
@@ -276,8 +277,14 @@ namespace RPGCreator.Core.Managers.AssetsManager
             {
                 try
                 {
-                    object loadedObject = location.Pack.LoadAsset(uniqueId);
+                    object? loadedObject = location.Pack?.LoadAssetDirect(location.RelativePath);
 
+                    if(loadedObject == null)
+                    {
+                        Logger.Error("Failed to load asset with ID {AssetID} from pack {PackName}: LoadAssetDirect returned null.", args:[uniqueId,
+                            location.Pack.Name]);
+                        return false;
+                    }
                     RegisterAsset(loadedObject);
 
                     if (loadedObject is T typedAsset)
@@ -650,9 +657,20 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 }
             }
         }
+
+        public IEnumerable<T> GetFromAllPacks<T>()
+        {
+            var list = new List<T>();
+            foreach (var pack in _assetsPacks.Values)
+            {
+                list.AddRange(pack.LoadAssetsByType<T>());
+            }
+            return list;
+        }
         
         public IEnumerable<T> GetAssetsOfType<T>() where T : class, IBaseAssetDef, IHasUniqueId
         {
+            Stopwatch stopwatch = Stopwatch.StartNew();
             foreach (var result in SearchAllPacks<T>())
             {
                 if (TryResolveAsset(result.AssetId, out T? asset))
@@ -660,6 +678,8 @@ namespace RPGCreator.Core.Managers.AssetsManager
                     yield return asset;
                 }
             }
+            stopwatch.Stop();
+            Logger.Info("Retrieved all assets of type {AssetType} in {ElapsedMilliseconds} ms", args: [typeof(T).FullName, stopwatch.ElapsedMilliseconds]);
         }
 
         public IEnumerable<T> GetAssetsOfType<T>(T valueForType) where T : class, IBaseAssetDef, IHasUniqueId

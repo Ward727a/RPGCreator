@@ -60,7 +60,7 @@ public class CharacterExplorer : UserControl
     {
         _scope = scope ?? throw new ArgumentNullException(nameof(scope), "Asset scope cannot be null.");
         
-        LoadContent();
+        Dispatcher.UIThread.Post(LoadContent);
         CreateComponents();
         RegisterEvents();
         LinkToExtension();
