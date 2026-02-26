@@ -26,6 +26,11 @@ using Avalonia.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia.Layout;
+using CommunityToolkit.Mvvm.Input;
+using RPGCreator.SDK.Types;
+using RPGCreator.UI.Content.Preferences.Components.Projects;
+using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.Preferences
 {
@@ -34,31 +39,54 @@ namespace RPGCreator.UI.Content.Preferences
 
         #region Components
 
-        public Grid Body { get; private set; }
-        public StackPanel MenuPanel { get; private set; }
-
-        public UserControl SettingsPanel { get; private set; }
+        private Grid Body { get; set; } = null!;
+        private NavMenu MenuPanel { get; set; } = null!;
+        private UserControl SettingsPanel { get; set; } = null!;
 
         #endregion
-
+        
+        // We really need to change that to a more dynamic system.
+        
         // To Add a new settings panel, add it to the _SettingsPanels dictionary with a unique key.
         // If the key contains dots, it will be considered a sub-panel, but it need to be under the same parent entry.
         // For example, "General.Appearance" is a sub-panel of "General", so its just under the "General" entry in the dictionary.
         // If you had "General.Appearance.Color", it would be a sub-panel of "General.Appearance", and should be under the "General.Appearance" entry in the dictionary.
-        private Dictionary<string, UserControl> _SettingsPanels = new()
+        private Dictionary<PipedPath, Control> _settingsPanels = new()
         {
-            ["General"] = new UserControl(), // Replace with actual settings panel
-            ["General.Appearance"] = new UserControl(), // Replace with actual settings panel
-            ["General.Language"] = new UserControl(), // Replace with actual settings panel
-            ["General.Shortcuts"] = new UserControl(), // Replace with actual settings panel
-            //["Graphics"] = new UserControl(), // Replace with actual settings panel
-            //["Audio"] = new UserControl(), // Replace with actual settings panel
-            ["Controls"] = new UserControl() // Replace with actual settings panel
+            { "General".ToPipedPath(), new TextBlock()
+                {
+                    Text = "General settings"
+                }
+            },
+            { "General".ToPipedPath().Extend("Appearance"), new TextBlock()
+                {
+                    Text = "Appearance settings - Coming soon!"
+                }
+            },
+            { "General".ToPipedPath().Extend("Keybinds"), new TextBlock()
+                {
+                    Text = "Keybinds settings - Coming soon!"
+                }
+            },
+            {
+                "Modules".ToPipedPath(), new TextBlock()
+                {
+                    Text = "Modules settings - Coming soon!"
+                }
+            },
+            { "Project".ToPipedPath(), new ProjectSettingsControl()
+                {
+                    VerticalAlignment = VerticalAlignment.Stretch,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                }
+            },
+            { "Editor".ToPipedPath(), new TextBlock()
+                {
+                    Text = "Editor settings - Coming soon!"
+                }
+            }
         };
-        // TODO: Voir pour continuer à bosser sur le système de préférences
-        // Pourquoi pas voir pour passé sur chaque panel, et ajouter / uniformiser les styles ?
-        // Voir pour aussi bosser sur le système de gestion des assets, pour l'instant c'est pas encore fait, mais foudrais voir pour le faire
-        // pour gérer les assets de manière plus simple.
+        
         public PreferencesWindowControl()
         {
             CreateComponents();
@@ -70,61 +98,74 @@ namespace RPGCreator.UI.Content.Preferences
 
         protected void CreateComponents()
         {
-
             Body = new Grid
             {
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-
+                VerticalAlignment = VerticalAlignment.Stretch,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
                 ColumnDefinitions = new ColumnDefinitions("Auto, *"),
-
             };
 
-            MenuPanel = new StackPanel
+            MenuPanel = new NavMenu()
             {
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-                Margin = new Avalonia.Thickness(10)
+                VerticalAlignment = VerticalAlignment.Stretch,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Margin = new Avalonia.Thickness(10),
             };
+            
             Body.Children.Add(MenuPanel);
             Grid.SetColumn(MenuPanel, 0);
+            
+            SettingsPanel = new UserControl
+            {
+                VerticalAlignment = VerticalAlignment.Stretch,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                Margin = new Avalonia.Thickness(10)
+            };
+            Body.Children.Add(SettingsPanel);
+            Grid.SetColumn(SettingsPanel, 1);
 
-            // Initialize components for the preferences window here
-            // This could include settings panels, buttons, etc.
         }
 
         protected void LoadSettingsPanels()
         {
-            foreach (var panel in _SettingsPanels)
-            {
-                // Count the number of dots in the panel name to determine the depth
-                int depth = panel.Key.Count(c => c == '.');
-                // Remove the dots to keep only the last part of the panel name
-                string displayName = panel.Key.Split('.').Last();
-                var button = new Button
-                {
-                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                    Content = displayName,
-                    Margin = new Avalonia.Thickness(20*depth, 4, 0, 4)
-                };
-                button.Click += (sender, e) => ShowSettingsPanel(panel.Key);
-                MenuPanel.Children.Add(button);
-            }
-        }
+            MenuPanel.Items.Clear();
 
-        protected void ShowSettingsPanel(string panelName)
-        {
-            if (_SettingsPanels.TryGetValue(panelName, out var panel))
+            var lastPath = PipedPath.Empty;
+            NavMenuItem? lastButton = null;
+            foreach (var settingsPanel in _settingsPanels.GetSortedByParentsAndBrother())
             {
-                Body.Children.Remove(SettingsPanel); // Remove the previous settings panel
-                SettingsPanel = panel; // Set the new settings panel
-                Body.Children.Add(SettingsPanel); // Add the new settings panel
-                Grid.SetColumn(SettingsPanel, 1); // Set it to the second column
-            }
-            else
-            {
-                throw new ArgumentException($"Settings panel '{panelName}' does not exist.");
+                var path = settingsPanel.path;
+                var control = settingsPanel.item;
+                
+                var button = new NavMenuItem()
+                {
+                    Command = new RelayCommand(() =>
+                    {
+                        SettingsPanel.Content = control;
+                    }),
+                    Header = path.Name,
+                    HorizontalAlignment = HorizontalAlignment.Stretch
+                };
+                
+                if(lastButton != null)
+                {
+                    if (path.IsChildOf(lastPath))
+                    {
+                        lastButton.Items.Add(button);
+                    }
+                    else
+                    {
+                        MenuPanel.Items.Add(button);
+                        lastButton = button;
+                        lastPath = path;
+                    }
+                }
+                else
+                {
+                    MenuPanel.Items.Add(button);
+                    lastButton = button;
+                    lastPath = path;
+                }
             }
         }
 

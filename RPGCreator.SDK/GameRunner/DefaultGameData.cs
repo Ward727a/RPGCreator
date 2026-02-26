@@ -34,6 +34,19 @@ public class DefaultGameData : IGameData
     public IReadOnlyList<string> AcceptedModuleHashes => _modulesHashes;
     public Ulid MainMapId { get; private set; } = Ulid.Empty;
 
+    public void SetProjectPath(string projectPath)
+    {
+        ProjectPath = projectPath;
+    }
+    public void SetModulesHashes(List<string> modulesHashes)
+    {
+        _modulesHashes = modulesHashes;
+    }
+    public void SetMainMapId(Ulid mainMapId)
+    {
+        MainMapId = mainMapId;
+    }
+    
     public SerializationInfo GetObjectData()
     {
         var info = new SerializationInfo(typeof(DefaultGameData))

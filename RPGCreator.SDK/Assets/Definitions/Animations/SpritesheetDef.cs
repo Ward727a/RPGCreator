@@ -1,11 +1,14 @@
 using System.Numerics;
+using System.Runtime.Serialization;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Helpers;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Internals;
+using ISerializable = RPGCreator.SDK.Serializer.ISerializable;
 using Rectangle = System.Drawing.Rectangle;
+using SerializationInfo = RPGCreator.SDK.Serializer.SerializationInfo;
 
 namespace RPGCreator.SDK.Assets.Definitions.Animations;
 
@@ -33,8 +36,19 @@ public class SpritesheetDef : BaseAssetDef, ISerializable, IDeserializable, IHas
         Unique = Ulid.NewUlid();
     }
 
+    [OnDeserialized]
+    internal void OnDeserializedMethod(StreamingContext context)
+    {
+        CalculateValues();
+    }
+
     public Rectangle GetFrameRect(int index)
     {
+        if(_frames == null || _frames.Length == 0)
+        {
+            Logger.Error("SpritesheetDef {unique} {Urn} has no frames defined. Returning empty rectangle.", Unique, Urn);
+            return Rectangle.Empty;
+        }
         if (index < 0 || index >= _frames.Length) return _frames[0];
         return _frames[index];
     }
@@ -82,6 +96,7 @@ public class SpritesheetDef : BaseAssetDef, ISerializable, IDeserializable, IHas
         info.TryGetValue("FrameHeight", out int frameHeight, 0);
         FrameHeight = frameHeight;
 
+        Logger.Debug("Deserialized SpritesheetDef: {Unique}({Urn}) | ImagePath: {ImagePath}, ImageWidth: {ImageWidth}, ImageHeight: {ImageHeight}, FrameWidth: {FrameWidth}, FrameHeight: {FrameHeight}", Unique, Urn, ImagePath, ImageWidth, ImageHeight, FrameWidth, FrameHeight);
         CalculateValues();
     }
 
@@ -90,7 +105,7 @@ public class SpritesheetDef : BaseAssetDef, ISerializable, IDeserializable, IHas
     /// </summary>
     public void CalculateValues()
     {
-        if (!string.IsNullOrEmpty(ImagePath) && (ImageWidth <= 0 || ImageHeight <= 0))
+        if (!string.IsNullOrEmpty(ImagePath) && (ImageWidth <= 0 && ImageHeight <= 0))
         {
             TryResolveDimensions();
         }
@@ -104,6 +119,7 @@ public class SpritesheetDef : BaseAssetDef, ISerializable, IDeserializable, IHas
         {
             _frames[i] = new Rectangle((i % Columns) * FrameWidth, (i / Columns) * FrameHeight, FrameWidth, FrameHeight);
         }
+        Logger.Debug("Calculated SpritesheetDef values for {Unique}({Urn}): FeetOrigin={FeetOrigin}, Columns={Columns}, Rows={Rows}, TotalFrames={TotalFrames}", Unique, Urn, FeetOrigin, Columns, Rows, _frames.Length);
     }
 
     public void TryResolveDimensions()
@@ -116,6 +132,7 @@ public class SpritesheetDef : BaseAssetDef, ISerializable, IDeserializable, IHas
                 
             ImageWidth = info.Width;
             ImageHeight = info.Height;
+            Logger.Debug("Resolved image dimensions for SpritesheetDef: {Urn} ({path}) | Width: {width}, Height: {height}", Urn, ImagePath, ImageWidth, ImageHeight);
             
         } catch (Exception ex)
         {

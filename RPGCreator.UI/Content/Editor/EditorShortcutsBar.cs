@@ -49,7 +49,7 @@ public class EditorShortcutsBar : UserControl
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
             RowDefinitions = new RowDefinitions("*"),
-            ColumnDefinitions = new ColumnDefinitions("*"),
+            ColumnDefinitions = new ColumnDefinitions("*, Auto"),
         };
         this.Content = _body;
         _scroll = new ScrollViewer()
@@ -68,6 +68,10 @@ public class EditorShortcutsBar : UserControl
             Spacing = 4
         };
         _scroll.Content = _menuPanel;
+
+        var playButtons = new PlayButtonsBar(){};
+        _body.Children.Add(playButtons);
+        Grid.SetColumn(playButtons, 1);
         
         AddCustomButton("Add custom shortcut","Add a custom shortcut to the bar.","mdi-plus",
             () => { Logger.Info("Add custom shortcut clicked."); }

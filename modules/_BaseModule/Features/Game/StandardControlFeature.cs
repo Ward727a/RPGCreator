@@ -36,7 +36,7 @@ namespace _BaseModule.Features.Game;
 [GameFeature]
 public class StandardControlFeature : BaseGameFeature
 {
-    public override int FeaturePriority { get; } = 100;
+    public override int FeaturePriority { get; } = 10;
     public override string FeatureName => "Standard Player Control";
     public override string FeatureDescription => "Allows the controlled entity to be moved by the player with the keyboard.\n" +
                                                  "All controls can be reconfigured in the input settings in the editor parameters.";
@@ -156,7 +156,7 @@ public class StandardControlFeature : BaseGameFeature
 
 public class StandardControlSystem : ISystem
 {
-    public override int Priority => 200;
+    public override int Priority => 10;
     public override bool IsDrawingSystem => false;
     
     ComponentManager _componentManager;

@@ -63,13 +63,13 @@ public class EntityManager(ComponentManager componentManager)
     public IEntity CreateCameraEntity()
     {
         var entity = CreateEntityInternal();
-        entity.AddComponent<TransformComponent>();
+        ref var transformComponent = ref entity.AddComponent<TransformComponent>();
         ref var cameraComponent = ref entity.AddComponent<CameraComponent>();
         
         cameraComponent.Zoom = 1.0f;
         cameraComponent.ViewportSize = new(800, 600);
         cameraComponent.IsFollowingEntity = false;
-        cameraComponent.Position = new(0, 0);
+        transformComponent.Position = new(0, 0);
         cameraComponent.Rotation = 0.0f;
         
         return entity;

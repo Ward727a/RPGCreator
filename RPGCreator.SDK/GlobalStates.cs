@@ -98,6 +98,13 @@ public class GlobalStatesProvider
     }
 }
 
+
+public enum EEngineMode
+{
+    Player,
+    Editor
+}
+
 public static class GlobalStates
 {
     private static readonly GlobalStatesProvider StateProvider = new();
@@ -159,6 +166,7 @@ public static class GlobalStates
     public static string ApplicationName => "RPG Creator";
     public static TimeSpan ElapsedTime { get; set; }
     public static TimeSpan TotalTime { get; set; }
+    public static EEngineMode EngineMode { get; set; } = EEngineMode.Editor;
     
     /// <summary>
     /// The current version of the engine.
@@ -217,4 +225,10 @@ public static class GlobalStates
         get => GetState(defaultInstance: field);
         set => RegisterState(value);
     } = new BaseToolState();
+    
+    public static IGamePlayerState GamePlayerState
+    {
+        get => GetState(defaultInstance: field);
+        set => RegisterState(value);
+    }
 }

@@ -21,6 +21,8 @@ using RPGCreator.RTP;
 
 namespace RPGCreator.UI.Test;
 
+// Code from 'AvaloniaInside.MonoGame' package, slightly modified to work with a multi-viewport system.
+
 public sealed class MonoGameControlTest : Control
 {
   public static readonly DirectProperty<MonoGameControlTest, IBrush> FallbackBackgroundProperty = AvaloniaProperty.RegisterDirect<MonoGameControlTest, IBrush>(nameof (FallbackBackground), (Func<MonoGameControlTest, IBrush>) (o => o.FallbackBackground), (Action<MonoGameControlTest, IBrush>) ((o, v) => o.FallbackBackground = v));

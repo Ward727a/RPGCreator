@@ -20,13 +20,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Numerics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using RPGCreator.Core.Types.Map.Chunks;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Types;
 using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.Player.Services;
@@ -159,19 +159,10 @@ public partial class ChunkService : ObservableObject, IChunkService
         IsLoadFrozen = false;
     }
     
-    private (Vector2 lastCamPosition, float lastCamZoom, Size viewPortSize) _lastCameraState;
-    private (long minX, long maxX, long minY, long maxY) _lastCameraChunkBounds;
     
     public (long minX, long maxX, long minY, long maxY) GetVisibleChunkBounds(int padding = 1)
     {
         var camera = RuntimeServices.CameraService;
-        
-        if(_lastCameraState == (camera.Position, camera.ZoomLevel, camera.ViewportSize))
-        {
-            return _lastCameraChunkBounds;
-        }
-        Logger.Debug("Calculating visible chunk bounds for camera at position {Position} with zoom {Zoom} and viewport {Viewport}", 
-            args: [camera.Position, camera.ZoomLevel, camera.ViewportSize]);
     
         // Taille d'un chunk en pixels (ex: 32 * 32 = 1024)
         float chunkPx = LayerChunk.ChunkSize * _chunkTileSize.Width;
@@ -192,8 +183,6 @@ public partial class ChunkService : ObservableObject, IChunkService
         long minY = (long)Math.Floor(top / chunkPx) - padding;
         long maxY = (long)Math.Floor(bottom / chunkPx) + padding;
 
-        _lastCameraState = (camera.Position, camera.ZoomLevel, camera.ViewportSize);
-        _lastCameraChunkBounds = (minX, maxX, minY, maxY);
         return (minX, maxX, minY, maxY);
     }
 
@@ -206,7 +195,7 @@ public partial class ChunkService : ObservableObject, IChunkService
             RuntimeServices.RenderService.DrawDebugRect(
                 chunkWorldPosition,
                 ChunkSizeInPixels,
-                Color.IndianRed
+                Color.Red
             );
             
         }
@@ -214,7 +203,7 @@ public partial class ChunkService : ObservableObject, IChunkService
 
     public void DebugDrawChunkItemsGrid()
     {
-        var gridColor = Color.FromArgb(100, Color.DarkOliveGreen);
+        var gridColor = Color.Green * 0.5f;
         var render = RuntimeServices.RenderService;
 
         foreach (var chunkId in ActiveChunks)

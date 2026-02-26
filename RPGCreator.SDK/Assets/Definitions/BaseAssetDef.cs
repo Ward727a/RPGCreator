@@ -82,12 +82,14 @@ public abstract class BaseObservableAssetDef : ObservableObject, IBaseAssetDef
     {
         if (Unique != Ulid.Empty) return;
         Unique = id;
+        UpdateUrn();
     }
 }
 
 public abstract class BaseAssetDef : IBaseAssetDef
 {
     private bool _isTrackingActivated;
+    [JsonProperty("Name")]
     public string Name
     {
         get;
@@ -119,7 +121,7 @@ public abstract class BaseAssetDef : IBaseAssetDef
 
     public void UpdateUrn()
     {
-        if (!_isTrackingActivated || string.IsNullOrWhiteSpace(Name)) return;
+        if (string.IsNullOrWhiteSpace(Name)) return;
         var urn = UrnNamespace.ToUrnModule(UrnModule).ToUrn($"{Name}");
         
         if(Urn == urn) return;

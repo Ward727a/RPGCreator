@@ -23,20 +23,16 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using RPGCreator.Core.Types.Map.Chunks;
-using RPGCreator.Player.Extensions;
+using RPGCreator.Player.MethodsExtension;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
-using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.ECS;
-using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Systems;
 using RPGCreator.SDK.RuntimeService;
-using ToolsUtilitiesStandard.Helpers;
-using Vector2 = System.Numerics.Vector2;
 
 namespace RPGCreator.Player.ECS.Systems;
 
@@ -132,7 +128,7 @@ public class MapDrawingSystem() : BaseMapDrawingSystem
     private void DrawChunkTiles(long chunkId, LayerWithElements<ITileDef> layer)
     {
         var chunkElements = layer.GetElements(chunkId);
-        if (chunkElements == null)
+        if (chunkElements.IsEmpty)
             return;
         
         if(chunkElements.IsEmpty)
@@ -161,7 +157,7 @@ public class MapDrawingSystem() : BaseMapDrawingSystem
             {
                 var chunkId = LayerChunk.GetChunkId(x, y);
                 var elements = tileLayer.GetElements(chunkId);
-                if (elements == null || elements.IsEmpty) continue;
+                if (elements.IsEmpty) continue;
 
                 for (int i = 0; i < elements.Length; i++)
                 {
@@ -170,15 +166,14 @@ public class MapDrawingSystem() : BaseMapDrawingSystem
 
                     var worldPos = tileLayer.GetElementWorldPosition(chunkId, i);
                 
-                    // UX : On trie par le BAS de la tuile pour que le perso passe derrière
                     float sortY = worldPos.Y + tile.SizeInTileset.Height;
 
                     RuntimeServices.RenderService.SubmitToQueue(new RenderCommand
                     {
-                        TexturePath = tile.TilesetDef.ImagePath, // Supposant que ITileDef a accès au tileset
+                        TexturePath = tile.TilesetDef.ImagePath,
                         Position = worldPos,
                         SourceRect = RuntimeServices.RenderService.GetTileSourceRect(tile),
-                        Color = (Color.White * layer.Opacity).ToSystemFast(),
+                        Color = (Color.White * layer.Opacity).ToRpgColor(),
                         SortY = sortY
                     });
                 }

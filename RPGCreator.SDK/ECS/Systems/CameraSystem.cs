@@ -19,6 +19,7 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using RPGCreator.SDK.ECS.Components;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
 using RPGCreator.SDK.Types;
 
@@ -26,7 +27,7 @@ namespace RPGCreator.SDK.ECS.Systems;
 
 public class CameraSystem : ISystem
 {
-    public override int Priority => 50;
+    public override int Priority => 2147483010;
     public override bool IsDrawingSystem => false;
     
     private ICameraService _cameraService;
@@ -60,7 +61,7 @@ public class CameraSystem : ISystem
         
         if(cameraEntityId == -1) return;
         
-        if(_componentManager.HasComponent<CameraComponent, TransformComponent>(cameraEntityId))
+        if(!_componentManager.HasComponent<CameraComponent, TransformComponent>(cameraEntityId))
             return;
         
         ref var cameraData = ref _componentManager.GetComponent<CameraComponent>(cameraEntityId);

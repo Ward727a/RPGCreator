@@ -106,7 +106,7 @@ public struct AnimationComponent : IComponent
 
 public class AnimationSystem(int animationStateIdx, int animationDirStateIdx) : ISystem
 {
-    public override int Priority => 80;
+    public override int Priority => 200;
     public override bool IsDrawingSystem => false;
     
     private int _animationStateIdx = animationStateIdx;

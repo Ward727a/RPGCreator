@@ -132,6 +132,7 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
 
     public object LoadAsset(Ulid assetId)
     {
+        Logger.Debug("[Pack {PackName}] Attempting to load asset with ID {AssetId}.", Name, assetId);
         var db = EngineDB.GetDB(_dbId);
         if (db == null)
         {
@@ -330,6 +331,9 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
                 Name, asset.GetType().FullName, idAsset.Unique);
         }
 
+        if (GlobalStates.EngineMode == EEngineMode.Player)
+            return;
+        
         indexCollection.Upsert(record);
 
         if(asset is ISerializable serializableAssetRef and IHasUniqueId)
@@ -469,28 +473,17 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
     public IEnumerable<IAssetIndexRecord> SearchIndexByType(Type type)
     {
         var db = EngineDB.GetDB(_dbId);
-        if (db == null)
-        {
-            yield break;
-        }
+        if (db == null) return Enumerable.Empty<EngineDB.AssetIndexRecord>();
 
         var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
-        
         var validNames = Common.TypeUtil.GetInheritance(type);
-        
-        var queries = validNames.Select(name => Query.EQ("TypeName", name));
-        if(queries.Count() == 0)
-        {
-            yield break;
-        }
-        var finalQuery = Query.Or(queries.ToArray());
+    
+        var queries = validNames.Select(name => Query.EQ("TypeName", name)).ToArray();
+        if(queries.Length == 0) return Enumerable.Empty<EngineDB.AssetIndexRecord>();
 
-        var allIndexed = indexCollection.Find(finalQuery);
-        
-        foreach (var index in allIndexed)
-        {
-            yield return index;
-        }
+        var finalQuery = Query.Or(queries);
+
+        return indexCollection.Find(finalQuery).ToList();
     }
 
     public void Dispose()

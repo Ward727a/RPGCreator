@@ -96,8 +96,7 @@ public static class EngineServices
 {
     private static readonly EngineServicesProvider ServiceProvider = new();
     private static readonly Dictionary<Type, List<Action<IService>>> ServiceReadyCallbacks = new();
-    private static readonly object ServiceReadyLock = new object();
-
+    private static readonly Lock ServiceReadyLock = new Lock();
     
     // ReSharper disable MemberCanBePrivate.Global
     public static void RegisterService<T>(T service, string groupName) where T : class, IService
@@ -242,6 +241,12 @@ public static class EngineServices
     public static IGlobalContextProvider GlobalContextProvider
     {
         get => GetService<IGlobalContextProvider>();
+        set => RegisterService(value);
+    }
+
+    public static IGamePlayerService GamePlayerService
+    {
+        get => GetService<IGamePlayerService>();
         set => RegisterService(value);
     }
 

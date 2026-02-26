@@ -2,21 +2,18 @@
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using Gum.Forms;
-using Gum.Forms.Controls;
-using Gum.Forms.DefaultVisuals;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using MonoGameGum;
-using MonoGameGum.GueDeriving;
 using RPGCreator.Core;
+using RPGCreator.Core.Types.Project;
 using RPGCreator.Player.ECS.Systems;
 using RPGCreator.Player.Services;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.ECS.Systems;
 using RPGCreator.SDK.Exceptions;
 using RPGCreator.SDK.GameRunner;
 using RPGCreator.SDK.Inputs;
@@ -30,8 +27,7 @@ namespace RPGCreator.Player;
 public class GamePlayer : Game, IGameRunner
 {
     private GraphicsDeviceManager _graphics;
-    private SpriteBatch _spriteBatch;
-    GumService Gum = GumService.Default;
+    private SpriteBatch _spriteBatch = null!;
 
     public enum GameFrom
     {
@@ -50,13 +46,14 @@ public class GamePlayer : Game, IGameRunner
     GameFrom _gameFrom;
     GameState _gameState;
 
-    string _gameFilePath;
-    IGameData _gameData;
+    string _gameFilePath = null!;
+    bool _fromArgs = false;
+    IGameData _gameData = null!;
     
     public GamePlayer()
     {
 
-        EngineCore.InitCore(EngineCore.EEngineMode.PlayerMode);
+        EngineCore.InitCore(EEngineMode.Player);
         
         
         _graphics = new GraphicsDeviceManager(this);
@@ -65,12 +62,10 @@ public class GamePlayer : Game, IGameRunner
         IsMouseVisible = true;
     }
     
-    private TextRuntime _healthTextInstance;
 
     protected override void Initialize()
     {
         // TODO: Add your initialization logic here
-        Gum.Initialize(this, DefaultVisualsVersion.V2);
         OnInitialize?.Invoke();
         
         logger.Info("Starting RPG Creator Player...");
@@ -92,11 +87,11 @@ public class GamePlayer : Game, IGameRunner
         {
             _gameFrom = GameFrom.Args;
             
-            // Check if we have the '--file' argument
+            // Check if we have the '--project' argument
             var args = Environment.GetCommandLineArgs();
             for (int i = 0; i < args.Length; i++)
             {
-                if (args[i] == "--file" && i + 1 < args.Length)
+                if (args[i] == "--project" && i + 1 < args.Length)
                 {
                     logger.Info("Game source from command line arguments.");
                     string filePath = args[i + 1];
@@ -105,10 +100,12 @@ public class GamePlayer : Game, IGameRunner
                     if (System.IO.Path.GetExtension(filePath).Equals(".xml", StringComparison.OrdinalIgnoreCase))
                     {
                         _gameFilePath = filePath;
+                        _fromArgs = true;
                     }
                     else
                     {
-                        logger.Error("Game source from file path doesn't match expected format.");    
+                        logger.Error("Game source from file path doesn't match expected format.");
+                        logger.Error("Provided file path: {FilePath}", args: filePath);
                         throw new("Error: The specified file is not a valid .xml file.");
                     }
                     
@@ -133,7 +130,14 @@ public class GamePlayer : Game, IGameRunner
             var data = File.ReadAllText(_gameFilePath);
             try
             {
-                EngineServices.SerializerService.Deserialize(data, out DefaultGameData gameData);
+                EngineServices.SerializerService.Deserialize(data, out DefaultGameData? gameData);
+
+                if (gameData == null)
+                {
+                    logger.Error("Failed to deserialize GameData.json: Deserialized data is null.");
+                    throw new("Error: Failed to load game data from GameData.json.");
+                }
+                
                 _gameData = gameData;
             }
             catch (Exception ex)
@@ -142,37 +146,36 @@ public class GamePlayer : Game, IGameRunner
                 throw new("Error: Failed to load game data from GameData.json.", ex);
             }
         }
-        
-        Gum.Root.Width = _graphics.GraphicsDevice.Viewport.Width;
-        Gum.Root.Height = _graphics.GraphicsDevice.Viewport.Height;
-        // Create base GumUI Panel
-        var mainPanel = new Panel(Gum.Root);
-        
-        var startButton = new Button()
-        {
-            Text = "Start Game",
-            Width = 200,
-            Height = 50,
-            X = (Gum.Root.Width - 200) / 2,
-            Y = (Gum.Root.Height - 50) / 2,
-        };
-        startButton.Click += (_, _) =>
-        {
-            RuntimeServices.OnceServiceReady((IGameSession gameSession) =>
-            {
-                gameSession.IsPaused = false;
-                startButton.IsVisible = false;
-            });
-        };
 
-        _healthTextInstance = new TextRuntime()
+        if (_fromArgs)
         {
-            Text = "Health: 100",
-            X = 10,
-            Y = 10,
-        };
-        mainPanel.AddChild(_healthTextInstance);
-        mainPanel.AddChild(startButton);
+            var projectData = File.ReadAllText(_gameFilePath);
+            try
+            {
+                EngineServices.SerializerService.Deserialize(projectData, out BaseProject? project);
+                if (project == null)
+                {
+                    logger.Error("Failed to deserialize project file: Deserialized data is null.");
+                    throw new("Error: Failed to load game data from specified project file.");
+                }
+
+                var data = new DefaultGameData();
+                data.SetProjectPath(_gameFilePath);
+                data.SetModulesHashes(project.Modules);
+                data.SetMainMapId(project.MainMapId);
+                _gameData = data;
+            }
+            catch (Exception ex)
+            {
+                logger.Critical("Failed to deserialize project file: {Message}", args: ex.Message);
+                throw new("Error: Failed to load game data from specified project file.", ex);
+            }
+        }
+
+        RuntimeServices.OnceServiceReady((IGameSession gameSession) =>
+        {
+            gameSession.IsPaused = false;
+        });
         
         EngineServices.ResourcesService.RegisterLoader<Texture2D>(new Texture2DLoader(GraphicsDevice));
         
@@ -205,10 +208,11 @@ public class GamePlayer : Game, IGameRunner
             }
         };
         _spriteBatch = new SpriteBatch(GraphicsDevice);
+        
         RuntimeServices.LayerService = new LayerService();
         RuntimeServices.ChunkService = new ChunkService();
-        RuntimeServices.CameraService = new CameraService();
-        RuntimeServices.RenderService = new RenderService(_spriteBatch);
+        RuntimeServices.CameraService = new CameraService(_graphics);
+        RuntimeServices.RenderService = new RenderService(GraphicsDevice, _spriteBatch);
         RuntimeServices.PlayerController = new BasePlayerController();
         RuntimeServices.GameSession = new DefaultGameSession();
 
@@ -220,29 +224,18 @@ public class GamePlayer : Game, IGameRunner
         var cameraEntity = RuntimeServices.GameSession.ActiveEcsWorld.EntityManager.CreateCameraEntity();
         RuntimeServices.CameraService.SetCameraEntity(cameraEntity.Id);
         
+        RuntimeServices.GameSession.ActiveEcsWorld.SystemManager.AddSystem(new CameraSystem());
         RuntimeServices.GameSession.ActiveEcsWorld.SystemManager.AddSystem(new MapDrawingSystem());
         ((RenderService)RuntimeServices.RenderService).AddSystemToWorld(RuntimeServices.GameSession.ActiveEcsWorld);
         RuntimeServices.GameSession.ActiveEcsWorld.SystemManager.AddSystem(new MapForegroundSystem());
 
         
-        
         new BaseSubscriber(new URN("rpgc", "events", "on_stat_changed"), 0,
         @event =>
         {
             var statId = @event.Data.GetAsOrDefault("statDefId", Ulid.Empty);
-            var statFinalValue = @event.Data.GetAsOrDefault("finalValue", 0d);
-            var statActualValue = @event.Data.GetAsOrDefault("actualValue", 0d);
-            var statDef = EngineServices.AssetsManager.TryResolveAsset(statId, out BaseStatDefinition? StatDef) ? StatDef : null;
-            if (statDef != null && statDef.Name == "Health")
-            {
-                _healthTextInstance.Text =
-                    $"Stat: (Health) {statActualValue} / {statFinalValue}";
-                Logger.Debug("Received stat changed event: stat new value: {Value}", args:
-                [
-                    @event.Data.GetAsOrDefault<double>("value", 0d).ToString(CultureInfo.InvariantCulture)
-                ]);
-            }
         }).Subscribe();
+            _worldRenderTarget = new RenderTarget2D(GraphicsDevice, 400, 225);
         
         base.Initialize();
     }
@@ -267,7 +260,6 @@ public class GamePlayer : Game, IGameRunner
             sdkKeys[i] = (KeyboardKeys)(int)pressedKeys[i];
         }
 
-        // On crée la donnée brute
         var rawData = new RawKeyboardData(
             sdkKeys, 
             mgState.CapsLock, 
@@ -298,6 +290,16 @@ public class GamePlayer : Game, IGameRunner
         {
             _accumulatedTime = 0;
             RuntimeServices.GameSession.ActiveEcsWorld?.EventBus.Publish(new URN("rpgc", "events", "test"));
+            if (RuntimeServices.GameSession.CurrentPlayerId != -1)
+            {
+                RuntimeServices.CameraService.LinkToEntity(RuntimeServices.GameSession.CurrentPlayerId);
+                logger.Info("Player entity found with ID {PlayerId}. Camera linked to player.", args: RuntimeServices.GameSession.CurrentPlayerId);
+            }
+            else
+            {
+                if(!RuntimeServices.CameraService.IsLinkedToEntity)
+                    logger.Warning("No player entity found in the loaded game data. The game may not function correctly without a player entity.");
+            }
             
         }
         
@@ -305,25 +307,26 @@ public class GamePlayer : Game, IGameRunner
         EngineServices.InputsService.Update();
         
         RuntimeServices.GameSession.ActiveEcsWorld?.Update(gameTime.ElapsedGameTime);
-        Gum.Update(gameTime);
         
         EngineServices.InputsService.ResetInputAxis();
         RuntimeServices.GameSession.ActiveEcsWorld?.EventBus.TickEndOfFrame();
         base.Update(gameTime);
     }
 
+    private RenderTarget2D _worldRenderTarget = null!;
+    
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
         OnDraw?.Invoke(gameTime.ElapsedGameTime);
 
         RuntimeServices.GameSession.ActiveEcsWorld.Draw(gameTime.ElapsedGameTime);
-        Gum.Draw();
+        
         base.Draw(gameTime);
     }
 
-    public event Action OnInitialize;
-    public event Action OnLoad;
-    public event Action<TimeSpan> OnUpdate;
-    public event Action<TimeSpan> OnDraw;
+    public event Action OnInitialize = null!;
+    public event Action OnLoad = null!;
+    public event Action<TimeSpan> OnUpdate = null!;
+    public event Action<TimeSpan> OnDraw = null!;
 }

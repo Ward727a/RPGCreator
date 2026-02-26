@@ -24,7 +24,7 @@ using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.SDK;
 using RPGCreator.SDK.ECS.Systems;
 
-namespace RPGCreator.Player.Extensions;
+namespace RPGCreator.Player.MethodsExtension;
 
 public static class SystemManagerExtensions
 {
@@ -37,7 +37,7 @@ public static class SystemManagerExtensions
             BlendState.AlphaBlend, 
             SamplerState.PointClamp, 
             DepthStencilState.None, 
-            RasterizerState.CullNone, // Force le rendu même si MonoGame hésite
+            RasterizerState.CullNone,
             null, 
             transformMatrix: RuntimeServices.CameraService.GetViewMatrix().ToXnaFast()
         );
@@ -46,8 +46,8 @@ public static class SystemManagerExtensions
             drawingSystem.Update(deltaTime);
         }
         var render = RuntimeServices.RenderService;
-        render.DrawDebugLine(new System.Numerics.Vector2(-10000, 0), new System.Numerics.Vector2(10000, 0), 2f, Color.Red.ToSystemFast());
-        render.DrawDebugLine(new System.Numerics.Vector2(0, -10000), new Vector2(0, 10000).ToNumerics(), 2f, Color.Green.ToSystemFast());
+        render.DrawDebugLine(new System.Numerics.Vector2(-10000, 0), new System.Numerics.Vector2(10000, 0), 2f, SDK.Types.Color.Red);
+        render.DrawDebugLine(new System.Numerics.Vector2(0, -10000), new Vector2(0, 10000).ToNumerics(), 2f, SDK.Types.Color.Green);
         
         spriteBatch.End();
     }

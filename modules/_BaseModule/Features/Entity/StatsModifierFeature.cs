@@ -133,7 +133,7 @@ public class StatsModifierSystem : ISystem
     
     private long _nextModifierInstanceId; // Used to assign unique instance IDs to modifiers inside the slabs, this is used to track modifiers for expiration and removal.
     
-    public override int Priority => 90; // Before the Stats System, which is at 100, to ensure that the modifiers are applied before the stats are calculated.
+    public override int Priority => 20; // Before the Stats System, which is at 30, to ensure that the modifiers are applied before the stats are calculated.
     public override bool IsDrawingSystem => false;
 
     // Initial capacity of 20 modifiers BY stats BY entity, it will automatically resize if needed

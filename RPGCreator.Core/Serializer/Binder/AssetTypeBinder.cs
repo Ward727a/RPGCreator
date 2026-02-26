@@ -28,7 +28,8 @@ namespace RPGCreator.Core.Serializer.Binder;
 public class AssetTypeBinder : ISerializationBinder
 {
     public Type BindToType(string? assemblyName, string typeName)
-    {var assetType = RegistryServices.AssetTypeRegistry.GetType(typeName);
+    {
+        var assetType = RegistryServices.AssetTypeRegistry.GetType(typeName);
     
         if (assetType != null && assetType != typeof(GenericBaseAssetStub))
         {
@@ -42,6 +43,8 @@ public class AssetTypeBinder : ISerializationBinder
             return systemType;
         }
 
+        EditorUiServices.NotificationService.Error("Error while loading asset!",
+            $"Unknown asset type: {typeName}, using GenericAssetStub as fallback.");
         return typeof(GenericBaseAssetStub);
     }
 

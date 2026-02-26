@@ -34,6 +34,7 @@ using RPGCreator.Core.Parser.Graph;
 using RPGCreator.Core.Parser.PRATT;
 using RPGCreator.Core.Registry;
 using RPGCreator.Core.Scheduler;
+using RPGCreator.Core.Services;
 using RPGCreator.Core.Types.Editor.Context;
 using RPGCreator.Core.Types.Map.Layers.AutoLayer;
 using RPGCreator.SDK;
@@ -62,13 +63,8 @@ namespace RPGCreator.Core
 
         private readonly ScopedLogger _logger = Logger.ForContext<EngineCore>();
         
-        public enum EEngineMode
-        {
-            EditorMode,
-            PlayerMode
-        }
         
-        public readonly EEngineMode engineMode = EEngineMode.EditorMode;
+        public readonly EEngineMode engineMode = EEngineMode.Editor;
         
         // Suppressing this error, this should never happen. And if it happen, then it should cause a fatal crash!
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
@@ -105,8 +101,8 @@ namespace RPGCreator.Core
             Logger.Implementation = new EngineLogger();
             
             #region GlobalStates Initialization
+            GlobalStates.EngineMode = mode;
             GlobalStates.EditorState = new EditorState();
-            GlobalStates.EditorState.InEditorMode = mode == EEngineMode.EditorMode;
             GlobalStates.ProjectState = new ProjectState();
             GlobalStates.MapState = new MapState();
             GlobalStates.ToolState = new BaseToolState();
@@ -114,10 +110,15 @@ namespace RPGCreator.Core
             GlobalStates.MouseState = new EngineMouseState();
             GlobalStates.KeyboardState = new EngineKeyboardState();
 
-            if (GlobalStates.EditorState.InEditorMode)
+            if (GlobalStates.EngineMode == EEngineMode.Editor)
             {
                 GlobalStates.ViewportMouseState = new ViewportMouseState();
                 GlobalStates.ViewportKeyboardState = new ViewportKeyboardState();
+            }
+            else
+            {
+                GlobalStates.ViewportMouseState = GlobalStates.MouseState;
+                GlobalStates.ViewportKeyboardState = GlobalStates.KeyboardState;
             }
             #endregion
             
@@ -157,6 +158,7 @@ namespace RPGCreator.Core
             EngineServices.ECS = new EcsService();
             EngineServices.InputsService = new InputsService();
             EngineServices.ModulePathResolver = new ModulePathResolver();
+            EngineServices.GamePlayerService = new GamePlayerService();
 
             Logger.Warning("---");
             Logger.Warning("NORMAL WARNING: The warning below can be ignored!");
@@ -292,15 +294,13 @@ namespace RPGCreator.Core
 
 
 
-        public static EEngineMode DetectedMode = EEngineMode.EditorMode;
-        
-        public static EngineCore InitCore(EEngineMode mode = EEngineMode.EditorMode)
+        public static EngineCore InitCore(EEngineMode mode = EEngineMode.Editor)
         {
             Instance = new(mode);
 
             IsCoreReady = true;
             
-            DetectedMode = mode;
+            GlobalStates.EngineMode = mode;
 
             return Instance;
         }

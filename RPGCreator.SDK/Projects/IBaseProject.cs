@@ -13,5 +13,7 @@ public interface IBaseProject
     List<string> AssetsPackPath { get; }
     ProjectGameData GameData { get; }
     IGlobalPathData GlobalPathData { get; }
+    public List<string> Modules { get; }
+    public Ulid MainMapId { get; set; }
     void Save();
 }

@@ -52,6 +52,10 @@ namespace RPGCreator.UI.Content.AssetsManage
 
         public static AssetsManageWindow Instance { get; private set; }
         
+        // All of this dictionnary need to be replaced with a better system, what? IDK, but a better system anyway.
+        // For two reasons:
+        // - Memory optimizations (here, we need to create a new instance of each panel at each menu switch)
+        // - Flexibility (with this system, we kinda need to define each menu in the code, we are using the method RegisterAssetsMenuOption to allow plugins to add new menu options, but it's still not very flexible)
         private Dictionary<string, Func<UserControl>> _AssetsMenuOptions = new(
             new Dictionary<string, Func<UserControl>>
             {
@@ -59,22 +63,22 @@ namespace RPGCreator.UI.Content.AssetsManage
                 ["Auto-tiles"] = () => new AutoLayerEditorControl(), // Replace with actual assets panel
                 ["---0"] = null, // Separator
                 ["Characters"] = () => new CharactersManageControl(), // Replace with actual assets panel
-                ["Enemies"] = () => new UserControl(), // Replace with actual assets panel
+                ["#Enemies"] = () => new UserControl(), // Replace with actual assets panel
                 // ["Stats"] = () => new StatsManageControl(), // Replace with the actual assets panel (This should be for creating / editing stats, like HP, MP, ATK, DEf, etc...)
-                ["Items"] = () => new UserControl(), // Replace with actual assets panel (This items section should be for consumables, weapons, armor, etc...)
+                ["#Items"] = () => new UserControl(), // Replace with actual assets panel (This items section should be for consumables, weapons, armor, etc...)
                 ["Skills"] = () => new SkillsManageControl(), // Replace with actual assets panel
-                ["Classes"] = () => new UserControl(), // Replace with actual assets panel
-                ["Actors"] = () => new UserControl(), // Replace with actual assets panel
-                ["Maps"] = () => new UserControl(), // Replace with actual assets panel
-                ["Events"] = () => new UserControl(), // Replace with actual assets panel
-                ["Quests"] = () => new UserControl(), // Replace with actual assets panel
+                ["#Classes"] = () => new UserControl(), // Replace with actual assets panel
+                ["#Actors"] = () => new UserControl(), // Replace with actual assets panel
+                ["#Maps"] = () => new UserControl(), // Replace with actual assets panel
+                ["#Events"] = () => new UserControl(), // Replace with actual assets panel
+                ["#Quests"] = () => new UserControl(), // Replace with actual assets panel
                 ["---4"] = null, // Separator
-                ["Backgrounds"] = () => new UserControl(), // Replace with actual assets panel (This should be for backgrounds, like the title screen background, fighting background, map background etc...)
+                ["#Backgrounds"] = () => new UserControl(), // Replace with actual assets panel (This should be for backgrounds, like the title screen background, fighting background, map background etc...)
                 ["---2"] = null, // Separator
-                ["Sounds"] = () => new UserControl(), // Replace with actual assets panel
-                ["Music"] = () => new UserControl(), // Replace with actual assets panel  
+                ["#Sounds"] = () => new UserControl(), // Replace with actual assets panel
+                ["#Music"] = () => new UserControl(), // Replace with actual assets panel  
                 ["---3"] = null, // Separator
-                ["Plugins"] = () => new UserControl(), // Replace with actual assets panel
+                ["#Plugins"] = () => new UserControl(), // Replace with actual assets panel
 
             }
         );
@@ -138,11 +142,19 @@ namespace RPGCreator.UI.Content.AssetsManage
                 }
                 var button = new Button
                 {
-                    Content = option.Key,
+                    Content = option.Key.Replace("#", ""), // Remove the # used for categorization
                     Margin = new Avalonia.Thickness(5),
                     HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch
                 };
                 button.Click += (s, e) => ShowAssetsPanel(option.Key);
+
+                if (option.Key.Contains("#"))
+                {
+                    button.IsEnabled = false;
+                    ToolTip.SetTip(button, "Sorry, this section is not available yet.");
+                    ToolTip.SetShowOnDisabled(button, true);
+                }
+                
                 MenuPanel.Children.Add(button);
             }
             

@@ -21,10 +21,13 @@
 using System;
 using System.Numerics;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.SDK;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Entities;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
 using RPGCreator.SDK.Types;
 using Vector2 = System.Numerics.Vector2;
@@ -35,8 +38,10 @@ namespace RPGCreator.Player.Services;
 public class CameraService : ObservableObject, ICameraService
 {
     private Size _cellSize = new(32f, 32f);
-    public CameraService()
+    private readonly GraphicsDeviceManager _graphics;
+    public CameraService(GraphicsDeviceManager device)
     {
+        _graphics = device;
         RuntimeServices.MapService.OnMapLoaded += (_) =>
         {
             var loadedMapData = RuntimeServices.MapService.CurrentLoadedMapData;
@@ -97,11 +102,11 @@ public class CameraService : ObservableObject, ICameraService
 
     public Vector2 Position
     {
-        get => GetCameraComponent().Position;
+        get => GetCameraTransformComponent().Position;
         private  set
         {
             OnPropertyChanging();
-            GetCameraComponent().Position = value;
+            GetCameraTransformComponent().Position = value;
             OnPropertyChanged();
         }
     }
@@ -235,11 +240,23 @@ public class CameraService : ObservableObject, ICameraService
 
     public Matrix4x4 GetViewMatrix()
     {
-        var viewportCenter = new Vector2(ViewportSize.Width / 2f, ViewportSize.Height / 2f);
+        // Taille réelle de ta fenêtre (ex: 800, 600)
+        float viewportWidth = _graphics.PreferredBackBufferWidth;
+        float viewportHeight = _graphics.PreferredBackBufferHeight;
 
-        return Matrix4x4.CreateTranslation(new Vector3(-Position.X, -Position.Y, 0)) *
-               Matrix4x4.CreateScale(new Vector3(ZoomLevel, ZoomLevel, 1)) *
-               Matrix4x4.CreateTranslation(new Vector3(viewportCenter.X, viewportCenter.Y, 0));
+        // 1. On arrondit la position de la caméra au PIXEL ENTIER le plus proche
+        // C'est ça qui empêche les textures de "fondre"
+        int camX = (int)MathF.Round(Position.X);
+        int camY = (int)MathF.Round(Position.Y);
+
+        // 2. On calcule le centre
+        float centerX = viewportWidth / 2f;
+        float centerY = viewportHeight / 2f;
+
+        // 3. On construit la matrice : Translation inverse -> Scale -> Translation centre
+        // IMPORTANT : Pas de virgules ici !
+        return Matrix4x4.CreateTranslation(new Vector3(-camX, -camY, 0)) *
+               Matrix4x4.CreateScale(new Vector3(ZoomLevel, ZoomLevel, 1)) * Matrix4x4.CreateTranslation(new Vector3(MathF.Floor(centerX), MathF.Floor(centerY), 0));
     }
     
     public void Dispose()
@@ -263,6 +280,22 @@ public class CameraService : ObservableObject, ICameraService
             throw new InvalidOperationException("Camera entity does not have a CameraComponent.");
         
         return ref components.GetComponent<CameraComponent>(CameraEntityId.Value);
+    }
+    
+    private ref TransformComponent GetCameraTransformComponent()
+    {
+        ComponentManager components;
+        if (RuntimeServices.GameSession.ActiveEcsWorld == null)
+            throw new InvalidOperationException("No active ECS world found.");
+        components = RuntimeServices.GameSession.ActiveEcsWorld.ComponentManager;
+        
+        if (!CameraEntityId.HasValue)
+            throw new InvalidOperationException("Camera entity is not set.");
+        
+        if (!components.HasComponent<TransformComponent>(CameraEntityId.Value))
+            throw new InvalidOperationException("Camera entity does not have a TransformComponent.");
+        
+        return ref components.GetComponent<TransformComponent>(CameraEntityId.Value);
     }
     
     #endregion

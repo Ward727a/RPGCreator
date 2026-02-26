@@ -33,6 +33,7 @@ using System.IO;
 using System.Linq;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Logging;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
@@ -353,16 +354,33 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
                 return;
             }
 
+            var imagePath = ImagePick.SelectedPaths[0];
+
             // Update the tileset properties
             TilesetDefinition.Name = NameInput.Text;
             TilesetDefinition.TileHeight = int.TryParse(TileHeightInput.Text, out var height) ? height : 0;
             TilesetDefinition.TileWidth = int.TryParse(TileWidthInput.Text, out var width) ? width : 0;
-            TilesetDefinition.ImagePath = ImagePick.SelectedPaths[0];
             TilesetDefinition.PackName = AssetPackChoice.SelectedItem as string;
             
             if (EngineServices.AssetsManager.TryGetPack(TilesetDefinition.PackName, out var pack))
             {
+
+                var assetFolder = pack.RootFolder;
+                var imageExtension = Path.GetExtension(imagePath);
+                var imageCopyPath = Path.Combine(assetFolder, $"{TilesetDefinition.Unique}{imageExtension}");
                 
+                try
+                {
+                    File.Copy(imagePath, imageCopyPath, true);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error($"Error copying image: {ex.Message}");
+                    EditorUiServices.NotificationService.Error("Error copying image!", $"An error occurred while copying the image: {ex.Message}");
+                    return;
+                }
+                
+                TilesetDefinition.ImagePath = imageCopyPath;
                 pack.AddOrUpdateAsset(TilesetDefinition);
             
                 Console.WriteLine($"New Tileset Created: {TilesetDefinition.Name}, Width: {TilesetDefinition.TileWidth}, Height: {TilesetDefinition.TileHeight}, Asset Pack: {TilesetDefinition.PackName}");

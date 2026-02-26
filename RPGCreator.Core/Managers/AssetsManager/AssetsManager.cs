@@ -123,7 +123,9 @@ namespace RPGCreator.Core.Managers.AssetsManager
             {
                 assetRegistry.RegisterUntyped((IHasUniqueId)asset, true);
                 Guard.IsAssignableToType(asset, typeof(IBaseAssetDef));
-                OnAssetRegistered?.Invoke((IBaseAssetDef)asset);
+                // OnAssetRegistered?.Invoke((IBaseAssetDef)asset);
+                if(asset is BaseAssetDef baseAssetDef)
+                    baseAssetDef.UpdateUrn();
                 Logger.Info("Registered asset {unique} ({URN}) of type {AssetType} in registry {RegistryName}",  args: [((IHasUniqueId)asset).Unique, ((IHasUniqueId)asset).Urn, type.FullName, assetRegistry.ModuleName]);
                 return;
             }
@@ -277,7 +279,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             {
                 try
                 {
-                    object? loadedObject = location.Pack?.LoadAssetDirect(location.RelativePath);
+                    object? loadedObject = location.Pack.LoadAsset(uniqueId);
 
                     if(loadedObject == null)
                     {

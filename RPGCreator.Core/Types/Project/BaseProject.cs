@@ -57,6 +57,8 @@ namespace RPGCreator.Core.Types.Project
 
         public ProjectGameData GameData { get; set; }
         public IGlobalPathData GlobalPathData { get; private set; }
+        public List<string> Modules { get; private set; } = [];
+        public Ulid MainMapId { get; set; }
 
         public BaseProject()
         {
@@ -92,6 +94,8 @@ namespace RPGCreator.Core.Types.Project
             info.AddValue("authors", Authors);
             info.AddValue("assetsPackPath", AssetsPackPath);
             info.AddValue("gameData", GameData);
+            info.AddValue(nameof(Modules), Modules);
+            info.AddValue(nameof(MainMapId), MainMapId);
             info.AddValue(nameof(GlobalPathData), GlobalPathData);
             return info;
         }
@@ -127,6 +131,8 @@ namespace RPGCreator.Core.Types.Project
             info.TryGetList("assetsPackPath", out List<string> assetsPackPath);
             info.TryGetValue("gameData", out ProjectGameData gameData, new ProjectGameData(this));
             info.TryGetValue(nameof(GlobalPathData), out EngineGlobalPathData globalPathData, new EngineGlobalPathData());
+            info.TryGetValue(nameof(Modules), out List<string> modules, []);
+            info.TryGetValue(nameof(MainMapId), out Ulid mainMapId, Ulid.Empty);
 
             Id = id;
             Name = name;
@@ -142,6 +148,8 @@ namespace RPGCreator.Core.Types.Project
             AssetsPackPath = assetsPackPath;
             GameData = gameData;
             GlobalPathData = globalPathData;
+            Modules = modules;
+            MainMapId = mainMapId;
         }
     }
 }

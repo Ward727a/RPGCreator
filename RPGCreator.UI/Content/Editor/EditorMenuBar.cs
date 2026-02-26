@@ -28,6 +28,7 @@ using RPGCreator.SDK;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.UI.Content.AssetsManage;
+using RPGCreator.UI.Content.Preferences;
 
 namespace RPGCreator.UI.Content.Editor;
 
@@ -224,6 +225,13 @@ public class EditorMenuBar : UserControl
                 ToolTip.SetTip(_editRedoMenuItem, undoRedoService.CanRedo ? MakeUndoRedoTip(false, undoRedoService.GetRedoCommandName()) : "Nothing to Redo");
             };
         });
+
+        _editPreferencesMenuItem.Click += (_, _) =>
+        {
+            var preferencesWindow = new PreferencesWindow();
+
+            preferencesWindow.Show();
+        };
     }
     
     private TextBlock MakeUndoRedoTip(bool Undo, string commandName)
@@ -272,7 +280,11 @@ public class EditorMenuBar : UserControl
         _helpReportIssuesMenuItem.Click += (s, e) => OpenUrl("https://github.com/Ward727a/RPGCreator/issues");
         _communityDiscordMenuItem.Click += (s, e) => OpenUrl("https://discord.gg/4yfq4NNzs4");
         _communityWebsiteMenuItem.Click += (s, e) => OpenUrl("https://rpgcreator.dev");
-        _helpAboutMenuItem.Click += (s, e) => OpenUrl("https://github.com/Ward727a/RPGCreator/blob/Dev/README.md");
+        _helpAboutMenuItem.Click += (s, e) =>
+        {
+            var aboutWindow = new AboutWindow();
+            aboutWindow.Show();
+        };
     }
 
     #endregion

@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using Newtonsoft.Json;
 using RPGCreator.SDK.Assets.Definitions.Skills;
 using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Attributes;
@@ -565,7 +566,6 @@ public class CharacterData : BaseAssetDef, IEntityDefinition, ICharacter, ISeria
     public CharacterData()
     {
         SuspendTracking();
-        Name = "UNKNOWN";
         _features = new ObservableCollection<EntityFeatureData>();
         Tags = new List<string>();
     }
@@ -574,6 +574,7 @@ public class CharacterData : BaseAssetDef, IEntityDefinition, ICharacter, ISeria
     {
         Name = name;
         RefreshStats();
+        UpdateUrn();
     }
     
     #endregion

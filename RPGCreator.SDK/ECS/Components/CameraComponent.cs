@@ -29,7 +29,6 @@ public struct CameraComponent : IComponent
     public float Zoom;
     public float Rotation;
     public Vector2 Offset;
-    public Vector2 Position;
     public Size ViewportSize;
     public bool IsFollowingEntity;
     public int FollowedEntity;

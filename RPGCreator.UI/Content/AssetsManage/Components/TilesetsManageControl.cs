@@ -36,6 +36,7 @@ using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using RPGCreator.SDK.Extensions;
+using RPGCreator.SDK.Helpers;
 using RPGCreator.SDK.Types.Collections;
 using RPGCreator.UI.Common;
 
@@ -366,6 +367,13 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
             sep = new VSeparator();
             Body.Children.Add(sep);
             Grid.SetColumn(sep, 3);
+
+            if (TilesetDef?.ImageWidth == 0 && TilesetDef?.ImageHeight == 0)
+            {
+                var size = ImageHelper.GetImageDimensions(TilesetDef.ImagePath);
+                TilesetDef.ImageWidth = size.Width;
+                TilesetDef.ImageHeight = size.Height;
+            }
 
             var imageSizeTextBlock = new TextBlock
             {

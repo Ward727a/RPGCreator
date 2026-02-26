@@ -98,7 +98,7 @@ namespace RPGCreator.Core
             };
             _logger.Info($"EngineModules initialized.");
 
-            if (EngineCore.DetectedMode == EngineCore.EEngineMode.PlayerMode)
+            if (GlobalStates.EngineMode == EEngineMode.Player)
             {
                 _logger.Debug("Player mode detected, skipping module loading.");
                 return;

@@ -5,6 +5,7 @@ using RPGCreator.Core.Serializer;
 using RPGCreator.Core.Serializer.Binder;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
+using RPGCreator.SDK.Assets.Definitions;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 
@@ -58,6 +59,9 @@ public class EngineSerializer : ISerializerService
                 new EngineJsonConverter(),
                 new UlidJsonConverter(),
                 new ColorJsonConverter(),
+                // old one, should be removed before first release, but for now we need it to avoid breaking testing data.
+                // (I just don't want to restart the testing data... [Ward727, 22/02/2026])
+                new OldColorJsonConverter(), 
                 new UrnJsonConverter()
             },
             PreserveReferencesHandling = PreserveReferencesHandling.Objects,
@@ -94,6 +98,10 @@ public class EngineSerializer : ISerializerService
         using var sr = new StreamReader(stream);
         using var reader = new JsonTextReader(sr);
         obj = _serializer.Deserialize<T>(reader);
+        if (obj is BaseAssetDef def)
+        {
+            def.ResumeTracking();
+        }
     }
     
     public void Deserialize<T>(Stream stream, out T obj, out Type type)

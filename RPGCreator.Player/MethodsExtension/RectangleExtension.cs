@@ -1,7 +1,5 @@
-﻿#region LICENSE
-//
-// RPG Creator - Open-source RPG Engine.
-// (c) 2025 Ward
+﻿// RPG Creator - Open-source RPG Engine.
+// (c) 2026 Ward
 // 
 // This file is part of RPG Creator and is distributed under the Apache 2.0 License.
 // You are free to use, modify, and distribute this file under the terms of the Apache 2.0 License.
@@ -19,27 +17,21 @@
 // => Discord: ward727
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
-// 
-// 
-#endregion
-using Avalonia.Controls;
 
-namespace RPGCreator.UI.Content.Preferences
+using RPGRect = RPGCreator.SDK.Types.Rect;
+using MGRect = Microsoft.Xna.Framework.Rectangle;
+
+namespace RPGCreator.Player.MethodsExtension;
+
+public static class RectangleExtension
 {
-    public class PreferencesWindow : Window
+    public static MGRect ToMGRect(this RPGRect rect)
     {
-        public PreferencesWindow()
-        {
-            Title = "Preferences";
-            Width = 800;
-            Height = 600;
-            WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            CreateComponents();
-        }
-
-        protected void CreateComponents()
-        {
-            Content = new PreferencesWindowControl();
-        }
+        return new MGRect((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height);
+    }
+    
+    public static RPGRect ToRPGRect(this MGRect rect)
+    {
+        return new RPGRect(rect.X, rect.Y, rect.Width, rect.Height);
     }
 }

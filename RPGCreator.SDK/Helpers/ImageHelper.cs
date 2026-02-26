@@ -32,17 +32,18 @@ public static class ImageHelper
 
         foreach (var directory in directories)
         {
-            if (directory.TryGetInt32(JpegDirectory.TagImageWidth, out var width) &&
-                directory.TryGetInt32(JpegDirectory.TagImageHeight, out var height))
-            {
-                return (width, height);
-            }
         
             if (directory.Name == "PNG-IHDR") 
             {
                 var w = directory.GetInt32(PngDirectory.TagImageWidth);
                 var h = directory.GetInt32(PngDirectory.TagImageHeight);
                 return (w, h);
+            }
+            
+            if (directory.TryGetInt32(JpegDirectory.TagImageWidth, out var width) &&
+                directory.TryGetInt32(JpegDirectory.TagImageHeight, out var height))
+            {
+                return (width, height);
             }
         }
 

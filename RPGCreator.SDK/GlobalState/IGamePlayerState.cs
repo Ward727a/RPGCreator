@@ -1,7 +1,5 @@
-﻿#region LICENSE
-//
-// RPG Creator - Open-source RPG Engine.
-// (c) 2025 Ward
+﻿// RPG Creator - Open-source RPG Engine.
+// (c) 2026 Ward
 // 
 // This file is part of RPG Creator and is distributed under the Apache 2.0 License.
 // You are free to use, modify, and distribute this file under the terms of the Apache 2.0 License.
@@ -19,27 +17,12 @@
 // => Discord: ward727
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
-// 
-// 
-#endregion
-using Avalonia.Controls;
 
-namespace RPGCreator.UI.Content.Preferences
+namespace RPGCreator.SDK.GlobalState;
+
+public interface IGamePlayerState : IState
 {
-    public class PreferencesWindow : Window
-    {
-        public PreferencesWindow()
-        {
-            Title = "Preferences";
-            Width = 800;
-            Height = 600;
-            WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            CreateComponents();
-        }
-
-        protected void CreateComponents()
-        {
-            Content = new PreferencesWindowControl();
-        }
-    }
+    public bool IsPlaying { get; }
+    public bool IsDebugging { get; }
+    public System.Diagnostics.Process? GameProcess { get; }
 }

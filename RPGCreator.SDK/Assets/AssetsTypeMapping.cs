@@ -24,7 +24,6 @@ public class AssetsTypeMapping : IAssetTypeRegistry
         if (_keyToType.TryGetValue(key, out var type)) return type;
 
         Logger.Error("Unknown asset type: {key}, returning GenericAssetStub.", args: key);
-        EditorUiServices.NotificationService.Error("Error while loading asset!", "Unknown asset type: {key}, using GenericAssetStub as fallback.");
         return typeof(GenericBaseAssetStub);
     }
 

@@ -96,11 +96,11 @@ public class CameraService : ObservableObject, ICameraService
 
     public Vector2 Position
     {
-        get => GetCameraComponent().Position;
+        get => GetCameraTransformComponent().Position;
         private  set
         {
             OnPropertyChanging();
-            GetCameraComponent().Position = value;
+            GetCameraTransformComponent().Position = value;
             OnPropertyChanged();
         }
     }
@@ -235,8 +235,10 @@ public class CameraService : ObservableObject, ICameraService
     public Matrix4x4 GetViewMatrix()
     {
         var viewportCenter = new Vector2(ViewportSize.Width / 2f, ViewportSize.Height / 2f);
+        int camX = (int)MathF.Round(Position.X);
+        int camY = (int)MathF.Round(Position.Y);
 
-        return Matrix4x4.CreateTranslation(new Vector3(-Position.X, -Position.Y, 0)) *
+        return Matrix4x4.CreateTranslation(new Vector3(-camX, -camY, 0)) *
                Matrix4x4.CreateScale(new Vector3(ZoomLevel, ZoomLevel, 1)) *
                Matrix4x4.CreateTranslation(new Vector3(viewportCenter.X, viewportCenter.Y, 0));
     }
@@ -262,6 +264,22 @@ public class CameraService : ObservableObject, ICameraService
             throw new InvalidOperationException("Camera entity does not have a CameraComponent.");
         
         return ref components.GetComponent<CameraComponent>(CameraEntityId.Value);
+    }
+    
+    private ref TransformComponent GetCameraTransformComponent()
+    {
+        ComponentManager components;
+        if (RuntimeServices.GameSession.ActiveEcsWorld == null)
+            throw new InvalidOperationException("No active ECS world found.");
+        components = RuntimeServices.GameSession.ActiveEcsWorld.ComponentManager;
+        
+        if (!CameraEntityId.HasValue)
+            throw new InvalidOperationException("Camera entity is not set.");
+        
+        if (!components.HasComponent<TransformComponent>(CameraEntityId.Value))
+            throw new InvalidOperationException("Camera entity does not have a TransformComponent.");
+        
+        return ref components.GetComponent<TransformComponent>(CameraEntityId.Value);
     }
     
     #endregion

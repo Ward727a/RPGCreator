@@ -46,6 +46,7 @@ public class MapForegroundSystem : ISystem
     public override void Update(TimeSpan deltaTime)
     {
         if (!MapService.HasLoadedMap) return;
+        
         var sortedLayersZIndex = MapService.CurrentLoadedMapDefinition!.TileLayers;
         
         var range = RuntimeServices.ChunkService.GetVisibleChunkBounds(IChunkService.ChunkLoadDistance);
@@ -74,7 +75,7 @@ public class MapForegroundSystem : ISystem
     private void DrawChunkTiles(long chunkId, LayerWithElements<ITileDef> layer)
     {
         var chunkElements = layer.GetElements(chunkId);
-        if (chunkElements == null)
+        if (chunkElements.IsEmpty)
             return;
         
         if(chunkElements.IsEmpty)

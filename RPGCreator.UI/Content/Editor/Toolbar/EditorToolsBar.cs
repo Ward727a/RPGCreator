@@ -226,11 +226,11 @@ public class EditorToolsBar : UserControl
             Orientation = Orientation.Vertical
         });
         
-        #if DEBUG
-        
-        MenuPanel.Children.Add(CreateToolButton(new MockupTool()));
-        
-        #endif
+        // #if DEBUG
+        //
+        // MenuPanel.Children.Add(CreateToolButton(new MockupTool()));
+        //
+        // #endif
 
         ToolPanel = new ItemsControl()
         {

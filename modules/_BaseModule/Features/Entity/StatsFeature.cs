@@ -369,7 +369,7 @@ public record struct StatData(Ulid StatDefId, double BaseValue, double FinalValu
 public class StatSystem : ISystem
 {
     private URN SignalChanged = ISignalRegistry.SignalModuleUrn.ToUrnModule("rpgc").ToUrn("stat_changed");
-    public override int Priority => 100; // Priority can be adjusted based on when you want this system to run in the update loop.
+    public override int Priority => 30; // Priority can be adjusted based on when you want this system to run in the update loop.
     public override bool IsDrawingSystem => false; // This system is not responsible for drawing, it's purely for logic updates.
     
     private ComponentManager _componentManager = null!;

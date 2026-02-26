@@ -1,4 +1,5 @@
 using LiteDB;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Logging;
 
@@ -144,6 +145,14 @@ public class EngineDB
     {
         dbFilePath = CheckReservedPath(dbFilePath);
         
+        var isPlayer = GlobalStates.EngineMode == EEngineMode.Player;
+
+        var connectionString = new ConnectionString(dbFilePath)
+        {
+            ReadOnly = isPlayer,
+            Connection = ConnectionType.Shared
+        };
+        
         if (DatabaseIds.TryGetValue(dbFilePath, out var existingId))
         {
             _logger.Info("Database at {dbFilePath} is already opened with id {dbId}", args: [dbFilePath, existingId]);
@@ -180,7 +189,7 @@ public class EngineDB
                 }
             }
 
-            var db = new LiteDatabase(dbFilePath);
+            var db = new LiteDatabase(connectionString);
             
             var metadataCollection = db.GetCollection<DataBaseMetaData>("metadata");
 
@@ -208,14 +217,16 @@ public class EngineDB
         }
         else
         {
-            var db = new LiteDatabase(dbFilePath);
+            var db = new LiteDatabase(connectionString);
             
             var metadataCollection = db.GetCollection<DataBaseMetaData>("metadata");
             var metadata = new DataBaseMetaData()
             {
                 Name = Path.GetFileNameWithoutExtension(dbFilePath),
             };
-            
+
+            if (GlobalStates.EngineMode == EEngineMode.Player)
+                return metadata.ObjectId;
             metadataCollection.Insert(metadata);
             
             if (RegisterDB(dbFilePath, metadata, db) is var status && status  != ERegisterDbStatus.Success)
@@ -355,6 +366,8 @@ public class EngineDB
         var collection = db.GetCollection<DatabaseFileData>();
         
         var existing = collection.FindOne(x => x.FilePath == data.FilePath);
+        if (GlobalStates.EngineMode == EEngineMode.Player)
+            return EFileInsertStatus.Success;
         if (existing != null)
         {
             data.Id = existing.Id;

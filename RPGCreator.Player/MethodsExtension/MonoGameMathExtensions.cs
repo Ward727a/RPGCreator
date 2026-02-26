@@ -23,7 +23,7 @@ using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace RPGCreator.Player.Extensions;
+namespace RPGCreator.Player.MethodsExtension;
 
 /// <summary>
 /// Extensions for fast conversion between MonoGame and System.Numerics math types.<br/>
@@ -50,26 +50,26 @@ public static class MonoGameMathExtensions
     static MonoGameMathExtensions()
     {
         // Verify that the sizes of the types match to ensure safe conversion
-        if (Unsafe.SizeOf<Vector2>() != Unsafe.SizeOf<Microsoft.Xna.Framework.Vector2>())
+        if (Unsafe.SizeOf<System.Numerics.Vector2>() != Unsafe.SizeOf<Microsoft.Xna.Framework.Vector2>())
             throw new NotSupportedException("Vector2 size mismatch between System.Numerics and MonoGame.");
 
-        if (Unsafe.SizeOf<Matrix4x4>() != Unsafe.SizeOf<Microsoft.Xna.Framework.Matrix>())
+        if (Unsafe.SizeOf<System.Numerics.Matrix4x4>() != Unsafe.SizeOf<Microsoft.Xna.Framework.Matrix>())
             throw new NotSupportedException("Matrix size mismatch between System.Numerics and MonoGame.");
             
-        if (Unsafe.SizeOf<Vector3>() != Unsafe.SizeOf<Microsoft.Xna.Framework.Vector3>())
+        if (Unsafe.SizeOf<System.Numerics.Vector3>() != Unsafe.SizeOf<Microsoft.Xna.Framework.Vector3>())
             throw new NotSupportedException("Vector3 size mismatch between System.Numerics and MonoGame.");
     }
  
     #region Unsafe Conversions
     
-    public static Microsoft.Xna.Framework.Matrix ToXnaFast(this Matrix4x4 matrix)
+    public static Microsoft.Xna.Framework.Matrix ToXnaFast(this System.Numerics.Matrix4x4 matrix)
     {
-        return Unsafe.As<Matrix4x4, Microsoft.Xna.Framework.Matrix>(ref matrix);
+        return Unsafe.As<System.Numerics.Matrix4x4, Microsoft.Xna.Framework.Matrix>(ref matrix);
     }
     
-    public static Matrix4x4 ToNumericFast(this Microsoft.Xna.Framework.Matrix matrix)
+    public static System.Numerics.Matrix4x4 ToNumericFast(this Microsoft.Xna.Framework.Matrix matrix)
     {
-        return Unsafe.As<Microsoft.Xna.Framework.Matrix, Matrix4x4>(ref matrix);
+        return Unsafe.As<Microsoft.Xna.Framework.Matrix, System.Numerics.Matrix4x4>(ref matrix);
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -114,15 +114,15 @@ public static class MonoGameMathExtensions
     // The "fast" suffix is kept for consistency, but these methods do involve some overhead due to copying.
     #region Standard Conversions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Microsoft.Xna.Framework.Color ToXnaFast(this Color color)
+    public static Microsoft.Xna.Framework.Color ToXnaFast(this System.Drawing.Color color)
     {
         return new Microsoft.Xna.Framework.Color(color.R, color.G, color.B, color.A);
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Color ToSystemFast(this Microsoft.Xna.Framework.Color color)
+    public static System.Drawing.Color ToSystemFast(this Microsoft.Xna.Framework.Color color)
     {
-        return Color.FromArgb(color.A, color.R, color.G, color.B);
+        return System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
     }
     
     #endregion
