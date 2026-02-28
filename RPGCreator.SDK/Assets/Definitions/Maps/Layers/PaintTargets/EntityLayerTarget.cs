@@ -6,6 +6,9 @@ namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers.PaintTargets;
 
 public class EntityLayerTarget : IPaintTarget
 {
+    public List<Vector2> PreviewPosition { get; set; }
+    public object? PreviewObject { get; set; }
+    
     private readonly EntityLayerDefinition _layerDef;
     public IMapDef? MapDef { get; }
 
@@ -46,5 +49,20 @@ public class EntityLayerTarget : IPaintTarget
     public void PreviewAt(Vector2 position, object objectToPreview)
     {
         // Preview functionality can be implemented here if needed
+    }
+
+    public void PreviewAt(List<Vector2> positions, object objectToPreview)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ClearPreview()
+    {
+        if (RuntimeServices.RenderService.CurrentPreviewTarget == this)
+        {
+            RuntimeServices.RenderService.CurrentPreviewTarget = null;
+        }
+        
+        PreviewObject = null;
     }
 }

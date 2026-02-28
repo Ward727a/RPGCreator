@@ -42,6 +42,31 @@ public class AssetTypeBinder : ISerializationBinder
             RegistryServices.AssetTypeRegistry.RegisterMapping(typeName, systemType);
             return systemType;
         }
+        
+        try 
+        {
+            // Si assemblyName est fourni par Newtonsoft, on tente de charger l'assembly
+            if (!string.IsNullOrEmpty(assemblyName))
+            {
+                var assembly = AppDomain.CurrentDomain.GetAssemblies()
+                    .FirstOrDefault(a => a.FullName == assemblyName || a.GetName().Name == assemblyName);
+            
+                if (assembly != null)
+                {
+                    var resolvedType = assembly.GetType(typeName);
+                    if (resolvedType != null) return resolvedType;
+                }
+            }
+        }
+        catch { /* Ignore */ }
+
+        // 4. Fallback de dernier recours : parcourir tous les assemblies chargés
+        // Utile pour les ObservableCollection et types système
+        var fallbackType = AppDomain.CurrentDomain.GetAssemblies()
+            .Select(a => a.GetType(typeName))
+            .FirstOrDefault(t => t != null);
+
+        if (fallbackType != null) return fallbackType;
 
         EditorUiServices.NotificationService.Error("Error while loading asset!",
             $"Unknown asset type: {typeName}, using GenericAssetStub as fallback.");

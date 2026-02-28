@@ -145,7 +145,7 @@ public class MovementSystem(int animationStateIdx, int animationDirStateIdx, int
             ref var transformComponent = ref _componentManager.GetComponent<TransformComponent>(entityId);
             ref var stateComponent = ref _componentManager.GetComponent<StateComponent>(entityId);
             
-            if (!RuntimeServices.GameSession.IsPaused)
+            if (!GlobalStates.GameSession.IsPaused)
             {
                 switch (moveComponent.MovementType)
                 {
@@ -161,7 +161,7 @@ public class MovementSystem(int animationStateIdx, int animationDirStateIdx, int
                 }
             }
 
-            if (moveComponent.Direction != Vector2.Zero && !RuntimeServices.GameSession.IsPaused)
+            if (moveComponent.Direction != Vector2.Zero && !GlobalStates.GameSession.IsPaused)
                 stateComponent.GetInt(animationStateIdx) = walkId;
             else
                 stateComponent.GetInt(animationStateIdx) = idleId;

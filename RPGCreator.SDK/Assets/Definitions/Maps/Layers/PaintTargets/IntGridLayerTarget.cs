@@ -1,15 +1,16 @@
 using System.Numerics;
-using RPGCreator.SDK.Assets.Definitions.Maps;
-using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using RPGCreator.SDK.Editor;
 
-namespace RPGCreator.Core.Types.Editor.Visual.PaintTargets;
+namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers.PaintTargets;
 
 
 public class IntGridLayerTarget : IPaintTarget
 {
+    public List<Vector2> PreviewPosition { get; set; }
+    public object? PreviewObject { get; set; }
+
     public int GridWidth { get; } = 32;
     public int GridHeight { get; } = 32;
 
@@ -45,5 +46,20 @@ public class IntGridLayerTarget : IPaintTarget
     public void PreviewAt(Vector2 position, object objectToPreview)
     {
         // Preview functionality can be implemented here if needed
+    }
+
+    public void PreviewAt(List<Vector2> positions, object objectToPreview)
+    {
+        
+    }
+
+    public void ClearPreview()
+    {
+        if (RuntimeServices.RenderService.CurrentPreviewTarget == this)
+        {
+            RuntimeServices.RenderService.CurrentPreviewTarget = null;
+        }
+        
+        PreviewObject = null;
     }
 }

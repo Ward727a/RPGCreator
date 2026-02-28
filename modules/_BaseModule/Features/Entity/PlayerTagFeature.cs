@@ -57,11 +57,11 @@ public class PlayerTagFeature : BaseEntityFeature
         entity.ExecuteOnceCreated((int entityId) =>
         {
             RuntimeServices.CameraService.LinkToEntity(entityId);
-            RuntimeServices.GameSession.CurrentPlayerId = entityId;
+            GlobalStates.GameSession.CurrentPlayerId = entityId;
             Logger.Debug("PlayerTagFeature injected on entity {0}. Camera linked and player ID set.", args: [entityId]);
             var HealthBinding = new StatObservableAccessor(
-                RuntimeServices.GameSession.CurrentPlayerId,
-                RuntimeServices.GameSession.ActiveEcsWorld,
+                GlobalStates.GameSession.CurrentPlayerId,
+                GlobalStates.GameSession.ActiveEcsWorld,
                 "rpgc".ToUrnNamespace().ToUrnModule("stat").ToUrn("Health"));
 
             HealthBinding.PropertyChanged += (_, args) =>
@@ -82,7 +82,7 @@ public class PlayerTagFeature : BaseEntityFeature
                 HealthBinding.StatActualValue.ToString(CultureInfo.InvariantCulture),
                 HealthBinding.StatMaxValue.ToString(CultureInfo.InvariantCulture)
             ]);
-            HealthBinding.BindToEntity(RuntimeServices.GameSession.ActiveEcsWorld);
+            HealthBinding.BindToEntity(GlobalStates.GameSession.ActiveEcsWorld);
         });
     }
 }

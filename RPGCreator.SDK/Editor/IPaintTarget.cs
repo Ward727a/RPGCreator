@@ -6,6 +6,9 @@ namespace RPGCreator.SDK.Editor;
 
 public interface IPaintTarget
 {
+    public List<Vector2> PreviewPosition { get; set; }
+    public object? PreviewObject { get; set; }
+    
     int GridWidth { get; }
     int GridHeight { get; }
     
@@ -16,4 +19,7 @@ public interface IPaintTarget
     void PaintAt(Vector2 position, object objectToPaint);
     void EraseAt(Vector2 position);
     void PreviewAt(Vector2 position, object objectToPreview);
+    void PreviewAt(List<Vector2> positions, object objectToPreview);
+
+    void ClearPreview();
 }

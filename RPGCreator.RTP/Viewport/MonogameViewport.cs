@@ -27,13 +27,17 @@ using RPGCreator.SDK;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Systems;
 using RPGCreator.SDK.Editor.Rendering;
+using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
+using Vector2 = System.Numerics.Vector2;
 
 namespace RPGCreator.RTP.Viewport;
 
 public class MonogameViewport : BaseMonogameViewport
 {
+    private bool startCameraDragging = false;
+    
     private static ScopedLogger _logger = Logger.ForContext<MonogameViewport>();
     
     public RenderTarget2D? RenderTarget { get; set; }
@@ -47,6 +51,42 @@ public class MonogameViewport : BaseMonogameViewport
     public MonogameViewport(RenderTarget2D renderTarget)
     {
         RenderTarget = renderTarget;
+        GlobalStates.ViewportMouseState.Moved += OnMouseMoved;
+        GlobalStates.ViewportMouseState.WheelScrolled += OnMouseWheelScrolled;
+    }
+
+    private float _baseZoomLevel = 1;
+    private void OnMouseWheelScrolled(int obj)
+    {
+        var isCtrlPressed = GlobalStates.ViewportKeyboardState.IsKeyPressed(KeyboardKeys.RightControl) || GlobalStates.ViewportKeyboardState.IsKeyPressed(KeyboardKeys.LeftControl);
+
+        if (!isCtrlPressed)
+            return;
+        
+        if (GlobalStates.ViewportMouseState.InObject is not ("MonoGameImage"))
+        {
+            return;
+        }
+
+        if(obj > 0)
+            _baseZoomLevel+=.1f;
+        else
+            _baseZoomLevel-=.1f;
+        
+        _baseZoomLevel = Math.Clamp(_baseZoomLevel, .2f, 2);
+        
+        RuntimeServices.CameraService.SetZoomLevel(_baseZoomLevel);
+    }
+
+    private void OnMouseMoved(Vector2 delta)
+    {
+        var isCtrlPressed = GlobalStates.ViewportKeyboardState.IsKeyPressed(KeyboardKeys.RightControl) || GlobalStates.ViewportKeyboardState.IsKeyPressed(KeyboardKeys.LeftControl);
+        
+        if(isCtrlPressed)
+        {
+            var reversedDelta = new Vector2(-delta.X, -delta.Y);
+            RuntimeServices.CameraService.Drag(reversedDelta);
+        }
     }
 
     public void LoadContent(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
@@ -61,8 +101,8 @@ public class MonogameViewport : BaseMonogameViewport
         RuntimeServices.CameraService = new CameraService();
         RuntimeServices.RenderService = new RenderService(graphicsDevice, _spriteBatch);
         RuntimeServices.PlayerController = new BasePlayerController();
-        RuntimeServices.GameSession = new DefaultGameSession();
-        RuntimeServices.GameSession.ActiveEcsWorld = _ecsWorld;
+        GlobalStates.GameSession = new DefaultGameSession();
+        GlobalStates.GameSession.ActiveEcsWorld = _ecsWorld;
         RuntimeServices.CameraService.SetCameraEntity(_ecsWorld.EntityManager.CreateCameraEntity().Id);
         
         _ecsWorld.SystemManager.AddSystem(new CameraSystem());

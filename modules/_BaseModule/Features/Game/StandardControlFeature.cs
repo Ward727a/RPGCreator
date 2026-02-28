@@ -52,9 +52,9 @@ public class StandardControlFeature : BaseGameFeature
         {
             pc.PropertyChanged += OnPlayerControllerPropertyChanged;
         });
-        RuntimeServices.OnceServiceReady((IGameSession gs) =>
+        GlobalStates.OnceStateReady((IGameSession gs) =>
         {
-            gs.EcsWorldChanged += OnEcsWorldChanged;
+            gs.PropertyChanged += OnEcsWorldChanged;
         });
 
         EngineServices.OnceServiceReady((IInputsService IS) =>
@@ -68,9 +68,11 @@ public class StandardControlFeature : BaseGameFeature
         });
     }
 
-    private void OnEcsWorldChanged(IEcsWorld? obj)
+    private void OnEcsWorldChanged(object? sender, PropertyChangedEventArgs args) 
     {
-        obj.SystemManager.AddSystem(new StandardControlSystem());
+        if(args.PropertyName != nameof(IGameSession.ActiveEcsWorld)) return;
+        
+        GlobalStates.GameSession.ActiveEcsWorld.SystemManager.AddSystem(new StandardControlSystem());
     }
 
     private bool CheckEntityHasMovement()
@@ -140,9 +142,9 @@ public class StandardControlFeature : BaseGameFeature
         {
             pc.PropertyChanged -= OnPlayerControllerPropertyChanged;
         });
-        RuntimeServices.OnceServiceReady((IGameSession gs) =>
+        GlobalStates.OnceStateReady((IGameSession gs) =>
         {
-            gs.EcsWorldChanged -= OnEcsWorldChanged;
+            gs.PropertyChanged -= OnEcsWorldChanged;
         });
         RuntimeServices.OnceServiceReady((IInputsService IS) =>
         {

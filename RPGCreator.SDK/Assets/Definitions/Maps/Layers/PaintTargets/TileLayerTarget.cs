@@ -1,18 +1,22 @@
 using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Editor;
+using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers.PaintTargets;
 
 public class TileLayerTarget : IPaintTarget
 {
+    public List<Vector2> PreviewPosition { get; set; }
+    public object? PreviewObject { get; set; }
+    
     private readonly TileLayerDefinition _layerDef;
     public IMapDef? MapDef { get; }
     public int GridWidth { get; private set; }
     public int GridHeight { get; private set; }
 
-    private object? _previewObj;
-    
     public TileLayerTarget(TileLayerDefinition layerDef, IMapDef map, int gridWidth, int gridHeight)
     {
         _layerDef = layerDef;
@@ -46,5 +50,41 @@ public class TileLayerTarget : IPaintTarget
 
     public void PreviewAt(Vector2 position, object objectToPreview)
     {
+        if (RuntimeServices.RenderService.CurrentPreviewTarget != this)
+        {
+            RuntimeServices.RenderService.CurrentPreviewTarget = this;
+        }
+        
+        if (objectToPreview is ITileDef tileDef && PreviewObject != tileDef)
+        {
+            PreviewObject = tileDef;
+        }
+        
+        PreviewPosition = [position];
+    }
+    
+    public void PreviewAt(List<Vector2> positions, object objectToPreview)
+    {
+        if (RuntimeServices.RenderService.CurrentPreviewTarget != this)
+        {
+            RuntimeServices.RenderService.CurrentPreviewTarget = this;
+        }
+        
+        if (objectToPreview is ITileDef tileDef && PreviewObject != tileDef)
+        {
+            PreviewObject = tileDef;
+        }
+        
+        PreviewPosition = positions;
+    }
+
+    public void ClearPreview()
+    {
+        if (RuntimeServices.RenderService.CurrentPreviewTarget == this)
+        {
+            RuntimeServices.RenderService.CurrentPreviewTarget = null;
+        }
+        
+        PreviewObject = null;
     }
 }

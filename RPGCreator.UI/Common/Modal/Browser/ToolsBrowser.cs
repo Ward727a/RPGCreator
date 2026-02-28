@@ -178,11 +178,13 @@ internal class AddButtonCommand(ToolLogic addedTool) : BaseCommand
     protected override void OnExecute()
     {
         EngineServices.EngineConfig.ToolsShortcuts.Add(AddedTool.ToolUrn);
+        EngineServices.EngineConfig.SaveConfig();
     }
 
     protected override void OnUndo()
     {
         EngineServices.EngineConfig.ToolsShortcuts.Remove(AddedTool.ToolUrn);
+        EngineServices.EngineConfig.SaveConfig();
     }
 }
 

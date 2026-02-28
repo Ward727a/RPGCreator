@@ -168,12 +168,6 @@ public static class RuntimeServices
         get => GetService<IGameRunner>();
         set => RegisterService(value);
     }
-    
-    public static IGameSession GameSession
-    {
-        get => GetService<IGameSession>();
-        set => RegisterService(value);
-    }
 
     public static IPlayerController PlayerController
     {

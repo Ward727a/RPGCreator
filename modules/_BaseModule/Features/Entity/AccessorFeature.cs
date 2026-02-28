@@ -97,7 +97,7 @@ public class AccessorSystem : ISystem
 {
     public override int Priority => 2147481000;
     public override bool IsDrawingSystem => false;
-    private IEcsWorld? World => RuntimeServices.GameSession.ActiveEcsWorld;
+    private IEcsWorld? World => GlobalStates.GameSession.ActiveEcsWorld;
     private ComponentManager _componentManager = null!;
     
     private readonly Dictionary<int /*signalIdx*/, Bitmask256 /*signalBitmask*/> _signalBitmasks = new();

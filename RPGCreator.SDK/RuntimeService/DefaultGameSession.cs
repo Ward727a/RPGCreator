@@ -20,28 +20,47 @@
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.GlobalState;
 
 namespace RPGCreator.SDK.RuntimeService;
 
-public class DefaultGameSession : ObservableObject, IGameSession
+public class DefaultGameSession : BaseState, IGameSession
 {
 
-    private IEcsWorld? _activeEcsWorld;
-    public event Action<IEcsWorld?>? EcsWorldChanged;
-
-    public IEcsWorld? ActiveEcsWorld 
+    public IEcsWorld? ActiveEcsWorld
     {
-        get => _activeEcsWorld;
+        get;
         set
         {
-            if (SetProperty(ref _activeEcsWorld, value))
-            {
-                EcsWorldChanged?.Invoke(_activeEcsWorld);
-            }
+            if(value == field) return;
+            SetProperty(ref field, value);
         }
     }
 
-    public bool IsPaused { get; set; } = true;
+    public bool IsPaused
+    {
+        get;
+        set
+        {
+            if (value == field) return;
+            SetProperty(ref field, value);
+        }
+    } = true;
 
-    public int CurrentPlayerId { get; set; } = -1;
+    public int CurrentPlayerId
+    {
+        get;
+        set
+        {
+            if (value == field) return;
+            SetProperty(ref field, value);
+        }
+    } = -1;
+    
+    public override void Reset()
+    {
+        ActiveEcsWorld = null;
+        IsPaused = true;
+        CurrentPlayerId = -1;
+    }
 }

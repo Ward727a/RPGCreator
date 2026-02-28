@@ -42,9 +42,13 @@ namespace RPGCreator.Core.Services
             GlobalStates.ViewportMouseState.ButtonDown += (button) =>
             {
                 var insideOf = GlobalStates.ViewportMouseState.InObject;
-                
                 // the "MonoGameImage" can be found in the "EditorWindowControl.cs" file, for the "mgImage" object.
                 if (insideOf is not ("MonoGameImage"))
+                {
+                    return;
+                }
+                
+                if(GlobalStates.ViewportKeyboardState.IsKeyPressed(KeyboardKeys.LeftControl) || GlobalStates.ViewportKeyboardState.IsKeyPressed(KeyboardKeys.RightControl))
                 {
                     return;
                 }
@@ -63,6 +67,11 @@ namespace RPGCreator.Core.Services
                 }
                 
                 MoveAt(GlobalStates.ViewportMouseState.Position, deltaPosition);
+                
+                if(GlobalStates.ViewportKeyboardState.IsKeyPressed(KeyboardKeys.LeftControl) || GlobalStates.ViewportKeyboardState.IsKeyPressed(KeyboardKeys.RightControl))
+                {
+                    return;
+                }
                 
                 if (GlobalStates.ViewportMouseState.LeftButtonPressed)
                 {

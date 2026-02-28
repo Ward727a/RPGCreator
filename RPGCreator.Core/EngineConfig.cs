@@ -42,10 +42,17 @@ public class EngineConfig : IEngineConfig
     private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<EngineConfig>();
     private readonly string _configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
 
-    public ObservableCollection<URN> Shortcuts { get; private set; } = [];
-    public ObservableCollection<URN> ToolsShortcuts { get; private set; } = [];
+    
+    public ObservableCollection<URN> Shortcuts { get => _data.GetAs<ObservableCollection<URN>>("shortcuts"); }
+    public ObservableCollection<URN> ToolsShortcuts { get => _data.GetAs<ObservableCollection<URN>>("toolsShortcuts"); }
     
     private CustomData _data = new();
+    
+    public EngineConfig()
+    {
+        _data.Set("shortcuts", new ObservableCollection<URN>());
+        _data.Set("toolsShortcuts", new ObservableCollection<URN>());
+    }
 
     public string GetString(string key, string defaultValue = "")
     {
@@ -177,8 +184,6 @@ public class EngineConfig : IEngineConfig
             }
 
             _data = config._data;
-            Shortcuts = config.Shortcuts;
-            ToolsShortcuts = config.ToolsShortcuts;
 
             Logger.Debug("Successfully loaded engine config from path: {Path}", args: path);
             Logger.Debug("Loaded config data: {@Data}", args: _data);
@@ -206,8 +211,8 @@ public class EngineConfig : IEngineConfig
         var keyIntrity = data.Has("shortcuts") && data.Has("toolsShortcuts");
         checksResults |= (byte)(keyIntrity ? 1 : 0);
         
-        var dataIntegrity = data.GetTypeOf("shortcuts") == typeof(List<ShortcutButtonInfo>) &&
-                           data.GetTypeOf("toolsShortcuts") == typeof(List<IToolButtonInfo>);
+        var dataIntegrity = data.GetTypeOf("shortcuts") == typeof(ObservableCollection<URN>) &&
+                           data.GetTypeOf("toolsShortcuts") == typeof(ObservableCollection<URN>);
         checksResults |= (byte)(dataIntegrity ? 2 : 0);
         
         return keyIntrity && dataIntegrity;
@@ -219,10 +224,10 @@ public class EngineConfig : IEngineConfig
             return true;
 
         if (!_data.Has("shortcuts"))
-            _data.Set("shortcuts", new List<ShortcutButtonInfo>());
+            _data.Set("shortcuts", new ObservableCollection<URN>());
 
         if (!_data.Has("toolsShortcuts"))
-            _data.Set("toolsShortcuts", new List<IToolButtonInfo>());
+            _data.Set("toolsShortcuts", new ObservableCollection<URN>());
 
         return CheckDataIntegrity(out checksResults);
     }

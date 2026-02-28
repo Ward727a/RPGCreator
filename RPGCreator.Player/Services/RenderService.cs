@@ -31,6 +31,7 @@ using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.Editor;
 using RPGCreator.SDK.RuntimeService;
 using RPGCreator.SDK.Types;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
@@ -40,6 +41,8 @@ namespace RPGCreator.Player.Services;
 
 public class RenderService : IRenderService
 {
+    
+    private float _globalOpacity = 1f;
     
     private readonly GraphicsDevice _graphicsDevice;
     private readonly SpriteBatch spriteBatch;
@@ -82,7 +85,7 @@ public class RenderService : IRenderService
             texture,
             position.ToXnaFast(),
             null,
-            Color.White.ToMgColor(),
+            Color.White.ToMgColor() * _globalOpacity,
             0f,
             Vector2.Zero,
             new Microsoft.Xna.Framework.Vector2(scaleX, scaleY),
@@ -91,6 +94,7 @@ public class RenderService : IRenderService
         );
     }
 
+    public IPaintTarget? CurrentPreviewTarget { get; set; }
     public int GetStackSize() => DrawingStateStack.Count;
     
     private readonly List<RenderCommand> _ySortQueue = new();
@@ -155,7 +159,7 @@ public class RenderService : IRenderService
             texture,
             roundedTilePos.ToXnaFast(),
             sourceRect,
-            Microsoft.Xna.Framework.Color.White,
+            Microsoft.Xna.Framework.Color.White * _globalOpacity,
             0f,
             Vector2.Zero,
             1f,
@@ -187,7 +191,7 @@ public class RenderService : IRenderService
                 w,
                 h
             ),
-            xnaColor,
+            xnaColor * _globalOpacity,
             adjustedThickness
         );
     }
@@ -204,7 +208,7 @@ public class RenderService : IRenderService
         spriteBatch.DrawLine(
             startPos.ToXnaFast(),
             endPos.ToXnaFast(),
-            xnaColor,
+            xnaColor * _globalOpacity,
             adjustedThickness
         );
     }
@@ -222,7 +226,7 @@ public class RenderService : IRenderService
             position.ToXnaFast(),
             adjustedSize / 2,
             6,
-            xnaColor,
+            xnaColor * _globalOpacity,
             adjustedThickness
         );
     }
@@ -334,7 +338,7 @@ public class RenderService : IRenderService
             texture,
             drawPos.ToXnaFast(),
             finalSourceRect,
-            xnaColor,
+            xnaColor * _globalOpacity,
             rotation,
             origin.ToXnaFast(),
             finalScale,
@@ -346,6 +350,11 @@ public class RenderService : IRenderService
     public void FinishDrawing()
     {
         spriteBatch.End();
+    }
+
+    public void SetGlobalOpacity(float opacity)
+    {
+        _globalOpacity = Math.Clamp(opacity, 0f, 1f);
     }
 
     public System.Drawing.Rectangle GetTileSourceRect(ITileDef tileDef)

@@ -66,7 +66,7 @@ public class BaseSubscriber : IEcsSubscriber, IDisposable
     
     public virtual void Subscribe()
     {
-        RuntimeServices.GameSession.ActiveEcsWorld?.EventBus.Subscribe(this);
+        GlobalStates.GameSession.ActiveEcsWorld?.EventBus.Subscribe(this);
     }
     
     public virtual void OnEvent(IEcsEvent evt)
@@ -84,7 +84,7 @@ public class BaseSubscriber : IEcsSubscriber, IDisposable
         if (_isDisposed) return;
         _isDisposed = true;
         
-        RuntimeServices.GameSession.ActiveEcsWorld?.EventBus.Unsubscribe(this);
+        GlobalStates.GameSession.ActiveEcsWorld?.EventBus.Unsubscribe(this);
     }
 }
 

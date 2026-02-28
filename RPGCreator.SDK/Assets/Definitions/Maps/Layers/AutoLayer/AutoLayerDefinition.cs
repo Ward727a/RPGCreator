@@ -1,5 +1,4 @@
 using System.Numerics;
-using RPGCreator.Core.Types.Editor.Visual.PaintTargets;
 using RPGCreator.Core.Types.Map;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.PaintTargets;
@@ -77,7 +76,7 @@ public class AutoLayerDefinition : BaseLayerDef
                     InternalTileLayer.AddElement(newTile, position);
                     BakeDirtyTiles(CheckAround(position));
                 }
-                else if(InternalTileLayer.GetElement(position) == null && SourceIntGrid.Elements != null && SourceIntGrid.HasElement(position))
+                else if(SourceIntGrid.HasElement(position))
                 {
                     var defaultTile = IntGridSet.IntRefs[SourceIntGrid.GetValue(position)].DefaultTileData;
                     var tile = defaultTile.ToTileDef();
@@ -85,7 +84,7 @@ public class AutoLayerDefinition : BaseLayerDef
                     InternalTileLayer.AddElement(tile, position);
                     BakeDirtyTiles(CheckAround(position));
                 }
-                else
+                else if (!SourceIntGrid.HasElement(position))
                 {
                     InternalTileLayer.TryRemoveElement(position, out _);
                     BakeDirtyTiles(CheckAround(position));

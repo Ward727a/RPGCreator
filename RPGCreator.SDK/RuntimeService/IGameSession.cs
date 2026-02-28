@@ -20,12 +20,12 @@
 
 using System.ComponentModel;
 using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.GlobalState;
 
 namespace RPGCreator.SDK.RuntimeService;
 
-public interface IGameSession : IService, INotifyPropertyChanged, INotifyPropertyChanging
+public interface IGameSession : IState
 {
-    public event Action<IEcsWorld?>? EcsWorldChanged;
     public IEcsWorld? ActiveEcsWorld { get; set; }
     
     public bool IsPaused { get; set; }

@@ -23,6 +23,7 @@ using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.ECS.Components;
+using RPGCreator.SDK.Editor;
 using Color = RPGCreator.SDK.Types.Color;
 using Size = RPGCreator.SDK.Types.Size;
 
@@ -44,7 +45,8 @@ public struct RenderCommand()
 
 public interface IRenderService : IService
 {
-
+    public IPaintTarget? CurrentPreviewTarget { get; set; }
+    
     public int GetStackSize();
     public void SubmitToQueue(RenderCommand command);
 
@@ -158,6 +160,8 @@ public interface IRenderService : IService
     /// Inside the game, this method will usually call the SpriteBatch.End method or equivalent rendering function.
     /// </summary>
     void FinishDrawing();
+    
+    void SetGlobalOpacity(float opacity);
 
     Rectangle GetTileSourceRect(ITileDef tileDef);
 }

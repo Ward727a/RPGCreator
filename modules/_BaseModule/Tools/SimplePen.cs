@@ -76,6 +76,10 @@ public class SimplePen : ToolLogic
         ];
     }
 
+    public SimplePen()
+    {
+    }
+    
     public override void UseAt(Vector2? absolutePosition = null, MouseButton button = MouseButton.Left)
     {
         if (absolutePosition == null || Payload == null || button != MouseButton.Left)
@@ -148,7 +152,9 @@ public class SimplePen : ToolLogic
             Logger.Warning("No paint target available for erasing at the specified position.");
     }
     
-    private void DoCommandForSize(Vector2 clickPos, Action<Vector2>? command = null, Action<Vector2, object>? commandWithPayload = null)
+    List<Vector2> positions = new();
+    
+    private void DoCommandForSize(Vector2 clickPos, Action<Vector2>? command = null, Action<Vector2, object>? commandWithPayload = null, Action<List<Vector2>, object>? commandWithMultiplePositionsAndPayload = null)
     {
         int size = SizeParameter.GetValueAs<int>(out var success);
         
@@ -157,17 +163,19 @@ public class SimplePen : ToolLogic
             Logger.Error("Failed to get size parameter value for SimplePen. Defaulting to size 1.");
             size = 1;
         }
-        
         if (size <= 1)
         {
             if(command != null)
                 command(clickPos);
             else if (commandWithPayload != null)
                 commandWithPayload(clickPos, Payload!);
+            else if (commandWithMultiplePositionsAndPayload != null)
+                commandWithMultiplePositionsAndPayload([clickPos], Payload!);
             return;
         }
 
         int halfSize = size / 2;
+        positions.Clear();
         for (int x = -halfSize; x <= halfSize; x++)
         {
             for (int y = -halfSize; y <= halfSize; y++)
@@ -180,8 +188,13 @@ public class SimplePen : ToolLogic
                     command(offsetPos);
                 else if (commandWithPayload != null)
                     commandWithPayload(offsetPos, Payload!);
+                else if (commandWithMultiplePositionsAndPayload != null)
+                    positions.Add(offsetPos);
             }
         }
+        
+        if (commandWithMultiplePositionsAndPayload != null)
+            commandWithMultiplePositionsAndPayload(positions, Payload!);
     }
     
     private Vector2 MultiplyVector2ByMapGridSize(Vector2 position)
@@ -217,8 +230,15 @@ public class SimplePen : ToolLogic
                 return;
             }
         }
+
+        if (ShowPreviewParameter.Value is false)
+        {
+            _paintTarget?.ClearPreview();
+            return;
+        }
+
         if(_paintTarget != null && Payload != null)
-            _paintTarget.PreviewAt(clickPos, Payload);
+            DoCommandForSize(clickPos, commandWithMultiplePositionsAndPayload: _paintTarget.PreviewAt);
         else
             Logger.Warning("Cannot preview because paint target or payload is null.");
     }

@@ -59,11 +59,13 @@ internal class RemoveButtonCommand(ToolLogic removedTool, bool wasActiveButton =
     protected override void OnExecute()
     {
         EngineServices.EngineConfig.ToolsShortcuts.Remove(removedTool.ToolUrn);
+        EngineServices.EngineConfig.SaveConfig();
     }
 
     protected override void OnUndo()
     {
         EngineServices.EngineConfig.ToolsShortcuts.Add(removedTool.ToolUrn);
+        EngineServices.EngineConfig.SaveConfig();
     }
 }
 
@@ -208,13 +210,15 @@ public class EditorToolsBar : UserControl
             "Add new tool",
             "Add a new available tool to the toolbar.",
             "mdi-plus",
-            (obj, state) =>
+            async (obj, state) =>
             {
                 if(obj is not { } button)
                     return;
                 if (!state) return;
                 button.IsChecked = false;
-                EditorUiServices.DialogService.ShowPromptAsync("Add Tool", new ToolsBrowser(), new DialogStyle(Width: 900, Height: 500, SizeToContent:DialogSizeToContent.None));
+                await EditorUiServices.DialogService.ShowPromptAsync("Add Tool", new ToolsBrowser(),
+                    new DialogStyle(Width: 900, Height: 500, SizeToContent: DialogSizeToContent.None));
+
             }
         );
         

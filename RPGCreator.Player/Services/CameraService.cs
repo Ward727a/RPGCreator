@@ -269,9 +269,9 @@ public class CameraService : ObservableObject, ICameraService
     {
 
         ComponentManager components;
-        if (RuntimeServices.GameSession.ActiveEcsWorld == null)
+        if (GlobalStates.GameSession.ActiveEcsWorld == null)
             throw new InvalidOperationException("No active ECS world found.");
-        components = RuntimeServices.GameSession.ActiveEcsWorld.ComponentManager;
+        components = GlobalStates.GameSession.ActiveEcsWorld.ComponentManager;
         
         if (!CameraEntityId.HasValue)
             throw new InvalidOperationException("Camera entity is not set.");
@@ -285,9 +285,9 @@ public class CameraService : ObservableObject, ICameraService
     private ref TransformComponent GetCameraTransformComponent()
     {
         ComponentManager components;
-        if (RuntimeServices.GameSession.ActiveEcsWorld == null)
+        if (GlobalStates.GameSession.ActiveEcsWorld == null)
             throw new InvalidOperationException("No active ECS world found.");
-        components = RuntimeServices.GameSession.ActiveEcsWorld.ComponentManager;
+        components = GlobalStates.GameSession.ActiveEcsWorld.ComponentManager;
         
         if (!CameraEntityId.HasValue)
             throw new InvalidOperationException("Camera entity is not set.");

@@ -88,6 +88,23 @@ public class MapDrawingSystem(GraphicsDevice graphicsDevice) : BaseMapDrawingSys
                 }
             }
         }
+
+        if (RuntimeServices.RenderService.CurrentPreviewTarget != null)
+        {
+
+            var previewTarget = RuntimeServices.RenderService.CurrentPreviewTarget;
+            if (previewTarget.PreviewObject is ITileDef tileDef)
+            {
+                RuntimeServices.RenderService.SetGlobalOpacity(.5f);
+                foreach (var pos in previewTarget.PreviewPosition)
+                {
+                    RuntimeServices.RenderService.DrawTile(tileDef, pos);
+                }
+                RuntimeServices.RenderService.SetGlobalOpacity(1f);
+            }
+        }
+
+        
         DrawDebugChunkBounds();
         RuntimeServices.RenderService.FinishDrawing();
         RuntimeServices.RenderService.ResumeDrawing();

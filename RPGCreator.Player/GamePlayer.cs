@@ -172,7 +172,7 @@ public class GamePlayer : Game, IGameRunner
             }
         }
 
-        RuntimeServices.OnceServiceReady((IGameSession gameSession) =>
+        GlobalStates.OnceStateReady((IGameSession gameSession) =>
         {
             gameSession.IsPaused = false;
         });
@@ -201,8 +201,8 @@ public class GamePlayer : Game, IGameRunner
                         if(spawner == null)
                             continue;
                         
-                        var entity = RuntimeServices.GameSession.ActiveEcsWorld.CreateEntity();
-                        RuntimeServices.GameSession.ActiveEcsWorld.EntityFactory.InitializeEntity(entity, spawner.EntityDefinition, position);
+                        var entity = GlobalStates.GameSession.ActiveEcsWorld.CreateEntity();
+                        GlobalStates.GameSession.ActiveEcsWorld.EntityFactory.InitializeEntity(entity, spawner.EntityDefinition, position);
                     }
                 }
             }
@@ -214,20 +214,20 @@ public class GamePlayer : Game, IGameRunner
         RuntimeServices.CameraService = new CameraService(_graphics);
         RuntimeServices.RenderService = new RenderService(GraphicsDevice, _spriteBatch);
         RuntimeServices.PlayerController = new BasePlayerController();
-        RuntimeServices.GameSession = new DefaultGameSession();
+        GlobalStates.GameSession = new DefaultGameSession();
 
         LoadingValue = EngineCore.LoadGameData(_gameData);
         
-        RuntimeServices.GameSession.ActiveEcsWorld = EngineServices.ECS.CreateWorld();
+        GlobalStates.GameSession.ActiveEcsWorld = EngineServices.ECS.CreateWorld();
         if(!LoadingValue.success)
             throw new CriticalEngineException("[GamePlayer] Failed to load game data.", this);
-        var cameraEntity = RuntimeServices.GameSession.ActiveEcsWorld.EntityManager.CreateCameraEntity();
+        var cameraEntity = GlobalStates.GameSession.ActiveEcsWorld.EntityManager.CreateCameraEntity();
         RuntimeServices.CameraService.SetCameraEntity(cameraEntity.Id);
         
-        RuntimeServices.GameSession.ActiveEcsWorld.SystemManager.AddSystem(new CameraSystem());
-        RuntimeServices.GameSession.ActiveEcsWorld.SystemManager.AddSystem(new MapDrawingSystem());
-        ((RenderService)RuntimeServices.RenderService).AddSystemToWorld(RuntimeServices.GameSession.ActiveEcsWorld);
-        RuntimeServices.GameSession.ActiveEcsWorld.SystemManager.AddSystem(new MapForegroundSystem());
+        GlobalStates.GameSession.ActiveEcsWorld.SystemManager.AddSystem(new CameraSystem());
+        GlobalStates.GameSession.ActiveEcsWorld.SystemManager.AddSystem(new MapDrawingSystem());
+        ((RenderService)RuntimeServices.RenderService).AddSystemToWorld(GlobalStates.GameSession.ActiveEcsWorld);
+        GlobalStates.GameSession.ActiveEcsWorld.SystemManager.AddSystem(new MapForegroundSystem());
 
         
         new BaseSubscriber(new URN("rpgc", "events", "on_stat_changed"), 0,
@@ -235,7 +235,6 @@ public class GamePlayer : Game, IGameRunner
         {
             var statId = @event.Data.GetAsOrDefault("statDefId", Ulid.Empty);
         }).Subscribe();
-            _worldRenderTarget = new RenderTarget2D(GraphicsDevice, 400, 225);
         
         base.Initialize();
     }
@@ -289,11 +288,11 @@ public class GamePlayer : Game, IGameRunner
         if (_accumulatedTime >= 10)
         {
             _accumulatedTime = 0;
-            RuntimeServices.GameSession.ActiveEcsWorld?.EventBus.Publish(new URN("rpgc", "events", "test"));
-            if (RuntimeServices.GameSession.CurrentPlayerId != -1)
+            GlobalStates.GameSession.ActiveEcsWorld?.EventBus.Publish(new URN("rpgc", "events", "test"));
+            if (GlobalStates.GameSession.CurrentPlayerId != -1)
             {
-                RuntimeServices.CameraService.LinkToEntity(RuntimeServices.GameSession.CurrentPlayerId);
-                logger.Info("Player entity found with ID {PlayerId}. Camera linked to player.", args: RuntimeServices.GameSession.CurrentPlayerId);
+                RuntimeServices.CameraService.LinkToEntity(GlobalStates.GameSession.CurrentPlayerId);
+                logger.Info("Player entity found with ID {PlayerId}. Camera linked to player.", args: GlobalStates.GameSession.CurrentPlayerId);
             }
             else
             {
@@ -306,21 +305,19 @@ public class GamePlayer : Game, IGameRunner
         UpdateKeyboard();
         EngineServices.InputsService.Update();
         
-        RuntimeServices.GameSession.ActiveEcsWorld?.Update(gameTime.ElapsedGameTime);
+        GlobalStates.GameSession.ActiveEcsWorld?.Update(gameTime.ElapsedGameTime);
         
         EngineServices.InputsService.ResetInputAxis();
-        RuntimeServices.GameSession.ActiveEcsWorld?.EventBus.TickEndOfFrame();
+        GlobalStates.GameSession.ActiveEcsWorld?.EventBus.TickEndOfFrame();
         base.Update(gameTime);
     }
 
-    private RenderTarget2D _worldRenderTarget = null!;
-    
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
         OnDraw?.Invoke(gameTime.ElapsedGameTime);
 
-        RuntimeServices.GameSession.ActiveEcsWorld.Draw(gameTime.ElapsedGameTime);
+        GlobalStates.GameSession.ActiveEcsWorld.Draw(gameTime.ElapsedGameTime);
         
         base.Draw(gameTime);
     }

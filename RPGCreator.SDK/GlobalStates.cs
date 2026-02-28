@@ -7,6 +7,7 @@ using RPGCreator.SDK.Exceptions;
 using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Projects;
+using RPGCreator.SDK.RuntimeService;
 
 namespace RPGCreator.SDK;
 
@@ -230,5 +231,31 @@ public static class GlobalStates
     {
         get => GetState(defaultInstance: field);
         set => RegisterState(value);
+    }
+    
+    public static IGameSession GameSession
+    {
+        get => GetState<IGameSession>();
+        set => RegisterState(value);
+    }
+    
+    public static void OnceStateReady<T>(Action<T> callback) where T : class, IState
+    {
+        lock (StateReadyLock)
+        {
+            if (StateProvider.TryGetState<T>(out var state, "default"))
+            {
+                callback(state);
+            }
+            else
+            {
+                if (!StateReadyCallbacks.ContainsKey(typeof(T)))
+                {
+                    StateReadyCallbacks[typeof(T)] = new List<Action<IState>>();
+                }
+
+                StateReadyCallbacks[typeof(T)].Add(s => callback((T)s));
+            }
+        }
     }
 }

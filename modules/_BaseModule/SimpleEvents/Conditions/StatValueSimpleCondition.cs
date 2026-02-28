@@ -40,7 +40,7 @@ public class StatValueSimpleCondition : BaseSimpleEventCondition
     public override bool ResultExpected => true;
     public override bool EvaluateCondition(CustomData context, CustomData parameters)
     {
-        var world = RuntimeServices.GameSession.ActiveEcsWorld;
+        var world = GlobalStates.GameSession.ActiveEcsWorld;
         if(world == null)
             return false;
 
