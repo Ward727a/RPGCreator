@@ -37,17 +37,17 @@ namespace RPGCreator.RTP.Viewport;
 public class MonogameViewport : BaseMonogameViewport
 {
     private bool startCameraDragging = false;
-    
+
     private static ScopedLogger _logger = Logger.ForContext<MonogameViewport>();
-    
+
     public RenderTarget2D? RenderTarget { get; set; }
-    
+
     private GraphicsDevice _graphicsDevice;
     private SpriteBatch _spriteBatch;
     private IEcsWorld _ecsWorld;
-    
+
     private readonly Color _bgColor = Color.CornflowerBlue; // We do this for now, later on, it's the map selected that will determine the background color of the viewport.
-    
+
     public MonogameViewport(RenderTarget2D renderTarget)
     {
         RenderTarget = renderTarget;
@@ -89,21 +89,22 @@ public class MonogameViewport : BaseMonogameViewport
         }
     }
 
-    public void LoadContent(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
+    private void LoadContent(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
     {
         _graphicsDevice = graphicsDevice;
         _spriteBatch = spriteBatch;
         _ecsWorld = EngineServices.ECS.CreateWorld();
-            
+        
         RuntimeServices.MapService = new MapService();
         RuntimeServices.LayerService = new LayerService();
         RuntimeServices.ChunkService = new ChunkService();
         RuntimeServices.CameraService = new CameraService();
         RuntimeServices.RenderService = new RenderService(graphicsDevice, _spriteBatch);
         RuntimeServices.PlayerController = new BasePlayerController();
+        RuntimeServices.CameraService.SetCameraEntity(_ecsWorld.EntityManager.CreateCameraEntity().Id);
+        
         GlobalStates.GameSession = new DefaultGameSession();
         GlobalStates.GameSession.ActiveEcsWorld = _ecsWorld;
-        RuntimeServices.CameraService.SetCameraEntity(_ecsWorld.EntityManager.CreateCameraEntity().Id);
         
         _ecsWorld.SystemManager.AddSystem(new CameraSystem());
         _ecsWorld.SystemManager.AddSystem(new MapDrawingSystem(graphicsDevice));
@@ -129,7 +130,7 @@ public class MonogameViewport : BaseMonogameViewport
     }
 
     #region InternalMethods - DO NOT TOUCH
-    
+
     private IntPtr? _bitmapControlAddress;
     private uint[]? _internalBuffer;
 

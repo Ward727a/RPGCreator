@@ -18,13 +18,16 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.EditorUiService;
 using Ursa.Controls;
 
@@ -60,6 +63,7 @@ public class ProjectSettingsControl : UserControl
     public ProjectSettingsControl()
     {
         CreateComponents();
+        LoadMaps();
         RegisterEvents();
         LinkToExtension();
         Content = _bodyGrid;
@@ -136,6 +140,11 @@ public class ProjectSettingsControl : UserControl
         _projectMainMapComboBox = new ComboBox()
         {
             VerticalAlignment = VerticalAlignment.Center,
+            ItemTemplate = new FuncDataTemplate<IMapDef>((def, _) => new TextBlock()
+            {
+                Text = def.Name
+            }),
+            PlaceholderText = "Select a main map for the project"
         };
         MakeItem(ref _projectMainMapLabel, _projectMainMapComboBox, "Project Main Map");
         
@@ -178,6 +187,18 @@ public class ProjectSettingsControl : UserControl
             currentProject.Authors.AddRange(authors);
         }
         
+        if(_projectMainMapComboBox.SelectedItem is IMapDef selectedMapDef)
+        {
+            if(currentProject.MainMapId != selectedMapDef.Unique)
+            {
+                currentProject.MainMapId = selectedMapDef.Unique;
+            }
+        }
+        else
+        {
+            currentProject.MainMapId = Ulid.Empty;
+        }
+        
         currentProject.Save();
         
         EditorUiServices.NotificationService.Success("Project settings saved.", "", new NotificationOptions(4_000));
@@ -210,5 +231,18 @@ public class ProjectSettingsControl : UserControl
         Grid.SetColumn(control, 1);
         
         _formBody.Children.Add(grid);
+    }
+
+    private void LoadMaps()
+    {
+        var mapDefs = EngineServices.AssetsManager.GetAssetsOfType<IMapDef>().ToList();
+        
+        _projectMainMapComboBox.ItemsSource = mapDefs;
+
+        _projectMainMapComboBox.SelectedItem = null;
+
+        var selectedDef = mapDefs.Where(d => d.Unique == GlobalStates.ProjectState.CurrentProject?.MainMapId);
+        
+        _projectMainMapComboBox.SelectedItem = selectedDef.FirstOrDefault();
     }
 }

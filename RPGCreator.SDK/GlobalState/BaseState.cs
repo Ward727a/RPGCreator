@@ -19,6 +19,7 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace RPGCreator.SDK.GlobalState;
 
@@ -27,7 +28,7 @@ public abstract class BaseState : IState
     public event PropertyChangedEventHandler? PropertyChanged;
     public event PropertyChangingEventHandler? PropertyChanging;
     
-    public bool SetProperty<T>(ref T field, T value, string propertyName = "")
+    public bool SetProperty<T>(ref T field, T value, [CallerMemberName]string propertyName = "")
     {
         if(EqualityComparer<T>.Default.Equals(field, value))
             return false;

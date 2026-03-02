@@ -18,6 +18,7 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Numerics;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
@@ -76,7 +77,11 @@ public class CameraSystem : ISystem
             ref var transformTargetComponent = ref _componentManager.GetComponent<TransformComponent>(cameraTargetId);
             var targetPosition = transformTargetComponent.Position;
             var targetWithOffset = targetPosition + cameraData.Offset;
-            transformData.Position = targetWithOffset;
+            var smoothness = 5;
+            var delta = (float)deltaTime.TotalSeconds;
+            float t = 1.0f - MathF.Exp(-smoothness * delta);
+            if(Vector2.Distance(transformData.Position, targetWithOffset) > 1f)
+                transformData.Position = Vector2.Lerp(transformData.Position, targetWithOffset, t);;
         }
     }
 

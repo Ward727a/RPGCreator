@@ -240,21 +240,15 @@ public class CameraService : ObservableObject, ICameraService
 
     public Matrix4x4 GetViewMatrix()
     {
-        // Taille réelle de ta fenêtre (ex: 800, 600)
         float viewportWidth = _graphics.PreferredBackBufferWidth;
         float viewportHeight = _graphics.PreferredBackBufferHeight;
 
-        // 1. On arrondit la position de la caméra au PIXEL ENTIER le plus proche
-        // C'est ça qui empêche les textures de "fondre"
         int camX = (int)MathF.Round(Position.X);
         int camY = (int)MathF.Round(Position.Y);
 
-        // 2. On calcule le centre
         float centerX = viewportWidth / 2f;
         float centerY = viewportHeight / 2f;
 
-        // 3. On construit la matrice : Translation inverse -> Scale -> Translation centre
-        // IMPORTANT : Pas de virgules ici !
         return Matrix4x4.CreateTranslation(new Vector3(-camX, -camY, 0)) *
                Matrix4x4.CreateScale(new Vector3(ZoomLevel, ZoomLevel, 1)) * Matrix4x4.CreateTranslation(new Vector3(MathF.Floor(centerX), MathF.Floor(centerY), 0));
     }

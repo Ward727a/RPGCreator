@@ -23,9 +23,7 @@
 // 
 #endregion
 using Avalonia.Controls;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using Avalonia.Layout;
 using CommunityToolkit.Mvvm.Input;
 using RPGCreator.SDK.Types;
