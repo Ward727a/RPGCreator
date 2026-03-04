@@ -1738,7 +1738,7 @@ public class IntRefListControl : UserControl
 
             selectedTileset.Rules = Context.RulesByIntRefValue.Values.SelectMany(r => r).ToList();
             selectedTileset.IntRefs = Context.IntRefs.ToList();
-            EngineServices.AssetsManager.GetLoadedPacks()[0].AddOrUpdateAsset(selectedTileset);
+            EngineServices.AssetsManager.GetDefaultPack().AddOrUpdateAsset(selectedTileset);
         };
         
         AddedIntRef += (_) => RefreshList();

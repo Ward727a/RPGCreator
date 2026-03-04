@@ -145,6 +145,7 @@ namespace RPGCreator.Core
             EngineServices.SerializerService = Serializer;
             Configs = new EngineConfigs(); // Should be removed!!
             Managers = new EngineManagers();
+            
             #if DEBUG
             // In debug mode, we load the engine icons for debug tools (like IconsExplorer).
             Icons = new EngineIcons();

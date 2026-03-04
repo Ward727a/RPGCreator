@@ -313,6 +313,10 @@ namespace RPGCreator.Core.Managers.AssetsManager
             
             RegisterAsset(newAsset);
             newAsset.ResumeTracking();
+
+            var pack = GetDefaultPack();
+            
+            pack.AddOrUpdateAsset(newAsset);
             
             Logger.Debug("Created asset of type {AssetType} with ID {AssetID}", args:[typeof(T).FullName, newAsset.Unique]);
             
@@ -364,7 +368,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             UnregisterAsset(asset);
         }
 
-        public void CommitAsset(BaseAssetDef baseAsset, string packName, AssetScope? fromScope = null)
+        public void CommitAsset(BaseAssetDef baseAsset, AssetScope? fromScope = null)
         {
             if (!baseAsset.IsTransient)
             {
@@ -374,18 +378,13 @@ namespace RPGCreator.Core.Managers.AssetsManager
             }
             
             fromScope?.Untrack(baseAsset);
+
+            var pack = GetDefaultPack();
             
-            if (TryGetPack(packName, out var pack))
-            {
-                baseAsset.IsTransient = false;
-                pack.AddOrUpdateAsset(baseAsset);
-                Logger.Info("Commited transient asset of type {AssetType} with ID {AssetID} to pack {PackName}",
-                    args:[baseAsset.GetType().FullName, baseAsset.Unique, packName]);
-            }
-            else
-            {
-                Logger.Warning("No assets pack found with name {PackName}", args: packName);
-            }
+            baseAsset.IsTransient = false;
+            pack.AddOrUpdateAsset(baseAsset);
+            Logger.Info("Commited transient asset of type {AssetType} with ID {AssetID} to pack {PackName}",
+                args:[baseAsset.GetType().FullName, baseAsset.Unique, pack.Name]);
         }
         
         /// <summary>
@@ -597,6 +596,29 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 return _assetsPacks[packId];
             throw new CriticalEngineException("Default assets pack with name 'assets_pack' not found. Make sure it is included in the project and loaded correctly.",
                 (_assetsPacksMapping, _assetsPacks));
+        }
+
+        public void OnceDefaultPackReady(Action<IAssetsPack> action)
+        {
+            if(_assetsPacksMapping.TryGetValue("assets_pack", out Ulid packId) && _assetsPacks.TryGetValue(packId, out IAssetsPack? pack))
+            {
+                action(pack);
+            }
+            else
+            {
+                void Handler(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+                {
+                    if (e.PropertyName == nameof(GlobalStates.ProjectState.CurrentProject))
+                    {
+                        if(_assetsPacksMapping.TryGetValue("assets_pack", out Ulid newPackId) && _assetsPacks.TryGetValue(newPackId, out IAssetsPack? newPack))
+                        {
+                            action(newPack);
+                            GlobalStates.ProjectState.PropertyChanged -= Handler;
+                        }
+                    }
+                }
+                GlobalStates.ProjectState.PropertyChanged += Handler;
+            }
         }
         
         public bool TryGetPack(string? packName, [NotNullWhen(true)] out IAssetsPack? pack)

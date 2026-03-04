@@ -45,10 +45,15 @@
     <PackageReference Include="Dock.Avalonia.Themes.Fluent" Version="11.3.11.13" />
     <PackageReference Include="Dock.Model.Avalonia" Version="11.3.11.13" />
     <PackageReference Include="Dock.Serializer.Newtonsoft" Version="11.3.11.13" />
+    <PackageReference Include="Fody" Version="6.9.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Irihi.Ursa" Version="1.14.1" />
     <PackageReference Include="Irihi.Ursa.Themes.Semi" Version="1.14.1" />
     <PackageReference Include="LiveMarkdown.Avalonia" Version="1.7.0" />
     <PackageReference Include="LiveMarkdown.Avalonia.Math" Version="1.7.0" />
+    <PackageReference Include="MethodTimer.Fody" Version="3.2.3" />
     <PackageReference Include="Projektanker.Icons.Avalonia" Version="9.6.2" />
     <PackageReference Include="Projektanker.Icons.Avalonia.MaterialDesign" Version="9.6.2" />
     <PackageReference Include="Semi.Avalonia" Version="11.3.7.2" />

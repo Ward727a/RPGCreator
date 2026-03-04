@@ -1,5 +1,10 @@
+using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Newtonsoft.Json;
+using NullGuard;
+using PropertyChanged;
+using PropertyChanging;
+using RPGCreator.SDK.Assets.MetaData;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Internals;
@@ -86,7 +91,9 @@ public abstract class BaseObservableAssetDef : ObservableObject, IBaseAssetDef
     }
 }
 
-public abstract class BaseAssetDef : IBaseAssetDef
+[AddINotifyPropertyChangedInterface]
+[ImplementPropertyChanging]
+public abstract class BaseAssetDef : IBaseAssetDef, IHasMetadata
 {
     private bool _isTrackingActivated;
     [JsonProperty("Name")]
@@ -99,6 +106,7 @@ public abstract class BaseAssetDef : IBaseAssetDef
             UpdateUrn();
         }
     }
+    
     public bool IsDirty { get; set; }
     public bool IsTransient { get; set; }
 
@@ -117,6 +125,28 @@ public abstract class BaseAssetDef : IBaseAssetDef
     {
         _isTrackingActivated = true;
         UpdateUrn();
+        SaveMetaData();
+    }
+    
+    protected void OnPropertyChanged(object sender, PropertyChangedEventArgs args)
+    {
+        if (args.PropertyName == nameof(Unique)) return; // In fact, this should NEVER happen (except on first init).
+        SaveMetaData();
+    }
+
+    private void SaveMetaData()
+    {
+        if (!_isTrackingActivated) return; // We don't want to update the metadata if the tracking is not activated (meaning that the object is still being initialized).
+
+        var meta = GetMetaData();
+        
+        if (meta == null)
+            return;
+        
+        if(RegistryServices.AssetsMetaDataRegistry.ContainsMetaData(Unique))
+            RegistryServices.AssetsMetaDataRegistry.UpdateMetaData(meta);
+        else
+            RegistryServices.AssetsMetaDataRegistry.RegisterMetaData(meta);
     }
 
     public void UpdateUrn()
@@ -152,5 +182,11 @@ public abstract class BaseAssetDef : IBaseAssetDef
     {
         if (Unique != Ulid.Empty) return;
         Unique = id;
+    }
+
+    
+    public virtual BaseMetaData? GetMetaData()
+    {
+        return null;
     }
 }

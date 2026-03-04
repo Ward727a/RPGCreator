@@ -23,9 +23,11 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using CommunityToolkit.Diagnostics;
+using MethodTimer;
 using RPGCreator.Core.Types;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.MetaData;
 using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Extensions;
 using RPGCreator.SDK.Logging;
@@ -162,13 +164,14 @@ namespace RPGCreator.UI.Content.Editor.Tabs
             };
         }
 
+        [Time]
         private void OnLoaded(object? sender, RoutedEventArgs e)
         {
             var project = EngineServices.ProjectsManager.GetCurrentProject();
             _MapList.Children.Clear();
             if (project != null)
             {
-                var maps = EngineServices.AssetsManager.GetAssets<MapDefinition>();
+                var maps = RegistryServices.AssetsMetaDataRegistry.GetAllMetaDataOfType<MapMetaData>();
                 foreach (var map in maps)
                 {
                     AddMapToUi(map);
@@ -184,20 +187,19 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
             Guard.IsNotNull(GlobalStates.ProjectState.CurrentProject, "CurrentProject");
 
-            var mapDef = EngineServices.AssetsManager.CreateTransientAsset<MapDefinition>();
+            var mapDef = EngineServices.AssetsManager.CreateAsset<MapDefinition>();
             mapDef.Name = result;
 
-            var defaultPack = EngineServices.AssetsManager.GetLoadedPacks()[0];
+            EngineServices.AssetsManager.GetDefaultPack().AddOrUpdateAsset(mapDef);
             
-            defaultPack.AddOrUpdateAsset(mapDef);
-            
-            AddMapToUi(mapDef);
+            AddMapToUi(mapDef.GetMetaData() as MapMetaData);
             Logger.Info($"Map '{result}' created.");
         }
         
-        private void AddMapToUi(MapDefinition mapDef)
+        private void AddMapToUi(MapMetaData? mapMetaData)
         {
-            var map = new MapItem(mapDef);
+            if (mapMetaData == null) return;
+            var map = new MapItem(mapMetaData);
             _MapList.Children.Add(map);
         }
     }

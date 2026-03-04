@@ -5,7 +5,7 @@ using RPGCreator.SDK.Types;
 namespace RPGCreator.SDK.Assets.Definitions.Maps;
 
 [SerializingType("SGridParameter")]
-public struct SGridParameter : ISerializable, IDeserializable
+public struct GridParameter : ISerializable, IDeserializable
 {
     public float CellWidth;
     public float CellHeight;
@@ -18,7 +18,7 @@ public struct SGridParameter : ISerializable, IDeserializable
     public SerializationInfo GetObjectData()
     {
         
-        return new SerializationInfo(typeof(SGridParameter))
+        return new SerializationInfo(typeof(GridParameter))
             .AddValue(nameof(CellWidth), CellWidth)
             .AddValue(nameof(CellHeight), CellHeight)
             .AddValue(nameof(CellBorderColor), CellBorderColor);

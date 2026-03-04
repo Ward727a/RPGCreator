@@ -2,11 +2,10 @@ using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Internals;
-using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps;
 
-public interface IMapDef : IBaseAssetDef, ISerializable, IDeserializable, IHasSavePath
+public interface IMapDef : IBaseAssetDef, ISerializable, IDeserializable, IHasSavePath, IHasMetadata
 {
     public Ulid PackId { get; set; }
     
@@ -31,7 +30,7 @@ public interface IMapDef : IBaseAssetDef, ISerializable, IDeserializable, IHasSa
     /// <summary>
     /// Parameters for the grid layout of the map, including cell size and border color.
     /// </summary>
-    public SGridParameter GridParameter { get; set; }
+    public GridParameter GridParameter { get; set; }
     /// <summary>
     /// Background color of the map, which can be used to set a default background or for visual effects.
     /// </summary>

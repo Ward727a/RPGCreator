@@ -1,6 +1,9 @@
-﻿using RPGCreator.SDK.Editor;
+﻿using PropertyChanged;
+using RPGCreator.SDK.Assets.MetaData;
+using RPGCreator.SDK.Editor;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
+using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 
@@ -20,7 +23,7 @@ public enum RenderingMode
     Dynamic
 }
 
-public abstract class BaseLayerDef : BaseAssetDef, ISerializable, IDeserializable
+public abstract class BaseLayerDef : BaseAssetDef, ISerializable, IDeserializable, IHasMetadata
 {
     public abstract IPaintTarget? GetPaintTarget();
     public abstract bool CanPaintObject(object? objectToPaint);
@@ -85,5 +88,10 @@ public abstract class BaseLayerDef : BaseAssetDef, ISerializable, IDeserializabl
         ZIndex = zIndex;
         VisibleByDefault = visible;
         Opacity = opacity;
+    }
+
+    public BaseMetaData GetMetaData()
+    {
+        return new LayerMetaData(this);
     }
 }

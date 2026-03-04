@@ -27,6 +27,7 @@ using RPGCreator.Core.Managers.BrushManagers;
 using RPGCreator.Core.Managers.BrushManagers.Brushs;
 using RPGCreator.Core.Managers.ProjectsManager;
 using RPGCreator.Core.Module;
+using RPGCreator.Core.Registry;
 using RPGCreator.Core.Services;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Commands;
@@ -60,6 +61,14 @@ namespace RPGCreator.Core
             EngineServices.ToolService = Brush;
             EngineServices.UndoRedoService = Commands;
             EngineServices.FeaturesManager = new FeatureManager();
+
+            Projects.OnProjectOpened += (_) =>
+            {
+                RegistryServices.AssetsMetaDataRegistry = new AssetsMetadataRegistry();
+                var ids = RegistryServices.AssetsMetaDataRegistry.GetAllMetaData();
+                
+                Logger.Debug($"AssetsMetadataRegistry: Loaded {ids.Count()} metadata entries for the opened project.");
+            };
 
             _logger.Info($"EngineManagers initialized.");
         }

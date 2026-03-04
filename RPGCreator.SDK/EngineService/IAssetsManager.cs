@@ -48,6 +48,7 @@ public interface IAssetsManager : IService
     public void RegisterPack(IAssetsPack pack);
     public void UnregisterPack(Ulid packId);
     public IAssetsPack GetDefaultPack();
+    public void OnceDefaultPackReady(Action<IAssetsPack> action);
     public bool TryGetPack(string? packName, [NotNullWhen(true)] out IAssetsPack? pack);
     public bool TryGetPack(Ulid packId, [NotNullWhen(true)] out IAssetsPack? pack);
     public IAssetsPack GetPack(Ulid packId);

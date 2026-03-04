@@ -74,6 +74,11 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
 
         LoadIndex();
     }
+    
+    internal Ulid GetDbId()
+    {
+        return _dbId;
+    }
 
     private void LoadIndex()
     {
@@ -344,10 +349,27 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
         EngineCore.Instance.Managers.Assets.AddNewAssetLocation(idAsset.Unique, this, relativePath,
             record.TypeName);
 
+        if (asset is IHasMetadata metadataAsset)
+        {
+            var metaData = metadataAsset.GetMetaData();
+            
+            var metaDataRegistry = RegistryServices.AssetsMetaDataRegistry;
+            if (metaDataRegistry.ContainsMetaData(metaData.UniqueId))
+            {
+                metaDataRegistry.UpdateMetaData(metaData);
+            } 
+            else 
+                metaDataRegistry.RegisterMetaData(metaData);
+            
+            Logger.Debug("Registered metadata for asset of type {AssetType} with ID {AssetID}", args: [asset.GetType().FullName, ((IHasUniqueId)asset).Unique]);
+        }
+
         Log.Information("[Pack {PackName}] Asset {AssetId} saved to path {FilePath} and indexed.", Name,
             idAsset.Unique, fullPath);
     }
 
+    // This method is probably outdated, and might be overhauled by the metadata system.
+    // For now we will keep it, but need to check if it's still relevant.
     public void RegisterReference<T>(T serializableAsset) where T : ISerializable
     {
         var db = EngineDB.GetDB(_dbId);

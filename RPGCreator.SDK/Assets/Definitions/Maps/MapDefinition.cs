@@ -1,5 +1,9 @@
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using Newtonsoft.Json;
+using PropertyChanged;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
+using RPGCreator.SDK.Assets.MetaData;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
@@ -9,9 +13,9 @@ namespace RPGCreator.SDK.Assets.Definitions.Maps;
 [SerializingType("Map")]
 public class MapDefinition : BaseAssetDef, IMapDef
 {
-    private readonly List<IMapDef> _mapDefs = new List<IMapDef>();
+    private List<IMapDef> _mapDefs = new List<IMapDef>();
     [JsonProperty(ItemTypeNameHandling = TypeNameHandling.All)]
-    private readonly List<BaseLayerDef> _tileLayers = new List<BaseLayerDef>();
+    private ObservableCollection<BaseLayerDef> _tileLayers = [];
 
     public Ulid PackId { get; set; }
     public event Action<BaseLayerDef>? TileLayerAdded;
@@ -23,14 +27,16 @@ public class MapDefinition : BaseAssetDef, IMapDef
     
     [JsonProperty(ItemTypeNameHandling = TypeNameHandling.All)]
     public IReadOnlyList<BaseLayerDef> TileLayers => _tileLayers;
+    
     public Size Size { get; set; } = new Size(10, 20); // Default size, can be changed later
 
-    public SGridParameter GridParameter { get; set; } = new()
+    public GridParameter GridParameter { get; set; } = new()
     {
         CellWidth = 32,
         CellHeight = 32,
         CellBorderColor = Color.Black
     }; // Default grid parameters, can be changed later
+    
     public Color BackgroundColor { get; set; }
     
     public MapDefinition()
@@ -39,6 +45,30 @@ public class MapDefinition : BaseAssetDef, IMapDef
         Unique = Ulid.NewUlid();
         Name = "New Map";
         Description = "";
+        _tileLayers.CollectionChanged += (sender, args) =>
+        {
+            if (args.Action is NotifyCollectionChangedAction.Move) return;
+            if (args.NewItems == null) return;
+            
+            foreach (var argsNewItem in args.NewItems)
+            {
+                if (argsNewItem is BaseLayerDef newLayer)
+                {
+                    var metaRegistry = RegistryServices.AssetsMetaDataRegistry;
+                    var metaData = newLayer.GetMetaData();
+                    if (metaData is LayerMetaData layerMeta)
+                        layerMeta.MapId = this.Unique;
+                    if (metaRegistry.ContainsMetaData(metaData.UniqueId))
+                    {
+                        metaRegistry.UpdateMetaData(metaData);
+                    }
+                    else
+                    {
+                        metaRegistry.RegisterMetaData(metaData);
+                    }
+                }
+            }
+        };
     }
 
     public MapDefinition(string mapName, string mapDescription = "")
@@ -54,6 +84,7 @@ public class MapDefinition : BaseAssetDef, IMapDef
             return false; // If the map definition is null or already exists, we can't add it
 
         _mapDefs.Add(mapDef);
+        RegistryServices.AssetsMetaDataRegistry.UpdateMetaData(this.GetMetaData());
         return true;
     }
     public bool RemoveMap(IMapDef mapDef)
@@ -62,12 +93,13 @@ public class MapDefinition : BaseAssetDef, IMapDef
             return false; // If the map definition is null or doesn't exist, we can't remove it
 
         _mapDefs.Remove(mapDef);
+        RegistryServices.AssetsMetaDataRegistry.UpdateMetaData(this.GetMetaData());
         return true;
     }
     
     public bool AddLayer(BaseLayerDef layer)
     {
-        if (layer == null || _tileLayers.Exists(l => l.Unique == layer.Unique))
+        if (layer == null || _tileLayers.Any(l => l.Unique == layer.Unique))
             return false; // If the layer is null or already exists, we can't add it
 
         _tileLayers.Add(layer);
@@ -77,7 +109,7 @@ public class MapDefinition : BaseAssetDef, IMapDef
     
     public bool RemoveLayer(BaseLayerDef layer)
     {
-        if (layer == null || !_tileLayers.Exists(l => l.Unique == layer.Unique))
+        if (layer == null || _tileLayers.All(l => l.Unique != layer.Unique))
             return false; // If the layer is null or doesn't exist, we can't remove it
 
         _tileLayers.Remove(layer);
@@ -126,17 +158,21 @@ public class MapDefinition : BaseAssetDef, IMapDef
         Description = description;
         info.TryGetValue(nameof(MapDefs), out var mapDefs, new List<IMapDef>());
         _mapDefs.Clear();
-        _mapDefs.AddRange(mapDefs);
+        _mapDefs = mapDefs;
         info.TryGetValue(nameof(TileLayers), out var tileLayers, new List<BaseLayerDef>());
-        _tileLayers.Clear();
-        _tileLayers.AddRange(tileLayers);
+        _tileLayers = new ObservableCollection<BaseLayerDef>(tileLayers);
         info.TryGetValue(nameof(Size), out var size, new Size(10, 20));
         Size = size;
-        info.TryGetValue(nameof(GridParameter), out var gridParameter, new SGridParameter());
+        info.TryGetValue(nameof(GridParameter), out var gridParameter, new GridParameter());
         GridParameter = gridParameter;
         info.TryGetValue(nameof(BackgroundColor), out var backgroundColor, Color.DeepSkyBlue);
         BackgroundColor = backgroundColor;
     }
 
     public string SavePath { get; set; }
+    
+    public override BaseMetaData GetMetaData()
+    {
+        return new MapMetaData(this);
+    }
 }

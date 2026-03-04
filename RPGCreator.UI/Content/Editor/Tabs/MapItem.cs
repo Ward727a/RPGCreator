@@ -25,6 +25,7 @@ using Avalonia.Input;
 using CommunityToolkit.Diagnostics;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.MetaData;
 using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Logging;
 
@@ -42,7 +43,7 @@ public class MapItem : StackPanel
     
     private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<MapItem>();
     private string MapName => _mapDef.Name;
-    private readonly MapDefinition _mapDef;
+    private readonly MapMetaData _mapDef;
     
     #endregion
 
@@ -56,13 +57,9 @@ public class MapItem : StackPanel
     
     #region Constructors
     
-    public MapItem(string mapName) : this(new MapDefinition(mapName))
+    public MapItem(MapMetaData metaData)
     {
-    }
-    
-    public MapItem(MapDefinition mapDef)
-    {
-        _mapDef = mapDef;
+        _mapDef = metaData;
         
         Styling();
         CreateComponents();
@@ -74,12 +71,10 @@ public class MapItem : StackPanel
         RegisterEvents();
 
         
-        foreach(var levelChildItem in mapDef.MapDefs)
+        foreach(var levelChildItem in metaData.ChildMapIds)
         {
-            if(levelChildItem is not MapDefinition levelDef)
-                continue;
-
-            AddLevelToUi(levelDef);
+            if (!RegistryServices.AssetsMetaDataRegistry.ContainsMetaData(levelChildItem)) continue;
+            // AddLevelToUi(levelDef);
         }
 
     }
@@ -139,7 +134,7 @@ public class MapItem : StackPanel
         levelItem.OnLevelRemoved += () => 
         {
             _levelsList!.Children.Remove(levelItem);
-            _mapDef.RemoveMap(levelDef);
+            _mapDef.ChildMapIds.Remove(levelDef.Unique);
         };
         _levelsList!.Children.Add(levelItem);
     }
@@ -204,7 +199,7 @@ public class MapItem : StackPanel
 
     private void OnOpenMap()
     {
-        if (!RuntimeServices.MapService.LoadMap(_mapDef.Unique))
+        if (!RuntimeServices.MapService.LoadMap(_mapDef.UniqueId))
         {
             Logger.Error("Failed to load map: {MapName}", args: MapName);
             return;
@@ -228,8 +223,7 @@ public class MapItem : StackPanel
 
                     var levelItem = new LevelItem(levelName);
                     _levelsList!.Children.Add(levelItem);
-
-                    _mapDef.AddMap(levelItem.Level); // Add the level to the map's levels
+                    _mapDef.ChildMapIds.Add(levelItem.Level.Unique); // Add the level to the map's levels
                 }
             }, TaskScheduler.FromCurrentSynchronizationContext());
         
@@ -318,7 +312,25 @@ public class MapItem : StackPanel
             {
                 Guard.IsNotNull(GlobalStates.ProjectState.CurrentProject, "CurrentProject");
 
-                EngineServices.AssetsManager.GetPack(_mapDef.PackId).RemoveAsset(_mapDef.Unique);
+                var assetsManager = EngineServices.AssetsManager;
+                var defaultPack = assetsManager.GetDefaultPack();
+                var metaRegistry = RegistryServices.AssetsMetaDataRegistry;
+                
+                defaultPack.RemoveAsset(_mapDef.UniqueId);
+
+                foreach (var mapDefChildMapId in _mapDef.ChildMapIds)
+                {
+                    defaultPack.RemoveAsset(mapDefChildMapId);
+                    metaRegistry.UnregisterMetaData(mapDefChildMapId);
+                }
+
+                foreach (var tileLayerId in _mapDef.TileLayerIds)
+                {
+                    defaultPack.RemoveAsset(tileLayerId);
+                    metaRegistry.UnregisterMetaData(tileLayerId);
+                }
+                
+                metaRegistry.UnregisterMetaData(_mapDef.UniqueId);
                 
                 OnMapRemoved?.Invoke();
             };

@@ -220,7 +220,7 @@ public class IntGridSetCreateModal : Window
         var newIntGridSet = EngineServices.AssetsManager.CreateAsset<IntGridTilesetDef>();
         newIntGridSet.Name = intGridSetName;
         newIntGridSet.Pack = selectedPack;
-        selectedPack.AddOrUpdateAsset(newIntGridSet);
+        EngineServices.AssetsManager.GetDefaultPack().AddOrUpdateAsset(newIntGridSet);
         Logger.Info("[IntGridSetCreateModal] Created new IntGrid Set '{name}' in pack '{packName}'", intGridSetName, selectedPack.Name);
         
         OnIntGridSetCreated?.Invoke(newIntGridSet);

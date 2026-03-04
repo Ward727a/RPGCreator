@@ -20,6 +20,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using RPGCreator.SDK.Assets;
+using RPGCreator.SDK.Assets.MetaData;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Exceptions;
 using RPGCreator.SDK.Logging;
@@ -187,6 +188,12 @@ public static class RegistryServices
         get => GetService<IToolRegistry>();
         set => RegisterService(value);
     }
+
+    public static IAssetsMetaDataRegistry AssetsMetaDataRegistry
+    {
+        get => GetService(defaultInstance:field);
+        set => RegisterService(value);
+    } = new DefaultAssetsMetaDataRegistry();
     
     #region DefaultInstance
     // All instances here SHOULD NOT be used!
@@ -255,4 +262,68 @@ public static class RegistryServices
         }
     }
 
+    #region DefaultInstances
+    
+    public sealed class DefaultAssetsMetaDataRegistry : IAssetsMetaDataRegistry
+    {
+        public void RegisterIfNotExists<T>(T data) where T : BaseMetaData
+        {
+            Logger.Error("[RegistryService] Sorry, the current instance of AssetsMetadataRegistry is the default one, you need to implement and define your own!");
+        }
+
+        public void RegisterMetaData<T>(T data) where T : BaseMetaData
+        {
+            Logger.Error("[RegistryService] Sorry, the current instance of AssetsMetadataRegistry is the default one, you need to implement and define your own!");
+        }
+
+        public void UpdateMetaData<T>(T data) where T : BaseMetaData
+        {
+            Logger.Error("[RegistryService] Sorry, the current instance of AssetsMetadataRegistry is the default one, you need to implement and define your own!");
+        }
+
+        public void UnregisterMetaData(Ulid uniqueId)
+        {
+            Logger.Error("[RegistryService] Sorry, the current instance of AssetsMetadataRegistry is the default one, you need to implement and define your own!");
+        }
+
+        public T GetMetaData<T>(Ulid uniqueId) where T : BaseMetaData
+        {
+            Logger.Error("[RegistryService] Sorry, the current instance of AssetsMetadataRegistry is the default one, you need to implement and define your own!");
+            return null;
+        }
+
+        public bool TryGetMetaData<T>(Ulid uniqueId, out T? data) where T : BaseMetaData
+        {
+            Logger.Error("[RegistryService] Sorry, the current instance of AssetsMetadataRegistry is the default one, you need to implement and define your own!");
+            data = null;
+            return false;
+        }
+
+        public IEnumerable<Ulid> GetAllMetaData()
+        {
+            Logger.Error("[RegistryService] Sorry, the current instance of AssetsMetadataRegistry is the default one, you need to implement and define your own!");
+            return [];
+        }
+
+        public IEnumerable<T> GetAllMetaDataOfType<T>() where T : BaseMetaData, new()
+        {
+            Logger.Error("[RegistryService] Sorry, the current instance of AssetsMetadataRegistry is the default one, you need to implement and define your own!");
+            return [];
+        }
+
+        public bool ContainsMetaData(Ulid uniqueId)
+        {
+            Logger.Error("[RegistryService] Sorry, the current instance of AssetsMetadataRegistry is the default one, you need to implement and define your own!");
+            return false;
+        }
+
+        public IEnumerable<Ulid> GetRelatedMetaDataIds(Ulid uniqueId)
+        {
+            Logger.Error("[RegistryService] Sorry, the current instance of AssetsMetadataRegistry is the default one, you need to implement and define your own!");
+            return [];
+        }
+    }
+    
+    #endregion
+    
 }
