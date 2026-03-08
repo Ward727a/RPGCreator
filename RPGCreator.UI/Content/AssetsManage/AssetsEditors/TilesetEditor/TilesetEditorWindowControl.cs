@@ -33,7 +33,9 @@ using System.IO;
 using System.Linq;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Logging;
+using RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor.CollisionEditor;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
@@ -55,7 +57,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
         public TextBox NameInput { get; private set; }
         public TextBox TileHeightInput { get; private set; }
         public TextBox TileWidthInput { get; private set; }
-        public ComboBox AssetPackChoice { get; private set; }
+        public Button CollisionEditorButton { get; private set; }
         
         public StackPanel ExamplesTilesPanel { get; private set; }
         public Button ExamplesGenerateTilesButton { get; private set; }
@@ -199,36 +201,18 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
                 Margin = new Avalonia.Thickness(0, 0, 0, 10)
             };
             MainPanel.Children.Add(TileWidthInput);
-
-            AssetPackChoice = new ComboBox
+            
+            CollisionEditorButton = new Button
             {
+                Content = "Collision Editor",
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                Margin = new Avalonia.Thickness(0, 0, 0, 10),
+                Margin = new Avalonia.Thickness(0, 0, 0, 10)
             };
-
-            var index = 0;
-            var currentPack = -1;
-            // Populate the ComboBox with available asset packs
-            foreach (var pack in EngineServices.AssetsManager.GetLoadedPacks())
+            CollisionEditorButton.Click += (sender, e) =>
             {
-                AssetPackChoice.Items.Add(pack.Name);
-                if (TilesetDefinition.PackName != null && TilesetDefinition.PackName == pack.Name)
-                {
-                    currentPack = index;
-                }
-                index++;
-            }
-            MainPanel.Children.Add(AssetPackChoice);
-
-            // Set the selected index if a pack is found
-            if (currentPack >= 0)
-            {
-                AssetPackChoice.SelectedIndex = currentPack;
-            }
-            else
-            {
-                AssetPackChoice.SelectedIndex = 0;
-            }
+                ShowCollisionEditor();
+            };
+            MainPanel.Children.Add(CollisionEditorButton);
         }
 
         private void CreateExampleTiles()
@@ -318,6 +302,29 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             }
         }
 
+        private async void ShowCollisionEditor()
+        {
+            if (ImagePick.SelectedPaths.Count == 0 && string.IsNullOrWhiteSpace(TilesetDefinition.ImagePath))
+            {
+                EditorUiServices.NotificationService.Error("No image selected!", "Please select an image before opening the collision editor.");
+                return;
+            }
+            var imagePath = TilesetDefinition.ImagePath == ImagePick.SelectedPaths[0] ? TilesetDefinition.ImagePath : ImagePick.SelectedPaths[0];
+            var promptContent = new CollisionEditorControl(TilesetDefinition, imagePath);
+            
+            var confirmed = await EditorUiServices.DialogService.ConfirmAsync("Collision Editor", promptContent, new DialogStyle(800, 600, CanResize:true, SizeToContent:DialogSizeToContent.None));
+            
+            if(confirmed)
+                promptContent.SaveCollision();
+            TilesetDefinition.BuildRuntimeCollisionCache();
+            
+            // Debug print for collision cache
+            foreach (var tile in TilesetDefinition.RuntimeCollisionCache.Keys)
+            {
+                Logger.Debug("Tile {tile.X},{tile.Y} has collision: @{colData} flag: @{flag} type: @{type}", tile.X, tile.Y, TilesetDefinition.RuntimeCollisionCache[tile], (int)TilesetDefinition.Collisions[tile].CollisionFlag,TilesetDefinition.Collisions[tile].CollisionGroupingType);
+            }
+        }
+        
         private void CreateFooter()
         {
             // Create a footer with a save button
@@ -360,7 +367,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             TilesetDefinition.Name = NameInput.Text;
             TilesetDefinition.TileHeight = int.TryParse(TileHeightInput.Text, out var height) ? height : 0;
             TilesetDefinition.TileWidth = int.TryParse(TileWidthInput.Text, out var width) ? width : 0;
-            TilesetDefinition.PackName = AssetPackChoice.SelectedItem as string;
+            TilesetDefinition.PackName = EngineServices.AssetsManager.GetDefaultPack().Name;
             
             if (EngineServices.AssetsManager.TryGetPack(TilesetDefinition.PackName, out var pack))
             {
@@ -382,8 +389,6 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
                 
                 TilesetDefinition.ImagePath = imageCopyPath;
                 pack.AddOrUpdateAsset(TilesetDefinition);
-            
-                Console.WriteLine($"New Tileset Created: {TilesetDefinition.Name}, Width: {TilesetDefinition.TileWidth}, Height: {TilesetDefinition.TileHeight}, Asset Pack: {TilesetDefinition.PackName}");
             } else
             {
                 throw new Exception("Couldn't get the pack from the pack name... INTERNAL ERROR!");

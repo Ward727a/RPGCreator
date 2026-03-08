@@ -1,5 +1,6 @@
 using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Tilesets.Collision;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
@@ -23,6 +24,7 @@ public interface ITileDef : ILayerElem, ISerializable, IDeserializable
     public BaseTilesetDef TilesetDef { get; } // The tileset this tile belongs to
     public Rect UV { get; }
     public TileFlip Flip { get; set; }
+    public ECollisionFlag CollisionFlag { get; set; }
     public RuntimeBag Tags { get; } 
 
     public void UpdateTileset(BaseTilesetDef newTilesetDefinition);

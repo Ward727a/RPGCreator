@@ -15,7 +15,7 @@ public class EditorGridLayer : Control
 {
     // On peut binder ça ou le passer en propriété
     public Point Offset { get; set; } = new Point(0, 0);
-    public Size GridCellSize { get; set; } = new (32, 32);
+    public SDK.Types.Size GridCellSize { get; set; } = new (32, 32);
     public bool ShowGrid { get; set; } = true;
 
     // Stylos (Cached pour la perf)
@@ -69,10 +69,11 @@ public class MoveableCanvas : UserControl
     public bool LimitTo00Coordinates { get; set; } = true;
     
     public bool ShowGrid { get; set; } = false;
-    public System.Drawing.Size GridCellSize { get; private set; } = new (32, 32);
+    public SDK.Types.Size GridCellSize { get; private set; } = new (32, 32);
 
     private bool _showCheckboard = false;
-    public bool ShowCheckboard { get => _showCheckboard;
+    public bool ShowCheckboard { 
+        get => _showCheckboard;
         set
         {
             _showCheckboard = value;
@@ -119,7 +120,7 @@ public class MoveableCanvas : UserControl
         }
     }
     
-    public void SetGridCellSize(System.Drawing.Size cellSize)
+    public void SetGridCellSize(SDK.Types.Size cellSize)
     {
         GridCellSize = cellSize;
         _gridLayer.GridCellSize = GridCellSize;

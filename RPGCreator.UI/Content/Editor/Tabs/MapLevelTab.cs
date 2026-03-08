@@ -32,6 +32,7 @@ using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Extensions;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types.Collections;
+using RPGCreator.UI.Common;
 
 namespace RPGCreator.UI.Content.Editor.Tabs
 {
@@ -154,12 +155,12 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
                     e.Handled = true;
 
-                    GlobalStaticUIData.CloseContext();
-                    GlobalStaticUIData.CurrentContext = new ContextMenu();
+                    GlobalStaticUiData.CloseContext();
+                    GlobalStaticUiData.CurrentContext = new ContextMenu();
                     var addMapItem = new MenuItem { Header = "Add Map" };
                     addMapItem.Click += (s, e) => OnCreateNewMap();
-                    (GlobalStaticUIData.CurrentContext as ContextMenu).Items.Add(addMapItem);
-                    GlobalStaticUIData.OpenContext(_BodyGrid);
+                    (GlobalStaticUiData.CurrentContext as ContextMenu).Items.Add(addMapItem);
+                    GlobalStaticUiData.OpenContext(_BodyGrid);
                 }
             };
         }

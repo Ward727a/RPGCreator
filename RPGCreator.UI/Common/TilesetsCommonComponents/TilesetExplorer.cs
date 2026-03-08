@@ -189,7 +189,7 @@ public class TilesetExplorer : UserControl
     {
         base.OnInitialized();
         
-        _canvas.SetGridCellSize(new Size(32, 32));
+        _canvas.SetGridCellSize(new SDK.Types.Size(32, 32));
         ClearTilesetOptions();
         Logger.Debug("[TilingPanel] Loading tileset options...");
         _ = Task.Run(() =>

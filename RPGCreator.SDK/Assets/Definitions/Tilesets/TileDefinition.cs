@@ -1,4 +1,5 @@
 using System.Numerics;
+using RPGCreator.SDK.Assets.Definitions.Tilesets.Collision;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
@@ -16,6 +17,7 @@ public class TileDefinition : BaseAssetDef, ITileDef
     public Vector2 PositionInTileset { get; private set; }
     public Rect UV => new (new(PositionInTileset.X, PositionInTileset.Y), new(TilesetDef.TileWidth, TilesetDef.TileHeight));
     public TileFlip Flip { get; set; } = TileFlip.None;
+    public ECollisionFlag CollisionFlag { get; set; } = ECollisionFlag.None;
     public BaseTilesetDef TilesetDef { get; private set; }
     public RuntimeBag Tags { get; } = new RuntimeBag();
 

@@ -155,7 +155,7 @@ public sealed class GraphViewCtxMenu : UserControl
                     }
                 }
                 
-                GlobalStaticUIData.CloseContext();
+                GlobalStaticUiData.CloseContext();
             }
         };
         
@@ -194,7 +194,7 @@ public sealed class GraphViewCtxMenu : UserControl
                 {
                     if (!args.Properties.IsLeftButtonPressed)
                         return;
-                    GlobalStaticUIData.CloseContext();
+                    GlobalStaticUiData.CloseContext();
                     // Set the position of the node to the mouse position in the GraphView
                     var clone = node.Clone();
                     // var pos = args.GetPosition(this.GetVisualParent());
@@ -211,10 +211,10 @@ public sealed class GraphViewCtxMenu : UserControl
     public void Open(Control? control, Point spawnNodePos)
     {
         SpawnNodePos = spawnNodePos;
-        if(GlobalStaticUIData.CurrentContext != null)
-            GlobalStaticUIData.CloseContext();
-        GlobalStaticUIData.CurrentContext = menu;
-        GlobalStaticUIData.OpenContext(control);
+        if(GlobalStaticUiData.CurrentContext != null)
+            GlobalStaticUiData.CloseContext();
+        GlobalStaticUiData.CurrentContext = menu;
+        GlobalStaticUiData.OpenContext(control);
     }
     
 }

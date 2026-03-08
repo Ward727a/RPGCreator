@@ -161,12 +161,12 @@ public class DialogService : IDialogService
         var confirmWindow = new Window { Title = title };
         ApplyStyle(confirmWindow, style);
 
-        var stackPanel = new StackPanel { Margin = new Thickness(15), Spacing = 20 };
-        confirmWindow.Content = stackPanel;
+        var gridPanel = new Grid { Margin = new Thickness(15), RowSpacing = 20, RowDefinitions = new RowDefinitions("*, Auto")};
+        confirmWindow.Content = gridPanel;
         
         if (content is Control avaloniaContent)
         {
-            stackPanel.Children.Add(avaloniaContent);
+            gridPanel.Children.Add(avaloniaContent);
         }
         else
         {
@@ -176,11 +176,12 @@ public class DialogService : IDialogService
                     Text = content?.ToString() ?? "EMPTY CONTENT PROVIDED",
                     TextWrapping = Avalonia.Media.TextWrapping.Wrap
                 };
-            stackPanel.Children.Add(textContent);
+            gridPanel.Children.Add(textContent);
         }
 
         var buttonPanel = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Spacing = 10 };
-        stackPanel.Children.Add(buttonPanel);
+        gridPanel.Children.Add(buttonPanel);
+        Grid.SetRow(buttonPanel, 1);
         
         var yesButton = new Button { Content = confirmButtonText, IsDefault = true };
         buttonPanel.Children.Add(yesButton);

@@ -53,7 +53,7 @@
     <PackageReference Include="Irihi.Ursa.Themes.Semi" Version="1.14.1" />
     <PackageReference Include="LiveMarkdown.Avalonia" Version="1.7.0" />
     <PackageReference Include="LiveMarkdown.Avalonia.Math" Version="1.7.0" />
-    <PackageReference Include="MethodTimer.Fody" Version="3.2.3" />
+    <PackageReference Include="MethodTimer.Fody" Version="3.2.3" PrivateAssets="all" />
     <PackageReference Include="Projektanker.Icons.Avalonia" Version="9.6.2" />
     <PackageReference Include="Projektanker.Icons.Avalonia.MaterialDesign" Version="9.6.2" />
     <PackageReference Include="Semi.Avalonia" Version="11.3.7.2" />

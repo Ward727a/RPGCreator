@@ -309,7 +309,7 @@ public class TilingPanelControl : UserControl
     {
         base.OnInitialized();
         
-        _canvas.SetGridCellSize(new Size(32, 32));
+        _canvas.SetGridCellSize(new SDK.Types.Size(32, 32));
         ClearTilesetOptions();
         Logger.Debug("[TilingPanel] Loading tileset options...");
         var searchResults = EngineServices.AssetsManager.GetAssets<BaseTilesetDef>();

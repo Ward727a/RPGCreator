@@ -462,12 +462,12 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                 };
                 contextMenu.Items.Add(editMenuItem);
 
-                if (GlobalStaticUIData.CurrentContext != null)
+                if (GlobalStaticUiData.CurrentContext != null)
                 {
-                    GlobalStaticUIData.CloseContext();
+                    GlobalStaticUiData.CloseContext();
                 }
-                GlobalStaticUIData.CurrentContext = contextMenu;
-                GlobalStaticUIData.OpenContext(this);
+                GlobalStaticUiData.CurrentContext = contextMenu;
+                GlobalStaticUiData.OpenContext(this);
 
                 Body.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromArgb(100, 0, 0, 0));
             }

@@ -27,7 +27,6 @@ namespace RPGCreator.SDK.Registry;
 /// </summary>
 public interface IAssetsMetaDataRegistry : IService
 {
-    
     public void RegisterIfNotExists<T>(T data) where T : BaseMetaData;
     
     public void RegisterMetaData<T>(T data) where T : BaseMetaData;

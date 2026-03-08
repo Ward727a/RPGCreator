@@ -200,10 +200,10 @@ public sealed class NodeControl : Control
                 _removeNode(Node);
             };
             menu.Items.Add(item);
-            if(GlobalStaticUIData.CurrentContext != null)
-                GlobalStaticUIData.CloseContext();
-            GlobalStaticUIData.CurrentContext = menu;
-            GlobalStaticUIData.OpenContext(this);
+            if(GlobalStaticUiData.CurrentContext != null)
+                GlobalStaticUiData.CloseContext();
+            GlobalStaticUiData.CurrentContext = menu;
+            GlobalStaticUiData.OpenContext(this);
         }
     }
     private void Dragging(object? s, PointerEventArgs e)

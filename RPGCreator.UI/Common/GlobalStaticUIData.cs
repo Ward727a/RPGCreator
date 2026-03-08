@@ -22,13 +22,14 @@
 // 
 // 
 #endregion
+
 using Avalonia.Controls;
 using Avalonia.Controls.Diagnostics;
 using Avalonia.Controls.Primitives;
 
-namespace RPGCreator.Core.Types
+namespace RPGCreator.UI.Common
 {
-    public static class GlobalStaticUIData
+    public static class GlobalStaticUiData
     {
         public static IPopupHostProvider? CurrentContext;
 

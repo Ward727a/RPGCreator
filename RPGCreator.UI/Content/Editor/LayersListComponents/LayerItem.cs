@@ -36,6 +36,7 @@ using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
+using RPGCreator.UI.Common;
 using Ursa.Controls;
 using MenuItem = Avalonia.Controls.MenuItem;
 using NumericUpDown = Avalonia.Controls.NumericUpDown;
@@ -138,12 +139,12 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
             {
                 e.Handled = true;
 
-                GlobalStaticUIData.CloseContext();
-                GlobalStaticUIData.CurrentContext = new ContextMenu();
+                GlobalStaticUiData.CloseContext();
+                GlobalStaticUiData.CurrentContext = new ContextMenu();
                 var removeLayerItem = new MenuItem { Header = "Remove Layer" };
                 removeLayerItem.Click += (s, e) => OnRemoveLayer();
-                (GlobalStaticUIData.CurrentContext as ContextMenu).Items.Add(removeLayerItem);
-                GlobalStaticUIData.OpenContext(Body);
+                (GlobalStaticUiData.CurrentContext as ContextMenu).Items.Add(removeLayerItem);
+                GlobalStaticUiData.OpenContext(Body);
             }
         }
 
