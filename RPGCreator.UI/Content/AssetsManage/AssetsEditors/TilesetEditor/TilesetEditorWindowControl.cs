@@ -319,10 +319,10 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             TilesetDefinition.BuildRuntimeCollisionCache();
             
             // Debug print for collision cache
-            foreach (var tile in TilesetDefinition.RuntimeCollisionCache.Keys)
-            {
-                Logger.Debug("Tile {tile.X},{tile.Y} has collision: @{colData} flag: @{flag} type: @{type}", tile.X, tile.Y, TilesetDefinition.RuntimeCollisionCache[tile], (int)TilesetDefinition.Collisions[tile].CollisionFlag,TilesetDefinition.Collisions[tile].CollisionGroupingType);
-            }
+            // foreach (var tile in TilesetDefinition.RuntimeCollisionCache.Keys)
+            // {
+            //     Logger.Debug("Tile {tile.X},{tile.Y} has collision: @{colData} flag: @{flag} type: @{type}", tile.X, tile.Y, TilesetDefinition.RuntimeCollisionCache[tile], (int)TilesetDefinition.Collisions[tile].CollisionFlag,TilesetDefinition.Collisions[tile].CollisionGroupingType);
+            // }
         }
         
         private void CreateFooter()

@@ -1,3 +1,4 @@
+using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
@@ -11,6 +12,9 @@ public interface IMapDef : IBaseAssetDef, ISerializable, IDeserializable, IHasSa
     
     event Action<BaseLayerDef> TileLayerAdded;
     event Action<BaseLayerDef> TileLayerRemoved;
+    
+    public CollisionLayer CollisionChunk { get; set; }
+    
     /// <summary>
     /// Description of the map.
     /// </summary>

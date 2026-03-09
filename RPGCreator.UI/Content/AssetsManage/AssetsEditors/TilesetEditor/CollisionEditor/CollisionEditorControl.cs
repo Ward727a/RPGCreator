@@ -37,6 +37,7 @@ using Avalonia.Styling;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.Collision;
+using RPGCreator.SDK.Helpers;
 using RPGCreator.UI.Common;
 using RPGCreator.SDK.Types;
 using Ursa.Controls;
@@ -131,7 +132,7 @@ public class CollisionEditorControl : UserControl
         // Loading collisions from tileset
         foreach (var tilesetDefCollision in _tilesetDef.Collisions)
         {
-            var pos = tilesetDefCollision.Key;
+            var pos = tilesetDefCollision.Key.FromKey();
             var type = tilesetDefCollision.Value.CollisionGroupingType;
             var flag = tilesetDefCollision.Value.CollisionFlag;
             
@@ -538,9 +539,11 @@ public class CollisionEditorControl : UserControl
 
             var data = new CollisionData(groupType, flags);
 
-            if (!_tilesetDef.Collisions.TryAdd(pos, data))
+            var key = pos.ToKey();
+            
+            if (!_tilesetDef.Collisions.TryAdd(key, data))
             {
-                _tilesetDef.Collisions[pos] = data;
+                _tilesetDef.Collisions[key] = data;
             }
         }
         EditorUiServices.NotificationService.Success("Collisions saved.", "Collision saved successfully.");

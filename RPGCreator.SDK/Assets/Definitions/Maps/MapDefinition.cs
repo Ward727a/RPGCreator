@@ -1,10 +1,13 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Numerics;
 using Newtonsoft.Json;
 using PropertyChanged;
+using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.MetaData;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Helpers;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
@@ -21,6 +24,8 @@ public class MapDefinition : BaseAssetDef, IMapDef
     public event Action<BaseLayerDef>? TileLayerAdded;
     public event Action<BaseLayerDef>? TileLayerRemoved;
     
+    public CollisionLayer CollisionChunk { get; set; } = new();
+
     public override UrnSingleModule UrnModule => "maps".ToUrnSingleModule();
     public string Description { get; set; }
     public IReadOnlyList<IMapDef> MapDefs => _mapDefs;
@@ -115,6 +120,57 @@ public class MapDefinition : BaseAssetDef, IMapDef
         _tileLayers.Remove(layer);
         TileLayerRemoved?.Invoke(layer); // Notify subscribers that a layer has been removed
         return true;
+    }
+
+    public void BakeCollisionChunk()
+    {
+        var mergedCollisions = new Dictionary<Vector2, List<Rect>>();
+
+        foreach (var layer in _tileLayers)
+        {
+            if (layer is not TileLayerDefinition tileLayer) continue;
+        
+            foreach (var (chunkId, chunk) in tileLayer.Chunks)
+            {
+                var tiles = chunk.GetAllElementsSpan();
+                for (int i = 0; i < tiles.Length; i++)
+                {
+                    var tile = tiles[i];
+                    if (tile == null) continue;
+
+                    var worldPos = tileLayer.GetElementWorldPosition(chunkId, i);
+                    
+                    // Set world pos to be a 32 multiple
+                    worldPos.X = (int)Math.Round(worldPos.X / 32) * 32;
+                    worldPos.Y = (int)Math.Round(worldPos.Y / 32) * 32;
+                    
+                    tile.TilesetDef.BuildRuntimeCollisionCache();
+                    if (tile.TilesetDef.RuntimeCollisionCache.TryGetValue(tile.PositionInTileset.ToKey(), out var rects))
+                    {
+                        if (!mergedCollisions.ContainsKey(worldPos))
+                            mergedCollisions[worldPos] = new List<Rect>();
+
+                        foreach(var r in rects) {
+                            float localX = r.X - tile.PositionInTileset.X;
+                            float localY = r.Y - tile.PositionInTileset.Y;
+
+                            float finalWorldX = worldPos.X + localX;
+                            float finalWorldY = worldPos.Y + localY;
+                            mergedCollisions[worldPos].Add(new Rect(finalWorldX, finalWorldY, r.Width, r.Height));
+                        }
+                    }
+                }
+            }
+        }
+
+        foreach (var (pos, allRects) in mergedCollisions)
+        {
+            
+            var finalData = new RuntimeCollisionChunkData() {
+                Collisions = allRects.ToArray() 
+            };
+            CollisionChunk.AddElement(finalData, pos);
+        }
     }
     
     public SerializationInfo GetObjectData()

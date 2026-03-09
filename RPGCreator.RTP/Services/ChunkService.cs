@@ -22,8 +22,8 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using CommunityToolkit.Mvvm.ComponentModel;
-using RPGCreator.Core.Types.Map.Chunks;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
 using RPGCreator.SDK.Types;
@@ -164,11 +164,8 @@ public partial class ChunkService : ObservableObject, IChunkService
     {
         var camera = RuntimeServices.CameraService;
     
-        // Taille d'un chunk en pixels (ex: 32 * 32 = 1024)
         float chunkPx = LayerChunk.ChunkSize * _chunkTileSize.Width;
 
-        // On calcule les bords réels du monde vus par la caméra
-        // (L'utilisation du zoom est correcte ici)
         float viewW = (camera.ViewportSize.Width / camera.ZoomLevel);
         float viewH = (camera.ViewportSize.Height / camera.ZoomLevel);
 
@@ -177,7 +174,6 @@ public partial class ChunkService : ObservableObject, IChunkService
         float top = camera.Position.Y - (viewH / 2f);
         float bottom = camera.Position.Y + (viewH / 2f);
 
-        // Conversion en index de Chunks avec Math.Floor impératif
         long minX = (long)Math.Floor(left / chunkPx) - padding;
         long maxX = (long)Math.Floor(right / chunkPx) + padding;
         long minY = (long)Math.Floor(top / chunkPx) - padding;

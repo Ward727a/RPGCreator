@@ -62,7 +62,7 @@ public class EngineSerializer : ISerializerService
                 // old one, should be removed before first release, but for now we need it to avoid breaking testing data.
                 // (I just don't want to restart the testing data... [Ward727, 22/02/2026])
                 new OldColorJsonConverter(), 
-                new UrnJsonConverter()
+                new UrnJsonConverter(),
             },
             PreserveReferencesHandling = PreserveReferencesHandling.Objects,
             DefaultValueHandling = DefaultValueHandling.Ignore

@@ -24,6 +24,7 @@ using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.RTP.ECS.Systems;
 using RPGCreator.RTP.Services;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Systems;
 using RPGCreator.SDK.Editor.Rendering;
@@ -121,6 +122,37 @@ public class MonogameViewport : BaseMonogameViewport
         _graphicsDevice.Clear(_bgColor);
         
         _ecsWorld.SystemManager.Draw(deltaTime);
+        
+        if (RuntimeServices.MapService.CurrentLoadedMapDefinition is MapDefinition mapDef)
+        {
+            if (mapDef.CollisionChunk.Elements.Count <= 0)
+            {
+                mapDef.BakeCollisionChunk();
+        
+                _logger.Debug("Baked {number} collisions for collision chunk",
+                    args: [mapDef.CollisionChunk.Elements.Count]);
+            }
+            else
+            {
+                var elements = mapDef.CollisionChunk.Elements;
+                RuntimeServices.RenderService.PrepareDrawing();
+                foreach (var element in elements)
+                {
+                    var colDataList = element.Value;
+                    if (colDataList.Collisions.Length <= 0) continue;
+                    foreach (var data in colDataList.Collisions)
+                    {
+                        RuntimeServices.RenderService.DrawDebugRect(
+                            data.Position,
+                            data.Size,
+                            SDK.Types.Color.Red * 0.5f,
+                            2f
+                        );
+                    }
+                }
+                RuntimeServices.RenderService.FinishDrawing();
+            }
+        }
     }
 
     public void Update(TimeSpan deltaTime)

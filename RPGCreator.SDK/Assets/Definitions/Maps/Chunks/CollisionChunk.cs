@@ -18,42 +18,26 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
-using System.Runtime.CompilerServices;
-using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
-using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Extensions;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 
-[SerializingType("TileLayerChunk")]
-public class TileLayerChunk() : LayerChunk<ITileDef>
+public record struct RuntimeCollisionChunkData
 {
+    public Rect[] Collisions { get; init; }
 }
 
-[SerializingType("EntityLayerChunk")]
-public class EntityLayerChunk() : LayerChunk<EntitySpawner>
+public class CollisionChunk : LayerChunk
 {
-}
-
-/// <summary>
-/// A chunk of a layer in a map.<br/>
-/// Each chunk is 32x32 elements.<br/>
-/// <br/>
-/// This class is used to store elements of a layer in a map in a more efficient way.<br/>
-/// Instead of storing all elements in a single large array, the layer is divided into chunks.<br/>
-/// This allows for more efficient memory usage and faster access to elements.<br/>
-/// <br/>
-/// Note: This class is generic and can be used with any type that implements <see cref="ILayerElem"/>.
-/// </summary>
-/// <typeparam name="TDef">The type of elements stored in the chunk. Must implement <see cref="ILayerElem"/>.</typeparam>
-public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where TDef : class, ILayerElem
-{
-
-    static LayerChunk()
+    static CollisionChunk()
     {
         if (!(ChunkSize > 0) && ((ChunkSize & (ChunkSize - 1)) == 0))
             throw new NotSupportedException(
@@ -62,7 +46,7 @@ public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where
             "or reimplement SanitizeLocalCoord using modulo or your own system!");
     }
     
-    private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<LayerChunk<TDef>>();
+    private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<CollisionChunk>();
     
     public bool IsEmpty => _localElements.All(e => e == null);
     
@@ -73,7 +57,7 @@ public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where
     /// <br/>
     /// 32*32 = 1024 elements total. (32 tiles wide, 32 tiles high)
     /// </summary>
-    private readonly TDef?[] _localElements = new TDef?[LocalElementsLength];
+    private readonly RuntimeCollisionChunkData?[] _localElements = new RuntimeCollisionChunkData?[LocalElementsLength];
     
     /// <summary>
     /// Sets the element at the given local coordinates.<br/>
@@ -88,7 +72,7 @@ public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where
     /// <param name="localY">The local Y coordinate (0-31).</param>
     /// <param name="element">The element to set at the given coordinates. Can be null.</param>
     /// <exception cref="ArgumentOutOfRangeException">Thrown if the local coordinates are out of bounds even after sanitization.</exception>
-    public void SetElement(int localX, int localY, TDef? element)
+    public void SetElement(int localX, int localY, RuntimeCollisionChunkData? element)
     {
         if (SanitizeLocalCoord(ref localX))
         {
@@ -118,7 +102,7 @@ public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where
     /// </summary>
     /// <param name="location">The world location to set the element at.</param>
     /// <param name="element">The element to set at the given location. Can be null.</param>
-    public void SetElement(Vector2 location, TDef? element)
+    public void SetElement(Vector2 location, RuntimeCollisionChunkData? element)
     {
         var intLocation = location.ToIntFloored();
         SetElement(intLocation.Item1, intLocation.Item2, element);
@@ -137,7 +121,7 @@ public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where
     /// <param name="localY">The local Y coordinate (0-31).</param>
     /// <returns>The element at the given coordinates, or null if none is set.</returns>
     /// <exception cref="ArgumentOutOfRangeException">Thrown if the local coordinates are out of bounds even after sanitization.</exception>
-    public TDef? GetElement(int localX, int localY)
+    public RuntimeCollisionChunkData? GetElement(int localX, int localY)
     {
         if (SanitizeLocalCoord(ref localX))
         {
@@ -167,7 +151,7 @@ public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where
     /// </summary>
     /// <param name="location">The world location to get the element from.</param>
     /// <returns>The element at the given location, or null if none is set.</returns>
-    public TDef? GetElement(Vector2 location)
+    public RuntimeCollisionChunkData? GetElement(Vector2 location)
     {
         var intLocation = location.ToIntFloored();
         return GetElement(intLocation.Item1, intLocation.Item2);
@@ -222,7 +206,7 @@ public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where
     /// <returns>
     /// The removed element, or null if none was set at the given coordinates.
     /// </returns>
-    public TDef? RemoveElement(int localX, int localY)
+    public RuntimeCollisionChunkData? RemoveElement(int localX, int localY)
     {
         if(!HasElement(localX, localY))
             return null;
@@ -242,13 +226,13 @@ public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where
     /// <returns>
     /// The removed element, or null if none was set at the given location.
     /// </returns>
-    public TDef? RemoveElement(Vector2 location)
+    public RuntimeCollisionChunkData? RemoveElement(Vector2 location)
     {
         var intLocation = location.ToIntFloored();
         return RemoveElement(intLocation.Item1, intLocation.Item2);
     }
     
-    public ReadOnlySpan<TDef?> GetAllElementsSpan()
+    public ReadOnlySpan<RuntimeCollisionChunkData?> GetAllElementsSpan()
     {
         return _localElements.AsSpan();
     }
@@ -269,18 +253,18 @@ public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where
 
     public override SerializationInfo GetObjectData()
     {
-        var info = new SerializationInfo(typeof(LayerChunk<TDef>));
+        var info = new SerializationInfo(typeof(CollisionChunk));
     
-        ReadOnlySpan<TDef?> span = _localElements.AsSpan();
+        ReadOnlySpan<RuntimeCollisionChunkData?> span = _localElements.AsSpan();
     
-        var dataToSave = new Dictionary<int, TDef>();
+        var dataToSave = new Dictionary<int, RuntimeCollisionChunkData>();
 
         for (int i = 0; i < span.Length; i++)
         {
-            TDef? element = span[i];
-            if (element != null)
+            RuntimeCollisionChunkData? element = span[i];
+            if (element.HasValue)
             {
-                dataToSave.Add(i, element);
+                dataToSave.Add(i, element.Value);
             }
         }
 
@@ -292,9 +276,9 @@ public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where
     {
         Array.Clear(_localElements, 0, _localElements.Length);
 
-        if (info.TryGetValue("Data", out Dictionary<int, TDef> savedData))
+        if (info.TryGetValue("Data", out Dictionary<int, RuntimeCollisionChunkData>? savedData))
         {
-            Span<TDef?> span = _localElements.AsSpan();
+            Span<RuntimeCollisionChunkData?> span = _localElements.AsSpan();
 
             foreach (var (index, element) in savedData)
             {
@@ -311,135 +295,82 @@ public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where
     }
 }
 
-public abstract class LayerChunk : ISerializable, IDeserializable
+public class CollisionLayer : BaseAssetDef, IMapLayerDef<RuntimeCollisionChunkData>
 {
-    /// <summary>
-    /// The size of the chunk in both width and height.<br/>
-    /// Each chunk is 32x32 elements.<br/>
-    /// <br/>
-    /// Be aware that this is a constant value, and SHOULD NOT be changed.<br/>
-    /// Changing this value will break the map system and cause unexpected behavior.
-    /// </summary>
-    public const int ChunkSize = 32;
-    
-    protected const int LocalElementsLength = ChunkSize * ChunkSize;
-    
-    /// <summary>
-    /// Returns the unique chunk ID for the given world location.<br/>
-    /// The chunk ID is calculated by flooring the location coordinates, dividing by chunk size (32), and combining them into a single long value.<br/>
-    /// <br/>
-    /// This allows for efficient storage and retrieval of chunks based on world coordinates.<br/>
-    /// <br/>
-    /// Note: This method is efficient, but limit the number of chunks to: 2^32 in each direction (X and Y) to avoid overflow issues.
-    /// </summary>
-    /// <param name="location"></param>
-    /// <returns></returns>
-    public static long GetChunkId(Vector2 location)
+    public override UrnSingleModule UrnModule => "CollisionLayer".ToUrnSingleModule();
+    public SerializationInfo GetObjectData()
     {
-        int cx = (int)Math.Floor(location.X / 1024f);
-        int cy = (int)Math.Floor(location.Y / 1024f);
-
-        long xBits = (long)(uint)cx & 0xFFFFFFFFL;
-        long yBits = (long)(uint)cy & 0xFFFFFFFFL;
-
-        return (yBits << 32) | xBits;
-    }
-    
-    /// <summary>
-    /// Returns the unique chunk ID for the given chunk coordinates.<br/>
-    /// The chunk ID is calculated by combining the chunkX and chunkY into a single long value.<br/>
-    /// <br/>
-    /// This allows for efficient storage and retrieval of chunks based on chunk coordinates.<br/>
-    /// <br/>
-    /// Note: This method is efficient, but limit the number of chunks to: 2^32 in each direction (X and Y) to avoid overflow issues.
-    /// </summary>
-    /// <param name="chunkX"></param>
-    /// <param name="chunkY"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long GetChunkId(long chunkX, long chunkY)
-    {
-        return (long)(((ulong)(uint)chunkY << 32) | (uint)chunkX);
-    }
-    
-    /// <summary>
-    /// Deconstructs the given chunk ID into its chunk coordinates (chunkX, chunkY).<br/>
-    /// <br/>
-    /// This allows for efficient retrieval of chunk coordinates from a unique chunk ID.<br/>
-    /// <br/>
-    /// Note: This is strictly like <see cref="GetChunkCoordinate"/> but returns a tuple instead of a Vector2.<br/>
-    /// In fact, <see cref="GetChunkCoordinate"/> uses this method internally.
-    /// </summary>
-    /// <param name="chunkId"></param>
-    /// <returns>
-    /// A tuple containing the chunkX and chunkY coordinates.
-    /// </returns>
-    public static (long chunkX, long chunkY) DeconstructChunkId(long chunkId)
-    {
-        long x = (int)(chunkId & 0xFFFFFFFFL);
-
-        long y = chunkId >> 32;
-
-        return (x, y);
-    }
-    
-    /// <summary>
-    /// Returns the chunk coordinates (chunkX, chunkY) for the given chunk ID as a Vector2.<br/>
-    /// <br/>
-    /// This allows for efficient retrieval of chunk coordinates from a unique chunk ID.
-    /// </summary>
-    /// <param name="index"></param>
-    /// <returns></returns>
-    public static Vector2 GetChunkCoordinate(long index)
-    {
-        var localPos = DeconstructChunkId(index);
-        return new Vector2(localPos.chunkX, localPos.chunkY);
-    }
-    
-    public static Vector2 GetWorldPosition(long chunkId, int index)
-    {
-        if (!RuntimeServices.MapService.HasLoadedMap)
-            return Vector2.Zero;
-        
-        var gridParam = RuntimeServices.MapService.CurrentLoadedMapDefinition?.GridParameter;
-        if (gridParam == null)
-            return Vector2.Zero;
-        
-        if (index is < 0 or >= LocalElementsLength)
-            throw new ArgumentOutOfRangeException(nameof(index), $"Index must be between 0 and {LocalElementsLength}.");
-        
-        long chunkX = (int)(chunkId & 0xFFFFFFFFL);
-        long chunkY = (int)(chunkId >> 32);
-        
-        int localX = index & 31;
-        int localY = index >> 5;
-        
-        float worldX = ((chunkX * ChunkSize) + localX) * gridParam.Value.CellWidth;
-        float worldY = ((chunkY * ChunkSize) + localY) * gridParam.Value.CellHeight;
-        
-        return new Vector2(worldX, worldY);
+        return new SerializationInfo(typeof(CollisionLayer)).AddValue(nameof(Elements), _elements);
     }
 
-    public static Vector2 GetChunkPosition(Vector2 worldPosition)
-    {
-        if (!RuntimeServices.MapService.HasLoadedMap)
-            return Vector2.Zero;
-        
-        var gridParam = RuntimeServices.MapService.CurrentLoadedMapDefinition?.GridParameter;
-        if (gridParam == null)
-            return Vector2.Zero;
-        
-        float cellWidth = gridParam.Value.CellWidth;
-        float cellHeight = gridParam.Value.CellHeight;
-        
-        return new Vector2(worldPosition.X/cellWidth, worldPosition.Y/cellHeight);
-    }
-
-    public abstract SerializationInfo GetObjectData();
     public List<Ulid> GetReferencedAssetIds()
     {
-        return new List<Ulid>();
+        return [];
     }
 
-    public abstract void SetObjectData(DeserializationInfo info);
+    public void SetObjectData(DeserializationInfo info)
+    {
+        info.TryGetValue(nameof(Elements), out _elements, new Dictionary<Vector2, RuntimeCollisionChunkData>());
+    }
+
+    public int ZIndex => 999999;
+    public bool VisibleByDefault { get; set; } = true;
+    public event EventHandler<(Vector2, RuntimeCollisionChunkData)>? ElementAdded;
+    public event EventHandler<(Vector2, RuntimeCollisionChunkData)>? ElementRemoved;
+    private Dictionary<Vector2, RuntimeCollisionChunkData> _elements = new();
+    public ReadOnlyDictionary<Vector2, RuntimeCollisionChunkData> Elements => _elements.AsReadOnly();
+    public void AddElement(RuntimeCollisionChunkData element, Vector2 location)
+    {
+        _elements.Add(location, element);
+    }
+
+    public bool TryAddElement(RuntimeCollisionChunkData element, Vector2 location)
+    {
+        return _elements.TryAdd(location, element);
+    }
+
+    public RuntimeCollisionChunkData RemoveElement(Vector2 location)
+    {
+        return _elements.Remove(location) ? _elements[location] : throw new KeyNotFoundException();
+    }
+
+    public bool TryRemoveElement(Vector2 location, out RuntimeCollisionChunkData removedElement)
+    {
+        return _elements.Remove(location, out removedElement);
+    }
+
+    public bool TryRemoveElement(RuntimeCollisionChunkData element, [NotNullWhen(true)] out Vector2? removedLocation)
+    {
+        foreach (var kvp in _elements)
+        {
+            if (EqualityComparer<RuntimeCollisionChunkData>.Default.Equals(kvp.Value, element))
+            {
+                removedLocation = kvp.Key;
+                _elements.Remove(kvp.Key);
+                return true;
+            }
+        }
+        removedLocation = null;
+        return false;
+    }
+
+    public RuntimeCollisionChunkData GetElement(Vector2 location)
+    {
+        return _elements[location];
+    }
+
+    public bool TryGetElement(Vector2 location, out RuntimeCollisionChunkData element)
+    {
+        return _elements.TryGetValue(location, out element);
+    }
+
+    public bool HasElement(Vector2 location)
+    {
+        return _elements.ContainsKey(location);
+    }
+
+    public void ClearElements()
+    {
+        _elements.Clear();
+    }
 }

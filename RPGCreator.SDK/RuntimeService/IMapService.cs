@@ -194,6 +194,8 @@ public interface IMapService : IService
     /// <returns>The definition of the currently selected layer.</returns>
     BaseLayerDef GetSelectedLayer();
 
+    BaseLayerDef GetLayerAt(int layerIndex);
+
     #endregion
-    
+
 }

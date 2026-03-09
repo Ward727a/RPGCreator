@@ -21,9 +21,9 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using RPGCreator.Core.Types.Map.Chunks;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
+using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;

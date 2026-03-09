@@ -352,16 +352,20 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
         if (asset is IHasMetadata metadataAsset)
         {
             var metaData = metadataAsset.GetMetaData();
-            
-            var metaDataRegistry = RegistryServices.AssetsMetaDataRegistry;
-            if (metaDataRegistry.ContainsMetaData(metaData.UniqueId))
+
+            if (metaData != null)
             {
-                metaDataRegistry.UpdateMetaData(metaData);
-            } 
-            else 
-                metaDataRegistry.RegisterMetaData(metaData);
-            
-            Logger.Debug("Registered metadata for asset of type {AssetType} with ID {AssetID}", args: [asset.GetType().FullName, ((IHasUniqueId)asset).Unique]);
+                var metaDataRegistry = RegistryServices.AssetsMetaDataRegistry;
+                if (metaDataRegistry.ContainsMetaData(metaData.UniqueId))
+                {
+                    metaDataRegistry.UpdateMetaData(metaData);
+                }
+                else
+                    metaDataRegistry.RegisterMetaData(metaData);
+
+                Logger.Debug("Registered metadata for asset of type {AssetType} with ID {AssetID}",
+                    args: [asset.GetType().FullName, ((IHasUniqueId)asset).Unique]);
+            }
         }
 
         Log.Information("[Pack {PackName}] Asset {AssetId} saved to path {FilePath} and indexed.", Name,

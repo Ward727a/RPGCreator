@@ -1,4 +1,4 @@
-using RPGCreator.Core.Types.Map.Chunks;
+using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.PaintTargets;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Editor;

@@ -1,6 +1,7 @@
 using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.Collision;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Helpers;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
@@ -21,13 +22,15 @@ public static class CollisionPhysicsExtensions
         (ECollisionFlag.Bottom | ECollisionFlag.Right, 0.5f, 0.5f)
     };
     
-    public static IEnumerable<Rect> GetCollisionShapes(this CollisionData data, Vector2 tileOffset, float tileSize = 32f)
+    public static IEnumerable<Rect> GetCollisionShapes(this CollisionData data, long tileOffsetKey, float tileSize = 32f)
     {
         float half = tileSize / 2f;
 
         if(data.CollisionFlag == ECollisionFlag.None)
             yield break;
 
+        var tileOffset = tileOffsetKey.FromKey();
+        
         bool CanBeIntersect = (data.CollisionFlag & (ECollisionFlag.Top | ECollisionFlag.Bottom)) != 0 && 
                               (data.CollisionFlag & (ECollisionFlag.Left | ECollisionFlag.Right)) != 0;
         
@@ -73,8 +76,8 @@ public abstract class BaseTilesetDef : BaseAssetDef, ISerializable, IDeserializa
     public virtual int TileWidth { get; set; }
     public virtual int TileHeight { get; set; }
 
-    public Dictionary<Vector2, CollisionData> Collisions { get; set; } = new Dictionary<Vector2, CollisionData>();
-    public Dictionary<Vector2, List<Rect>> RuntimeCollisionCache { get; private set; } = new();
+    public Dictionary<long, CollisionData> Collisions { get; set; } = new Dictionary<long, CollisionData>();
+    public Dictionary<long, List<Rect>> RuntimeCollisionCache { get; private set; } = new();
     
     public void ClearRuntimeCollisionCache() => RuntimeCollisionCache.Clear();
 
@@ -100,6 +103,7 @@ public abstract class BaseTilesetDef : BaseAssetDef, ISerializable, IDeserializa
         info.AddValue("ImageHeight", ImageHeight);
         info.AddValue("TileWidth", TileWidth);
         info.AddValue("TileHeight", TileHeight);
+        info.AddValue("Collisions", Collisions);
         return info;
     }
 
@@ -129,7 +133,7 @@ public abstract class BaseTilesetDef : BaseAssetDef, ISerializable, IDeserializa
         TileWidth = tileWidth;
         info.TryGetValue("TileHeight", out int tileHeight, 0);
         TileHeight = tileHeight;
-        info.TryGetValue("Collisions", out Dictionary<Vector2, CollisionData> collisions, new Dictionary<Vector2, CollisionData>());
+        info.TryGetValue("Collisions", out Dictionary<long, CollisionData> collisions, new Dictionary<long, CollisionData>());
         Collisions = collisions;
         
         //Get the assets pack

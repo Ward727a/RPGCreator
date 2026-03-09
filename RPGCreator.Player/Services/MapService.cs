@@ -113,6 +113,7 @@ public class MapService : IMapService
     {
         MapState.CurrentLayerIndex = layerIndex;
     }
+    
     public bool TryAddLayer(BaseLayerDef layerDef)
     {
         if (!HasLoadedMap || CurrentLoadedMapDefinition == null)
@@ -137,6 +138,15 @@ public class MapService : IMapService
         if (CurrentLayerIndex < 0 || CurrentLayerIndex >= CurrentLoadedMapDefinition.TileLayers.Count)
             throw new InvalidOperationException("Selected layer index is out of bounds.");
         return CurrentLoadedMapDefinition.TileLayers[CurrentLayerIndex];
+    }
+
+    public BaseLayerDef GetLayerAt(int layerIndex)
+    {
+        if (!HasLoadedMap || CurrentLoadedMapDefinition == null)
+            throw new InvalidOperationException("No map loaded.");
+        if (layerIndex < 0 || layerIndex >= CurrentLoadedMapDefinition.TileLayers.Count)
+            throw new InvalidOperationException("Layer index is out of bounds.");
+        return CurrentLoadedMapDefinition.TileLayers[layerIndex];
     }
 
     #region Helpers
