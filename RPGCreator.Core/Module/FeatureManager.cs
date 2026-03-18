@@ -62,6 +62,7 @@ public class FeatureManager : IFeaturesManager
         EngineServices.OnceServiceReady((IFeaturesManager featureManager) =>
         {
             featureManager.RegisterEntityFeature<SpriteFeature>();
+            featureManager.RegisterEntityFeature<BoundsFeature>();
         });
     }
     

@@ -25,18 +25,7 @@ public class EntityManager(ComponentManager componentManager)
 
     public int CreateEntity()
     {
-        var entity = _entityPool.Rent();
-        entity.Id = GetNextEntityId();
-        entity.SetManager(this, componentManager);
-        
-        componentManager.RegisterEntityComponentBits(entity.Id);
-        EnsureCapacity(entity.Id);
-        _entitiesById[entity.Id] = entity;
-        
-        // Add very basic components
-        componentManager.AddComponent(entity.Id, StateComponentFactory.CreateState());
-        
-        return entity.Id;
+        return CreateEntityInternal().Id;
     }
     
     private Entity CreateEntityInternal()
@@ -48,6 +37,8 @@ public class EntityManager(ComponentManager componentManager)
         componentManager.RegisterEntityComponentBits(entity.Id);
         EnsureCapacity(entity.Id);
         _entitiesById[entity.Id] = entity;
+        
+        componentManager.AddComponent(entity.Id, StateComponentFactory.CreateState());
         
         return entity;
     }

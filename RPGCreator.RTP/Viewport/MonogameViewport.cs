@@ -25,6 +25,7 @@ using RPGCreator.RTP.ECS.Systems;
 using RPGCreator.RTP.Services;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Systems;
 using RPGCreator.SDK.Editor.Rendering;
@@ -138,16 +139,30 @@ public class MonogameViewport : BaseMonogameViewport
                 RuntimeServices.RenderService.PrepareDrawing();
                 foreach (var element in elements)
                 {
-                    var colDataList = element.Value;
-                    if (colDataList.Collisions.Length <= 0) continue;
-                    foreach (var data in colDataList.Collisions)
+                    var chunkId = element.Key;
+                    var chunk = element.Value;
+                    if (chunk.IsEmpty) continue;
+                    var index = 0;
+                    foreach (var colDataList in chunk.GetAllElementsSpan())
                     {
-                        RuntimeServices.RenderService.DrawDebugRect(
-                            data.Position,
-                            data.Size,
-                            SDK.Types.Color.Red * 0.5f,
-                            2f
-                        );
+                        if (!colDataList.HasValue)
+                        {
+                            
+                            index++;
+                            continue;
+                        };
+                        Vector2 worldPos = LayerChunk.GetWorldPosition(chunkId, index);
+                        foreach (var data in colDataList.Value.Collisions)
+                        {
+                            RuntimeServices.RenderService.DrawDebugRect(
+                                worldPos + data.Position,
+                                data.Size,
+                                SDK.Types.Color.Red * 0.5f,
+                                2f
+                            );
+                        }
+                        
+                        index++;
                     }
                 }
                 RuntimeServices.RenderService.FinishDrawing();

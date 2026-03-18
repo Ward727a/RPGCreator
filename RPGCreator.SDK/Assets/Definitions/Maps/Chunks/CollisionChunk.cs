@@ -295,7 +295,7 @@ public class CollisionChunk : LayerChunk
     }
 }
 
-public class CollisionLayer : BaseAssetDef, IMapLayerDef<RuntimeCollisionChunkData>
+public class CollisionLayer : BaseAssetDef
 {
     public override UrnSingleModule UrnModule => "CollisionLayer".ToUrnSingleModule();
     public SerializationInfo GetObjectData()
@@ -310,40 +310,40 @@ public class CollisionLayer : BaseAssetDef, IMapLayerDef<RuntimeCollisionChunkDa
 
     public void SetObjectData(DeserializationInfo info)
     {
-        info.TryGetValue(nameof(Elements), out _elements, new Dictionary<Vector2, RuntimeCollisionChunkData>());
+        info.TryGetValue(nameof(Elements), out _elements, new Dictionary<long, CollisionChunk>());
     }
 
     public int ZIndex => 999999;
     public bool VisibleByDefault { get; set; } = true;
-    public event EventHandler<(Vector2, RuntimeCollisionChunkData)>? ElementAdded;
-    public event EventHandler<(Vector2, RuntimeCollisionChunkData)>? ElementRemoved;
-    private Dictionary<Vector2, RuntimeCollisionChunkData> _elements = new();
-    public ReadOnlyDictionary<Vector2, RuntimeCollisionChunkData> Elements => _elements.AsReadOnly();
-    public void AddElement(RuntimeCollisionChunkData element, Vector2 location)
+    public event EventHandler<(long, CollisionChunk)>? ElementAdded;
+    public event EventHandler<(long, CollisionChunk)>? ElementRemoved;
+    private Dictionary<long, CollisionChunk> _elements = new();
+    public ReadOnlyDictionary<long, CollisionChunk> Elements => _elements.AsReadOnly();
+    public void AddElement(CollisionChunk element, long location)
     {
         _elements.Add(location, element);
     }
 
-    public bool TryAddElement(RuntimeCollisionChunkData element, Vector2 location)
+    public bool TryAddElement(CollisionChunk element, long location)
     {
         return _elements.TryAdd(location, element);
     }
 
-    public RuntimeCollisionChunkData RemoveElement(Vector2 location)
+    public CollisionChunk RemoveElement(long location)
     {
         return _elements.Remove(location) ? _elements[location] : throw new KeyNotFoundException();
     }
 
-    public bool TryRemoveElement(Vector2 location, out RuntimeCollisionChunkData removedElement)
+    public bool TryRemoveElement(long location, out CollisionChunk removedElement)
     {
         return _elements.Remove(location, out removedElement);
     }
 
-    public bool TryRemoveElement(RuntimeCollisionChunkData element, [NotNullWhen(true)] out Vector2? removedLocation)
+    public bool TryRemoveElement(CollisionChunk element, [NotNullWhen(true)] out long? removedLocation)
     {
         foreach (var kvp in _elements)
         {
-            if (EqualityComparer<RuntimeCollisionChunkData>.Default.Equals(kvp.Value, element))
+            if (EqualityComparer<CollisionChunk>.Default.Equals(kvp.Value, element))
             {
                 removedLocation = kvp.Key;
                 _elements.Remove(kvp.Key);
@@ -354,17 +354,17 @@ public class CollisionLayer : BaseAssetDef, IMapLayerDef<RuntimeCollisionChunkDa
         return false;
     }
 
-    public RuntimeCollisionChunkData GetElement(Vector2 location)
+    public CollisionChunk GetElement(long location)
     {
         return _elements[location];
     }
 
-    public bool TryGetElement(Vector2 location, out RuntimeCollisionChunkData element)
+    public bool TryGetElement(long location, out CollisionChunk element)
     {
         return _elements.TryGetValue(location, out element);
     }
 
-    public bool HasElement(Vector2 location)
+    public bool HasElement(long location)
     {
         return _elements.ContainsKey(location);
     }

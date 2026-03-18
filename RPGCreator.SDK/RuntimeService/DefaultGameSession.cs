@@ -36,6 +36,8 @@ public class DefaultGameSession : BaseState, IGameSession
             SetProperty(ref field, value);
         }
     }
+    
+    public BlobManager BlobManager { get; } = new BlobManager();
 
     public bool IsPaused
     {

@@ -2,10 +2,12 @@
 using System.Numerics;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
 
 namespace RPGCreator.RTP.Services;
@@ -107,6 +109,84 @@ public class MapService : IMapService
             (float)Math.Floor(worldPosition.Y / cellHeight) * cellHeight
         );
         return mapPosition;
+    }
+    
+    public Vector2 WorldToMapCoordinates(float worldX, float worldY)
+    {
+        if (CurrentLoadedMapDefinition == null)
+            return Vector2.Zero;
+        var cellWidth = CurrentLoadedMapDefinition.GridParameter.CellWidth;
+        var cellHeight = CurrentLoadedMapDefinition.GridParameter.CellHeight;
+        
+        var mapPosition = new Vector2(
+            (float)Math.Floor(worldX / cellWidth) * cellWidth,
+            (float)Math.Floor(worldY / cellHeight) * cellHeight
+        );
+        return mapPosition;
+    }
+
+    public bool IsAreaBlocked(Rect collisionRectangle, int excludeEntityId = -1)
+    {
+        if (CurrentLoadedMapDefinition == null) return true; // If no map definition, we block it by default.
+        return IsTileBlocked(collisionRectangle);
+    }
+
+    private bool IsTileBlocked(Rect collisionRectangle)
+    {
+       if (CurrentLoadedMapDefinition == null) return true;
+
+        var min = WorldToMapCoordinates(collisionRectangle.Left, collisionRectangle.Left);
+        var max = WorldToMapCoordinates(collisionRectangle.Right, collisionRectangle.Bottom);
+        
+        long lastChunkId = -1;
+        ReadOnlySpan<RuntimeCollisionChunkData?> currentChunkSpan = default;
+
+        for (int y = (int)Math.Floor(min.Y); y <= (int)Math.Floor(max.Y); y++)
+        {
+            for (int x = (int)Math.Floor(min.X); x <= (int)Math.Floor(max.X); x++)
+            {
+                long chunkId = LayerChunk.GetChunkId(x, y);
+
+                if (chunkId != lastChunkId)
+                {
+                    if (CurrentLoadedMapDefinition.CollisionChunk.TryGetElement(chunkId, out var chunk))
+                    {
+                        currentChunkSpan = chunk.GetAllElementsSpan();
+                        lastChunkId = chunkId;
+                    }
+                    else
+                    {
+                        lastChunkId = chunkId;
+                        currentChunkSpan = default;
+                    }
+                }
+
+                if (currentChunkSpan == default) continue;
+
+                int localIndex = (y & 31) << 5 | (x & 31);
+                var tileData = currentChunkSpan[localIndex];
+
+                if (tileData.HasValue)
+                {
+                    float tileWorldX = x * 32;
+                    float tileWorldY = y * 32;
+
+                    foreach (var localRect in tileData.Value.Collisions)
+                    {
+                        var worldCollisionRect = new Rect(
+                            tileWorldX + localRect.X,
+                            tileWorldY + localRect.Y,
+                            localRect.Width,
+                            localRect.Height
+                        );
+
+                        if (worldCollisionRect.Intersects(collisionRectangle))
+                            return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public void SelectLayer(int layerIndex)

@@ -22,6 +22,7 @@ using _BaseModule.Features.Entity;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.ECS.Features;
 using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Types;
 
@@ -57,11 +58,19 @@ public class LivingBeingMacroFeature : BaseMacroEntityFeature
         get => GetConfigurationValue(MovementFeature.Urn, 5);
         set => SetConfigurationValue(MovementFeature.Urn, value);
     }
+
+    [EntityFeatureProperty("Size", "The size of the entity.", Category = "Appearance")]
+    public Size Size
+    {
+        get => GetConfigurationValue(BoundsFeature.Urn, new Size(32, 32));
+        set => SetConfigurationValue(BoundsFeature.Urn, value);
+    }
     
     public override void OnSetup()
     {
         var fm = EngineServices.FeaturesManager;
         
+        fm.OnceEntityFeaturesRegistered(BoundsFeature.Urn, RegisterSubFeature);
         fm.OnceEntityFeaturesRegistered(MovementFeature.Urn, RegisterSubFeature);
         fm.OnceEntityFeaturesRegistered(AnimationFeature.Urn, RegisterSubFeature);
         fm.OnceEntityFeaturesRegistered(PlayerTagFeature.Urn, RegisterSubFeature);

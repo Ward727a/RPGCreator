@@ -88,6 +88,11 @@ public class AssetsMetadataRegistry : IAssetsMetaDataRegistry
         Logger.Debug($"AssetsMetadataRegistry: Details collection for table key '{dbTableKey}' initialized.");
         return detailsDb;
     }
+
+    private bool CanEditDb()
+    {
+        return GlobalStates.EngineMode == EEngineMode.Editor;
+    }
     
     public AssetsMetadataRegistry()
     {
@@ -104,6 +109,7 @@ public class AssetsMetadataRegistry : IAssetsMetaDataRegistry
 
     public void RegisterIfNotExists<T>(T data) where T : BaseMetaData
     {
+        if (!CanEditDb()) return;
         EnsureRegistry();
         
         if(ContainsMetaData(data.UniqueId))
@@ -114,6 +120,7 @@ public class AssetsMetadataRegistry : IAssetsMetaDataRegistry
 
     public void RegisterMetaData<T>(T data) where T : BaseMetaData
     {
+        if (!CanEditDb()) return;
         EnsureRegistry();
         
         _registryCache.Upsert(new RegistryEntry()
@@ -130,6 +137,7 @@ public class AssetsMetadataRegistry : IAssetsMetaDataRegistry
     
     public void UpdateMetaData<T>(T data) where T : BaseMetaData
     {
+        if (!CanEditDb()) return;
         EnsureRegistry();
         
         if(!ContainsMetaData(data.UniqueId))
@@ -143,6 +151,7 @@ public class AssetsMetadataRegistry : IAssetsMetaDataRegistry
 
     public void UnregisterMetaData(Ulid uniqueId)
     {
+        if (!CanEditDb()) return;
         EnsureRegistry();
         var db = GetDatabase() ?? throw new InvalidOperationException("The database is not available. This should never happen, as the database should be available when the registry is initialized.");
         var validId = new BsonValue(uniqueId.ToString());

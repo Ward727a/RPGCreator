@@ -39,10 +39,10 @@ public interface ISlabItem
     /// Manually setting this property can lead to unexpected behavior and should be done with caution, if you don't know what you are doing.<br/>
     /// Consider using the appropriate methods in the <see cref="Slabs{T}"/> class to manage the allocation and addition of items to blocks instead of manually setting this property.<br/>
     /// </summary>
-    public int? SlabPointerIndex { get; set; }
+    public int? BlockPointerIndex { get; set; }
 }
 
-public record struct SlabPointer
+public record struct BlockPointer
 {
     public int OccupiedItemsCount;
     /// <summary>
@@ -56,13 +56,18 @@ public record struct SlabPointer
     public int BlockStart;
 }
 
-public sealed class Slabs<T> where T : ISlabItem
+internal interface ISlab
+{
+    void Clear();
+}
+
+public sealed class Slabs<T> : ISlab where T : ISlabItem
 {
     private int _blockSize;
     private List<T> _items;
     
     private int _nextPointerIndex = 0;
-    private ConcurrentDictionary<int, SlabPointer> _pointers;
+    private ConcurrentDictionary<int, BlockPointer> _blockPointers;
     private List<FreeBlock> _blocks;
     
     
@@ -74,14 +79,14 @@ public sealed class Slabs<T> where T : ISlabItem
         _blockSize = blockSize;
         _items = new List<T>();
         _blocks = new List<FreeBlock>();
-        _pointers = new ConcurrentDictionary<int, SlabPointer>();
+        _blockPointers = new ConcurrentDictionary<int, BlockPointer>();
     }
     
     public void Clear()
     {
         _items.Clear();
         _blocks.Clear();
-        _pointers.Clear();
+        _blockPointers.Clear();
         _nextPointerIndex = 0;
     }
 
@@ -256,13 +261,13 @@ public sealed class Slabs<T> where T : ISlabItem
     
     /// <summary>
     /// Determine if the allocation for the next item in the block.<br>
-    /// should be done from the start of the block (if there are any FreeBlocks there).<br/>
-    /// or from the end of the block (if there are any FreeBlocks there OR if the item list can be extended to accommodate it).<br/>
+    /// Should be done from the start of the block (if there are any FreeBlocks there).<br/>
+    /// Or from the end of the block (if there are any FreeBlocks there OR if the item list can be extended to accommodate it).<br/>
     /// <br/>
     /// So: <br/>
     /// if FreeBlock at the start of the block => allocate from start.<br/>
-    /// else if FreeBlock at the end of the block OR the size of item list is equal to the end of the block => allocate from end.<br/>
-    /// else => no space for allocation (So we need to find another block, or extend the item list by the block size + the new item, then move all items inside the new space, and add the old on to the FreeBlocks).<br/>
+    /// Else if FreeBlock at the end of the block OR the size of item list is equal to the end of the block => allocate from end.<br/>
+    /// Else => no space for allocation. (So we need to find another block, or extend the item list by the block size plus the new item, then move all items inside the new space, and add the old on to the FreeBlocks.)<br/>
     /// </summary>
     /// <param name="index"></param>
     /// <returns></returns>
@@ -271,7 +276,7 @@ public sealed class Slabs<T> where T : ISlabItem
         var totalItemSize = _items.Count;
         var item = _items[index];
         
-        var slabPointer = _pointers[item.SlabPointerIndex.Value];
+        var slabPointer = _blockPointers[item.BlockPointerIndex.Value];
         
         var startFreeBlockIndex = FindBlockStartNeighbor(slabPointer.BlockStart);
         
@@ -290,9 +295,8 @@ public sealed class Slabs<T> where T : ISlabItem
         return AllocationDirection.NoSpace;
     }
 
-
     /// <summary>
-    /// Allocate an empty block and return its pointer index and the item index of the first item in the block (which should be 0 since it's empty).<br/>
+    /// Allocate an empty block and return its pointer index.<br/>
     /// </summary>
     /// <returns></returns>
     public int AllocateEmpty()
@@ -300,13 +304,13 @@ public sealed class Slabs<T> where T : ISlabItem
         var freeBlockIndex = TryFindFreeBlock(_blockSize);
         if (freeBlockIndex != -1)
         {
-            var slabPointer = new SlabPointer
+            var blockPointer = new BlockPointer
             {
                 BlockSize = _blockSize,
                 BlockStart = _blocks[freeBlockIndex].StartIndex,
                 OccupiedItemsCount = 0
             };
-            _pointers.TryAdd(_nextPointerIndex, slabPointer);
+            _blockPointers.TryAdd(_nextPointerIndex, blockPointer);
             
             ReduceFreeBlock(freeBlockIndex, _blockSize);
             
@@ -316,14 +320,14 @@ public sealed class Slabs<T> where T : ISlabItem
         }
         else
         {
-            var slabPointer = new SlabPointer
+            var slabPointer = new BlockPointer
             {
                 BlockSize = _blockSize,
                 BlockStart = _items.Count,
                 OccupiedItemsCount = 0
             };
             
-            _pointers.TryAdd(_nextPointerIndex, slabPointer);
+            _blockPointers.TryAdd(_nextPointerIndex, slabPointer);
             
             EnsureCapacity(_items.Count + _blockSize);
             
@@ -332,71 +336,71 @@ public sealed class Slabs<T> where T : ISlabItem
             return _nextPointerIndex - 1;
         }
     }
-    public (int slabPointerIndex, int itemIndex) Allocate(T? item = default)
+    public SlabItemPointer Allocate(T? item = default)
     {
         var freeBlockIndex = TryFindFreeBlock(_blockSize);
         if (freeBlockIndex != -1)
         {
-            var slabPointer = new SlabPointer
+            var blockPointer = new BlockPointer
             {
                 BlockSize = _blockSize,
                 BlockStart = _blocks[freeBlockIndex].StartIndex,
                 OccupiedItemsCount = 1
             };
-            _pointers.TryAdd(_nextPointerIndex, slabPointer);
+            _blockPointers.TryAdd(_nextPointerIndex, blockPointer);
             if(item != null)
-                item.SlabPointerIndex = _nextPointerIndex;
+                item.BlockPointerIndex = _nextPointerIndex;
             
             ReduceFreeBlock(freeBlockIndex, _blockSize);
             
-            _items[slabPointer.BlockStart] = item;
+            _items[blockPointer.BlockStart] = item;
             _nextPointerIndex++;
         }
         else
         {
-            var slabPointer = new SlabPointer
+            var blockPointer = new BlockPointer
             {
                 BlockSize = _blockSize,
                 BlockStart = _items.Count,
                 OccupiedItemsCount = 1
             };
             
-            item.SlabPointerIndex = _nextPointerIndex;
+            item.BlockPointerIndex = _nextPointerIndex;
             if(item.Equals(default(T)))
             {
-                slabPointer.OccupiedItemsCount = 0;
+                blockPointer.OccupiedItemsCount = 0;
             }
-            _pointers.TryAdd(_nextPointerIndex, slabPointer);
+            _blockPointers.TryAdd(_nextPointerIndex, blockPointer);
             
             EnsureCapacity(_items.Count + _blockSize);
             
-            _items[slabPointer.BlockStart] = item;
+            _items[blockPointer.BlockStart] = item;
             _nextPointerIndex++;
         }
         
-        return (item.SlabPointerIndex.Value, 0);
+        return new SlabItemPointer(item.BlockPointerIndex.Value, 0);
     }
 
     /// <summary>
     /// This should only be used to add items to an already allocated block!<br/>
     /// If you don't know what you are doing, consider using an already allocated item as a reference for the block you want to add to, and use the overload that takes an already inserted item as a reference.<br/>
     /// </summary>
-    /// <param name="slabPointIndex"></param>
+    /// <param name="blockPointIndex"></param>
     /// <param name="item"></param>
     /// <exception cref="ArgumentException"></exception>
     /// <exception cref="InvalidOperationException"></exception>
-    public int AddItem(int slabPointIndex, T item)
+    public int AddItem(int blockPointIndex, T item)
     {
-        if (item.SlabPointerIndex != null)
-            throw new ArgumentException("The item already has a slab pointer index, it may already be allocated.", nameof(item));
+        if (item.BlockPointerIndex != null)
+            throw new ArgumentException("The item already has a block pointer index, it may already be allocated.", nameof(item));
         
-        if(!_pointers.TryGetValue(slabPointIndex, out var ptr))
+        if(!_blockPointers.TryGetValue(blockPointIndex, out var ptr))
         {
-            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(slabPointIndex));
+            throw new ArgumentException("Invalid block pointer index for expansion.", nameof(blockPointIndex));
         }
         
         if (ptr.BlockSize <= 0)
-            throw new InvalidOperationException("Invalid slab pointer block size.");
+            throw new InvalidOperationException("Invalid block pointer block size.");
         
         // Check if we need to expand it or if there is space for it in the block.
         if (ptr.BlockSize > 0)
@@ -404,10 +408,10 @@ public sealed class Slabs<T> where T : ISlabItem
             var blockStart = ptr.BlockStart;
             for (int i = blockStart; i < blockStart + ptr.BlockSize; i++)
             {
-                if (!_items[i].SlabPointerIndex.HasValue || _items[i].SlabPointerIndex!.Value != slabPointIndex || _items[i].Equals(default(T)))
+                if (!_items[i].BlockPointerIndex.HasValue || _items[i].BlockPointerIndex!.Value != blockPointIndex || _items[i].Equals(default(T)))
                 {
                     _items[i] = item;
-                    item.SlabPointerIndex = slabPointIndex;
+                    item.BlockPointerIndex = blockPointIndex;
                     ptr.OccupiedItemsCount++;
                     return ptr.OccupiedItemsCount - 1;
                 }
@@ -418,18 +422,23 @@ public sealed class Slabs<T> where T : ISlabItem
         switch (allocationDirection)
         {
             case AllocationDirection.FromStart:
-                ExpandFromStart(slabPointIndex, item);
+                ExpandFromStart(blockPointIndex, item);
                 break;
             case AllocationDirection.FromEnd:
-                ExpandFromEnd(slabPointIndex, item);
+                ExpandFromEnd(blockPointIndex, item);
                 break;
             case AllocationDirection.NoSpace:
-                ReallocateAndAdd(slabPointIndex, item);
+                ReallocateAndAdd(blockPointIndex, item);
                 break;
             default:
                 throw new InvalidOperationException("Unexpected allocation direction.");
         }
         return ptr.OccupiedItemsCount - 1;
+    }
+    
+    public int AddItem(SlabItemPointer itemPointer, T item)
+    {
+        return AddItem(itemPointer.BlockPtrIdx, item);
     }
     
     /// <summary>
@@ -442,17 +451,17 @@ public sealed class Slabs<T> where T : ISlabItem
     /// <exception cref="InvalidOperationException"></exception>
     public int AddItem(T alreadyInsertedItem, T itemToAdd)
     {
-        if(alreadyInsertedItem.SlabPointerIndex == null)
+        if(alreadyInsertedItem.BlockPointerIndex == null)
             throw new ArgumentException("The provided item does not have a valid slab pointer index.", nameof(alreadyInsertedItem));
         
-        if(!_pointers.TryGetValue(alreadyInsertedItem.SlabPointerIndex.Value, out var ptr))
+        if(!_blockPointers.TryGetValue(alreadyInsertedItem.BlockPointerIndex.Value, out var ptr))
         {
-            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(alreadyInsertedItem.SlabPointerIndex.Value));
+            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(alreadyInsertedItem.BlockPointerIndex.Value));
         }
         
         if (ptr.BlockSize <= 0)
             throw new InvalidOperationException("Invalid slab pointer block size.");
-        if (itemToAdd.SlabPointerIndex != null)
+        if (itemToAdd.BlockPointerIndex != null)
             throw new ArgumentException("The item to add already has a slab pointer index, it may already be allocated.", nameof(itemToAdd));
         
         if (ptr.BlockSize > 0)
@@ -463,7 +472,7 @@ public sealed class Slabs<T> where T : ISlabItem
                 if (_items[i] == null)
                 {
                     _items[i] = itemToAdd;
-                    itemToAdd.SlabPointerIndex = alreadyInsertedItem.SlabPointerIndex;
+                    itemToAdd.BlockPointerIndex = alreadyInsertedItem.BlockPointerIndex;
                     ptr.OccupiedItemsCount++;
                     return i - blockStart;
                 }
@@ -474,13 +483,13 @@ public sealed class Slabs<T> where T : ISlabItem
         switch (allocationDirection)
         {
             case AllocationDirection.FromStart:
-                ExpandFromStart(alreadyInsertedItem.SlabPointerIndex.Value, itemToAdd);
+                ExpandFromStart(alreadyInsertedItem.BlockPointerIndex.Value, itemToAdd);
                 break;
             case AllocationDirection.FromEnd:
-                ExpandFromEnd(alreadyInsertedItem.SlabPointerIndex.Value, itemToAdd);
+                ExpandFromEnd(alreadyInsertedItem.BlockPointerIndex.Value, itemToAdd);
                 break;
             case AllocationDirection.NoSpace:
-                ReallocateAndAdd(alreadyInsertedItem.SlabPointerIndex.Value, itemToAdd);
+                ReallocateAndAdd(alreadyInsertedItem.BlockPointerIndex.Value, itemToAdd);
                 break;
             default:
                 throw new InvalidOperationException("Unexpected allocation direction.");
@@ -512,7 +521,7 @@ public sealed class Slabs<T> where T : ISlabItem
             }
         }
 
-        foreach (var pair in _pointers)
+        foreach (var pair in _blockPointers)
         {
             var ptr = pair.Value;
             for (int i = ptr.BlockStart; i < ptr.BlockStart + ptr.BlockSize; i++)
@@ -530,12 +539,12 @@ public sealed class Slabs<T> where T : ISlabItem
     }
     #endif
     
-    private void ExpandFromEnd(int pointerIndex, T itemToAdd)
+    private void ExpandFromEnd(int blockPointerIndex, T itemToAdd)
     {
         
-        if(!_pointers.TryGetValue(pointerIndex, out var ptr))
+        if(!_blockPointers.TryGetValue(blockPointerIndex, out var ptr))
         {
-            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(pointerIndex));
+            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(blockPointerIndex));
         }
         
         int endOfBlock = ptr.BlockStart + ptr.BlockSize;
@@ -555,14 +564,14 @@ public sealed class Slabs<T> where T : ISlabItem
 
         ptr.BlockSize++;
         ptr.OccupiedItemsCount++;
-        itemToAdd.SlabPointerIndex = pointerIndex;
+        itemToAdd.BlockPointerIndex = blockPointerIndex;
     }
 
-    private void ExpandFromStart(int pointerIndex, T itemToAdd)
+    private void ExpandFromStart(int blockPointerIndex, T itemToAdd)
     {
-        if(!_pointers.TryGetValue(pointerIndex, out var ptr))
+        if(!_blockPointers.TryGetValue(blockPointerIndex, out var ptr))
         {
-            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(pointerIndex));
+            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(blockPointerIndex));
         }
     
         int freeIdx = FindBlockStartNeighbor(ptr.BlockStart);
@@ -578,7 +587,7 @@ public sealed class Slabs<T> where T : ISlabItem
         ptr.BlockSize++;
         ptr.OccupiedItemsCount++;
     
-        itemToAdd.SlabPointerIndex = pointerIndex;
+        itemToAdd.BlockPointerIndex = blockPointerIndex;
     }
 
     private void EnsureCapacity(int index)
@@ -589,11 +598,11 @@ public sealed class Slabs<T> where T : ISlabItem
         }
     }
     
-    private void ReallocateAndAdd(int pointerIndex, T itemToAdd)
+    private void ReallocateAndAdd(int blockPointerIndex, T itemToAdd)
     {
-        if(!_pointers.TryGetValue(pointerIndex, out var ptr))
+        if(!_blockPointers.TryGetValue(blockPointerIndex, out var ptr))
         {
-            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(pointerIndex));
+            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(blockPointerIndex));
         }
 
         int oldStart = ptr.BlockStart;
@@ -627,17 +636,17 @@ public sealed class Slabs<T> where T : ISlabItem
 
         int itemIndex = newStart + oldSize;
         _items[itemIndex] = itemToAdd;
-        itemToAdd.SlabPointerIndex = pointerIndex;
+        itemToAdd.BlockPointerIndex = blockPointerIndex;
     }
     
     public void Deallocate(T item)
     {
-        if (item.SlabPointerIndex == null)
+        if (item.BlockPointerIndex == null)
             throw new ArgumentException("The item does not have a valid slab pointer index.", nameof(item));
         
-        if(!_pointers.TryGetValue(item.SlabPointerIndex.Value, out var ptr))
+        if(!_blockPointers.TryGetValue(item.BlockPointerIndex.Value, out var ptr))
         {
-            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(item.SlabPointerIndex.Value));
+            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(item.BlockPointerIndex.Value));
         }
         
         int blockStart = ptr.BlockStart;
@@ -650,16 +659,16 @@ public sealed class Slabs<T> where T : ISlabItem
 
         AddFreeBlock(blockStart, blockSize);
         
-        _pointers.TryRemove(item.SlabPointerIndex.Value, out _);
-        item.SlabPointerIndex = null;
+        _blockPointers.TryRemove(item.BlockPointerIndex.Value, out _);
+        item.BlockPointerIndex = null;
     }
     
-    public void DeallocateBlock(int pointerIndex)
+    public void DeallocateBlock(int blockPointerIndex)
     {
         
-        if(!_pointers.TryGetValue(pointerIndex, out var ptr))
+        if(!_blockPointers.TryGetValue(blockPointerIndex, out var ptr))
         {
-            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(pointerIndex));
+            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(blockPointerIndex));
         }
         
         int blockStart = ptr.BlockStart;
@@ -672,15 +681,19 @@ public sealed class Slabs<T> where T : ISlabItem
 
         AddFreeBlock(blockStart, blockSize);
         
-        _pointers.Remove(pointerIndex, out _);
+        _blockPointers.Remove(blockPointerIndex, out _);
     }
-
     
-    public void RemoveItem(int pointerIndex, int itemIndex)
+    public void DeallocateBlock(SlabItemPointer itemPointer)
     {
-        if(!_pointers.TryGetValue(pointerIndex, out var ptr))
+        DeallocateBlock(itemPointer.BlockPtrIdx);
+    }
+    
+    public void RemoveItem(int blockPointerIndex, int itemIndex)
+    {
+        if(!_blockPointers.TryGetValue(blockPointerIndex, out var ptr))
         {
-            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(pointerIndex));
+            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(blockPointerIndex));
         }
         
         int globalIndex = ptr.BlockStart + itemIndex;
@@ -706,21 +719,71 @@ public sealed class Slabs<T> where T : ISlabItem
     
         ptr.BlockSize--;
         ptr.OccupiedItemsCount--;
-        item.SlabPointerIndex = null;
+        item.BlockPointerIndex = null;
     
         if (ptr.BlockSize == 0)
         {
-            _pointers.Remove(pointerIndex, out _);
+            _blockPointers.Remove(blockPointerIndex, out _);
         }
         
     }
     
+    public void RemoveItem(SlabItemPointer itemPointer)
+    {
+        RemoveItem(itemPointer.BlockPtrIdx, itemPointer.ItemIndex);
+    }
+
+    public bool TryRemoveItem(int blockPointerIndex, int itemIndex, out T? item)
+    {
+        item = default;
+        
+        if(!_blockPointers.TryGetValue(blockPointerIndex, out var ptr))
+        {
+            return false;
+        }
+        
+        int globalIndex = ptr.BlockStart + itemIndex;
+        if (globalIndex < ptr.BlockStart || globalIndex >= ptr.BlockStart + ptr.BlockSize)
+            return false;
+        
+        item = _items[globalIndex];
+        if (item == null)
+            return false;
+        
+        int lastIndexInBlock = ptr.BlockStart + ptr.BlockSize - 1;
+
+        if (globalIndex < lastIndexInBlock)
+        {
+            _items[globalIndex] = _items[lastIndexInBlock];
+        }
+
+        _items[lastIndexInBlock] = default!;
+    
+        AddFreeBlock(lastIndexInBlock, 1);
+    
+        ptr.BlockSize--;
+        ptr.OccupiedItemsCount--;
+        item.BlockPointerIndex = null;
+    
+        if (ptr.BlockSize == 0)
+        {
+            _blockPointers.Remove(blockPointerIndex, out _);
+        }
+        
+        return true;
+    }
+    
+    public bool TryRemoveItem(SlabItemPointer itemPointer, out T? item)
+    {
+        return TryRemoveItem(itemPointer.BlockPtrIdx, itemPointer.ItemIndex, out item);
+    }
+    
     public void RemoveItem(T item)
     {
-        if (item.SlabPointerIndex == null) return;
+        if (item.BlockPointerIndex == null) return;
 
-        int ptrIdx = item.SlabPointerIndex.Value;
-        if(!_pointers.TryGetValue(ptrIdx, out var ptr))
+        int ptrIdx = item.BlockPointerIndex.Value;
+        if(!_blockPointers.TryGetValue(ptrIdx, out var ptr))
         {
             throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(ptrIdx));
         }
@@ -750,45 +813,126 @@ public sealed class Slabs<T> where T : ISlabItem
     
         ptr.BlockSize--;
         ptr.OccupiedItemsCount--;
-        item.SlabPointerIndex = null;
+        item.BlockPointerIndex = null;
     
         if (ptr.BlockSize == 0)
         {
-            _pointers.Remove(ptrIdx, out _);
+            _blockPointers.Remove(ptrIdx, out _);
         }
     }
-    
-    public Span<T> GetSpan(int pointerIndex)
+
+    public bool ContainsItem(int blockPointerIndex, int itemIndex)
     {
-        if(!_pointers.TryGetValue(pointerIndex, out var ptr))
+        if(!_blockPointers.TryGetValue(blockPointerIndex, out var ptr))
         {
-            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(pointerIndex));
+            return false;
+        }
+        
+        int globalIndex = ptr.BlockStart + itemIndex;
+        if (globalIndex < ptr.BlockStart || globalIndex >= ptr.BlockStart + ptr.BlockSize)
+            return false;
+        
+        return _items[globalIndex] != null;
+    }
+    
+    public bool ContainsItem(SlabItemPointer itemPointer)
+    {
+        return ContainsItem(itemPointer.BlockPtrIdx, itemPointer.ItemIndex);
+    }
+    
+    public bool ContainsItem(T item)
+    {
+        return item.BlockPointerIndex != null && _blockPointers.TryGetValue(item.BlockPointerIndex.Value, out var ptr) && ptr.BlockStart <= item.BlockPointerIndex.Value && item.BlockPointerIndex.Value < ptr.BlockStart + ptr.BlockSize;
+    }
+    
+    public Span<T> GetSpan(int blockPointerIndex)
+    {
+        if(!_blockPointers.TryGetValue(blockPointerIndex, out var ptr))
+        {
+            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(blockPointerIndex));
         }
 
 
         return CollectionsMarshal.AsSpan(_items).Slice(ptr.BlockStart, ptr.BlockSize);
     }
     
-    public int GetOccupiedCount(int pointerIndex)
+    public Span<T> GetSpan(SlabItemPointer itemPointer)
     {
-        if(!_pointers.TryGetValue(pointerIndex, out var ptr))
+        return GetSpan(itemPointer.BlockPtrIdx);
+    }
+    
+    public int GetOccupiedCount(int blockPointerIndex)
+    {
+        if(!_blockPointers.TryGetValue(blockPointerIndex, out var ptr))
         {
-            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(pointerIndex));
+            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(blockPointerIndex));
         }
         
         return ptr.OccupiedItemsCount;
     }
 
-    public T GetItem(int slabIdx, int localIdx)
+    public int GetOccupiedCount(SlabItemPointer itemPointer)
     {
-        if(!_pointers.TryGetValue(slabIdx, out var ptr))
+        return GetOccupiedCount(itemPointer.BlockPtrIdx);
+    }
+
+    public T GetItem(int blockPtrIdx, int itemIdx)
+    {
+        if(!_blockPointers.TryGetValue(blockPtrIdx, out var ptr))
         {
-            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(slabIdx));
+            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(blockPtrIdx));
         }
         
-        if (localIdx < 0 || localIdx >= ptr.BlockSize)
-            throw new ArgumentOutOfRangeException(nameof(localIdx), "Invalid local item index for the specified slab pointer.");
+        if (itemIdx < 0 || itemIdx >= ptr.BlockSize)
+            throw new ArgumentOutOfRangeException(nameof(itemIdx), "Invalid local item index for the specified slab pointer.");
         
-        return _items[ptr.BlockStart + localIdx];
+        return _items[ptr.BlockStart + itemIdx];
     }
+
+    public T GetItem(SlabItemPointer itemPointer)
+    {
+        return GetItem(itemPointer.BlockPtrIdx, itemPointer.ItemIndex);
+    }
+
+    public ref T GetItemRef(SlabItemPointer itemPointer)
+    {
+        if(!_blockPointers.TryGetValue(itemPointer.BlockPtrIdx, out var ptr))
+        {
+            throw new ArgumentException("Invalid slab pointer index for expansion.", nameof(itemPointer.BlockPtrIdx));
+        }
+        
+        if (itemPointer.ItemIndex < 0 || itemPointer.ItemIndex >= ptr.BlockSize)
+            throw new ArgumentOutOfRangeException(nameof(itemPointer.ItemIndex), "Invalid local item index for the specified slab pointer.");
+
+        return ref GetSpan(itemPointer)[itemPointer.ItemIndex];
+    }
+    
+    public bool TryGetItem(int blockPtrIdx, int itemIdx, out T item)
+    {
+        if(!_blockPointers.TryGetValue(blockPtrIdx, out var ptr))
+        {
+            item = default!;
+            return false;
+        }
+
+        if (itemIdx < 0 || itemIdx >= ptr.BlockSize)
+        {
+            item = default!;
+            return false;
+        }
+        
+        item = _items[ptr.BlockStart + itemIdx];
+        return true;
+    }
+    
+    public bool TryGetItem(SlabItemPointer itemPointer, out T item)
+    {
+        return TryGetItem(itemPointer.BlockPtrIdx, itemPointer.ItemIndex, out item);
+    }
+}
+
+public record struct SlabItemPointer(int BlockPtrIdx, int ItemIndex)
+{
+    public int BlockPtrIdx { get; internal set; } = BlockPtrIdx;
+    public int ItemIndex { get; internal set; } = ItemIndex;
 }

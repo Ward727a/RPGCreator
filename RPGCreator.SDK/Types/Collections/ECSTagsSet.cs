@@ -22,7 +22,7 @@ using System.Runtime.CompilerServices;
 
 namespace RPGCreator.SDK.Types.Collections;
 
-public sealed class ECSTagsSet : ISparseSet
+public sealed class ECSTagsSet : IEcsSparseSet
 {
     public bool IsTag => true;
     private int[] sparse;

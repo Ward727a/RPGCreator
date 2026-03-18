@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 using RPGCreator.SDK.ECS;
 
 namespace RPGCreator.SDK.Types.Collections;
-public interface ISparseSet
+public interface IEcsSparseSet
 {
     int Count { get; }
     ReadOnlySpan<int> EntitiesSpan { get; }
@@ -10,7 +10,7 @@ public interface ISparseSet
 
     public bool IsTag { get; }
 }
-public sealed class ECSSparseSet<T> : ISparseSet where T : IComponent
+public sealed class ECSSparseSet<T> : IEcsSparseSet where T : IComponent
 {
     public bool IsTag => false;
     

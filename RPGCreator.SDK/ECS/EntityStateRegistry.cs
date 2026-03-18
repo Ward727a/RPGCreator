@@ -28,7 +28,8 @@ public enum StateStorageType
     Int,
     Bool,
     String,
-    Vector2
+    Vector2,
+    Byte
 }
 
 public record struct StateStorageInfo(int Index, StateStorageType StorageType);
@@ -43,9 +44,14 @@ public record struct StateStorageInfo(int Index, StateStorageType StorageType);
 /// Loop(All Components present in module) => Calling 'OnSetup' on each component => Each component register its states (with <see cref="Register"/>) => The registry assign storage index for each state.<br/>
 /// <br/>
 /// This allows the engine to KNOW what size the storage arrays should be for each entity (TotalFloat, TotalInt, etc...).<br/>
+/// <remarks>
+/// It's not a perfect system (Even if a feature is not on an entity, if it defines a float, the size will be at least 1), but it's working.
+/// </remarks>
 /// </summary>
 public class EntityStateRegistry
 {
+    public static UrnSingleModule ModuleUrn => "entity_states".ToUrnSingleModule();
+    
     private readonly Dictionary<URN, StateStorageInfo> _registry = new();
 
     private readonly Dictionary<URN, int> _actionsUrn = new();
@@ -55,6 +61,7 @@ public class EntityStateRegistry
     public int TotalBool { get; private set; }
     public int TotalString { get; private set; }
     public int TotalVector2 { get; private set; }
+    public int TotalByte { get; private set; }
 
     /// <summary>
     /// Register a state with the given URN and storage type.<br/>
@@ -86,6 +93,7 @@ public class EntityStateRegistry
             StateStorageType.Bool => TotalBool++,
             StateStorageType.String => TotalString++,
             StateStorageType.Vector2 => TotalVector2++,
+            StateStorageType.Byte => TotalByte++,
             _ => throw new ArgumentOutOfRangeException(nameof(storageType), storageType, null)
         };
         
@@ -94,6 +102,15 @@ public class EntityStateRegistry
         return info;
     }
 
+    /// <summary>
+    /// Register an action with the given URN.<br/>
+    /// This can be used, for example, for defining if an entity is walking or not, via a global URN path logic.<br/>
+    /// So, if you need to know if an entity is walking, you can check if the entity has the Action 'rpgc://action/walking' inside his state.
+    /// </summary>
+    /// <param name="actionUrn">The URN of the action to register.</param>
+    /// <returns>
+    /// Return a new int, or the existing int if the action was already registered.
+    /// </returns>
     public int RegisterAction(URN actionUrn)
     {
         if (_actionsUrn.ContainsKey(actionUrn))

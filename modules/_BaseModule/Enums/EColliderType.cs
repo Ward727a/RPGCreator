@@ -18,17 +18,18 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGCreator.SDK.ECS.Components;
+using RPGCreator.SDK.Attributes;
 
-namespace RPGCreator.SDK.ECS;
+namespace _BaseModule.Enums;
 
-internal static class StateComponentFactory
+public enum EColliderType
 {
-    private static EntityStateRegistry StateRegistry => EngineServices.ECS.StateRegistry;
-    
-    internal static StateComponent CreateState()
-    {
-        return new StateComponent(StateRegistry.TotalFloat, StateRegistry.TotalInt, StateRegistry.TotalString,
-            StateRegistry.TotalBool, StateRegistry.TotalVector2, StateRegistry.TotalByte);
-    }
+    [Description("None", "No collider.")]
+    None,
+    [Description("Square", "Collider with a square shape.")]
+    Square,
+    [Description("Circle", "Collider with a circle shape.")]
+    Circle,
+    [Description("Complex", "Collider with a complex shape (user defined).")]
+    Complex
 }

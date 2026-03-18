@@ -18,17 +18,28 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGCreator.SDK.ECS.Components;
+namespace RPGCreator.SDK.Debug;
 
-namespace RPGCreator.SDK.ECS;
-
-internal static class StateComponentFactory
+public static class DebugMemory
 {
-    private static EntityStateRegistry StateRegistry => EngineServices.ECS.StateRegistry;
+    #if DEBUG
+        private static readonly Dictionary<string, object?> _data = new();
+
+        public static void Set(string key, object? value) => _data[key] = value;
+
+        public static T? Get<T>(string key)
+        {
+            if (_data.TryGetValue(key, out var val) && val is T typedVal)
+                return typedVal;
+            return default;
+        }
+
+        public static IEnumerable<KeyValuePair<string, object?>> GetAll() => _data;
+    #else
+        [Conditional("DEBUG")] 
+        public static void Set(string key, object? value) { }
     
-    internal static StateComponent CreateState()
-    {
-        return new StateComponent(StateRegistry.TotalFloat, StateRegistry.TotalInt, StateRegistry.TotalString,
-            StateRegistry.TotalBool, StateRegistry.TotalVector2, StateRegistry.TotalByte);
-    }
+        [Conditional("DEBUG")] 
+        public static T? Get<T>(string key) => default;
+    #endif
 }

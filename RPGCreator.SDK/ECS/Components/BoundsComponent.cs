@@ -18,17 +18,15 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGCreator.SDK.ECS.Components;
+using System.Numerics;
+using RPGCreator.SDK.Types;
 
-namespace RPGCreator.SDK.ECS;
+namespace RPGCreator.SDK.ECS.Components;
 
-internal static class StateComponentFactory
+public struct BoundsComponent(Size size) : IComponent
 {
-    private static EntityStateRegistry StateRegistry => EngineServices.ECS.StateRegistry;
-    
-    internal static StateComponent CreateState()
-    {
-        return new StateComponent(StateRegistry.TotalFloat, StateRegistry.TotalInt, StateRegistry.TotalString,
-            StateRegistry.TotalBool, StateRegistry.TotalVector2, StateRegistry.TotalByte);
-    }
+    public Vector2? OffsetOrigin;
+    public Size Size = size;
+    public float Width => Size.Width;
+    public float Height => Size.Height;
 }

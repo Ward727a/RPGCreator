@@ -18,6 +18,8 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Numerics;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.ECS.Components;
@@ -31,6 +33,32 @@ public enum SpriteEffects
     FlipBoth = FlipHorizontally | FlipVertically
 }
 
+public enum ESizeMode : byte
+{
+    [Description("Stretch",
+        "Stretches the sprite to fill the bounds rectangle, which may distort the image if the aspect ratio of the source and destination rectangles are different.")]
+    Stretch,
+
+    [Description("Fit", "Fits the sprite inside the bounds rectangle, cropping the image if necessary.")]
+    Fit,
+
+    [Description("Center", "Centers the sprite inside the bounds rectangle, without cropping.")]
+    Center,
+    
+    [Description("Keep aspect ratio", "Keeps the aspect ratio of the sprite inside the bounds rectangle, but reduce the size of the sprite if necessary.")]
+    KeepAspectRatio,
+
+    // [Description("Tile",
+    //     "Tiles the sprite inside the bounds rectangle, repeating it as necessary on both direction.")]
+    // Tile,
+    //
+    // [Description("Tile X", "Tiles the sprite inside the bounds rectangle, repeating it on the X axis only.")]
+    // TileX,
+    //
+    // [Description("Tile Y", "Tiles the sprite inside the bounds rectangle, repeating it on the Y axis only.")]
+    // TileY,
+}
+
 public struct SpriteComponent : IComponent
 {
     public Ulid SpritesheetId;
@@ -38,4 +66,7 @@ public struct SpriteComponent : IComponent
     public Color Color;
     public SpriteEffects SpriteEffect;
     public float LayerDepth;
+    public ESizeMode SizeMode;
+    public Vector2 ScaledSize; // Set from the system
+    public Vector2 Offset; // Set from the system
 }

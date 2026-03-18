@@ -101,6 +101,16 @@ public interface IMapService : IService
     /// <returns>The corresponding map coordinates.</returns>
     Vector2 WorldToMapCoordinates(Vector2 worldPosition);
 
+    /// <summary>
+    /// Check if a given area is blocked by an entity or a tile with collision.
+    /// </summary>
+    /// <param name="collisionRectangle">The rectangle to check.</param>
+    /// <param name="excludeEntityId">An optional entity ID to exclude from the check (useful for checking if an entity can move to a position without colliding with itself).</param>
+    /// <returns>
+    /// True if the area is blocked, false otherwise.
+    /// </returns>
+    bool IsAreaBlocked(Rect collisionRectangle, int excludeEntityId = -1);
+
     #region Layers
 
     /// <summary>

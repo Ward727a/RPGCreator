@@ -66,6 +66,7 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
         EngineServices.FeaturesManager.RegisterEntityFeature<PlayerTagFeature>();
         EngineServices.FeaturesManager.RegisterEntityFeature<SignalsFeature>();
         EngineServices.FeaturesManager.RegisterEntityFeature<AccessorFeature>();
+        EngineServices.FeaturesManager.RegisterEntityFeature<CollisionFeature>();
         EngineServices.FeaturesManager.RegisterEntityFeature<LivingBeingMacroFeature>();
         EngineServices.FeaturesManager.RegisterGameFeature<StandardControlFeature>();
         
@@ -75,7 +76,6 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
         // Then we can set up the custom assets menu for stats management.
         // We are doing that here, simply to allow us to 'order' the menu option in a specific way.
         // If we were to add another button like 'Items' we could want it to be before 'Stats' for example, so we would add it here before the 'Stats' button.
-        
         EditorUiServices.OnceServiceReady((IDocService docService) =>
         {
             var assembly = Assembly.GetExecutingAssembly();

@@ -25,5 +25,17 @@ namespace RPGCreator.SDK.EngineService;
 public interface IEcsService : IService
 {
     public IEcsWorld CreateWorld();
+    /// <summary>
+    /// State registry.
+    /// Allows registering entity states and keeps track of their storage information.<br/>
+    /// This allows each component to know where to read/write the state value in the storage arrays.<br/>
+    /// State value is shared between all components on the same entity.<br/>
+    /// <br/>
+    /// If a state is registered multiple times, the same StateStorageInfo is returned, ensuring consistency.<br/>
+    /// Here is a schema:<br/>
+    /// Loop (All Components present in module) => Calling 'OnSetup' on each component => Each component register its states (with <see cref="EntityStateRegistry.Register"/>) => The registry assigns storage index for each state.<br/>
+    /// <br/>
+    /// This allows the engine to KNOW what size the storage arrays should be for each entity (TotalFloat, TotalInt, etc...).<br/>
+    /// </summary>
     public EntityStateRegistry StateRegistry { get; }
 }

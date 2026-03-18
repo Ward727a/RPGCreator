@@ -420,6 +420,11 @@ public abstract class LayerChunk : ISerializable, IDeserializable
         return new Vector2(worldX, worldY);
     }
 
+    public static int GetElementIndexByWorldPosition(Vector2 worldPosition)
+    {
+        return ((int)worldPosition.X & 31) | (((int)worldPosition.Y & 31) << 5);
+    }
+
     public static Vector2 GetChunkPosition(Vector2 worldPosition)
     {
         if (!RuntimeServices.MapService.HasLoadedMap)
@@ -432,7 +437,10 @@ public abstract class LayerChunk : ISerializable, IDeserializable
         float cellWidth = gridParam.Value.CellWidth;
         float cellHeight = gridParam.Value.CellHeight;
         
-        return new Vector2(worldPosition.X/cellWidth, worldPosition.Y/cellHeight);
+        return new Vector2(
+            MathF.Floor(worldPosition.X / cellWidth),
+            MathF.Floor(worldPosition.Y / cellHeight)
+        );
     }
 
     public abstract SerializationInfo GetObjectData();

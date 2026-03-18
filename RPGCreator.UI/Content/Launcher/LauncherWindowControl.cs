@@ -40,7 +40,7 @@ namespace RPGCreator.UI.Content.Launcher
 
         public class TestSlab : ISlabItem
         {
-            public int? SlabPointerIndex { get; set; }
+            public int? BlockPointerIndex { get; set; }
         }
         
         private readonly Slabs<TestSlab> _testSlabs = new Slabs<TestSlab>(4);
@@ -187,7 +187,7 @@ namespace RPGCreator.UI.Content.Launcher
             {
                 var newSlab = new TestSlab();
                 _testSlabs.AddItem(1, newSlab);
-                Logger.Info($"Added new slab to index 0. Pointer index: {newSlab.SlabPointerIndex}");
+                Logger.Info($"Added new slab to index 0. Pointer index: {newSlab.BlockPointerIndex}");
             };
             
             projectDetailsPanel.Children.Add(TestAddSlabButton);
@@ -196,7 +196,7 @@ namespace RPGCreator.UI.Content.Launcher
                 var newSlab = new TestSlab();
                 _testSlabs.Allocate(newSlab);
                 _slabPointerCounter++;
-                Logger.Info($"Added new slab. Pointer index: {newSlab.SlabPointerIndex}");
+                Logger.Info($"Added new slab. Pointer index: {newSlab.BlockPointerIndex}");
             };
             
             var TestDebugSlabsButton = new Button

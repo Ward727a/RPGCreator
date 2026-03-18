@@ -18,12 +18,12 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.Drawing;
 using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Animations;
 using RPGCreator.SDK.ECS.Components;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
-using RPGCreator.SDK.Types.Collections;
+using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.ECS.Systems;
 
@@ -34,10 +34,17 @@ public class SpriteRenderSystem : ISystem
     public override bool IsDrawingSystem => true;
     
     ComponentManager _componentManager = null!;
+
+    private int _shouldRecalculateSpriteSizeIdx;
     
     private Action<TimeSpan> _updateAction = (_) => { };
     
     private readonly Dictionary<Ulid, SpritesheetDef> _sheetCache = new();
+
+    public SpriteRenderSystem(int shouldRecalculateSpriteSizeIdx)
+    {
+        _shouldRecalculateSpriteSizeIdx = shouldRecalculateSpriteSizeIdx;
+    }
     
     public override void Initialize(IEcsWorld ecsWorld)
     {
@@ -56,23 +63,49 @@ public class SpriteRenderSystem : ISystem
             return;
         _updateAction = ActualUpdate;
     }
+    
     public override void Update(TimeSpan deltaTime)
     {
         _updateAction(deltaTime);
+    }
+
+    private enum ENeedRecalculateSpriteSize : byte
+    {
+        FirstTime,
+        ShouldRecalculate,
+        Done
     }
     
     private void ActualUpdate(TimeSpan deltaTime)
     {
         var renderer = RuntimeServices.RenderService;
         
+        // All entities have a state component without exception, so we can safely get the set without checking.
+        // If it crashes, then there is a problem with how the engine ECS setup is made, and not in this system.
+        var stateSet = _componentManager.GetCompSet<StateComponent>(); 
         var transformSet = _componentManager.GetCompSet<TransformComponent>();
         var spriteSet = _componentManager.GetCompSet<SpriteComponent>();
+        var boundsSet = _componentManager.GetCompSet<BoundsComponent>();
         
-        foreach (var entityId in _componentManager.Query<SpriteComponent, TransformComponent>())
+        foreach (var entityId in _componentManager.QueryDirty<TransformComponent>().WithComponent<BoundsComponent>())
         {
+            ref var stateComponent = ref stateSet.Get(entityId);
+            stateComponent.SetByte(_shouldRecalculateSpriteSizeIdx, (byte)ENeedRecalculateSpriteSize.ShouldRecalculate);
+        }
+
+        foreach (var entityId in _componentManager.QueryDirty<BoundsComponent>())
+        {
+            ref var stateComponent = ref stateSet.Get(entityId);
+            stateComponent.SetByte(_shouldRecalculateSpriteSizeIdx, (byte)ENeedRecalculateSpriteSize.ShouldRecalculate);
+        }
+        
+        foreach (var entityId in _componentManager.Query<SpriteComponent, TransformComponent, BoundsComponent>())
+        {
+            ref var stateComponent = ref stateSet.Get(entityId);
             ref var transformComponent = ref transformSet.Get(entityId);
             ref var spriteComponent = ref spriteSet.Get(entityId);
-
+            ref var boundsComponent = ref boundsSet.Get(entityId);
+            
             if (!_sheetCache.TryGetValue(spriteComponent.SpritesheetId, out var spritesheet))
             {
                 if (EngineServices.AssetsManager.TryResolveAsset(spriteComponent.SpritesheetId, out spritesheet))
@@ -82,23 +115,76 @@ public class SpriteRenderSystem : ISystem
                 else continue;
             }
             
-            var imagePath = spritesheet.ImagePath;
             var frameRect = spritesheet.GetFrameRect(spriteComponent.CurrentFrameIndex);
+
+            var shouldRecalculateSize = stateComponent.GetByte(_shouldRecalculateSpriteSizeIdx);
+            if (shouldRecalculateSize != (byte)ENeedRecalculateSpriteSize.Done)
+            {
+                Logger.Debug("Recalculating sprite size");
+                stateComponent.SetByte(_shouldRecalculateSpriteSizeIdx, (byte)ENeedRecalculateSpriteSize.Done);
+                Vector2 finalScale = transformComponent.Scale;
+                Vector2 offset = Vector2.Zero;
             
-            float depthOffset = Math.Clamp(transformComponent.Position.Y / 10000f, 0, 0.9f);
-            float finalDepth = spriteComponent.LayerDepth - depthOffset;
+                float scaleX = boundsComponent.Width / frameRect.Width;
+                float scaleY = boundsComponent.Height / frameRect.Height;
+
+                switch (spriteComponent.SizeMode)
+                {
+                    case ESizeMode.Stretch:
+                    {
+                        finalScale *= new Vector2(scaleX, scaleY);
+                        break;
+                    }
+                    case ESizeMode.KeepAspectRatio:
+                    {
+                        float ratio = MathF.Min(scaleX, scaleY);
+                        finalScale *= new Vector2(ratio, ratio);
+                    
+                        offset.X = (boundsComponent.Width - (frameRect.Width * ratio * transformComponent.Scale.X)) / 2f;
+                        offset.Y = (boundsComponent.Height - (frameRect.Height * ratio * transformComponent.Scale.Y)) / 2f;
+                        break;
+                    }
+                    case ESizeMode.Center:
+                    {
+                        offset.X = (boundsComponent.Width - frameRect.Width * transformComponent.Scale.X) / 2f;
+                        offset.Y = (boundsComponent.Height - frameRect.Height * transformComponent.Scale.Y) / 2f;
+                        break;
+                    }
+                }
+                spriteComponent.ScaledSize = finalScale;
+                spriteComponent.Offset = offset;
+                
+                Logger.Debug("Sprite size recalculated, result: ScaledSize: {scaledSize}, Offset: {offset}", spriteComponent.ScaledSize, spriteComponent.Offset);
+            }
             
+            // Debug drawing render square
+
+            var originDebugRect = spritesheet.FeetOrigin * spriteComponent.ScaledSize;
+
+            if (!boundsComponent.OffsetOrigin.HasValue || boundsComponent.OffsetOrigin.Value != originDebugRect)
+            {
+                boundsComponent.OffsetOrigin = originDebugRect;
+            }
+            
+            renderer.DrawDebugRect(
+                transformComponent.Position
+                - (originDebugRect), // Here we use the scaledsize because the Origin is from the sprite.
+                (boundsComponent.Size), 
+                Color.Magenta,
+                1f
+                );
             
             renderer.SubmitToQueue(new RenderCommand {
                 TexturePath = spritesheet.ImagePath,
-                Position = transformComponent.Position,
+                Position = transformComponent.Position + spriteComponent.Offset,
                 SourceRect = frameRect,
                 Color = spriteComponent.Color,
                 Rotation = transformComponent.Rotation,
                 Origin = spritesheet.FeetOrigin,
-                Scale = transformComponent.Scale * 2,
-                SortY = transformComponent.Position.Y // foot pivot
+                Scale = spriteComponent.ScaledSize,
+                SortY = transformComponent.Position.Y // Foot pivot (the engine manages this, so we only need to put the position Y)
             });
         }
     }
+
 }

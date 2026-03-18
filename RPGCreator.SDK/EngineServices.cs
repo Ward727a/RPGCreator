@@ -271,6 +271,9 @@ public static class EngineServices
     /// <param name="action">The action to execute with the service instance.</param>
     /// <param name="groupName">The group name of the service. Defaults to "default".</param>
     /// <typeparam name="T">The type of the service.</typeparam>
+    
+    // Should we force user to use this by putting internal on the static variables?
+    // Need to think about this, because if a module creator use a service while it's not ready, the module will stop working...
     public static void OnceServiceReady<T>(Action<T> action, string groupName = "default") where T : class, IService
     {
         lock (ServiceReadyLock)

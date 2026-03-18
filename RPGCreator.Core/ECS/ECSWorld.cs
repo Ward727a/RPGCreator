@@ -17,6 +17,7 @@ public class EcsWorld : IEcsWorld
     public IEntityFactory EntityFactory { get; }
     
     public IEcsCommandBuffer CommandBuffer { get; }
+    public BlobManager WorldBlobManager { get; }
 
     public EcsWorld()
     {
@@ -27,6 +28,7 @@ public class EcsWorld : IEcsWorld
         SystemManager = new SystemManager(this);
         EntityFactory = new EntityFactory(this);
         CommandBuffer = new DefaultCommandBuffer(this);
+        WorldBlobManager = new BlobManager();
     }
 
     public BufferedEntity SpawnEntity(IEntityDefinition entityDefinition)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -10,8 +11,10 @@ using RPGCreator.Core.Types.Project;
 using RPGCreator.Player.ECS.Systems;
 using RPGCreator.Player.Services;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Stats;
+using RPGCreator.SDK.Debug;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Systems;
 using RPGCreator.SDK.Exceptions;
@@ -21,6 +24,7 @@ using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
 using RPGCreator.SDK.Types;
 using Color = Microsoft.Xna.Framework.Color;
+using Vector2 = System.Numerics.Vector2;
 
 namespace RPGCreator.Player;
 
@@ -121,6 +125,7 @@ public class GamePlayer : Game, IGameRunner
             // Get the path of the currently executing assembly
             var exeDirectory = System.IO.Path.GetDirectoryName(exePath);
             _gameFilePath = System.IO.Path.Combine(exeDirectory, "GameData.json");
+            logger.Info("GameData.json path found: {path}", args: _gameFilePath);
             
             if(!File.Exists(_gameFilePath))
             {
@@ -320,6 +325,58 @@ public class GamePlayer : Game, IGameRunner
         GlobalStates.GameSession.ActiveEcsWorld.Draw(gameTime.ElapsedGameTime);
         
         base.Draw(gameTime);
+        
+        // var elements = RuntimeServices.MapService.CurrentLoadedMapDefinition.CollisionChunk.Elements;
+        RuntimeServices.RenderService.PrepareDrawing();
+        // foreach (var element in elements)
+        // {
+        //     var chunkId = element.Key;
+        //     var chunk = element.Value;
+        //     if (chunk.IsEmpty) continue;
+        //     var index = 0;
+        //     foreach (var colDataList in chunk.GetAllElementsSpan())
+        //     {
+        //         if (!colDataList.HasValue)
+        //         {
+        //                     
+        //             index++;
+        //             continue;
+        //         };
+        //         Vector2 worldPos = LayerChunk.GetWorldPosition(chunkId, index);
+        //         foreach (var data in colDataList.Value.Collisions)
+        //         {
+        //             RuntimeServices.RenderService.DrawDebugRect(
+        //                 worldPos + data.Position,
+        //                 data.Size,
+        //                 SDK.Types.Color.Red * 0.5f,
+        //                 2f
+        //             );
+        //         }
+        //                 
+        //         index++;
+        //     }
+        // }
+
+        if (DebugMemory.Get<Rect>("map.collision_rectangle") is var collisionRectangle)
+        {
+            RuntimeServices.RenderService.DrawDebugRect(
+                collisionRectangle.Position,
+                collisionRectangle.Size,
+                SDK.Types.Color.Green * 0.5f,
+                1f
+            );
+        }
+        
+        if(DebugMemory.Get<Rect>("map.world_collision_rectangle") is var worldCollisionRect)
+        {
+            RuntimeServices.RenderService.DrawDebugRect(
+                worldCollisionRect.Position,
+                worldCollisionRect.Size,
+                SDK.Types.Color.Blue * 0.5f,
+                1f
+            );
+        }
+        RuntimeServices.RenderService.FinishDrawing();
     }
 
     public event Action OnInitialize = null!;

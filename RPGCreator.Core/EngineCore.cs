@@ -248,6 +248,8 @@ namespace RPGCreator.Core
                 if(!acceptedHashes.Contains(sha256, StringComparer.InvariantCultureIgnoreCase))
                 {
                     Logger.Critical("Module hash mismatch for file: {FilePath}", args: dll);
+                    Logger.Critical("File hash: {wrongSha}", args: sha256);
+                    Logger.Critical("Available Hashes: {listHash}", args: acceptedHashes);
                     Logger.Critical("Please contact the game developer!");
                     continue;
                 }

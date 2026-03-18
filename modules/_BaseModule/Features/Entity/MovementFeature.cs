@@ -100,6 +100,7 @@ public class MovementFeature : BaseEntityFeature
     {
         // Logic to execute when the world is set up can be added here.
         world.SystemManager.AddSystem(new MovementSystem(_animationStateIdx, _animationDirStateIdx, _walkActionId, _idleActionId));
+        world.SystemManager.AddSystem(new FinalMovementSystem());
     }
 
     public override void OnInject(BufferedEntity entity, IEntityDefinition entityDefinition)
@@ -122,6 +123,7 @@ public struct MovementComponent : IComponent
     public MovementType MovementType;
     public int Speed;
     public Vector2 Direction;
+    public Vector2 DesiredVelocity;
 }
 
 public class MovementSystem(int animationStateIdx, int animationDirStateIdx, int walkId, int idleId) : ISystem
@@ -186,7 +188,7 @@ public class MovementSystem(int animationStateIdx, int animationDirStateIdx, int
                 dir = new Vector2(0, MathF.Sign(dir.Y));
 
             float dt = (float)deltaTime.TotalSeconds;
-            transform.Position += dir * movement.Speed * dt;
+            movement.DesiredVelocity = dir * movement.Speed * dt;
         
             movement.Direction = dir;
         }
@@ -198,7 +200,7 @@ public class MovementSystem(int animationStateIdx, int animationDirStateIdx, int
             var normalizedDir = Vector2.Normalize(movement.Direction);
             float dt = (float)deltaTime.TotalSeconds;
         
-            transform.Position += normalizedDir * movement.Speed * dt;
+            movement.DesiredVelocity = normalizedDir * movement.Speed * dt;
         
             movement.Direction = normalizedDir;
         }
@@ -210,7 +212,30 @@ public class MovementSystem(int animationStateIdx, int animationDirStateIdx, int
             var normalizedDir = Vector2.Normalize(movement.Direction);
             float dt = (float)deltaTime.TotalSeconds;
         
-            transform.Position += normalizedDir * movement.Speed * dt;
+            movement.DesiredVelocity = normalizedDir * movement.Speed * dt;
+        }
+    }
+}
+
+public class FinalMovementSystem() : ISystem
+{
+    public override int Priority => 300;
+    public override bool IsDrawingSystem => false;
+    private ComponentManager _componentManager = null!;
+    public override void Initialize(IEcsWorld ecsWorld)
+    {
+        _componentManager = ecsWorld.ComponentManager;
+    }
+
+    public override void Update(TimeSpan deltaTime)
+    {
+        foreach (var entityId in _componentManager.Query<MovementComponent, TransformComponent>())
+        {
+            ref var moveComp = ref _componentManager.GetComponent<MovementComponent>(entityId);
+            ref var transformComp = ref _componentManager.GetComponent<TransformComponent>(entityId);
+            
+            transformComp.Position += moveComp.DesiredVelocity;
+            moveComp.DesiredVelocity = Vector2.Zero;
         }
     }
 }

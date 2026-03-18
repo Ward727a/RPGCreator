@@ -49,7 +49,7 @@ public record struct BaseStatFlatModifier : IStatsModifier
 {
     public float FlatValue { get; set; } // 10 => +10, -5 => -5
     public TimeSpan Duration { get; set; }
-    public int? SlabPointerIndex { get; set; } // Slab pointer index. Required by Slabs<T>.
+    public int? BlockPointerIndex { get; set; } // Slab pointer index. Required by Slabs<T>.
     public int ModifierId { get; set; } // Unique identifier for this modifier, used to prevent stacking of the same modifier multiple times.
     public long InstanceId { get; set; } // Unique identifier for this modifier INSIDE the Slabs, this is used by the ModifierExpirationData!
 }
@@ -58,7 +58,7 @@ public record struct BaseStatPercentModifier : IStatsModifier
 {
     public float PercentValue { get; set; } // 10 => +10%, -20 => -20%
     public TimeSpan Duration { get; set; }
-    public int? SlabPointerIndex { get; set; } // Slab pointer index. Required by Slabs<T>.
+    public int? BlockPointerIndex { get; set; } // Slab pointer index. Required by Slabs<T>.
     public int ModifierId { get; set; } // Unique identifier for this modifier, used to prevent stacking of the same modifier multiple times.
     public long InstanceId { get; set; } // Unique identifier for this modifier INSIDE the Slabs, this is used by the ModifierExpirationData!
 }
@@ -67,7 +67,7 @@ public record struct BaseStatMultiplierModifier : IStatsModifier
 {
     public float MultiplierValue { get; set; } // 1.5 => +50%, 0.8 => -20%
     public TimeSpan Duration { get; set; }
-    public int? SlabPointerIndex { get; set; } // Slab pointer index. Required by Slabs<T>.
+    public int? BlockPointerIndex { get; set; } // Slab pointer index. Required by Slabs<T>.
     public int ModifierId { get; set; } // Unique identifier for this modifier, used to prevent stacking of the same modifier multiple times.
     public long InstanceId { get; set; } // Unique identifier for this modifier INSIDE the Slabs, this is used by the ModifierExpirationData!
 }
@@ -362,17 +362,17 @@ public class StatsModifierSystem : ISystem
         {
             case BaseStatFlatModifier flatModifier:
                 FlatModifiers.AddItem(slabIdx, flatModifier);
-                flatModifier.SlabPointerIndex = slabIdx;
+                flatModifier.BlockPointerIndex = slabIdx;
                 ApplyExpirationModifierData(flatModifier, StatModifierType.Flat, entityId);
                 break;
             case BaseStatPercentModifier percentModifier:
                 PercentModifiers.AddItem(slabIdx, percentModifier);
-                percentModifier.SlabPointerIndex = slabIdx;
+                percentModifier.BlockPointerIndex = slabIdx;
                 ApplyExpirationModifierData(percentModifier, StatModifierType.Percent, entityId);
                 break;
             case BaseStatMultiplierModifier multiplierModifier:
                 MultiplierModifiers.AddItem(slabIdx, multiplierModifier);
-                multiplierModifier.SlabPointerIndex = slabIdx;
+                multiplierModifier.BlockPointerIndex = slabIdx;
                 ApplyExpirationModifierData(multiplierModifier, StatModifierType.Multiplier, entityId);
                 break;
             default:
@@ -383,7 +383,7 @@ public class StatsModifierSystem : ISystem
     private void ApplyExpirationModifierData(IStatsModifier modifier, StatModifierType type, int entityId)
     {
         var expirationTime = _totalTimeElapsed + modifier.Duration.TotalMilliseconds;
-        var expirationData = new ModifierExpirationData(modifier.SlabPointerIndex.Value, modifier.InstanceId, type, modifier.ModifierId);
+        var expirationData = new ModifierExpirationData(modifier.BlockPointerIndex.Value, modifier.InstanceId, type, modifier.ModifierId);
         
         var statsModifierComponent = _componentManager.GetComponent<StatsModifierComponent>(entityId);
         statsModifierComponent.ModifierDurations.Enqueue(expirationData, expirationTime);

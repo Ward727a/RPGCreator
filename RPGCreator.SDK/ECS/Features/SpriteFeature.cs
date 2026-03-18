@@ -21,6 +21,7 @@
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Systems;
+using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Types;
 
@@ -32,10 +33,33 @@ public class SpriteFeature : BaseEntityFeature
     public override string FeatureName { get; } = "Sprite Feature";
     public override string FeatureDescription { get; } = "Adds a sprite to the entity for rendering.";
     public override URN FeatureUrn => FeatureUrnModule.ToUrnModule("rpgc").ToUrn("sprite");
+    
+    public override URN[] DependentFeatures { get; } = [BoundsFeature.Urn];
+    
+    [EntityFeatureProperty("Size mode", "Define how the sprite should be scaled to fit the entity bounds.")]
+    public ESizeMode SizeMode { get; set; } = ESizeMode.Fit;
+
+    private int _shouldRecalculateSpriteSizeIdx = -1;
+    
+    public override void OnSetup()
+    {
+        // As internal feature are loaded before even service like ECS are loaded, we need to get the service Once it's ready.
+        // In a normal module, we don't need to do this.
+        EngineServices.OnceServiceReady<IEcsService>(ecsService =>
+        {
+           var stateRegistry = ecsService.StateRegistry;
+           
+            // We use a byte registry for those following reason:
+            // - We need to know when the TransformComponent or BoundsComponent has changed
+            // - But we also need to do it "one" time, so to skip
+            _shouldRecalculateSpriteSizeIdx = stateRegistry.Register(EntityStateRegistry.ModuleUrn.ToUrnModule("rpgc").ToUrn("should_recalculate_sprite_size"), StateStorageType.Byte).Index;
+        });
+        
+    }
 
     public override void OnWorldSetup(IEcsWorld world)
     {
-        world.SystemManager.AddSystem(new SpriteRenderSystem());
+        world.SystemManager.AddSystem(new SpriteRenderSystem(_shouldRecalculateSpriteSizeIdx));
     }
 
     public override void OnInject(BufferedEntity entity, IEntityDefinition entityDefinition)

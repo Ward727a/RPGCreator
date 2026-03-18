@@ -170,6 +170,11 @@ public interface IEcsWorld
     IEcsCommandBuffer CommandBuffer { get; }
     
     /// <summary>
+    /// The blob manager for this world.
+    /// </summary>
+    BlobManager WorldBlobManager { get; }
+    
+    /// <summary>
     /// Create a new entity.
     /// <param name="onCreated">Optional callback invoked when the entity is created, receiving the new entity ID.</param>
     /// </summary>

@@ -92,6 +92,8 @@ public class SystemManager(IEcsWorld world)
         {
             system.Update(deltaTime);
         }
+        
+        _world.ComponentManager.ClearDirties();
     }
     
     public List<ISystem> GetDrawingSystems()

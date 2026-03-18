@@ -30,8 +30,9 @@ public struct StateComponent : IComponent
     private string[] Strings;
     private bool[] Bool;
     private Vector2[] Vector2;
+    private byte[] Bytes;
     
-    public StateComponent(int floatCount, int intCount, int stringCount, int boolCount, int vector2Count)
+    public StateComponent(int floatCount, int intCount, int stringCount, int boolCount, int vector2Count, int byteCount)
     {
         Floats = new float[floatCount];
         Ints = new int[intCount];
@@ -39,6 +40,7 @@ public struct StateComponent : IComponent
         for(int i = 0; i < stringCount; i++) Strings[i] = string.Empty;
         Bool = new bool[boolCount];
         Vector2 = new Vector2[vector2Count];
+        Bytes = new byte[byteCount];
     }
     
     /// <summary>
@@ -82,6 +84,16 @@ public struct StateComponent : IComponent
     public ref Vector2 GetVector2(int index) => ref Vector2.AsSpan()[index];
     
     /// <summary>
+    /// Gets a reference to a byte value at the specified index.
+    /// </summary>
+    /// <param name="index">The index of the byte value.</param>
+    /// <returns>
+    /// A reference to the byte value.
+    /// </returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ref byte GetByte(int index) => ref Bytes.AsSpan()[index];
+    
+    /// <summary>
     /// Sets the float value at the specified index.
     /// </summary>
     /// <param name="index">Index of the float value.</param>
@@ -115,4 +127,11 @@ public struct StateComponent : IComponent
     /// <param name="index">Index of the Vector2 value.</param>
     /// <param name="value">The Vector2 value to set.</param>
     public void SetVector2(int index, Vector2 value) => Vector2[index] = value;
+    
+    /// <summary>
+    /// Sets the byte value at the specified index.
+    /// </summary>
+    /// <param name="index">Index of the byte value.</param>
+    /// <param name="value">The byte value to set.</param>
+    public void SetByte(int index, byte value) => Bytes[index] = value;
 }

@@ -2,10 +2,13 @@
 using System.Numerics;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
+using RPGCreator.SDK.Debug;
 using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
 
 namespace RPGCreator.Player.Services;
@@ -56,6 +59,10 @@ public class MapService : IMapService
         MapState.HasCurrentMap = true;
         MapState.CurrentMapDef = mapDef;
         MapState.CurrentMapData = CreateMapData(mapDef);
+        if (MapState.CurrentMapDef is MapDefinition mapDefinition)
+        {
+            mapDefinition.BakeCollisionChunk();
+        }
         ClearDirtyFlag();
         OnMapLoaded?.Invoke(mapId);
         return true;
@@ -107,6 +114,98 @@ public class MapService : IMapService
             (float)Math.Floor(worldPosition.Y / cellHeight) * cellHeight
         );
         return mapPosition;
+    }
+    
+    public Vector2 WorldToMapCoordinates(float worldX, float worldY)
+    {
+        if (CurrentLoadedMapDefinition == null)
+            return Vector2.Zero;
+        var cellWidth = CurrentLoadedMapDefinition.GridParameter.CellWidth;
+        var cellHeight = CurrentLoadedMapDefinition.GridParameter.CellHeight;
+        
+        var mapPosition = new Vector2(
+            (float)Math.Floor(worldX / cellWidth) * cellWidth,
+            (float)Math.Floor(worldY / cellHeight) * cellHeight
+        );
+        return mapPosition;
+    }
+
+    public bool IsAreaBlocked(Rect collisionRectangle, int excludeEntityId = -1)
+    {
+        if (CurrentLoadedMapDefinition == null) return true; // If no map definition, we block it by default.
+        return IsTileBlocked(collisionRectangle);
+    }
+
+    private bool IsTileBlocked(Rect collisionRectangle)
+    {
+       if (CurrentLoadedMapDefinition == null) return true;
+
+        var min = WorldToMapCoordinates(collisionRectangle.Left, collisionRectangle.Top);
+        var max = WorldToMapCoordinates(collisionRectangle.Right, collisionRectangle.Bottom);
+        
+        long? lastChunkId = null;
+        ReadOnlySpan<RuntimeCollisionChunkData?> currentChunkSpan = default;
+        Vector2 currentChunkPosition = Vector2.Zero;
+
+        // Need to move that inside the chunk class, and not there
+        int chunkSize = LayerChunk.ChunkSize; 
+
+        int chunkMask = chunkSize - 1; 
+
+        int chunkShift = (int)Math.Log2(chunkSize);
+        
+        for (int y = (int)Math.Floor(min.Y); y <= (int)Math.Floor(max.Y); y++)
+        {
+            for (int x = (int)Math.Floor(min.X); x <= (int)Math.Floor(max.X); x++)
+            {
+                long chunkId = LayerChunk.GetChunkId(new Vector2(x >> chunkShift, y >> chunkShift));
+                var chunkPosition = LayerChunk.GetChunkPosition(new Vector2(x, y));
+                if (!lastChunkId.HasValue || chunkId != lastChunkId)
+                {
+                    if (CurrentLoadedMapDefinition.CollisionChunk.TryGetElement(chunkId, out var chunk))
+                    {
+                        currentChunkSpan = chunk.GetAllElementsSpan();
+                        lastChunkId = chunkId;
+                        currentChunkPosition = chunkPosition;
+                    }
+                    else
+                    {
+                        lastChunkId = chunkId;
+                        currentChunkSpan = default;
+                        currentChunkPosition = Vector2.Zero;
+                    }
+                }
+
+                if (currentChunkSpan == default) continue;
+
+                var localPosition = new Vector2(x / LayerChunk.ChunkSize, y / LayerChunk.ChunkSize);
+                int localIndex = (int)localPosition.X & chunkMask | ((int)localPosition.Y & chunkMask) << chunkShift;
+                var tileData = currentChunkSpan[localIndex];
+                Vector2 worldPos = LayerChunk.GetWorldPosition(chunkId, localIndex);
+
+                if (tileData.HasValue)
+                {
+
+                    foreach (var localRect in tileData.Value.Collisions)
+                    {
+                        var worldCollisionRect = new Rect(
+                            worldPos.X + localRect.X,
+                            worldPos.Y + localRect.Y,
+                            localRect.Width,
+                            localRect.Height
+                        );
+
+                        if (worldCollisionRect.Intersects(collisionRectangle))
+                        {
+                            DebugMemory.Set("map.collision_rectangle", collisionRectangle);
+                            DebugMemory.Set("map.world_collision_rectangle", worldCollisionRect);
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public void SelectLayer(int layerIndex)

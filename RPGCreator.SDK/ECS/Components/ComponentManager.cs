@@ -21,6 +21,22 @@ public readonly ref struct DirtyQueryView
     }
 
     public DirtyQueryEnumerator GetEnumerator() => new DirtyQueryEnumerator(_entities, _queryMask, _manager);
+    
+    public DirtyQueryView WithComponent<T>() where T : IComponent
+    {
+        var bit = ComponentTypeIdRegistry.GetBit<T>();
+        var newMask = _queryMask;
+        newMask.Set(bit, true);
+        return new DirtyQueryView(_entities, newMask, _manager);
+    }
+    
+    public DirtyQueryView WithoutComponent<T>() where T : IComponent
+    {
+        var bit = ComponentTypeIdRegistry.GetBit<T>();
+        var newMask = _queryMask;
+        newMask.Set(bit, false);
+        return this;
+    }
 }
 public ref struct DirtyQueryEnumerator
 {
@@ -43,11 +59,18 @@ public ref struct DirtyQueryEnumerator
     {
         while (++_index < _dirtyEntities.Length)
         {
-            // On vérifie si l'entité dirty possède bien les composants demandés par la query
             if (_manager.IsMatch(_dirtyEntities[_index], _queryMask))
                 return true;
         }
         return false;
+    }
+    
+    public DirtyQueryView WithComponent<T>() where T : IComponent
+    {
+        var bit = ComponentTypeIdRegistry.GetBit<T>();
+        var newMask = _queryMask;
+        newMask.Set(bit, true);
+        return new DirtyQueryView(_dirtyEntities, newMask, _manager);
     }
 }
 
@@ -323,7 +346,7 @@ public class ComponentManager(EcsEventBus eventBus)
         return ref Unsafe.NullRef<T>();
     }
 
-    public ISparseSet GetSet<T>() where T : struct, IComponent
+    public IEcsSparseSet GetSet<T>() where T : struct, IComponent
     {
         return GetOrCreateSparseSet<T>();
     }
@@ -485,8 +508,16 @@ public class ComponentManager(EcsEventBus eventBus)
             list.Clear();
         }
     }
+
+    public void ClearDirties()
+    {
+        foreach (var list in _dirtyEntities.Values)
+        {
+            list.Clear();
+        }
+    }
     
-    private ISparseSet GetOrCreateSparseSet<T>(T _ = default) where T : struct, IComponent
+    private IEcsSparseSet GetOrCreateSparseSet<T>(T _ = default) where T : struct, IComponent
     {
         var type = typeof(T);
         if (!_sparseSets.TryGetValue(type, out var set))
@@ -502,7 +533,7 @@ public class ComponentManager(EcsEventBus eventBus)
             }
             _sparseSets[type] = set;
         }
-        return (ISparseSet)set;
+        return (IEcsSparseSet)set;
     }
     
     public QueryView Query<T>() where T : IComponent
@@ -622,14 +653,14 @@ public class ComponentManager(EcsEventBus eventBus)
         return new QueryView(smallestSet.EntitiesSpan, queryMask, this);
     }
     
-    private ISparseSet? GetSmallestSet(Type[] componentTypes)
+    private IEcsSparseSet? GetSmallestSet(Type[] componentTypes)
     {
-        ISparseSet? smallest = null;
+        IEcsSparseSet? smallest = null;
         int minCount = int.MaxValue;
 
         foreach (var type in componentTypes)
         {
-            if (_sparseSets.TryGetValue(type, out var obj) && obj is ISparseSet set)
+            if (_sparseSets.TryGetValue(type, out var obj) && obj is IEcsSparseSet set)
             {
                 if (set.Count < minCount)
                 {

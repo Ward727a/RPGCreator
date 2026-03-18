@@ -18,17 +18,26 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.ECS.Components;
+using RPGCreator.SDK.Modules.Features.Entity;
+using RPGCreator.SDK.Types;
 
-namespace RPGCreator.SDK.ECS;
+namespace RPGCreator.SDK.ECS.Features;
 
-internal static class StateComponentFactory
+[EntityFeature]
+public class BoundsFeature : BaseEntityFeature
 {
-    private static EntityStateRegistry StateRegistry => EngineServices.ECS.StateRegistry;
+    public static URN Urn = FeatureUrnModule.ToUrnModule("rpgc").ToUrn("bounds_feature");
+    public override string FeatureName => "Bounds Feature";
+    public override string FeatureDescription => "Defines the bounds (size) of the entity.";
+    public override URN FeatureUrn => Urn;
+
+    [EntityFeatureProperty("Size", "The size of the entity.")]
+    public Size Size { get; set; } = new(32, 32);
     
-    internal static StateComponent CreateState()
+    public override void OnInject(BufferedEntity entity, IEntityDefinition entityDefinition)
     {
-        return new StateComponent(StateRegistry.TotalFloat, StateRegistry.TotalInt, StateRegistry.TotalString,
-            StateRegistry.TotalBool, StateRegistry.TotalVector2, StateRegistry.TotalByte);
+        entity.AddComponent(new BoundsComponent(Size));
     }
 }

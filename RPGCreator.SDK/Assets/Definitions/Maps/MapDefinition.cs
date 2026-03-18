@@ -50,7 +50,7 @@ public class MapDefinition : BaseAssetDef, IMapDef
         Unique = Ulid.NewUlid();
         Name = "New Map";
         Description = "";
-        _tileLayers.CollectionChanged += (sender, args) =>
+        _tileLayers.CollectionChanged += (_, args) =>
         {
             if (args.Action is NotifyCollectionChangedAction.Move) return;
             if (args.NewItems == null) return;
@@ -82,7 +82,7 @@ public class MapDefinition : BaseAssetDef, IMapDef
         Name = mapName;
         Description = mapDescription;
     }
-
+    
     public bool AddMap(IMapDef mapDef)
     {
         if (mapDef == null || _mapDefs.Contains(mapDef))
@@ -115,7 +115,7 @@ public class MapDefinition : BaseAssetDef, IMapDef
     public bool RemoveLayer(BaseLayerDef layer)
     {
         if (layer == null || _tileLayers.All(l => l.Unique != layer.Unique))
-            return false; // If the layer is null or doesn't exist, we can't remove it
+            return false; // If the layer is null or doesn't exist, we can't remove it 
 
         _tileLayers.Remove(layer);
         TileLayerRemoved?.Invoke(layer); // Notify subscribers that a layer has been removed
@@ -124,52 +124,43 @@ public class MapDefinition : BaseAssetDef, IMapDef
 
     public void BakeCollisionChunk()
     {
-        var mergedCollisions = new Dictionary<Vector2, List<Rect>>();
+        CollisionChunk.ClearElements();
 
         foreach (var layer in _tileLayers)
         {
             if (layer is not TileLayerDefinition tileLayer) continue;
         
-            foreach (var (chunkId, chunk) in tileLayer.Chunks)
+            foreach (var (chunkId, tileChunk) in tileLayer.Chunks)
             {
-                var tiles = chunk.GetAllElementsSpan();
+                var tiles = tileChunk.GetAllElementsSpan();
+                
                 for (int i = 0; i < tiles.Length; i++)
                 {
                     var tile = tiles[i];
                     if (tile == null) continue;
 
-                    var worldPos = tileLayer.GetElementWorldPosition(chunkId, i);
-                    
-                    // Set world pos to be a 32 multiple
-                    worldPos.X = (int)Math.Round(worldPos.X / 32) * 32;
-                    worldPos.Y = (int)Math.Round(worldPos.Y / 32) * 32;
+                    Vector2 worldPos = LayerChunk.GetWorldPosition(chunkId, i);
                     
                     tile.TilesetDef.BuildRuntimeCollisionCache();
                     if (tile.TilesetDef.RuntimeCollisionCache.TryGetValue(tile.PositionInTileset.ToKey(), out var rects))
                     {
-                        if (!mergedCollisions.ContainsKey(worldPos))
-                            mergedCollisions[worldPos] = new List<Rect>();
-
-                        foreach(var r in rects) {
-                            float localX = r.X - tile.PositionInTileset.X;
-                            float localY = r.Y - tile.PositionInTileset.Y;
-
-                            float finalWorldX = worldPos.X + localX;
-                            float finalWorldY = worldPos.Y + localY;
-                            mergedCollisions[worldPos].Add(new Rect(finalWorldX, finalWorldY, r.Width, r.Height));
+                        if (!CollisionChunk.TryGetElement(chunkId, out var colChunk))
+                        {
+                            colChunk = new CollisionChunk();
+                            CollisionChunk.AddElement(colChunk, chunkId);
                         }
+
+                        int localIdX = i & 31;
+                        int localIdY = i >> 5;
+
+                        var finalData = new RuntimeCollisionChunkData {
+                            Collisions = rects.Select(r => new Rect(r.X - tile.PositionInTileset.X, r.Y - tile.PositionInTileset.Y, r.Width, r.Height)).ToArray()
+                        };
+
+                        colChunk.SetElement(localIdX, localIdY, finalData);
                     }
                 }
             }
-        }
-
-        foreach (var (pos, allRects) in mergedCollisions)
-        {
-            
-            var finalData = new RuntimeCollisionChunkData() {
-                Collisions = allRects.ToArray() 
-            };
-            CollisionChunk.AddElement(finalData, pos);
         }
     }
     

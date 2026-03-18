@@ -27,6 +27,7 @@ namespace RPGCreator.SDK.RuntimeService;
 public interface IGameSession : IState
 {
     public IEcsWorld? ActiveEcsWorld { get; set; }
+    public BlobManager BlobManager { get; }
     
     public bool IsPaused { get; set; }
     
