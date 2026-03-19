@@ -72,7 +72,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
         #region Registries
         
         private readonly Dictionary<string, IAssetRegistry> _registries = new();
-        private readonly Dictionary<System.Type, string> _registryTypeToName = new();
+        private readonly Dictionary<Type, string> _registryTypeToName = new();
         
         #endregion
         
@@ -80,7 +80,6 @@ namespace RPGCreator.Core.Managers.AssetsManager
         
         public GenericPooledFactory<TileLayerInstance, TileLayerDefinition> TileLayerFactory = new();
         public GenericCachedFactory<MapInstance, IMapDef> MapFactory = new();
-        public TilesetFactory TilesetFactory { get; } = new();
         public TileFactory TileFactory { get; } = new();
         public StatFactory StatFactory { get; } = new();
         
@@ -195,7 +194,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             return false;
         }
         
-        public bool TryResolveRegistry<T>(System.Type type, [NotNullWhen(true)] out T? registry) where T : IAssetRegistry
+        public bool TryResolveRegistry<T>(Type type, [NotNullWhen(true)] out T? registry) where T : IAssetRegistry
         {
             registry = default;
 

@@ -26,8 +26,8 @@ public class IntGridSetListItemControl : UserControl
     {
         TilesetDefDef = tilesetDefDef;
         CreateComponents();
-        this.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
-        this.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch;
+        HorizontalAlignment = HorizontalAlignment.Stretch;
+        VerticalAlignment = VerticalAlignment.Stretch;
         Width = double.NaN;
         Content = Body;
         RegisterEvents();
@@ -39,7 +39,7 @@ public class IntGridSetListItemControl : UserControl
         {
             RowDefinitions = new RowDefinitions("auto, 5, Auto"),
             ColumnDefinitions = new ColumnDefinitions("auto, *"),
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
             Margin = new Avalonia.Thickness(5),
             Background = Avalonia.Media.Brushes.Transparent,
             Cursor = new Cursor(StandardCursorType.Hand)
@@ -47,7 +47,7 @@ public class IntGridSetListItemControl : UserControl
         SetLabel = new TextBlock()
         {
             Text = string.IsNullOrWhiteSpace(TilesetDefDef.Name) ? "Unnamed IntGrid Set" : TilesetDefDef.Name,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
             Margin = new Avalonia.Thickness(5),
         };
         Body.Children.Add(SetLabel);
@@ -56,8 +56,8 @@ public class IntGridSetListItemControl : UserControl
         var divider = new Divider()
         {
             Orientation = Orientation.Horizontal,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
         };
         Body.Children.Add(divider);
         Grid.SetRow(divider, 2);
@@ -115,9 +115,9 @@ public class IntGridSetCreateModal : Window
         
         FormPanel = new StackPanel()
         {
-            Orientation = Avalonia.Layout.Orientation.Vertical,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            Orientation = Orientation.Vertical,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
             Spacing = 10
         };
         Body.Children.Add(FormPanel);
@@ -127,21 +127,21 @@ public class IntGridSetCreateModal : Window
         {
             InnerLeftContent = "Name: ",
             Watermark = "Enter IntGrid Set Name",
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
         };
         FormPanel.Children.Add(NameTextBox);
         
         PackComboBox = new ComboBox()
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
             PlaceholderText = "Select Asset Pack"
         };
         FormPanel.Children.Add(PackComboBox);
         
         ButtonsPanel = new StackPanel()
         {
-            Orientation = Avalonia.Layout.Orientation.Horizontal,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right,
             Spacing = 10
         };
         Body.Children.Add(ButtonsPanel);
@@ -150,14 +150,14 @@ public class IntGridSetCreateModal : Window
         CancelButton = new Button()
         {
             Content = "Cancel",
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right
+            HorizontalAlignment = HorizontalAlignment.Right
         };
         ButtonsPanel.Children.Add(CancelButton);
         
         CreateButton = new Button()
         {
             Content = "Create",
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+            HorizontalAlignment = HorizontalAlignment.Right,
         };
         ButtonsPanel.Children.Add(CreateButton);
     }
@@ -271,16 +271,16 @@ public class IntGridSetListControl : UserControl
         
         ListScroller = new ScrollViewer()
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
         };
         Body.Children.Add(ListScroller);
         Grid.SetRow(ListScroller, 2);
         
         ListBody = new StackPanel()
         {
-            Orientation = Avalonia.Layout.Orientation.Vertical,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            Orientation = Orientation.Vertical,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
             Width = double.NaN,
             Spacing = 5
         };
@@ -289,16 +289,16 @@ public class IntGridSetListControl : UserControl
         var divider = new Divider()
         {
             Orientation = Orientation.Horizontal,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
         };
         Body.Children.Add(divider);
         Grid.SetRow(divider, 1);
         
         MenuPanel = new StackPanel()
         {
-            Orientation = Avalonia.Layout.Orientation.Horizontal,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Center,
             Width = double.NaN,
             Spacing = 5
         };
@@ -308,7 +308,7 @@ public class IntGridSetListControl : UserControl
         RemoveTilesetButton = new Button()
         {
             Content = "Remove IntGrid Set",
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+            HorizontalAlignment = HorizontalAlignment.Left,
             IsEnabled = false,
         };
         MenuPanel.Children.Add(RemoveTilesetButton);
@@ -316,7 +316,7 @@ public class IntGridSetListControl : UserControl
         EditTilesetButton = new Button()
         {
             Content = "Edit IntGrid Set",
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Center,
             IsEnabled = false,
         };
         MenuPanel.Children.Add(EditTilesetButton);
@@ -324,7 +324,7 @@ public class IntGridSetListControl : UserControl
         AddTilesetButton = new Button()
         {
             Content = "Add IntGrid Set",
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+            HorizontalAlignment = HorizontalAlignment.Right,
         };
         MenuPanel.Children.Add(AddTilesetButton);
     }
@@ -382,7 +382,7 @@ public class IntGridSetListControl : UserControl
             createModal.Close();
         };
         
-        createModal.ShowDialog((Window?)this.VisualRoot);
+        createModal.ShowDialog((Window?)VisualRoot);
     }
     
     private void RefreshList()

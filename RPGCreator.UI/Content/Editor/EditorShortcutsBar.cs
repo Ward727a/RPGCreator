@@ -46,25 +46,25 @@ public class EditorShortcutsBar : UserControl
     {
         _body = new Grid()
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
             RowDefinitions = new RowDefinitions("*"),
             ColumnDefinitions = new ColumnDefinitions("*, Auto"),
         };
-        this.Content = _body;
+        Content = _body;
         _scroll = new ScrollViewer()
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
             VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
         };
         _body.Children.Add(_scroll);
         _menuPanel = new StackPanel()
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Orientation = Orientation.Horizontal,
             Spacing = 4
         };
         _scroll.Content = _menuPanel;
@@ -93,8 +93,8 @@ public class EditorShortcutsBar : UserControl
             MinHeight = 32,
             MinWidth = 32,
             MaxWidth = 32,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
         };
     }
 

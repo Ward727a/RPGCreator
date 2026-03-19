@@ -151,6 +151,7 @@ public class SpriteRenderSystem : ISystem
                         break;
                     }
                 }
+                
                 spriteComponent.ScaledSize = finalScale;
                 spriteComponent.Offset = offset;
                 
@@ -163,16 +164,17 @@ public class SpriteRenderSystem : ISystem
 
             if (!boundsComponent.OffsetOrigin.HasValue || boundsComponent.OffsetOrigin.Value != originDebugRect)
             {
-                boundsComponent.OffsetOrigin = originDebugRect;
+                boundsComponent.OffsetOrigin = originDebugRect; // This is kinda dirty to do this like that... But well, it's needed.
+                // Still need to think of a better way (even more with the collision editor coming).
             }
             
-            renderer.DrawDebugRect(
-                transformComponent.Position
-                - (originDebugRect), // Here we use the scaledsize because the Origin is from the sprite.
-                (boundsComponent.Size), 
-                Color.Magenta,
-                1f
-                );
+            // renderer.DrawDebugRect(
+            //     transformComponent.Position
+            //     - (originDebugRect), // Here we use the scaledsize because the Origin is from the sprite.
+            //     (boundsComponent.Size), 
+            //     Color.Magenta,
+            //     1f
+            //     );
             
             renderer.SubmitToQueue(new RenderCommand {
                 TexturePath = spritesheet.ImagePath,

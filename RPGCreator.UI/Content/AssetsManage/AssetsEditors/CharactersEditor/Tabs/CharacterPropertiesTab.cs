@@ -46,9 +46,9 @@ public class CharacterPropertiesTab : UserControl
     {
         Body = new StackPanel
         {
-            Orientation = Avalonia.Layout.Orientation.Vertical,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            Orientation = Orientation.Vertical,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
             Margin = new Avalonia.Thickness(10),
             Spacing = 10
         };

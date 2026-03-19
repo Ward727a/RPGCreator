@@ -320,7 +320,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
             Body = new Grid
             {
                 Margin = new Avalonia.Thickness(5),
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
                 ColumnDefinitions = new ColumnDefinitions("" +
                 "Auto, " + // Image
                 "Auto, " + // Separator
@@ -340,8 +340,8 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                 Width = 50,
                 Height = 50,
                 Margin = new Avalonia.Thickness(5),
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
             };
             Body.Children.Add(iconImage);
 
@@ -356,8 +356,8 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                 TextWrapping = Avalonia.Media.TextWrapping.Wrap,
                 Margin = new Avalonia.Thickness(5),
                 TextAlignment = Avalonia.Media.TextAlignment.Center,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Center,
                 Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Transparent),
             };
             Body.Children.Add(nameTextBlock);
@@ -382,8 +382,8 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                 TextWrapping = Avalonia.Media.TextWrapping.Wrap,
                 Margin = new Avalonia.Thickness(5),
                 TextAlignment = Avalonia.Media.TextAlignment.Center,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
                 Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Transparent),
             };
             Body.Children.Add(imageSizeTextBlock);
@@ -447,7 +447,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
             }
         }
 
-        private void Body_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+        private void Body_PointerPressed(object? sender, PointerPressedEventArgs e)
         {
             if (e.GetCurrentPoint(this).Properties.IsRightButtonPressed)
             {
@@ -616,8 +616,8 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
             FilterTop = new Grid
             {
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
                 Margin = new Avalonia.Thickness(5),
                 RowDefinitions = new RowDefinitions("*"),
             };
@@ -633,9 +633,9 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
             FilterBottom = new StackPanel
             {
-                Orientation = Avalonia.Layout.Orientation.Horizontal,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                Orientation = Orientation.Horizontal,
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
                 Margin = new Avalonia.Thickness(5),
             };
             FilterGrid.Children.Add(FilterBottom);
@@ -645,7 +645,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
             {
                 Content = "GroupDefinition by Assets Pack",
                 Margin = new Avalonia.Thickness(5),
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+                HorizontalAlignment = HorizontalAlignment.Left,
             };
             FilterBottom.Children.Add(Filter_GroupByAssetsPack);
 
@@ -653,7 +653,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
             {
                 Content = "Only Tilesets",
                 Margin = new Avalonia.Thickness(5),
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+                HorizontalAlignment = HorizontalAlignment.Left,
             };
 
             FilterBottom.Children.Add(Filter_ShowOnlyTileset);
@@ -662,14 +662,14 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
             {
                 Content = "Only Autotiles",
                 Margin = new Avalonia.Thickness(5),
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+                HorizontalAlignment = HorizontalAlignment.Left,
             };
             FilterBottom.Children.Add(Filter_ShowOnlyAutotiles);
 
             Filter_ShowType = new ComboBox
             {
                 Margin = new Avalonia.Thickness(5),
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+                HorizontalAlignment = HorizontalAlignment.Left,
             };
             Filter_ShowType.Items.Add("List View");
             Filter_ShowType.Items.Add("Grid View");
@@ -680,7 +680,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
             Filter_Separator = new Separator
             {
                 Margin = new Avalonia.Thickness(5),
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
             };
             FilterGrid.Children.Add(Filter_Separator);
             Grid.SetRow(Filter_Separator, 2);
@@ -734,7 +734,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
             ViewPanel = new StackPanel
             {
-                Orientation = Avalonia.Layout.Orientation.Vertical,
+                Orientation = Orientation.Vertical,
                 Margin = new Avalonia.Thickness(10),
             };
 
@@ -785,15 +785,15 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
             Footer_Separator = new Separator
             {
                 Margin = new Avalonia.Thickness(5),
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
             };
             FooterGrid.Children.Add(Footer_Separator);
 
             Footer = new StackPanel
             {
-                Orientation = Avalonia.Layout.Orientation.Horizontal,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Avalonia.Thickness(5),
             };
             FooterGrid.Children.Add(Footer);
@@ -802,7 +802,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
             {
                 Content = "New...",
                 Margin = new Avalonia.Thickness(5),
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+                HorizontalAlignment = HorizontalAlignment.Left,
             };
             Footer.Children.Add(Footer_New);
             ToolTip.SetTip(Footer_New, "Add a new tileset to the project.");
@@ -811,7 +811,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
             {
                 Content = "Edit Tileset",
                 Margin = new Avalonia.Thickness(5),
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+                HorizontalAlignment = HorizontalAlignment.Left,
                 IsEnabled = false
             };
             Footer.Children.Add(Footer_Edit);
@@ -821,7 +821,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
             {
                 Content = "Delete Tileset",
                 Margin = new Avalonia.Thickness(5),
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+                HorizontalAlignment = HorizontalAlignment.Left,
                 IsEnabled = false
             };
             Footer.Children.Add(Footer_Delete);

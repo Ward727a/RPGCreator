@@ -1,5 +1,4 @@
 using RPGCreator.Core.Managers.AssetsManager.Registries;
-using RPGCreator.Core.Types.Assets.Characters.Stats;
 using RPGCreator.Core.Types.Assets.Entities.Characters.Stats;
 using RPGCreator.SDK.ECS;
 

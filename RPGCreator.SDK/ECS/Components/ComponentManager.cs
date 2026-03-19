@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.Types.Collections;
 
@@ -183,10 +181,10 @@ public class ComponentManager(EcsEventBus eventBus)
     
     private EcsEventBus _eventBus { get; } = eventBus;
     private EntityManager _entityManager = null!;
-    private Dictionary<System.Type, object> _sparseSets = new();
-    private Dictionary<System.Type, Action<int>> _removeActions = new();
+    private Dictionary<Type, object> _sparseSets = new();
+    private Dictionary<Type, Action<int>> _removeActions = new();
     private Dictionary<Type, List<int>> _dirtyEntities = new();
-    private Dictionary<System.Type, Action<int, object>> _cleanupActions = new();
+    private Dictionary<Type, Action<int, object>> _cleanupActions = new();
     
     private Bitmask256[] _entityMasks = new Bitmask256[1024];
     
@@ -485,7 +483,7 @@ public class ComponentManager(EcsEventBus eventBus)
         return QueryDirty(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7), typeof(T8), typeof(T9));
     }
     
-    public DirtyQueryView QueryDirty(params System.Type[] componentTypes)
+    public DirtyQueryView QueryDirty(params Type[] componentTypes)
     {
         if (componentTypes == null || componentTypes.Length == 0)
             return new DirtyQueryView(ReadOnlySpan<int>.Empty, new Bitmask256(), this);
@@ -642,7 +640,7 @@ public class ComponentManager(EcsEventBus eventBus)
         return _entityMasks[entityId].Matches(queryMask);
     }
     
-    public QueryView Query(params System.Type[] componentTypes)
+    public QueryView Query(params Type[] componentTypes)
     {
         var queryMask = GenerateQueryMask(componentTypes);
         var smallestSet = GetSmallestSet(componentTypes);

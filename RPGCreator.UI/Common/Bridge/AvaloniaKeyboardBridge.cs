@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Input;
-using AvaloniaInside.MonoGame;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Inputs;
-using RPGCreator.UI.Test;
 
 namespace RPGCreator.UI.Common.Bridge;
 

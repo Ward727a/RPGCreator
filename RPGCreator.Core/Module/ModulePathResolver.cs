@@ -37,7 +37,7 @@ public class ModulePathResolver : IModulePathResolver
     public string ResolveFilePath(URN targetUrn, string filePath)
     {
         var basePath = ResolvePath(targetUrn);
-        return System.IO.Path.Combine(basePath, filePath);
+        return Path.Combine(basePath, filePath);
     }
 
     public void RegisterPath(URN targetUrn, string path)

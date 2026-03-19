@@ -82,10 +82,12 @@ public class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
+        #if DEBUG
         this.AttachDevTools(new()
         {
             StartupScreenIndex = 1,
         });
+        #endif
     }
 
 }

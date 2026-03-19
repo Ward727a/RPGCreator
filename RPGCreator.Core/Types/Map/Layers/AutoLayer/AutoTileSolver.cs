@@ -214,9 +214,8 @@ public class AutoTileSolver : IAutoTileSolver
         var tileData = rule.OutputTiles[index];
 
         var tilesetDef = scope.Load<BaseTilesetDef>(tileData.TilesetId);
-        // Instantiate the tileset
-        var tileset = EngineServices.GameFactory.CreateInstance<ITilesetInstance>(tilesetDef);
-        var tile = tileset.GetTileAt((int)(tileData.TilePosition.X / tilesetDef.TileWidth), (int)(tileData.TilePosition.Y / tilesetDef.TileHeight));
+        
+        var tile = tilesetDef.GetTileAt((int)(tileData.TilePosition.X / tilesetDef.TileWidth), (int)(tileData.TilePosition.Y / tilesetDef.TileHeight));
 
         if (!flipX && !flipY)
             return tile;

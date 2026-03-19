@@ -20,7 +20,6 @@
 
 using System.Collections.ObjectModel;
 using _BaseModule.AssetDefinitions.BaseStats;
-using _BaseModule.UI.StatsFeature;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -29,7 +28,6 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Threading;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Extensions;
 using RPGCreator.UI.Contexts;
 
@@ -78,7 +76,7 @@ public class StatsModifierManagement : UserControl
             RowSpacing = 10,
             Margin = new Thickness(10)
         };
-        this.Content = _statsGrid;
+        Content = _statsGrid;
 
         _searchBar = new AutoCompleteBox()
         {

@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Numerics;
 using Newtonsoft.Json;
-using PropertyChanged;
 using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.MetaData;
@@ -62,7 +61,7 @@ public class MapDefinition : BaseAssetDef, IMapDef
                     var metaRegistry = RegistryServices.AssetsMetaDataRegistry;
                     var metaData = newLayer.GetMetaData();
                     if (metaData is LayerMetaData layerMeta)
-                        layerMeta.MapId = this.Unique;
+                        layerMeta.MapId = Unique;
                     if (metaRegistry.ContainsMetaData(metaData.UniqueId))
                     {
                         metaRegistry.UpdateMetaData(metaData);
@@ -89,7 +88,7 @@ public class MapDefinition : BaseAssetDef, IMapDef
             return false; // If the map definition is null or already exists, we can't add it
 
         _mapDefs.Add(mapDef);
-        RegistryServices.AssetsMetaDataRegistry.UpdateMetaData(this.GetMetaData());
+        RegistryServices.AssetsMetaDataRegistry.UpdateMetaData(GetMetaData());
         return true;
     }
     public bool RemoveMap(IMapDef mapDef)
@@ -98,7 +97,7 @@ public class MapDefinition : BaseAssetDef, IMapDef
             return false; // If the map definition is null or doesn't exist, we can't remove it
 
         _mapDefs.Remove(mapDef);
-        RegistryServices.AssetsMetaDataRegistry.UpdateMetaData(this.GetMetaData());
+        RegistryServices.AssetsMetaDataRegistry.UpdateMetaData(GetMetaData());
         return true;
     }
     

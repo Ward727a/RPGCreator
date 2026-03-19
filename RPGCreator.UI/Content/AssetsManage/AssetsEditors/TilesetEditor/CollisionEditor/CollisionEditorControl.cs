@@ -256,7 +256,7 @@ public class CollisionEditorControl : UserControl
     {
         base.OnInitialized();
         
-        _editorCanvas.SetGridCellSize(new RPGCreator.SDK.Types.Size(32, 32));
+        _editorCanvas.SetGridCellSize(new SDK.Types.Size(32, 32));
     }
 
     private void RegisterEvents()

@@ -28,7 +28,7 @@ public class SkillEffectsRegistry: RegistryBase<ISkillEffect>
             !a.FullName.StartsWith("CommunityToolkit") &&
             !a.FullName.StartsWith("Serilog") &&
             !a.FullName.StartsWith("MonoGame"));
-        var skillEffectTypes = new List<System.Type>();
+        var skillEffectTypes = new List<Type>();
         
         foreach (var assembly in assemblies)
         {

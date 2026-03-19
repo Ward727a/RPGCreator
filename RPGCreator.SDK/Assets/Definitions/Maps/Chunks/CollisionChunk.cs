@@ -21,8 +21,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
-using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
-using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Extensions;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;

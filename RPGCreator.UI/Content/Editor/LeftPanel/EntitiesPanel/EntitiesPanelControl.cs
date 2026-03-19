@@ -1,12 +1,10 @@
 using System.ComponentModel;
 using System.Numerics;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Media;
-using CommunityToolkit.Mvvm.ComponentModel;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.ECS;
@@ -76,7 +74,7 @@ public partial class EntitiesPanelControl : UserControl
         {
             Inlines = new InlineCollection(),
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            TextAlignment = Avalonia.Media.TextAlignment.Center
+            TextAlignment = TextAlignment.Center
         };
         UpdateSelectedEntityText();
         

@@ -23,13 +23,10 @@
 // 
 #endregion
 using Avalonia.Controls;
-using RPGCreator.Core.Types;
 using System;
 using System.Linq;
 using Avalonia.Layout;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Assets.Definitions.Maps;
-using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
@@ -64,13 +61,13 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
 
             LayersBody = new StackPanel
             {
-                Orientation = Avalonia.Layout.Orientation.Vertical,
+                Orientation = Orientation.Vertical,
             };
 
             SelectedLayerText = new TextBlock
             {
                 Text = "Selected Layer: None",
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
                 TextAlignment = Avalonia.Media.TextAlignment.Center
             };
 
@@ -80,7 +77,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
             {
                 Content = "Add Layer",
                 Margin = App.style.Margin,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center
+                HorizontalAlignment = HorizontalAlignment.Center
             };
 
             LayersBody.Children.Add(AddLayerButton);

@@ -26,7 +26,6 @@
 using System.Numerics;
 using CommunityToolkit.Diagnostics;
 using RPGCreator.Core.Managers.AssetsManager.Factories;
-using RPGCreator.Core.Types.Editor.Context;
 using RPGCreator.SDK.Editor.Brushes;
 using RPGCreator.SDK.Types;
 

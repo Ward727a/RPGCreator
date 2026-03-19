@@ -40,12 +40,12 @@ namespace RPGCreator.UI.Content.Launcher
             // For now we will use the default avalonia icon, but you can replace it with your own icon.
             Icon = new WindowIcon("Assets/rpgc-logo.ico");
             WindowStartupLocation = WindowStartupLocation.Manual;
-            Position = Position.WithX(this.Screens.Primary.WorkingArea.Center.X-(int)Width/2)
-                .WithY(this.Screens.Primary.WorkingArea.Center.Y-(int)Height/2);
+            Position = Position.WithX(Screens.Primary.WorkingArea.Center.X-(int)Width/2)
+                .WithY(Screens.Primary.WorkingArea.Center.Y-(int)Height/2);
 
             Content = new LauncherWindowControl();
 
-            this.Show(); // Show the window immediately
+            Show(); // Show the window immediately
         }
 
         #region EventsHandlers

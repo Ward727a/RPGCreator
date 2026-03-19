@@ -26,7 +26,6 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using System;
 using RPGCreator.SDK.Projects;
-using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.UI.Content.Launcher
 {
@@ -41,14 +40,14 @@ namespace RPGCreator.UI.Content.Launcher
             {
                 Orientation = Avalonia.Layout.Orientation.Vertical,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                Background = Avalonia.Media.Brushes.Transparent,
+                Background = Brushes.Transparent,
             };
 
             stackPanel.Children.Add(new TextBlock
             {
                 Text = project.Name,
                 FontSize = 16,
-                FontWeight = Avalonia.Media.FontWeight.Bold,
+                FontWeight = FontWeight.Bold,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
                 Margin = new(0, 20, 0, 0),
             });
@@ -65,16 +64,16 @@ namespace RPGCreator.UI.Content.Launcher
             PointerEntered += (_, e) =>
             {
                 // Change cursor to hand when hovering over the item
-                this.Cursor = Avalonia.Input.Cursor.Parse("hand");
+                Cursor = Avalonia.Input.Cursor.Parse("hand");
                 // Set the background less transparent
-                stackPanel.Background = new SolidColorBrush(Avalonia.Media.Color.FromArgb(100, 0, 0, 0)); // Semi-transparent black
+                stackPanel.Background = new SolidColorBrush(Color.FromArgb(100, 0, 0, 0)); // Semi-transparent black
             };
             PointerExited += (_, e) =>
             {
                 // Reset cursor when not hovering over the item
-                this.Cursor = Avalonia.Input.Cursor.Default;
+                Cursor = Avalonia.Input.Cursor.Default;
                 // Reset background color
-                stackPanel.Background = Avalonia.Media.Brushes.Transparent;
+                stackPanel.Background = Brushes.Transparent;
             };
 
             Content = stackPanel; 

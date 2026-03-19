@@ -43,7 +43,7 @@ public class AssetsTypeMapping : IAssetTypeRegistry
     }
 
     public bool HasKey(string key) => _keyToType.ContainsKey(key);
-    public void ScanAssembly(System.Reflection.Assembly asm, bool overrideExisting = false)
+    public void ScanAssembly(Assembly asm, bool overrideExisting = false)
     {
         var types = asm.GetLoadableTypes();
 

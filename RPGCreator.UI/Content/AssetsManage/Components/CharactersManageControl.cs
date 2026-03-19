@@ -12,10 +12,8 @@ using Avalonia.Threading;
 using Avalonia.VisualTree;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Characters;
-using RPGCreator.SDK.ECS.Features;
 using RPGCreator.SDK.Extensions;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor;
-using Ursa.Controls;
 using AutoCompleteBox = Avalonia.Controls.AutoCompleteBox;
 
 namespace RPGCreator.UI.Content.AssetsManage.Components;
@@ -79,7 +77,7 @@ public class CharacterManageItem : UserControl
         InfoPanel = new StackPanel
         {
             Orientation = Orientation.Vertical,
-            Margin = new Avalonia.Thickness(5)
+            Margin = new Thickness(5)
         };
         Body.Children.Add(InfoPanel);
         Grid.SetColumn(InfoPanel, 1);
@@ -88,7 +86,7 @@ public class CharacterManageItem : UserControl
         {
             Text = CharacterData.Name,
             VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Avalonia.Thickness(5, 0, 0, 0)
+            Margin = new Thickness(5, 0, 0, 0)
         };
         InfoPanel.Children.Add(NameTextBlock);
         
@@ -96,7 +94,7 @@ public class CharacterManageItem : UserControl
         {
             Text = CharacterData.Urn.ToString(),
             VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Avalonia.Thickness(5, 0, 0, 0),
+            Margin = new Thickness(5, 0, 0, 0),
             FontSize = 10,
             Opacity = 0.6
         };
@@ -105,7 +103,7 @@ public class CharacterManageItem : UserControl
         ButtonsPanel = new StackPanel
         {
             Orientation = Orientation.Vertical,
-            Margin = new Avalonia.Thickness(5)
+            Margin = new Thickness(5)
         };
         Body.Children.Add(ButtonsPanel);
         Grid.SetColumn(ButtonsPanel, 2);
@@ -113,14 +111,14 @@ public class CharacterManageItem : UserControl
         EditButton = new Button
         {
             Content = "Edit",
-            Margin = new Avalonia.Thickness(5)
+            Margin = new Thickness(5)
         };
         ButtonsPanel.Children.Add(EditButton);
         
         DeleteButton = new Button
         {
             Content = "Delete",
-            Margin = new Avalonia.Thickness(5)
+            Margin = new Thickness(5)
         };
         ButtonsPanel.Children.Add(DeleteButton);
         
@@ -266,14 +264,14 @@ public class CharactersManageControl : UserControl
         {
             HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-            Margin = new Avalonia.Thickness(5)
+            Margin = new Thickness(5)
         };
         Body.Children.Add(ViewComponents);
         Grid.SetRow(ViewComponents, 1);
         
         ViewPanel = new ListBox()
         {
-            Margin = new Avalonia.Thickness(5),
+            Margin = new Thickness(5),
             ItemsSource = _filteredCharacterDatas,
             ItemTemplate = new FuncDataTemplate<CharacterData>((charactersData, _) =>
             {

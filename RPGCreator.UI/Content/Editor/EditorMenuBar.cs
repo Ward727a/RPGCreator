@@ -40,7 +40,7 @@ public class EditorMenuBar : UserControl
     {
         CreateComponents();
         RegisterEvents();
-        this.Content = _menu;
+        Content = _menu;
     }
 
     private void CreateComponents()

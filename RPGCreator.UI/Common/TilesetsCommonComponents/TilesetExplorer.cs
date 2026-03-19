@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Drawing;
-using System.Numerics;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using RPGCreator.SDK;
@@ -175,9 +172,7 @@ public class TilesetExplorer : UserControl
                     (int)((position.Y + Math.Abs(_canvas.CurrentElementsPosition.Y)) / cellSize.Height)
                 );
 
-                var tilesetInstance = EngineServices.GameFactory.CreateInstance<ITilesetInstance>(def);
-                
-                tileToPaint = tilesetInstance.GetTileAt(tilePositionInTileset.X, tilePositionInTileset.Y);
+                tileToPaint = def.GetTileAt(tilePositionInTileset.X, tilePositionInTileset.Y);
                 Logger.Debug("[TilesetExplorer] Got tile definition at position {0} in tileset {1}", tilePositionInTileset, def.Name);
                 TileSelected?.Invoke(tileToPaint);
                 

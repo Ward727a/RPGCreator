@@ -48,7 +48,7 @@ public class TestingDialog : Window
             var textDialog = new TextInputDialog("Enter the path to the pack to load:");
             textDialog.Confirmed += (path) =>
             {
-                EngineServices.SerializerService.Deserialize(File.ReadAllText(path), out object? pack, out System.Type? type);
+                EngineServices.SerializerService.Deserialize(File.ReadAllText(path), out object? pack, out Type? type);
                 if (type == typeof(IAssetsPack))
                 {
                     Console.WriteLine($"Pack loaded successfully: {((IAssetsPack)pack).Name}");
@@ -91,8 +91,8 @@ public class TestingDialog : Window
             {
                 Content = testButton.Name,
                 Margin = new Thickness(5),
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
                 Width = 200,
                 Height = 40,
                 FontSize = 16

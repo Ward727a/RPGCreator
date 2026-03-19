@@ -70,7 +70,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
             Body.Children.Add(TilesetImage);
             Body.Children.Add(NameTextBlock);
 
-            this.Content = Body;
+            Content = Body;
         }
 
     }

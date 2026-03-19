@@ -20,13 +20,11 @@
 
 using Avalonia.Controls;
 using Avalonia.Media;
-using AvaloniaInside.MonoGame;
 using CommunityToolkit.Diagnostics;
 using Microsoft.Xna.Framework;
 using RPGCreator.SDK.GameUI;
 using RPGCreator.UI.Content.GameUiEditor.Components;
 using RPGCreator.UI.Test;
-using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.GameUiEditor;
 

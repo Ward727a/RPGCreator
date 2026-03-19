@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using Microsoft.Xna.Framework;
@@ -13,7 +11,6 @@ using RPGCreator.Player.Services;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
-using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Debug;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Systems;
@@ -101,7 +98,7 @@ public class GamePlayer : Game, IGameRunner
                     string filePath = args[i + 1];
                     
                     // Check if the file is an .xml file
-                    if (System.IO.Path.GetExtension(filePath).Equals(".xml", StringComparison.OrdinalIgnoreCase))
+                    if (Path.GetExtension(filePath).Equals(".xml", StringComparison.OrdinalIgnoreCase))
                     {
                         _gameFilePath = filePath;
                         _fromArgs = true;
@@ -123,8 +120,8 @@ public class GamePlayer : Game, IGameRunner
             _gameFrom = GameFrom.File;
             
             // Get the path of the currently executing assembly
-            var exeDirectory = System.IO.Path.GetDirectoryName(exePath);
-            _gameFilePath = System.IO.Path.Combine(exeDirectory, "GameData.json");
+            var exeDirectory = Path.GetDirectoryName(exePath);
+            _gameFilePath = Path.Combine(exeDirectory, "GameData.json");
             logger.Info("GameData.json path found: {path}", args: _gameFilePath);
             
             if(!File.Exists(_gameFilePath))
@@ -254,7 +251,7 @@ public class GamePlayer : Game, IGameRunner
     
     public void UpdateKeyboard()
     {
-        var mgState = Microsoft.Xna.Framework.Input.Keyboard.GetState();
+        var mgState = Keyboard.GetState();
         var pressedKeys = mgState.GetPressedKeys();
 
         Span<KeyboardKeys> sdkKeys = stackalloc KeyboardKeys[pressedKeys.Length];
@@ -326,7 +323,7 @@ public class GamePlayer : Game, IGameRunner
         
         base.Draw(gameTime);
         
-        // var elements = RuntimeServices.MapService.CurrentLoadedMapDefinition.CollisionChunk.Elements;
+        var elements = RuntimeServices.MapService.CurrentLoadedMapDefinition.CollisionChunk.Elements;
         RuntimeServices.RenderService.PrepareDrawing();
         // foreach (var element in elements)
         // {
@@ -363,7 +360,7 @@ public class GamePlayer : Game, IGameRunner
                 collisionRectangle.Position,
                 collisionRectangle.Size,
                 SDK.Types.Color.Green * 0.5f,
-                1f
+                2f
             );
         }
         
@@ -373,7 +370,7 @@ public class GamePlayer : Game, IGameRunner
                 worldCollisionRect.Position,
                 worldCollisionRect.Size,
                 SDK.Types.Color.Blue * 0.5f,
-                1f
+                2f
             );
         }
         RuntimeServices.RenderService.FinishDrawing();

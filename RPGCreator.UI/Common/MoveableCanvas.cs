@@ -24,7 +24,7 @@ public class EditorGridLayer : Control
 
     public EditorGridLayer()
     {
-        this.IsHitTestVisible = false; 
+        IsHitTestVisible = false; 
     }
 
     public override void Render(DrawingContext context)
@@ -77,7 +77,7 @@ public class MoveableCanvas : UserControl
         set
         {
             _showCheckboard = value;
-            CanvasBody.Background = _showCheckboard ? CheckerBoardBrush.CreateCheckerBoardBrush(new Color(50, 100, 100, 100), Colors.Transparent, _checkerboardSize) : Avalonia.Media.Brushes.Transparent;
+            CanvasBody.Background = _showCheckboard ? CheckerBoardBrush.CreateCheckerBoardBrush(new Color(50, 100, 100, 100), Colors.Transparent, _checkerboardSize) : Brushes.Transparent;
         } 
     }
     
@@ -134,7 +134,7 @@ public class MoveableCanvas : UserControl
         {
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-            Background = ShowCheckboard ? CheckerBoardBrush.CreateCheckerBoardBrush(Colors.LightGray, Colors.Gray) :Avalonia.Media.Brushes.Transparent
+            Background = ShowCheckboard ? CheckerBoardBrush.CreateCheckerBoardBrush(Colors.LightGray, Colors.Gray) :Brushes.Transparent
         };
         
         _gridLayer = new EditorGridLayer();

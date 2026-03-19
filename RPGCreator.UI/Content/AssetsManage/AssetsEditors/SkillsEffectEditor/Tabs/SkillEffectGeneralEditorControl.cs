@@ -203,7 +203,7 @@ public class SkillEffectGeneralEditorControl : UserControl
             RemoveButton.Click += (sender, args) =>
             {
                 RemoveRequested?.Invoke(this, EventArgs.Empty);
-                if (this.Parent is Panel parentPanel)
+                if (Parent is Panel parentPanel)
                 {
                     parentPanel.Children.Remove(this);
                 }

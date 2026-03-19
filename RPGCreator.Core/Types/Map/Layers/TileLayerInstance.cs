@@ -29,15 +29,6 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
         IsVisible = definition.VisibleByDefault;
         _def = definition;
         
-        // TODO: Code to refactor due to changes with LayerChunk system.
-        /*
-        foreach (var element in definition.Chunks)
-        {
-            var tileInstance = EngineCore.Instance.Managers.Assets.TileFactory.Create(element.Value);
-            tileInstance.Position = element.Key;
-            InstancedElements.Add(element.Key, tileInstance);
-        }
-        */
         
         _def.ElementAdded += OnElementAdded;
         _def.ElementRemoved += OnElementRemoved;
@@ -69,23 +60,6 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
             return;
 
         EngineCore.Instance.Managers.Assets.TileFactory.Release(removedTile);
-    }
-    
-    public void Draw()
-    {
-        if (!IsVisible)
-            return;
-
-        if (Renderer != null)
-        {
-            Renderer.Draw(null, this);
-            return;
-        }
-        
-        foreach (var tile in InstancedElements.Values)
-        {
-            tile.Draw(null, null/*NEED TO PASS DRAWER*/); //TODO: pass drawer
-        }
     }
 
     public void Update(TimeSpan gameTime)
@@ -119,15 +93,7 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
 
         _def = def;
         InstancedElements.Clear();
-
-        // TODO: Code to refactor due to changes with LayerChunk system.
-        /*
-        foreach (var element in def.Chunks)
-        {
-            var tileInstance = EngineCore.Instance.Managers.Assets.TileFactory.Create(element.Value);
-            InstancedElements.Add(element.Key, tileInstance);
-        }
-        */
+        
         _def.ElementAdded += OnElementAdded;
         _def.ElementRemoved += OnElementRemoved;
         

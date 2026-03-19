@@ -28,7 +28,6 @@ public class GameFactory : IGameFactory
     
     public GenericPooledFactory<TileLayerInstance, TileLayerDefinition> TileLayerFactory = new();
     public GenericCachedFactory<MapInstance, MapDefinition> MapFactory = new();
-    public TilesetFactory TilesetFactory { get; } = new();
     public TileFactory TileFactory { get; } = new();
     public StatFactory StatFactory { get; } = new();
     public AnimationFactory AnimationFactory { get; } = new();
@@ -38,7 +37,6 @@ public class GameFactory : IGameFactory
         // Register built-in factories
         Register(TileLayerFactory);
         Register(MapFactory);
-        Register(TilesetFactory);
         Register(TileFactory);
         Register(StatFactory);
         Register(AnimationFactory);

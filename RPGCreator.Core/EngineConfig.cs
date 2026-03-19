@@ -21,7 +21,6 @@
 using System.Collections.ObjectModel;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
-using RPGCreator.SDK.Editor;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.Definition;
@@ -265,6 +264,6 @@ public class EngineConfig : IEngineConfig
             return;
         }
 
-        this.SaveConfig();
+        SaveConfig();
     }
 }

@@ -33,14 +33,10 @@ using RPGCreator.UI.Content.Editor.TilesetSelectorComponents;
 using RPGCreator.UI.Content.Editor.Toolbar;
 using RPGCreator.UI.Content.Preferences;
 using System;
-using System.Diagnostics;
 using System.Numerics;
-using System.Threading;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
-using RPGCreator.Core.Types.Windows;
-using RPGCreator.RTP;
 using RPGCreator.RTP.Services;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
@@ -215,7 +211,7 @@ namespace RPGCreator.UI.Content.Editor
             {
                 Margin = App.style.Margin,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                BorderBrush = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Gray),
+                BorderBrush = new SolidColorBrush(Colors.Gray),
             };
             LeftPanel.Children.Add(separatorLeftPanel0);
             Grid.SetRow(separatorLeftPanel0, 1);

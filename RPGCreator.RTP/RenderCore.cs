@@ -24,7 +24,6 @@ using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.RTP.Services;
-using RPGCreator.RTP.Viewport;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Editor.Rendering;
 
@@ -48,7 +47,7 @@ public sealed class RenderCore : Game, IGameRenderCore
     {
         _parentService = parentService;
         Graphics = new GraphicsDeviceManager(this);
-        this.IsMouseVisible = false;
+        IsMouseVisible = false;
         RuntimeServices.GameRunner = this;
         
     }

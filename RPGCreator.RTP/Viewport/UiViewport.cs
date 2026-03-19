@@ -19,7 +19,6 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System;
-using FontStashSharp;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.RTP.GameUI;
 using RPGCreator.RTP.GameUI.Controls;

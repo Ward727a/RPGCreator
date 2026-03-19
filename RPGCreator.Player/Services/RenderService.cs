@@ -168,13 +168,9 @@ public class RenderService : IRenderService
         );
     }
 
-    public void DrawTileInstance(ITileInstance tileInstance)
-    {
-        
-    }
-
     public void DrawDebugRect(Vector2 worldPos, Size size, Color? color = null, float thickness = 2f)
     {
+        #if DEBUG
         var camera = RuntimeServices.CameraService;
         var adjustedThickness = thickness / camera.ZoomLevel;
         
@@ -194,6 +190,7 @@ public class RenderService : IRenderService
             xnaColor * _globalOpacity,
             adjustedThickness
         );
+        #endif
     }
 
     public void DrawDebugLine(Vector2 startPos, Vector2 endPos, float thickness = 1, Color? color = null)

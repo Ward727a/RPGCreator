@@ -20,7 +20,6 @@
 
 using System.Numerics;
 using _BaseModule.Enums;
-using Avalonia.Logging;
 using RPGCreator.SDK;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.Attributes;
@@ -76,7 +75,7 @@ public class CollisionFeature : BaseEntityFeature
                 
                 var colliderBlobIndex = GlobalStates.GameSession.BlobManager.Register(
                     new SquareCollider(
-                        new(new Vector2(2, 16 + 8),
+                        new(new Vector2(2, 16 + 16),
                             boundsComponent.Size with
                             {
                                 Height = (boundsComponent.Size.Height / 2) - 8,
@@ -143,25 +142,30 @@ public class CollisionSystem : ISystem
                 colliderRect.Size
             );
             
-            var futureColliderPosition = worldColliderRect with {Position = worldColliderRect.Position + movementComponent.DesiredVelocity};
-
-            if (_mapService.IsAreaBlocked(futureColliderPosition))
-            {
-                if (!_test_IsColliding)
-                {
-                    Logger.Debug("Area blocked!");
-                    _test_IsColliding = true;
-                }
-                movementComponent.DesiredVelocity = Vector2.Zero;
-            }
-            else
-            {
-                if (_test_IsColliding)
-                {
-                    Logger.Debug("Area unblocked!");
-                    _test_IsColliding = false;
-                }
-            }
+            var velocityX = movementComponent.DesiredVelocity with { Y = 0 };
+            var velocityY = movementComponent.DesiredVelocity with { X = 0 };
+            
+            var isCollidingX = CheckVelocity(worldColliderRect, velocityX);
+            var isCollidingY = CheckVelocity(worldColliderRect, velocityY);
+            
+            movementComponent.DesiredVelocity = new Vector2(
+                isCollidingX ? 0 : movementComponent.DesiredVelocity.X,
+                isCollidingY ? 0 : movementComponent.DesiredVelocity.Y
+            );
         }
+    }
+
+    /// <summary>
+    /// Check if the entity is colliding with the map at a given velocity.
+    /// </summary>
+    /// <param name="worldColliderRect">The rectangle of the entity's collider in the world position.</param>
+    /// <param name="velocity">The velocity to check.</param>
+    /// <returns>
+    /// True if the entity is colliding with the map at the given velocity, false otherwise.
+    /// </returns>
+    private bool CheckVelocity(Rect worldColliderRect, Vector2 velocity)
+    {
+        var futureColliderPosition = worldColliderRect with {Position = worldColliderRect.Position + velocity};
+        return _mapService.IsAreaBlocked(futureColliderPosition);
     }
 }

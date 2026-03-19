@@ -1,5 +1,3 @@
-using RPGCreator.SDK.Logging;
-
 namespace RPGCreator.SDK.ECS.Systems;
 
 public class SystemManager(IEcsWorld world)

@@ -19,7 +19,6 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System;
-using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Projektanker.Icons.Avalonia;

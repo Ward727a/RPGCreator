@@ -35,9 +35,10 @@ namespace _BaseModule.Features.Entity;
 /// </summary>
 public class SignalsFeature : BaseEntityFeature
 {
+    public static readonly URN Urn = FeatureUrnModule.ToUrnModule("rpgc").ToUrn("signals");
     public override string FeatureName => "Signals";
     public override string FeatureDescription => "Allows the entity to emit and react to signals. Signals are a powerful way to create interactions between entities without tight coupling. They can be used for a wide variety of purposes, such as triggering events, communicating between entities, and creating complex behaviors.";
-    public override URN FeatureUrn { get; } = FeatureUrnModule.ToUrnModule("rpgc").ToUrn("signals");
+    public override URN FeatureUrn => Urn;
 
     public override void OnWorldSetup(IEcsWorld world)
     {

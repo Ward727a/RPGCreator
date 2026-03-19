@@ -20,7 +20,6 @@
 
 using System.ComponentModel;
 using System.Numerics;
-using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.RuntimeService;

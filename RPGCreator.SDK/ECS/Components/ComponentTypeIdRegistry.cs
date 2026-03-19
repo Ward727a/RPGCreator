@@ -2,7 +2,7 @@ namespace RPGCreator.SDK.ECS;
 
 public static class ComponentTypeIdRegistry
 {
-    private static readonly Dictionary<System.Type, int> _componentTypeToId = new();
+    private static readonly Dictionary<Type, int> _componentTypeToId = new();
     private static int _nextId = 0;
     
     /// <summary>
@@ -24,7 +24,7 @@ public static class ComponentTypeIdRegistry
         return id;
     }
     
-    public static int GetComponentTypeId(System.Type type)
+    public static int GetComponentTypeId(Type type)
     {
         if (!typeof(IComponent).IsAssignableFrom(type))
             throw new ArgumentException($"Type {type.FullName} does not implement IComponent interface.");
@@ -44,7 +44,7 @@ public static class ComponentTypeIdRegistry
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    public static System.Type? GetType(int id)
+    public static Type? GetType(int id)
     {
         return (from kvp in _componentTypeToId where kvp.Value == id select kvp.Key).FirstOrDefault();
     }
@@ -57,5 +57,5 @@ public static class ComponentTypeIdRegistry
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
     public static int GetBit<T>() where T : IComponent => GetComponentTypeId<T>();
-    public static int GetBit(System.Type type) => GetComponentTypeId(type);
+    public static int GetBit(Type type) => GetComponentTypeId(type);
 }

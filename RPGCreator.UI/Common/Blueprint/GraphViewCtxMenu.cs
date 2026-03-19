@@ -3,7 +3,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Layout;
-using RPGCreator.Core.Types;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Graph.Nodes;
 

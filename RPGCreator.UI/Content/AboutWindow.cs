@@ -43,7 +43,7 @@ public class AboutWindow : Window
         {
             RowDefinitions = new RowDefinitions("*")
         };
-        this.Content = _mainGrid;
+        Content = _mainGrid;
         
         _scrollViewer = new ScrollViewer
         {

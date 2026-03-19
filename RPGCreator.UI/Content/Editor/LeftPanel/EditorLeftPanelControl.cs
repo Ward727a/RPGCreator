@@ -1,26 +1,15 @@
 using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
-using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
-using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
-using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
-using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Modules.UIModule;
-using RPGCreator.SDK.RuntimeService;
 using RPGCreator.UI.Common.CharacterCommonComponents;
 using RPGCreator.UI.Common.TilesetsCommonComponents;
-using RPGCreator.UI.Contexts;
-using RPGCreator.UI.Content.Editor.LeftPanel.EntitiesPanel;
-using RPGCreator.UI.Content.Editor.LeftPanel.NonePanel;
-using RPGCreator.UI.Content.Editor.LeftPanel.TilingPanel;
 using RPGCreator.UI.Content.Editor.Tabs;
 
 namespace RPGCreator.UI.Content.Editor.LeftPanel;

@@ -28,7 +28,6 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
-using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media;
 using RPGCreator.SDK;
 using RPGCreator.SDK.GlobalState;
@@ -52,7 +51,7 @@ public class ToolSettingsControl : UserControl
     {
         CreateComponents();
         RegisterEvents();
-        this.Content = _content;
+        Content = _content;
     }
 
     private void CreateComponents()
@@ -60,8 +59,8 @@ public class ToolSettingsControl : UserControl
         
         _contentHeader = new TextBlock()
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
             Inlines = new InlineCollection()
         };
 
@@ -94,8 +93,8 @@ public class ToolSettingsControl : UserControl
         
         _body = new Grid()
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
             RowDefinitions = new RowDefinitions("*"),
             ColumnDefinitions = new ColumnDefinitions("*"),
             MaxHeight = 250
@@ -104,8 +103,8 @@ public class ToolSettingsControl : UserControl
         _content.Content = _body;
         _scroll = new ScrollViewer()
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
         };
         
@@ -113,13 +112,13 @@ public class ToolSettingsControl : UserControl
         _settingsPanel = new ItemsControl()
         {
             ItemsSource = GlobalStates.ToolState.ActiveToolParameters,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Top,
             ItemsPanel = new FuncTemplate<Panel?>(() => new StackPanel()
             {
-                Orientation = Avalonia.Layout.Orientation.Vertical,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
+                Orientation = Orientation.Vertical,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Top,
                 Spacing = 4,
                 Margin = new Thickness(0, 0, 8, 0)
             }),
@@ -173,8 +172,8 @@ public class ToolSettingsControl : UserControl
         var paramName = new TextBlock()
         {
             Text = param.DisplayName,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
             FontWeight = FontWeight.SemiBold
         };
         ToolTip.SetTip(paramName, param.Description);
@@ -198,12 +197,12 @@ public class ToolSettingsControl : UserControl
         {
             Minimum = parameter.Min,
             Maximum = parameter.Max,
-            Orientation =  Avalonia.Layout.Orientation.Horizontal,
+            Orientation =  Orientation.Horizontal,
             TickFrequency = parameter.Step,
             IsSnapToTickEnabled = true,
             Value = parameter.Value as double? ?? 0,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center
         };
 
         control.ValueChanged += OnControlChanged;
@@ -240,8 +239,8 @@ public class ToolSettingsControl : UserControl
         var control = new TextBox()
         {
             Text = parameter.GetValueAs<string>(out _),
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center
         };
 
         control.TextChanged += OnControlChanged;
@@ -281,8 +280,8 @@ public class ToolSettingsControl : UserControl
             Maximum = parameter.Max,
             Step = parameter.Step,
             Value = parameter.Value as int? ?? 0,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center
         };
 
         control.ValueChanged += OnControlChanged;
@@ -323,8 +322,8 @@ public class ToolSettingsControl : UserControl
             Maximum = parameter.Max,
             Step = parameter.Step,
             Value = parameter.GetValueAs<float>(out _),
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center
         };
 
         control.ValueChanged += OnControlChanged;
@@ -368,8 +367,8 @@ public class ToolSettingsControl : UserControl
             Maximum = parameter.Max,
             Step = parameter.Step,
             Value = parameter.GetValueAs<double>(out _),
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Center,
             FormatString = "0.###########" // To avoid displaying too much decimal places that could be caused by precision errors.
         };
 
@@ -424,8 +423,8 @@ public class ToolSettingsControl : UserControl
         var control = new CheckBox()
         {
             IsChecked = parameter.GetValueAs<bool>(out _),
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center
         };
 
         control.IsCheckedChanged += OnControlChanged;
@@ -468,7 +467,7 @@ public class ToolSettingsControl : UserControl
         return new TextBlock()
         {
             Text = "Invalid control for parameter '" + parameter.DisplayName + "'.",
-            Foreground = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Red)
+            Foreground = new SolidColorBrush(Colors.Red)
         };
     }
     

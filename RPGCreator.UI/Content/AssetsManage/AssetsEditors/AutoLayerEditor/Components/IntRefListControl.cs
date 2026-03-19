@@ -11,6 +11,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.VisualTree;
+using CommunityToolkit.Diagnostics;
 using Projektanker.Icons.Avalonia;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
@@ -69,7 +70,7 @@ public class IntRefListMenu : Grid
             HorizontalAlignment = HorizontalAlignment.Right,
         };
         Children.Add(SaveButton);
-        Grid.SetColumn(SaveButton, 2);
+        SetColumn(SaveButton, 2);
     }
     
     private void RegisterEvents()
@@ -230,7 +231,7 @@ public class IntRefListCreateModal : Window
     {
         Body = new StackPanel()
         {
-            Orientation = Avalonia.Layout.Orientation.Vertical,
+            Orientation = Orientation.Vertical,
             Margin = new Thickness(10),
         };
         Content = Body;
@@ -245,7 +246,7 @@ public class IntRefListCreateModal : Window
         
         ColorInput = new ColorPicker()
         {
-            Color = FromRef?.Color.ToAvalonia() ?? Avalonia.Media.Colors.White,
+            Color = FromRef?.Color.ToAvalonia() ?? Colors.White,
             ColorModel = ColorModel.Rgba,
             Palette = new MaterialHalfColorPalette(),
             Margin = new Thickness(0, 0, 0, 10),
@@ -254,7 +255,7 @@ public class IntRefListCreateModal : Window
 
         DefaultTilePanel = new StackPanel()
         {
-            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            Orientation = Orientation.Horizontal,
             Margin = new Thickness(0, 0, 0, 10),
         };
         Body.Children.Add(DefaultTilePanel);
@@ -306,8 +307,8 @@ public class IntRefListCreateModal : Window
         
         ButtonsPanel = new StackPanel()
         {
-            Orientation = Avalonia.Layout.Orientation.Horizontal,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right,
         };
         Body.Children.Add(ButtonsPanel);
         
@@ -386,7 +387,7 @@ public class IntRefListCreateModal : Window
             intRef = new IntGridValueRef();
 
         intRef.Name = NameInput.Text;
-        intRef.Color = intRef.Color.FromAvalonia(ColorInput?.Color ?? Avalonia.Media.Colors.White);
+        intRef.Color = intRef.Color.FromAvalonia(ColorInput?.Color ?? Colors.White);
         
         if (SelectedDefaultTile != null)
         {
@@ -415,7 +416,7 @@ public class AutoLayerRuleSelectOutputTileModal : Window
     
     public AutoLayerRuleSelectOutputTileModal(int baseTilesetIndex = -1)
     {
-        this.SizeToContent = SizeToContent.WidthAndHeight;
+        SizeToContent = SizeToContent.WidthAndHeight;
         CreateComponents(baseTilesetIndex);
         RegisterEvents();
     }
@@ -532,6 +533,11 @@ public class AutoLayerRuleCreateModal : Window
             _outputTilesPanel?.Children.Add(_tileBorder);
         }
 
+        public void OnRemovedFromStack()
+        {
+            
+        }
+
         public string Name { get; } = "Remove Output Tile";
     }
     
@@ -596,7 +602,12 @@ public class AutoLayerRuleCreateModal : Window
             _rule.OutputTiles.Remove(_tileData);
             _outputTilesPanel?.Children.Remove(_tileBorder);
         }
-        
+
+        public void OnRemovedFromStack()
+        {
+            
+        }
+
         public string Name { get; } = "Add Output Tile";
     }
     
@@ -861,7 +872,7 @@ public class AutoLayerRuleCreateModal : Window
     }
     private void RegisterEvents()
     {
-        if (OutputTilesButton == null || CreateRuleButton == null || CancelButton == null)
+        if (OutputTilesButton == null || CreateRuleButton == null || CancelButton == null || FlipXParameter == null || FlipYParameter == null || ChanceParameter == null)
             return;
         
         OutputTilesButton.Click += (_, _) =>
@@ -929,6 +940,8 @@ public class AutoLayerRuleCreateModal : Window
         
         CommandManager.StateChanged += () =>
         {
+            Guard.IsNotNull(TestUndoButton);
+            Guard.IsNotNull(TestRedoButton);
             TestUndoButton.IsEnabled = CommandManager.CanUndo;
             ToolTip.SetTip(TestUndoButton, $"Undo: {CommandManager.GetUndoCommandName()}");
             ToolTip.SetShowOnDisabled(TestUndoButton, true);
@@ -968,7 +981,7 @@ public class AutoLayerRuleCreateModal : Window
             if (brightness < 0.5)
             {
                 text.Foreground = new SolidColorBrush(new Color(
-                    (byte)255,
+                    255,
                     (byte)Math.Min(255, intRef.Color.R + 150),
                     (byte)Math.Min(255, intRef.Color.G + 150),
                     (byte)Math.Min(255, intRef.Color.B + 150)
@@ -977,7 +990,7 @@ public class AutoLayerRuleCreateModal : Window
             else
             {
                 text.Foreground = new SolidColorBrush(new Color(
-                    (byte)255,
+                    255,
                     (byte)Math.Max(0, intRef.Color.R - 150),
                     (byte)Math.Max(0, intRef.Color.G - 150),
                     (byte)Math.Max(0, intRef.Color.B - 150)
@@ -1055,6 +1068,11 @@ public class AutoLayerRuleCreateModal : Window
             }
         }
 
+        public void OnRemovedFromStack()
+        {
+            
+        }
+
         public string Name { get; } = "Select Condition";
     }
 
@@ -1109,6 +1127,11 @@ public class AutoLayerRuleCreateModal : Window
                     _selectAction(false);
                     break;
             }
+        }
+
+        public void OnRemovedFromStack()
+        {
+            
         }
 
         public string Name { get; } = "Deselect Condition Panel";
@@ -1309,7 +1332,7 @@ public class IntRefListItemControl : UserControl
         {
             Width = 32,
             Height = 32,
-            Background = new Avalonia.Media.SolidColorBrush(IntRef.Color.ToAvalonia()),
+            Background = new SolidColorBrush(IntRef.Color.ToAvalonia()),
             Margin = new Thickness(0, 0, 10, 0),
         };
         
@@ -1357,7 +1380,7 @@ public class IntRefListItemControl : UserControl
         {
             Value = "mdi-alert-box-outline",
             FontSize = 20,
-            Foreground = Avalonia.Media.Brushes.Red,
+            Foreground = Brushes.Red,
             Margin = new Thickness(0, 0, 10, 0),
             IsVisible = false,
         };
@@ -1365,12 +1388,12 @@ public class IntRefListItemControl : UserControl
         NameText = new TextBlock()
         {
             Text = IntRef.Name,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
         };
         
         Body = new StackPanel()
         {
-            Orientation = Avalonia.Layout.Orientation.Vertical,
+            Orientation = Orientation.Vertical,
         };
         
         ButtonsPanel = new Grid()
@@ -1417,7 +1440,7 @@ public class IntRefListItemControl : UserControl
         
         RulesList = new StackPanel()
         {
-            Orientation = Avalonia.Layout.Orientation.Vertical,
+            Orientation = Orientation.Vertical,
         };
         Body.Children.Add(RulesList);
         
@@ -1425,7 +1448,7 @@ public class IntRefListItemControl : UserControl
         {
             Header = new StackPanel()
             {
-                Orientation = Avalonia.Layout.Orientation.Horizontal,
+                Orientation = Orientation.Horizontal,
                 Children =
                 {
                     IconDisplay!,
@@ -1489,7 +1512,7 @@ public class IntRefListItemControl : UserControl
     {
         if (ColorDisplay != null)
         {
-            ColorDisplay.Background = new Avalonia.Media.SolidColorBrush(IntRef.Color.ToAvalonia());
+            ColorDisplay.Background = new SolidColorBrush(IntRef.Color.ToAvalonia());
         }
         
         if (NameText != null)
@@ -1690,7 +1713,7 @@ public class IntRefListControl : UserControl
         
         ListBody = new StackPanel()
         {
-            Orientation = Avalonia.Layout.Orientation.Vertical,
+            Orientation = Orientation.Vertical,
         };
         ListViewer.Content = ListBody;
     }
@@ -1772,7 +1795,7 @@ public class IntRefListControl : UserControl
                 intRefItem.IconDisplay!.IsVisible = true;
                 ToolTip.SetTip(intRefItem.IconDisplay, "Warning: Duplicate Value detected!");
                 
-                intRefItem.refValueSelector!.Foreground = Avalonia.Media.Brushes.Red;
+                intRefItem.refValueSelector!.Foreground = Brushes.Red;
             }
             else if(intRefItem.IconDisplay!.IsVisible)
             {

@@ -20,7 +20,6 @@
 
 using System.Numerics;
 using RPGCreator.RTP.GameUI.Enums;
-using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.RTP.GameUI.Visual;

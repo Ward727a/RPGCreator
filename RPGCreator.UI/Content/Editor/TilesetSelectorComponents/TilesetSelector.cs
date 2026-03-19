@@ -308,8 +308,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
             int tileCol = (int)(position.X / tileWidth);
             int tileRow = (int)(position.Y / tileHeight);
 
-            var tilesetInstance = EngineServices.GameFactory.CreateInstance<ITilesetInstance>(SelectedTilesetDef);
-            var tile = tilesetInstance.GetTileAt(tileCol, tileRow);
+            var tile = SelectedTilesetDef.GetTileAt(tileCol, tileRow);
 
             if(tile == null)
             {
@@ -320,7 +319,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
             // Now we can use the tileCol and tileRow to draw a square around the clicked tile
             Console.WriteLine($"Tile clicked at column: {tileCol}, row: {tileRow}");
 
-            var tileRectangle = new Avalonia.Rect(tileCol * tileWidth, tileRow * tileHeight, tileWidth, tileHeight);
+            var tileRectangle = new Rect(tileCol * tileWidth, tileRow * tileHeight, tileWidth, tileHeight);
 
             if (TileBorder != null) // If the tileborder already exists, we just move it
             {
@@ -337,7 +336,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 #if DEBUG
                     Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromArgb(100, 0, 255, 0)),
 #endif
-                    BorderThickness = new Avalonia.Thickness(2),
+                    BorderThickness = new Thickness(2),
                     BorderBrush = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromArgb(127, 0, 0, 0)),
                     HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
                     VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top

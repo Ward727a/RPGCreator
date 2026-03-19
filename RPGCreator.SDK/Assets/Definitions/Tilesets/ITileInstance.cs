@@ -1,6 +1,4 @@
 using System.Drawing;
-using System.Numerics;
-using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Types.Internals;
 

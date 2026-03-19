@@ -1,5 +1,4 @@
-﻿using RPGCreator.RTP;
-using RPGCreator.RTP.Services;
+﻿using RPGCreator.RTP.Services;
 using RPGCreator.SDK;
 
 RuntimeServices.MapService = new MapService();

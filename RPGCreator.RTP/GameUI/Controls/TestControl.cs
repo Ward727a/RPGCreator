@@ -42,7 +42,7 @@ public class TestControl : BaseControl
     
     public TestControl(Color? color = null, Color? hoverColor = null)
     {
-        Visual = new Visual.TestVisual();
+        Visual = new TestVisual();
         if (color != null)
         {
             _Visual.RectColor = color.Value;

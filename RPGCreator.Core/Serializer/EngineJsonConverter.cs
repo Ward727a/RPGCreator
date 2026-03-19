@@ -47,7 +47,7 @@ public class EngineJsonConverter : JsonConverter
         }
     }
 
-    public override object? ReadJson(JsonReader reader, System.Type objectType, object? existingValue, JsonSerializer serializer)
+    public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
     {
         if (objectType == typeof(EntityLayerDefinition))
         {
@@ -72,7 +72,7 @@ public class EngineJsonConverter : JsonConverter
                 string typeName = typeToken.ToString();
 
                 // Exact match
-                actualType = System.Type.GetType(typeName);
+                actualType = Type.GetType(typeName);
 
                 // Loose match
                 if (actualType == null && typeName.Contains(","))
@@ -81,7 +81,7 @@ public class EngineJsonConverter : JsonConverter
                     if (parts.Length >= 2)
                     {
                         var looseTypeName = $"{parts[0].Trim()}, {parts[1].Trim()}";
-                        actualType = System.Type.GetType(looseTypeName);
+                        actualType = Type.GetType(looseTypeName);
                     }
                 }
 
@@ -129,7 +129,7 @@ public class EngineJsonConverter : JsonConverter
         return instance;
     }
 
-    public override bool CanConvert(System.Type objectType)
+    public override bool CanConvert(Type objectType)
     {
         return typeof(ISerializable).IsAssignableFrom(objectType);
     }

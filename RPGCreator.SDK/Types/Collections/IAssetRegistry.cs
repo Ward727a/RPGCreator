@@ -4,10 +4,10 @@ namespace RPGCreator.SDK.Types.Collections;
 
 public interface IAssetRegistry
 {
-    System.Type ManagedType { get; }
+    Type ManagedType { get; }
     string ModuleName { get; }
     
-    IEnumerable<System.Type> SupportedTypes { get; }
+    IEnumerable<Type> SupportedTypes { get; }
     
     bool HasAsset(IHasUniqueId asset);
     bool HasAsset(Ulid unique);

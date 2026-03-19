@@ -64,7 +64,7 @@ namespace RPGCreator.Core.Configs
                 throw new InvalidOperationException($"Config at {configPath} is not of type {typeof(T).Name}.");
             }
 
-            if (TryLoadConfig(configPath, out ConfHelper? outConf, out System.Type? outConfType))
+            if (TryLoadConfig(configPath, out ConfHelper? outConf, out Type? outConfType))
             {
                 if(outConfType == null || !typeof(T).IsAssignableFrom(outConfType))
                 {
@@ -117,7 +117,7 @@ namespace RPGCreator.Core.Configs
             ConfigMap[conf.ConfigName] = configPath;
         }
         
-        public bool TryLoadConfig(string configPath, out ConfHelper? confObject, out System.Type? confType, bool force = false)
+        public bool TryLoadConfig(string configPath, out ConfHelper? confObject, out Type? confType, bool force = false)
         {
 
             confObject = null;

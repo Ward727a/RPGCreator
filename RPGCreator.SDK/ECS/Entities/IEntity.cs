@@ -1,5 +1,3 @@
-using System.Collections;
-
 namespace RPGCreator.SDK.ECS.Entities;
 
 public interface IEntity

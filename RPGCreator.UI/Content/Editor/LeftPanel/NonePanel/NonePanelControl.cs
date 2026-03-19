@@ -1,13 +1,5 @@
 
 using Avalonia.Controls;
-using Dock.Avalonia.Themes.Fluent;
-using Dock.Avalonia.Controls;
-using Dock.Model;
-using Dock.Model.Avalonia;
-using Dock.Model.Avalonia.Controls;
-using Dock.Model.Core;
-using Dock.Serializer;
-using Dock.Settings;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Modules.UIModule;
 

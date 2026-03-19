@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using RPGCreator.SDK.Inputs;
-using RPGCreator.SDK.Logging;
 
 namespace RPGCreator.SDK;
 

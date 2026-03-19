@@ -26,7 +26,6 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
-using Avalonia.VisualTree;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.EditorUiService;
@@ -140,7 +139,7 @@ public class StatEditor : UserControl
             RowDefinitions = new RowDefinitions("*, Auto"),
             Margin = new Thickness(10),
         };
-        this.Content = _editorGrid;
+        Content = _editorGrid;
         
         _formScroller = new ScrollViewer
         {

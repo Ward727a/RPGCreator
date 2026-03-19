@@ -20,7 +20,6 @@
 
 using _BaseModule.AssetDefinitions.BaseStats;
 using _BaseModule.Features.Entity;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
@@ -33,7 +32,6 @@ using RPGCreator.UI.Common;
 using RPGCreator.UI.Contexts;
 using RPGCreator.UI.Extensions;
 using Ursa.Controls;
-using AutoCompleteBox = Avalonia.Controls.AutoCompleteBox;
 using Thickness = Avalonia.Thickness;
 
 namespace _BaseModule.UI.StatsModifier;
@@ -184,7 +182,7 @@ public class StatModifierEditor : UserControl
         {
             RowDefinitions = new RowDefinitions("*, Auto")
         };
-        this.Content = _editorGrid;
+        Content = _editorGrid;
 
         #region Editor Panel
         _editorScrollViewer = new ScrollViewer();

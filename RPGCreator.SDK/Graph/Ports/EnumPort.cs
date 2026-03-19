@@ -6,7 +6,7 @@ namespace RPGCreator.SDK.Graph.Ports;
 
 public class EnumPort : Port
 {
-    public System.Type EnumType { get; private set; }
+    public Type EnumType { get; private set; }
 
     public EnumPort()
     {
@@ -33,7 +33,7 @@ public class EnumPort : Port
         }
     }
 
-    public EnumPort(System.Type enumType)
+    public EnumPort(Type enumType)
     {
         if (!enumType.IsEnum)
             throw new ArgumentException("The provided type must be an enum type.", nameof(enumType));
@@ -54,7 +54,7 @@ public class EnumPort : Port
     public override void SetObjectData(DeserializationInfo info)
     {
         base.SetObjectData(info);
-        info.TryGetValue(nameof(EnumType), out System.Type enumType, typeof(Enum));
+        info.TryGetValue(nameof(EnumType), out Type enumType, typeof(Enum));
         if (!enumType.IsEnum)
             throw new InvalidOperationException("The deserialized type is not an enum type.");
         EnumType = enumType;

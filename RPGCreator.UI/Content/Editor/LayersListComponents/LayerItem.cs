@@ -24,22 +24,17 @@
 #endregion
 using Avalonia.Controls;
 using Avalonia.VisualTree;
-using RPGCreator.Core.Types;
 using RPGCreator.Core.Types.Windows;
 using System;
 using Avalonia.Controls.Documents;
 using Avalonia.Media;
-using Projektanker.Icons.Avalonia;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Assets.Definitions.Maps;
-using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.UI.Common;
 using Ursa.Controls;
 using MenuItem = Avalonia.Controls.MenuItem;
-using NumericUpDown = Avalonia.Controls.NumericUpDown;
 
 namespace RPGCreator.UI.Content.Editor.LayersListComponents
 {
@@ -75,7 +70,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                 Orientation = Avalonia.Layout.Orientation.Horizontal,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                Background = Avalonia.Media.Brushes.Transparent,
+                Background = Brushes.Transparent,
             };
 
             ZIndexSelector = new NumericIntUpDown

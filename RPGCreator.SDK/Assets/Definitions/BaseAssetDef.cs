@@ -1,11 +1,9 @@
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Newtonsoft.Json;
-using NullGuard;
 using PropertyChanged;
 using PropertyChanging;
 using RPGCreator.SDK.Assets.MetaData;
-using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Internals;
 
@@ -78,8 +76,10 @@ public abstract class BaseObservableAssetDef : ObservableObject, IBaseAssetDef
 
     public void UpdateUrn()
     {
-        if (!_isTrackingActivated || string.IsNullOrWhiteSpace(Name)) return;
-        var urn = UrnNamespace.ToUrnModule(UrnModule).ToUrn($"{Name}");
+        if (!_isTrackingActivated)
+            return;
+        var identifier = !string.IsNullOrWhiteSpace(Name) ? Name : Unique.ToString();
+        var urn = UrnNamespace.ToUrnModule(UrnModule).ToUrn($"{identifier ?? $"NO_IDENTIFIER-{Ulid.NewUlid()}"}");
         Urn = urn;
     }
 
@@ -114,6 +114,7 @@ public abstract class BaseAssetDef : IBaseAssetDef, IHasMetadata
     public Ulid Unique { get; protected set; }
 
     public virtual UrnNamespace UrnNamespace => "rpgc".ToUrnNamespace();
+    protected virtual bool ShouldUrnBeRegistered => true;
     
     public abstract UrnSingleModule UrnModule { get; }
     public void SuspendTracking()
@@ -151,11 +152,10 @@ public abstract class BaseAssetDef : IBaseAssetDef, IHasMetadata
 
     public void UpdateUrn()
     {
-        if (string.IsNullOrWhiteSpace(Name)) return;
-        var urn = UrnNamespace.ToUrnModule(UrnModule).ToUrn($"{Name}");
-        
-        if(Urn == urn) return;
-        
+        if (!_isTrackingActivated)
+            return;
+        var identifier = !string.IsNullOrWhiteSpace(Name) ? Name : Unique.ToString();
+        var urn = UrnNamespace.ToUrnModule(UrnModule).ToUrn($"{identifier ?? $"NO_IDENTIFIER-{Ulid.NewUlid()}"}");
         Urn = urn;
     }
 
@@ -164,7 +164,7 @@ public abstract class BaseAssetDef : IBaseAssetDef, IHasMetadata
         get;
         protected set
         {
-            if (RegistryServices.UrnRegistry.IsUrnRegistered(field))
+            if (ShouldUrnBeRegistered && RegistryServices.UrnRegistry.IsUrnRegistered(field))
             {
                 RegistryServices.UrnRegistry.UnregisterUrn(field);
             }
@@ -173,7 +173,8 @@ public abstract class BaseAssetDef : IBaseAssetDef, IHasMetadata
             
             if (field != URN.Empty)
             {
-                RegistryServices.UrnRegistry.RegisterUrn(ref field);
+                if(ShouldUrnBeRegistered)
+                    RegistryServices.UrnRegistry.RegisterUrn(ref field);
             }
         }
     } = URN.Empty;

@@ -1,4 +1,3 @@
-using System.Numerics;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;

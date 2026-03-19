@@ -30,7 +30,6 @@ using RPGCreator.Core.Types.Assets.BaseAssetsPack;
 using RPGCreator.SDK;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Projects;
-using RPGCreator.SDK.Types.Interfaces;
 using Serilog;
 
 namespace RPGCreator.Core.Managers.ProjectsManager
@@ -82,7 +81,7 @@ namespace RPGCreator.Core.Managers.ProjectsManager
             project = null;
             if (File.Exists(configPath))
             {
-                EngineServices.SerializerService.Deserialize<BaseProject>(File.ReadAllText(configPath), out var _projectObject, out System.Type? objectType);
+                EngineServices.SerializerService.Deserialize<BaseProject>(File.ReadAllText(configPath), out var _projectObject, out Type? objectType);
 
                 if (objectType == null)
                     return false;

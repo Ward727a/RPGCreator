@@ -19,7 +19,6 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
@@ -126,7 +125,7 @@ public class HelpWindow : UserControl
         {
             RowDefinitions = new RowDefinitions("*")
         };
-        this.Content = _mainGrid;
+        Content = _mainGrid;
         
         _scrollViewer = new ScrollViewer
         {

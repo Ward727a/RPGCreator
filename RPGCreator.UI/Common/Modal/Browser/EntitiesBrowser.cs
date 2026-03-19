@@ -231,18 +231,18 @@ public class EntityBrowserItem : UserControl
         
         _browser.ShowAll += () =>
         {
-            this.IsVisible = true;
+            IsVisible = true;
         };
 
         _browser.SearchFor += (searchForName) =>
         {
             if (!_entityDefinition.Name.ToLowerInvariant().StartsWith(searchForName.ToLowerInvariant()))
             {
-                this.IsVisible = false;
+                IsVisible = false;
             }
             else
             {
-                this.IsVisible = true;
+                IsVisible = true;
             }
         };
         
@@ -252,7 +252,7 @@ public class EntityBrowserItem : UserControl
 
     private void OnPointerEntered(object? sender, PointerEventArgs e)
     {
-        ItemBorder.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.LightGray, 0.3);
+        ItemBorder.Background = new SolidColorBrush(Colors.LightGray, 0.3);
 
         Cursor = new Cursor(StandardCursorType.Hand);
     }

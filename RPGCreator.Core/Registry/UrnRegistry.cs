@@ -46,8 +46,8 @@ public sealed class UrnRegistry : IUrnRegistry
                     var old = urn;
                     urn = new URN(urn.Namespace, urn.Module, $"{urn.Name}_{Ulid.NewUlid()}".AsMemory());
                     Logger.Debug("URN collision detected for {0}. Renamed to {1}", args: [old, urn]);
-                    var stackTrace = new System.Diagnostics.StackTrace(2, true);
-                    Logger.Debug("Collision stack trace:\n{0}", args: [stackTrace]);
+                    // var stackTrace = new System.Diagnostics.StackTrace(2, true);
+                    // Logger.Debug("Collision stack trace:\n{0}", args: [stackTrace]);
                     break;
                 case UrnCollisionStrategy.Ignore:
                     return true;

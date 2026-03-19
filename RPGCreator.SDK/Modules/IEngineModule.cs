@@ -94,7 +94,7 @@ public abstract class BaseModule : IEngineModuleInfo {
     /// <exception cref="DirectoryNotFoundException"></exception>
     public bool IsFirstTimeInitialization()
     {
-        var moduleFolder = Path.GetDirectoryName(this.GetType().Assembly.Location);
+        var moduleFolder = Path.GetDirectoryName(GetType().Assembly.Location);
         
         if (Directory.Exists(moduleFolder))
         {

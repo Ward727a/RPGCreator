@@ -1,3 +1,4 @@
+using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Types;
@@ -126,4 +127,12 @@ public interface IEntityFeature : IDisposable
 
     public IEntityFeature Clone();
     public void Reset();
+}
+
+public static class IEntityFeatureExtension
+{
+    public static EntityFeatureData ToEntityFeatureData(this IEntityFeature feature)
+    {
+        return new EntityFeatureData(feature.FeatureUrn, feature.Configuration);
+    }
 }

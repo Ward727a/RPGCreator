@@ -68,13 +68,6 @@ public interface IRenderService : IService
     public void DrawEntitySpawner(EntitySpawner entityDef, Vector2 position);
 
     /// <summary>
-    /// Draws a tile instance at its designated world position.<br/>
-    /// This method takes into account the tile instance's properties such as position, rotation, scale, and any other relevant attributes defined in the ITileInstance interface.
-    /// </summary>
-    /// <param name="tileInstance">The tile instance to be drawn.</param>
-    void DrawTileInstance(ITileInstance tileInstance);
-
-    /// <summary>
     /// Draws a debug rectangle at the specified world position with the given size and color.<br/>
     /// This is useful for visualizing chunks, collision boxes, and other debug information during development.
     /// </summary>

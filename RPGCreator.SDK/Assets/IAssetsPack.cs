@@ -1,7 +1,4 @@
-﻿using LiteDB;
-using RPGCreator.SDK.Modules;
-
-namespace RPGCreator.SDK.Assets;
+﻿namespace RPGCreator.SDK.Assets;
 
 public interface IAssetsPack
 {

@@ -23,7 +23,7 @@ public class Port : ISerializable, IDeserializable
     public string Name { get; set; } = "";
     public PortKind Kind { get; set; }
     public EPortType Type { get; set; } = EPortType.Single;
-    public System.Type ObjectInternalType { get; set; } = typeof(object); // The actual type of the object, e.g. float, bool, etc.
+    public Type ObjectInternalType { get; set; } = typeof(object); // The actual type of the object, e.g. float, bool, etc.
     public string ValueType { get; set; } = ""; // "float", "bool", etc.
     public object? Value { get; set; } // String representation of the value, e.g. "42" for a float or "true" for a bool.
     public bool IsInput { get; set; } = false;

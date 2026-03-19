@@ -148,4 +148,28 @@ public abstract class BaseTilesetDef : BaseAssetDef, ISerializable, IDeserializa
 
         BuildRuntimeCollisionCache();
     }
+    
+    
+    public ITileDef? GetTileAt(int row, int column)
+    {
+        var size = new Size(TileWidth, TileHeight);
+        var position = new Vector2(row * TileWidth, column * TileHeight);
+        
+        return new TileDefinition(
+            size,
+            position,
+            this
+        );
+    }
+
+    public bool HasTile(int row, int column)
+    {
+        // In a simple tileset, we can always assume the tile exists if the row and column are within bounds.
+        return row >= 0 && column >= 0 && row < (ImageWidth / TileWidth) && column < (ImageHeight / TileHeight);
+    }
+    
+    public bool HasTile(Vector2 rowColumn)
+    {
+        return HasTile((int)rowColumn.X, (int)rowColumn.Y);
+    }
 }

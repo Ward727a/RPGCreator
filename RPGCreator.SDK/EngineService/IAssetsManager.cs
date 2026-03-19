@@ -35,9 +35,9 @@ public interface IAssetsManager : IService
     public void RegisterRegistry(IAssetRegistry registry);
     public void RegisterAsset(object asset);
     public bool TryResolveRegistry<T>(string moduleName, [NotNullWhen(true)] out T? registry) where T : IAssetRegistry;
-    public bool TryResolveRegistry<T>(System.Type type, [NotNullWhen(true)] out T? registry) where T : IAssetRegistry;
+    public bool TryResolveRegistry<T>(Type type, [NotNullWhen(true)] out T? registry) where T : IAssetRegistry;
     public bool TryResolveRegistry(string moduleName, [NotNullWhen(true)] out IAssetRegistry? registry);
-    public bool TryResolveRegistry(System.Type type, [NotNullWhen(true)] out IAssetRegistry? registry);
+    public bool TryResolveRegistry(Type type, [NotNullWhen(true)] out IAssetRegistry? registry);
     public bool TryResolveAsset<T>(URN urn, [NotNullWhen(true)] out T? result) where T : class, IHasUniqueId;
     public bool TryResolveAsset<T>(Ulid uniqueId, [NotNullWhen(true)] out T? result) where T : class, IHasUniqueId;
     public T CreateAsset<T>() where T : IBaseAssetDef, IHasUniqueId, new();

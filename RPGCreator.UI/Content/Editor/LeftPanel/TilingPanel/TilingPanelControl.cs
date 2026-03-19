@@ -15,7 +15,6 @@ using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types.Collections;
 using RPGCreator.UI.Common;
 using Ursa.Controls;
-using Size = System.Drawing.Size;
 
 namespace RPGCreator.UI.Content.Editor.LeftPanel.TilingPanel;
 
@@ -131,14 +130,14 @@ public class SelectionCursorControl : Border
                 new KeyFrame
                 {
                     Cue = new Cue(0.0),
-                    Setters = { new Setter(Border.BorderBrushProperty, Brushes.White) }
+                    Setters = { new Setter(BorderBrushProperty, Brushes.White) }
                     
                 },
                 
                 new KeyFrame
                 {
                     Cue = new Cue(1.0),
-                    Setters = { new Setter(Border.BorderBrushProperty, Brushes.Black)}
+                    Setters = { new Setter(BorderBrushProperty, Brushes.Black)}
                 }
             }
         };
@@ -201,7 +200,7 @@ public class TilingPanelControl : UserControl
         _topDivider = new Divider
         {
             Orientation =  Avalonia.Layout.Orientation.Horizontal,
-            Margin = new Avalonia.Thickness(0, 5, 0, 5),
+            Margin = new Thickness(0, 5, 0, 5),
             Content = "Tiling Options"
         };
         _body.Children.Add(_topDivider);
@@ -210,7 +209,7 @@ public class TilingPanelControl : UserControl
         {
             HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            Margin = new Avalonia.Thickness(0, 0, 0, 5),
+            Margin = new Thickness(0, 0, 0, 5),
             PlaceholderText = "Select Tileset..."
         };
         _body.Children.Add(_setSelector);
@@ -236,7 +235,7 @@ public class TilingPanelControl : UserControl
             Width = 256,
             Height = 256,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            Margin = new Avalonia.Thickness(0, 5, 0, 5),
+            Margin = new Thickness(0, 5, 0, 5),
             LimitTo00Coordinates = true,
             LimitToContentSize = true,
             ShowGrid = true
@@ -248,7 +247,7 @@ public class TilingPanelControl : UserControl
             Width = 256,
             Height = 256,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            Margin = new Avalonia.Thickness(0, 5, 0, 5),
+            Margin = new Thickness(0, 5, 0, 5),
             IsVisible = false
         };
         _body.Children.Add(IntGridListBox);
@@ -296,8 +295,7 @@ public class TilingPanelControl : UserControl
                     (int)((position.Y + Math.Abs(_canvas.CurrentElementsPosition.Y)) / cellSize.Height)
                 );
 
-                var tileset = EngineServices.GameFactory.CreateInstance<ITilesetInstance>(def);
-                tileToPaint = tileset.GetTileAt((int)tilePositionInTileset.X, (int)tilePositionInTileset.Y);
+                tileToPaint = def.GetTileAt((int)tilePositionInTileset.X, (int)tilePositionInTileset.Y);
                 Logger.Debug("[TilingPanel] Created tile definition at position {0} in tileset {1}", tilePositionInTileset, def.Name);
                 
                 GlobalStates.BrushState.CurrentObjectToPaint = tileToPaint;

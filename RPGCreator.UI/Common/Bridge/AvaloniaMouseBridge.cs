@@ -1,10 +1,8 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.VisualTree;
-using AvaloniaInside.MonoGame;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Inputs;
-using RPGCreator.UI.Test;
 using MouseButton = RPGCreator.SDK.Inputs.MouseButton;
 
 namespace RPGCreator.UI.Common.Bridge;

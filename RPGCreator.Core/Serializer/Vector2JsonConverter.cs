@@ -18,7 +18,4 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.Numerics;
-using Newtonsoft.Json;
-
 namespace RPGCreator.Core.Serializer;

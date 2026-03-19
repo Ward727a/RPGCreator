@@ -21,13 +21,10 @@
 using System.Collections.ObjectModel;
 using System.Numerics;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
-using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 using RPGCreator.SDK.Editor;
 using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.Registry;
 using RPGCreator.SDK.RuntimeService;
 using RPGCreator.SDK.Types;
 

@@ -52,4 +52,8 @@ public abstract class BaseCommand : ICommand
         Executed += action;
         return this;
     }
+
+    public virtual void OnRemovedFromStack()
+    {
+    }
 }

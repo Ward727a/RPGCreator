@@ -1,11 +1,9 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Parser.PrattFormula;
 using RPGCreator.SDK.Serializer;
-using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Stats;
 
@@ -70,7 +68,7 @@ public abstract class BaseStatDefinition : BaseAssetDef, IStatDef
 
     public virtual SerializationInfo GetObjectData()
     {
-        return new SerializationInfo(this.GetType())
+        return new SerializationInfo(GetType())
             .AddValue(nameof(Unique), Unique)
             .AddValue(nameof(Name), Name)
             .AddValue(nameof(Description), Description)

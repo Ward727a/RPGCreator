@@ -1,5 +1,4 @@
 using System.Numerics;
-using RPGCreator.SDK.Assets.Definitions.Tilesets.Collision;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
@@ -19,6 +18,8 @@ public class TileDefinition : BaseAssetDef, ITileDef
     public TileFlip Flip { get; set; } = TileFlip.None;
     public BaseTilesetDef TilesetDef { get; private set; }
     public RuntimeBag Tags { get; } = new RuntimeBag();
+
+    protected override bool ShouldUrnBeRegistered => false;
 
     public TileDefinition()
     {

@@ -82,14 +82,14 @@ namespace RPGCreator.Core.Types
             HeaderPanel.PointerEntered += (s, e) =>
             {
                 // Change cursor to hand when hovering over the header
-                this.Cursor = Avalonia.Input.Cursor.Parse("hand");
+                Cursor = Avalonia.Input.Cursor.Parse("hand");
                 // Set the background less transparent
                 HeaderPanel.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromArgb(150, 0, 0, 0)); // More opaque
             };
             HeaderPanel.PointerExited += (s, e) =>
             {
                 // Reset cursor to default when not hovering
-                this.Cursor = Avalonia.Input.Cursor.Default;
+                Cursor = Avalonia.Input.Cursor.Default;
                 // Reset the background to semi-transparent
                 HeaderPanel.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromArgb(100, 0, 0, 0)); // Semi-transparent black
             };

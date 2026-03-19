@@ -21,7 +21,6 @@
 using _BaseModule.Features.Entity;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
-using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Features;
 using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Types;
@@ -70,10 +69,15 @@ public class LivingBeingMacroFeature : BaseMacroEntityFeature
     {
         var fm = EngineServices.FeaturesManager;
         
+        fm.OnceEntityFeaturesRegistered(SpriteFeature.Urn, RegisterSubFeature);
         fm.OnceEntityFeaturesRegistered(BoundsFeature.Urn, RegisterSubFeature);
+        fm.OnceEntityFeaturesRegistered(CollisionFeature.Urn, RegisterSubFeature);
         fm.OnceEntityFeaturesRegistered(MovementFeature.Urn, RegisterSubFeature);
         fm.OnceEntityFeaturesRegistered(AnimationFeature.Urn, RegisterSubFeature);
         fm.OnceEntityFeaturesRegistered(PlayerTagFeature.Urn, RegisterSubFeature);
-        // More to come...
+        fm.OnceEntityFeaturesRegistered(AccessorFeature.Urn, RegisterSubFeature);
+        fm.OnceEntityFeaturesRegistered(StatsFeature.Urn, RegisterSubFeature);
+        fm.OnceEntityFeaturesRegistered(StatsModifierFeature.Urn, RegisterSubFeature);
+        fm.OnceEntityFeaturesRegistered(SignalsFeature.Urn, RegisterSubFeature);
     }
 }

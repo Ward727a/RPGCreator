@@ -1,8 +1,6 @@
-﻿using PropertyChanged;
-using RPGCreator.SDK.Assets.MetaData;
+﻿using RPGCreator.SDK.Assets.MetaData;
 using RPGCreator.SDK.Editor;
 using RPGCreator.SDK.Serializer;
-using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers;

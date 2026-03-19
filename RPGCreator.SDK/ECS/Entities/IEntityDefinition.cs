@@ -2,8 +2,6 @@ using System.Collections.ObjectModel;
 using RPGCreator.SDK.Assets.Definitions;
 using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.SDK.Modules.Definition;
-using RPGCreator.SDK.Types;
-using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.SDK.ECS;
 

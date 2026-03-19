@@ -24,10 +24,7 @@
 #endregion
 using Avalonia.Controls;
 using System;
-using System.Diagnostics;
 using Avalonia.Input;
-using Avalonia.Threading;
-using RPGCreator.RTP;
 using RPGCreator.SDK;
 using RPGCreator.SDK.EditorUiService;
 
@@ -52,7 +49,7 @@ namespace RPGCreator.UI.Content.Editor
             Show(); // Show the window immediately
 
 
-            var topLevel = TopLevel.GetTopLevel(this);
+            var topLevel = GetTopLevel(this);
 
             
             

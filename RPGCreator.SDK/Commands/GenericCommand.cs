@@ -25,5 +25,10 @@ public class GenericCommand : ICommand
         _undoAction();
     }
 
+    public void OnRemovedFromStack()
+    {
+        
+    }
+
     public override string ToString() => _name;
 }

@@ -167,7 +167,7 @@ public class AnimationPreviewer : UserControl
         bodyBorder = new Border()
         {
             BorderThickness = new Thickness(1),
-            BorderBrush = Avalonia.Media.Brushes.Gray,
+            BorderBrush = Brushes.Gray,
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
             Margin = new Thickness(5)
@@ -191,7 +191,7 @@ public class AnimationPreviewer : UserControl
             VerticalAlignment = VerticalAlignment.Center
         };
         bodyPanel.Children.Add(animationImage);
-        RenderOptions.SetBitmapInterpolationMode(animationImage, Avalonia.Media.Imaging.BitmapInterpolationMode.None);
+        RenderOptions.SetBitmapInterpolationMode(animationImage, BitmapInterpolationMode.None);
         
         buttonsPanel = new StackPanel
         {

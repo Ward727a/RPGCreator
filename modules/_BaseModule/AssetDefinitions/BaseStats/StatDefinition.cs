@@ -18,7 +18,6 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGCreator.SDK.Assets.Definitions.SimpleEvent;
 using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Types;

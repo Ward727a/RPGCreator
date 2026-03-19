@@ -28,7 +28,6 @@ using RPGCreator.RTP.Extensions;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
-using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.Editor;
 using RPGCreator.SDK.RuntimeService;
 using RPGCreator.SDK.Types;
@@ -128,11 +127,6 @@ public class RenderService : IRenderService
             SpriteEffects.None,
             0.5f
         );
-    }
-
-    public void DrawTileInstance(ITileInstance tileInstance)
-    {
-        
     }
 
     public void DrawDebugRect(Vector2 worldPos, Size size, Color? color = null, float thickness = 2f)

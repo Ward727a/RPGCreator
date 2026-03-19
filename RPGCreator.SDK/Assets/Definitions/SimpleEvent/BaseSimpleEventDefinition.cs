@@ -25,7 +25,6 @@ using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Modules.SimpleEvents;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
-using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.SDK.Assets.Definitions.SimpleEvent;
 

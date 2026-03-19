@@ -98,7 +98,7 @@ public class EngineSerializer : ISerializerService
         using var sr = new StreamReader(stream);
         using var reader = new JsonTextReader(sr);
         obj = _serializer.Deserialize<T>(reader);
-        if (obj is BaseAssetDef def)
+        if (obj is IBaseAssetDef def)
         {
             def.ResumeTracking();
         }

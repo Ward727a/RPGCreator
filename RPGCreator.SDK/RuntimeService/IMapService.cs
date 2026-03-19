@@ -1,12 +1,8 @@
-﻿using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Numerics;
+﻿using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
-using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Types;
-using RPGCreator.SDK.Types.Records;
 using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.SDK.RuntimeService;

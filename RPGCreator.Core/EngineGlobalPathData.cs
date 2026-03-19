@@ -153,7 +153,7 @@ public class EngineGlobalPathData : IGlobalPathData, ISerializable, IDeserializa
 
     public SerializationInfo GetObjectData()
     {
-        var info = new SerializationInfo(this.GetType());
+        var info = new SerializationInfo(GetType());
         info.AddValue(nameof(_pathToValue), _pathToValue);
         info.AddValue(nameof(_tagToIds), _tagToIds);
         info.AddValue(nameof(_idToTag), _idToTag);

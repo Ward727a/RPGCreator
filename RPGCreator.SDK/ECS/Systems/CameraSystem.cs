@@ -20,7 +20,6 @@
 
 using System.Numerics;
 using RPGCreator.SDK.ECS.Components;
-using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
 using RPGCreator.SDK.Types;
 

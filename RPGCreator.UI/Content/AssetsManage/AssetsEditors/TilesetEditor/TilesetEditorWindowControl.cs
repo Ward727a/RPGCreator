@@ -68,7 +68,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
         {
             TilesetDefinition = tilesetDefinition ?? throw new ArgumentNullException(nameof(tilesetDefinition), "Tileset cannot be null");
             CreateComponents();
-            this.Content = Body;
+            Content = Body;
             _FromWindow = FromWindow;
         }
 
@@ -78,9 +78,9 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             {
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-                Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Transparent),
-                ColumnDefinitions = new Avalonia.Controls.ColumnDefinitions("Auto, *"),
-                RowDefinitions = new Avalonia.Controls.RowDefinitions("*, Auto")
+                Background = new SolidColorBrush(Colors.Transparent),
+                ColumnDefinitions = new ColumnDefinitions("Auto, *"),
+                RowDefinitions = new RowDefinitions("*, Auto")
             };
 
             CreateImagePick();
@@ -97,8 +97,8 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             {
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-                Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Transparent),
-                RowDefinitions = new Avalonia.Controls.RowDefinitions("Auto, Auto"),
+                Background = new SolidColorBrush(Colors.Transparent),
+                RowDefinitions = new RowDefinitions("Auto, Auto"),
             };
             Body.Children.Add(ImageContainer);
             Grid.SetColumn(ImageContainer, 0);
@@ -112,11 +112,11 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
                 MaxHeight = 200,
                 Width = 200,
                 Height = 200,
-                Margin = new Avalonia.Thickness(4)
+                Margin = new Thickness(4)
             };
             ImageContainer.Children.Add(ImagePreview);
             Grid.SetRow(ImagePreview, 0);
-            RenderOptions.SetBitmapInterpolationMode(ImagePreview, Avalonia.Media.Imaging.BitmapInterpolationMode.None);
+            RenderOptions.SetBitmapInterpolationMode(ImagePreview, BitmapInterpolationMode.None);
 
         }
 
@@ -126,7 +126,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             {
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-                Margin = new Avalonia.Thickness(10)
+                Margin = new Thickness(10)
             };
             Body.Children.Add(MainPanel);
             Grid.SetColumn(MainPanel, 1);
@@ -134,7 +134,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             ImagePick = new PathPicker
             {
                 Title = "Choose image...",
-                Margin = new Avalonia.Thickness(0, 0, 0, 10),
+                Margin = new Thickness(0, 0, 0, 10),
                 UsePickerType = UsePickerTypes.OpenFile,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
@@ -181,7 +181,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
                 Watermark = "Tileset Name",
                 Text = TilesetDefinition.Name,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                Margin = new Avalonia.Thickness(0, 0, 0, 10)
+                Margin = new Thickness(0, 0, 0, 10)
             };
             MainPanel.Children.Add(NameInput);
 
@@ -190,7 +190,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
                 Watermark = "Tile Height",
                 Text = TilesetDefinition.TileHeight > 0 ? TilesetDefinition.TileHeight.ToString() : string.Empty,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                Margin = new Avalonia.Thickness(0, 0, 0, 10)
+                Margin = new Thickness(0, 0, 0, 10)
             };
             MainPanel.Children.Add(TileHeightInput);
             TileWidthInput = new TextBox
@@ -198,7 +198,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
                 Watermark = "Tile Width",
                 Text = TilesetDefinition.TileWidth > 0 ? TilesetDefinition.TileWidth.ToString() : string.Empty,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                Margin = new Avalonia.Thickness(0, 0, 0, 10)
+                Margin = new Thickness(0, 0, 0, 10)
             };
             MainPanel.Children.Add(TileWidthInput);
             
@@ -206,7 +206,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             {
                 Content = "Collision Editor",
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                Margin = new Avalonia.Thickness(0, 0, 0, 10)
+                Margin = new Thickness(0, 0, 0, 10)
             };
             CollisionEditorButton.Click += (sender, e) =>
             {
@@ -221,7 +221,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             {
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-                Margin = new Avalonia.Thickness(0, 0, 0, 10)
+                Margin = new Thickness(0, 0, 0, 10)
             };
 
             ImageContainer.Children.Add(ExamplesTilesPanel);
@@ -231,7 +231,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             {
                 Text = "Example Tiles",
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                Margin = new Avalonia.Thickness(0, 0, 0, 10)
+                Margin = new Thickness(0, 0, 0, 10)
             };
             ExamplesTilesPanel.Children.Add(ExamplesTilesLabel);
 
@@ -239,10 +239,10 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             {
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-                Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Transparent),
-                Margin = new Avalonia.Thickness(10),
-                ColumnDefinitions = new Avalonia.Controls.ColumnDefinitions("Auto, Auto, Auto, Auto"),
-                RowDefinitions = new Avalonia.Controls.RowDefinitions("Auto, Auto, Auto, Auto")
+                Background = new SolidColorBrush(Colors.Transparent),
+                Margin = new Thickness(10),
+                ColumnDefinitions = new ColumnDefinitions("Auto, Auto, Auto, Auto"),
+                RowDefinitions = new RowDefinitions("Auto, Auto, Auto, Auto")
             };
 
             ExamplesTilesPanel.Children.Add(ExamplesTilesGrid);
@@ -251,7 +251,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             {
                 Content = "Generate Example Tiles",
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                Margin = new Avalonia.Thickness(0, 0, 0, 10)
+                Margin = new Thickness(0, 0, 0, 10)
             };
             ExamplesGenerateTilesButton.Click += (sender, e) =>
             {
@@ -285,7 +285,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
                         VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
                         Width = TilesetDefinition.TileWidth,
                         Height = TilesetDefinition.TileHeight,
-                        Margin = new Avalonia.Thickness(2)
+                        Margin = new Thickness(2)
                     };
 
                     // Calculate the position of the tile in the tileset image
@@ -333,7 +333,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
                 Orientation = Avalonia.Layout.Orientation.Horizontal,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Bottom,
-                Margin = new Avalonia.Thickness(10)
+                Margin = new Thickness(10)
             };
             Body.Children.Add(footer);
             Grid.SetRow(footer, 2);
@@ -342,7 +342,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             {
                 Content = "Save Tileset",
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
-                Margin = new Avalonia.Thickness(0, 0, 10, 0)
+                Margin = new Thickness(0, 0, 10, 0)
             };
             saveButton.Click += SaveTileset;
             footer.Children.Add(saveButton);

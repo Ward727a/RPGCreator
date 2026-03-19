@@ -92,7 +92,7 @@ public class StatsManagement : UserControl
             RowSpacing = 10,
             Margin = new Thickness(10)
         };
-        this.Content = _statsGrid;
+        Content = _statsGrid;
 
         _searchBar = new AutoCompleteBox()
         {

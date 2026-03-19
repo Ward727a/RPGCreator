@@ -23,16 +23,13 @@
 // 
 #endregion
 
-using System.Reflection;
 using LiteDB;
 using RPGCreator.Core.Common;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.Modules;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types.Internals;
-using RPGCreator.SDK.EditorUiService;
 using Serilog;
 
 namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
@@ -93,8 +90,8 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
 
         if (meta != null)
         {
-            this.Id = meta.ObjectId;
-            this.Name = meta.Name;
+            Id = meta.ObjectId;
+            Name = meta.Name;
         }
 
         var db = EngineDB.GetDB(_dbId);
@@ -209,7 +206,7 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
             try
             {
                 string fileContent = File.ReadAllText(fullPath);
-                EngineServices.SerializerService.Deserialize(fileContent, out loadedAsset, out System.Type? _);
+                EngineServices.SerializerService.Deserialize(fileContent, out loadedAsset, out Type? _);
             }
             catch (Exception ex)
             {
@@ -502,7 +499,7 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
         if (db == null) return Enumerable.Empty<EngineDB.AssetIndexRecord>();
 
         var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
-        var validNames = Common.TypeUtil.GetInheritance(type);
+        var validNames = TypeUtil.GetInheritance(type);
     
         var queries = validNames.Select(name => Query.EQ("TypeName", name)).ToArray();
         if(queries.Length == 0) return Enumerable.Empty<EngineDB.AssetIndexRecord>();

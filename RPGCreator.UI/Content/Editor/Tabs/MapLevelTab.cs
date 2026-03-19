@@ -24,12 +24,10 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using CommunityToolkit.Diagnostics;
 using MethodTimer;
-using RPGCreator.Core.Types;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.MetaData;
 using RPGCreator.SDK.EditorUiService;
-using RPGCreator.SDK.Extensions;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types.Collections;
 using RPGCreator.UI.Common;
@@ -102,7 +100,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
                 RowDefinitions = new RowDefinitions("Auto,*"),
                 Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromArgb(60, 0, 0, 0))
             };
-            this.Content = _BodyGrid;
+            Content = _BodyGrid;
 
             _SearchBox = new AutoCompleteBox()
             {

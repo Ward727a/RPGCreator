@@ -1,4 +1,3 @@
-using RPGCreator.Core.Types.Assets.Characters.Stats;
 using RPGCreator.Core.Types.Assets.Entities.Characters.Stats;
 using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions.Stats;

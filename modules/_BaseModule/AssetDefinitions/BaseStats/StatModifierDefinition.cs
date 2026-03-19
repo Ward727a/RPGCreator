@@ -19,7 +19,6 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using _BaseModule.Features.Entity;
-using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;

@@ -25,9 +25,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
-using Avalonia.Data;
 using Avalonia.Layout;
-using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using AvaloniaEdit.Utils;
@@ -119,8 +117,8 @@ public class CharacterExplorer : UserControl
                 };
                 var stackPanel = new StackPanel
                 {
-                    Orientation = Avalonia.Layout.Orientation.Horizontal,
-                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                    Orientation = Orientation.Horizontal,
+                    VerticalAlignment = VerticalAlignment.Center,
                     Children =
                     {
                         image,

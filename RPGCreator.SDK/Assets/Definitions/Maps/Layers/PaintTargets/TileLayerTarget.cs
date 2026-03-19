@@ -1,9 +1,6 @@
 using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Editor;
-using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.RuntimeService;
-using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers.PaintTargets;
 

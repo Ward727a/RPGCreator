@@ -31,7 +31,6 @@ using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Projects;
 using RPGCreator.SDK.Types.Collections;
-using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.UI.Content.Launcher
 {
@@ -167,72 +166,6 @@ namespace RPGCreator.UI.Content.Launcher
             ContentGrid.Children.Add(projectDetailsPanel);
             Grid.SetColumn(projectDetailsPanel, 1);
             
-            var TestAddSlabButton = new Button
-            {
-                Content = "Test Add Slab",
-                FontSize = App.style.TextFontSize,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            };
-            
-            var TestAddTo0Button = new Button
-            {
-                Content = "Test Add To 1",
-                FontSize = App.style.TextFontSize,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            };
-            projectDetailsPanel.Children.Add(TestAddTo0Button);
-            TestAddTo0Button.Click += (sender, args) =>
-            {
-                var newSlab = new TestSlab();
-                _testSlabs.AddItem(1, newSlab);
-                Logger.Info($"Added new slab to index 0. Pointer index: {newSlab.BlockPointerIndex}");
-            };
-            
-            projectDetailsPanel.Children.Add(TestAddSlabButton);
-            TestAddSlabButton.Click += (sender, args) =>
-            {
-                var newSlab = new TestSlab();
-                _testSlabs.Allocate(newSlab);
-                _slabPointerCounter++;
-                Logger.Info($"Added new slab. Pointer index: {newSlab.BlockPointerIndex}");
-            };
-            
-            var TestDebugSlabsButton = new Button
-            {
-                Content = "Test Debug Slabs",
-                FontSize = App.style.TextFontSize,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            };
-            projectDetailsPanel.Children.Add(TestDebugSlabsButton);
-            TestDebugSlabsButton.Click += (sender, args) =>
-            {
-                Logger.Info("Debugging slabs:");
-                _testSlabs.DEBUG_PRINT_SCHEMA_BLOCKS();
-            };
-            
-            var TestDebugRemoveRandomSlabButton = new Button
-            {
-                Content = "Test Remove 0",
-                FontSize = App.style.TextFontSize,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-            };
-            projectDetailsPanel.Children.Add(TestDebugRemoveRandomSlabButton);
-            TestDebugRemoveRandomSlabButton.Click += (sender, args) =>
-            {
-                if (_slabPointerCounter == 0)                
-                {
-                    Logger.Warning("No slabs to remove.");
-                    return;
-                }
-                var random = new Random();
-                int randomIndex = random.Next(0, _slabPointerCounter);
-                _testSlabs.DeallocateBlock(0);
-                Logger.Info($"Removed slab at pointer index: {randomIndex}");
-            };
 
             _ProjectName = new TextBlock
             {
@@ -252,14 +185,14 @@ namespace RPGCreator.UI.Content.Launcher
             };
             projectDetailsPanel.Children.Add(_ProjectDescription);
 
-            _ProjectLastModified = new TextBlock
-            {
-                Text = "Last Modified (WIP): " + DateTime.Now.ToString("g"),
-                FontSize = App.style.MediumTextFontSize,
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top
-            };
-            projectDetailsPanel.Children.Add(_ProjectLastModified);
+            // _ProjectLastModified = new TextBlock
+            // {
+            //     Text = "Last Modified (WIP): " + DateTime.Now.ToString("g"),
+            //     FontSize = App.style.MediumTextFontSize,
+            //     HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+            //     VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top
+            // };
+            // projectDetailsPanel.Children.Add(_ProjectLastModified);
 
             var detail_buttons = new Grid
             {
@@ -306,13 +239,13 @@ namespace RPGCreator.UI.Content.Launcher
             {
                 _ProjectName.Text = $"Project Name: {_selectedProject.Name}";
                 _ProjectDescription.Text = $"Description: {_selectedProject.Description}";
-                _ProjectLastModified.Text = $"Last Modified: {DateTime.Now.ToString("g")}"; // Placeholder for last modified date
+                // _ProjectLastModified.Text = $"Last Modified: {DateTime.Now.ToString("g")}"; // Placeholder for last modified date
             }
             else
             {
                 _ProjectName.Text = "No project selected.";
                 _ProjectDescription.Text = string.Empty;
-                _ProjectLastModified.Text = string.Empty;
+                // _ProjectLastModified.Text = string.Empty;
             }
         }
 

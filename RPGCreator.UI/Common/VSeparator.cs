@@ -30,7 +30,7 @@ namespace RPGCreator.Core.Types
     {
         public VSeparator()
         {
-            this.Content = new Border
+            Content = new Border
             {
                 Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Gray),
                 Width = 1,

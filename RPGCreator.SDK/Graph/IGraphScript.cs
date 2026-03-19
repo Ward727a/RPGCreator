@@ -4,5 +4,5 @@ public interface IGraphScript
 {
     string DocumentPath { get; }
     IList<GraphLabeledInstr> GetInstructions();
-    IReadOnlyDictionary<string, (System.Type, object)> GetVariables();
+    IReadOnlyDictionary<string, (Type, object)> GetVariables();
 }

@@ -27,7 +27,7 @@ public enum EffectPropertyType
 
 public static class EffectPropertyTypeExtensions
 {
-    public static System.Type ToSystemType(this EffectPropertyType propertyType)
+    public static Type ToSystemType(this EffectPropertyType propertyType)
     {
         return propertyType switch
         {

@@ -55,7 +55,7 @@ namespace RPGCreator.Core.Types
                 VerticalAlignment = VerticalAlignment.Center,
                 Width = 20, // Set a fixed width for the right separator
                 HorizontalAlignment = HorizontalAlignment.Stretch,
-                Margin = new Avalonia.Thickness(0, 0, 5, 0),
+                Margin = new Thickness(0, 0, 5, 0),
             };
             MainPanel.Children.Add(LeftSeparator);
             Grid.SetColumn(LeftSeparator, 0);
@@ -74,13 +74,13 @@ namespace RPGCreator.Core.Types
             {
                 VerticalAlignment = VerticalAlignment.Center,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
-                Margin = new Avalonia.Thickness(5, 0, 0, 0),
+                Margin = new Thickness(5, 0, 0, 0),
                 Width = 20, // Set a fixed width for the right separator
             };
             MainPanel.Children.Add(RightSeparator);
             Grid.SetColumn(RightSeparator, 2);
 
-            this.Content = MainPanel;
+            Content = MainPanel;
         }
 
         protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)

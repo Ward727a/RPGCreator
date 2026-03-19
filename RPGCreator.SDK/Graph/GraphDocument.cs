@@ -12,10 +12,10 @@ public sealed class GraphDocument : ISerializable, IDeserializable
     public readonly Dictionary<string, Node> Nodes = new();
     public readonly List<Link> Links = new();
 
-    private Dictionary<string, (System.Type, object)> _GraphVariables = new();
-    public IReadOnlyDictionary<string, (System.Type, object)> GraphVariables => _GraphVariables;
+    private Dictionary<string, (Type, object)> _GraphVariables = new();
+    public IReadOnlyDictionary<string, (Type, object)> GraphVariables => _GraphVariables;
 
-    public event Action<string, (System.Type, object)>? GraphVariableAdded;
+    public event Action<string, (Type, object)>? GraphVariableAdded;
     public event Action<string>? GraphVariableRemoved;
     public event Action<Node>? NodeAdded;
     public event Action<Node>? NodeRemoved;
@@ -23,7 +23,7 @@ public sealed class GraphDocument : ISerializable, IDeserializable
     public event Action<Link>? LinkRemoved;
     public event Action<Node>? NodeMoved;
     
-    public void AddGraphVariable(string name, System.Type type, object defaultValue)
+    public void AddGraphVariable(string name, Type type, object defaultValue)
     {
         _GraphVariables[name] = (type, defaultValue);
         GraphVariableAdded?.Invoke(name, (type, defaultValue));

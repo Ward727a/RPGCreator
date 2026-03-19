@@ -23,11 +23,8 @@
 // 
 #endregion
 
-using System.Collections.ObjectModel;
-using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
-using RPGCreator.SDK.Types.Interfaces;
 
 namespace RPGCreator.SDK.Projects
 {

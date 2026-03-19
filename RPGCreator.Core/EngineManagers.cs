@@ -23,8 +23,6 @@
 // 
 #endregion
 using RPGCreator.Core.Managers.AssetsManager;
-using RPGCreator.Core.Managers.BrushManagers;
-using RPGCreator.Core.Managers.BrushManagers.Brushs;
 using RPGCreator.Core.Managers.ProjectsManager;
 using RPGCreator.Core.Module;
 using RPGCreator.Core.Registry;

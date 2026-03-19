@@ -30,9 +30,10 @@ namespace RPGCreator.SDK.ECS.Features;
 [EntityFeature]
 public class SpriteFeature : BaseEntityFeature
 {
+    public static URN Urn = FeatureUrnModule.ToUrnModule("rpgc").ToUrn("sprite_feature");
     public override string FeatureName { get; } = "Sprite Feature";
     public override string FeatureDescription { get; } = "Adds a sprite to the entity for rendering.";
-    public override URN FeatureUrn => FeatureUrnModule.ToUrnModule("rpgc").ToUrn("sprite");
+    public override URN FeatureUrn => Urn;
     
     public override URN[] DependentFeatures { get; } = [BoundsFeature.Urn];
     

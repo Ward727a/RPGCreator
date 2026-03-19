@@ -98,7 +98,7 @@ public class GraphViewLeftBar : UserControl
         HorizontalAlignment = HorizontalAlignment.Stretch;
         VerticalAlignment = VerticalAlignment.Stretch;
         Background = // Set a test background color
-            new SolidColorBrush(Avalonia.Media.Color.FromRgb(30, 30, 30));
+            new SolidColorBrush(Color.FromRgb(30, 30, 30));
         
         CreateComponents();
         RegisterEvents();

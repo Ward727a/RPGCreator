@@ -93,7 +93,7 @@ namespace RPGCreator.UI.Content.ProjectCreator
             {
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 Margin = App.style.Margin,
-                ColumnDefinitions = new Avalonia.Controls.ColumnDefinitions("Auto, *")
+                ColumnDefinitions = new ColumnDefinitions("Auto, *")
             };
             if (!string.IsNullOrEmpty(labelText))
             {
@@ -101,7 +101,7 @@ namespace RPGCreator.UI.Content.ProjectCreator
                 {
                     Text = labelText,
                     VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                    Margin = new Avalonia.Thickness(0, 0, 10, 0)
+                    Margin = new Thickness(0, 0, 10, 0)
                 };
 
                 grid.Children.Add(label);

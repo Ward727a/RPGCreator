@@ -18,12 +18,9 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
-using RPGCreator.SDK.Editor.Brushes;
 using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Inputs;
-using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.EngineService;
 

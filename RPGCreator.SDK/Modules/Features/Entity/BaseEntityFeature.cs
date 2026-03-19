@@ -287,7 +287,7 @@ public abstract class BaseEntityFeature : IEntityFeature
     public virtual IEntityFeature Clone()
     {
         var clone = (BaseEntityFeature)MemberwiseClone();
-        clone.Configuration = this.Configuration.Clone();
+        clone.Configuration = Configuration.Clone();
         clone.OnAfterClone();
         return clone;
     }

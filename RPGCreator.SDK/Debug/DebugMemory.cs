@@ -18,6 +18,8 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Diagnostics;
+
 namespace RPGCreator.SDK.Debug;
 
 public static class DebugMemory
@@ -39,7 +41,6 @@ public static class DebugMemory
         [Conditional("DEBUG")] 
         public static void Set(string key, object? value) { }
     
-        [Conditional("DEBUG")] 
         public static T? Get<T>(string key) => default;
     #endif
 }

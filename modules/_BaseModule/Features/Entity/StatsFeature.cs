@@ -18,10 +18,8 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.Runtime.InteropServices;
 using _BaseModule.AssetDefinitions.BaseResistance;
 using _BaseModule.AssetDefinitions.BaseStats;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Layout;
@@ -147,7 +145,7 @@ public class StatsFeature : BaseEntityFeature
                     Foreground = Brushes.Gray
                 });
             }
-            this.Content = _panel;
+            Content = _panel;
         }
 
         private void RegisterEvents()

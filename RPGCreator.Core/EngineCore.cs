@@ -35,7 +35,6 @@ using RPGCreator.Core.Parser.PRATT;
 using RPGCreator.Core.Registry;
 using RPGCreator.Core.Scheduler;
 using RPGCreator.Core.Services;
-using RPGCreator.Core.Types.Editor.Context;
 using RPGCreator.Core.Types.Map.Layers.AutoLayer;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;

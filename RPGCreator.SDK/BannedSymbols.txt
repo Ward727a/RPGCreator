@@ -1,0 +1,3 @@
+﻿T:System.Drawing.Color;Use RPGCreator.SDK.Types.Color instead.
+T:System.Drawing.Rectangle;Use RPGCreator.SDK.Types.Rect instead.
+N:System.Drawing;The use of this namespace is not allowed.

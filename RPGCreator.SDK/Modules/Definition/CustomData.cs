@@ -8,7 +8,7 @@ namespace RPGCreator.SDK.Modules.Definition;
 /// A custom data system, also called "data bags" or "property bags", that allows modules to store and retrieve misc data, defined by users or other modules.
 /// </summary>
 [SerializingType("CustomData")]
-public class CustomData : ISerializable, IDeserializable
+public class CustomData : ISerializable, IDeserializable, IDisposable
 {
     public event Action<string>? OnDataChanged;
     public event Action<string>? OnDataRemoved;
@@ -25,13 +25,13 @@ public class CustomData : ISerializable, IDeserializable
 
     public CustomData Get<T>(string key, out T? value)
     {
-        value = this.GetAs<T>(key);
+        value = GetAs<T>(key);
         return this;
     }
     
     public CustomData GetOrDefault<T>(string key, T defaultValue, out T value)
     {
-        value = this.GetAsOrDefault(key, defaultValue);
+        value = GetAsOrDefault(key, defaultValue);
         return this;
     }
     
@@ -56,7 +56,7 @@ public class CustomData : ISerializable, IDeserializable
 
             try
             {
-                return (T)Convert.ChangeType(value, typeof(T), System.Globalization.CultureInfo.InvariantCulture);
+                return (T)Convert.ChangeType(value, typeof(T), CultureInfo.InvariantCulture);
             }
             catch
             {
@@ -137,5 +137,17 @@ public class CustomData : ISerializable, IDeserializable
             clone._data[kvp.Key] = kvp.Value;
         }
         return clone;
+    }
+
+    public void Dispose()
+    {
+        DisposeEvents();
+        _data.Clear();
+    }
+
+    public void DisposeEvents()
+    {
+        OnDataChanged = null;
+        OnDataRemoved = null;
     }
 }

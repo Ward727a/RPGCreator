@@ -23,11 +23,8 @@
 // 
 #endregion
 
-using RPGCreator.SDK.Editor.Rendering;
 using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Inputs;
-using RPGCreator.SDK.Logging;
-using Serilog;
 using MouseButton = RPGCreator.SDK.Inputs.MouseButton;
 using Vector2 = System.Numerics.Vector2;
 

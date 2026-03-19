@@ -41,7 +41,6 @@ using RPGCreator.SDK.Commands;
 using RPGCreator.SDK.Editor;
 using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.GlobalState;
-using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types;
 using RPGCreator.UI.Common.Modal.Browser;
@@ -129,18 +128,18 @@ public class EditorToolsBar : UserControl
     {
         Body = new Grid()
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
             RowDefinitions = new RowDefinitions("*"),
             ColumnDefinitions = new ColumnDefinitions("Auto, *"),
             ColumnSpacing = 4
         };
-        this.Content = Body;
+        Content = Body;
         MenuPanel = new StackPanel()
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
-            Orientation = Avalonia.Layout.Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            Orientation = Orientation.Horizontal,
             Spacing = 4
         };
         Body.Children.Add(MenuPanel);
@@ -148,8 +147,8 @@ public class EditorToolsBar : UserControl
         
         Scroll = new ScrollViewer()
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden,
             VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
         };
@@ -238,11 +237,11 @@ public class EditorToolsBar : UserControl
 
         ToolPanel = new ItemsControl()
         {
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Stretch,
             ItemsPanel = new FuncTemplate<Panel?>(() => new StackPanel()
             {
-                Orientation = Avalonia.Layout.Orientation.Horizontal,
+                Orientation = Orientation.Horizontal,
                 Spacing = 4
             }),
             ItemsSource = EngineServices.EngineConfig.ToolsShortcuts,
@@ -326,8 +325,8 @@ public class EditorToolsBar : UserControl
             MinHeight = 32,
             MinWidth = 32,
             MaxWidth = 32,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
         };
     }
     
@@ -358,7 +357,7 @@ public class EditorToolsBar : UserControl
         
         var nameRun = new Run(name)
         {
-            FontWeight = Avalonia.Media.FontWeight.Bold,
+            FontWeight = FontWeight.Bold,
         };
         tip.Inlines.Add(nameRun);
         
@@ -366,7 +365,7 @@ public class EditorToolsBar : UserControl
         
         var descRun = new Run(!string.IsNullOrWhiteSpace(description) ? description : "No description provided.")
         {
-            FontStyle = Avalonia.Media.FontStyle.Italic,
+            FontStyle = FontStyle.Italic,
         };
         tip.Inlines.Add(descRun);
         

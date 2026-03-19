@@ -21,11 +21,9 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using RPGCreator.RTP.Viewport;
 using RPGCreator.SDK.Editor.Rendering;
 using RPGCreator.SDK.EditorUiService;
-using RPGCreator.SDK.Logging;
 using Size = System.Drawing.Size;
 
 namespace RPGCreator.RTP.Services;

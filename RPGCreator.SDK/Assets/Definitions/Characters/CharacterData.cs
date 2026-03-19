@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
-using Newtonsoft.Json;
 using RPGCreator.SDK.Assets.Definitions.Skills;
 using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Attributes;

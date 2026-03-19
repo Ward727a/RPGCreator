@@ -526,7 +526,7 @@ public class SkillEffectTab : UserControl
         
         _bodyPanel = new StackPanel
         {
-            Orientation = Avalonia.Layout.Orientation.Vertical,
+            Orientation = Orientation.Vertical,
             Spacing = 10
         };
         
@@ -542,7 +542,7 @@ public class SkillEffectTab : UserControl
         _topPanel = new Grid
         {
             ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto"),
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
         };
         _contentGrid.Children.Add(_topPanel);
         Grid.SetRow(_topPanel, 0);
@@ -590,7 +590,7 @@ public class SkillEffectTab : UserControl
         
         _effectsListPanel = new StackPanel
         {
-            Orientation = Avalonia.Layout.Orientation.Vertical,
+            Orientation = Orientation.Vertical,
             Spacing = 5
         };
         _effectsListBox.Content = _effectsListPanel;

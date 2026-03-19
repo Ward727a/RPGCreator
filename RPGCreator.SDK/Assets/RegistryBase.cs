@@ -11,10 +11,10 @@ public abstract class RegistryBase <T> : IAssetRegistry<T> where T : class, IHas
     private readonly Dictionary<Ulid, int> _refCounts = new();
     protected readonly Dictionary<URN, Ulid> _uniqueIds = new();
     
-    public System.Type ManagedType => typeof(T);
+    public Type ManagedType => typeof(T);
     public abstract string ModuleName { get; }
 
-    public virtual IEnumerable<System.Type> SupportedTypes
+    public virtual IEnumerable<Type> SupportedTypes
     {
         get
         {

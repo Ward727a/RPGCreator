@@ -17,7 +17,6 @@ using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using RPGCreator.RTP;
 
 namespace RPGCreator.UI.Test;
 
@@ -46,7 +45,7 @@ public sealed class MonoGameControlTest : Control
   private WriteableBitmap? _bitmap;
   private bool _isInitialized;
 
-  public MonoGameControlTest() => this.Focusable = true;
+  public MonoGameControlTest() => Focusable = true;
 
   public IBrush FallbackBackground { get; set; } = (IBrush) Brushes.Purple;
 
@@ -58,24 +57,24 @@ public sealed class MonoGameControlTest : Control
       if (field == value)
         return;
       field = value;
-      if (!this._isInitialized)
+      if (!_isInitialized)
         return;
-      this.Initialize();
+      Initialize();
     }
   }
 
   public override void Render(DrawingContext context)
   {
-    Game game = this.Game;
+    Game game = Game;
     if (game != null)
     {
-      GraphicsDevice graphicsDevice = this.Game?.GraphicsDevice;
-      if (graphicsDevice != null && this._bitmap != null)
+      GraphicsDevice graphicsDevice = Game?.GraphicsDevice;
+      if (graphicsDevice != null && _bitmap != null)
       {
-        Rect bounds = this.Bounds;
-        if ((bounds.Width >= 1.0 || bounds.Height >= 1.0) && this.HandleDeviceReset(graphicsDevice))
+        Rect bounds = Bounds;
+        if ((bounds.Width >= 1.0 || bounds.Height >= 1.0) && HandleDeviceReset(graphicsDevice))
         {
-          this.RunFrame(game);
+          RunFrame(game);
         }
       }
     }
@@ -85,12 +84,12 @@ public sealed class MonoGameControlTest : Control
   {
     finalSize = base.ArrangeOverride(finalSize);
     Size size1 = finalSize;
-    Size? size2 = this._bitmap?.Size;
+    Size? size2 = _bitmap?.Size;
     if ((size2.HasValue ? (size1 != size2.GetValueOrDefault() ? 1 : 0) : 1) != 0)
     {
-      GraphicsDevice graphicsDevice = this.Game?.GraphicsDevice;
+      GraphicsDevice graphicsDevice = Game?.GraphicsDevice;
       if (graphicsDevice != null)
-        this.ResetDevice(graphicsDevice, finalSize);
+        ResetDevice(graphicsDevice, finalSize);
     }
     return finalSize;
   }
@@ -98,57 +97,57 @@ public sealed class MonoGameControlTest : Control
   protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
   {
     base.OnAttachedToVisualTree(e);
-    this.Start();
+    Start();
   }
 
   private bool HandleDeviceReset(GraphicsDevice device)
   {
     if (device.GraphicsDeviceStatus == GraphicsDeviceStatus.NotReset)
-      this.ResetDevice(device, this.Bounds.Size);
+      ResetDevice(device, Bounds.Size);
     return device.GraphicsDeviceStatus == GraphicsDeviceStatus.Normal;
   }
 
   private void Initialize()
   {
-    this.TrySetWindowHandle();
-    Game game = this.Game;
+    TrySetWindowHandle();
+    Game game = Game;
     if (game == null)
       return;
     GraphicsDevice graphicsDevice = game.GraphicsDevice;
     if (graphicsDevice != null)
-      this.ResetDevice(graphicsDevice, this.Bounds.Size);
-    this.RunFrame(game);
+      ResetDevice(graphicsDevice, Bounds.Size);
+    RunFrame(game);
   }
 
   private void Start()
   {
-    if (this._isInitialized)
+    if (_isInitialized)
       return;
-    this.Initialize();
-    this._stopwatch.Start();
-    this._isInitialized = true;
+    Initialize();
+    _stopwatch.Start();
+    _isInitialized = true;
   }
 
   private void ResetDevice(GraphicsDevice device, Size newSize)
   {
-    if (this._presentationParameters.DeviceWindowHandle == IntPtr.Zero)
+    if (_presentationParameters.DeviceWindowHandle == IntPtr.Zero)
     {
-      this.TrySetWindowHandle();
-      if (this._presentationParameters.DeviceWindowHandle == IntPtr.Zero)
+      TrySetWindowHandle();
+      if (_presentationParameters.DeviceWindowHandle == IntPtr.Zero)
         return;
     }
     int width1 = Math.Max(1, (int) Math.Ceiling(newSize.Width));
     int height1 = Math.Max(1, (int) Math.Ceiling(newSize.Height));
     device.Viewport = new Viewport(0, 0, width1, height1);
-    this._presentationParameters.BackBufferWidth = width1;
-    this._presentationParameters.BackBufferHeight = height1;
-    device.Reset(this._presentationParameters);
-    this._bitmap?.Dispose();
+    _presentationParameters.BackBufferWidth = width1;
+    _presentationParameters.BackBufferHeight = height1;
+    device.Reset(_presentationParameters);
+    _bitmap?.Dispose();
     Viewport viewport = device.Viewport;
     int width2 = viewport.Width;
     viewport = device.Viewport;
     int height2 = viewport.Height;
-    this._bitmap = new WriteableBitmap(new PixelSize(width2, height2), new Vector(96.0, 96.0), new PixelFormat?(PixelFormat.Rgba8888), new AlphaFormat?(AlphaFormat.Opaque));
+    _bitmap = new WriteableBitmap(new PixelSize(width2, height2), new Vector(96.0, 96.0), new PixelFormat?(PixelFormat.Rgba8888), new AlphaFormat?(AlphaFormat.Opaque));
   }
 
   private void TrySetWindowHandle()
@@ -158,14 +157,14 @@ public sealed class MonoGameControlTest : Control
     IntPtr? handle = visualRoot.TryGetPlatformHandle()?.Handle;
     if (!handle.HasValue)
       return;
-    this._presentationParameters.DeviceWindowHandle = handle.GetValueOrDefault();
+    _presentationParameters.DeviceWindowHandle = handle.GetValueOrDefault();
   }
 
   private void RunFrame(Game game)
   {
-    this._gameTime.ElapsedGameTime = this._stopwatch.Elapsed;
-    this._gameTime.TotalGameTime += this._gameTime.ElapsedGameTime;
-    this._stopwatch.Restart();
+    _gameTime.ElapsedGameTime = _stopwatch.Elapsed;
+    _gameTime.TotalGameTime += _gameTime.ElapsedGameTime;
+    _stopwatch.Restart();
     try
     {
       game.RunOneFrame();
@@ -185,10 +184,10 @@ public sealed class MonoGameControlTest : Control
     using (ILockedFramebuffer lockedFramebuffer = bitmap.Lock())
     {
       int num = lockedFramebuffer.RowBytes * lockedFramebuffer.Size.Height;
-      if (this._bufferData.Length < num)
-        Array.Resize<byte>(ref this._bufferData, num);
-      device.GetBackBufferData<byte>(this._bufferData, 0, num);
-      Marshal.Copy(this._bufferData, 0, lockedFramebuffer.Address, num);
+      if (_bufferData.Length < num)
+        Array.Resize<byte>(ref _bufferData, num);
+      device.GetBackBufferData<byte>(_bufferData, 0, num);
+      Marshal.Copy(_bufferData, 0, lockedFramebuffer.Address, num);
     }
   }
 }

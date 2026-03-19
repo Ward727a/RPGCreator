@@ -8,7 +8,6 @@ using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
 using AvaloniaEdit.Utils;
-using RPGCreator.Core.Types;
 using RPGCreator.Core.Types.Blueprint;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Graph.Ports;
@@ -73,8 +72,8 @@ public sealed class NodeControl : Control
         
         border.Child = grid;
         
-        this.VisualChildren.Add(border);
-        this.LogicalChildren.Add(border);
+        VisualChildren.Add(border);
+        LogicalChildren.Add(border);
 
         foreach (var p in node.Inputs)
         {
@@ -164,7 +163,7 @@ public sealed class NodeControl : Control
         throw new KeyNotFoundException(portId);
     }
 
-    private Avalonia.Point _grab, _start;
+    private Point _grab, _start;
     public event Action<double,double>? Moved;
     private void StartDrag(object? s, PointerPressedEventArgs e)
     {
@@ -348,8 +347,8 @@ public sealed class PortTextInputControl : PortControl, IPortInput
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(!_isOutput?16:8, 0, !_isOutput?8:16, 0),
         };
-        this.VisualChildren.Add(_inputPanel);
-        this.LogicalChildren.Add(_inputPanel);
+        VisualChildren.Add(_inputPanel);
+        LogicalChildren.Add(_inputPanel);
         
         _label = new TextBlock
         {
@@ -378,7 +377,7 @@ public sealed class PortTextInputControl : PortControl, IPortInput
         Grid.SetColumn(_inputBox, 2);
         
         _inputPanel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-        this.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));  
+        Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));  
         if(def.Kind == PortKind.Exec)
             Logger.Error("PortNumInputControl should not be Exec type, but got: {Def}", def.Kind);
     }
@@ -448,8 +447,8 @@ public sealed class PortNumInputControl : PortControl, IPortInput
             };
         }
 
-        this.VisualChildren.Add(_inputBox);
-        this.LogicalChildren.Add(_inputBox);
+        VisualChildren.Add(_inputBox);
+        LogicalChildren.Add(_inputBox);
         
         if(def.Kind == PortKind.Exec)
             Logger.Error("PortNumInputControl should not be Exec type, but got: {Def}", def.Kind);
@@ -510,8 +509,8 @@ public sealed class PortBoolInputControl : PortControl, IPortInput
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(!_isOutput?16:8, 0, !_isOutput?8:16, 0),
         };
-        this.VisualChildren.Add(_inputPanel);
-        this.LogicalChildren.Add(_inputPanel);
+        VisualChildren.Add(_inputPanel);
+        LogicalChildren.Add(_inputPanel);
         
         _label = new TextBlock
         {
@@ -536,7 +535,7 @@ public sealed class PortBoolInputControl : PortControl, IPortInput
         Width = name.Width + 32 + 16; // 16px on each side for padding
         
         _inputPanel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-        this.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));  
+        Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));  
         if(def.Kind == PortKind.Exec)
             Logger.Error("PortNumInputControl should not be Exec type, but got: {Def}", def.Kind);
     }
@@ -605,8 +604,8 @@ public sealed class PortEnumInputControl : PortControl, IPortInput
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(!_isOutput?16:8, 0, !_isOutput?8:16, 0),
         };
-        this.VisualChildren.Add(_inputPanel);
-        this.LogicalChildren.Add(_inputPanel);
+        VisualChildren.Add(_inputPanel);
+        LogicalChildren.Add(_inputPanel);
         
         _label = new TextBlock
         {
@@ -652,7 +651,7 @@ public sealed class PortEnumInputControl : PortControl, IPortInput
         Grid.SetColumn(_inputBox, 2);
         
         _inputPanel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-        this.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));  
+        Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));  
         if(def.Kind == PortKind.Exec)
             Logger.Error("PortNumInputControl should not be Exec type, but got: {Def}", def.Kind);
     }

@@ -8,7 +8,7 @@ public class TilesetRegistry : RegistryBase<BaseTilesetDef>
 {
     public override string ModuleName => "tilesets";
     
-    public override IEnumerable<System.Type> SupportedTypes
+    public override IEnumerable<Type> SupportedTypes
     {
         get
         {

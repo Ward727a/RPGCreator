@@ -9,7 +9,7 @@ public abstract class Node : ISerializable, IDeserializable
     public Node Clone()
     {
         // Get the type of the current node
-        var type = this.GetType();
+        var type = GetType();
         // Create a new instance of the node using the Activator
         var clone = (Node)Activator.CreateInstance(type)!;
         return clone;

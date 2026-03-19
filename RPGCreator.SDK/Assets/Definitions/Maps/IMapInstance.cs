@@ -1,6 +1,4 @@
-﻿using RPGCreator.SDK.ECS.Entities;
-
-namespace RPGCreator.SDK.Assets.Definitions.Maps;
+﻿namespace RPGCreator.SDK.Assets.Definitions.Maps;
 
 public interface IMapInstance
 {

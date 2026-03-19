@@ -27,12 +27,10 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
-using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
-using AvaloniaEdit.Utils;
 using MonoGame.Extended.Collections;
 using RPGCreator.SDK.EditorUiService;
 using RPGCreator.UI.Content.Editor;
@@ -90,7 +88,7 @@ public class DialogService : IDialogService
                 new TextBlock()
                 {
                     Text = content?.ToString() ?? "EMPTY CONTENT PROVIDED",
-                    TextWrapping = Avalonia.Media.TextWrapping.Wrap
+                    TextWrapping = TextWrapping.Wrap
                 };
             
             inputBox.InnerLeftContent = textContent;
@@ -135,10 +133,10 @@ public class DialogService : IDialogService
         var stackPanel = new StackPanel { Margin = new Thickness(15), Spacing = 20 };
         confirmWindow.Content = stackPanel;
         
-        var label = new TextBlock { Text = "Please confirm:", FontWeight = Avalonia.Media.FontWeight.Bold };
+        var label = new TextBlock { Text = "Please confirm:", FontWeight = FontWeight.Bold };
         stackPanel.Children.Add(label);
         
-        var messageBlock = new TextBlock { Text = message, TextWrapping = Avalonia.Media.TextWrapping.Wrap };
+        var messageBlock = new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap };
         stackPanel.Children.Add(messageBlock);
 
         var buttonPanel = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Spacing = 10 };
@@ -174,7 +172,7 @@ public class DialogService : IDialogService
                 new TextBlock()
                 {
                     Text = content?.ToString() ?? "EMPTY CONTENT PROVIDED",
-                    TextWrapping = Avalonia.Media.TextWrapping.Wrap
+                    TextWrapping = TextWrapping.Wrap
                 };
             gridPanel.Children.Add(textContent);
         }
@@ -203,7 +201,7 @@ public class DialogService : IDialogService
         var stackPanel = new StackPanel { Margin = new Thickness(15), Spacing = 20 };
         messageWindow.Content = stackPanel;
         
-        var messageBlock = new TextBlock { Text = message, TextWrapping = Avalonia.Media.TextWrapping.Wrap };
+        var messageBlock = new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap };
         stackPanel.Children.Add(messageBlock);
 
         var okButton = new Button { Content = "OK", IsDefault = true, HorizontalAlignment = HorizontalAlignment.Right };
@@ -232,7 +230,7 @@ public class DialogService : IDialogService
                 new TextBlock()
                 {
                     Text = content?.ToString() ?? "EMPTY CONTENT PROVIDED",
-                    TextWrapping = Avalonia.Media.TextWrapping.Wrap
+                    TextWrapping = TextWrapping.Wrap
                 };
             stackPanel.Children.Add(textContent);
         }
@@ -257,8 +255,8 @@ public class DialogService : IDialogService
         var messageBlock = new TextBlock 
         { 
             Text = message, 
-            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-            Foreground = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Red)
+            TextWrapping = TextWrapping.Wrap,
+            Foreground = new SolidColorBrush(Colors.Red)
         };
         stackPanel.Children.Add(messageBlock);
 

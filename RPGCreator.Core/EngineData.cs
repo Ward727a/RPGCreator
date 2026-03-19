@@ -23,12 +23,8 @@
 // 
 #endregion
 
-using System.Numerics;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Assets.Definitions.Maps;
-using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
-using RPGCreator.SDK.Editor.Brushes;
 using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Projects;
 

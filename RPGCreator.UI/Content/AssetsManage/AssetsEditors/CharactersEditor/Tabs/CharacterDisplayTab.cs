@@ -18,7 +18,6 @@ using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
 using RPGCreator.UI.Common;
 using Ursa.Controls;
