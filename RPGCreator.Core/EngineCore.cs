@@ -98,9 +98,6 @@ namespace RPGCreator.Core
             }
 
             Logger.Implementation = new EngineLogger();
-            var config = new EngineConfig();
-            config.CreateOrLoadConfig();
-            EngineServices.Config = config;
             
             #region GlobalStates Initialization
             GlobalStates.EngineMode = mode;
@@ -145,6 +142,9 @@ namespace RPGCreator.Core
             Scheduler = new EngineScheduler();
             Serializer = new EngineSerializer();
             EngineServices.Serializer = Serializer;
+            var config = new EngineConfig();
+            config.CreateOrLoadConfig();
+            EngineServices.Config = config;
             // Configs = new EngineConfigs(); // Should be removed!!
             Managers = new EngineManagers();
             

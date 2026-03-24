@@ -6,6 +6,8 @@ using RPGCreator.SDK.Serializer;
 
 namespace RPGCreator.SDK.Modules.Definition;
 
+// DevNote: There is still some room for optimisation here. Notably, the string hashing for dictionary keys is not very efficient.
+
 /// <summary>
 /// A custom data system, also called "data bags" or "property bags", that allows modules to store and retrieve misc data, defined by users or other modules.
 /// </summary>

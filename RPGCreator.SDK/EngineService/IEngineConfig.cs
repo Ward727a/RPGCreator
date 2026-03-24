@@ -20,6 +20,7 @@
 
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
@@ -27,12 +28,14 @@ namespace RPGCreator.SDK.EngineService;
 
 public interface IConfig : ISerializable, IDeserializable
 {
-    public event Action<string>? OnKeyChanged;
+    public event Action<string>? KeyChanged;
     event Action? ConfigSaved;
     event Action? ConfigLoaded;
     event Action? ConfigChanged;
     public bool IsDirty { get; }    
     public string ConfigPath { get; set; }
+
+    public CustomData GetDefaultConfig();
 
     public string GetString(string key, string defaultValue = "");
     public int GetInt(string key, int defaultValue = 0);
@@ -62,25 +65,14 @@ public interface IConfig : ISerializable, IDeserializable
     public void OnSavedConfig();
 }
 
-public interface IEngineConfig : IService, ISerializable, IDeserializable
+public interface IEngineConfig : IConfig, IService, ISerializable, IDeserializable
 {
-    public event Action<string>? OnKeyChanged;
-    event Action? OnConfigChanged;
-    event Action? OnShortcutsChanged;
-    event Action? OnToolsShortcutsChanged;
+    event Action? AutoSaveStarted;
 
     public ObservableCollection<URN> Shortcuts { get; }
     public ObservableCollection<URN> ToolsShortcuts { get; }
 
-    public bool IsDirty { get; }
     
-    public string GetString(string key, string defaultValue = "");
-    public int GetInt(string key, int defaultValue = 0);
-    public bool GetBool(string key, bool defaultValue = false);
-    public float GetFloat(string key, float defaultValue = 0f);
-    public double GetDouble(string key, double defaultValue = 0.0);
-    public T Get<T>(string key, T defaultValue);
-
     /// <summary>
     /// Try to open a config from its name.
     /// </summary>
@@ -134,23 +126,6 @@ public interface IEngineConfig : IService, ISerializable, IDeserializable
     /// Return true if the config was created successfully, false otherwise.
     /// </returns>
     public bool CreateConfig(string configName, IConfig configData, bool isGlobal = false);
-    
-    public void SetString(string key, string value);
-    public void SetInt(string key, int value);
-    public void SetBool(string key, bool value);
-    public void SetFloat(string key, float value);
-    public void SetDouble(string key, double value);
-    public void Set<T>(string key, T value);
-    
-    public bool HasString(string key);
-    public bool HasInt(string key);
-    public bool HasBool(string key);
-    public bool HasFloat(string key);
-    public bool HasDouble(string key);
-    public bool Has<T>(string key);
-
-    public bool SaveConfig();
-    public bool SaveConfigAt(string path);
     
     public bool LoadConfig();
     public bool LoadConfigFrom(string path);

@@ -18,20 +18,17 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.Collections.ObjectModel;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.Modules;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Serializer;
-using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.EngineService;
 
 [SerializingType("BaseConfig")]
 public class BaseConfig : IConfig
 {
-    public event Action<string>? OnKeyChanged;
+    public event Action<string>? KeyChanged;
     public event Action? ConfigSaved;
     public event Action? ConfigLoaded;
     public event Action? ConfigChanged;
@@ -47,7 +44,12 @@ public class BaseConfig : IConfig
     } = string.Empty;
 
     protected CustomData Data = new();
-    
+
+    public virtual CustomData GetDefaultConfig()
+    {
+        return new CustomData();
+    }
+
     public string GetString(string key, string defaultValue = "")
     {
         return Get(key, defaultValue);
@@ -108,7 +110,7 @@ public class BaseConfig : IConfig
         Data.Set(key, value);
         IsDirty = true;
         ConfigChanged?.Invoke();
-        OnKeyChanged?.Invoke(key);
+        KeyChanged?.Invoke(key);
     }
 
     public bool HasString(string key)

@@ -20,8 +20,10 @@
 
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using CommunityToolkit.Diagnostics;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.Definition;
@@ -33,37 +35,96 @@ namespace RPGCreator.Core;
 [SerializingType("EngineConfig")]
 public class EngineConfig : IEngineConfig
 {
-    public event Action<string>? OnKeyChanged;
-    public event Action? OnConfigChanged;
-    public event Action? OnShortcutsChanged;
-    public event Action? OnToolsShortcutsChanged;
-    
+    private static class Keys
+    {
+        public const string Shortcuts = "shortcuts";
+        public const string ToolsShortcuts = "toolsShortcuts";
+        public const string AutoSaveTime = "autosaving_time";
+        public const string AutoSaveEnabled = "is_autosave_enabled";
+        public const string NotifyOnAutoSave = "notify_on_autosave";
+    }
+
+    public event Action<string>? KeyChanged;
+    public event Action? ConfigSaved;
+    public event Action? ConfigLoaded;
+    public event Action? ConfigChanged;
+    public event Action? AutoSaveStarted;
+
     public bool IsDirty { get; private set; } = false;
-    
+    public string ConfigPath { get; set; } = Path.Combine(RpgEnv.Config, "config.json");
+
     private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<EngineConfig>();
     private readonly string _configPath = Path.Combine(RpgEnv.Config, "config.json");
 
-    public ObservableCollection<URN> Shortcuts => _data.GetAs<ObservableCollection<URN>>("shortcuts") ?? [];
-    public ObservableCollection<URN> ToolsShortcuts => _data.GetAs<ObservableCollection<URN>>("toolsShortcuts") ?? [];
+    public ObservableCollection<URN> Shortcuts => _data.GetAs<ObservableCollection<URN>>(Keys.Shortcuts) ?? [];
+
+    public ObservableCollection<URN> ToolsShortcuts =>
+        _data.GetAs<ObservableCollection<URN>>(Keys.ToolsShortcuts) ?? [];
+
+    private float _autosavingTime = 300;
+    private bool _isAutosaveEnabled = true;
+    private bool _notifyOnAutoSave = false;
 
     private Dictionary<string, IConfig> _globalConfigs = new();
     private Dictionary<string, IConfig> _localConfigs = new();
-    
+
     private CustomData _data = new();
-    
+
     private Guid _schedulerAutosavingId = Guid.Empty;
-    
+
     public EngineConfig()
     {
-        _data.Set("shortcuts", new ObservableCollection<URN>());
-        _data.Set("toolsShortcuts", new ObservableCollection<URN>());
+        _data.Set(Keys.Shortcuts, new ObservableCollection<URN>());
+        _data.Set(Keys.ToolsShortcuts, new ObservableCollection<URN>());
 
-        if (!HasFloat("autosaving_time"))
+        if (!HasFloat(Keys.AutoSaveTime))
         {
-            SetFloat("autosaving_time", 300);
+            SetFloat(Keys.AutoSaveTime, _autosavingTime);
         }
+        else
+            _autosavingTime = GetFloat(Keys.AutoSaveTime);
+
+        if (!HasBool(Keys.AutoSaveEnabled))
+        {
+            SetBool(Keys.AutoSaveEnabled, _isAutosaveEnabled);
+        }
+        else
+            _isAutosaveEnabled = GetBool(Keys.AutoSaveEnabled);
+
+        if (!HasBool(Keys.NotifyOnAutoSave))
+        {
+            SetBool(Keys.NotifyOnAutoSave, _notifyOnAutoSave);
+        }
+        else
+            _notifyOnAutoSave = GetBool(Keys.NotifyOnAutoSave);
 
         SetAutoSave();
+
+        RegisterEvents();
+    }
+
+    private void RegisterEvents()
+    {
+        KeyChanged += OnAutoSaveChanged;
+    }
+
+    private void OnAutoSaveChanged(string key)
+    {
+        switch (key)
+        {
+            case Keys.AutoSaveTime:
+                _autosavingTime = GetFloat(Keys.AutoSaveTime);
+                SetAutoSave();
+                break;
+            case Keys.AutoSaveEnabled:
+                _isAutosaveEnabled = GetBool(Keys.AutoSaveEnabled);
+                SetAutoSave();
+                break;
+            case Keys.NotifyOnAutoSave:
+                _notifyOnAutoSave = GetBool(Keys.NotifyOnAutoSave);
+                SetAutoSave();
+                break;
+        }
     }
 
     private void SetAutoSave()
@@ -74,27 +135,57 @@ public class EngineConfig : IEngineConfig
             {
                 scheduler.CancelTask(_schedulerAutosavingId);
             }
-            
-            _schedulerAutosavingId = scheduler.WaitSecond(GetFloat("autosaving_time", 300), () =>
+
+            if (!_isAutosaveEnabled && _autosavingTime <= 0) return;
+
+            _schedulerAutosavingId = scheduler.WaitSecond(_autosavingTime, () =>
             {
-                if(IsDirty)
+                if (!_isAutosaveEnabled)
+                {
+                    scheduler.CancelTask(_schedulerAutosavingId);
+                    return;
+                }
+
+                if (IsDirty)
                     SaveConfig();
-            
+
                 foreach (var globalConfig in _globalConfigs)
                 {
-                    if(globalConfig.Value.IsDirty)
+                    if (globalConfig.Value.IsDirty)
                         globalConfig.Value.SaveConfig();
                 }
 
                 foreach (var localConfig in _localConfigs)
                 {
-                    if(localConfig.Value.IsDirty)
+                    if (localConfig.Value.IsDirty)
                         localConfig.Value.SaveConfig();
                 }
-            
+
+                AutoSaveStarted?.Invoke();
+
                 Logger.Debug("auto-save done.");
+
+                if (_notifyOnAutoSave)
+                {
+                    if (EditorUiServices.IsServiceReady<INotificationService>())
+                    {
+                        EditorUiServices.NotificationService.Info("Auto-save", "Auto-save done.",
+                            new NotificationOptions(2000));
+                    }
+                }
             }, true);
         });
+    }
+
+    public CustomData GetDefaultConfig()
+    {
+        var defaultConfig = new CustomData();
+        defaultConfig.Set(Keys.Shortcuts, new ObservableCollection<URN>());
+        defaultConfig.Set(Keys.ToolsShortcuts, new ObservableCollection<URN>());
+        defaultConfig.Set(Keys.AutoSaveTime, 300);
+        defaultConfig.Set(Keys.AutoSaveEnabled, true);
+        defaultConfig.Set(Keys.NotifyOnAutoSave, false);
+        return defaultConfig;
     }
 
     public string GetString(string key, string defaultValue = "")
@@ -127,7 +218,7 @@ public class EngineConfig : IEngineConfig
         return _data.GetAsOrDefault(key, defaultValue);
     }
 
-    public bool TryFrom(string configName, bool isGlobal, [NotNullWhen(true)]out IConfig? config)
+    public bool TryFrom(string configName, bool isGlobal, [NotNullWhen(true)] out IConfig? config)
     {
         IConfig? fromConfig = From(configName, isGlobal);
         if (fromConfig is null)
@@ -135,6 +226,7 @@ public class EngineConfig : IEngineConfig
             config = null;
             return false;
         }
+
         config = fromConfig;
         return true;
     }
@@ -160,7 +252,7 @@ public class EngineConfig : IEngineConfig
 
     private IConfig? GetGlobalConfig(string configName)
     {
-        if(_globalConfigs.TryGetValue(configName, out var globalConfig))
+        if (_globalConfigs.TryGetValue(configName, out var globalConfig))
             return globalConfig;
         var globalConfigPath = Path.Combine(RpgEnv.Config, $"{configName}.config.json");
         if (File.Exists(globalConfigPath))
@@ -172,22 +264,22 @@ public class EngineConfig : IEngineConfig
                 Logger.Error("Failed to deserialize global config from file: {Path}", args: globalConfigPath);
                 return null;
             }
-            
-            if(conf.ConfigPath != globalConfigPath)
+
+            if (conf.ConfigPath != globalConfigPath)
                 conf.ConfigPath = globalConfigPath;
-                
+
             _globalConfigs[configName] = conf;
             conf.OnLoadedConfig();
             return conf;
         }
-            
+
         Logger.Error("Global config file not found at path: {Path}", args: globalConfigPath);
         return null;
     }
-    
+
     private IConfig? GetLocalConfig(string configName)
     {
-        if(_localConfigs.TryGetValue(configName, out var localConfig))
+        if (_localConfigs.TryGetValue(configName, out var localConfig))
             return localConfig;
 
         if (GlobalStates.ProjectState.CurrentProject == null)
@@ -195,8 +287,9 @@ public class EngineConfig : IEngineConfig
             Logger.Error("Cannot get local config without a project loaded.");
             return null;
         }
-            
-        var localConfigPath = Path.Combine(GlobalStates.ProjectState.CurrentProject.Path, "config", $"{configName}.config.json");
+
+        var localConfigPath = Path.Combine(GlobalStates.ProjectState.CurrentProject.Path, "config",
+            $"{configName}.config.json");
         if (File.Exists(localConfigPath))
         {
             EngineServices.Serializer.DeserializeFrom<BaseConfig>(localConfigPath, out var config);
@@ -207,13 +300,14 @@ public class EngineConfig : IEngineConfig
                 return null;
             }
 
-            if(conf.ConfigPath != localConfigPath)
+            if (conf.ConfigPath != localConfigPath)
                 conf.ConfigPath = localConfigPath;
-            
+
             _localConfigs[configName] = conf;
             conf.OnLoadedConfig();
             return conf;
         }
+
         Logger.Error("Local config file not found at path: {Path}", args: localConfigPath);
         return null;
     }
@@ -233,7 +327,7 @@ public class EngineConfig : IEngineConfig
         }
 
         string globalConfigPath;
-        
+
         if (!string.IsNullOrEmpty(configData.ConfigPath))
         {
             globalConfigPath = configData.ConfigPath;
@@ -273,8 +367,9 @@ public class EngineConfig : IEngineConfig
             Logger.Error("Cannot create local config without a project loaded.");
             return false;
         }
-            
-        var localConfigPath = Path.Combine(GlobalStates.ProjectState.CurrentProject.Path, "config", $"{configName}.config.json");
+
+        var localConfigPath = Path.Combine(GlobalStates.ProjectState.CurrentProject.Path, "config",
+            $"{configName}.config.json");
 
         try
         {
@@ -285,7 +380,7 @@ public class EngineConfig : IEngineConfig
             Logger.Error(e, "Failed to create local config at path: {Path}", args: localConfigPath);
             return false;
         }
-            
+
         _localConfigs[configName] = configData;
         return true;
     }
@@ -319,8 +414,8 @@ public class EngineConfig : IEngineConfig
     {
         _data.Set(key, value);
         IsDirty = true;
-        OnConfigChanged?.Invoke();
-        OnKeyChanged?.Invoke(key);
+        ConfigChanged?.Invoke();
+        KeyChanged?.Invoke(key);
     }
 
     public bool HasString(string key)
@@ -361,7 +456,7 @@ public class EngineConfig : IEngineConfig
     public bool SaveConfigAt(string path)
     {
         EngineServices.Serializer.Serialize(this, out var stringData);
-        
+
         if (string.IsNullOrEmpty(stringData))
             return false;
 
@@ -369,11 +464,20 @@ public class EngineConfig : IEngineConfig
         {
             File.WriteAllText(path, stringData);
             return true;
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             Logger.Error(ex, "Failed to save engine config to path: {Path}", args: path);
             return false;
         }
+    }
+
+    public void OnLoadedConfig()
+    {
+    }
+
+    public void OnSavedConfig()
+    {
     }
 
     public bool LoadConfig()
@@ -394,8 +498,11 @@ public class EngineConfig : IEngineConfig
         {
             var stringData = File.ReadAllText(path);
             EngineServices.Serializer.Deserialize<EngineConfig>(stringData, out var config);
-            // ReSharper disable once ConvertTypeCheckToNullCheck
-            if (config == null || config is not EngineConfig)
+
+            Guard.IsNotNull(config);
+
+            // ReSharper disable once ConvertTypeCheckPatternToNullCheck
+            if (config is not EngineConfig)
             {
                 Logger.Error("Failed to deserialize engine config from file: {Path}", args: path);
                 return false;
@@ -418,6 +525,12 @@ public class EngineConfig : IEngineConfig
 
                     return false;
                 }
+                else
+                {
+                    Logger.Info("Data integrity check has been fixed for loaded config from path: {Path}", args: path);
+                    SaveConfig();
+                    Logger.Info("Config has been saved after data integrity check has been fixed.");
+                }
             }
 
             _data = config._data;
@@ -425,7 +538,7 @@ public class EngineConfig : IEngineConfig
             Logger.Debug("Successfully loaded engine config from path: {Path}", args: path);
             Logger.Debug("Loaded config data: {@Data}", args: _data);
 
-            OnConfigChanged?.Invoke();
+            ConfigChanged?.Invoke();
 
             return true;
         }
@@ -445,26 +558,39 @@ public class EngineConfig : IEngineConfig
         checksResults = 0;
         data ??= _data;
 
-        var keyIntrity = data.Has("shortcuts") && data.Has("toolsShortcuts");
-        checksResults |= (byte)(keyIntrity ? 1 : 0);
-        
-        var dataIntegrity = data.GetTypeOf("shortcuts") == typeof(ObservableCollection<URN>) &&
-                           data.GetTypeOf("toolsShortcuts") == typeof(ObservableCollection<URN>);
-        checksResults |= (byte)(dataIntegrity ? 2 : 0);
-        
-        return keyIntrity && dataIntegrity;
+        var keyIntegrity = data.Has(Keys.Shortcuts) && data.Has(Keys.ToolsShortcuts) && data.Has(Keys.AutoSaveTime) &&
+                           data.Has(Keys.AutoSaveEnabled) && data.Has(Keys.NotifyOnAutoSave);
+        checksResults |= (byte)(keyIntegrity ? 0 : 1);
+
+        var dataIntegrity = data.GetTypeOf(Keys.Shortcuts) == typeof(ObservableCollection<URN>) &&
+                            data.GetTypeOf(Keys.ToolsShortcuts) == typeof(ObservableCollection<URN>) &&
+                            data.GetTypeOf(Keys.AutoSaveTime) == typeof(float) &&
+                            data.GetTypeOf(Keys.AutoSaveEnabled) == typeof(bool) &&
+                            data.GetTypeOf(Keys.NotifyOnAutoSave) == typeof(bool);
+        checksResults |= (byte)(dataIntegrity ? 0 : 2);
+
+        return keyIntegrity && dataIntegrity;
     }
-    
+
     private bool TryFixDataIntegrity(out byte checksResults)
     {
         if (CheckDataIntegrity(out checksResults))
             return true;
 
-        if (!_data.Has("shortcuts"))
-            _data.Set("shortcuts", new ObservableCollection<URN>());
+        if (!_data.Has(Keys.Shortcuts))
+            _data.Set(Keys.Shortcuts, new ObservableCollection<URN>());
 
-        if (!_data.Has("toolsShortcuts"))
-            _data.Set("toolsShortcuts", new ObservableCollection<URN>());
+        if (!_data.Has(Keys.ToolsShortcuts))
+            _data.Set(Keys.ToolsShortcuts, new ObservableCollection<URN>());
+
+        if (!_data.Has(Keys.AutoSaveTime))
+            _data.Set(Keys.AutoSaveTime, 300f);
+
+        if (!_data.Has(Keys.AutoSaveEnabled))
+            _data.Set(Keys.AutoSaveEnabled, true);
+
+        if (!_data.Has(Keys.NotifyOnAutoSave))
+            _data.Set(Keys.NotifyOnAutoSave, false);
 
         return CheckDataIntegrity(out checksResults);
     }
@@ -484,7 +610,7 @@ public class EngineConfig : IEngineConfig
     public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue("settings", out CustomData? savedData);
-        
+
         _data = savedData ?? new CustomData();
     }
 
@@ -502,6 +628,7 @@ public class EngineConfig : IEngineConfig
             return;
         }
 
+        _data = GetDefaultConfig();
         SaveConfig();
     }
 }
