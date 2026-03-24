@@ -35,13 +35,22 @@ namespace RPGCreator.Core;
 [SerializingType("EngineConfig")]
 public class EngineConfig : IEngineConfig
 {
-    private static class Keys
+    public static class Keys
     {
         public const string Shortcuts = "shortcuts";
         public const string ToolsShortcuts = "toolsShortcuts";
         public const string AutoSaveTime = "autosaving_time";
         public const string AutoSaveEnabled = "is_autosave_enabled";
         public const string NotifyOnAutoSave = "notify_on_autosave";
+
+        public static class Paths
+        {
+            public const string Modules = "path_modules";
+            public const string Projects = "path_projects";
+            public const string Logs = "path_logs";
+            public const string Temp = "path_temp";
+            public const string Config = "path_config";
+        }
     }
 
     public event Action<string>? KeyChanged;
@@ -64,6 +73,8 @@ public class EngineConfig : IEngineConfig
     private float _autosavingTime = 300;
     private bool _isAutosaveEnabled = true;
     private bool _notifyOnAutoSave = false;
+    
+    private string _modulesPath = RpgEnv.Modules;
 
     private Dictionary<string, IConfig> _globalConfigs = new();
     private Dictionary<string, IConfig> _localConfigs = new();
@@ -97,6 +108,13 @@ public class EngineConfig : IEngineConfig
         }
         else
             _notifyOnAutoSave = GetBool(Keys.NotifyOnAutoSave);
+
+        if (!HasString(Keys.Paths.Modules))
+        {
+            SetString(Keys.Paths.Modules, _modulesPath);
+        } 
+        else
+            _modulesPath = GetString(Keys.Paths.Modules);
 
         SetAutoSave();
 
@@ -185,6 +203,7 @@ public class EngineConfig : IEngineConfig
         defaultConfig.Set(Keys.AutoSaveTime, 300);
         defaultConfig.Set(Keys.AutoSaveEnabled, true);
         defaultConfig.Set(Keys.NotifyOnAutoSave, false);
+        defaultConfig.Set(Keys.Paths.Modules, RpgEnv.Modules);
         return defaultConfig;
     }
 
@@ -559,14 +578,15 @@ public class EngineConfig : IEngineConfig
         data ??= _data;
 
         var keyIntegrity = data.Has(Keys.Shortcuts) && data.Has(Keys.ToolsShortcuts) && data.Has(Keys.AutoSaveTime) &&
-                           data.Has(Keys.AutoSaveEnabled) && data.Has(Keys.NotifyOnAutoSave);
+                           data.Has(Keys.AutoSaveEnabled) && data.Has(Keys.NotifyOnAutoSave) && data.Has(Keys.Paths.Modules);
         checksResults |= (byte)(keyIntegrity ? 0 : 1);
 
         var dataIntegrity = data.GetTypeOf(Keys.Shortcuts) == typeof(ObservableCollection<URN>) &&
                             data.GetTypeOf(Keys.ToolsShortcuts) == typeof(ObservableCollection<URN>) &&
                             data.GetTypeOf(Keys.AutoSaveTime) == typeof(float) &&
                             data.GetTypeOf(Keys.AutoSaveEnabled) == typeof(bool) &&
-                            data.GetTypeOf(Keys.NotifyOnAutoSave) == typeof(bool);
+                            data.GetTypeOf(Keys.NotifyOnAutoSave) == typeof(bool) &&
+                            data.GetTypeOf(Keys.Paths.Modules) == typeof(string);
         checksResults |= (byte)(dataIntegrity ? 0 : 2);
 
         return keyIntegrity && dataIntegrity;
@@ -591,6 +611,9 @@ public class EngineConfig : IEngineConfig
 
         if (!_data.Has(Keys.NotifyOnAutoSave))
             _data.Set(Keys.NotifyOnAutoSave, false);
+        
+        if (!_data.Has(Keys.Paths.Modules))
+            _data.Set(Keys.Paths.Modules, RpgEnv.Modules);
 
         return CheckDataIntegrity(out checksResults);
     }

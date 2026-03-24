@@ -22,11 +22,15 @@
 // 
 // 
 #endregion
+
+using System;
 using Avalonia.Controls;
 using System.Collections.Generic;
 using Avalonia.Layout;
 using CommunityToolkit.Mvvm.Input;
+using RPGCreator.SDK;
 using RPGCreator.SDK.Types;
+using RPGCreator.UI.Content.Preferences.Components.Modules;
 using RPGCreator.UI.Content.Preferences.Components.Projects;
 using Ursa.Controls;
 
@@ -49,36 +53,50 @@ namespace RPGCreator.UI.Content.Preferences
         // If the key contains dots, it will be considered a sub-panel, but it need to be under the same parent entry.
         // For example, "General.Appearance" is a sub-panel of "General", so its just under the "General" entry in the dictionary.
         // If you had "General.Appearance.Color", it would be a sub-panel of "General.Appearance", and should be under the "General.Appearance" entry in the dictionary.
-        private Dictionary<PipedPath, Control> _settingsPanels = new()
+        private Dictionary<PipedPath, Func<Control>> _settingsPanels = new()
         {
-            { "General".ToPipedPath(), new TextBlock()
+            { "General".ToPipedPath(), ()=>new TextBlock()
                 {
                     Text = "General settings"
                 }
             },
-            { "General".ToPipedPath().Extend("Appearance"), new TextBlock()
+            { "General".ToPipedPath().Extend("Appearance"), ()=>new TextBlock()
                 {
                     Text = "Appearance settings - Coming soon!"
                 }
             },
-            { "General".ToPipedPath().Extend("Keybinds"), new TextBlock()
+            { "General".ToPipedPath().Extend("Keybinds"), ()=>new TextBlock()
                 {
                     Text = "Keybinds settings - Coming soon!"
                 }
             },
             {
-                "Modules".ToPipedPath(), new TextBlock()
+                "Modules".ToPipedPath(), ()=>new TextBlock()
                 {
                     Text = "Modules settings - Coming soon!"
                 }
             },
-            { "Project".ToPipedPath(), new ProjectSettingsControl()
+            {
+                "Modules".ToPipedPath().Extend("List"), () =>
                 {
-                    VerticalAlignment = VerticalAlignment.Stretch,
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    return new ModulesList();
                 }
             },
-            { "Editor".ToPipedPath(), new TextBlock()
+            { "Project".ToPipedPath(), ()=>
+                {
+                    if (GlobalStates.ProjectState.CurrentProject == null)
+                        return new TextBlock()
+                        {
+                            Text = "No project loaded.",
+                        };
+                    return new ProjectSettingsControl()
+                    {
+                        VerticalAlignment = VerticalAlignment.Stretch,
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
+                    };
+                }
+            },
+            { "Editor".ToPipedPath(), ()=>new TextBlock()
                 {
                     Text = "Editor settings - Coming soon!"
                 }
@@ -139,7 +157,7 @@ namespace RPGCreator.UI.Content.Preferences
                 {
                     Command = new RelayCommand(() =>
                     {
-                        SettingsPanel.Content = control;
+                        SettingsPanel.Content = control?.Invoke();
                     }),
                     Header = path.Name,
                     HorizontalAlignment = HorizontalAlignment.Stretch

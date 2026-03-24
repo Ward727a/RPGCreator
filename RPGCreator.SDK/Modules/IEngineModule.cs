@@ -51,8 +51,9 @@ public struct ModuleCandidate : IEngineModuleInfo
     public URN[] Dependencies { get; }
     public URN[] Incompatibilities { get; }
     internal Type? ModuleType { get; }
+    public readonly bool Certified = false;
 
-    public ModuleCandidate(ModuleManifestAttribute manifest, Type type)
+    public ModuleCandidate(ModuleManifestAttribute manifest, Type type, bool certified = false)
     {
         ModuleUrn = manifest.Urn;
         Name = manifest.Name;
@@ -63,6 +64,7 @@ public struct ModuleCandidate : IEngineModuleInfo
         Dependencies = (manifest?.Dependencies ?? []).Select(urnStr => new URN(urnStr)).ToArray();
         Incompatibilities = (manifest?.Incompatibilities ?? []).Select(urnStr => new URN(urnStr)).ToArray();;
         ModuleType = type;
+        Certified = certified;
     }
 
     public ModuleCandidate(IEngineModuleInfo moduleInfo)

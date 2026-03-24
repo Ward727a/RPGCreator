@@ -84,4 +84,23 @@ public static class RpgEnv
             return field;
         }
     } = "";
+
+    public static string RunningModules
+    {
+        get
+        {
+            if (field == "")
+            {
+                field = Path.Combine(ApplicationData, "_runningModules");
+                if (!Directory.Exists(field))
+                {
+                    Directory.CreateDirectory(field);
+                    File.WriteAllText(Path.Combine(field, "__DO NOT TOUCH HERE!!!.txt"),
+                        "DO NOT TOUCH THIS FOLDER! Otherwise the engine could crash!");
+                }
+            }
+
+            return field;
+        }
+    } = "";
 }

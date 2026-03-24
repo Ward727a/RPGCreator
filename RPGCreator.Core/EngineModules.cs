@@ -26,6 +26,9 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using RPGCreator.Core.Common;
 using RPGCreator.Core.Module;
 using RPGCreator.SDK;
@@ -67,11 +70,9 @@ namespace RPGCreator.Core
         // This is the SHA256 checksum of the module DLL file to ensure integrity.
         // Those should be updated with each new module version. (even for small changes!)
 
-        private readonly string MODULES_PATH = $"{EngineServices.Config.GetString("path.global_module_dir")}Assets/Modules/";
-        
         internal EngineModules()
         {
-            
+            string modulesPath = EngineServices.Config.GetString(EngineConfig.Keys.Paths.Modules);
             
             TaskScheduler.UnobservedTaskException += (sender, e) => 
             {
@@ -87,7 +88,6 @@ namespace RPGCreator.Core
                             _logger.Critical("UnauthorizedAccessException detected: {Message}", args: UAE.Message);
                             _logger.Critical("This may indicate a security violation within the module!!!");
                             EditorUiServices.NotificationService.Error("SECURITY_ALERT!", $"Security Alert: A module attempted an unauthorized operation. The engine remains stable, but please review module usage.", new NotificationOptions(60000));
-                            
                         }
                     }
                 }
@@ -100,45 +100,24 @@ namespace RPGCreator.Core
                 return;
             }
 
-            if (!Directory.Exists(MODULES_PATH))
+            if (!Directory.Exists(modulesPath))
             {
-                _logger.Error("Engine modules directory not found.");
-                return;
+                _logger.Info("No modules directory found. Creating one at '{ModulesPath}'.", args: modulesPath);
+                Directory.CreateDirectory(modulesPath);
             }
 
             ClearTempModulesShadowCopies("", new EngineSecurityToken());
             
-            foreach (var directory in Directory.GetDirectories(MODULES_PATH))
+            foreach (var directory in Directory.GetDirectories(modulesPath))
             {
                 var files = Directory.GetFiles(directory, "*.dll");
                 foreach (var file in files)
                 {
                     try
                     {
-                        // Calculate the SHA256 checksum of the file.
-                        var hashString = ShaUtil.ComputeSha256(file);
-                        if (/*CHECKSUM_INTERNAL_MODULES.Contains(hashString)*/
-                            #if DEBUG
-                            /*|| */true
-                            #endif
-                            )
+                        if (TryLoadModule(file, new EngineSecurityToken()))
                         {
-                            // DISABLED FOR NOW
-                            // I was kinda annoyed during development, having to update the checksum each time I made a small change.
-                            // So this is disabled for now, but should be re-enabled before release.
-                            #if DEBUG
-                            _logger.Error("[ModuleLoader] Warning: Module integrity check is currently disabled. This should only be used for development purposes.");
-                            _logger.Error("[ModuleLoader] Warning: Module integrity check is currently disabled. This should only be used for development purposes.");
-                            _logger.Error("[ModuleLoader] Warning: Module integrity check is currently disabled. This should only be used for development purposes.");
-                            _logger.Error("[ModuleLoader] Warning: Module integrity check is currently disabled. This should only be used for development purposes.");
-                            _logger.Error("[ModuleLoader] Warning: Module integrity check is currently disabled. This should only be used for development purposes.");
-                            _logger.Error("[ModuleLoader] Warning: Module integrity check is currently disabled. This should only be used for development purposes.");
-                            _logger.Error("[ModuleLoader] Warning: Module integrity check is currently disabled. This should only be used for development purposes.");
-                            #endif
-                            if (TryLoadModule(file, new EngineSecurityToken()))
-                            {
-                                _logger.Info($"Module file '{file}' loaded successfully.");
-                            }
+                            _logger.Info($"Module file '{file}' loaded successfully.");
                         }
                         else
                         {
@@ -182,24 +161,25 @@ namespace RPGCreator.Core
             var moduleFileName = Path.GetFileNameWithoutExtension(modulePath);
             var pdpFileName = $"{moduleFileName}.pdb";
             var moduleDirectory = Path.GetDirectoryName(modulePath);
+            var runningDir = RpgEnv.RunningModules;
             
             var shadowPdpCopyName = $"_runned_temp_{moduleFileName}.pdb";
             var shadowDllCopyName = $"_runned_temp_{moduleFileName}.dll";
             
             var originalDll = modulePath;
-            string PdpPath = Path.Combine(moduleDirectory!, pdpFileName);
+            string pdpPath = Path.Combine(moduleDirectory!, pdpFileName);
 
             var pdpCopyPath = (string?)null;
             var originalPdp = (string?)null;
 
             try
             {
-                if (File.Exists(PdpPath))
+                if (File.Exists(pdpPath))
                 {
-                    pdpCopyPath = Path.Combine(moduleDirectory!, shadowPdpCopyName);
-                    originalPdp = PdpPath;
+                    pdpCopyPath = Path.Combine(runningDir, shadowPdpCopyName);
+                    originalPdp = pdpPath;
                 }
-                var shadowCopyPath = Path.Combine(moduleDirectory!, shadowDllCopyName);
+                var shadowCopyPath = Path.Combine(runningDir, shadowDllCopyName);
                 
                 return (shadowCopyPath, pdpCopyPath, originalDll, originalPdp);
             }
@@ -288,6 +268,13 @@ namespace RPGCreator.Core
                 throw new UnauthorizedAccessException($"TryLoadModule method can only be called by the engine. Unauthorized call from method: {callingMethod?.DeclaringType?.FullName}.{callingMethod?.Name} in assembly {callingMethod?.DeclaringType?.Assembly.FullName} estimed path: {callingMethod?.DeclaringType?.Assembly.Location}");
             }
 
+            bool certified = CheckCertification(modulePath);
+
+            if (certified)
+            {
+                _logger.Info("Module '{ModulePath}' is certified.", args: modulePath);
+            }
+            
             var copy = CreateShadowCopyPath(modulePath);
 
             if (string.IsNullOrEmpty(copy))
@@ -313,7 +300,7 @@ namespace RPGCreator.Core
             if (attr != null)
             {
                 _contexts[attr.Urn] = context;
-                _loadedModulesByUrn[attr.Urn] = new ModuleCandidate(attr, moduleType);
+                _loadedModulesByUrn[attr.Urn] = new ModuleCandidate(attr, moduleType, certified);
                 _logger.Info("Module '{ModuleName}' v{ModuleVersion} by {ModuleAuthor} loaded successfully from assembly '{AssemblyPath}'.",
                     args:[attr.Name, attr.Version, attr.Author, copy]);
                 
@@ -326,6 +313,52 @@ namespace RPGCreator.Core
             else
             {
                 _logger.Error("ModuleManifestAttribute not found on module type '{ModuleType}' in assembly '{AssemblyPath}'.", args:[moduleType.FullName, copy]);
+                return false;
+            }
+        }
+
+        private const string PublicKey = 
+            """
+            -----BEGIN PUBLIC KEY-----
+            MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEhF/z+houm7QByxUXGfgj8tcqc4I2
+            QGw7aO36FGPblMjeuwHUE8tzBXUD/TBKk5hUXCqmXS4/WgFM+SEkL4k/6A==
+            -----END PUBLIC KEY-----
+            """;
+        
+        public static bool CheckCertification(string originalDllFilePath)
+        {
+            try
+            {
+                string certPath = Path.ChangeExtension(originalDllFilePath, ".RCert");
+                if (!File.Exists(certPath)) return false;
+                
+                var certContent = File.ReadAllText(certPath);
+                using var doc = JsonDocument.Parse(certContent);
+                var root = doc.RootElement;
+
+                string signature64 = root.GetProperty("Signature").GetString()!;
+                string rawData = root.GetProperty("Data").GetString()!;
+
+                using var ecdsa = ECDsa.Create();
+                ecdsa.ImportFromPem(PublicKey);
+                
+                byte[] signature = Convert.FromBase64String(signature64);
+                byte[] rawDataBytes = Encoding.UTF8.GetBytes(rawData);
+                
+                if(!ecdsa.VerifyData(rawDataBytes, signature, HashAlgorithmName.SHA256))
+                    return false;
+
+                using var certDataDoc = JsonDocument.Parse(rawData);
+                var certDataRoot = certDataDoc.RootElement;
+                var dllHash = certDataRoot.GetProperty("DllHash").GetString()!;
+                
+                string actualHash = ShaUtil.ComputeSha256(originalDllFilePath);
+                
+                return actualHash.Equals(dllHash, StringComparison.OrdinalIgnoreCase);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Failed to check module certification. Exception: {Exception}", args: ex);
                 return false;
             }
         }
@@ -345,7 +378,7 @@ namespace RPGCreator.Core
             return _loadedModulesByUrn.GetValueOrDefault(moduleUrn);
         }
         
-        internal BaseModule? GetModuleInternal(URN moduleUrn)
+        internal BaseModule? GetModuleInternal(URN moduleUrn, EngineSecurityToken token)
         {
             return _startedModulesByUrn.GetValueOrDefault(moduleUrn);
         }
@@ -369,12 +402,14 @@ namespace RPGCreator.Core
                 throw new UnauthorizedAccessException($"ClearTempModulesShadowCopies method can only be called by the engine. Unauthorized call from method: {callingMethod?.DeclaringType?.FullName}.{callingMethod?.Name} in assembly {callingMethod?.DeclaringType?.Assembly.FullName} estimed path: {callingMethod?.DeclaringType?.Assembly.Location}");
             }
             
-            if (!Directory.Exists(MODULES_PATH) && string.IsNullOrEmpty(path))
+            string modulesPath = EngineServices.Config.GetString(EngineConfig.Keys.Paths.Modules);
+            
+            if (!Directory.Exists(modulesPath) && string.IsNullOrEmpty(path))
             {
                 return;
             }
             
-            var searchPath = string.IsNullOrEmpty(path) ? MODULES_PATH : path;
+            var searchPath = string.IsNullOrEmpty(path) ? modulesPath : path;
             
             string[] filesToDelete = Directory.GetFiles(searchPath, "_runned_temp_*", SearchOption.AllDirectories);
             
@@ -509,7 +544,7 @@ namespace RPGCreator.Core
             if (!IsModuleStarted(moduleUrn))
                 return true; // Already stopped
             
-            var module = GetModuleInternal(moduleUrn);
+            var module = GetModuleInternal(moduleUrn, token);
             
             if (module == null)
                 return true; // Not even loaded, consider it stopped

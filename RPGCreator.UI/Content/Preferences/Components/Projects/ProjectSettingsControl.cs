@@ -71,7 +71,6 @@ public class ProjectSettingsControl : UserControl
 
     private void CreateComponents()
     {
-
         _bodyGrid = new Grid()
         {
             RowDefinitions = new RowDefinitions("*, Auto"),

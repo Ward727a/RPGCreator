@@ -31,6 +31,7 @@ using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Projects;
 using RPGCreator.SDK.Types.Collections;
+using RPGCreator.UI.Content.Preferences;
 
 namespace RPGCreator.UI.Content.Launcher
 {
@@ -92,6 +93,23 @@ namespace RPGCreator.UI.Content.Launcher
             };
             MainGrid.Children.Add(header);
             Grid.SetRow(header, 0);
+
+            var openPreferences = new Button()
+            {
+                Content = "Preferences",
+                FontSize = App.style.TextFontSize,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
+                Margin = new(0, 0, 10, 0)
+            };
+            MainGrid.Children.Add(openPreferences);
+            Grid.SetRow(openPreferences, 0);
+
+            openPreferences.Click += (sender, e) =>
+            {
+                var preferencesWindow = new PreferencesWindow();
+                preferencesWindow.ShowDialog(_Host);
+            };
 
             var footer = new TextBlock
             {
