@@ -48,7 +48,7 @@ public class TestingDialog : Window
             var textDialog = new TextInputDialog("Enter the path to the pack to load:");
             textDialog.Confirmed += (path) =>
             {
-                EngineServices.SerializerService.Deserialize(File.ReadAllText(path), out object? pack, out Type? type);
+                EngineServices.Serializer.Deserialize(File.ReadAllText(path), out object? pack, out Type? type);
                 if (type == typeof(IAssetsPack))
                 {
                     Console.WriteLine($"Pack loaded successfully: {((IAssetsPack)pack).Name}");

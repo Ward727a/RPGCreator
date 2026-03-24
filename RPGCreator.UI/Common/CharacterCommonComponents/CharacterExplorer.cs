@@ -26,6 +26,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using AvaloniaEdit.Utils;
@@ -58,17 +59,24 @@ public class CharacterExplorer : UserControl
     {
         _scope = scope ?? throw new ArgumentNullException(nameof(scope), "Asset scope cannot be null.");
         
-        Dispatcher.UIThread.Post(LoadContent);
         CreateComponents();
         RegisterEvents();
         LinkToExtension();
         Content = _body;
     }
 
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        Dispatcher.UIThread.Post(LoadContent, DispatcherPriority.Background);
+    }
+
     private void LoadContent()
     {
-        _characters = new(EngineServices.AssetsManager.GetAssetsOfType<CharacterData>());
-        _sortedCharacters = new(_characters.OrderBy(c => c.Name));
+        _sortedCharacters.Clear();
+        _characters.Clear();
+        _characters.AddRange(EngineServices.AssetsManager.GetAssetsOfType<CharacterData>());
+        _sortedCharacters.AddRange(_characters.OrderBy(c => c.Name));
     }
 
     private void CreateComponents()
@@ -96,11 +104,11 @@ public class CharacterExplorer : UserControl
         _itemsBox = new()
         {
             ItemsSource = _sortedCharacters,
-            ItemTemplate = new FuncDataTemplate<CharacterData>(((data, scope) =>
+            ItemTemplate = new FuncDataTemplate<CharacterData>((data, scope) =>
             {
                 if (data == null) return null;
                 var characterIconPath = data.PortraitPath;
-                var characterIcon = EngineServices.ResourcesService.Load<Bitmap>(characterIconPath);
+                var characterIcon = EngineServices.Resources.Load<Bitmap>(characterIconPath);
                 var image = new Image
                 {
                     Source = characterIcon,
@@ -126,7 +134,7 @@ public class CharacterExplorer : UserControl
                     }
                 };
                 return stackPanel;
-            }))
+            })
         };
         _scrollViewer.Content = _itemsBox;
     }

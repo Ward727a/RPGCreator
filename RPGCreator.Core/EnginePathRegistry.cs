@@ -28,7 +28,7 @@ using RPGCreator.SDK.Types;
 namespace RPGCreator.Core;
 
 [SerializingType("EngineGlobalPathData")]
-public class EngineGlobalPathData : IGlobalPathData, ISerializable, IDeserializable
+public class EnginePathRegistry : IPathRegistry, ISerializable, IDeserializable
 {
     private Dictionary<URN, Ulid> _pathToValue = new();
     private Dictionary<URN, HashSet<Ulid>> _tagToIds = new();

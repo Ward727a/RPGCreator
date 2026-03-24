@@ -212,7 +212,7 @@ public class EntityBrowserItem : UserControl
 
         ItemImage = new Image()
         {
-            Source = EngineServices.ResourcesService.Load<Bitmap>(_entityDefinition.SpritePath),
+            Source = EngineServices.Resources.Load<Bitmap>(_entityDefinition.SpritePath),
         };
         Grid.SetRow(ItemImage, 0);
         ItemBody.Children.Add(ItemImage);

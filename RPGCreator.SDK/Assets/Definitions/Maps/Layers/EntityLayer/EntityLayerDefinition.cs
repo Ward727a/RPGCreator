@@ -1,6 +1,7 @@
 using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.PaintTargets;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.Editor;
 using RPGCreator.SDK.Types;
 
@@ -28,6 +29,6 @@ public class EntityLayerDefinition() : LayerWithElements<EntitySpawner>
 
     public override bool CanPaintObject(object? objectToPaint)
     {
-        return objectToPaint is EntitySpawner;
+        return objectToPaint is IEntityDefinition;
     }
 }

@@ -90,7 +90,7 @@ public class StatsEditorWindowControl : UserControl
             Logger.Info("Saving Stat Definition...");
             // AssetsManager.AssetMapping[typeof(IStatDef)].Invoke(StatDef);
             
-            EngineServices.SerializerService.Serialize(StatDef, out string data);
+            EngineServices.Serializer.Serialize(StatDef, out string data);
             
             // Default test path
             if (GlobalStates.ProjectState.CurrentProject == null)

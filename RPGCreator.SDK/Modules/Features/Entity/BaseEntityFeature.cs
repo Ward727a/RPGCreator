@@ -149,7 +149,7 @@ public abstract class BaseEntityFeature : IEntityFeature
         Configuration = configuration;
     }
 
-    public virtual void OnAddingToDefinition(IEntityDefinition definition, object itemControl)
+    public virtual void OnAddingToDefinition(IEntityDefinition definition)
     {
     }
 
@@ -158,18 +158,38 @@ public abstract class BaseEntityFeature : IEntityFeature
     /// This is called once when the feature is added to the definition, allowing it to perform any necessary setup or registration.
     /// </summary>
     /// <param name="definition">The entity definition to which this feature is being added.</param>
-    public virtual bool OnAddedToDefinition(IEntityDefinition definition)
+    /// <param name="instanceID"></param>
+    public virtual bool OnAddedToDefinition(IEntityDefinition definition, Ulid instanceID)
     {
         return true;
     }
-    
+
     /// <summary>
     /// Called when this feature is removed from an entity definition.<br/>
     /// This is called once when the feature is removed from the definition, allowing it to perform any necessary cleanup or deregistration.
     /// </summary>
     /// <param name="definition">The entity definition from which this feature is being removed.</param>
-    public virtual void OnRemovedFromDefinition(IEntityDefinition definition) { }
+    public virtual void OnRemovedFromDefinition(IEntityDefinition definition)
+    {
+        Configuration.DisposeEvents();
+    }
 
+    public virtual void OnRemovedFromUi(IEntityDefinition definition, object itemCtx)
+    {
+        
+    }
+
+    /// <summary>
+    /// Called when this feature is added to the UI.<br/>
+    /// This is called once when the feature is added to the UI, allowing it to perform edit to the UI if needed.<br/>
+    /// If it's added from a macro-feature, it will be called for each feature of the macro-feature, and the itemCtx will be the macro-feature item context.
+    /// </summary>
+    /// <param name="definition">The entity definition to which this feature is being added.</param>
+    /// <param name="itemCtx">The context of the item control in the UI, which can be used to make specific adjustments to the UI for this feature.</param>
+    public virtual void OnAddedToUi(IEntityDefinition definition, object itemCtx)
+    {
+    }
+    
     /// <summary>
     /// When this feature is initialized (created).<br/>
     /// This is called once when the feature instance is created, before being injected into any entity, when the engine loads the feature definitions.

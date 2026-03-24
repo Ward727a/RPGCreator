@@ -20,8 +20,10 @@
 
 using System.Collections.ObjectModel;
 using System.Numerics;
+using RPGCreator.SDK;
 using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Inputs;
+using RPGCreator.SDK.RuntimeService;
 using RPGCreator.SDK.Types;
 using Logger = RPGCreator.SDK.Logging.Logger;
 
@@ -36,6 +38,8 @@ public class CharacterPlacer : ToolLogic
     public override PipedPath Category { get; } = EntityCategory.Extend("Characters");
     public override EPayloadType PayloadType => EPayloadType.Character;
     public override URN HelpKey => "rpgc".ToUrnNamespace().ToUrnModule("docs").ToUrn("tool_character_placer");
+    
+    private IMapService? _mapService;
 
     public override ObservableCollection<IToolParameter> GetParameters()
     {
@@ -45,5 +49,30 @@ public class CharacterPlacer : ToolLogic
     public override void UseAt(Vector2? absolutePosition = null, MouseButton button = MouseButton.Left)
     {
         Logger.Warning("The Character Placer tool is not yet implemented.");
+        if (absolutePosition == null || Payload == null)
+        {
+            return;
+        }
+        
+        Vector2 clickPos = AbsolutePositionToMapPosition(absolutePosition!.Value);
+        
+        _mapService ??= RuntimeServices.MapService;
+
+        if (!_mapService.HasSelectedLayer) return;
+        
+        var layer = _mapService.GetSelectedLayer();
+        if (layer.CanPaintObject(Payload) && Payload != null)
+        {
+            var paintTarget = layer.GetPaintTarget();
+            if (paintTarget != null)
+            {
+                if (button == MouseButton.Right)
+                {
+                    paintTarget.EraseAt(clickPos);
+                    return;
+                }
+                paintTarget.PaintAt(clickPos, Payload);
+            }
+        }
     }
 }

@@ -22,6 +22,16 @@ using RPGCreator.SDK.Modules.UIModule;
 
 namespace RPGCreator.SDK.EditorUiService;
 
+public enum UiMessageType
+{
+    AddTo,
+}
+
+public record struct UiMessagePayload()
+{
+    
+}
+
 public interface IUiExtensionManager : IService
 {
     /// <summary>
@@ -51,4 +61,18 @@ public interface IUiExtensionManager : IService
     /// <param name="targetControl">The control to which the extensions will be applied.</param>
     /// <param name="context">The context object that can be used by extensions to determine how to modify the target control. This is optional and can be null.</param>
     public void ApplyExtensions(UIRegion region, object targetControl, object? context = null);
+    // For milestone preview 02
+    // public void UnregisterExtension(UIRegion region, Ulid extensionId);
+    //
+    // public void UnregisterAllExtensions(UIRegion region);
+    //
+    // /// <summary>
+    // /// Allow sending a message to a specific region.<br/>
+    // /// This message will then be processed by the extensions registered for that region.<br/>
+    // /// So, each region has their own list of available messages.<br/>
+    // /// This allows dynamically modifying the UI of the region.
+    // /// </summary>
+    // /// <param name="region"></param>
+    // /// <param name="message"></param>
+    // public void SendMessage(UIRegion region, object message);
 }

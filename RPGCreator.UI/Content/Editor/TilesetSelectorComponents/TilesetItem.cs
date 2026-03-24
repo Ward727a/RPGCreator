@@ -55,14 +55,14 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
 
             TilesetImage = new Image
             {
-                Source = EngineServices.ResourcesService.Load<Bitmap>(tilesetDef.ImagePath),
+                Source = EngineServices.Resources.Load<Bitmap>(tilesetDef.ImagePath),
                 Width = 32,
                 Height = 32,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
             };
             tilesetDef.ImageChanged += () =>
             {
-                TilesetImage.Source = EngineServices.ResourcesService.Load<Bitmap>(tilesetDef.ImagePath);
+                TilesetImage.Source = EngineServices.Resources.Load<Bitmap>(tilesetDef.ImagePath);
             };
 
             TilesetDef = tilesetDef;

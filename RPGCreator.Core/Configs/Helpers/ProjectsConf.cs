@@ -87,7 +87,7 @@ namespace RPGCreator.Core.Configs.Helpers
 
         public void SaveProject(BaseProject project, bool force = false)
         {
-            EngineServices.SerializerService.Serialize(project, out string projectData);
+            EngineServices.Serializer.Serialize(project, out string projectData);
 
             var link = ProjectLinks.Find(link => link.ProjectID == project.Id);
             if(link == null)
@@ -101,7 +101,7 @@ namespace RPGCreator.Core.Configs.Helpers
                 throw new InvalidOperationException("ConfigPath is not set. Cannot save project.");
             }
             
-            EngineServices.SerializerService.Serialize(this, out string configData);
+            EngineServices.Serializer.Serialize(this, out string configData);
             
             // Save the configuration data to the config file
             File.WriteAllText(ConfigPath, configData);

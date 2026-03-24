@@ -1,6 +1,6 @@
 namespace RPGCreator.SDK.Commands;
 
-public interface ICommand
+public interface ICommand : IDisposable
 {
     string Name { get;}
     public void Execute();

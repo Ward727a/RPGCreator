@@ -79,12 +79,14 @@ public class SimplePen : ToolLogic
     
     public override void UseAt(Vector2? absolutePosition = null, MouseButton button = MouseButton.Left)
     {
-        if (absolutePosition == null || Payload == null || button != MouseButton.Left)
+        if (absolutePosition == null || Payload == null)
         {
-            if (button == MouseButton.Right && absolutePosition != null)
-            {
-                TryEraseAt(absolutePosition.Value);
-            }
+            return;
+        }
+        
+        if (button == MouseButton.Right)
+        {
+            TryEraseAt(absolutePosition.Value);
             return;
         }
         

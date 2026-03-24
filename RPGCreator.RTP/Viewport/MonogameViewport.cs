@@ -129,9 +129,9 @@ public class MonogameViewport : BaseMonogameViewport
             if (mapDef.CollisionChunk.Elements.Count <= 0)
             {
                 mapDef.BakeCollisionChunk();
-        
-                _logger.Debug("Baked {number} collisions for collision chunk",
-                    args: [mapDef.CollisionChunk.Elements.Count]);
+                // Need another way to detect non-baked collision chunk, because if the map has no collision at all, it will always be empty, even after baking, so we can't rely on the count to check if it's baked or not.
+                // _logger.Debug("Baked {number} collisions for collision chunk",
+                //     args: [mapDef.CollisionChunk.Elements.Count]);
             }
             else
             {

@@ -67,7 +67,7 @@ public sealed class RenderCore : Game, IGameRenderCore
         GraphicsDevice.Reset();
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         
-        EngineServices.ResourcesService.RegisterLoader<Texture2D>(new Texture2DLoader(GraphicsDevice));
+        EngineServices.Resources.RegisterLoader<Texture2D>(new Texture2DLoader(GraphicsDevice));
         
         if (FontSystem == null)
         {
@@ -134,6 +134,9 @@ public sealed class RenderCore : Game, IGameRenderCore
 
         GlobalStates.MouseState.ResetDeltas();
         GlobalStates.ViewportMouseState.ResetDeltas();
+        
+        EngineServices.Scheduler.Update((float)deltaTime.Milliseconds / 1000);
+        
         base.Update(gameTime);
     }
     

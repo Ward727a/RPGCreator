@@ -71,6 +71,7 @@ public interface IEntityFeature : IDisposable
     /// This is an engine reserved method and should not be called directly!!
     /// </summary>
     /// <param name="configuration">The configuration data to set.</param>
+    /// <param name="token">The security token used to validate the configuration. Only the engine can provide a valid token.</param>
     public void SetConfiguration(CustomData configuration, EngineSecurityToken token);
 
     /// <summary>
@@ -78,15 +79,24 @@ public interface IEntityFeature : IDisposable
     /// This is called once when the feature is added to the definition, allowing it to perform any necessary validation or preparation before being added to the definition.
     /// </summary>
     /// <param name="definition">The entity definition to which this feature is being added.</param>
-    /// <param name="itemControl">The item control associated with this feature in the editor, allowing it to modify the control or add additional controls if necessary.</param>
-    void OnAddingToDefinition(IEntityDefinition definition, object itemControlOrContext);
-    
+    void OnAddingToDefinition(IEntityDefinition definition);
+
     /// <summary>
     /// Called when this feature is added to an entity definition.<br/>
     /// This is called once when the feature is added to the definition, allowing it to perform any necessary setup or registration.
     /// </summary>
     /// <param name="definition">The entity definition to which this feature is being added.</param>
-    bool OnAddedToDefinition(IEntityDefinition definition);
+    /// <param name="instanceId"></param>
+    bool OnAddedToDefinition(IEntityDefinition definition, Ulid instanceId);
+
+    /// <summary>
+    /// Called when this feature is added to the UI.<br/>
+    /// This is called once when the feature is added to the UI, allowing it to perform edit to the UI if needed.<br/>
+    /// If it's added from a macro-feature, it will be called for each feature of the macro-feature, and the itemCtx will be the macro-feature item context.
+    /// </summary>
+    /// <param name="definition">The entity definition to which this feature is being added.</param>
+    /// <param name="itemCtx">The context of the item control in the UI, which can be used to make specific adjustments to the UI for this feature.</param>
+    void OnAddedToUi(IEntityDefinition definition, object itemCtx);
     
     /// <summary>
     /// Called when this feature is removed from an entity definition.<br/>
@@ -94,6 +104,15 @@ public interface IEntityFeature : IDisposable
     /// </summary>
     /// <param name="definition">The entity definition from which this feature is being removed.</param>
     void OnRemovedFromDefinition(IEntityDefinition definition);
+    
+    /// <summary>
+    /// Called when this feature is removed from the UI.<br/>
+    /// This is called once when the feature is removed from the UI, allowing it to perform any necessary cleanup or deregistration.<br/>
+    /// If it's removed from a macro-feature, it will be called for each feature of the macro-feature, and the itemCtx will be the macro-feature item context.
+    /// </summary>
+    /// <param name="definition">The entity definition from which this feature is being removed.</param>
+    /// <param name="itemCtx">The context of the item control in the UI, which can be used to make specific adjustments to the UI for this feature.</param>
+    void OnRemovedFromUi(IEntityDefinition definition, object itemCtx);
     
     /// <summary>
     /// When this feature is initialized (created).<br/>

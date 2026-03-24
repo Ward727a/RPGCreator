@@ -61,7 +61,7 @@ public class RenderService : IRenderService
 
     public void DrawEntitySpawner(EntitySpawner entityDef, Vector2 position)
     {
-        var texture = EngineServices.ResourcesService.Load<Texture2D>(entityDef.PreviewImagePath);
+        var texture = EngineServices.Resources.Load<Texture2D>(entityDef.PreviewImagePath);
 
         
         float scaleX = (float)32 / texture?.Height ?? 32;
@@ -272,7 +272,7 @@ public class RenderService : IRenderService
     public void DirectDraw(string texturePath, Vector2 position, System.Drawing.Rectangle? sourceRect = null, Color? tint = null, float rotation = 0, Vector2 origin = default,
         Vector2? scale = null, float layerDepth = 0, SDK.ECS.Components.SpriteEffects effects = SDK.ECS.Components.SpriteEffects.None)
     {
-        var texture = EngineServices.ResourcesService.Load<Texture2D>(texturePath);
+        var texture = EngineServices.Resources.Load<Texture2D>(texturePath);
         var xnaColor = (tint ?? Color.White).ToMgColor();
         var xnaEffects = SpriteEffects.None;
         if (effects.HasFlag(SDK.ECS.Components.SpriteEffects.FlipHorizontally))
@@ -351,7 +351,7 @@ public class RenderService : IRenderService
             return texture;
         }
 
-        texture = EngineServices.ResourcesService.Load<Texture2D>(tilesetDef.ImagePath);
+        texture = EngineServices.Resources.Load<Texture2D>(tilesetDef.ImagePath);
 
         tilesetDef.Tags.Set(texture ?? throw new FileNotFoundException($"Tileset texture could not be loaded from path: {tilesetDef.ImagePath}"));
         _lastTilesetDef = tilesetDef;

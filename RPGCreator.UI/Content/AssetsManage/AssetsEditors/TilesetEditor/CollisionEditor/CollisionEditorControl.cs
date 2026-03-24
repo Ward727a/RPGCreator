@@ -193,7 +193,7 @@ public class CollisionEditorControl : UserControl
         Grid.SetRow(_editorCanvas, 1);
         var previewImage = new Image()
         {
-            Source = EngineServices.ResourcesService.Load<Bitmap>(_imagePath),
+            Source = EngineServices.Resources.Load<Bitmap>(_imagePath),
         };
         Canvas.SetLeft(previewImage, 0);
         Canvas.SetTop(previewImage, 0);

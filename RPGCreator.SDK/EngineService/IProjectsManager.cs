@@ -28,9 +28,10 @@ public interface IProjectsManager : IService
     public event Action<IBaseProject>? OnProjectOpened;
     
     List<BaseProjectLink> GetAllProjects();
-    public IBaseProject? CreateProject(string projectName, string projectPath);
+    public IBaseProject CreateProject(string projectName, string projectPath, string description = "");
     public bool TryGetProject(string configPath, [NotNullWhen(true)] out IBaseProject? project);
     public void OpenProject(IBaseProject project);
     public void CloseCurrentProject();
     public IBaseProject? GetCurrentProject();
+    public bool SaveProject(IBaseProject project);
 }

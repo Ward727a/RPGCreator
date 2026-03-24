@@ -45,7 +45,24 @@ public class CollisionFeature : BaseEntityFeature
     public override URN[] DependentFeatures { get; } = [BoundsFeature.Urn];
 
     [EntityFeatureProperty("Collider type", "Define the type of collider this entity has")]
-    public EColliderType ColliderType { get; set; } = EColliderType.Square;
+    public EColliderType ColliderType
+    {
+        get => GetConfig(EColliderType.Square);
+        set => SetConfig(value);
+    }
+
+    [EntityFeatureProperty("Collision origin", "Define the origin of the collision box")]
+    public Vector2 CollisionOrigin {
+        get => GetConfig(Vector2.Zero);
+        set => SetConfig(value);
+    }
+
+    [EntityFeatureProperty("Collision size", "Define the size of the collision box")]
+    public Vector2 CollisionSize
+    {
+        get => GetConfig(Vector2.Zero);
+        set => SetConfig(value);
+    }
 
     public override void OnSetup()
     {
@@ -75,12 +92,8 @@ public class CollisionFeature : BaseEntityFeature
                 
                 var colliderBlobIndex = GlobalStates.GameSession.BlobManager.Register(
                     new SquareCollider(
-                        new(new Vector2(2, 16 + 16),
-                            boundsComponent.Size with
-                            {
-                                Height = (boundsComponent.Size.Height / 2) - 8,
-                                Width = boundsComponent.Size.Width - 4
-                            })
+                        new(CollisionOrigin,
+                            (CollisionSize == Vector2.Zero ? boundsComponent.Size : CollisionSize))
                     )
                 );
 

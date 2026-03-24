@@ -68,7 +68,7 @@ public class ToolsBrowser : UserControl
             ItemsSource = RegistryServices.ToolRegistry.RegisteredTools,
             ItemTemplate = new FuncDataTemplate<ToolLogic>((tool, scope) =>
             {
-                if(EngineServices.EngineConfig.ToolsShortcuts.Contains(tool.ToolUrn))
+                if(EngineServices.Config.ToolsShortcuts.Contains(tool.ToolUrn))
                 {
                     return null;
                 }
@@ -131,7 +131,7 @@ public class ToolsBrowser : UserControl
                 foreach (var tool in RegistryServices.ToolRegistry.RegisteredTools)
                 {
                     // We don't want to show tools that are already in the shortcuts, as they can be accessed from there.
-                    if (!_showEvenAddedToolsToggle?.IsChecked == true && EngineServices.EngineConfig.ToolsShortcuts.Contains(tool.ToolUrn))
+                    if (!_showEvenAddedToolsToggle?.IsChecked == true && EngineServices.Config.ToolsShortcuts.Contains(tool.ToolUrn))
                         continue;
                     if (tool.DisplayName.Contains(_searchBox?.Text ?? "", StringComparison.OrdinalIgnoreCase))
                     {
@@ -147,7 +147,7 @@ public class ToolsBrowser : UserControl
                 _toolsSortedByName.Clear();
                 foreach (var tool in RegistryServices.ToolRegistry.RegisteredTools)
                 {
-                    if (!_showEvenAddedToolsToggle?.IsChecked == true && EngineServices.EngineConfig.ToolsShortcuts.Contains(tool.ToolUrn))
+                    if (!_showEvenAddedToolsToggle?.IsChecked == true && EngineServices.Config.ToolsShortcuts.Contains(tool.ToolUrn))
                         continue;
                     if (tool.DisplayName.Contains(_searchBox?.Text ?? "", StringComparison.OrdinalIgnoreCase))
                     {
@@ -177,14 +177,14 @@ internal class AddButtonCommand(ToolLogic addedTool) : BaseCommand
     public override string Name => $"Add '{AddedTool.DisplayName}' tool button";
     protected override void OnExecute()
     {
-        EngineServices.EngineConfig.ToolsShortcuts.Add(AddedTool.ToolUrn);
-        EngineServices.EngineConfig.SaveConfig();
+        EngineServices.Config.ToolsShortcuts.Add(AddedTool.ToolUrn);
+        EngineServices.Config.SaveConfig();
     }
 
     protected override void OnUndo()
     {
-        EngineServices.EngineConfig.ToolsShortcuts.Remove(AddedTool.ToolUrn);
-        EngineServices.EngineConfig.SaveConfig();
+        EngineServices.Config.ToolsShortcuts.Remove(AddedTool.ToolUrn);
+        EngineServices.Config.SaveConfig();
     }
 }
 
@@ -249,7 +249,7 @@ public class ToolItemControl : UserControl
         _body.Children.Add(_addToToolbarButton);
         ToolTip.SetShowOnDisabled(_addToToolbarButton, true);
 
-        if (EngineServices.EngineConfig.ToolsShortcuts.Contains(Tool.ToolUrn))
+        if (EngineServices.Config.ToolsShortcuts.Contains(Tool.ToolUrn))
         {
             _addToToolbarButton.IsEnabled = false;
             ToolTip.SetTip(_addToToolbarButton, "This tool is already in the shortcuts.");

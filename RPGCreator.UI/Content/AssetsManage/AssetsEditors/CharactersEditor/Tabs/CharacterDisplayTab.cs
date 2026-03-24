@@ -685,11 +685,12 @@ public class CharacterDisplayTab : UserControl
         
         if(File.Exists(newPath))
         {
-            var tempSpriteSheetDef = EngineServices.AssetsManager.CreateTransientAsset<SpritesheetDef>();
+            var tempSpriteSheetDef = new SpritesheetDef();
             tempSpriteSheetDef.ImagePath = (newPath);
             tempSpriteSheetDef.FrameWidth = 16;
             tempSpriteSheetDef.FrameHeight = 32;
             tempSpriteSheetDef.CalculateValues();
+            EngineServices.AssetsManager.GetDefaultPack().AddOrUpdateAsset(tempSpriteSheetDef);
 
             _selectedAnimationData.FrameIndexes = tempSpriteSheetDef.GetAllRowIndexes(0);
             _selectedAnimationData.SpritesheetId = tempSpriteSheetDef.Unique;

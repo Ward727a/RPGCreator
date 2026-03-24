@@ -156,20 +156,8 @@ namespace RPGCreator.UI.Content.ProjectCreator
                 RefreshState();
                 return;
             }
-
-            var project = EngineServices.ProjectsManager.CreateProject(_ProjectName, _ProjectPath);
-            if(project == null)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                // Show an error message if the project creation failed
-                Console.WriteLine($"Project {_ProjectName} couldn't be created.");
-                Console.ResetColor();
-                //App.ShowError("Project creation failed", "An error occurred while creating the project. Please check the logs for more details.");
-                return;
-            }
-            project.Description = _ProjectDescription;
-
-            project.Save();
+            
+            EngineServices.ProjectsManager.CreateProject(_ProjectName, _ProjectPath, _ProjectDescription);
 
             ProjectCreated?.Invoke(this, EventArgs.Empty);
         }

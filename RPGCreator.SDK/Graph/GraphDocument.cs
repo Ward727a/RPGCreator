@@ -53,7 +53,7 @@ public sealed class GraphDocument : ISerializable, IDeserializable
 
     public void Save(string toFile)
     {
-        EngineServices.SerializerService.Serialize(this, out var serializedData);
+        EngineServices.Serializer.Serialize(this, out var serializedData);
         File.WriteAllText(toFile, serializedData, Encoding.UTF8);
         SavePath = toFile;
         Logger.Info("GraphDocument saved to {toFile}", toFile);
@@ -62,7 +62,7 @@ public sealed class GraphDocument : ISerializable, IDeserializable
     public static GraphDocument Load(string fromFile)
     {
         var serializedData = File.ReadAllText(fromFile, Encoding.UTF8);
-        EngineServices.SerializerService.Deserialize<GraphDocument>(serializedData, out var obj, out var type);
+        EngineServices.Serializer.Deserialize<GraphDocument>(serializedData, out var obj, out var type);
         if (obj is { } doc)
         {
             doc.SavePath = fromFile;

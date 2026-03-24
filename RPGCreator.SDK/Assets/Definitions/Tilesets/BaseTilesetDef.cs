@@ -53,14 +53,6 @@ public static class CollisionPhysicsExtensions
     }
 }
 
-
-public enum CollisionShapeType : byte
-{
-    None = 0,
-    Rectangle = 1,
-    Triangle = 2
-}
-
 [SerializingType("BaseTilesetDef")]
 public abstract class BaseTilesetDef : BaseAssetDef, ISerializable, IDeserializable, IHasSavePath
 {

@@ -276,6 +276,11 @@ namespace RPGCreator.Core.Managers.AssetsManager
 
             if (_assetLocations.TryGetValue(uniqueId, out AssetLocation location))
             {
+                if (location.Pack == null)
+                {
+                    Logger.Error("Failed to load asset with ID {AssetId}: Pack is null.", args: uniqueId);
+                    return false;
+                }
                 try
                 {
                     object? loadedObject = location.Pack.LoadAsset(uniqueId);
@@ -297,7 +302,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
                 catch (Exception ex)
                 {
                     Logger.Error(ex, "Failed to load asset with ID {AssetID} from pack {PackName}", args:[uniqueId,
-                        location.Pack.Name]);
+                        location.Pack?.Name ?? "UNKNOWN PACK"]);
                 }
             }
             return false;

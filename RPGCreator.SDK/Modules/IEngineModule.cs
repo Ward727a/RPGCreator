@@ -18,6 +18,21 @@ public sealed class EngineSecurityToken
     internal EngineSecurityToken() { }
 }
 
+public static class EngineSecurityTokenExtensions
+{
+    public static bool IsValid(this EngineSecurityToken? token)
+    {
+        if(token == null)
+        {
+            StackTrace stackTrace = new StackTrace();
+            var callingMethod = stackTrace.GetFrame(1)?.GetMethod();
+            throw new UnauthorizedAccessException($"ClearTempModulesShadowCopies method can only be called by the engine. Unauthorized call from method: {callingMethod?.DeclaringType?.FullName}.{callingMethod?.Name} in assembly {callingMethod?.DeclaringType?.Assembly.FullName} estimed path: {callingMethod?.DeclaringType?.Assembly.Location}");
+        }
+
+        return true;
+    }
+}
+
 /// <summary>
 /// A module candidate represent a module that can be started by the engine.<br/>
 /// It contains all the metadata about the module, as well as the type of the module itself.<br/>

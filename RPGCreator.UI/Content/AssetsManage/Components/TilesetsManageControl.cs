@@ -336,7 +336,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
             var iconImage = new Image
             {
-                Source = TilesetDef != null ? EngineServices.ResourcesService.Load<Bitmap>(TilesetDef.ImagePath) : EditorAssets.FallbackImage,
+                Source = TilesetDef != null ? EngineServices.Resources.Load<Bitmap>(TilesetDef.ImagePath) : EditorAssets.FallbackImage,
                 Width = 50,
                 Height = 50,
                 Margin = new Avalonia.Thickness(5),

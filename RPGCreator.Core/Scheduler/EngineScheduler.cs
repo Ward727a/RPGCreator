@@ -22,13 +22,83 @@
 // 
 // 
 #endregion
-using RPGCreator.Core.Scheduler.Tasks;
 using RPGCreator.Core.Scheduler.Tasks.Condition;
 using RPGCreator.Core.Scheduler.Tasks.Time;
+using RPGCreator.SDK.EngineService;
 using Serilog;
 
 namespace RPGCreator.Core.Scheduler
 {
+    
+    public class WaitUntilTask : BaseTask
+    {
+        private readonly Func<bool> _condition;
+        public WaitUntilTask(Func<bool> condition, Action callback)
+        {
+            _condition = condition;
+            Callback = callback;
+        }
+
+        public override void Update(float deltaTime)
+        {
+        }
+
+        public override bool IsCompleted()
+        {
+            return _condition.Invoke();
+        }
+
+        public override void Execute()
+        {
+            Callback?.Invoke();
+        }
+
+        public override bool CanBeRemoved()
+        {
+            return true;
+        }
+    }
+    
+    public class WaitSecondTask : BaseTask
+    {
+        public float RemainingTime { get; private set; } = 0f;
+        private float _time;
+        public bool Loop = false;
+
+        public WaitSecondTask(float seconds, Action callback)
+        {
+            RemainingTime = seconds;
+            _time = seconds;
+            Callback = callback;
+        }
+
+        public override void Update(float deltaTime)
+        {
+            RemainingTime -= deltaTime;
+        }
+
+        public override bool IsCompleted()
+        {
+            return RemainingTime <= 0f;
+        }
+
+        public override void Execute()
+        {
+            Callback?.Invoke();
+        }
+
+        public override bool CanBeRemoved()
+        {
+            if (Loop)
+            {
+                RemainingTime = _time;
+                return false;
+            }
+
+            return true;
+        }
+    }
+    
     /// <summary>
     /// This class is the main scheduler of the engine. <br/>
     /// Right now it's only utility is to wait a few seconds before executing a callback. <br/>
@@ -38,52 +108,75 @@ namespace RPGCreator.Core.Scheduler
     /// - Wait for an object to be loaded <br/>
     /// - Wait for an animation to be completed <br/>
     /// </summary>
-    public class EngineScheduler
+    public class EngineScheduler : IScheduler
     {
-        private List<BaseTask> _tasks = [];
-        
+        private readonly List<BaseTask> _tasks = new();
+        private readonly List<BaseTask> _tasksToAdd = new();
+        private readonly HashSet<Guid> _tasksToRemove = new();
+
         internal EngineScheduler()
         {
-            // Private constructor to prevent instantiation from outside
-            Log.Information($"EngineScheduler started at {DateTime.Now}.");
+            Log.Information("EngineScheduler initialized.");
         }
 
-        public void WaitSecond(float seconds, Action callback)
+        public Guid WaitSecond(float seconds, Action callback, bool loop = false)
         {
             var task = new WaitSecondTask(seconds, callback);
-            _tasks.Add(task);
+            task.Loop = loop;
+            return AddTask(task);
         }
 
-        public void WaitUntil(Func<bool> condition, Action callback)
+        public Guid WaitUntil(Func<bool> condition, Action callback)
         {
             var task = new WaitUntilTask(condition, callback);
-            _tasks.Add(task);
+            return AddTask(task);
         }
 
-        public int AddTask(BaseTask task)
+        public Guid AddTask(BaseTask task)
         {
-            _tasks.Add(task);
-            return _tasks.Count - 1;
+            _tasksToAdd.Add(task);
+            return task.Id;
         }
 
-        public void RemoveTask(int index)
+        public void CancelTask(Guid taskId)
         {
-            if (index >= 0 && index < _tasks.Count)
-            {
-                _tasks.RemoveAt(index);
-            }
+            _tasksToRemove.Add(taskId);
         }
 
         public void Update(float deltaTime)
         {
+            if (_tasksToAdd.Count > 0)
+            {
+                _tasks.AddRange(_tasksToAdd);
+                _tasksToAdd.Clear();
+            }
+
             for (int i = _tasks.Count - 1; i >= 0; i--)
             {
                 var task = _tasks[i];
+
+                if (_tasksToRemove.Contains(task.Id))
+                {
+                    _tasks.RemoveAt(i);
+                    _tasksToRemove.Remove(task.Id);
+                    continue;
+                }
+
                 task.Update(deltaTime);
+
                 if (task.IsCompleted())
                 {
-                    task.Execute();
-                    RemoveTask(i);
+                    try 
+                    {
+                        task.Execute();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Error while executing task {TaskId}", task.Id);
+                    }
+                    
+                    if(task.CanBeRemoved())
+                        _tasks.RemoveAt(i);
                 }
             }
         }

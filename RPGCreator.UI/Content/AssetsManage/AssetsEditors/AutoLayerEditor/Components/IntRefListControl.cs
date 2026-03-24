@@ -284,7 +284,7 @@ public class IntRefListCreateModal : Window
 
             if (tileset != null)
             {
-                var bitmap = EngineServices.ResourcesService.Load<Bitmap>(tileset.ImagePath);
+                var bitmap = EngineServices.Resources.Load<Bitmap>(tileset.ImagePath);
 
                 if (bitmap != null)
                 {
@@ -350,7 +350,7 @@ public class IntRefListCreateModal : Window
                     if (tile != null)
                     {
                         var tileset = tile.TilesetDef;
-                        var tilesetImage = EngineServices.ResourcesService.Load<Bitmap>(tileset.ImagePath);
+                        var tilesetImage = EngineServices.Resources.Load<Bitmap>(tileset.ImagePath);
                         var croppedImage = new CroppedBitmap(
                             tilesetImage,
                             new PixelRect(
@@ -483,7 +483,7 @@ public class AutoLayerRuleSelectOutputTileModal : Window
             CroppedBitmap? outputTile = null;
 
             var tileset = _selectedTile.TilesetDef;
-            tilesetImage = EngineServices.ResourcesService.Load<Bitmap>(tileset.ImagePath);
+            tilesetImage = EngineServices.Resources.Load<Bitmap>(tileset.ImagePath);
             
             if (tilesetImage == null)
                 return;
@@ -504,7 +504,7 @@ public class AutoLayerRuleSelectOutputTileModal : Window
 
 public class AutoLayerRuleCreateModal : Window
 {
-    private class RemoveTileCmd : ICommand
+    private class RemoveTileCmd : BaseCommand
     {
         Border _tileBorder;
         TileData _tileData;
@@ -520,28 +520,23 @@ public class AutoLayerRuleCreateModal : Window
             _rule = parent.Rule;
             _outputTilesPanel = parent.OutputTilesPanel;
         }
-        
-        public void Execute()
+
+        protected override void OnExecute()
         {
             _rule.OutputTiles.Remove(_tileData);
             _outputTilesPanel?.Children.Remove(_tileBorder);
         }
 
-        public void Undo()
+        protected override void OnUndo()
         {
             _rule.OutputTiles.Add(_tileData);
             _outputTilesPanel?.Children.Add(_tileBorder);
         }
 
-        public void OnRemovedFromStack()
-        {
-            
-        }
-
-        public string Name { get; } = "Remove Output Tile";
+        public override string Name => "Remove Output Tile";
     }
     
-    private class AddTileCmd : ICommand
+    private class AddTileCmd : BaseCommand
     {
         Border _tileBorder;
         TileData _tileData;
@@ -566,8 +561,8 @@ public class AutoLayerRuleCreateModal : Window
             _tileData = TileData.FromTileDef(_selectedTile);
             _requestRemoveTile = requestRemoveTile;
         }
-        
-        public void Execute()
+
+        protected override void OnExecute()
         {
             _tileBorder = new Border()
             {
@@ -597,18 +592,13 @@ public class AutoLayerRuleCreateModal : Window
             _rule.OutputTiles.Add(_tileData);
         }
 
-        public void Undo()
+        protected override void OnUndo()
         {
             _rule.OutputTiles.Remove(_tileData);
             _outputTilesPanel?.Children.Remove(_tileBorder);
         }
 
-        public void OnRemovedFromStack()
-        {
-            
-        }
-
-        public string Name { get; } = "Add Output Tile";
+        public override string Name => "Add Output Tile";
     }
     
     public CommandManager CommandManager;
@@ -1002,7 +992,7 @@ public class AutoLayerRuleCreateModal : Window
 
     }
 
-    private class SelectConditionPanel : ICommand
+    private class SelectConditionPanel : BaseCommand
     {
         private readonly AutoLayerRuleCreateModal _parent;
         private readonly Action _deselectAction;
@@ -1030,8 +1020,8 @@ public class AutoLayerRuleCreateModal : Window
             _initialTargetValue = _parent.Rule.Pattern[_index].TargetValue;
             _initialIsRelative = _parent.Rule.Pattern[_index].IsRelative;
         }
-        
-        public void Execute()
+
+        protected override void OnExecute()
         {
             var contraint = _parent.Rule.Pattern[_index];
             switch (contraint.Condition)
@@ -1051,7 +1041,7 @@ public class AutoLayerRuleCreateModal : Window
             }
         }
 
-        public void Undo()
+        protected override void OnUndo()
         {
             _setPatternAction(_index, _initialTargetValue, _initialCondition, _initialIsRelative);
             switch (_initialCondition)
@@ -1068,15 +1058,10 @@ public class AutoLayerRuleCreateModal : Window
             }
         }
 
-        public void OnRemovedFromStack()
-        {
-            
-        }
-
-        public string Name { get; } = "Select Condition";
+        public override string Name => "Select Condition";
     }
 
-    private class DeselectConditionPanel : ICommand
+    private class DeselectConditionPanel : BaseCommand
     {
         private readonly AutoLayerRuleCreateModal _parent;
         private readonly Action _deselectAction;
@@ -1104,15 +1089,15 @@ public class AutoLayerRuleCreateModal : Window
             _initialTargetValue = _parent.Rule.Pattern[_index].TargetValue;
             _initialIsRelative = _parent.Rule.Pattern[_index].IsRelative;
         }
-        
-        public void Execute()
+
+        protected override void OnExecute()
         {
             var ruleData = _parent.Rule.Pattern[_index];
             _setPatternAction(_index, ruleData.TargetValue, PatternCondition.DontCare, ruleData.IsRelative);
             _deselectAction();
         }
 
-        public void Undo()
+        protected override void OnUndo()
         {
             _setPatternAction(_index, _initialTargetValue, _initialCondition, _initialIsRelative);
             switch (_initialCondition)
@@ -1129,12 +1114,7 @@ public class AutoLayerRuleCreateModal : Window
             }
         }
 
-        public void OnRemovedFromStack()
-        {
-            
-        }
-
-        public string Name { get; } = "Deselect Condition Panel";
+        public override string Name => "Deselect Condition Panel";
     }
     
     public void PopulateConditionsPanel()
@@ -1355,7 +1335,7 @@ public class IntRefListItemControl : UserControl
 
             if (tileset != null)
             {
-                var bitmap = EngineServices.ResourcesService.Load<Bitmap>(tileset.ImagePath);
+                var bitmap = EngineServices.Resources.Load<Bitmap>(tileset.ImagePath);
 
                 if (bitmap != null)
                 {

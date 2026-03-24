@@ -139,7 +139,7 @@ public static class EngineServices
         }
     }
 
-    public static IEngineConfig EngineConfig
+    public static IEngineConfig Config
     {
         get => GetService<IEngineConfig>();
         set => RegisterService(value);
@@ -157,13 +157,13 @@ public static class EngineServices
         set => RegisterService(value);
     }
 
-    public static ISerializerService SerializerService
+    public static ISerializerService Serializer
     {
         get => GetService<ISerializerService>();
         set => RegisterService(value);
     }
 
-    public static IResourceService ResourcesService
+    public static IResourceService Resources
     {
         get => GetService<IResourceService>();
         set => RegisterService(value);
@@ -231,9 +231,9 @@ public static class EngineServices
         set => RegisterService(value);
     }
 
-    public static IGlobalPathData GlobalPathData
+    public static IPathRegistry PathRegistry
     {
-        get => GetService<IGlobalPathData>();
+        get => GetService<IPathRegistry>();
         set => RegisterService(value);
     }
 
@@ -246,6 +246,12 @@ public static class EngineServices
     public static IGamePlayerService GamePlayerService
     {
         get => GetService<IGamePlayerService>();
+        set => RegisterService(value);
+    }
+
+    public static IScheduler Scheduler
+    {
+        get => GetService<IScheduler>();
         set => RegisterService(value);
     }
 

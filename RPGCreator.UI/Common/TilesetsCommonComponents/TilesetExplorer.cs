@@ -299,7 +299,7 @@ public class TilesetExplorer : UserControl
                 _intGridGroupsListBox.IsVisible = false;
                 _canvas.IsVisible = true;
                 if (_previewImage != null)
-                    _previewImage.Source = EngineServices.ResourcesService.Load<Bitmap>(def.ImagePath);
+                    _previewImage.Source = EngineServices.Resources.Load<Bitmap>(def.ImagePath);
             }
         }
         

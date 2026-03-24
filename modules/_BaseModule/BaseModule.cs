@@ -12,7 +12,7 @@ using RPGCreator.SDK.Types;
 
 [assembly: ModuleManifest(
     urn: "rpgc://module/base_module",
-    name: "RPG Creator Base Module",
+    name: "RPG Creator - Base Module",
     Author = "RPG Creator Team",
     TargetEngineVersion = "1.0.0",
     Description = "Base module of RPG Creator providing essential features and functionalities.",

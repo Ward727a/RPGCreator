@@ -1,6 +1,8 @@
 
+using System.ComponentModel;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using RPGCreator.Core.Serializer;
 using RPGCreator.Core.Serializer.Binder;
 using RPGCreator.SDK;
@@ -82,6 +84,13 @@ public class EngineSerializer : ISerializerService
         data = json;
     }
 
+    public void SerializeTo<T>(T obj, string filePath)
+    {
+        using var sw = new StreamWriter(filePath);
+        using var writer = new JsonTextWriter(sw);
+        _serializer.Serialize(writer, obj);
+    }
+
     public void Deserialize<T>(string data, out T? obj)
     {
         obj = JsonConvert.DeserializeObject<T>(data, _settings)!;
@@ -110,6 +119,30 @@ public class EngineSerializer : ISerializerService
         using var reader = new JsonTextReader(sr);
         obj = _serializer.Deserialize<T>(reader)!;
         type = obj?.GetType() ?? typeof(T);
+    }
+
+    public void DeserializeFrom<T>(string filePath, out T? obj)
+    {
+        if (!File.Exists(filePath))
+        {
+            _logger.Error("File not found: {filePath}", args: filePath);
+            obj = default;
+            return;
+        }
+
+        try
+        {
+            using Stream stream = File.Open(filePath, FileMode.Open);
+            Deserialize(stream, out obj);
+            return;
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e, "Error encountered while deserializing from file: {filePath}", args: filePath);
+            obj = default;
+            return;
+        }
+
     }
 
     #region Helpers

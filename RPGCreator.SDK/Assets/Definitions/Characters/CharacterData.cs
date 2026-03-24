@@ -438,6 +438,7 @@ public class EntityFeatureData() : ISerializable, IDeserializable
     {
         var feature = EngineServices.FeaturesManager.CreateEntityFeatureInstance(FeatureUrn);
         feature.SetConfiguration(Configuration, new EngineSecurityToken());
+        
         return feature;
     }
 }
@@ -645,6 +646,13 @@ public class CharacterData : BaseAssetDef, IEntityDefinition, ICharacter, ISeria
     public Ulid AddFeatureConfig(IEntityFeature feature)
     {
         return AddFeatureConfig(feature.FeatureUrn, feature.Configuration);
+    }
+
+    public void AddFeatureConfig(URN urn, CustomData config, Ulid instanceId)
+    {
+        var featureData = new EntityFeatureData(urn, config) {InstanceId = instanceId};
+        _features.Add(featureData);
+        OnFeaturesChanged?.Invoke();
     }
     
     /// <summary>

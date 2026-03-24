@@ -308,7 +308,7 @@ public class FeatureLibraryExplorerDialog : UserControl
             {
                 var icon = new Image
                 {
-                    Source = EngineServices.ResourcesService.Load<Bitmap>(Feature.FeatureIcon),
+                    Source = EngineServices.Resources.Load<Bitmap>(Feature.FeatureIcon),
                     Width = 32,
                     Height = 32,
                     Margin = new Avalonia.Thickness(0, 0, 10, 0)

@@ -25,18 +25,5 @@
 
 namespace RPGCreator.Core.Scheduler.Tasks.Condition
 {
-    public class WaitUntilTask : BaseTask
-    {
-        private readonly Func<bool> _condition;
-        public WaitUntilTask(Func<bool> condition, Action callback) : base(callback)
-        {
-            _condition = condition;
-            Callback = callback;
-        }
-
-        public override bool IsCompleted()
-        {
-            return _condition.Invoke();
-        }
-    }
+    
 }

@@ -33,7 +33,7 @@ public class AvaloniaAnimationDrawer : IDrawer<AnimationInstance>, IDisposable
         if(_cachedSpritesheet == null || _cachedSpritesheet.Unique != animation.Definition.SpritesheetId)
         {
             _cachedSpritesheet = _assetScope.Load<SpritesheetDef>(animation.Definition.SpritesheetId);
-            _cachedSpritesheetImage = EngineServices.ResourcesService.Load<Bitmap>(_cachedSpritesheet.ImagePath);
+            _cachedSpritesheetImage = EngineServices.Resources.Load<Bitmap>(_cachedSpritesheet.ImagePath);
             
             if (_cachedSpritesheet == null)
             {

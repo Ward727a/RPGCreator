@@ -98,6 +98,9 @@ namespace RPGCreator.Core
             }
 
             Logger.Implementation = new EngineLogger();
+            var config = new EngineConfig();
+            config.CreateOrLoadConfig();
+            EngineServices.Config = config;
             
             #region GlobalStates Initialization
             GlobalStates.EngineMode = mode;
@@ -128,7 +131,7 @@ namespace RPGCreator.Core
             typeMapping.ScanAllEngineAssemblies();
             RegistryServices.AssetTypeRegistry = typeMapping;
             
-            EngineServices.ResourcesService = new EngineResourcesService();
+            EngineServices.Resources = new EngineResourcesService();
             RegistryServices.SimpleEventRegistry = new EngineSimpleEventRegistry();
             RegistryServices.EventsRegisterService = new EngineEventsRegister();
             
@@ -141,17 +144,14 @@ namespace RPGCreator.Core
 
             Scheduler = new EngineScheduler();
             Serializer = new EngineSerializer();
-            EngineServices.SerializerService = Serializer;
-            Configs = new EngineConfigs(); // Should be removed!!
+            EngineServices.Serializer = Serializer;
+            // Configs = new EngineConfigs(); // Should be removed!!
             Managers = new EngineManagers();
             
             #if DEBUG
             // In debug mode, we load the engine icons for debug tools (like IconsExplorer).
             Icons = new EngineIcons();
             #endif
-            var config = new EngineConfig();
-            config.CreateOrLoadConfig();
-            EngineServices.EngineConfig = config;
             EngineServices.GraphService = new GraphService();
             EngineServices.PrattFormulaService = new PrattFormulaService();
             EngineServices.GraphNodeScanner = new GraphNodeScanner();
@@ -159,6 +159,7 @@ namespace RPGCreator.Core
             EngineServices.InputsService = new InputsService();
             EngineServices.ModulePathResolver = new ModulePathResolver();
             EngineServices.GamePlayerService = new GamePlayerService();
+            EngineServices.Scheduler = Scheduler;
 
             Logger.Warning("---");
             Logger.Warning("NORMAL WARNING: The warning below can be ignored!");
@@ -326,7 +327,7 @@ namespace RPGCreator.Core
 
         public void Update()
         {
-            Scheduler.Update(0.016f);
+            
         }
 
     }

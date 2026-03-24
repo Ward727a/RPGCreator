@@ -184,7 +184,7 @@ public class EditorMenuBar : UserControl
                 pack.Save();
             }
             
-            currentProject.Save();
+            EngineServices.ProjectsManager.SaveProject(currentProject);
         };
     }
     

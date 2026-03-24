@@ -41,7 +41,7 @@ public abstract class BaseMacroEntityFeature : BaseEntityFeature
     /// <summary>
     /// The unique identifier for this macro feature instance.
     /// </summary>
-    protected Ulid MacroFeatureId;
+    public Ulid MacroFeatureId;
     
     /// <summary>
     /// A list of required features for this macro feature.<br/>
@@ -107,6 +107,7 @@ public abstract class BaseMacroEntityFeature : BaseEntityFeature
             Logger.Error($"Cannot register sub-feature '{featureUrn}' to macro feature '{FeatureUrn}': feature is marked as conflicting.");
             return;
         }
+        
         var feature = EngineServices.FeaturesManager.GetEntityFeature(featureUrn);
         RegisterSubFeature(feature, new CustomData(), specificIndex);
     }
@@ -135,7 +136,6 @@ public abstract class BaseMacroEntityFeature : BaseEntityFeature
             Logger.Warning("The specific index ({specific_index}) provided for the sub-feature '{feature_urn}' in macro feature '{macro_feature_urn}' is less than the next available index ({next_index}). " +
                            "The index has been adjusted to avoid conflicts.", specificIndex, feature.FeatureUrn, FeatureUrn, _nextIndex);
         }
-        
         
         _featureData.Add(feature, configuration);
         _requiredFeatures.Add(index, feature);
@@ -187,24 +187,24 @@ public abstract class BaseMacroEntityFeature : BaseEntityFeature
         _featureData[featureType] = configuration;
     }
     
-    public void SetConfigurationValue<T>(URN featureUrn, T value, [CallerMemberName] string key = "")
+    public void SetSubConfigValue<T>(URN featureUrn, T value, [CallerMemberName] string key = "")
     {
         var featureData = GetRequiredFeatureData(featureUrn);
         featureData.Set(key, value);
     }
 
-    public T GetConfigurationValue<T>(URN featureUrn, T defaultValue, [CallerMemberName] string key = "")
+    public T GetSubConfigValue<T>(URN featureUrn, T defaultValue, [CallerMemberName] string key = "")
     {
         var featureData = GetRequiredFeatureData(featureUrn);
         return featureData.GetAsOrDefault(key, defaultValue);
     }
     
-    public void SetSharedConfigurationValue<T>(URN featureUrn, T value, [CallerMemberName] string key = "")
+    public void SetSubSharedConfigValue<T>(URN featureUrn, T value, [CallerMemberName] string key = "")
     {
         SharedDataFeatures.SetValueShared(featureUrn, key, value);
     }
     
-    public T GetSharedConfigurationValue<T>(URN featureUrn, T defaultValue, [CallerMemberName] string key = "")
+    public T GetSubSharedConfigValue<T>(URN featureUrn, T defaultValue, [CallerMemberName] string key = "")
     {
         return SharedDataFeatures.GetValueShared(featureUrn, key, defaultValue);
     }
@@ -217,9 +217,27 @@ public abstract class BaseMacroEntityFeature : BaseEntityFeature
         return featureData;
     }
 
-    public override bool OnAddedToDefinition(IEntityDefinition definition)
+    public override void OnAddingToDefinition(IEntityDefinition definition)
     {
-        MacroFeatureId = Ulid.NewUlid();
+        foreach (var feature in _requiredFeatures.Values)
+        {
+            feature.OnAddingToDefinition(definition);
+        }
+    }
+
+    public override bool OnAddedToDefinition(IEntityDefinition definition, Ulid instancedId)
+    {
+        if (MacroFeatureId == Ulid.Empty)
+        {
+            MacroFeatureId = instancedId;
+            if (MacroFeatureId == Ulid.Empty)
+            {
+                Logger.Error(
+                    "Cannot add macro feature '{FeatureUrn}' to entity definition '{definition.Name}': the macro feature ID is not set.",
+                    FeatureUrn, definition.Name);
+                return false;
+            }
+        }
 
         if (definition.Features.Any(f => IsConflictingFeature(f.FeatureUrn)))
         {
@@ -229,9 +247,18 @@ public abstract class BaseMacroEntityFeature : BaseEntityFeature
 
         foreach (var feature in _requiredFeatures.Values)
         {
-            feature.OnAddedToDefinition(definition);
+            if(definition.Features.Any(f => f.FeatureUrn == feature.FeatureUrn))
+            {
+                // If the feature is already present, we can't add it again.
+                // Maybe cancel the addition of the macro feature, and show an error to the user?
+                //
+                // For future update, we could ask the user if they want to replace the existing feature, but for now we will keep it simple and stupid.
+                continue;
+            }
+            feature.OnAddingToDefinition(definition);
             var featureData = MakeFeatureData(feature);
             definition.Features.Add(featureData);
+            feature.OnAddedToDefinition(definition, featureData.InstanceId);
             
             var idx = _featureToIndex[feature.FeatureUrn];
             _addedFeatureData.Add(idx, featureData);
@@ -240,8 +267,19 @@ public abstract class BaseMacroEntityFeature : BaseEntityFeature
         return true;
     }
 
+    public override void OnAddedToUi(IEntityDefinition definition, object itemCtx)
+    {
+        base.OnAddedToUi(definition, itemCtx);
+        foreach (var feature in _requiredFeatures.Values)
+        {
+            feature.OnAddedToUi(definition, itemCtx);
+        }
+    }
+
     public override void OnRemovedFromDefinition(IEntityDefinition definition)
     {
+        base.OnRemovedFromDefinition(definition);
+        
         foreach (var feature in _requiredFeatures.Values)
         {
             feature.OnRemovedFromDefinition(definition);
@@ -252,14 +290,14 @@ public abstract class BaseMacroEntityFeature : BaseEntityFeature
         _addedFeatureData.Clear();
     }
 
-    public override void OnInject(BufferedEntity entity, IEntityDefinition entityDefinition)
+    public override void OnRemovedFromUi(IEntityDefinition definition, object itemCtx)
     {
-        entity.AddComponent(new CharStateComponent
+        base.OnRemovedFromUi(definition, itemCtx);
+        foreach (var feature in _requiredFeatures.Values)
         {
-            AnimationsMapping = entityDefinition.AnimationsMapping
-        });
+            feature.OnRemovedFromUi(definition, itemCtx);
+        }
     }
-
     public override void OnDestroy(BufferedEntity entity)
     {
         foreach (var feature in _activeFeatures)

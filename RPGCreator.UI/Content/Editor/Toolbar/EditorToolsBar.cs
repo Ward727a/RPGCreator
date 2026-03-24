@@ -57,14 +57,14 @@ internal class RemoveButtonCommand(ToolLogic removedTool, bool wasActiveButton =
 
     protected override void OnExecute()
     {
-        EngineServices.EngineConfig.ToolsShortcuts.Remove(removedTool.ToolUrn);
-        EngineServices.EngineConfig.SaveConfig();
+        EngineServices.Config.ToolsShortcuts.Remove(removedTool.ToolUrn);
+        EngineServices.Config.SaveConfig();
     }
 
     protected override void OnUndo()
     {
-        EngineServices.EngineConfig.ToolsShortcuts.Add(removedTool.ToolUrn);
-        EngineServices.EngineConfig.SaveConfig();
+        EngineServices.Config.ToolsShortcuts.Add(removedTool.ToolUrn);
+        EngineServices.Config.SaveConfig();
     }
 }
 
@@ -244,7 +244,7 @@ public class EditorToolsBar : UserControl
                 Orientation = Orientation.Horizontal,
                 Spacing = 4
             }),
-            ItemsSource = EngineServices.EngineConfig.ToolsShortcuts,
+            ItemsSource = EngineServices.Config.ToolsShortcuts,
             DataTemplates = { 
                 new FuncDataTemplate<URN>((urn, _) =>
                 {

@@ -31,4 +31,9 @@ public class GenericCommand : ICommand
     }
 
     public override string ToString() => _name;
+
+    public void Dispose()
+    {
+        
+    }
 }

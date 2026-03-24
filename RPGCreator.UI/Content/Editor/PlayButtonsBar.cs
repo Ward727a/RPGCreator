@@ -23,6 +23,8 @@ using Avalonia.Controls;
 using Avalonia.Layout;
 using Projektanker.Icons.Avalonia;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Exceptions;
+using RPGCreator.SDK.Logging;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.Editor;
@@ -161,7 +163,11 @@ public class PlayButtonsBar : UserControl
         // We will need to implement a way to get the module hashes from the project, and not hardcode them like this.
         if(!GlobalStates.ProjectState.CurrentProject!.Modules.Contains("AC6A81E0851B805A8A33C35E9019D3A91BCD4AF3EDCA388178C3FD2A0EE321FA"))
             GlobalStates.ProjectState.CurrentProject?.Modules.Add("AC6A81E0851B805A8A33C35E9019D3A91BCD4AF3EDCA388178C3FD2A0EE321FA");
-        GlobalStates.ProjectState.CurrentProject?.Save();
+        if (GlobalStates.ProjectState.CurrentProject == null)
+        {
+            throw new CriticalEngineException("Project is null!", GlobalStates.ProjectState);
+        }
+        EngineServices.ProjectsManager.SaveProject(GlobalStates.ProjectState.CurrentProject);
         EngineServices.GamePlayerService.StartDebugGame();
     }
 

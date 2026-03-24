@@ -19,6 +19,7 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.EngineService;
@@ -32,6 +33,7 @@ namespace RPGCreator.Core;
 [SerializingType("EngineConfig")]
 public class EngineConfig : IEngineConfig
 {
+    public event Action<string>? OnKeyChanged;
     public event Action? OnConfigChanged;
     public event Action? OnShortcutsChanged;
     public event Action? OnToolsShortcutsChanged;
@@ -39,18 +41,60 @@ public class EngineConfig : IEngineConfig
     public bool IsDirty { get; private set; } = false;
     
     private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<EngineConfig>();
-    private readonly string _configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
+    private readonly string _configPath = Path.Combine(RpgEnv.Config, "config.json");
 
-    
-    public ObservableCollection<URN> Shortcuts { get => _data.GetAs<ObservableCollection<URN>>("shortcuts"); }
-    public ObservableCollection<URN> ToolsShortcuts { get => _data.GetAs<ObservableCollection<URN>>("toolsShortcuts"); }
+    public ObservableCollection<URN> Shortcuts => _data.GetAs<ObservableCollection<URN>>("shortcuts") ?? [];
+    public ObservableCollection<URN> ToolsShortcuts => _data.GetAs<ObservableCollection<URN>>("toolsShortcuts") ?? [];
+
+    private Dictionary<string, IConfig> _globalConfigs = new();
+    private Dictionary<string, IConfig> _localConfigs = new();
     
     private CustomData _data = new();
+    
+    private Guid _schedulerAutosavingId = Guid.Empty;
     
     public EngineConfig()
     {
         _data.Set("shortcuts", new ObservableCollection<URN>());
         _data.Set("toolsShortcuts", new ObservableCollection<URN>());
+
+        if (!HasFloat("autosaving_time"))
+        {
+            SetFloat("autosaving_time", 300);
+        }
+
+        SetAutoSave();
+    }
+
+    private void SetAutoSave()
+    {
+        EngineServices.OnceServiceReady((IScheduler scheduler) =>
+        {
+            if (_schedulerAutosavingId != Guid.Empty)
+            {
+                scheduler.CancelTask(_schedulerAutosavingId);
+            }
+            
+            _schedulerAutosavingId = scheduler.WaitSecond(GetFloat("autosaving_time", 300), () =>
+            {
+                if(IsDirty)
+                    SaveConfig();
+            
+                foreach (var globalConfig in _globalConfigs)
+                {
+                    if(globalConfig.Value.IsDirty)
+                        globalConfig.Value.SaveConfig();
+                }
+
+                foreach (var localConfig in _localConfigs)
+                {
+                    if(localConfig.Value.IsDirty)
+                        localConfig.Value.SaveConfig();
+                }
+            
+                Logger.Debug("auto-save done.");
+            }, true);
+        });
     }
 
     public string GetString(string key, string defaultValue = "")
@@ -83,6 +127,169 @@ public class EngineConfig : IEngineConfig
         return _data.GetAsOrDefault(key, defaultValue);
     }
 
+    public bool TryFrom(string configName, bool isGlobal, [NotNullWhen(true)]out IConfig? config)
+    {
+        IConfig? fromConfig = From(configName, isGlobal);
+        if (fromConfig is null)
+        {
+            config = null;
+            return false;
+        }
+        config = fromConfig;
+        return true;
+    }
+
+    public bool TryFrom<T>(string configName, bool isGlobal, [NotNullWhen(true)] out T? config) where T : class, IConfig
+    {
+        var returnValue = TryFrom(configName, isGlobal, out IConfig? returnConfig);
+
+        if (returnConfig is T config1)
+        {
+            config = config1;
+            return returnValue;
+        }
+
+        config = null;
+        return false;
+    }
+
+    public IConfig? From(string configName, bool isGlobal = false)
+    {
+        return isGlobal ? GetGlobalConfig(configName) : GetLocalConfig(configName);
+    }
+
+    private IConfig? GetGlobalConfig(string configName)
+    {
+        if(_globalConfigs.TryGetValue(configName, out var globalConfig))
+            return globalConfig;
+        var globalConfigPath = Path.Combine(RpgEnv.Config, $"{configName}.config.json");
+        if (File.Exists(globalConfigPath))
+        {
+            EngineServices.Serializer.DeserializeFrom<BaseConfig>(globalConfigPath, out var config);
+
+            if (config is not IConfig conf)
+            {
+                Logger.Error("Failed to deserialize global config from file: {Path}", args: globalConfigPath);
+                return null;
+            }
+            
+            if(conf.ConfigPath != globalConfigPath)
+                conf.ConfigPath = globalConfigPath;
+                
+            _globalConfigs[configName] = conf;
+            conf.OnLoadedConfig();
+            return conf;
+        }
+            
+        Logger.Error("Global config file not found at path: {Path}", args: globalConfigPath);
+        return null;
+    }
+    
+    private IConfig? GetLocalConfig(string configName)
+    {
+        if(_localConfigs.TryGetValue(configName, out var localConfig))
+            return localConfig;
+
+        if (GlobalStates.ProjectState.CurrentProject == null)
+        {
+            Logger.Error("Cannot get local config without a project loaded.");
+            return null;
+        }
+            
+        var localConfigPath = Path.Combine(GlobalStates.ProjectState.CurrentProject.Path, "config", $"{configName}.config.json");
+        if (File.Exists(localConfigPath))
+        {
+            EngineServices.Serializer.DeserializeFrom<BaseConfig>(localConfigPath, out var config);
+
+            if (config is not IConfig conf)
+            {
+                Logger.Error("Failed to deserialize local config from file: {Path}", args: localConfigPath);
+                return null;
+            }
+
+            if(conf.ConfigPath != localConfigPath)
+                conf.ConfigPath = localConfigPath;
+            
+            _localConfigs[configName] = conf;
+            conf.OnLoadedConfig();
+            return conf;
+        }
+        Logger.Error("Local config file not found at path: {Path}", args: localConfigPath);
+        return null;
+    }
+
+    public bool CreateConfig(string configName, IConfig configData, bool isGlobal = false)
+    {
+        return isGlobal ? CreateGlobalConfig(configName, configData) : CreateLocalConfig(configName, configData);
+    }
+
+    private bool CreateGlobalConfig(string configName, IConfig configData)
+    {
+        if (_globalConfigs.ContainsKey(configName))
+        {
+            _globalConfigs[configName] = configData;
+            IsDirty = true;
+            return true;
+        }
+
+        string globalConfigPath;
+        
+        if (!string.IsNullOrEmpty(configData.ConfigPath))
+        {
+            globalConfigPath = configData.ConfigPath;
+        }
+        else
+        {
+            globalConfigPath = Path.Combine(RpgEnv.Config, $"{configName}.config.json");
+
+            configData.ConfigPath = globalConfigPath;
+        }
+
+        try
+        {
+            EngineServices.Serializer.SerializeTo(configData, globalConfigPath);
+        }
+        catch (Exception e)
+        {
+            Logger.Error(e, "Failed to create global config at path: {Path}", args: globalConfigPath);
+            return false;
+        }
+
+        _globalConfigs[configName] = configData;
+        return true;
+    }
+
+    private bool CreateLocalConfig(string configName, IConfig configData)
+    {
+        if (_localConfigs.ContainsKey(configName))
+        {
+            _localConfigs[configName] = configData;
+            IsDirty = true;
+            return true;
+        }
+
+        if (GlobalStates.ProjectState.CurrentProject == null)
+        {
+            Logger.Error("Cannot create local config without a project loaded.");
+            return false;
+        }
+            
+        var localConfigPath = Path.Combine(GlobalStates.ProjectState.CurrentProject.Path, "config", $"{configName}.config.json");
+
+        try
+        {
+            EngineServices.Serializer.SerializeTo(configData, localConfigPath);
+        }
+        catch (Exception e)
+        {
+            Logger.Error(e, "Failed to create local config at path: {Path}", args: localConfigPath);
+            return false;
+        }
+            
+        _localConfigs[configName] = configData;
+        return true;
+    }
+
     public void SetString(string key, string value)
     {
         Set(key, value);
@@ -113,6 +320,37 @@ public class EngineConfig : IEngineConfig
         _data.Set(key, value);
         IsDirty = true;
         OnConfigChanged?.Invoke();
+        OnKeyChanged?.Invoke(key);
+    }
+
+    public bool HasString(string key)
+    {
+        return _data.Has(key);
+    }
+
+    public bool HasInt(string key)
+    {
+        return _data.Has(key);
+    }
+
+    public bool HasBool(string key)
+    {
+        return _data.Has(key);
+    }
+
+    public bool HasFloat(string key)
+    {
+        return _data.Has(key);
+    }
+
+    public bool HasDouble(string key)
+    {
+        return _data.Has(key);
+    }
+
+    public bool Has<T>(string key)
+    {
+        return _data.Has(key);
     }
 
     public bool SaveConfig()
@@ -122,7 +360,7 @@ public class EngineConfig : IEngineConfig
 
     public bool SaveConfigAt(string path)
     {
-        EngineServices.SerializerService.Serialize(this, out var stringData);
+        EngineServices.Serializer.Serialize(this, out var stringData);
         
         if (string.IsNullOrEmpty(stringData))
             return false;
@@ -155,7 +393,7 @@ public class EngineConfig : IEngineConfig
         try
         {
             var stringData = File.ReadAllText(path);
-            EngineServices.SerializerService.Deserialize<EngineConfig>(stringData, out var config);
+            EngineServices.Serializer.Deserialize<EngineConfig>(stringData, out var config);
             // ReSharper disable once ConvertTypeCheckToNullCheck
             if (config == null || config is not EngineConfig)
             {

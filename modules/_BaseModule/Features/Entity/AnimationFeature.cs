@@ -18,8 +18,13 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using Avalonia.Controls;
+using Avalonia.LogicalTree;
+using Avalonia.Threading;
+using Avalonia.VisualTree;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Animations;
+using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;
@@ -27,6 +32,9 @@ using RPGCreator.SDK.ECS.Systems;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Types;
+using RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor;
+using RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;
+using RPGCreator.UI.Contexts;
 
 namespace _BaseModule.Features.Entity;
 
@@ -65,8 +73,6 @@ public class AnimationFeature : BaseEntityFeature
     {
         entity.AddComponent(new AnimationComponent
         {
-            CurrentAnimation = 0,
-            CurrentDirection = EntityDirection.Center.ToInt(),
             SpeedMultiplier = 1.0f,
             IsPlaying = false,
             LastWorkingAnimation = -1,
@@ -74,6 +80,38 @@ public class AnimationFeature : BaseEntityFeature
         });
     }
 
+    private object? AddedTab;
+    public override void OnAddedToUi(IEntityDefinition definition, object itemControlOrContext)
+    {
+        if (itemControlOrContext is CharacterFeaturesEditorFeatureItemContext ctx && definition is CharacterData data)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                var value = ctx.ExpanderBodyGrid.FindLogicalAncestorOfType<CharacterEditorWindowControl>();
+                AddedTab = new TabItem()
+                {
+                    Header = "Animation",
+                    Content = new CharacterDisplayTab(data)
+                };
+                value?.MainContent.Items
+                    .Add(AddedTab);
+            }, DispatcherPriority.Background);
+        }
+    }
+
+    public override void OnRemovedFromUi(IEntityDefinition definition, object itemControlOrContext)
+    {
+        if (itemControlOrContext is CharacterFeaturesEditorFeatureItemContext ctx && definition is CharacterData data && AddedTab is TabItem)
+        {
+            var parent = ctx.PropExpander.FindLogicalAncestorOfType<CharacterEditorWindowControl>();
+            Dispatcher.UIThread.Post(() =>
+                {
+                    parent?.MainContent.Items
+                        .Remove(AddedTab);
+                }, DispatcherPriority.Background);
+        }
+    }
+    
     public override void OnDestroy(BufferedEntity entity)
     {
         entity.RemoveComponent<AnimationComponent>();
@@ -90,9 +128,6 @@ public struct AnimationComponent : IComponent
     
     public Ulid CurrentAnimationId { get; set; }
     public AnimationDef? CurrentAnimationDef;
-    
-    public int CurrentAnimation;
-    public int CurrentDirection;
     
     public double ElapsedTime;
     public int CurrentFrame;

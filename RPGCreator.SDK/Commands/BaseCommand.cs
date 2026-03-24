@@ -25,6 +25,8 @@ public abstract class BaseCommand : ICommand
     public event Action<BaseCommand>? Executed;
     public event Action<BaseCommand>? Undone;
     
+    protected bool IsFirstExecution { get; private set; } = true;
+    
     public abstract string Name { get; }
     protected abstract void OnExecute();
     protected abstract void OnUndo();
@@ -33,6 +35,7 @@ public abstract class BaseCommand : ICommand
     {
         OnExecute();
         Executed?.Invoke(this);
+        IsFirstExecution = false;
     }
 
     public void Undo()
@@ -55,5 +58,12 @@ public abstract class BaseCommand : ICommand
 
     public virtual void OnRemovedFromStack()
     {
+    }
+
+    public virtual void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        Executed = null;
+        Undone = null;
     }
 }

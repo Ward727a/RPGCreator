@@ -79,7 +79,7 @@ namespace RPGCreator.SDK.EngineService;
 /// </code>
 /// </example>
 /// </summary>
-public interface IGlobalPathData : IService
+public interface IPathRegistry : IService
 {
     /// <summary>
     /// Register a path to a value, with an optional tag to group it with other paths.

@@ -24,6 +24,8 @@ public class CharacterManageItem : UserControl
     #region Events
 
     public event Action<CharacterData>? OnSelected;
+    public event Action<CharacterData>? OnEditRequested;
+    public event Action<CharacterData>? OnDeleteRequested;
     
     #endregion
     
@@ -51,6 +53,7 @@ public class CharacterManageItem : UserControl
     {
         CharacterData = characterData;
         CreateComponents();
+        RegisterEvents();
         Content = Body;
     }
     #endregion
@@ -66,7 +69,7 @@ public class CharacterManageItem : UserControl
         
         CharacterImage = new Image
         {
-            Source = EngineServices.ResourcesService.Load<Bitmap>(CharacterData.PortraitPath),
+            Source = EngineServices.Resources.Load<Bitmap>(CharacterData.PortraitPath),
             Width = 64,
             Height = 64,
             VerticalAlignment = VerticalAlignment.Center
@@ -132,6 +135,17 @@ public class CharacterManageItem : UserControl
             {
                 SelectCharacter();
             }
+        };
+        EditButton.Click += (_, e) =>
+        {
+            OnEditRequested?.Invoke(CharacterData);
+            e.Handled = true;
+        };
+
+        DeleteButton.Click += (_, e) =>
+        {
+            OnDeleteRequested?.Invoke(CharacterData);
+            e.Handled = true;
         };
     }
     private void SelectCharacter()
@@ -276,7 +290,10 @@ public class CharactersManageControl : UserControl
             ItemTemplate = new FuncDataTemplate<CharacterData>((charactersData, _) =>
             {
                 if (charactersData == null) return null;
-                return new CharacterManageItem(charactersData);
+                var item = new CharacterManageItem(charactersData);
+                item.OnEditRequested += (data => EditCharacter(data));
+                item.OnDeleteRequested += (data => DeleteCharacter(data));
+                return item;
             }),
         };
 
@@ -421,21 +438,33 @@ public class CharactersManageControl : UserControl
     {
         if (SelectedCharacterData != null)
         {
-            var host_ = ((AssetsManageWindow)this.GetVisualRoot()!);
-            var characterEditor = new CharacterEditorWindowControl(SelectedCharacterData);
-            host_.OpenCustom(characterEditor);
+            EditCharacter(SelectedCharacterData);
+            return;
         }
+        EditorUiServices.NotificationService.Error("No Character Selected", "Please select a character to edit.");
+    }
+
+    private void EditCharacter(CharacterData data)
+    {
+        var host_ = ((AssetsManageWindow)this.GetVisualRoot()!);
+        var characterEditor = new CharacterEditorWindowControl(data);
+        host_.OpenCustom(characterEditor);
     }
     
     private void OnDeleteCharacter(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (SelectedCharacterData == null)
+        if (SelectedCharacterData != null)
         {
-            // Show a message or handle the case where no character is selected
+            DeleteCharacter(SelectedCharacterData);
             return;
         }
-        
+        EditorUiServices.NotificationService.Error("No Character Selected", "Please select a character to delete.");
     }
-    
+
+    private void DeleteCharacter(CharacterData data)
+    {
+        EditorUiServices.DialogService.ShowErrorAsync("WIP", "This feature is not yet implemented.");
+    }
+
     #endregion
 }

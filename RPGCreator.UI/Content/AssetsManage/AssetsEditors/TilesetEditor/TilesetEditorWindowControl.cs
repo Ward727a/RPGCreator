@@ -145,7 +145,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             {
                 ImagePick.SelectedPathsText = TilesetDefinition.ImagePath;
                 ImagePick.SelectedPaths.Append(TilesetDefinition.ImagePath);
-                ImagePreview.Source = EngineServices.ResourcesService.Load<Bitmap>(TilesetDefinition.ImagePath);
+                ImagePreview.Source = EngineServices.Resources.Load<Bitmap>(TilesetDefinition.ImagePath);
             }
 
             MainPanel.Children.Add(ImagePick);

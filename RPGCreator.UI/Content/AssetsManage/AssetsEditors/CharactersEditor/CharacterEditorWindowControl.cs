@@ -48,6 +48,8 @@ public class CharacterEditorWindowControl : UserControl
         
         public TabControl MainContent { get; private set; }
         
+        private CharacterFeaturesTab CharacterFeaturesTab { get; set; }
+        
         #endregion
         
         private StackPanel BottomPanel { get; set; }
@@ -63,7 +65,8 @@ public class CharacterEditorWindowControl : UserControl
         
         CreateComponents();
         RegisterEvents();
-        
+
+        Name = "characterEditorControl";
         Content = Body;
         
         ReloadContent();
@@ -145,6 +148,8 @@ public class CharacterEditorWindowControl : UserControl
         SaveButton.Click += OnSaveButtonClick;
         BottomPanel.Children.Add(SaveButton);
 
+        CharacterFeaturesTab = new CharacterFeaturesTab(Data, this);
+        
         MainContent.Items.Add(new TabItem()
         {
             Header = "Properties",
@@ -173,7 +178,7 @@ public class CharacterEditorWindowControl : UserControl
         MainContent.Items.Add(new TabItem()
         {
             Header = "Features",
-            Content = new CharacterFeaturesTab(Data)
+            Content = CharacterFeaturesTab
         });
         MainContent.Items.Add(new TabItem()
         {

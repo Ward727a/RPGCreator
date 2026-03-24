@@ -260,7 +260,7 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
                 InnerTilesetCanvas.Children.Clear();
                 var tilesetImage = new Image
                 {
-                    Source = EngineServices.ResourcesService.Load<Bitmap>(item.TilesetDef.ImagePath),
+                    Source = EngineServices.Resources.Load<Bitmap>(item.TilesetDef.ImagePath),
                     Width = item.TilesetDef.ImageWidth,
                     Height = item.TilesetDef.ImageHeight,
                     HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,

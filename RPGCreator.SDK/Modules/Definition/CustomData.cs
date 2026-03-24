@@ -1,5 +1,7 @@
+using System.Collections;
 using System.Globalization;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 
 namespace RPGCreator.SDK.Modules.Definition;
@@ -8,18 +10,79 @@ namespace RPGCreator.SDK.Modules.Definition;
 /// A custom data system, also called "data bags" or "property bags", that allows modules to store and retrieve misc data, defined by users or other modules.
 /// </summary>
 [SerializingType("CustomData")]
-public class CustomData : ISerializable, IDeserializable, IDisposable
+public class CustomData : ISerializable, IDeserializable, IDisposable, ICloneable
 {
-    public event Action<string>? OnDataChanged;
+    object ICloneable.Clone() => Clone();
+
+    /// <summary>
+    /// Event triggered when a data value is changed.<br/>
+    /// The event parameter is the key of the changed data.
+    /// </summary>
+    public event Action<string>? DataChanged;
+    
+    /// <summary>
+    /// Event triggered when a data value is removed.<br/>
+    /// The event parameter is the key of the removed data.
+    /// </summary>
     public event Action<string>? OnDataRemoved;
     
     private Dictionary<string, object> _data = new();
     
+    private CustomData(Dictionary<string, object> initialData) : this()
+    {
+        _data = new Dictionary<string, object>(initialData.Count);
+        foreach (var kvp in initialData)
+        {
+            var val = CloneValue(kvp.Value);
+            if(val != null)
+                _data[kvp.Key] = val;
+            else
+                Logger.Error("Failed to clone value for key {key}(Val: {value}) in CustomData.", kvp.Key, kvp.Value);
+        }
+    }
+
+    private object? CloneValue(object? value)
+    {
+        if (value == null) return null;
+        
+        if (value is string || value.GetType().IsValueType) 
+            return value;
+
+        if (value is ICloneable cloneable)
+        {
+            return cloneable.Clone();
+        }
+
+        if (value is Array arr)
+        {
+            return arr.Clone();
+        }
+
+        if (value is IList list)
+        {
+            var listType = value.GetType();
+            var newList = (IList)Activator.CreateInstance(listType)!;
+
+            foreach (var item in list)
+            {
+                newList.Add(CloneValue(item));
+            }
+            
+            return newList;
+        }
+                
+        return value;
+    }
+
+    public CustomData()
+    {
+    }
+
     public CustomData Set<T>(string key, T value)
     {
         if (value == null) return this;
         _data[key] = value;
-        OnDataChanged?.Invoke(key);
+        DataChanged?.Invoke(key);
         return this;
     }
 
@@ -131,11 +194,7 @@ public class CustomData : ISerializable, IDeserializable, IDisposable
     
     public CustomData Clone()
     {
-        var clone = new CustomData();
-        foreach (var kvp in _data)
-        {
-            clone._data[kvp.Key] = kvp.Value;
-        }
+        var clone = new CustomData(_data);
         return clone;
     }
 
@@ -147,7 +206,7 @@ public class CustomData : ISerializable, IDeserializable, IDisposable
 
     public void DisposeEvents()
     {
-        OnDataChanged = null;
+        DataChanged = null;
         OnDataRemoved = null;
     }
 }

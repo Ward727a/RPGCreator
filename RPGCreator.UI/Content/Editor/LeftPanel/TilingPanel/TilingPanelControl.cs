@@ -40,7 +40,7 @@ public class SetOptionItem : UserControl
         IsIntGrid = definition is IntGridTilesetDef;
         CreateComponents();
         if (_previewImage != null && !string.IsNullOrEmpty(definition.ImagePath))
-            _previewImage.Source = EngineServices.ResourcesService.Load<Bitmap>(definition.ImagePath);
+            _previewImage.Source = EngineServices.Resources.Load<Bitmap>(definition.ImagePath);
         Content = _body;
         EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelTilingPanelTilesetItem, this);
     }
@@ -383,7 +383,7 @@ public class TilingPanelControl : UserControl
             IntGridListBox.IsVisible = false;
             _canvas.IsVisible = true;
             if (_previewImage != null)
-                _previewImage.Source = EngineServices.ResourcesService.Load<Bitmap>(def.ImagePath);
+                _previewImage.Source = EngineServices.Resources.Load<Bitmap>(def.ImagePath);
         }
         
     }

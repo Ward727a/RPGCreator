@@ -231,7 +231,7 @@ public class StatsFeature : BaseEntityFeature
 
     // When this feature is added to an entity definition, we want to add a toggle for each stat definition, allowing the user to choose which stats they want to use for this entity.
     // As the actual API of the editor doesn't allow us to put a specific UI for a property, we have to do it in this method, which is called when the feature is added to the definition, and we have access to the item control of the feature in the editor, which is a StackPanel that we can add controls to.
-    public override void OnAddingToDefinition(IEntityDefinition definition, object controlOrContext)
+    public override void OnAddedToUi(IEntityDefinition definition, object controlOrContext)
     {
         var tempUsingStats = new HashSet<Ulid>(_usingStats);
         foreach (var statDef in _statDefinitions)
@@ -242,12 +242,7 @@ public class StatsFeature : BaseEntityFeature
 
         if (controlOrContext is not CharacterFeaturesEditorFeatureItemContext ctx) return;
         
-        StackPanel panel = ctx.ExpanderContent;
-                
-        Expander statsExpander = new Expander() { Header = "Stats", IsExpanded = true };
-        StackPanel statsPanel = new StackPanel() { Margin = new Thickness(10) };
-        statsExpander.Content = statsPanel;
-        panel.Children.Add(statsExpander);
+        var statsPanel = ctx.GetOrCreateCategory("Stats");
                 
         foreach (var stat in _statDefinitions)
         {

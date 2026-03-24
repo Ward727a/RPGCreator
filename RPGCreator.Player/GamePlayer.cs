@@ -132,7 +132,7 @@ public class GamePlayer : Game, IGameRunner
             var data = File.ReadAllText(_gameFilePath);
             try
             {
-                EngineServices.SerializerService.Deserialize(data, out DefaultGameData? gameData);
+                EngineServices.Serializer.Deserialize(data, out DefaultGameData? gameData);
 
                 if (gameData == null)
                 {
@@ -154,7 +154,7 @@ public class GamePlayer : Game, IGameRunner
             var projectData = File.ReadAllText(_gameFilePath);
             try
             {
-                EngineServices.SerializerService.Deserialize(projectData, out BaseProject? project);
+                EngineServices.Serializer.Deserialize(projectData, out BaseProject? project);
                 if (project == null)
                 {
                     logger.Error("Failed to deserialize project file: Deserialized data is null.");
@@ -179,7 +179,7 @@ public class GamePlayer : Game, IGameRunner
             gameSession.IsPaused = false;
         });
         
-        EngineServices.ResourcesService.RegisterLoader<Texture2D>(new Texture2DLoader(GraphicsDevice));
+        EngineServices.Resources.RegisterLoader<Texture2D>(new Texture2DLoader(GraphicsDevice));
         
         RuntimeServices.MapService = new MapService();
         RuntimeServices.MapService.OnMapLoaded += (mapId) =>

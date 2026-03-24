@@ -121,7 +121,7 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
         try
         {
             using Stream stream = File.Open(fullPath, FileMode.Open);
-            EngineServices.SerializerService.Deserialize(stream, out loadedAsset);
+            EngineServices.Serializer.Deserialize(stream, out loadedAsset);
         }
         catch (Exception ex)
         {
@@ -161,7 +161,7 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
         try
         {
             using Stream stream = File.Open(fullPath, FileMode.Open);
-            EngineServices.SerializerService.Deserialize(stream, out loadedAsset);
+            EngineServices.Serializer.Deserialize(stream, out loadedAsset);
         }
         catch (Exception ex)
         {
@@ -206,7 +206,7 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
             try
             {
                 string fileContent = File.ReadAllText(fullPath);
-                EngineServices.SerializerService.Deserialize(fileContent, out loadedAsset, out Type? _);
+                EngineServices.Serializer.Deserialize(fileContent, out loadedAsset, out Type? _);
             }
             catch (Exception ex)
             {
@@ -308,7 +308,7 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
 
         Directory.CreateDirectory(Path.GetDirectoryName(fullPath) ?? string.Empty);
 
-        EngineServices.SerializerService.Serialize(serializableAsset, out string serializedData);
+        EngineServices.Serializer.Serialize(serializableAsset, out string serializedData);
         File.WriteAllText(fullPath, serializedData);
 
         var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);

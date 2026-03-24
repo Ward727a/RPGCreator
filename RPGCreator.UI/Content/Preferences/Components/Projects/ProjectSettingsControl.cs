@@ -199,7 +199,7 @@ public class ProjectSettingsControl : UserControl
             currentProject.MainMapId = Ulid.Empty;
         }
         
-        currentProject.Save();
+        EngineServices.ProjectsManager.SaveProject(currentProject);
         
         EditorUiServices.NotificationService.Success("Project settings saved.", "", new NotificationOptions(4_000));
     }

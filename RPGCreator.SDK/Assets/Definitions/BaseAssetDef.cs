@@ -76,8 +76,6 @@ public abstract class BaseObservableAssetDef : ObservableObject, IBaseAssetDef
 
     public void UpdateUrn()
     {
-        if (!_isTrackingActivated)
-            return;
         var identifier = !string.IsNullOrWhiteSpace(Name) ? Name : Unique.ToString();
         var urn = UrnNamespace.ToUrnModule(UrnModule).ToUrn($"{identifier ?? $"NO_IDENTIFIER-{Ulid.NewUlid()}"}");
         Urn = urn;
@@ -152,8 +150,6 @@ public abstract class BaseAssetDef : IBaseAssetDef, IHasMetadata
 
     public void UpdateUrn()
     {
-        if (!_isTrackingActivated)
-            return;
         var identifier = !string.IsNullOrWhiteSpace(Name) ? Name : Unique.ToString();
         var urn = UrnNamespace.ToUrnModule(UrnModule).ToUrn($"{identifier ?? $"NO_IDENTIFIER-{Ulid.NewUlid()}"}");
         Urn = urn;

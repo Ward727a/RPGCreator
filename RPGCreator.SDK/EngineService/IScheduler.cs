@@ -18,18 +18,23 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGCreator.SDK.Attributes;
+namespace RPGCreator.SDK.EngineService;
 
-namespace _BaseModule.Enums;
-
-public enum EColliderType
+public abstract class BaseTask
 {
-    [Description("None", "No collider.")]
-    None,
-    [Description("Square", "Collider with a square shape.")]
-    Square,
-    // [Description("Circle", "Collider with a circle shape.")]
-    // Circle,
-    // [Description("Complex", "Collider with a complex shape (user defined).")]
-    // Complex
+    public Action Callback;
+    public Guid Id { get; } = Guid.NewGuid();
+    public abstract void Update(float deltaTime);
+    public abstract bool IsCompleted();
+    public abstract void Execute();
+    public abstract bool CanBeRemoved();
+}
+
+public interface IScheduler : IService
+{ 
+    public Guid WaitSecond(float seconds, Action callback, bool loop = false);
+    public Guid WaitUntil(Func<bool> condition, Action callback);
+    public Guid AddTask(BaseTask task);
+    public void CancelTask(Guid taskId);
+    public void Update(float deltaTime);
 }

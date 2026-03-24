@@ -38,7 +38,6 @@ namespace RPGCreator.Core.Configs
         internal EngineConfigs()
         {
             // Load the default config file that should be inside the folder where the .exe is
-            var t = AppDomain.CurrentDomain.BaseDirectory;
             LoadOrCreateConfig<AppConf>(
                 Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App.conf")
             );
@@ -79,7 +78,7 @@ namespace RPGCreator.Core.Configs
             }
             
             var newConf = new T();
-            EngineServices.SerializerService.Serialize(newConf, out var data);
+            EngineServices.Serializer.Serialize(newConf, out var data);
             if (string.IsNullOrEmpty(data))
             {
                 throw new InvalidOperationException($"Config at {configPath} is not valid.");
@@ -139,7 +138,7 @@ namespace RPGCreator.Core.Configs
             {
                 return false;
             }
-            EngineServices.SerializerService.Deserialize<ConfHelper>(data, out var o, out var t);
+            EngineServices.Serializer.Deserialize<ConfHelper>(data, out var o, out var t);
 
             if (o == null || t == null)
                 return false;
@@ -156,64 +155,6 @@ namespace RPGCreator.Core.Configs
 
             return false;
         }
-        
-        // OLD CODE - kept for reference
-        // public bool LoadConfig(string configPath)
-        // {
-        //
-        //     if(ConfigMap.ContainsKey(configPath))
-        //         return true;
-        //
-        //     var doc = XDocument.Load(configPath);
-        //
-        //     if (doc.Root == null)
-        //         return false;
-        //
-        //     if (doc.Root.Attribute("configName") == null ||
-        //         string.IsNullOrEmpty(doc.Root.Attribute("configName")!.Value))
-        //     {
-        //         doc.Root.SetAttributeValue("configName", Path.GetFileName(configPath).Split(".")[0]);
-        //     }
-        //
-        //     if (doc.Root.Attribute("configClass") == null ||
-        //         string.IsNullOrEmpty(doc.Root.Attribute("customClass")!.Value))
-        //     {
-        //         // LoadedConfig.Add(configPath, new ConfHelper() { Doc = doc, ConfigPath = configPath });
-        //         ConfigMap.Add(configPath, Path.GetFileName(configPath).Split(".")[0]);
-        //         return true;
-        //     }
-        //     else
-        //     {
-        //         string customClass = doc.Root.Attribute("customClass")!.Value;
-        //         System.Type? type = System.Type.GetType(customClass);
-        //         if (type == null)
-        //             return false;
-        //         if (!typeof(ConfHelper).IsAssignableFrom(type))
-        //             return false;
-        //         object? obj = Activator.CreateInstance(type);
-        //         if (obj == null)
-        //             return false;
-        //         ConfHelper conf = (ConfHelper)obj;
-        //         conf.SetType(type);
-        //         conf.ConfigPath = configPath;
-        //         conf.LoadConfig();
-        //         LoadedConfig.Add(configPath, conf);
-        //         ConfigMap.Add(configPath, Path.GetFileName(configPath).Split(".")[0]);
-        //         return true;
-        //     }
-        // }
-        //
-        // public ConfHelper? GetConfig(string configName)
-        // {
-        //     if (LoadedConfig.ContainsKey(configName))
-        //     {
-        //         return LoadedConfig[configName];
-        //     }
-        //     else
-        //     {
-        //         return null;
-        //     }
-        // }
 
         public T? GetConfig<T>(string configName) where T : ConfHelper
         {
@@ -291,7 +232,7 @@ namespace RPGCreator.Core.Configs
                 if (string.IsNullOrEmpty(path))
                     return;
                 
-                EngineServices.SerializerService.Serialize(this, out var data);
+                EngineServices.Serializer.Serialize(this, out var data);
                 if (string.IsNullOrEmpty(data))
                     throw new InvalidOperationException("Data is null or empty. Cannot save config.");
                 try

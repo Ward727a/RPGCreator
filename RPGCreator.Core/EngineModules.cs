@@ -66,15 +66,11 @@ namespace RPGCreator.Core
         
         // This is the SHA256 checksum of the module DLL file to ensure integrity.
         // Those should be updated with each new module version. (even for small changes!)
-        private readonly List<string> CHECKSUM_INTERNAL_MODULES =
-        [ 
-            // "f3886692656072a8702c0d0faf32d956fefa6078f47087d4a5113b1927d5b6eb", // TestModule.dll - For now disabled so it doesn't load automatically
-        ];
 
-        private readonly string MODULES_PATH = $"{AppContext.BaseDirectory}Assets/Modules/";
+        private readonly string MODULES_PATH = $"{EngineServices.Config.GetString("path.global_module_dir")}Assets/Modules/";
         
         internal EngineModules()
-        {                   
+        {
             
             
             TaskScheduler.UnobservedTaskException += (sender, e) => 
@@ -121,9 +117,9 @@ namespace RPGCreator.Core
                     {
                         // Calculate the SHA256 checksum of the file.
                         var hashString = ShaUtil.ComputeSha256(file);
-                        if (CHECKSUM_INTERNAL_MODULES.Contains(hashString)
+                        if (/*CHECKSUM_INTERNAL_MODULES.Contains(hashString)*/
                             #if DEBUG
-                            || true
+                            /*|| */true
                             #endif
                             )
                         {

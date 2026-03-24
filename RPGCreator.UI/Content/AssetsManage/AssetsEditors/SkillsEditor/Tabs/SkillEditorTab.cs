@@ -460,7 +460,7 @@ public class SkillEditorTab : UserControl
             Logger.Info("Skill '{SkillName}' saved.", SkillDef.Name);
             
             
-            EngineServices.SerializerService.Serialize(SkillDef, out string data);
+            EngineServices.Serializer.Serialize(SkillDef, out string data);
             // Add the stat definition to the selected asset pack in the statdef
             if(SkillDef.PackId.HasValue && SkillDef.PackId != Ulid.Empty)
             {

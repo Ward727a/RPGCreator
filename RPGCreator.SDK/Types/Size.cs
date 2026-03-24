@@ -38,6 +38,9 @@ public record struct Size : ISerializable, IDeserializable
         return new Vector2(Width, Height);
     }
     
+    public float CenterWidth => Width / 2;
+    public float CenterHeight => Height / 2;
+    
     public static Size Parse(string s)
     {
         if (string.IsNullOrWhiteSpace(s)) throw new ArgumentException("Input cannot be empty", nameof(s));
