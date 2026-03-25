@@ -50,6 +50,7 @@ public enum CollisionOriginType
 [EntityMacroFeature(MaxInstancesPerCharacter = 1)]
 public class LivingBeingMacroFeature : BaseMacroEntityFeature
 {
+    public static URN Urn = new("rpgc", MacroFeatureUrnModule, "living_being");
     public override string FeatureName => "Living Being";
     public override string FeatureDescription => "Defines the entity as a living being, enabling health, stamina, and other vital systems.";
     public override URN FeatureUrn => new URN("rpgc", MacroFeatureUrnModule, "living_being");

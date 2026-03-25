@@ -36,6 +36,8 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
 
     public static bool FirstTime = false;
 
+    private StatModifierRegistry _statModifierRegistry = new(); 
+    
     protected override void OnInitialize()
     {
         FirstTime = IsFirstTime;
@@ -56,7 +58,7 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
         
         // We register the registry for the stats modifiers, which is used to store all the modifiers that can be applied to stats, such as buffs and debuffs.
         // This registry is then used by the StatsFeature to apply the modifiers to the stats of the entities.
-        EngineServices.AssetsManager.RegisterRegistry(new StatModifierRegistry());
+        EngineServices.AssetsManager.RegisterRegistry(_statModifierRegistry);
         
         // We register all entity features and game features provided by the base module.
         EngineServices.FeaturesManager.RegisterEntityFeature<MovementFeature>();
@@ -111,6 +113,26 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
     protected override void OnShutdown()
     {
         Logger.Info("BaseModule shutting down.");
+        var asm = Assembly.GetExecutingAssembly();
+        RegistryServices.AssetTypeRegistry.UnScanAssembly(asm);
+        
         EngineServices.ModulePathResolver.UnregisterPath(FolderUrn);
+
+        EngineServices.AssetsManager.UnregisterRegistry(_statModifierRegistry);
+        
+        EngineServices.FeaturesManager.UnregisterEntityFeature(MovementFeature.Urn);
+        EngineServices.FeaturesManager.UnregisterEntityFeature(AnimationFeature.Urn);
+        EngineServices.FeaturesManager.UnregisterEntityFeature(StatsFeature.Urn);
+        EngineServices.FeaturesManager.UnregisterEntityFeature(StatsModifierFeature.Urn);
+        EngineServices.FeaturesManager.UnregisterEntityFeature(PlayerTagFeature.Urn);
+        EngineServices.FeaturesManager.UnregisterEntityFeature(SignalsFeature.Urn);
+        EngineServices.FeaturesManager.UnregisterEntityFeature(AccessorFeature.Urn);
+        EngineServices.FeaturesManager.UnregisterEntityFeature(CollisionFeature.Urn);
+        EngineServices.FeaturesManager.UnregisterEntityFeature(LivingBeingMacroFeature.Urn);
+        EngineServices.FeaturesManager.UnregisterGameFeature(StandardControlFeature.Urn);
+        
+        RegistryServices.ToolRegistry.UnregisterTool(SimplePen.Urn);
+        RegistryServices.ToolRegistry.UnregisterTool(CharacterPlacer.Urn);
+        Logger.Info("BaseModule shutdown.");
     }
 }

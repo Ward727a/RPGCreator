@@ -31,7 +31,7 @@ namespace RPGCreator.UI.Content.Preferences
         public PreferencesWindow()
         {
             Title = "Preferences";
-            Width = 800;
+            Width = 1200;
             Height = 600;
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
             CreateComponents();

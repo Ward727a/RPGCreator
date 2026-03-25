@@ -14,4 +14,5 @@ public interface IAssetTypeRegistry : IService
     /// <param name="asm">The assembly to scan for asset type mappings.</param>
     /// <param name="overrideExisting">If true, will override existing mappings with the same key.</param>
     public void ScanAssembly(System.Reflection.Assembly asm, bool overrideExisting = false);
+    public void UnScanAssembly(System.Reflection.Assembly asm);
 }

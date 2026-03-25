@@ -96,6 +96,16 @@ public class MovementFeature : BaseEntityFeature
         _idleActionId = stateRegistry.RegisterAction(IdleUrn);
     }
 
+    public override void OnShutdown()
+    {
+        var stateRegistry = EngineServices.ECS.StateRegistry;
+
+        stateRegistry.Unregister(new URN("rpgc", "entity_states", "animation_state"));
+        stateRegistry.Unregister(new URN("rpgc", "entity_states", "animation_direction"));
+        stateRegistry.UnregisterAction(WalkUrn);
+        stateRegistry.UnregisterAction(IdleUrn);
+    }
+
     public override void OnWorldSetup(IEcsWorld world)
     {
         // Logic to execute when the world is set up can be added here.

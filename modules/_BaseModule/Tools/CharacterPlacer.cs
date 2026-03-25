@@ -31,7 +31,8 @@ namespace _BaseModule.Tools;
 
 public class CharacterPlacer : ToolLogic
 {
-    public override URN ToolUrn { get; protected set; } = ToolUrnModule.ToUrnModule("rpgc").ToUrn("character_placer");
+    public static URN Urn = ToolUrnModule.ToUrnModule("rpgc").ToUrn("character_placer");
+    public override URN ToolUrn { get; protected set; } = Urn;
     public override string DisplayName => "Character Placer";
     public override string Description => "A tool for placing characters on the map.";
     public override string Icon => "mdi-account-plus";

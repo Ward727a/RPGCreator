@@ -51,9 +51,31 @@ public struct ModuleCandidate : IEngineModuleInfo
     public URN[] Dependencies { get; }
     public URN[] Incompatibilities { get; }
     internal Type? ModuleType { get; }
-    public readonly bool Certified = false;
+    public string ModulePath { get; }
 
-    public ModuleCandidate(ModuleManifestAttribute manifest, Type type, bool certified = false)
+    public enum CertificationState : byte
+    {
+        /// <summary>
+        /// The module is not certified.
+        /// </summary>
+        NotCertified = 1 << 0,
+        /// <summary>
+        /// The module contains a certification that has been modified.
+        /// </summary>
+        ModifiedCertification = 1 << 1,
+        /// <summary>
+        /// The module contains a valid certification, but the DLL has been modified.
+        /// </summary>
+        DllModified = 1 << 2,
+        /// <summary>
+        /// The module is certified.
+        /// </summary>
+        Certified = 1 << 3,
+    }
+    
+    public readonly CertificationState Certified = CertificationState.NotCertified;
+
+    public ModuleCandidate(ModuleManifestAttribute manifest, Type type, string modulePath, CertificationState certified = CertificationState.NotCertified)
     {
         ModuleUrn = manifest.Urn;
         Name = manifest.Name;
@@ -64,10 +86,11 @@ public struct ModuleCandidate : IEngineModuleInfo
         Dependencies = (manifest?.Dependencies ?? []).Select(urnStr => new URN(urnStr)).ToArray();
         Incompatibilities = (manifest?.Incompatibilities ?? []).Select(urnStr => new URN(urnStr)).ToArray();;
         ModuleType = type;
+        ModulePath = modulePath;
         Certified = certified;
     }
 
-    public ModuleCandidate(IEngineModuleInfo moduleInfo)
+    public ModuleCandidate(IEngineModuleInfo moduleInfo, string modulePath)
     {
         ModuleUrn = moduleInfo.ModuleUrn;
         Name = moduleInfo.Name;
@@ -78,6 +101,7 @@ public struct ModuleCandidate : IEngineModuleInfo
         Dependencies = moduleInfo.Dependencies;
         Incompatibilities = moduleInfo.Incompatibilities;
         ModuleType = null;
+        ModulePath = modulePath;
     }
 }
 

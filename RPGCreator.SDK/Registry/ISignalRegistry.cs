@@ -26,6 +26,7 @@ public interface ISignalRegistry : IService
 {
     public static UrnSingleModule SignalModuleUrn => "signals".ToUrnSingleModule();
     public void RegisterSignal(URN signal);
+    public void UnregisterSignal(URN signal);
     public int GetSignalMask(URN signal);
     public bool TryGetSignalMask(URN signal, out int mask);
 }

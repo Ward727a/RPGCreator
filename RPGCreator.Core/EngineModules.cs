@@ -259,6 +259,11 @@ namespace RPGCreator.Core
             }
         }
 
+        public event Action<ModuleCandidate>? ModuleLoaded;
+        public event Action<ModuleCandidate>? ModuleUnloaded;
+        public event Action<ModuleCandidate>? ModuleStarted;
+        public event Action<ModuleCandidate>? ModuleStopped;
+
         public bool TryLoadModule(string modulePath, EngineSecurityToken token)
         {
             if (token == null)
@@ -268,9 +273,9 @@ namespace RPGCreator.Core
                 throw new UnauthorizedAccessException($"TryLoadModule method can only be called by the engine. Unauthorized call from method: {callingMethod?.DeclaringType?.FullName}.{callingMethod?.Name} in assembly {callingMethod?.DeclaringType?.Assembly.FullName} estimed path: {callingMethod?.DeclaringType?.Assembly.Location}");
             }
 
-            bool certified = CheckCertification(modulePath);
+            ModuleCandidate.CertificationState certified = CheckCertification(modulePath);
 
-            if (certified)
+            if (certified == ModuleCandidate.CertificationState.Certified)
             {
                 _logger.Info("Module '{ModulePath}' is certified.", args: modulePath);
             }
@@ -299,10 +304,13 @@ namespace RPGCreator.Core
 
             if (attr != null)
             {
+                var candidate = new ModuleCandidate(attr, moduleType, modulePath, certified);
                 _contexts[attr.Urn] = context;
-                _loadedModulesByUrn[attr.Urn] = new ModuleCandidate(attr, moduleType, certified);
+                _loadedModulesByUrn[attr.Urn] = candidate;
                 _logger.Info("Module '{ModuleName}' v{ModuleVersion} by {ModuleAuthor} loaded successfully from assembly '{AssemblyPath}'.",
                     args:[attr.Name, attr.Version, attr.Author, copy]);
+                
+                ModuleLoaded?.Invoke(candidate);
                 
                 #if DEBUG
                 StartModule(attr.Urn, new EngineSecurityToken());
@@ -325,12 +333,12 @@ namespace RPGCreator.Core
             -----END PUBLIC KEY-----
             """;
         
-        public static bool CheckCertification(string originalDllFilePath)
+        public static ModuleCandidate.CertificationState CheckCertification(string originalDllFilePath)
         {
             try
             {
                 string certPath = Path.ChangeExtension(originalDllFilePath, ".RCert");
-                if (!File.Exists(certPath)) return false;
+                if (!File.Exists(certPath)) return ModuleCandidate.CertificationState.NotCertified;
                 
                 var certContent = File.ReadAllText(certPath);
                 using var doc = JsonDocument.Parse(certContent);
@@ -346,20 +354,27 @@ namespace RPGCreator.Core
                 byte[] rawDataBytes = Encoding.UTF8.GetBytes(rawData);
                 
                 if(!ecdsa.VerifyData(rawDataBytes, signature, HashAlgorithmName.SHA256))
-                    return false;
+                    return ModuleCandidate.CertificationState.ModifiedCertification;
 
                 using var certDataDoc = JsonDocument.Parse(rawData);
                 var certDataRoot = certDataDoc.RootElement;
                 var dllHash = certDataRoot.GetProperty("DllHash").GetString()!;
                 
                 string actualHash = ShaUtil.ComputeSha256(originalDllFilePath);
-                
-                return actualHash.Equals(dllHash, StringComparison.OrdinalIgnoreCase);
+
+                if (actualHash.Equals(dllHash, StringComparison.OrdinalIgnoreCase))
+                {
+                    return ModuleCandidate.CertificationState.Certified;
+                }
+                else
+                {
+                    return ModuleCandidate.CertificationState.DllModified;
+                }
             }
             catch (Exception ex)
             {
                 Logger.Error("Failed to check module certification. Exception: {Exception}", args: ex);
-                return false;
+                return ModuleCandidate.CertificationState.NotCertified;
             }
         }
 
@@ -499,7 +514,7 @@ namespace RPGCreator.Core
                 return true; // Already started
             
             var moduleCandidate = GetLoadedModule(moduleUrn);
-            if (moduleCandidate == null)
+            if (!moduleCandidate.HasValue)
                 return false;
             
             var moduleType = moduleCandidate.Value.ModuleType;
@@ -521,6 +536,7 @@ namespace RPGCreator.Core
             try
             {
                 module.Initialize(token);
+                ModuleStarted?.Invoke(moduleCandidate.Value);
             } catch (Exception ex)
             {
                 _logger.Error("Failed to initialize module '{ModuleUrn}'. Exception: {Exception}",
@@ -543,15 +559,17 @@ namespace RPGCreator.Core
             }
             if (!IsModuleStarted(moduleUrn))
                 return true; // Already stopped
-            
+
+            var candidate = GetLoadedModule(moduleUrn);
             var module = GetModuleInternal(moduleUrn, token);
-            
-            if (module == null)
+
+            if (module == null || !candidate.HasValue)
                 return true; // Not even loaded, consider it stopped
 
             try
             {
                 module.Shutdown(token);
+                ModuleStopped?.Invoke(candidate.Value);
             }
             catch (Exception ex)
             {
@@ -570,12 +588,13 @@ namespace RPGCreator.Core
             if (IsModuleStarted(moduleUrn))
                 return;
             var module = GetLoadedModule(moduleUrn);
-            if (module == null && !_contexts.ContainsKey(moduleUrn))
+            if (!module.HasValue && !_contexts.ContainsKey(moduleUrn))
                 return;
             _loadedModulesByUrn.Remove(moduleUrn);
             var context = _contexts.GetValueOrDefault(moduleUrn);
             _contexts.Remove(moduleUrn);
             context?.Unload();
+            ModuleUnloaded?.Invoke(module.Value);
         }
 
         public void ForceUnloadModule(URN moduleUrn, EngineSecurityToken token)
@@ -598,6 +617,7 @@ namespace RPGCreator.Core
             var context = _contexts.GetValueOrDefault(moduleUrn);
             _contexts.Remove(moduleUrn);
             context?.Unload();
+            ModuleUnloaded?.Invoke(module.Value);
             
             _logger.Critical("Forcefully unloaded module {ModuleUrn}. This may lead to instability if the module was in use.", args: moduleUrn);
         }

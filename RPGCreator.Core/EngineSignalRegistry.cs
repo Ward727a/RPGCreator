@@ -44,6 +44,11 @@ public class EngineSignalRegistry : ISignalRegistry
         _signalToIndex[signal] = index;
     }
 
+    public void UnregisterSignal(URN signal)
+    {
+        _signalToIndex.Remove(signal);
+    }
+
     public int GetSignalMask(URN signal)
     {
         if (_signalToIndex.TryGetValue(signal, out var mask))

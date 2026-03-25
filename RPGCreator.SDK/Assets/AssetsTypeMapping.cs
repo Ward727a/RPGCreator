@@ -58,6 +58,21 @@ public class AssetsTypeMapping : IAssetTypeRegistry
             }
         }
     }
+
+    public void UnScanAssembly(Assembly asm)
+    {
+        var types = asm.GetLoadableTypes();
+        foreach (var type in types)
+        {
+            var attr = type.GetCustomAttribute<SerializingTypeAttribute>();
+            if (attr != null)
+            {
+                _keyToType.Remove(attr.TypeId);
+                _typeToKey.Remove(type);
+            }
+        }
+    }
+
     public void ScanAllEngineAssemblies()
     {
         var assemblies = AppDomain.CurrentDomain.GetAssemblies()

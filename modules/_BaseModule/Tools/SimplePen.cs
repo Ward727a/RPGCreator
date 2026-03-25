@@ -34,7 +34,8 @@ namespace _BaseModule.Tools;
 public class SimplePen : ToolLogic
 {
     
-    public override URN ToolUrn { get; protected set; } = ToolUrnModule.ToUrnModule("rpgc").ToUrn("simple_pen");
+    public static URN Urn = ToolUrnModule.ToUrnModule("rpgc").ToUrn("simple_pen");
+    public override URN ToolUrn { get; protected set; } = Urn;
     public override string DisplayName => "Simple Pen";
     public override string Description => "A simple pen tool for drawing on map layers.";
     public override string Icon => "mdi-pencil";

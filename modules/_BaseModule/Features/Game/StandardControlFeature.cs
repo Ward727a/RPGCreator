@@ -36,6 +36,8 @@ namespace _BaseModule.Features.Game;
 [GameFeature]
 public class StandardControlFeature : BaseGameFeature
 {
+    public static URN Urn = new("rpgc", FeatureUrnModule, "standard_control_feature");
+    
     public override int FeaturePriority { get; } = 10;
     public override string FeatureName => "Standard Player Control";
     public override string FeatureDescription => "Allows the controlled entity to be moved by the player with the keyboard.\n" +

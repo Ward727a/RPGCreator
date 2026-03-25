@@ -119,6 +119,12 @@ public interface IEntityFeature : IDisposable
     /// This is called once when the feature instance is created, before being injected into any entity, when the engine loads the feature definitions.
     /// </summary>
     void OnSetup();
+
+    /// <summary>
+    /// When the feature is being shutdown.<br/>
+    /// This is called once when the feature is being removed from the engine, like when the module adding the feature is being stopped.
+    /// </summary>
+    void OnShutdown();
     
     /// <summary>
     /// When the ECS world is being set up.<br/>

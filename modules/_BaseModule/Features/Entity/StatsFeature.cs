@@ -187,9 +187,7 @@ public class StatsFeature : BaseEntityFeature
                 {
                     var pack = manager.GetDefaultPack();
                     
-                    // If the paths for stats don't exist yet,
-                    // This either means that the feature is being set up for the very first time,
-                    // or that the paths have been deleted (which shouldn't happen, but just in case).
+                    // Need to find a better way.. This is not the best way (not at all in fact..)
                     if(BaseModule.FirstTime)
                     {
                         EngineServices.OnceServiceReady((IAssetsManager assetManager) =>
@@ -227,6 +225,12 @@ public class StatsFeature : BaseEntityFeature
         });
         var urn = ISignalRegistry.SignalModuleUrn.ToUrnModule("rpgc").ToUrn("stat_changed");
         RegistryServices.SignalRegistry.RegisterSignal(urn);
+    }
+
+    public override void OnShutdown()
+    {
+        var urn = ISignalRegistry.SignalModuleUrn.ToUrnModule("rpgc").ToUrn("stat_changed");
+        RegistryServices.SignalRegistry.UnregisterSignal(urn);
     }
 
     // When this feature is added to an entity definition, we want to add a toggle for each stat definition, allowing the user to choose which stats they want to use for this entity.

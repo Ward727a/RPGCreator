@@ -33,6 +33,7 @@ public interface IAssetsManager : IService
     event Action<IBaseAssetDef>? OnAssetRegistered;
     event Action<IBaseAssetDef>? OnAssetUnregistered;
     public void RegisterRegistry(IAssetRegistry registry);
+    public void UnregisterRegistry(IAssetRegistry registry);
     public void RegisterAsset(object asset);
     public bool TryResolveRegistry<T>(string moduleName, [NotNullWhen(true)] out T? registry) where T : IAssetRegistry;
     public bool TryResolveRegistry<T>(Type type, [NotNullWhen(true)] out T? registry) where T : IAssetRegistry;

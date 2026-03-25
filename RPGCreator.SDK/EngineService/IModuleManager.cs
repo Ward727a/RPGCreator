@@ -26,6 +26,12 @@ namespace RPGCreator.SDK.EngineService;
 
 public interface IModuleManager : IService
 {
+    
+    event Action<ModuleCandidate>? ModuleLoaded;
+    event Action<ModuleCandidate>? ModuleUnloaded;
+    event Action<ModuleCandidate>? ModuleStarted;
+    event Action<ModuleCandidate>? ModuleStopped;
+    
     /// <summary>
     /// This will try to load a module from the given path.<br/>
     /// If the module is already loaded, it will do nothing and return true.<br/>

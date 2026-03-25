@@ -64,6 +64,14 @@ public class AnimationFeature : BaseEntityFeature
             stateRegistry.Register(new URN("rpgc", "entity_states", "animation_direction"), StateStorageType.Int).Index;
     }
 
+    public override void OnShutdown()
+    {
+        var stateRegistry = EngineServices.ECS.StateRegistry;
+
+        stateRegistry.Unregister(new URN("rpgc", "entity_states", "animation_state"));
+        stateRegistry.Unregister(new URN("rpgc", "entity_states", "animation_direction"));
+    }
+
     public override void OnWorldSetup(IEcsWorld world)
     {
         world.SystemManager.AddSystem(new AnimationSystem(_animationStateIdx, _animationDirStateIdx));

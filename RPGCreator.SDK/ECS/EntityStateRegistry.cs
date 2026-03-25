@@ -102,6 +102,40 @@ public class EntityStateRegistry
         return info;
     }
 
+    public bool Unregister(URN stateUrn)
+    {
+        if (!_registry.Remove(stateUrn, out var info))
+        {
+            return false;
+        }
+
+        switch (info.StorageType)
+        {
+            case StateStorageType.Float:
+                TotalFloat--;
+                break;
+            case StateStorageType.Int:
+                TotalInt--;
+                break;
+            case StateStorageType.Bool:
+                TotalBool--;
+                break;
+            case StateStorageType.String:
+                TotalString--;
+                break;
+            case StateStorageType.Vector2:
+                TotalVector2--;
+                break;
+            case StateStorageType.Byte:
+                TotalByte--;
+                break;
+            default:
+                return false;
+        }
+
+        return true;
+    }
+
     /// <summary>
     /// Register an action with the given URN.<br/>
     /// This can be used, for example, for defining if an entity is walking or not, via a global URN path logic.<br/>
@@ -119,6 +153,11 @@ public class EntityStateRegistry
         int index = _actionsUrn.Count+1;
         _actionsUrn[actionUrn] = index;
         return index;
+    }
+
+    public bool UnregisterAction(URN actionUrn)
+    {
+        return _actionsUrn.Remove(actionUrn);
     }
     
     public int GetActionId(URN actionUrn)

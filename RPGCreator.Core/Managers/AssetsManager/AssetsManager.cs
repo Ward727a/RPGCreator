@@ -102,6 +102,16 @@ namespace RPGCreator.Core.Managers.AssetsManager
             Logger.Debug("Registered asset registry {RegistryName} for types: {SupportedTypes}", args: [registry.ModuleName, string.Join(", ", registry.SupportedTypes.Select(t => t.FullName))]);
         }
 
+        public void UnregisterRegistry(IAssetRegistry registry)
+        {
+            _registries.Remove(registry.ModuleName);
+            foreach (var supportedType in registry.SupportedTypes)
+            {
+                _registryTypeToName.Remove(supportedType);
+            }
+            Logger.Debug("Unregistered asset registry {RegistryName}", args: registry.ModuleName);
+        }
+
         public void RegisterAsset(object asset)
         {
             Guard.IsAssignableToType(asset, typeof(IHasUniqueId));
