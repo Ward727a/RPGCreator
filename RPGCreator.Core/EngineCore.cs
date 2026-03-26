@@ -132,7 +132,6 @@ namespace RPGCreator.Core
             RegistryServices.SimpleEventRegistry = new EngineSimpleEventRegistry();
             RegistryServices.EventsRegisterService = new EngineEventsRegister();
             
-            EngineServices.GlobalContextProvider = new GlobalContextProvider();
             RegistryServices.SignalRegistry = new EngineSignalRegistry();
             RegistryServices.UrnRegistry = new UrnRegistry();
             RegistryServices.ToolRegistry = new ToolRegistry();

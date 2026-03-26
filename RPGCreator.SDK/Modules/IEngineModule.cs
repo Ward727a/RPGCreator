@@ -52,6 +52,7 @@ public struct ModuleCandidate : IEngineModuleInfo
     public URN[] Incompatibilities { get; }
     internal Type? ModuleType { get; }
     public string ModulePath { get; }
+    public string ModuleHash { get; }
 
     public enum CertificationState : byte
     {
@@ -75,7 +76,7 @@ public struct ModuleCandidate : IEngineModuleInfo
     
     public readonly CertificationState Certified = CertificationState.NotCertified;
 
-    public ModuleCandidate(ModuleManifestAttribute manifest, Type type, string modulePath, CertificationState certified = CertificationState.NotCertified)
+    public ModuleCandidate(ModuleManifestAttribute manifest, Type type, string modulePath, string moduleHash, CertificationState certified = CertificationState.NotCertified)
     {
         ModuleUrn = manifest.Urn;
         Name = manifest.Name;
@@ -86,6 +87,7 @@ public struct ModuleCandidate : IEngineModuleInfo
         Dependencies = (manifest?.Dependencies ?? []).Select(urnStr => new URN(urnStr)).ToArray();
         Incompatibilities = (manifest?.Incompatibilities ?? []).Select(urnStr => new URN(urnStr)).ToArray();;
         ModuleType = type;
+        ModuleHash = moduleHash;
         ModulePath = modulePath;
         Certified = certified;
     }

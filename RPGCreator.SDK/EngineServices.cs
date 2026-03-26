@@ -224,24 +224,6 @@ public static class EngineServices
         get => GetService<IFeaturesManager>();
         set => RegisterService(value);
     }
-    
-    public static IToolService ToolService
-    {
-        get => GetService<IToolService>();
-        set => RegisterService(value);
-    }
-
-    public static IPathRegistry PathRegistry
-    {
-        get => GetService<IPathRegistry>();
-        set => RegisterService(value);
-    }
-
-    public static IGlobalContextProvider GlobalContextProvider
-    {
-        get => GetService<IGlobalContextProvider>();
-        set => RegisterService(value);
-    }
 
     public static IGamePlayerService GamePlayerService
     {

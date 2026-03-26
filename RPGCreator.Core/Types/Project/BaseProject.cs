@@ -55,14 +55,12 @@ namespace RPGCreator.Core.Types.Project
         private MapInstance? _EditMap = null;
 
         public ProjectGameData GameData { get; set; }
-        public IPathRegistry PathRegistry { get; private set; }
         public List<string> Modules { get; private set; } = [];
         public Ulid MainMapId { get; set; }
 
         public BaseProject()
         {
             GameData = new ProjectGameData(this);
-            PathRegistry = new EnginePathRegistry();
         }
         
         public BaseProject(string name) : this()
@@ -89,7 +87,6 @@ namespace RPGCreator.Core.Types.Project
             info.AddValue("gameData", GameData);
             info.AddValue(nameof(Modules), Modules);
             info.AddValue(nameof(MainMapId), MainMapId);
-            info.AddValue(nameof(PathRegistry), PathRegistry);
             return info;
         }
 
@@ -123,7 +120,6 @@ namespace RPGCreator.Core.Types.Project
             info.TryGetList("authors", out List<string> authors);
             info.TryGetList("assetsPackPath", out List<string> assetsPackPath);
             info.TryGetValue("gameData", out ProjectGameData gameData, new ProjectGameData(this));
-            info.TryGetValue(nameof(PathRegistry), out EnginePathRegistry globalPathData, new EnginePathRegistry());
             info.TryGetValue(nameof(Modules), out List<string> modules, []);
             info.TryGetValue(nameof(MainMapId), out Ulid mainMapId, Ulid.Empty);
 
@@ -140,7 +136,6 @@ namespace RPGCreator.Core.Types.Project
             Authors = authors;
             AssetsPackPath = assetsPackPath;
             GameData = gameData;
-            PathRegistry = globalPathData;
             Modules = modules;
             MainMapId = mainMapId;
         }

@@ -12,7 +12,6 @@ public interface IBaseProject
     List<string> Authors { get; }
     List<string> AssetsPackPath { get; }
     ProjectGameData GameData { get; }
-    IPathRegistry PathRegistry { get; }
     public List<string> Modules { get; }
     public Ulid MainMapId { get; set; }
 }

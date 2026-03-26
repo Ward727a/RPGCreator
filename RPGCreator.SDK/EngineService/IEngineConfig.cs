@@ -44,12 +44,12 @@ public interface IConfig : ISerializable, IDeserializable
     public double GetDouble(string key, double defaultValue = 0.0);
     public T Get<T>(string key, T defaultValue);
 
-    public void SetString(string key, string value);
-    public void SetInt(string key, int value);
-    public void SetBool(string key, bool value);
-    public void SetFloat(string key, float value);
-    public void SetDouble(string key, double value);
-    public void Set<T>(string key, T value);
+    public IConfig SetString(string key, string value);
+    public IConfig SetInt(string key, int value);
+    public IConfig SetBool(string key, bool value);
+    public IConfig SetFloat(string key, float value);
+    public IConfig SetDouble(string key, double value);
+    public IConfig Set<T>(string key, T value);
     
     public bool HasString(string key);
     public bool HasInt(string key);

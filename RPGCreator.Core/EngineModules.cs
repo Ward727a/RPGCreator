@@ -1,4 +1,5 @@
 ﻿#region LICENSE
+
 //
 // RPG Creator - Open-source RPG Engine.
 // (c) 2025 Ward
@@ -21,10 +22,12 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 // 
 // 
+
 #endregion
 
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 using System.Security.Cryptography;
 using System.Text;
@@ -40,8 +43,6 @@ using RPGCreator.SDK.Types;
 
 namespace RPGCreator.Core
 {
-
-    
     public class ModuleContext : AssemblyLoadContext
     {
         private readonly AssemblyDependencyResolver _resolver;
@@ -57,24 +58,24 @@ namespace RPGCreator.Core
             return assemblyPath != null ? LoadFromAssemblyPath(assemblyPath) : null;
         }
     }
-    
+
     public class EngineModules : IModuleManager
     {
         private readonly Dictionary<URN, ModuleContext> _contexts = new();
         private readonly Dictionary<URN, ModuleCandidate> _loadedModulesByUrn = new();
         private readonly Dictionary<URN, BaseModule> _startedModulesByUrn = new();
         private readonly List<Assembly> _moduleAssemblies = new();
-        
+
         private readonly ScopedLogger _logger = Logger.ForContext<EngineModules>();
-        
+
         // This is the SHA256 checksum of the module DLL file to ensure integrity.
         // Those should be updated with each new module version. (even for small changes!)
 
         internal EngineModules()
         {
             string modulesPath = EngineServices.Config.GetString(EngineConfig.Keys.Paths.Modules);
-            
-            TaskScheduler.UnobservedTaskException += (sender, e) => 
+
+            TaskScheduler.UnobservedTaskException += (sender, e) =>
             {
                 foreach (var inner in e.Exception.InnerExceptions)
                 {
@@ -87,7 +88,9 @@ namespace RPGCreator.Core
                         {
                             _logger.Critical("UnauthorizedAccessException detected: {Message}", args: UAE.Message);
                             _logger.Critical("This may indicate a security violation within the module!!!");
-                            EditorUiServices.NotificationService.Error("SECURITY_ALERT!", $"Security Alert: A module attempted an unauthorized operation. The engine remains stable, but please review module usage.", new NotificationOptions(60000));
+                            EditorUiServices.NotificationService.Error("SECURITY_ALERT!",
+                                $"Security Alert: A module attempted an unauthorized operation. The engine remains stable, but please review module usage.",
+                                new NotificationOptions(60000));
                         }
                     }
                 }
@@ -107,7 +110,7 @@ namespace RPGCreator.Core
             }
 
             ClearTempModulesShadowCopies("", new EngineSecurityToken());
-            
+
             foreach (var directory in Directory.GetDirectories(modulesPath))
             {
                 var files = Directory.GetFiles(directory, "*.dll");
@@ -140,32 +143,32 @@ namespace RPGCreator.Core
                     EngineServices.ECS.StateRegistry.TotalBool,
                     EngineServices.ECS.StateRegistry.TotalVector2
                 ]);
-            
-            AppDomain.CurrentDomain.UnhandledException += (sender, e) => 
+
+            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
             {
                 var ex = (Exception)e.ExceptionObject;
-                
+
                 var assembly = ex.TargetSite?.DeclaringType?.Assembly;
-    
-                if (assembly != null && _moduleAssemblies.Contains(assembly)) 
+
+                if (assembly != null && _moduleAssemblies.Contains(assembly))
                 {
-                    Logger.Critical("Unhandled exception in module assembly '{Assembly}': {Exception}", args: [assembly.FullName, ex]);
+                    Logger.Critical("Unhandled exception in module assembly '{Assembly}': {Exception}",
+                        args: [assembly.FullName, ex]);
                 }
             };
-
         }
 
-        internal (string dllCopy, string? pdpCopy, string originalDll, string? originalPdp) GetShadowCopyPath(string modulePath)
+        internal (string dllCopy, string? pdpCopy, string originalDll, string? originalPdp) GetShadowCopyPath(
+            string modulePath)
         {
-            
             var moduleFileName = Path.GetFileNameWithoutExtension(modulePath);
             var pdpFileName = $"{moduleFileName}.pdb";
             var moduleDirectory = Path.GetDirectoryName(modulePath);
             var runningDir = RpgEnv.RunningModules;
-            
+
             var shadowPdpCopyName = $"_runned_temp_{moduleFileName}.pdb";
             var shadowDllCopyName = $"_runned_temp_{moduleFileName}.dll";
-            
+
             var originalDll = modulePath;
             string pdpPath = Path.Combine(moduleDirectory!, pdpFileName);
 
@@ -179,18 +182,19 @@ namespace RPGCreator.Core
                     pdpCopyPath = Path.Combine(runningDir, shadowPdpCopyName);
                     originalPdp = pdpPath;
                 }
+
                 var shadowCopyPath = Path.Combine(runningDir, shadowDllCopyName);
-                
+
                 return (shadowCopyPath, pdpCopyPath, originalDll, originalPdp);
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to get shadow copy paths for module '{ModulePath}'. Exception: {Exception}", args: [modulePath, ex]);
+                _logger.Error("Failed to get shadow copy paths for module '{ModulePath}'. Exception: {Exception}",
+                    args: [modulePath, ex]);
                 return ("", null, originalDll, null);
             }
         }
-        
-        
+
 
         private bool IsSameCopy(string pathToModule)
         {
@@ -199,8 +203,8 @@ namespace RPGCreator.Core
             string copyDllPath = copyPath.dllCopy;
             string originalDllPath = copyPath.originalDll;
             string? originalPdpPath = copyPath.originalPdp;
-            
-            if(File.Exists(copyDllPath))
+
+            if (File.Exists(copyDllPath))
             {
                 var copySha = ShaUtil.ComputeSha256(copyDllPath);
                 var originalSha = ShaUtil.ComputeSha256(originalDllPath);
@@ -211,29 +215,33 @@ namespace RPGCreator.Core
 
                 if (!string.IsNullOrEmpty(copyPdpPath) && File.Exists(copyPdpPath))
                 {
-                    if(string.IsNullOrEmpty(originalPdpPath) || !File.Exists(originalPdpPath))
+                    if (string.IsNullOrEmpty(originalPdpPath) || !File.Exists(originalPdpPath))
                     {
                         return false;
                     }
+
                     var copyPdbSha = ShaUtil.ComputeSha256(copyPdpPath);
                     var originalPdbSha = ShaUtil.ComputeSha256(originalPdpPath);
-                    
+
                     return copyPdbSha == originalPdbSha;
                 }
+
                 return true;
             }
+
             return false;
         }
 
-        
+
         internal string CreateShadowCopyPath(string modulePath)
         {
             // If the shadow copy already exists and is the same, return it directly
-            if(IsSameCopy(modulePath))
+            if (IsSameCopy(modulePath))
             {
                 var existingCopyPath = GetShadowCopyPath(modulePath);
                 return existingCopyPath.dllCopy;
             }
+
             var copyPath = GetShadowCopyPath(modulePath);
             string? copyPdpPath = copyPath.pdpCopy;
             string copyDllPath = copyPath.dllCopy;
@@ -242,19 +250,21 @@ namespace RPGCreator.Core
 
             if (string.IsNullOrEmpty(copyDllPath))
                 return "";
-            
+
             try
             {
                 if (!string.IsNullOrEmpty(copyPdpPath) && !string.IsNullOrEmpty(originalPdpPath))
                 {
                     File.Copy(originalPdpPath, copyPdpPath, true);
                 }
+
                 File.Copy(originalDllPath, copyDllPath, true);
                 return copyDllPath;
             }
             catch (Exception ex)
             {
-                _logger.Error("Failed to create shadow copy for module '{ModulePath}'. Exception: {Exception}", args: [modulePath, ex]);
+                _logger.Error("Failed to create shadow copy for module '{ModulePath}'. Exception: {Exception}",
+                    args: [modulePath, ex]);
                 return "";
             }
         }
@@ -264,82 +274,128 @@ namespace RPGCreator.Core
         public event Action<ModuleCandidate>? ModuleStarted;
         public event Action<ModuleCandidate>? ModuleStopped;
 
+        public record struct ModuleStartContext(
+            URN ModuleUrn,
+            string ModuleHash,
+            ModuleCandidate.CertificationState ModuleCertification,
+            bool IsStarted);
+
         public bool TryLoadModule(string modulePath, EngineSecurityToken token)
         {
             if (token == null)
             {
                 StackTrace stackTrace = new StackTrace();
                 var callingMethod = stackTrace.GetFrame(1)?.GetMethod();
-                throw new UnauthorizedAccessException($"TryLoadModule method can only be called by the engine. Unauthorized call from method: {callingMethod?.DeclaringType?.FullName}.{callingMethod?.Name} in assembly {callingMethod?.DeclaringType?.Assembly.FullName} estimed path: {callingMethod?.DeclaringType?.Assembly.Location}");
+                throw new UnauthorizedAccessException(
+                    $"TryLoadModule method can only be called by the engine. Unauthorized call from method: {callingMethod?.DeclaringType?.FullName}.{callingMethod?.Name} in assembly {callingMethod?.DeclaringType?.Assembly.FullName} estimed path: {callingMethod?.DeclaringType?.Assembly.Location}");
             }
 
-            ModuleCandidate.CertificationState certified = CheckCertification(modulePath);
+            var certifiedData = CheckCertification(modulePath);
 
-            if (certified == ModuleCandidate.CertificationState.Certified)
+            if (certifiedData.cert == ModuleCandidate.CertificationState.Certified)
             {
                 _logger.Info("Module '{ModulePath}' is certified.", args: modulePath);
             }
-            
+
             var copy = CreateShadowCopyPath(modulePath);
 
             if (string.IsNullOrEmpty(copy))
             {
-                _logger.Error("Failed to load module from path '{ModulePath}' due to shadow copy creation failure.", args: modulePath);
+                _logger.Error("Failed to load module from path '{ModulePath}' due to shadow copy creation failure.",
+                    args: modulePath);
                 return false;
             }
-            
+
             var context = new ModuleContext(copy);
             var assembly = context.LoadFromAssemblyPath(copy);
 
-            var moduleType = assembly.GetLoadableTypes().FirstOrDefault(t => 
+            var moduleType = assembly.GetLoadableTypes().FirstOrDefault(t =>
                 typeof(BaseModule).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
-            
+
             if (moduleType == null)
             {
                 _logger.Debug("No valid module type found in assembly '{AssemblyPath}'.", args: copy);
                 return false;
             }
-            
+
             var attr = assembly.GetCustomAttribute<ModuleManifestAttribute>();
 
             if (attr != null)
             {
-                var candidate = new ModuleCandidate(attr, moduleType, modulePath, certified);
+                var candidate = new ModuleCandidate(attr, moduleType, modulePath, certifiedData.fileHash,
+                    certifiedData.cert);
                 _contexts[attr.Urn] = context;
                 _loadedModulesByUrn[attr.Urn] = candidate;
-                _logger.Info("Module '{ModuleName}' v{ModuleVersion} by {ModuleAuthor} loaded successfully from assembly '{AssemblyPath}'.",
-                    args:[attr.Name, attr.Version, attr.Author, copy]);
-                
+                _logger.Info(
+                    "Module '{ModuleName}' v{ModuleVersion} by {ModuleAuthor} loaded successfully from assembly '{AssemblyPath}'.",
+                    args: [attr.Name, attr.Version, attr.Author, copy]);
+
                 ModuleLoaded?.Invoke(candidate);
-                
-                #if DEBUG
-                StartModule(attr.Urn, new EngineSecurityToken());
-                #endif
-                
+
+                if (EngineServices.Config.TryFrom("modules", true, out var config))
+                {
+                    if (config.Has<ModuleStartContext>(attr.Urn))
+                    {
+                        var moduleStartContext = config.Get<ModuleStartContext>(attr.Urn, new ModuleStartContext());
+                        if (moduleStartContext.IsStarted)
+                        {
+                            if (moduleStartContext.ModuleUrn != attr.Urn)
+                            {
+                                Logger.Error(
+                                    "Couldn't automatically start module '{ModuleName}' v{ModuleVersion} by {ModuleAuthor} because it was started with a different URN than the current one.",
+                                    args: [attr.Name, attr.Version, attr.Author]);
+                            }
+                            else if (moduleStartContext.ModuleCertification != candidate.Certified)
+                            {
+                                Logger.Error(
+                                    "Couldn't automatically start module '{ModuleName}' v{ModuleVersion} by {ModuleAuthor} because it was started with a different certification than the current one.",
+                                    args: [attr.Name, attr.Version, attr.Author]);
+                            }
+                            else if (moduleStartContext.ModuleHash != candidate.ModuleHash)
+                            {
+                                Logger.Error(
+                                    "Couldn't automatically start module '{ModuleName}' v{ModuleVersion} by {ModuleAuthor} because it was started with a different hash than the current one.",
+                                    args: [attr.Name, attr.Version, attr.Author]);
+                            }
+                            else
+                            {
+                                Logger.Info(
+                                    "Automatically starting module '{ModuleName}' v{ModuleVersion} by {ModuleAuthor} with URN '{ModuleURN}'.",
+                                    args: [attr.Name, attr.Version, attr.Author, attr.Urn]);
+                                StartModule(attr.Urn, new EngineSecurityToken());
+                            }
+                        }
+                    }
+                }
+
                 return true;
             }
             else
             {
-                _logger.Error("ModuleManifestAttribute not found on module type '{ModuleType}' in assembly '{AssemblyPath}'.", args:[moduleType.FullName, copy]);
+                _logger.Error(
+                    "ModuleManifestAttribute not found on module type '{ModuleType}' in assembly '{AssemblyPath}'.",
+                    args: [moduleType.FullName, copy]);
                 return false;
             }
         }
 
-        private const string PublicKey = 
+        private const string PublicKey =
             """
             -----BEGIN PUBLIC KEY-----
             MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEhF/z+houm7QByxUXGfgj8tcqc4I2
             QGw7aO36FGPblMjeuwHUE8tzBXUD/TBKk5hUXCqmXS4/WgFM+SEkL4k/6A==
             -----END PUBLIC KEY-----
             """;
-        
-        public static ModuleCandidate.CertificationState CheckCertification(string originalDllFilePath)
+
+        public static (ModuleCandidate.CertificationState cert, string fileHash) CheckCertification(
+            string originalDllFilePath)
         {
+            string actualHash = ShaUtil.ComputeSha256(originalDllFilePath);
             try
             {
                 string certPath = Path.ChangeExtension(originalDllFilePath, ".RCert");
-                if (!File.Exists(certPath)) return ModuleCandidate.CertificationState.NotCertified;
-                
+                if (!File.Exists(certPath)) return (ModuleCandidate.CertificationState.NotCertified, actualHash);
+
                 var certContent = File.ReadAllText(certPath);
                 using var doc = JsonDocument.Parse(certContent);
                 var root = doc.RootElement;
@@ -349,32 +405,30 @@ namespace RPGCreator.Core
 
                 using var ecdsa = ECDsa.Create();
                 ecdsa.ImportFromPem(PublicKey);
-                
+
                 byte[] signature = Convert.FromBase64String(signature64);
                 byte[] rawDataBytes = Encoding.UTF8.GetBytes(rawData);
-                
-                if(!ecdsa.VerifyData(rawDataBytes, signature, HashAlgorithmName.SHA256))
-                    return ModuleCandidate.CertificationState.ModifiedCertification;
+
+                if (!ecdsa.VerifyData(rawDataBytes, signature, HashAlgorithmName.SHA256))
+                    return (ModuleCandidate.CertificationState.ModifiedCertification, actualHash);
 
                 using var certDataDoc = JsonDocument.Parse(rawData);
                 var certDataRoot = certDataDoc.RootElement;
                 var dllHash = certDataRoot.GetProperty("DllHash").GetString()!;
-                
-                string actualHash = ShaUtil.ComputeSha256(originalDllFilePath);
 
                 if (actualHash.Equals(dllHash, StringComparison.OrdinalIgnoreCase))
                 {
-                    return ModuleCandidate.CertificationState.Certified;
+                    return (ModuleCandidate.CertificationState.Certified, actualHash);
                 }
                 else
                 {
-                    return ModuleCandidate.CertificationState.DllModified;
+                    return (ModuleCandidate.CertificationState.DllModified, actualHash);
                 }
             }
             catch (Exception ex)
             {
                 Logger.Error("Failed to check module certification. Exception: {Exception}", args: ex);
-                return ModuleCandidate.CertificationState.NotCertified;
+                return (ModuleCandidate.CertificationState.NotCertified, actualHash);
             }
         }
 
@@ -392,7 +446,7 @@ namespace RPGCreator.Core
         {
             return _loadedModulesByUrn.GetValueOrDefault(moduleUrn);
         }
-        
+
         internal BaseModule? GetModuleInternal(URN moduleUrn, EngineSecurityToken token)
         {
             return _startedModulesByUrn.GetValueOrDefault(moduleUrn);
@@ -407,27 +461,28 @@ namespace RPGCreator.Core
         {
             return _startedModulesByUrn.Values;
         }
-        
+
         public void ClearTempModulesShadowCopies(string path = "", EngineSecurityToken? token = null)
-        {            
-            if(token == null)
+        {
+            if (token == null)
             {
                 StackTrace stackTrace = new StackTrace();
                 var callingMethod = stackTrace.GetFrame(1)?.GetMethod();
-                throw new UnauthorizedAccessException($"ClearTempModulesShadowCopies method can only be called by the engine. Unauthorized call from method: {callingMethod?.DeclaringType?.FullName}.{callingMethod?.Name} in assembly {callingMethod?.DeclaringType?.Assembly.FullName} estimed path: {callingMethod?.DeclaringType?.Assembly.Location}");
+                throw new UnauthorizedAccessException(
+                    $"ClearTempModulesShadowCopies method can only be called by the engine. Unauthorized call from method: {callingMethod?.DeclaringType?.FullName}.{callingMethod?.Name} in assembly {callingMethod?.DeclaringType?.Assembly.FullName} estimed path: {callingMethod?.DeclaringType?.Assembly.Location}");
             }
-            
+
             string modulesPath = EngineServices.Config.GetString(EngineConfig.Keys.Paths.Modules);
-            
+
             if (!Directory.Exists(modulesPath) && string.IsNullOrEmpty(path))
             {
                 return;
             }
-            
+
             var searchPath = string.IsNullOrEmpty(path) ? modulesPath : path;
-            
+
             string[] filesToDelete = Directory.GetFiles(searchPath, "_runned_temp_*", SearchOption.AllDirectories);
-            
+
             foreach (var filePath in filesToDelete)
             {
                 try
@@ -437,15 +492,18 @@ namespace RPGCreator.Core
                 }
                 catch (Exception ex)
                 {
-                    _logger.Warning("Failed to delete temporary module shadow copy file: {FilePath}. Exception: {Exception}", args: [filePath, ex]);
+                    _logger.Warning(
+                        "Failed to delete temporary module shadow copy file: {FilePath}. Exception: {Exception}",
+                        args: [filePath, ex]);
                 }
             }
         }
-        
-        public void PlanStarting(out HashSet<URN> startOrder, out HashSet<URN> incompatibilities, List<URN>? modulesToStart = null)
+
+        public void PlanStarting(out HashSet<URN> startOrder, out HashSet<URN> incompatibilities,
+            List<URN>? modulesToStart = null)
         {
             modulesToStart ??= _loadedModulesByUrn.Keys.ToList();
-            
+
             startOrder = [];
             var visiting = new HashSet<URN>();
             incompatibilities = [];
@@ -454,8 +512,8 @@ namespace RPGCreator.Core
             {
                 VisitAndCheck(urn, startOrder, visiting, incompatibilities);
             }
-            
-            if(startOrder.Count > modulesToStart.Count)
+
+            if (startOrder.Count > modulesToStart.Count)
             {
                 _logger.Warning("Some modules were started due to dependencies but were not explicitly requested:");
                 foreach (var urn in startOrder)
@@ -465,7 +523,8 @@ namespace RPGCreator.Core
                         _logger.Warning(" - {ModuleUrn}", args: urn);
                     }
                 }
-                if(incompatibilities.Count > 0)
+
+                if (incompatibilities.Count > 0)
                 {
                     _logger.Warning("Incompatibilities detected with the following modules:");
                     foreach (var urn in incompatibilities)
@@ -473,11 +532,13 @@ namespace RPGCreator.Core
                         _logger.Warning(" - {ModuleUrn}", args: urn);
                     }
                 }
+
                 _logger.Warning("Need to wait for user confirmation to proceed...");
             }
         }
 
-        private void VisitAndCheck(URN urn, HashSet<URN> startOrder, HashSet<URN> visiting, HashSet<URN> incompatibilities)
+        private void VisitAndCheck(URN urn, HashSet<URN> startOrder, HashSet<URN> visiting,
+            HashSet<URN> incompatibilities)
         {
             if (startOrder.Contains(urn)) return;
             if (visiting.Contains(urn)) throw new Exception($"Circle dependencies detected for {urn}");
@@ -498,46 +559,54 @@ namespace RPGCreator.Core
             visiting.Remove(urn);
             startOrder.Add(urn);
         }
-        
+
         public bool StartModule(URN moduleUrn, EngineSecurityToken token)
         {
             if (token == null)
             {
                 StackTrace stackTrace = new StackTrace();
                 var callingMethod = stackTrace.GetFrame(1)?.GetMethod();
-                throw new UnauthorizedAccessException($"TryLoadModule method can only be called by the engine. Unauthorized call from method: {callingMethod?.DeclaringType?.FullName}.{callingMethod?.Name} in assembly {callingMethod?.DeclaringType?.Assembly.FullName} estimed path: {callingMethod?.DeclaringType?.Assembly.Location}");
+                throw new UnauthorizedAccessException(
+                    $"TryLoadModule method can only be called by the engine. Unauthorized call from method: {callingMethod?.DeclaringType?.FullName}.{callingMethod?.Name} in assembly {callingMethod?.DeclaringType?.Assembly.FullName} estimed path: {callingMethod?.DeclaringType?.Assembly.Location}");
             }
+
             if (!IsModuleLoaded(moduleUrn))
                 return false;
-            
-            if(IsModuleStarted(moduleUrn))
+
+            if (IsModuleStarted(moduleUrn))
                 return true; // Already started
-            
+
             var moduleCandidate = GetLoadedModule(moduleUrn);
             if (!moduleCandidate.HasValue)
                 return false;
-            
+
             var moduleType = moduleCandidate.Value.ModuleType;
             if (moduleType == null)
                 return false; // Should not happen, but just in case
             BaseModule? module;
-            try{
-                module = (BaseModule?)Activator.CreateInstance(moduleType);
-            } catch (Exception ex)
+            try
             {
-                _logger.Error("Failed to create instance of module type '{ModuleType}' for module '{ModuleUrn}'. Exception: {Exception}",
+                module = (BaseModule?)Activator.CreateInstance(moduleType);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(
+                    "Failed to create instance of module type '{ModuleType}' for module '{ModuleUrn}'. Exception: {Exception}",
                     args: [moduleType.FullName, moduleUrn, ex]);
                 return false;
             }
-            
+
             if (module == null)
                 return false; // Failed to create instance
+
 
             try
             {
                 module.Initialize(token);
                 ModuleStarted?.Invoke(moduleCandidate.Value);
-            } catch (Exception ex)
+                SetConfigStartContext(moduleCandidate.Value, true);
+            }
+            catch (Exception ex)
             {
                 _logger.Error("Failed to initialize module '{ModuleUrn}'. Exception: {Exception}",
                     args: [moduleUrn, ex]);
@@ -555,8 +624,10 @@ namespace RPGCreator.Core
             {
                 StackTrace stackTrace = new StackTrace();
                 var callingMethod = stackTrace.GetFrame(1)?.GetMethod();
-                throw new UnauthorizedAccessException($"TryLoadModule method can only be called by the engine. Unauthorized call from method: {callingMethod?.DeclaringType?.FullName}.{callingMethod?.Name} in assembly {callingMethod?.DeclaringType?.Assembly.FullName} estimed path: {callingMethod?.DeclaringType?.Assembly.Location}");
+                throw new UnauthorizedAccessException(
+                    $"TryLoadModule method can only be called by the engine. Unauthorized call from method: {callingMethod?.DeclaringType?.FullName}.{callingMethod?.Name} in assembly {callingMethod?.DeclaringType?.Assembly.FullName} estimed path: {callingMethod?.DeclaringType?.Assembly.Location}");
             }
+
             if (!IsModuleStarted(moduleUrn))
                 return true; // Already stopped
 
@@ -566,6 +637,8 @@ namespace RPGCreator.Core
             if (module == null || !candidate.HasValue)
                 return true; // Not even loaded, consider it stopped
 
+            SetConfigStartContext(candidate.Value, false);
+            
             try
             {
                 module.Shutdown(token);
@@ -581,6 +654,41 @@ namespace RPGCreator.Core
             _startedModulesByUrn.Remove(moduleUrn);
             _moduleAssemblies.Remove(module.GetType().Assembly);
             return true;
+        }
+
+        private void SetConfigStartContext(ModuleCandidate candidate, bool isStarted)
+        {
+            var configs = EngineServices.Config;
+            
+            var urn = candidate.ModuleUrn;
+            var hash = candidate.ModuleHash;
+            var cert = candidate.Certified;
+            
+            if (configs.TryFrom("modules", true, out var config))
+            {
+                if (config.Has<ModuleStartContext>(urn))
+                {
+                    var data = config.Get<ModuleStartContext>(urn, new ModuleStartContext());
+                    if (data.IsStarted != isStarted)
+                    {
+                        data.IsStarted = isStarted;
+                    }
+
+                    data.ModuleCertification = cert;
+                    data.ModuleHash = hash;
+                    data.ModuleUrn = urn;
+                    config.Set(urn, data);
+                    config.SaveConfig();
+                }
+            }
+            else
+            {
+                configs.CreateConfig("modules", new BaseConfig(), true);
+                configs.From("modules", true)?.Set(urn,
+                        new ModuleStartContext(urn, hash, cert,
+                            isStarted))
+                    .SaveConfig();
+            }
         }
 
         public void UnloadModule(URN moduleUrn)
@@ -603,12 +711,15 @@ namespace RPGCreator.Core
             {
                 StackTrace stackTrace = new StackTrace();
                 var callingMethod = stackTrace.GetFrame(1)?.GetMethod();
-                throw new UnauthorizedAccessException($"TryLoadModule method can only be called by the engine. Unauthorized call from method: {callingMethod?.DeclaringType?.FullName}.{callingMethod?.Name} in assembly {callingMethod?.DeclaringType?.Assembly.FullName} estimed path: {callingMethod?.DeclaringType?.Assembly.Location}");
+                throw new UnauthorizedAccessException(
+                    $"TryLoadModule method can only be called by the engine. Unauthorized call from method: {callingMethod?.DeclaringType?.FullName}.{callingMethod?.Name} in assembly {callingMethod?.DeclaringType?.Assembly.FullName} estimed path: {callingMethod?.DeclaringType?.Assembly.Location}");
             }
+
             if (IsModuleStarted(moduleUrn))
             {
                 StopModule(moduleUrn, token);
             }
+
             var module = GetLoadedModule(moduleUrn);
             if (module == null)
                 return;
@@ -618,8 +729,10 @@ namespace RPGCreator.Core
             _contexts.Remove(moduleUrn);
             context?.Unload();
             ModuleUnloaded?.Invoke(module.Value);
-            
-            _logger.Critical("Forcefully unloaded module {ModuleUrn}. This may lead to instability if the module was in use.", args: moduleUrn);
+
+            _logger.Critical(
+                "Forcefully unloaded module {ModuleUrn}. This may lead to instability if the module was in use.",
+                args: moduleUrn);
         }
     }
 }

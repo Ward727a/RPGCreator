@@ -37,15 +37,6 @@ namespace RPGCreator.UI.Content.Launcher
 {
     public class LauncherWindowControl : UserControl
     {
-
-        public class TestSlab : ISlabItem
-        {
-            public int? BlockPointerIndex { get; set; }
-        }
-        
-        private readonly Slabs<TestSlab> _testSlabs = new Slabs<TestSlab>(4);
-        
-        private int _slabPointerCounter = 0;
         
         private Window _Host => (Window)this.GetVisualRoot()!;
 
@@ -99,7 +90,7 @@ namespace RPGCreator.UI.Content.Launcher
                 Content = "Preferences",
                 FontSize = App.style.TextFontSize,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
                 Margin = new(0, 0, 10, 0)
             };
             MainGrid.Children.Add(openPreferences);

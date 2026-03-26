@@ -80,37 +80,38 @@ public class BaseConfig : IConfig
         return Data.GetAsOrDefault(key, defaultValue);
     }
 
-    public void SetString(string key, string value)
+    public IConfig SetString(string key, string value)
     {
-        Set(key, value);
+        return Set(key, value);
     }
 
-    public void SetInt(string key, int value)
+    public IConfig SetInt(string key, int value)
     {
-        Set(key, value);
+        return Set(key, value);
     }
 
-    public void SetBool(string key, bool value)
+    public IConfig SetBool(string key, bool value)
     {
-        Set(key, value);
+        return Set(key, value);
     }
 
-    public void SetFloat(string key, float value)
+    public IConfig SetFloat(string key, float value)
     {
-        Set(key, value);
+        return Set(key, value);
     }
 
-    public void SetDouble(string key, double value)
+    public IConfig SetDouble(string key, double value)
     {
-        Set(key, value);
+        return Set(key, value);
     }
 
-    public void Set<T>(string key, T value)
+    public IConfig Set<T>(string key, T value)
     {
         Data.Set(key, value);
         IsDirty = true;
         ConfigChanged?.Invoke();
         KeyChanged?.Invoke(key);
+        return this;
     }
 
     public bool HasString(string key)

@@ -133,8 +133,6 @@ namespace RPGCreator.Core.Managers.ProjectsManager
                 }
             }
 
-            EngineServices.PathRegistry = project.PathRegistry;
-            
             OnProjectOpened?.Invoke(project);
         }
 
