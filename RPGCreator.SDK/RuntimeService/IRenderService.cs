@@ -24,6 +24,7 @@ using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.Editor;
+using RPGCreator.SDK.Types;
 using Color = RPGCreator.SDK.Types.Color;
 using Size = RPGCreator.SDK.Types.Size;
 
@@ -33,6 +34,7 @@ namespace RPGCreator.SDK.RuntimeService;
 public struct RenderCommand()
 {
     public string TexturePath;
+    public object? TextureObject;
     public Vector2 Position;
     public Rectangle? SourceRect;
     public Color Color;
@@ -147,6 +149,14 @@ public interface IRenderService : IService
         float rotation = 0, Vector2 origin = default,
         Vector2? scale = null, float layerDepth = 0, 
         SpriteEffects effects = SpriteEffects.None);
+    
+    public void DirectDraw(
+        object textureObject, Vector2 position, 
+        Rect? sourceRect = null, Color? tint = null,
+        float rotation = 0, Vector2 origin = default,
+        Vector2? scale = null, float layerDepth = 0, 
+        SpriteEffects effects = SpriteEffects.None);
+    
     /// <summary>
     /// A direct finish call after completing drawing operations.<br/>
     /// This method finalizes the rendering context and flushes any pending draw calls to the screen.<br/>

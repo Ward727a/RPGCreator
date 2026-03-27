@@ -36,7 +36,7 @@ public class CameraService : ObservableObject, ICameraService
     private Size _cellSize = new(32f, 32f);
     public CameraService()
     {
-        RuntimeServices.MapService.OnMapLoaded += (_) =>
+        RuntimeServices.MapService.MapLoaded += (_) =>
         {
             var loadedMapData = RuntimeServices.MapService.CurrentLoadedMapData;
             _cellSize = new(loadedMapData.CellWidth, loadedMapData.CellHeight);

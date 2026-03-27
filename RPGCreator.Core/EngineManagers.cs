@@ -39,6 +39,7 @@ namespace RPGCreator.Core
         public AssetsManager Assets { get; private set; }
         public GameFactory GameFactory { get; private set; }
         public ProjectsManager Projects { get; private set; }
+        public ToolService Brush { get; private set; }
         public CommandManager Commands { get; private set; }
         
         public FeaturesRulesManager FeaturesRules { get; private set; }
@@ -48,6 +49,9 @@ namespace RPGCreator.Core
             Assets = new AssetsManager();
             Projects = new ProjectsManager();
             GameFactory = new GameFactory();
+            // Created because this allow tool to interact with the engine canvas.
+            // Do not delete it, even if you think it's doesn't used.. It is.
+            Brush = new ToolService(); 
             FeaturesRules = new FeaturesRulesManager();
             Commands = new CommandManager();
             

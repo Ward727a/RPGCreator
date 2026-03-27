@@ -37,14 +37,14 @@ public class EntitySpawner : ILayerElem, IDisposable, ISerializable, IDeserializ
     /// <summary>
     /// Position of the entity on the map editor grid.
     /// </summary>
-    public Vector2 Position { get; set; } = Vector2.One;
+    public Vector2 Offset { get; set; } = Vector2.One;
 
     public string PreviewImagePath => EntityDefinition.SpritePath;
 
     public EntitySpawner(IEntityDefinition entityDefinition, Vector2 position)
     {
         EntityDefinition = entityDefinition;
-        Position = position;
+        Offset = position;
     }
 
     public EntitySpawner()
@@ -60,8 +60,8 @@ public class EntitySpawner : ILayerElem, IDisposable, ISerializable, IDeserializ
     {
         var info = new SerializationInfo(typeof(EntitySpawner));
         info.AddValue("EntityUnique", EntityUnique?.ToString() ?? string.Empty);
-        info.AddValue("PositionX", Position.X);
-        info.AddValue("PositionY", Position.Y);
+        info.AddValue("PositionX", Offset.X);
+        info.AddValue("PositionY", Offset.Y);
         return info;
     }
 
@@ -82,7 +82,7 @@ public class EntitySpawner : ILayerElem, IDisposable, ISerializable, IDeserializ
         float posY = 0;
         info.TryGetValue("PositionX", out posX);
         info.TryGetValue("PositionY", out posY);
-        Position = new Vector2(posX, posY);
+        Offset = new Vector2(posX, posY);
 
         EngineServices.OnceServiceReady((IAssetsManager assetManager) =>
         {

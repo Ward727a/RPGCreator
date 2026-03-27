@@ -1,4 +1,5 @@
 using System.Numerics;
+using CommunityToolkit.Diagnostics;
 using RPGCreator.Core.Types.Map;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.PaintTargets;
@@ -10,6 +11,34 @@ using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 
+public class AutoLayerRenderer : BaseLayerRenderer<AutoLayerDefinition>
+{
+    public override void Render(AutoLayerDefinition layer, long chunkId)
+    {
+        var tileLayer = layer.InternalTileLayer;
+        
+        Guard.IsNotNull(tileLayer);
+        
+        var chunkElements = tileLayer.GetElements(chunkId);
+        if (chunkElements == null)
+            return;
+        
+        if(chunkElements.IsEmpty)
+            return;
+        
+        for (int i = 0; i < chunkElements.Length; i++)
+        {
+            var tileDefinition  = chunkElements[i]; 
+            if(tileDefinition == null)
+                continue;
+            
+            var position = tileLayer.GetElementWorldPosition(chunkId, i);
+            
+            RuntimeServices.RenderService.DrawTile(tileDefinition, position);
+        }
+    }
+}
+
 [SerializingType("AutoLayerDefinition")]
 public class AutoLayerDefinition : BaseLayerDef
 {
@@ -18,6 +47,7 @@ public class AutoLayerDefinition : BaseLayerDef
     public IntGridTilesetDef? IntGridSet { get; set; }
 
     private IntGridLayerTarget? _paintTargetCache;
+    private readonly AutoLayerRenderer _renderer = new();
 
     public override IPaintTarget? GetPaintTarget()
     {
@@ -31,6 +61,8 @@ public class AutoLayerDefinition : BaseLayerDef
         _paintTargetCache = new IntGridLayerTarget(this, mapDef);
         return _paintTargetCache;
     }
+
+    public override ILayerRenderer GetRenderer() => _renderer;
 
     public override bool CanPaintObject(object? objectToPaint)
     {

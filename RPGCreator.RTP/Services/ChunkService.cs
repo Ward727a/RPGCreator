@@ -60,7 +60,7 @@ public partial class ChunkService : ObservableObject, IChunkService
     
     public ChunkService()
     {
-        RuntimeServices.MapService.OnMapLoaded += OnMapLoaded;
+        RuntimeServices.MapService.MapLoaded += MapLoaded;
         RuntimeServices.MapService.OnMapUnloaded += OnMapUnloaded;
     }
     
@@ -242,13 +242,13 @@ public partial class ChunkService : ObservableObject, IChunkService
     
     public void Dispose()
     {
-        RuntimeServices.MapService.OnMapLoaded -= OnMapLoaded;
+        RuntimeServices.MapService.MapLoaded -= MapLoaded;
         RuntimeServices.MapService.OnMapUnloaded -= OnMapUnloaded;
     }
 
     #region EventHandlers
     
-    void OnMapLoaded(Ulid mapId)
+    void MapLoaded(Ulid mapId)
     {
         _chunkTileSize = new(
             RuntimeServices.MapService.CurrentLoadedMapData.CellWidth, 

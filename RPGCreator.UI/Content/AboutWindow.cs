@@ -97,11 +97,14 @@ public class AboutWindow : Window
             - [NETStandard.Library](https://github.com/dotnet/standard) (Standard Library (used for Source Generators) - MIT License)
             - [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json) (JSON Serialization - MIT License)
             - [Projektanker.Icons.Avalonia](https://github.com/Projektanker/Icons.Avalonia) (Icon Rendering - MIT License)
-            - [MaterialDesign Icons](https://github.com/Templarian/MaterialDesign) (Icon Library - Apache 2.0 License)
             - [Serilog](https://github.com/serilog/serilog) (Logging - Apache 2.0 License)
             - [Ulid](https://github.com/Cysharp/Ulid) (ULID Generation - MIT License)
             
             *Note: If you are an open-source library owner, and we are using your library, but you don't see it in the list, please let me know so I can add it to the list and give you the credit you deserve.*
+            
+            We are also using icons from different authors:
+            - [MaterialDesign Icons](https://github.com/Templarian/MaterialDesign) (Apache 2.0 License)
+            - [sbed Icons - From GameIcons.net](http://opengameart.org/content/95-game-icons) (Creative Commons 2.0 BY)
             """);
         _scrollViewer.Content = (_markdownViewer);
 

@@ -19,7 +19,7 @@ public class MapService : IMapService
     
     private readonly IAssetScope _assetScope;
     
-    public event Action<Ulid>? OnMapLoaded;
+    public event Action<Ulid>? MapLoaded;
     public event Action? OnMapUnloaded;
     public event Action<float, float>? OnMapEdited;
 
@@ -64,7 +64,7 @@ public class MapService : IMapService
             mapDefinition.BakeCollisionChunk();
         }
         ClearDirtyFlag();
-        OnMapLoaded?.Invoke(mapId);
+        MapLoaded?.Invoke(mapId);
         return true;
     }
     
@@ -135,6 +135,10 @@ public class MapService : IMapService
         if (CurrentLoadedMapDefinition == null) return true; // If no map definition, we block it by default.
         return IsTileBlocked(collisionRectangle);
     }
+
+    public event Action<BaseLayerDef>? AddedLayer;
+    public event Action<BaseLayerDef>? RemovedLayer;
+    public event Action<BaseLayerDef>? SelectedLayer;
 
     private bool IsTileBlocked(Rect collisionRectangle)
     {

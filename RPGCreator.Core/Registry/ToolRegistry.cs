@@ -107,7 +107,10 @@ public class ToolRegistry : IToolRegistry
         if (!RegisteredTools.Contains(toolLogic))
         {
             RegisteredTools.Add(toolLogic);
+            Logger.Info("Registered tool: " + toolLogic.ToolUrn);
+            return;
         }
+        Logger.Error("Tool couldn't be registered: " + toolLogic.ToolUrn);
     }
 
     public void UnregisterTool(URN toolUrn)

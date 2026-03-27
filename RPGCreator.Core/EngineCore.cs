@@ -127,6 +127,7 @@ namespace RPGCreator.Core
             var typeMapping = new AssetsTypeMapping();
             typeMapping.ScanAllEngineAssemblies();
             RegistryServices.AssetTypeRegistry = typeMapping;
+            RegistryServices.RuntimeCompilerRegistry = new RuntimeCompilerRegistry();
             
             EngineServices.Resources = new EngineResourcesService();
             RegistryServices.SimpleEventRegistry = new EngineSimpleEventRegistry();

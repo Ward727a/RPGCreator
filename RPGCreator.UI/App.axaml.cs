@@ -34,6 +34,7 @@ using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.MaterialDesign;
 using RPGCreator.RTP.Services;
 using RPGCreator.SDK;
+using RPGCreator.UI.Common.IconsProvider;
 using RPGCreator.UI.Ressources;
 using RPGCreator.UI.Services;
 using RPGCreator.UI.UiService;
@@ -47,7 +48,6 @@ public class App : Application
     public static readonly BaseStyle style = new DefaultStyle();
     public override void Initialize()
     {
-        AvaloniaXamlLoader.Load(this);
         EditorUiServices.DialogService = new DialogService();
         EditorUiServices.MenuService = new MenuService();
         EditorUiServices.NotificationService = new NotificationService();
@@ -70,7 +70,8 @@ public class App : Application
         MarkdownNode.Register<MathInlineNode>();
         MarkdownNode.Register<MathBlockNode>();
         IconProvider.Current
-            .Register<MaterialDesignIconProvider>();
+            .Register<MaterialDesignIconProvider>()
+            .Register<GameIconProvider>();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {

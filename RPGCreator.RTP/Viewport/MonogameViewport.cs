@@ -109,7 +109,7 @@ public class MonogameViewport : BaseMonogameViewport
         GlobalStates.GameSession.ActiveEcsWorld = _ecsWorld;
         
         _ecsWorld.SystemManager.AddSystem(new CameraSystem());
-        _ecsWorld.SystemManager.AddSystem(new MapDrawingSystem(graphicsDevice));
+        _ecsWorld.SystemManager.AddSystem(new MapDrawingSystem());
     }
 
     public override void UpdateAvaloniaControl(IntPtr bitmapControlAddress)

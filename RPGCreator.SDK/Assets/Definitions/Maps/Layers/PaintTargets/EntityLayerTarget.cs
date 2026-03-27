@@ -24,13 +24,6 @@ public class EntityLayerTarget : IPaintTarget
         GridHeight = gridHeight;
     }
     
-    public bool IsValidPosition(Vector2 position)
-    {
-        if (MapDef == null)
-            return false;
-        return position is { X: >= 0, Y: >= 0 } && (position.X < MapDef.Size.Width && position.Y < MapDef.Size.Height);
-    }
-
     public bool CanAcceptObject(object objectToPaint)
     {
         return objectToPaint is IEntityDefinition;
@@ -38,8 +31,6 @@ public class EntityLayerTarget : IPaintTarget
 
     public void PaintAt(Vector2 position, object objectToPaint)
     {
-        if(objectToPaint is EntitySpawner entityVisual)
-            _layerDef.AddElement(entityVisual, position);
         if (objectToPaint is IEntityDefinition entityDef)
         {
             _layerDef.AddElement(new EntitySpawner(entityDef, position), position);

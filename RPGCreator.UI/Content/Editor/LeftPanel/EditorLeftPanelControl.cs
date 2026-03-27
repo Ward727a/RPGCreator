@@ -203,23 +203,22 @@ public class EditorLeftPanelControl : UserControl
                                 });
                                 break;
                         };
-
-                        if (activeTool.PayloadType == EPayloadType.Custom)
+                    } 
+                    else
+                    {
+                        var customControlObj = activeTool.GetCustomPayloadUiControl();
+                        if (customControlObj is Control customControl)
                         {
-                            var customControlObj = activeTool.GetCustomPayloadUiControl();
-                            if (customControlObj is Control customControl)
-                            {
-                                ShowPayloadControl(customControl);
-                            }
-                            else
-                                ShowPayloadControl(new TextBlock()
-                                {
-                                    Text = "Sorry, the custom payload control given by the current selected tool is not a valid Avalonia control.",
-                                    HorizontalAlignment = HorizontalAlignment.Center,
-                                    VerticalAlignment = VerticalAlignment.Center,
-                                    TextAlignment = TextAlignment.Center,
-                                });
+                            ShowPayloadControl(customControl);
                         }
+                        else
+                            ShowPayloadControl(new TextBlock()
+                            {
+                                Text = "Sorry, the custom payload control given by the current selected tool is not a valid Avalonia control.",
+                                HorizontalAlignment = HorizontalAlignment.Center,
+                                VerticalAlignment = VerticalAlignment.Center,
+                                TextAlignment = TextAlignment.Center,
+                            });
                     }
                 }
                 else

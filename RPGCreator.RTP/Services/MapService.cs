@@ -18,7 +18,7 @@ public class MapService : IMapService
     
     private readonly IAssetScope _assetScope;
     
-    public event Action<Ulid>? OnMapLoaded;
+    public event Action<Ulid>? MapLoaded;
     public event Action? OnMapUnloaded;
     public event Action<float, float>? OnMapEdited;
 
@@ -59,7 +59,7 @@ public class MapService : IMapService
         MapState.CurrentMapDef = mapDef;
         MapState.CurrentMapData = CreateMapData(mapDef);
         ClearDirtyFlag();
-        OnMapLoaded?.Invoke(mapId);
+        MapLoaded?.Invoke(mapId);
         return true;
     }
     
@@ -131,6 +131,10 @@ public class MapService : IMapService
         return IsTileBlocked(collisionRectangle);
     }
 
+    public event Action<BaseLayerDef>? AddedLayer;
+    public event Action<BaseLayerDef>? RemovedLayer;
+    public event Action<BaseLayerDef>? SelectedLayer;
+
     private bool IsTileBlocked(Rect collisionRectangle)
     {
        if (CurrentLoadedMapDefinition == null) return true;
@@ -192,12 +196,18 @@ public class MapService : IMapService
     public void SelectLayer(int layerIndex)
     {
         MapState.CurrentLayerIndex = layerIndex;
+        SelectedLayer?.Invoke(GetLayerAt(layerIndex));
     }
     public bool TryAddLayer(BaseLayerDef layerDef)
     {
         if (!HasLoadedMap || CurrentLoadedMapDefinition == null)
             return false;
-        return CurrentLoadedMapDefinition.AddLayer(layerDef);
+        if (CurrentLoadedMapDefinition.AddLayer(layerDef))
+        {
+            AddedLayer?.Invoke(layerDef);
+            return true;
+        }
+        return false;
     }
 
     public bool TryRemoveLayer(int layerIndex)
@@ -207,7 +217,12 @@ public class MapService : IMapService
         if (layerIndex < 0 || layerIndex >= CurrentLoadedMapDefinition.TileLayers.Count)
             return false;
         var layerDef = CurrentLoadedMapDefinition.TileLayers[layerIndex];
-        return CurrentLoadedMapDefinition.RemoveLayer(layerDef);
+        if (CurrentLoadedMapDefinition.RemoveLayer(layerDef))
+        {
+            RemovedLayer?.Invoke(layerDef);
+            return true;
+        }
+        return false;
     }
 
     public BaseLayerDef GetSelectedLayer()

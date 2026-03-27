@@ -43,7 +43,7 @@ public class LayerService : ObservableObject, ILayerService
 
     public LayerService()
     {
-        RuntimeServices.MapService.OnMapLoaded += OnMapLoaded;
+        RuntimeServices.MapService.MapLoaded += MapLoaded;
         RuntimeServices.MapService.OnMapUnloaded += OnMapUnloaded;
     }
 
@@ -174,7 +174,7 @@ public class LayerService : ObservableObject, ILayerService
         CurrentLayerIndex = -1;
     }
 
-    private void OnMapLoaded(Ulid mapId)
+    private void MapLoaded(Ulid mapId)
     {
         var mapDef = RuntimeServices.MapService.CurrentLoadedMapDefinition;
         if (mapDef != null)
@@ -213,7 +213,7 @@ public class LayerService : ObservableObject, ILayerService
 
     public void Dispose()
     {
-        RuntimeServices.MapService.OnMapLoaded -= OnMapLoaded;
+        RuntimeServices.MapService.MapLoaded -= MapLoaded;
         RuntimeServices.MapService.OnMapUnloaded -= OnMapUnloaded;
         GC.SuppressFinalize(this);
     }

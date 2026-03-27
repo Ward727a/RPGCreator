@@ -182,7 +182,7 @@ public class GamePlayer : Game, IGameRunner
         EngineServices.Resources.RegisterLoader<Texture2D>(new Texture2DLoader(GraphicsDevice));
         
         RuntimeServices.MapService = new MapService();
-        RuntimeServices.MapService.OnMapLoaded += (mapId) =>
+        RuntimeServices.MapService.MapLoaded += (mapId) =>
         {
             var def = RuntimeServices.MapService.CurrentLoadedMapDefinition;
 

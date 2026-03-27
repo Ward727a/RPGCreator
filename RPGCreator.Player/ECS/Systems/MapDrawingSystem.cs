@@ -44,7 +44,7 @@ public class MapDrawingSystem() : BaseMapDrawingSystem
     {
         RuntimeServices.OnceServiceReady((IMapService MapService) =>
         {
-            MapService.OnMapLoaded += map =>
+            MapService.MapLoaded += map =>
             {
                 if (!RuntimeServices.MapService.HasLoadedMap) return;
                 PrecalculateLayerRenderingMode(RuntimeServices.MapService.CurrentLoadedMapDefinition);

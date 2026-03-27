@@ -25,13 +25,18 @@
 using Avalonia.Controls;
 using System;
 using System.Linq;
+using Avalonia;
 using Avalonia.Layout;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.GlobalState;
+using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.RuntimeService;
+using RPGCreator.UI.Contexts;
 
 namespace RPGCreator.UI.Content.Editor.LayersListComponents
 {
@@ -41,6 +46,99 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
     /// </summary>
     public class LayersListComponent : UserControl
     {
+
+        public class LayerCreateModal : StackPanel
+        {
+            public readonly struct CreatedLayerEventArgs(string name, string key)
+            {
+                public readonly string Name = name;
+                public readonly string Key = key;
+            }
+
+            [ExposeEventToPlugin("EditorLeftPanel.LayerPanel.LayerCreator")]
+            public event Action<CreatedLayerEventArgs> LayerCreated;
+
+            [ExposePropToPlugin("EditorLeftPanel.LayerPanel.LayerCreator")]
+            public TextBox NameInput { get; } = new();
+            [ExposePropToPlugin("EditorLeftPanel.LayerPanel.LayerCreator")]
+            public ComboBox TypeInput { get; } = new();
+            
+            public LayerCreateModal()
+            {
+                Spacing = 5;
+            }
+
+            protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+            {
+                base.OnAttachedToVisualTree(e);
+                CreateComponents();
+                RegisterEvents();
+            }
+
+            private void CreateComponents()
+            {
+                NameInput.Watermark = "Enter layer name...";
+                NameInput.Text = "My Layer";
+                NameInput.InnerLeftContent = "Layer Name:";
+                
+                TypeInput.HorizontalAlignment = HorizontalAlignment.Stretch;
+                TypeInput.HorizontalContentAlignment = HorizontalAlignment.Stretch;
+                
+                AddType("tile_layer", "Tile Layer", true);
+                AddType("auto_layer", "Auto Layer");
+                AddType("entity_layer", "Entity Layer");
+            
+                TypeInput.SelectedIndex = 0;
+            
+                Children.Add(NameInput);
+                Children.Add(TypeInput);
+            }
+
+            [ExposeToPlugin("EditorLeftPanel.LayerPanel.LayerCreator")]
+            public void AddType(string key, string typeName, bool selectedByDefault = false)
+            {
+                TypeInput.Items.Add(new ComboBoxItem()
+                {
+                    Content = typeName,
+                    Tag = key
+                });
+
+                if (selectedByDefault)
+                {
+                    TypeInput.SelectedIndex = TypeInput.Items.Count - 1;
+                }
+            }
+
+            private void RegisterEvents()
+            {
+            }
+
+            public void LinkToExtension()
+            {
+                var context = new EditorLeftPanelLayerPanelLayerCreatorContext(
+                    new EditorLeftPanelLayerPanelLayerCreatorContext.Config()
+                    {
+                        AddLayerCreated = (action) =>
+                        {
+                            LayerCreated += action;
+                        },
+                        RemoveLayerCreated = (action) =>
+                        {
+                            LayerCreated -= action;
+                        },
+                        AddType = AddType,
+                        GetNameInput = () => NameInput,
+                        GetTypeInput = () => TypeInput
+                    });
+                EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.EditorLeftPanelLayerPanelLayerCreator, this, context);
+            }
+            
+            internal void CallLayerCreated(string name, string key)
+            {
+                LayerCreated?.Invoke(new CreatedLayerEventArgs(name, key));
+            }
+        }
+        
         #region Components
 
         public StackPanel LayersBody { get; private set; }
@@ -131,7 +229,23 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                     OnMapChanged();
                 }
             };
-            RuntimeServices.OnceServiceReady((IMapService mapService) => mapService.OnMapLoaded += (mapId) => OnMapChanged());
+            RuntimeServices.OnceServiceReady((IMapService mapService) =>
+            {
+                mapService.MapLoaded += (mapId) => OnMapChanged();
+                mapService.SelectedLayer += def =>
+                {
+                    SelectedLayerText.Text = $"Selected Layer: {def.Name}";
+                };
+                mapService.AddedLayer += def =>
+                {
+                    LayerItem newLayerItem = new LayerItem(def);
+                    
+                    newLayerItem.LayerRemoved += () => { RefreshComponents(); };
+                    
+                    LayersList.Items.Add(newLayerItem);
+                    LayersList.SelectedItem = newLayerItem;
+                };
+            });
         }
 
         #region EventsHandlers
@@ -150,69 +264,26 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                 return;
             }
 
-            var promptContent = new StackPanel()
-                { Spacing = 5};
-            var layerNameTextBox = new TextBox()
+            var promptContent = new LayerCreateModal();
+            promptContent.LayerCreated += (args) =>
             {
-                Watermark = "Enter layer name...",
-                Text = "My Layer",
-                InnerLeftContent = "Layer Name:",
-            };
-            var layerTypeComboBox = new ComboBox()
-            {
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                HorizontalContentAlignment = HorizontalAlignment.Stretch
-            };
-            
-            layerTypeComboBox.Items.Add("Tile Layer");
-            layerTypeComboBox.Items.Add("Auto Layer");
-            layerTypeComboBox.Items.Add("Entity Layer");
-            
-            layerTypeComboBox.SelectedIndex = 0;
-            
-            promptContent.Children.Add(layerNameTextBox);
-            promptContent.Children.Add(layerTypeComboBox);
-
-            var result = await EditorUiServices.DialogService.ConfirmAsync(
-                "Add Layer", 
-                promptContent,
-                confirmButtonText: "Add");
-
-            if(!result)
-            {
-                // User canceled the dialog
-                return;
-            }
-            
-            var resultText = layerNameTextBox.Text;
-            var resultType = layerTypeComboBox.SelectedIndex;
-            
-            if (string.IsNullOrWhiteSpace(resultText))
-            {
-                EditorUiServices.NotificationService.Warn("Invalid Layer Name", "Layer name cannot be empty.");
-                return;
-            }
-            
-            
-            var layerName = resultText;
-            if (!string.IsNullOrWhiteSpace(layerName))
-            {
+                var layerName = args.Name;
+                var layerType = args.Key;
                 // Logic to add a new layer with the specified name
                 BaseLayerDef newLayer;
                 
-                switch (resultType)
+                switch (layerType)
                 {
-                    case 0: // Tile Layer
+                    case "tile_layer": // Tile Layer
                         newLayer = EngineServices.AssetsManager.CreateAsset<TileLayerDefinition>();
                         break;
-                    case 1: // Auto Layer
+                    case "auto_layer": // Auto Layer
                         newLayer = EngineServices.AssetsManager.CreateAsset<AutoLayerDefinition>();
                         break;
-                    case 2: // Entity Layer
+                    case "entity_layer": // Entity Layer
                         newLayer = EngineServices.AssetsManager.CreateAsset<EntityLayerDefinition>();
                         break;
-                    default:
-                        EditorUiServices.NotificationService.Error("Error Adding Layer", "Invalid layer type selected.");
+                    default: // Not supported by default
                         return;
                 }
                 
@@ -226,23 +297,27 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
 
                 if (RuntimeServices.MapService.TryAddLayer(newLayer))
                 {
-                    LayerItem newLayerItem = new LayerItem(newLayer);
-
-                    newLayerItem.LayerRemoved += () => { RefreshComponents(); };
-
-                    LayersList.Items.Add(newLayerItem);
-                    LayersList.SelectedItem = newLayerItem;
-
-                    SelectedLayerText.Text = $"Selected Layer: {layerName}";
-
                     newLayer.LayerIndex = RuntimeServices.MapService.GetLastLayerIndex();
                     RuntimeServices.MapService.SelectLayer(newLayer.LayerIndex);
-
                     return;
                 }
                 
                 EditorUiServices.NotificationService.Error("Error Adding Layer", "Could not add the new layer. It may already exist?");
+            };
+            promptContent.LinkToExtension();
+
+            var result = await EditorUiServices.DialogService.ConfirmAsync(
+                "Add Layer", 
+                promptContent,
+                confirmButtonText: "Add");
+
+            if(!result)
+            {
+                // User canceled the dialog
+                return;
             }
+            
+            promptContent?.CallLayerCreated(promptContent.NameInput.Text ?? string.Empty, (promptContent.TypeInput.SelectedItem as ComboBoxItem)?.Tag as string ?? string.Empty);
         }
 
         private void OnLayerSelected(object? sender, SelectionChangedEventArgs e)

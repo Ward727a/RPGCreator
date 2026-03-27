@@ -192,6 +192,12 @@ public static class RegistryServices
         get => GetService(defaultInstance:field);
         set => RegisterService(value);
     } = new DefaultAssetsMetaDataRegistry();
+
+    public static IRuntimeCompilerRegistry RuntimeCompilerRegistry
+    {
+        get => GetService<IRuntimeCompilerRegistry>();
+        set => RegisterService(value);
+    }
     
     #region DefaultInstance
     // All instances here SHOULD NOT be used!

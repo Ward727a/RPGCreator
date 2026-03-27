@@ -15,7 +15,7 @@ public interface IMapService : IService
     /// Event called when a map is loaded.<br/>
     /// The Ulid parameter is the ID of the loaded map.
     /// </summary>
-    event Action<Ulid>? OnMapLoaded;
+    event Action<Ulid>? MapLoaded;
     
     /// <summary>
     /// Event called when a map is unloaded.
@@ -109,6 +109,10 @@ public interface IMapService : IService
 
     #region Layers
 
+    public event Action<BaseLayerDef>? AddedLayer;
+    public event Action<BaseLayerDef>? RemovedLayer;
+    public event Action<BaseLayerDef>? SelectedLayer;
+    
     /// <summary>
     /// Selects the layer at the given index, or last layer if the index is out of range.<br/>
     /// In the case where the index is out of range, it will also log a warning message.

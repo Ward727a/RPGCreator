@@ -71,7 +71,6 @@
 
   <ItemGroup>
     <Folder Include="Assets\GamePlayer\" />
-    <Folder Include="Assets\Icons\" />
     <Folder Include="Common\AnimEditor\" />
     <Folder Include="Content\AssetsManage\Components\Items\" />
     <Folder Include="Content\Preferences\Components\General\" />

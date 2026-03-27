@@ -51,7 +51,7 @@ public class RenderService : IRenderService
         _graphicsDevice = graphicsDevice;
         this.spriteBatch = spriteBatch;
         
-        RuntimeServices.MapService.OnMapLoaded += (_) =>
+        RuntimeServices.MapService.MapLoaded += (_) =>
         {
             var loadedMapData = RuntimeServices.MapService.CurrentLoadedMapData;
             _cellSize = new(loadedMapData.CellWidth, loadedMapData.CellHeight);
@@ -279,10 +279,38 @@ public class RenderService : IRenderService
             xnaEffects |= SpriteEffects.FlipHorizontally;
         if (effects.HasFlag(SDK.ECS.Components.SpriteEffects.FlipVertically))
             xnaEffects |= SpriteEffects.FlipVertically;
-        // Si scale est null, on utilise Vector2.One (1,1)
+        
         var finalScale = scale?.ToXnaFast() ?? Microsoft.Xna.Framework.Vector2.One;
         
         var finalSourceRect = sourceRect?.ToXnaFast() ?? null;
+        
+        spriteBatch.Draw(
+            texture,
+            position.ToXnaFast(),
+            finalSourceRect,
+            xnaColor * _globalOpacity,
+            rotation,
+            origin.ToXnaFast(),
+            finalScale,
+            xnaEffects,
+            layerDepth
+        );
+    }
+
+    public void DirectDraw(object textureObject, Vector2 position, Rect? sourceRect = null, Color? tint = null, float rotation = 0,
+        Vector2 origin = default, Vector2? scale = null, float layerDepth = 0, SDK.ECS.Components.SpriteEffects effects = SDK.ECS.Components.SpriteEffects.None)
+    {
+        var texture = (Texture2D)textureObject;
+        var xnaColor = (tint ?? Color.White).ToMgColor();
+        var xnaEffects = SpriteEffects.None;
+        if (effects.HasFlag(SDK.ECS.Components.SpriteEffects.FlipHorizontally))
+            xnaEffects |= SpriteEffects.FlipHorizontally;
+        if (effects.HasFlag(SDK.ECS.Components.SpriteEffects.FlipVertically))
+            xnaEffects |= SpriteEffects.FlipVertically;
+        
+        var finalScale = scale?.ToXnaFast() ?? Microsoft.Xna.Framework.Vector2.One;
+        
+        var finalSourceRect = sourceRect?.ToMGRect() ?? null;
         
         spriteBatch.Draw(
             texture,

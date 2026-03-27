@@ -24,6 +24,7 @@ public enum RenderingMode
 public abstract class BaseLayerDef : BaseAssetDef, ISerializable, IDeserializable, IHasMetadata
 {
     public abstract IPaintTarget? GetPaintTarget();
+    public abstract ILayerRenderer GetRenderer();
     public abstract bool CanPaintObject(object? objectToPaint);
     
     /// <summary>

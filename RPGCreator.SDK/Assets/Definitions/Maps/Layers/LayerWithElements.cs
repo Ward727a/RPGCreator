@@ -83,8 +83,9 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
     public TDef? RemoveElement(Vector2 location)
     {
         var chunkId = LayerChunk.GetChunkId(location);
+        var chunkPosition = LayerChunk.GetChunkPosition(location);
         var chunk = GetChunk(chunkId);
-        var removedElement = chunk.RemoveElement(location);
+        var removedElement = chunk.RemoveElement(chunkPosition);
 
         ElementRemoved?.Invoke(new LayerElementEventArgs(chunkId, location, removedElement));
         return removedElement;
@@ -266,6 +267,29 @@ public abstract class LayerWithElements<TDef> : BaseLayerDef
     public bool IsTransient { get; set; }
 }
 
+public class TileLayerRenderer : BaseLayerRenderer<TileLayerDefinition>
+{
+    public override void Render(TileLayerDefinition layer, long chunkId)
+    {
+        var chunkElements = layer.GetElements(chunkId);
+        if (chunkElements == null)
+            return;
+        
+        if(chunkElements.IsEmpty)
+            return;
+        
+        for (int i = 0; i < chunkElements.Length; i++)
+        {
+            var tileDefinition  = chunkElements[i]; 
+            if(tileDefinition == null)
+                continue;
+            
+            var position = layer.GetElementWorldPosition(chunkId, i);
+            
+            RuntimeServices.RenderService.DrawTile(tileDefinition, position);
+        }
+    }
+}
 
 [SerializingType("TileLayerDef")]
 public class TileLayerDefinition : LayerWithElements<ITileDef>
@@ -274,6 +298,7 @@ public class TileLayerDefinition : LayerWithElements<ITileDef>
     public override UrnSingleModule UrnModule => "tile_layer".ToUrnSingleModule();
     
     private TileLayerTarget? _paintTargetCache;
+    private readonly TileLayerRenderer _renderer = new();
     
     public override IPaintTarget? GetPaintTarget()
     {
@@ -287,6 +312,8 @@ public class TileLayerDefinition : LayerWithElements<ITileDef>
         _paintTargetCache = new TileLayerTarget(this, mapDef, (int)mapDef.GridParameter.CellWidth, (int)mapDef.GridParameter.CellHeight);
         return _paintTargetCache;
     }
+
+    public override ILayerRenderer GetRenderer() => _renderer;
 
     public override bool CanPaintObject(object? objectToPaint)
     {

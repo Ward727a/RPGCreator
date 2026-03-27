@@ -39,7 +39,7 @@ public class CameraService : ObservableObject, ICameraService
     public CameraService(GraphicsDeviceManager device)
     {
         _graphics = device;
-        RuntimeServices.MapService.OnMapLoaded += (_) =>
+        RuntimeServices.MapService.MapLoaded += (_) =>
         {
             var loadedMapData = RuntimeServices.MapService.CurrentLoadedMapData;
             _cellSize = new(loadedMapData.CellWidth, loadedMapData.CellHeight);

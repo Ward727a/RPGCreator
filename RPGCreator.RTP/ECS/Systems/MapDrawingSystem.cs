@@ -21,11 +21,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
-using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.ECS;
@@ -34,13 +32,11 @@ using RPGCreator.SDK.RuntimeService;
 
 namespace RPGCreator.RTP.ECS.Systems;
 
-public class MapDrawingSystem(GraphicsDevice graphicsDevice) : BaseMapDrawingSystem
+public class MapDrawingSystem : BaseMapDrawingSystem
 {
-
-    private GraphicsDevice _graphicsDevice = graphicsDevice;
-
     public override void Initialize(IEcsWorld ecsWorld)
     {
+        
     }
 
     public override void Update(TimeSpan deltaTime)
@@ -63,13 +59,6 @@ public class MapDrawingSystem(GraphicsDevice graphicsDevice) : BaseMapDrawingSys
         RuntimeServices.RenderService.PrepareDrawing(IRenderService.SpriteSortMode.Deferred);
         foreach (var layer in sortedLayersZIndex)
         {
-            var actualLayer = layer;
-            if (layer is AutoLayerDefinition autoLayer)
-                actualLayer = autoLayer.InternalTileLayer;
-            
-            bool IsEntityLayer = actualLayer is EntityLayerDefinition;
-            bool IsTileLayer = actualLayer is LayerWithElements<ITileDef>;
-            
             for(var x = range.minX; x <= range.maxX; x++)
             {
                 for(var y = range.minY; y <= range.maxY; y++)
@@ -77,11 +66,8 @@ public class MapDrawingSystem(GraphicsDevice graphicsDevice) : BaseMapDrawingSys
                     var chunk = LayerChunk.GetChunkId(x, y);
                     
                     visibleChunks.Add((x, y, chunk));
-
-                    if(IsTileLayer)
-                        DrawChunkTiles(chunk, actualLayer as LayerWithElements<ITileDef>);
-                    else if(IsEntityLayer)
-                        DrawEntity(chunk, actualLayer as LayerWithElements<EntitySpawner>);
+                    
+                    layer.GetRenderer().Render(layer, chunk);
                 }
             }
         }

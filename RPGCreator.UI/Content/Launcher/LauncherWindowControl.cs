@@ -27,6 +27,7 @@ using Avalonia.VisualTree;
 using RPGCreator.UI.Content.Editor;
 using RPGCreator.UI.Content.ProjectCreator;
 using System;
+using Projektanker.Icons.Avalonia;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Projects;
@@ -63,6 +64,7 @@ namespace RPGCreator.UI.Content.Launcher
                 ShowGridLines = true,
                 RowDefinitions = new RowDefinitions("Auto, *, Auto")
             };
+
 
             var ContentGrid = new Grid
             {
@@ -238,6 +240,11 @@ namespace RPGCreator.UI.Content.Launcher
             RefreshProjectList();
 
             Content = MainGrid;
+            var testIcon = new Icon()
+            {
+                Value = "gameIcon-spawn-node"
+            };
+            projectDetailsPanel.Children.Add(testIcon);
         }
 
         private void RefreshProjectDetails()

@@ -19,9 +19,15 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Runtime.CompilerServices;
+using _BaseModule.AssetDefinitions.SpawnPoint;
 using _BaseModule.UI.StatsFeature;
 using _BaseModule.UI.StatsModifier;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.EditorUiService;
+using RPGCreator.UI.Content.Editor.LayersListComponents;
 using RPGCreator.UI.Extensions;
 
 namespace _BaseModule;
@@ -41,6 +47,43 @@ internal static class BaseModuleUi
             {
                 return new StatsModifierManagement(context);
             });
+        });
+        extensionManager.EditorLeftPanel().LayerPanel_LayerCreator((o, context) =>
+        {
+            context.AddType("spawn_point_layer", "Spawn Points Layer", false);
+            context.LayerCreated += args =>
+            {
+                var layerName = args.Name;
+                var layerType = args.Key;
+                
+                BaseLayerDef newLayer;
+                
+                switch (layerType)
+                {
+                    case "spawn_point_layer": // Spawn Point Layer
+                        newLayer = EngineServices.AssetsManager.CreateAsset<SpawnPointLayer>();
+                        break;
+                    default: // Not supported by default
+                        return;
+                }
+                
+                newLayer.Name = layerName;
+                newLayer.ZIndex = RuntimeServices.MapService.CurrentLoadedMapDefinition!.TileLayers.Count; // Set ZIndex to the last index
+                newLayer.LayerIndex = RuntimeServices.MapService.GetLastLayerIndex() + 1; // Set LayerIndex to the next available index
+                if(!RuntimeServices.MapService.HasLoadedMap)
+                {
+                    return;
+                }
+
+                if (RuntimeServices.MapService.TryAddLayer(newLayer))
+                {
+                    newLayer.LayerIndex = RuntimeServices.MapService.GetLastLayerIndex();
+                    RuntimeServices.MapService.SelectLayer(newLayer.LayerIndex);
+                    return;
+                }
+                
+                EditorUiServices.NotificationService.Error("Error Adding Layer", "Could not add the new layer. It may already exist?");
+            };
         });
     }
 }

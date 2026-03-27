@@ -11,7 +11,7 @@ namespace RPGCreator.SDK.Assets.Definitions.Tilesets;
 [SerializingType("TileDefinition")]
 public class TileDefinition : BaseAssetDef, ITileDef
 {
-    public Vector2 Position { get; set; }
+    public Vector2 Offset { get; set; }
     public Size SizeInTileset { get; private set; }
     public Vector2 PositionInTileset { get; private set; }
     public Rect UV => new (new(PositionInTileset.X, PositionInTileset.Y), new(TilesetDef.TileWidth, TilesetDef.TileHeight));

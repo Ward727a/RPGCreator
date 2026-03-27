@@ -18,10 +18,49 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Reflection;
+using RPGCreator.SDK.Logging;
+
 namespace RPGCreator.SDK;
 
 public static class RpgEnv
 {
+
+    public static string ExecutableFolder
+    {
+        get
+        {
+            if (field == "")
+            {
+                if (Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) is { } path &&
+                    Directory.Exists(path))
+                {
+                    field = path;
+                }
+                else
+                {
+                    Logger.Error("Could not find the executable folder.");
+                    throw new Exception("Could not find the executable folder.");
+                }
+            }
+
+            return field;
+        }
+    } = "";
+
+    public static string ExeAssetsFolder
+    {
+        get
+        {
+            if (field == "")
+            {
+                field = Path.Combine(ExecutableFolder, "assets");
+            }
+
+            return field;
+        }
+    } = "";
+    
     public static string ApplicationData
     {
         get

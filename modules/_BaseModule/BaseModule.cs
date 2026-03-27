@@ -74,6 +74,7 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
         
         RegistryServices.ToolRegistry.RegisterTool(new SimplePen());
         RegistryServices.ToolRegistry.RegisterTool(new CharacterPlacer());
+        RegistryServices.ToolRegistry.RegisterTool(new SpawnPointPlacer());
         
         // Then we can set up the custom assets menu for stats management.
         // We are doing that here, simply to allow us to 'order' the menu option in a specific way.
@@ -92,7 +93,7 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
                     if (stream == null)            
                     {
                         Logger.Error("Failed to load embedded documentation resource: {ResourceName}", args: name);
-                        return;
+                        continue;
                     }
                     using StreamReader reader = new StreamReader(stream);
                     string markdownContent = reader.ReadToEnd();
@@ -133,6 +134,7 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
         
         RegistryServices.ToolRegistry.UnregisterTool(SimplePen.Urn);
         RegistryServices.ToolRegistry.UnregisterTool(CharacterPlacer.Urn);
+        RegistryServices.ToolRegistry.UnregisterTool(SpawnPointPlacer.Urn);
         Logger.Info("BaseModule shutdown.");
     }
 }

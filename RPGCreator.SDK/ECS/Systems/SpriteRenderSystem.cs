@@ -51,7 +51,7 @@ public class SpriteRenderSystem : ISystem
         _componentManager = ecsWorld.ComponentManager;
         _updateAction = CheckingServiceReady;
         
-        RuntimeServices.MapService.OnMapLoaded += (_) =>
+        RuntimeServices.MapService.MapLoaded += (_) =>
         {
             _sheetCache.Clear();
         };

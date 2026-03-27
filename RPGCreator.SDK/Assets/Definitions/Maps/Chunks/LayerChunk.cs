@@ -139,23 +139,9 @@ public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where
     /// <exception cref="ArgumentOutOfRangeException">Thrown if the local coordinates are out of bounds even after sanitization.</exception>
     public TDef? GetElement(int localX, int localY)
     {
-        if (SanitizeLocalCoord(ref localX))
-        {
-            // Logger.Debug("Sanitized local X coordinate to {localX}.", args: localX);
-        }
-
-        if (SanitizeLocalCoord(ref localY))
-        {
-            // Logger.Debug("Sanitized local Y coordinate to {localY}.", args: localY);
-        }
+        var index = LayerChunk.GetElementIndexByWorldPosition(new Vector2(localX, localY));
         
-        if (localX is < 0 or >= ChunkSize)
-            throw new ArgumentOutOfRangeException(nameof(localX), "Local coordinates must be between 0 and 31.");
-        
-        if (localY is < 0 or >= ChunkSize)
-            throw new ArgumentOutOfRangeException(nameof(localY), "Local coordinates must be between 0 and 31.");
-        
-        return _localElements[localY * ChunkSize + localX];
+        return _localElements[index];
     }
     
     /// <summary>
