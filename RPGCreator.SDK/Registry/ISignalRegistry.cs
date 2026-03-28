@@ -20,7 +20,7 @@
 
 using RPGCreator.SDK.Types;
 
-namespace RPGCreator.SDK.EngineService;
+namespace RPGCreator.SDK.Registry;
 
 public interface ISignalRegistry : IService
 {

@@ -2,12 +2,16 @@
 using _BaseModule.Features.Entity;
 using _BaseModule.Features.Game;
 using _BaseModule.MacroFeatures;
+using _BaseModule.NativeAction;
 using _BaseModule.Registry;
 using _BaseModule.Tools;
 using RPGCreator.SDK;
 using RPGCreator.SDK.EditorUiService;
+using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules;
+using RPGCreator.SDK.Registry;
+using RPGCreator.SDK.RuntimeService;
 using RPGCreator.SDK.Types;
 
 [assembly: ModuleManifest(
@@ -54,11 +58,13 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
         // We start by scanning the assembly for assets types, so we, and the engine more generally, can be aware of all the custom assets provided by this module, such as the stats definitions.
         // This is VERY important if you have any custom type of asset that need to be serialized, or deserialized (saved or loaded) in any way.
         // Without scanning the assembly, the engine won't be aware of these assets and won't be able to handle them properly.
-        RegistryServices.AssetTypeRegistry.ScanAssembly(asm);
+        RegistryServices.AssetsType.ScanAssembly(asm);
         
         // We register the registry for the stats modifiers, which is used to store all the modifiers that can be applied to stats, such as buffs and debuffs.
         // This registry is then used by the StatsFeature to apply the modifiers to the stats of the entities.
         EngineServices.AssetsManager.RegisterRegistry(_statModifierRegistry);
+        
+        RegistryServices.Signal.RegisterSignal(ISignalRegistry.SignalModuleUrn.ToUrnModule("rpgc").ToUrn("entity_spawned"));
         
         // We register all entity features and game features provided by the base module.
         EngineServices.FeaturesManager.RegisterEntityFeature<MovementFeature>();
@@ -72,9 +78,11 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
         EngineServices.FeaturesManager.RegisterEntityFeature<LivingBeingMacroFeature>();
         EngineServices.FeaturesManager.RegisterGameFeature<StandardControlFeature>();
         
-        RegistryServices.ToolRegistry.RegisterTool(new SimplePen());
-        RegistryServices.ToolRegistry.RegisterTool(new CharacterPlacer());
-        RegistryServices.ToolRegistry.RegisterTool(new SpawnPointPlacer());
+        RegistryServices.Tool.RegisterTool(new SimplePen());
+        RegistryServices.Tool.RegisterTool(new CharacterPlacer());
+        RegistryServices.Tool.RegisterTool(new SpawnPointPlacer());
+
+        RegistryServices.NativeAction.RegisterNativeAction(new SpawnPointNativeAction());
         
         // Then we can set up the custom assets menu for stats management.
         // We are doing that here, simply to allow us to 'order' the menu option in a specific way.
@@ -108,6 +116,17 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
             BaseModuleUi.Register(extensionManager);
         });
         
+        RuntimeServices.OnceServiceReady((IMapService mapService) =>
+        {
+            if (GlobalStates.EngineMode == EEngineMode.Player)
+            {
+                mapService.MapLoaded += (ulid =>
+                {
+                    
+                });
+            }
+        });
+        
         Logger.Info("BaseModule initialized.");
     }
 
@@ -115,10 +134,12 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
     {
         Logger.Info("BaseModule shutting down.");
         var asm = Assembly.GetExecutingAssembly();
-        RegistryServices.AssetTypeRegistry.UnScanAssembly(asm);
+        RegistryServices.AssetsType.UnScanAssembly(asm);
         
         EngineServices.ModulePathResolver.UnregisterPath(FolderUrn);
 
+        RegistryServices.Signal.UnregisterSignal(ISignalRegistry.SignalModuleUrn.ToUrnModule("rpgc").ToUrn("entity_spawned"));
+        
         EngineServices.AssetsManager.UnregisterRegistry(_statModifierRegistry);
         
         EngineServices.FeaturesManager.UnregisterEntityFeature(MovementFeature.Urn);
@@ -132,9 +153,9 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
         EngineServices.FeaturesManager.UnregisterEntityFeature(LivingBeingMacroFeature.Urn);
         EngineServices.FeaturesManager.UnregisterGameFeature(StandardControlFeature.Urn);
         
-        RegistryServices.ToolRegistry.UnregisterTool(SimplePen.Urn);
-        RegistryServices.ToolRegistry.UnregisterTool(CharacterPlacer.Urn);
-        RegistryServices.ToolRegistry.UnregisterTool(SpawnPointPlacer.Urn);
+        RegistryServices.Tool.UnregisterTool(SimplePen.Urn);
+        RegistryServices.Tool.UnregisterTool(CharacterPlacer.Urn);
+        RegistryServices.Tool.UnregisterTool(SpawnPointPlacer.Urn);
         Logger.Info("BaseModule shutdown.");
     }
 }

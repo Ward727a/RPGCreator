@@ -4,7 +4,7 @@ using RPGCreator.SDK.Modules;
 using RPGCreator.SDK.Types;
 
 [assembly: ModuleManifest(
-    urn: "rpgc://module/test_module",
+    urn: "rpgc://module/test_module2",
     name: "Test Module",
     Author = "Your Name",
     TargetEngineVersion = "1.0.0",

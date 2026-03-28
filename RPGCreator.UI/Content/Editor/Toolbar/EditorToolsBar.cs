@@ -265,7 +265,7 @@ public class EditorToolsBar : UserControl
                     }
                     
                     #endif
-                    return CreateToolButton(RegistryServices.ToolRegistry.GetTool(urn));
+                    return CreateToolButton(RegistryServices.Tool.GetTool(urn));
                 }),
             }
         };
@@ -425,14 +425,14 @@ public class EditorToolsBar : UserControl
 
             if (button.IsChecked != true && ActiveButtonBeforeEditMode?.Tag == button.Tag)
             {
-                RegistryServices.ToolRegistry.DeactivateTool(tool);
+                RegistryServices.Tool.DeactivateTool(tool);
                 ActiveButtonBeforeEditMode = null;
                 return;
             }
             if(button.IsChecked != true)
                 return;
 
-            RegistryServices.ToolRegistry.ActivateTool(tool);
+            RegistryServices.Tool.ActivateTool(tool);
             ActiveButtonBeforeEditMode = button;
         };
 

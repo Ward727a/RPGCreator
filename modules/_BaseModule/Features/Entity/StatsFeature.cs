@@ -32,6 +32,7 @@ using RPGCreator.SDK.ECS.Systems;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.Features.Entity;
+using RPGCreator.SDK.Registry;
 using RPGCreator.SDK.Types;
 using RPGCreator.UI.Contexts;
 using Ursa.Controls;
@@ -224,13 +225,13 @@ public class StatsFeature : BaseEntityFeature
             };
         });
         var urn = ISignalRegistry.SignalModuleUrn.ToUrnModule("rpgc").ToUrn("stat_changed");
-        RegistryServices.SignalRegistry.RegisterSignal(urn);
+        RegistryServices.Signal.RegisterSignal(urn);
     }
 
     public override void OnShutdown()
     {
         var urn = ISignalRegistry.SignalModuleUrn.ToUrnModule("rpgc").ToUrn("stat_changed");
-        RegistryServices.SignalRegistry.UnregisterSignal(urn);
+        RegistryServices.Signal.UnregisterSignal(urn);
     }
 
     // When this feature is added to an entity definition, we want to add a toggle for each stat definition, allowing the user to choose which stats they want to use for this entity.

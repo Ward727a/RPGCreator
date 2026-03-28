@@ -94,7 +94,7 @@ public class BaseSimpleEventDefinition : BaseAssetDef, ISerializable, IDeseriali
         
         if (!_conditionsByUrnCache.TryGetValue(condition, out expectedCondition))
         {
-            if (RegistryServices.SimpleEventRegistry.TryGetSimpleEventCondition(condition, out expectedCondition))
+            if (RegistryServices.SimpleEvents.TryGetSimpleEventCondition(condition, out expectedCondition))
             {
                 expectedCondition.Parameters = entry?.Parameters ?? new CustomData();
                 _conditionsByUrnCache.Add(condition, expectedCondition);
@@ -115,7 +115,7 @@ public class BaseSimpleEventDefinition : BaseAssetDef, ISerializable, IDeseriali
         
         if (!_thenActionsByUrnCache.TryGetValue(action, out actionDefinition))
         {
-            if (RegistryServices.SimpleEventRegistry.TryGetSimpleEventAction(action, out actionDefinition))
+            if (RegistryServices.SimpleEvents.TryGetSimpleEventAction(action, out actionDefinition))
             {
                 actionDefinition.Parameters = entry?.Parameters ?? new CustomData();
                 _thenActionsByUrnCache.Add(action, actionDefinition);
@@ -135,7 +135,7 @@ public class BaseSimpleEventDefinition : BaseAssetDef, ISerializable, IDeseriali
         
         if (!_elseActionsByUrnCache.TryGetValue(action, out actionDefinition))
         {
-            if (RegistryServices.SimpleEventRegistry.TryGetSimpleEventAction(action, out actionDefinition))
+            if (RegistryServices.SimpleEvents.TryGetSimpleEventAction(action, out actionDefinition))
             {
                 actionDefinition.Parameters = entry?.Parameters ?? new CustomData();
                 _elseActionsByUrnCache.Add(action, actionDefinition);
@@ -192,7 +192,7 @@ public class BaseSimpleEventDefinition : BaseAssetDef, ISerializable, IDeseriali
 
         foreach (var conditionsKey in Conditions.Keys)
         {
-            if(RegistryServices.SignalRegistry.TryGetSignalMask(conditionsKey, out var conditionMask))
+            if(RegistryServices.Signal.TryGetSignalMask(conditionsKey, out var conditionMask))
             {
                 SignalInterestsMask.Set(conditionMask, true);
             }

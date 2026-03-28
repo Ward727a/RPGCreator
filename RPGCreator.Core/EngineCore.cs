@@ -126,16 +126,17 @@ namespace RPGCreator.Core
             // In fact, I didn't check if it could be a problem, but I prefer to not take the risk for now, and we can always change that later if we need to).
             var typeMapping = new AssetsTypeMapping();
             typeMapping.ScanAllEngineAssemblies();
-            RegistryServices.AssetTypeRegistry = typeMapping;
-            RegistryServices.RuntimeCompilerRegistry = new RuntimeCompilerRegistry();
+            RegistryServices.AssetsType = typeMapping;
+            RegistryServices.RuntimeCompiler = new RuntimeCompilerRegistry();
             
             EngineServices.Resources = new EngineResourcesService();
-            RegistryServices.SimpleEventRegistry = new EngineSimpleEventRegistry();
-            RegistryServices.EventsRegisterService = new EngineEventsRegister();
+            RegistryServices.SimpleEvents = new EngineSimpleEventRegistry();
+            RegistryServices.Events = new EngineEventsRegister();
             
-            RegistryServices.SignalRegistry = new EngineSignalRegistry();
-            RegistryServices.UrnRegistry = new UrnRegistry();
-            RegistryServices.ToolRegistry = new ToolRegistry();
+            RegistryServices.Signal = new EngineSignalRegistry();
+            RegistryServices.Urn = new UrnRegistry();
+            RegistryServices.Tool = new ToolRegistry();
+            RegistryServices.NativeAction = new NativeActionRegistry();
             
             Instance = this;
 

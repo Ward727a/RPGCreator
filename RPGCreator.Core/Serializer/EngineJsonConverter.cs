@@ -19,7 +19,7 @@ public class EngineJsonConverter : JsonConverter
 
             writer.WriteStartObject();
 
-            string? typeKey = RegistryServices.AssetTypeRegistry.GetKey(value.GetType());
+            string? typeKey = RegistryServices.AssetsType.GetKey(value.GetType());
 
             if (typeKey != null)
             {
@@ -60,7 +60,7 @@ public class EngineJsonConverter : JsonConverter
         var typeKeyToken = jsonObject["$type"];
         if (typeKeyToken != null)
         {
-            actualType = RegistryServices.AssetTypeRegistry.GetType(typeKeyToken.ToString());
+            actualType = RegistryServices.AssetsType.GetType(typeKeyToken.ToString());
         }
 
         if (actualType == null || actualType == typeof(GenericBaseAssetStub))

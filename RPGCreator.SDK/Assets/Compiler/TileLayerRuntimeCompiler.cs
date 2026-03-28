@@ -39,7 +39,7 @@ public class TileLayerRuntimeCompiler : BaseAssetRuntimeCompiler<TileLayerDefini
     
     public override void Compile(TileLayerDefinition source, IEcsWorld world, ICompilerContext? context = null)
     {
-        var chunkCompiler = RegistryServices.RuntimeCompilerRegistry.GetRegisteredCompiler<TileChunkRuntimeCompiler, LayerChunk<ITileDef>>();
+        var chunkCompiler = RegistryServices.RuntimeCompiler.GetRegisteredCompiler<TileChunkRuntimeCompiler, LayerChunk<ITileDef>>();
         
         Guard.IsNotNull(source);
         Guard.IsNotNull(world);

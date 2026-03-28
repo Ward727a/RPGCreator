@@ -161,8 +161,8 @@ public class PlayButtonsBar : UserControl
         GlobalStates.ProjectState.CurrentProject?.MainMapId = GlobalStates.MapState.CurrentMapId;
         // This is a temporary way to give the module hash to the project player.
         // We will need to implement a way to get the module hashes from the project, and not hardcode them like this.
-        if(!GlobalStates.ProjectState.CurrentProject!.Modules.Contains("AC6A81E0851B805A8A33C35E9019D3A91BCD4AF3EDCA388178C3FD2A0EE321FA"))
-            GlobalStates.ProjectState.CurrentProject?.Modules.Add("AC6A81E0851B805A8A33C35E9019D3A91BCD4AF3EDCA388178C3FD2A0EE321FA");
+        if(!GlobalStates.ProjectState.CurrentProject!.Modules.Contains("2A3C116DF7BEFD8C684299A5220F88EF37DC1ED6044377432BD97CA1CFCF6A91"))
+            GlobalStates.ProjectState.CurrentProject?.Modules.Add("2A3C116DF7BEFD8C684299A5220F88EF37DC1ED6044377432BD97CA1CFCF6A91");
         if (GlobalStates.ProjectState.CurrentProject == null)
         {
             throw new CriticalEngineException("Project is null!", GlobalStates.ProjectState);

@@ -348,7 +348,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
         
         public T CreateTransientAsset<T>(IAssetScope? scope = null) where T : IBaseAssetDef, new()
         {
-            var typeKey = RegistryServices.AssetTypeRegistry.GetKey(typeof(T));
+            var typeKey = RegistryServices.AssetsType.GetKey(typeof(T));
             if(typeKey == null)
             {
                 Logger.Error("Cannot create transient asset of type {AssetType} because it is not registered in the AssetTypeRegistry.", args: typeof(T).FullName);
@@ -412,7 +412,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
             if (_assetLocations.TryGetValue(id, out var location))
             {
                 
-                Type? type = RegistryServices.AssetTypeRegistry.GetType(location.TypeName);
+                Type? type = RegistryServices.AssetsType.GetType(location.TypeName);
                 if(type == null)
                     type = Type.GetType(location.TypeName)!;
                 
@@ -450,7 +450,7 @@ namespace RPGCreator.Core.Managers.AssetsManager
         {
             if (_assetLocations.TryGetValue(id, out var location))
             {
-                Type? type = RegistryServices.AssetTypeRegistry.GetType(location.TypeName);
+                Type? type = RegistryServices.AssetsType.GetType(location.TypeName);
                 
                 if(type == null)
                     type = Type.GetType(location.TypeName);

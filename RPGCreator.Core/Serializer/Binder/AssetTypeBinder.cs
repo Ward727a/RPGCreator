@@ -29,7 +29,7 @@ public class AssetTypeBinder : ISerializationBinder
 {
     public Type BindToType(string? assemblyName, string typeName)
     {
-        var assetType = RegistryServices.AssetTypeRegistry.GetType(typeName);
+        var assetType = RegistryServices.AssetsType.GetType(typeName);
     
         if (assetType != null && assetType != typeof(GenericBaseAssetStub))
         {
@@ -39,7 +39,7 @@ public class AssetTypeBinder : ISerializationBinder
         var systemType = Type.GetType(typeName);
         if (systemType != null)
         {
-            RegistryServices.AssetTypeRegistry.RegisterMapping(typeName, systemType);
+            RegistryServices.AssetsType.RegisterMapping(typeName, systemType);
             return systemType;
         }
         
@@ -76,6 +76,6 @@ public class AssetTypeBinder : ISerializationBinder
     public void BindToName(Type serializedType, [UnscopedRef] out string? assemblyName, [UnscopedRef] out string? typeName)
     {
         assemblyName = null;
-        typeName = RegistryServices.AssetTypeRegistry.GetKey(serializedType) ?? serializedType.FullName;
+        typeName = RegistryServices.AssetsType.GetKey(serializedType) ?? serializedType.FullName;
     }
 }

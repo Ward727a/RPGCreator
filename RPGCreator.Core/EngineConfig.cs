@@ -65,12 +65,11 @@ public class EngineConfig : IEngineConfig
     private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<EngineConfig>();
     private readonly string _configPath = Path.Combine(RpgEnv.Config, "config.json");
 
-    public ObservableCollection<URN> Shortcuts => _data.GetAs<ObservableCollection<URN>>(Keys.Shortcuts) ?? [];
+    public ObservableCollection<URN> Shortcuts => Get<ObservableCollection<URN>>(Keys.Shortcuts, new ObservableCollection<URN>());
 
-    public ObservableCollection<URN> ToolsShortcuts =>
-        _data.GetAs<ObservableCollection<URN>>(Keys.ToolsShortcuts) ?? [];
+    public ObservableCollection<URN> ToolsShortcuts => Get<ObservableCollection<URN>>(Keys.ToolsShortcuts, new ObservableCollection<URN>());
 
-    private float _autosavingTime = 300;
+    private double _autosavingTime = 300;
     private bool _isAutosaveEnabled = true;
     private bool _notifyOnAutoSave = false;
     
@@ -85,15 +84,24 @@ public class EngineConfig : IEngineConfig
 
     public EngineConfig()
     {
-        _data.Set(Keys.Shortcuts, new ObservableCollection<URN>());
-        _data.Set(Keys.ToolsShortcuts, new ObservableCollection<URN>());
+    }
 
-        if (!HasFloat(Keys.AutoSaveTime))
+    private void LoadData()
+    {
+        if (!Has<ObservableCollection<URN>>(Keys.Shortcuts))
         {
-            SetFloat(Keys.AutoSaveTime, _autosavingTime);
+            _data.Set(Keys.Shortcuts, new ObservableCollection<URN>());
+        }
+        
+        if (!Has<ObservableCollection<URN>>(Keys.ToolsShortcuts))
+            _data.Set(Keys.ToolsShortcuts, new ObservableCollection<URN>());
+        
+        if (!HasDouble(Keys.AutoSaveTime))
+        {
+            SetDouble(Keys.AutoSaveTime, _autosavingTime);
         }
         else
-            _autosavingTime = GetFloat(Keys.AutoSaveTime);
+            _autosavingTime = GetDouble(Keys.AutoSaveTime);
 
         if (!HasBool(Keys.AutoSaveEnabled))
         {
@@ -131,7 +139,7 @@ public class EngineConfig : IEngineConfig
         switch (key)
         {
             case Keys.AutoSaveTime:
-                _autosavingTime = GetFloat(Keys.AutoSaveTime);
+                _autosavingTime = GetDouble(Keys.AutoSaveTime);
                 SetAutoSave();
                 break;
             case Keys.AutoSaveEnabled:
@@ -156,7 +164,7 @@ public class EngineConfig : IEngineConfig
 
             if (!_isAutosaveEnabled && _autosavingTime <= 0) return;
 
-            _schedulerAutosavingId = scheduler.WaitSecond(_autosavingTime, () =>
+            _schedulerAutosavingId = scheduler.WaitSecond(Convert.ToSingle(_autosavingTime), () =>
             {
                 if (!_isAutosaveEnabled)
                 {
@@ -218,11 +226,6 @@ public class EngineConfig : IEngineConfig
     }
 
     public bool GetBool(string key, bool defaultValue = false)
-    {
-        return Get(key, defaultValue);
-    }
-
-    public float GetFloat(string key, float defaultValue = 0)
     {
         return Get(key, defaultValue);
     }
@@ -419,11 +422,6 @@ public class EngineConfig : IEngineConfig
         return Set(key, value);
     }
 
-    public IConfig SetFloat(string key, float value)
-    {
-        return Set(key, value);
-    }
-
     public IConfig SetDouble(string key, double value)
     {
         return Set(key, value);
@@ -449,11 +447,6 @@ public class EngineConfig : IEngineConfig
     }
 
     public bool HasBool(string key)
-    {
-        return _data.Has(key);
-    }
-
-    public bool HasFloat(string key)
     {
         return _data.Has(key);
     }
@@ -555,6 +548,8 @@ public class EngineConfig : IEngineConfig
 
             _data = config._data;
 
+            LoadData();
+            
             Logger.Debug("Successfully loaded engine config from path: {Path}", args: path);
             Logger.Debug("Loaded config data: {@Data}", args: _data);
 
@@ -584,7 +579,7 @@ public class EngineConfig : IEngineConfig
 
         var dataIntegrity = data.GetTypeOf(Keys.Shortcuts) == typeof(ObservableCollection<URN>) &&
                             data.GetTypeOf(Keys.ToolsShortcuts) == typeof(ObservableCollection<URN>) &&
-                            data.GetTypeOf(Keys.AutoSaveTime) == typeof(float) &&
+                            data.GetTypeOf(Keys.AutoSaveTime) == typeof(double) &&
                             data.GetTypeOf(Keys.AutoSaveEnabled) == typeof(bool) &&
                             data.GetTypeOf(Keys.NotifyOnAutoSave) == typeof(bool) &&
                             data.GetTypeOf(Keys.Paths.Modules) == typeof(string);

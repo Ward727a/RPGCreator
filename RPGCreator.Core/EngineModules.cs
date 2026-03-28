@@ -382,8 +382,8 @@ namespace RPGCreator.Core
         private const string PublicKey =
             """
             -----BEGIN PUBLIC KEY-----
-            MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEhF/z+houm7QByxUXGfgj8tcqc4I2
-            QGw7aO36FGPblMjeuwHUE8tzBXUD/TBKk5hUXCqmXS4/WgFM+SEkL4k/6A==
+            MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWGEyQWgNEd+7DULoGRowlXjSR7/I
+            ljfzdojH6bX/gw80ZczAyxv18+kko/XbNi5XPM2vxaA9eNj5XrVKN7Co/g==
             -----END PUBLIC KEY-----
             """;
 

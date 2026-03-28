@@ -321,7 +321,6 @@ public class RenderService : IRenderService
             xnaEffects |= SpriteEffects.FlipHorizontally;
         if (effects.HasFlag(SDK.ECS.Components.SpriteEffects.FlipVertically))
             xnaEffects |= SpriteEffects.FlipVertically;
-        // Si scale est null, on utilise Vector2.One (1,1)
         var finalScale = scale?.ToXnaFast() ?? Microsoft.Xna.Framework.Vector2.One;
         
         var finalSourceRect = sourceRect?.ToXnaFast() ?? null;

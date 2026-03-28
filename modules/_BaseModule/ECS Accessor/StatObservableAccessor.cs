@@ -24,6 +24,7 @@ using RPGCreator.SDK;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Registry;
 using RPGCreator.SDK.Types;
 
 namespace _BaseModule.ECS_Accessor;
@@ -86,7 +87,7 @@ public partial class StatObservableAccessor : BaseObservableAccessor
 
         if (system == null) return;
         
-        var signalIdx = RegistryServices.SignalRegistry.GetSignalMask(ISignalRegistry.SignalModuleUrn.ToUrnModule("rpgc").ToUrn("stat_changed"));
+        var signalIdx = RegistryServices.Signal.GetSignalMask(ISignalRegistry.SignalModuleUrn.ToUrnModule("rpgc").ToUrn("stat_changed"));
         
         system.AddAccessorBinding(EntityId, signalIdx, this);
         IsBinded = true;

@@ -18,25 +18,27 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using CommunityToolkit.Diagnostics;
-using RPGCreator.SDK.Assets.Definitions.Maps;
+using System.Diagnostics.CodeAnalysis;
 using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.Modules.NativeAction;
+using RPGCreator.SDK.Types;
 
-namespace RPGCreator.SDK.Assets.Compiler;
+namespace RPGCreator.SDK.Registry;
 
-public readonly record struct MapCompilerContext(Ulid MapId) : ICompilerContext;
-
-public class MapRuntimeCompiler : BaseAssetRuntimeCompiler<IMapDef>
+public interface INativeActionRegistry : IService
 {
-    public override void Compile(IMapDef source, IEcsWorld world, ICompilerContext? context = null)
-    {
-        Guard.IsNotNull(source);
-        Guard.IsNotNull(world);
-
-        var mapCompilerContext = new MapCompilerContext(source.Unique);
-        foreach (var layer in source.TileLayers)
-        {
-            RegistryServices.RuntimeCompiler.Compile(layer.GetType(), layer, world, mapCompilerContext);
-        }
-    }
+    public static UrnSingleModule NativeActionModule => "simple_events_actions".ToUrnSingleModule();
+    
+    public bool RegisterNativeAction(BaseNativeAction action, bool overwriteIfExists = false);
+    public bool UnregisterNativeAction(URN urn);
+    
+    public bool TryGetNativeAction(URN urn, [NotNullWhen(true)] out BaseNativeAction? action);
+    
+    public IEnumerable<BaseNativeAction> GetNativeActions();
+    
+    public ReadOnlySpan<URN> SearchNativeActionsBySignal(Bitmask256 signalMask);
+    
+    public int NativeActionCount { get; }
+    
+    public void ClearRegistry();
 }

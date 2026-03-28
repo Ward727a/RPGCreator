@@ -40,21 +40,18 @@ public interface IConfig : ISerializable, IDeserializable
     public string GetString(string key, string defaultValue = "");
     public int GetInt(string key, int defaultValue = 0);
     public bool GetBool(string key, bool defaultValue = false);
-    public float GetFloat(string key, float defaultValue = 0f);
     public double GetDouble(string key, double defaultValue = 0.0);
     public T Get<T>(string key, T defaultValue);
 
     public IConfig SetString(string key, string value);
     public IConfig SetInt(string key, int value);
     public IConfig SetBool(string key, bool value);
-    public IConfig SetFloat(string key, float value);
     public IConfig SetDouble(string key, double value);
     public IConfig Set<T>(string key, T value);
     
     public bool HasString(string key);
     public bool HasInt(string key);
     public bool HasBool(string key);
-    public bool HasFloat(string key);
     public bool HasDouble(string key);
     public bool Has<T>(string key);
     

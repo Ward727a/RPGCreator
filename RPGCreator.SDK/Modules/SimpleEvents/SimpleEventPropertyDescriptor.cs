@@ -30,6 +30,7 @@ namespace RPGCreator.SDK.Modules.SimpleEvents;
 /// <param name="PropertyType">The property type awaited for this property.</param>
 /// <param name="DisplayName">The display name of the property, which will be shown in the editor.</param>
 /// <param name="Description">The description of the property, which will be shown in the editor as a tooltip.</param>
+/// <param name="GetInputControl">A function that returns a control to be used to edit the property.</param>
 /// <param name="DefaultValue">The default value of the property, which will be used if the user doesn't set any value for this property.</param>
 public record SimpleEventPropertyDescriptor(
     int Order,

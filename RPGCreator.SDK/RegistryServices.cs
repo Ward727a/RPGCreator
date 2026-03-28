@@ -145,31 +145,31 @@ public static class RegistryServices
         }
     }
 
-    public static IUrnRegistry UrnRegistry
+    public static IUrnRegistry Urn
     {
         get => GetService<IUrnRegistry>();
         set => RegisterService(value);
     }
     
-    public static IAssetTypeRegistry AssetTypeRegistry
+    public static IAssetTypeRegistry AssetsType
     {
         get => GetService<IAssetTypeRegistry>();
         set => RegisterService(value);
     }
 
-    public static IEventsRegisterService EventsRegisterService
+    public static IEventsRegisterService Events
     {
         get => GetService<IEventsRegisterService>();
         set => RegisterService(value);
     }
 
-    public static ISimpleEventRegistry SimpleEventRegistry
+    public static ISimpleEventRegistry SimpleEvents
     {
         get => GetService<ISimpleEventRegistry>();
         set => RegisterService(value);
     }
 
-    public static ISignalRegistry SignalRegistry
+    public static ISignalRegistry Signal
     {
         get => GetService<ISignalRegistry>();
         set => RegisterService(value);
@@ -181,7 +181,7 @@ public static class RegistryServices
         set => RegisterService(value);
     }
 
-    public static IToolRegistry ToolRegistry
+    public static IToolRegistry Tool
     {
         get => GetService<IToolRegistry>();
         set => RegisterService(value);
@@ -193,9 +193,15 @@ public static class RegistryServices
         set => RegisterService(value);
     } = new DefaultAssetsMetaDataRegistry();
 
-    public static IRuntimeCompilerRegistry RuntimeCompilerRegistry
+    public static IRuntimeCompilerRegistry RuntimeCompiler
     {
         get => GetService<IRuntimeCompilerRegistry>();
+        set => RegisterService(value);
+    }
+
+    public static INativeActionRegistry NativeAction
+    {
+        get => GetService<INativeActionRegistry>();
         set => RegisterService(value);
     }
     

@@ -46,7 +46,6 @@
 * [x] Camara system:
   The camera need to be able to lock the player, and follow him. For now this should be this simple, no massive parameters.
 * [ ] Adding a "spawn player point" on the map editor, allowing the user to define where the player will appear on a map when the player access it.
-* [ ] Convert map rendering by using ECS now. Currently we are using an "hybrid" style, the MapRenderingSystem is hardlinked to the POO Definition class, it should not be. The ideal solution would be to 'convert' the map definition by taking it's layer, converting them to an entity, and adding component (like ChunkStorageComponent and LayerHeaderComponent) then adding a componentTag (like 'TileLayerTagComponent' or 'EntityLayerTagComponent').
 
 ### Milestone for Preview 02
 
@@ -55,4 +54,5 @@
 * [ ] Add a better Game Feature system.
 * [ ] Add a way for feature property to 'link' them together with an Id.
 * [ ] Add a way for feature property to call an action method defined inside the feature when a property has changed.
+* [ ] Convert map rendering by using ECS now. Currently we are using an "hybrid" style, the MapRenderingSystem is hardlinked to the POO Definition class, it should not be. The ideal solution would be to 'convert' the map definition by taking it's layer, converting them to an entity, and adding component (like ChunkStorageComponent and LayerHeaderComponent) then adding a componentTag (like 'TileLayerTagComponent' or 'EntityLayerTagComponent').
 

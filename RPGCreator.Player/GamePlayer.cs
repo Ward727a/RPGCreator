@@ -96,6 +96,8 @@ public class GamePlayer : Game, IGameRunner
                 {
                     logger.Info("Game source from command line arguments.");
                     string filePath = args[i + 1];
+
+                    logger.Debug("Cmd args: @{args}", args: [args]);
                     
                     // Check if the file is an .xml file
                     if (Path.GetExtension(filePath).Equals(".xml", StringComparison.OrdinalIgnoreCase))

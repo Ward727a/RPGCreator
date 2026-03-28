@@ -317,7 +317,7 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
         {
             Id = idAsset.Unique,
             RelativePath = relativePath,
-            TypeName = RegistryServices.AssetTypeRegistry.GetKey(asset.GetType()) ?? asset.GetType().FullName ?? "Unknown",
+            TypeName = RegistryServices.AssetsType.GetKey(asset.GetType()) ?? asset.GetType().FullName ?? "Unknown",
             LastIndexed = DateTime.UtcNow,
         };
         
@@ -473,7 +473,7 @@ namespace RPGCreator.Core.Types.Assets.BaseAssetsPack
 
         var indexCollection = db.GetCollection<EngineDB.AssetIndexRecord>(INDEX_COLLECTION);
         
-        var typeName = RegistryServices.AssetTypeRegistry.GetKey(typeof(T)) ?? typeof(T).FullName ?? "Unknown";
+        var typeName = RegistryServices.AssetsType.GetKey(typeof(T)) ?? typeof(T).FullName ?? "Unknown";
         
         var allIndexed = indexCollection.Find(Query.EQ("TypeName", typeName));
 

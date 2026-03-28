@@ -66,7 +66,7 @@ public record struct ToolButtonInfo : IToolButtonInfo
         if (ToolUrn == URN.Empty)
             return null;
         
-        var toolRegistry = RegistryServices.ToolRegistry;
+        var toolRegistry = RegistryServices.Tool;
         if (!toolRegistry.HasTool(ToolUrn))
         {
             Logger.Warning($"Tool with URN {ToolUrn} not found in registry.");
@@ -105,6 +105,6 @@ public record struct ToolButtonInfo : IToolButtonInfo
 
         HasValidTool = false;
         if (ToolUrn != URN.Empty)
-            HasValidTool = RegistryServices.ToolRegistry.HasTool(ToolUrn);
+            HasValidTool = RegistryServices.Tool.HasTool(ToolUrn);
     }
 }

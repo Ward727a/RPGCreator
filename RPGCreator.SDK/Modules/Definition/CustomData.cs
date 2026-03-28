@@ -147,6 +147,7 @@ public class CustomData : ISerializable, IDeserializable, IDisposable, ICloneabl
             try
             {
                 if (value is T typedValue) return typedValue;
+                
                 return (T)Convert.ChangeType(value, typeof(T), CultureInfo.InvariantCulture);
             } catch
             {

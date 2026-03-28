@@ -43,7 +43,6 @@
 
     <ItemGroup>
       <Folder Include="AssetDefinitions\BaseItems\" />
-      <Folder Include="AssetDefinitions\CustomLayer\" />
     </ItemGroup>
 
 </Project>

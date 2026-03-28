@@ -21,8 +21,10 @@
 using RPGCreator.SDK;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Systems;
+using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Modules.Features.Entity;
+using RPGCreator.SDK.Registry;
 using RPGCreator.SDK.RuntimeService;
 using RPGCreator.SDK.Types;
 
@@ -40,16 +42,29 @@ public class SignalsFeature : BaseEntityFeature
     public override string FeatureDescription => "Allows the entity to emit and react to signals. Signals are a powerful way to create interactions between entities without tight coupling. They can be used for a wide variety of purposes, such as triggering events, communicating between entities, and creating complex behaviors.";
     public override URN FeatureUrn => Urn;
 
+    private int _onSpawnedSignal;
+    
     public override void OnWorldSetup(IEcsWorld world)
     {
+        world.SystemManager.AddSystem(new NativeActionSystem());
         world.SystemManager.AddSystem(new SimpleEventSystem());
         world.SystemManager.AddSystem(new SignalsSystem());
+        _onSpawnedSignal =
+            RegistryServices.Signal.GetSignalMask(ISignalRegistry.SignalModuleUrn.ToUrnModule("rpgc")
+                .ToUrn("entity_spawned"));
     }
 
     public override void OnInject(BufferedEntity entity, IEntityDefinition entityDefinition)
     {
         entity.AddComponent(new SimpleEventStorageComponent());
         entity.AddComponent(new SignalsComponent());
+        entity.ExecuteOnceCreated((i =>
+        {
+            SignalsSystem? system = null;
+            GlobalStates.GameSession.ActiveEcsWorld?.SystemManager.GetSystem(out system);
+            
+            system?.EmitSignal(i, _onSpawnedSignal);
+        }));
     }
 }
 
@@ -69,7 +84,7 @@ public struct SignalsComponent : IComponent
 
     public void EmitSignal(URN signalUrn)
     {
-        PendingSignals.Set(RegistryServices.SignalRegistry.GetSignalMask(signalUrn), true);
+        PendingSignals.Set(RegistryServices.Signal.GetSignalMask(signalUrn), true);
     }
 }
 
@@ -83,6 +98,39 @@ public struct SimpleEventRuntimeInstance
 {
     public Ulid AssetId;
     public Bitmask256 InterestsMask;
+}
+
+public class NativeActionSystem : ISystem
+{
+    public override int Priority => 2147481999;
+    public override bool IsDrawingSystem => false;
+
+    private IEcsWorld _world = null!;
+    private INativeActionRegistry _nativeActionRegistry = null!;
+    
+    public override void Initialize(IEcsWorld ecsWorld)
+    {
+        _world = ecsWorld;
+        _nativeActionRegistry = RegistryServices.NativeAction;
+    }
+
+    public override void Update(TimeSpan deltaTime)
+    {
+        foreach (var entityId in _world.ComponentManager.QueryDirty<SignalsComponent>())
+        {
+            ref var signals = ref _world.ComponentManager.GetComponent<SignalsComponent>(entityId);
+
+            var actionsBySignal = _nativeActionRegistry.SearchNativeActionsBySignal(signals.PendingSignals);
+
+            foreach (var actionUrn in actionsBySignal)
+            {
+                if (_nativeActionRegistry.TryGetNativeAction(actionUrn, out var action))
+                {
+                    action.Execute(entityId, _world);
+                }
+            }
+        }
+    }
 }
 
 public class SimpleEventSystem : ISystem

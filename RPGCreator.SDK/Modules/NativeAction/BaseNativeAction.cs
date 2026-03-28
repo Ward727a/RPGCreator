@@ -18,28 +18,41 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.EngineService;
-using RPGCreator.SDK.Modules.Definition;
+using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Registry;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Internals;
 
-namespace RPGCreator.SDK.Modules.SimpleEvents;
+namespace RPGCreator.SDK.Modules.NativeAction;
 
-public abstract class BaseSimpleEventAction : IHasUniqueId
+public abstract class BaseNativeAction : IHasUniqueId
 {
-    public static UrnSingleModule Module => ISimpleEventRegistry.ActionModule;
+    protected UrnSingleModule NativeActionModule => "native_actions".ToUrnSingleModule();
+    protected UrnSingleModule SignalItemModule => ISignalRegistry.SignalModuleUrn;
+
+    private Bitmask256 _triggerMask;
     
-    /// <summary>
-    /// The Unique ID of this class. It is used IN the engine, but it should <b>NOT BE USED</b> by the users as it could be changed between different sessions.<br/>
-    /// If you need to reference this class, you should use the URN instead, which is a unique and stable identifier that can be used to reference this class!
-    /// </summary>
+    public Bitmask256 TriggerMask => _triggerMask;
+
+    public abstract URN ExpectedSignal { get; }
     public Ulid Unique { get; private set; }
     public abstract URN Urn { get; }
-    
-    public abstract string Name { get; }
-    public abstract string Description { get; }
-    
-    public CustomData Parameters { get; set; } = new();
+
+    public bool BuildAction()
+    {
+        _triggerMask = new Bitmask256();
+        
+        if(RegistryServices.Signal.TryGetSignalMask(ExpectedSignal, out var signalIndex))
+        {
+            _triggerMask.Set(signalIndex, true);
+            return true;
+        }
+
+        Logger.Error("Couldn't find signal {signalName} in the SignalRegistry.", ExpectedSignal);
+        return false;
+    }
     
     public void Init(Ulid id)
     {
@@ -47,10 +60,5 @@ public abstract class BaseSimpleEventAction : IHasUniqueId
         Unique = id;
     }
 
-    public void Execute(CustomData context)
-    {
-        Execute(context, Parameters);
-    }
-    public abstract void Execute(CustomData context, CustomData data);
-    public abstract List<SimpleEventPropertyDescriptor> GetActionProperties();
+    public abstract void Execute(int entityId, IEcsWorld world);
 }

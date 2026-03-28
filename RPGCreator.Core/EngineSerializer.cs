@@ -75,7 +75,7 @@ public class EngineSerializer : ISerializerService
     public void Serialize<T>(T obj, out string data)
     {
         var jo = JObject.FromObject(obj);
-        string? key = RegistryServices.AssetTypeRegistry.GetKey(obj.GetType());
+        string? key = RegistryServices.AssetsType.GetKey(obj.GetType());
         if (key != null)
         {
             jo.AddFirst(new JProperty("TypeKey", key));
@@ -158,7 +158,7 @@ public class EngineSerializer : ISerializerService
         string typeName = typeToken.ToString();
 
         // New strategy: Try to resolve the type using the AssetTypeRegistry first
-        var type = RegistryServices.AssetTypeRegistry.GetType(typeName);
+        var type = RegistryServices.AssetsType.GetType(typeName);
         if (type != null && type != typeof(GenericBaseAssetStub)) return type;
 
         // Old strategy: Try to get the type directly

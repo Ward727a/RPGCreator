@@ -35,16 +35,16 @@ public abstract class BaseObservableAssetDef : ObservableObject, IBaseAssetDef
         get;
         protected set
         {
-            if (RegistryServices.UrnRegistry.IsUrnRegistered(field))
+            if (RegistryServices.Urn.IsUrnRegistered(field))
             {
-                RegistryServices.UrnRegistry.UnregisterUrn(field);
+                RegistryServices.Urn.UnregisterUrn(field);
             }
             
             field = value;
             
             if (field != URN.Empty)
             {
-                RegistryServices.UrnRegistry.RegisterUrn(ref field);
+                RegistryServices.Urn.RegisterUrn(ref field);
             }
         }
     } = URN.Empty;
@@ -160,9 +160,9 @@ public abstract class BaseAssetDef : IBaseAssetDef, IHasMetadata
         get;
         protected set
         {
-            if (ShouldUrnBeRegistered && RegistryServices.UrnRegistry.IsUrnRegistered(field))
+            if (ShouldUrnBeRegistered && RegistryServices.Urn.IsUrnRegistered(field))
             {
-                RegistryServices.UrnRegistry.UnregisterUrn(field);
+                RegistryServices.Urn.UnregisterUrn(field);
             }
             
             field = value;
@@ -170,7 +170,7 @@ public abstract class BaseAssetDef : IBaseAssetDef, IHasMetadata
             if (field != URN.Empty)
             {
                 if(ShouldUrnBeRegistered)
-                    RegistryServices.UrnRegistry.RegisterUrn(ref field);
+                    RegistryServices.Urn.RegisterUrn(ref field);
             }
         }
     } = URN.Empty;

@@ -19,6 +19,8 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System;
+using System.Collections.Generic;
+using CommunityToolkit.Diagnostics;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.SimpleEvent;
 using RPGCreator.SDK.EngineService;
@@ -32,10 +34,12 @@ public class SimpleEventExecutor : ISimpleEventExecutor
 {
 
     private readonly ISimpleEventRegistry _registry;
+    
+    private Dictionary<Ulid, BaseSimpleEventDefinition> _definitions = new();
 
     public SimpleEventExecutor()
     {
-        _registry = RegistryServices.SimpleEventRegistry;
+        _registry = RegistryServices.SimpleEvents;
     }
     
     public void Execute(BaseSimpleEventDefinition definition, CustomData localContext)
@@ -78,6 +82,21 @@ public class SimpleEventExecutor : ISimpleEventExecutor
 
     public void Execute(Ulid definitionId, CustomData localContext)
     {
-        throw new NotImplementedException();
+        Guard.IsNotDefault(definitionId);
+        Guard.IsNotNull(localContext);
+
+        if (_definitions.TryGetValue(definitionId, out var cachedDefinition))
+        {
+            Execute(cachedDefinition, localContext);
+        }
+        
+        if(EngineServices.AssetsManager.TryResolveAsset(definitionId, out BaseSimpleEventDefinition? definition))
+        {
+            Execute(definition, localContext);
+        }
+        else
+        {
+            Logger.Error($"[SimpleEventExecutor] Warning: Definition with id '{definitionId}' not found.");
+        }
     }
 }

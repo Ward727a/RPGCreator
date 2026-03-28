@@ -120,7 +120,7 @@ public ref struct QueryEnumerator
 /// The componentsMask is a struct that holds a bitmask representing which components an entity has.<br/>
 /// The max number of components is 256, so we can use 4 ulong (64 bits each) to store the mask. Each bit represents whether the entity has a specific component or not.
 /// </summary>
-public struct Bitmask256
+public record struct Bitmask256
 {
     private ulong _b0, _b1, _b2, _b3;
 

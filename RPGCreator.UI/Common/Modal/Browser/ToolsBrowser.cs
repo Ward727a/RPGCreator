@@ -48,7 +48,7 @@ public class ToolsBrowser : UserControl
     
     public ToolsBrowser()
     {
-        _toolsSortedByName = new ObservableCollection<ToolLogic>(RegistryServices.ToolRegistry.RegisteredTools);
+        _toolsSortedByName = new ObservableCollection<ToolLogic>(RegistryServices.Tool.RegisteredTools);
         CreateComponents();
         RegisterEvents();
         LinkToExtension();
@@ -65,7 +65,7 @@ public class ToolsBrowser : UserControl
         {
             Margin = new Thickness(5),
             Watermark = "Search tools...",
-            ItemsSource = RegistryServices.ToolRegistry.RegisteredTools,
+            ItemsSource = RegistryServices.Tool.RegisteredTools,
             ItemTemplate = new FuncDataTemplate<ToolLogic>((tool, scope) =>
             {
                 if(EngineServices.Config.ToolsShortcuts.Contains(tool.ToolUrn))
@@ -128,7 +128,7 @@ public class ToolsBrowser : UserControl
             Dispatcher.UIThread.Post(() =>
             {
                 _toolsSortedByName.Clear();
-                foreach (var tool in RegistryServices.ToolRegistry.RegisteredTools)
+                foreach (var tool in RegistryServices.Tool.RegisteredTools)
                 {
                     // We don't want to show tools that are already in the shortcuts, as they can be accessed from there.
                     if (!_showEvenAddedToolsToggle?.IsChecked == true && EngineServices.Config.ToolsShortcuts.Contains(tool.ToolUrn))
@@ -145,7 +145,7 @@ public class ToolsBrowser : UserControl
             Dispatcher.UIThread.Post(() =>
             {
                 _toolsSortedByName.Clear();
-                foreach (var tool in RegistryServices.ToolRegistry.RegisteredTools)
+                foreach (var tool in RegistryServices.Tool.RegisteredTools)
                 {
                     if (!_showEvenAddedToolsToggle?.IsChecked == true && EngineServices.Config.ToolsShortcuts.Contains(tool.ToolUrn))
                         continue;
@@ -268,7 +268,7 @@ public class ToolItemControl : UserControl
                 {
                     if(baseCmd is AddButtonCommand { WasActivatedBefore: true } command)
                     {
-                        RegistryServices.ToolRegistry.ActivateTool(command.AddedTool);
+                        RegistryServices.Tool.ActivateTool(command.AddedTool);
                     }
                     
                     _addToToolbarButton.IsEnabled = false;
@@ -280,7 +280,7 @@ public class ToolItemControl : UserControl
                         command.WasActivatedBefore = GlobalStates.ToolState.ActiveTool == command.AddedTool;
                         if (command.WasActivatedBefore)
                         {
-                            RegistryServices.ToolRegistry.DeactivateTool(command.AddedTool);
+                            RegistryServices.Tool.DeactivateTool(command.AddedTool);
                         }
                     }
                     _addToToolbarButton.IsEnabled = true;
