@@ -36,7 +36,7 @@ public sealed class MonogameViewportService : IMonogameViewport
     private Dictionary<string, BaseMonogameViewport> ViewportsMap { get; } = new();
     private readonly List<BaseMonogameViewport> _activeViewports = [];
 
-    private Queue<(string ViewportId, IntPtr bitmapControlAddress, Size InitialSize)> _pendingViewports = new();
+    private Queue<(string ViewportId, IntPtr bitmapControlAddress, SDK.Types.Size InitialSize)> _pendingViewports = new();
     private Queue<(string ViewportId, int Width, int Height)> _pendingResizes = new();
     
     public void Initialize()
@@ -64,7 +64,7 @@ public sealed class MonogameViewportService : IMonogameViewport
         OnCoreReady?.Invoke();
     }
     
-    public void CreateNewViewport(string viewportId, IntPtr bitmapControlAddress, Size initialSize, ViewportType viewportType = ViewportType.Game)
+    public BaseMonogameViewport? CreateNewViewport(string viewportId, IntPtr bitmapControlAddress, SDK.Types.Size initialSize, ViewportType viewportType = ViewportType.Game)
     {
         if (ViewportsMap.ContainsKey(viewportId))
         {
@@ -74,7 +74,7 @@ public sealed class MonogameViewportService : IMonogameViewport
         if (!IsCoreReady)
         {
             _pendingViewports.Enqueue((viewportId, bitmapControlAddress, initialSize));
-            return;
+            return null;
         }
 
         BaseMonogameViewport viewport;
@@ -82,10 +82,10 @@ public sealed class MonogameViewportService : IMonogameViewport
         switch (viewportType)
         {
             case ViewportType.Game:
-                viewport = new MonogameViewport(_core.CreateNewRenderTarget2D(initialSize.Width, initialSize.Height));
+                viewport = new MonogameViewport(_core.CreateNewRenderTarget2D((int)initialSize.Width, (int)initialSize.Height));
                 break;
             case ViewportType.Ui:
-                viewport = new UiViewport(_core.CreateNewRenderTarget2D(initialSize.Width, initialSize.Height));
+                viewport = new UiViewport(_core.CreateNewRenderTarget2D((int)initialSize.Width, (int)initialSize.Height));
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(viewportType), $"Unsupported viewport type: {viewportType}");
@@ -106,10 +106,12 @@ public sealed class MonogameViewportService : IMonogameViewport
         {
             if (sender is not BaseMonogameViewport vp) return;
             
-            vp.SetNewRendertarget(_core.CreateNewRenderTarget2D(newSize.Width, newSize.Height));
+            vp.SetNewRendertarget(_core.CreateNewRenderTarget2D((int)newSize.Width, (int)newSize.Height));
             vp.ResumeUpdating();
             vp.ResumeDrawing();
         };
+        
+        return viewport;
     }
 
     public void ResizeViewport(string viewportId, int width, int height)
@@ -125,7 +127,7 @@ public sealed class MonogameViewportService : IMonogameViewport
             throw new Exception($"Viewport with ID '{viewportId}' not found.");
         }
         
-        viewport.Resize(new Size(width, height));
+        viewport.Resize(new SDK.Types.Size(width, height));
     }
 
     public BaseMonogameViewport GetViewport(string viewportId)

@@ -222,7 +222,7 @@ public class MonogameViewport : BaseMonogameViewport
 
         var address = _bitmapControlAddress.Value;
         
-        int totalPixels = (Size.Width * Size.Height);
+        int totalPixels = ((int)Size.Width * (int)Size.Height);
         
         if (_internalBuffer == null || _internalBuffer.Length != totalPixels)
         {

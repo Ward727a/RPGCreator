@@ -26,7 +26,7 @@ public abstract class BaseMonogameViewport : IDisposable
 {
     public Ulid Id { get; } = Ulid.NewUlid();
     
-    public Size Size { get; set; }
+    public SDK.Types.Size Size { get; set; }
 
     public event Func<IntPtr>? DoNewFrameAction;
     
@@ -39,7 +39,7 @@ public abstract class BaseMonogameViewport : IDisposable
     public event EventHandler<TimeSpan>? Drawn;
     public event EventHandler<TimeSpan>? Updated;
     
-    public event EventHandler<Size>? Resized;
+    public event EventHandler<SDK.Types.Size>? Resized;
     public event EventHandler? Disposed;
     
     public bool DrawFrameByFrame { get; set; } = false;
@@ -50,10 +50,50 @@ public abstract class BaseMonogameViewport : IDisposable
     
     public bool InternalIsDrawingPaused { get; private set; } = false;
     public bool InternalIsUpdatingPaused { get; private set; } = false;
-    
+
+    public string IdControlLockedIn { get; private set; } = string.Empty;
+
     protected bool _inDrawing = false;
 
     public abstract void LoadContent(object graphicsDevice, object spriteBatch);
+
+    /// <summary>
+    /// This is used to lock the viewport to a specific image control.<br/>
+    /// By doing that, we ensure that the viewport will only get inputs event if the mouse is inside the image control.
+    /// </summary>
+    /// <param name="imageControlName">The image control name where the viewport is drawn and should be locked.</param>
+    public void LockToImageControl(string imageControlName)
+    {
+        IdControlLockedIn = imageControlName;
+    }
+
+    /// <summary>
+    /// Unlock the viewport from the image control.<br/>
+    /// This should be quite rare to happen, as without it, if we put the mouse at '0, 0' in viewport A, viewport B without image control lock, will also get it.
+    /// </summary>
+    public void UnlockFromImageControl()
+    {
+        IdControlLockedIn = string.Empty;
+    }
+
+    /// <summary>
+    /// Check if the mouse is inside the image control locked in.
+    /// </summary>
+    /// <returns>
+    /// Return true if the mouse is inside the image control locked in, false otherwise.
+    /// </returns>
+    public bool IsInsideImageControl()
+    {
+        if (string.IsNullOrWhiteSpace(IdControlLockedIn))
+            return true;
+
+        if (GlobalStates.ViewportMouseState.InObject is string insideControl)
+        {
+            return insideControl == IdControlLockedIn;
+        }
+
+        return false;
+    }
     
     public void DrawViewport(TimeSpan deltaTime)
     {
@@ -114,7 +154,7 @@ public abstract class BaseMonogameViewport : IDisposable
     public void Focus() => ViewportFocused?.Invoke(this, EventArgs.Empty);
     public void Close() => ViewportClosed?.Invoke(this, EventArgs.Empty);
     
-    public void Resize(Size newSize)
+    public void Resize(SDK.Types.Size newSize)
     {
 
         PauseDrawing();

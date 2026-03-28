@@ -20,6 +20,7 @@
 
 using System.Drawing;
 using RPGCreator.SDK.Editor.Rendering;
+using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.SDK.EditorUiService;
 
@@ -34,7 +35,7 @@ public interface IMonogameViewport : IService
     public bool IsCoreReady { get; }
     public event Action? OnCoreReady;
     public void Initialize();
-    public void CreateNewViewport(string viewportId, IntPtr bitmapControlAddress, Size sizeWanted, ViewportType viewportType = ViewportType.Game);
+    public BaseMonogameViewport? CreateNewViewport(string viewportId, IntPtr bitmapControlAddress, Size sizeWanted, ViewportType viewportType = ViewportType.Game);
     public void ResizeViewport(string viewportId, int width, int height);
     public BaseMonogameViewport GetViewport(string viewportId);
     public void DestroyViewport(string viewportId);

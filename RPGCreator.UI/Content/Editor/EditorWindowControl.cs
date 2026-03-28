@@ -66,7 +66,7 @@ namespace RPGCreator.UI.Content.Editor
 
         
         
-        private WriteableBitmap TestWrittableBitmap = new(new PixelSize(1172, 827), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
+        private WriteableBitmap _realTimePlayerWriteableBitmap = new(new PixelSize(1172, 827), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
 
         private Image mgImage;
         
@@ -87,27 +87,27 @@ namespace RPGCreator.UI.Content.Editor
             
             EditorUiServices.MonogameViewport.OnCoreReady += () =>
             {
-                using (var buf = TestWrittableBitmap.Lock())
+                using (var buf = _realTimePlayerWriteableBitmap.Lock())
                 {
-                    EditorUiServices.MonogameViewport.CreateNewViewport("Editor MonoGame Viewport", buf.Address,
-                        new Size(1172, 827));
+                    var viewport = EditorUiServices.MonogameViewport.CreateNewViewport("Editor MonoGame Viewport", buf.Address,
+                        new SDK.Types.Size(1172, 827));
+                    viewport?.LockToImageControl("MonoGameImage");
                     monogameGrid.SizeChanged += (_, _) =>
                     {
-                        TestWrittableBitmap = new WriteableBitmap(new PixelSize((int)monogameGrid.Bounds.Width, (int)monogameGrid.Bounds.Height), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
-                        EditorUiServices.MonogameViewport.GetViewport("Editor MonoGame Viewport")
-                            ?.Resize(new Size((int)monogameGrid.Bounds.Width, (int)monogameGrid.Bounds.Height));
-                        mgImage.Source = TestWrittableBitmap;
+                        _realTimePlayerWriteableBitmap = new WriteableBitmap(new PixelSize((int)monogameGrid.Bounds.Width, (int)monogameGrid.Bounds.Height), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
+                        viewport?.Resize(new SDK.Types.Size((int)monogameGrid.Bounds.Width, (int)monogameGrid.Bounds.Height));
+                        mgImage.Source = _realTimePlayerWriteableBitmap;
                     };
-                    EditorUiServices.MonogameViewport.GetViewport("Editor MonoGame Viewport")?.OnceUpdatedDo(()=>
+                    viewport?.OnceUpdatedDo(()=>
                     {
                         Dispatcher.UIThread.Post(()=>
                         {
                             mgImage.InvalidateVisual();
                         }, priority: DispatcherPriority.Render);
                     });
-                    EditorUiServices.MonogameViewport.GetViewport("Editor MonoGame Viewport")?.DoNewFrameAction += () =>
+                    viewport?.DoNewFrameAction += () =>
                     {
-                        using (var buf = TestWrittableBitmap.Lock())
+                        using (var buf = _realTimePlayerWriteableBitmap.Lock())
                         {
                             return buf.Address;
                         }
@@ -235,11 +235,7 @@ namespace RPGCreator.UI.Content.Editor
 
             var toolbar = new EditorToolsBar();
             CenterGrid.Children.Add(toolbar);
-
-            // This is used to contain the MonoGame screen inside it's bounds.
-            // If we don't do this, the MonoGame screen will not be able to resize properly and some dirty tricks would be needed.
-            // AKA: Adding a margin to the MonoGame screen, then removing it "down" property to each position when needed, etc...
-            // This is a cleaner way to do it.
+            
             monogameGrid = new Grid
             {
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
@@ -251,7 +247,7 @@ namespace RPGCreator.UI.Content.Editor
             
             mgImage = new Image
             {
-                Source = TestWrittableBitmap,
+                Source = _realTimePlayerWriteableBitmap,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
                 Focusable = true,
@@ -265,12 +261,6 @@ namespace RPGCreator.UI.Content.Editor
                 FontWeight = FontWeight.Bold,
                 FontSize = 24
             });
-
-            // MonoGameScreen = new AvaloniaInside.MonoGame.MonoGameControl
-            // {
-            //     Game = game,
-            // };
-            // monogameGrid.Children.Add(MonoGameScreen);
         }
 
 
@@ -281,111 +271,6 @@ namespace RPGCreator.UI.Content.Editor
         {
             _mouseBridge.RegisterEvents(mgImage);
             _keyboardBridge.RegisterEvents(mgImage);
-        }
-
-        private void MonoGameScreenOnKeyDown(object? sender, KeyEventArgs e)
-        {
-        }
-
-        private void MonoGameScreen_PointerExited(object? sender, PointerEventArgs e)
-        {
-            // EngineServices.BrushManager.ClearPreview(); // Clear the preview when the mouse exits the MonoGame screen
-        }
-
-        private void ManageAssetsMenuItem_Click(object? sender, RoutedEventArgs e)
-        {
-            // Open the assets management window
-            var assetsManageWindow = new AssetsManageWindow();
-            assetsManageWindow.ShowDialog(_Host).ContinueWith(t =>
-            {
-                if (t.IsFaulted)
-                {
-                    // Handle any errors that occurred while showing the assets management window
-                    Console.WriteLine("Error showing assets management window: " + t.Exception?.Message);
-                }
-            });
-        }
-
-        private void PreferencesMenuItem_Click(object? sender, RoutedEventArgs e)
-        {
-            // Open the preferences window
-            var preferencesWindow = new PreferencesWindow();
-
-            preferencesWindow.ShowDialog(_Host).ContinueWith(t =>
-            {
-                if (t.IsFaulted)
-                {
-                    // Handle any errors that occurred while showing the preferences window
-                    Console.WriteLine("Error showing preferences window: " + t.Exception?.Message);
-                }
-            });
-        }
-
-        private void MonoGameScreen_PointerPressed(object? sender, PointerPressedEventArgs e)
-        {
-            // if (e.GetCurrentPoint(MonoGameScreen).Properties.IsLeftButtonPressed)
-            // {
-            //     var mgPosition = e.GetPosition(MonoGameScreen);
-            //     var position = new Vector2((float)mgPosition.X, (float)mgPosition.Y);
-            //     // Adjust the position to account for the MonoGameScreen's margin (12px)
-            //     EngineServices.BrushManager.ClickAt(new Vector2(position.X, position.Y));
-            //     EngineStates.BrushState.LastDrawAt = EngineServices.BrushManager.NormalizedPositionToTile(position);
-            //     EngineStates.BrushState.IsDrawing = true; // Set the flag to indicate that a tile is being placed
-            // }
-        }
-
-        private void MonoGameScreen_PointerReleased(object? sender, PointerReleasedEventArgs e)
-        {
-            if (e.GetCurrentPoint(MonoGameScreen).Properties.IsLeftButtonPressed && _placingTile)
-            {
-                GlobalStates.BrushState.IsDrawing = false; // Reset the flag when the tile placement is done
-                GlobalStates.BrushState.LastDrawAt = new(-1, -1); // Reset the last tile position
-            }
-        }
-
-        private void MonoGameScreen_PointerMoved(object? sender, PointerEventArgs e)
-        {
-            var mgPosition = e.GetPosition(MonoGameScreen);
-            var position = new Vector2((float)mgPosition.X, (float)mgPosition.Y);
-            if (_placingTile && e.GetCurrentPoint(MonoGameScreen).Properties.IsLeftButtonPressed)
-            {
-
-                // Check if the mouse position has at least moved one tile from the last position
-                // var normalizedCurrentPosition = EngineServices.BrushManager.NormalizedPositionToTile(position);
-                //
-                // if(normalizedCurrentPosition != (_LastTilePlacePos))
-                // {
-                //     // If the position has changed, update the last position
-                //     GlobalStates.BrushState.LastDrawAt = normalizedCurrentPosition;
-                // }
-                // else
-                // {
-                //     // If the position hasn't changed, do not place a tile again
-                //     return;
-                // }
-
-                // Adjust the position to account for the MonoGameScreen's margin (12px)
-                // EngineServices.BrushManager.DrawAt(position);
-            }
-            
-            {
-                // Check if the mouse position has at least moved one tile from the last position
-                // var normalizedCurrentPosition = EngineServices.BrushManager.NormalizedPositionToTile(position);
-                //
-                // if (normalizedCurrentPosition != (GlobalStates.BrushState.LastDrawAt))
-                // {
-                //     // If the position has changed, update the last position
-                //     GlobalStates.BrushState.LastDrawAt = normalizedCurrentPosition;
-                // }
-                // else
-                // {
-                //     // If the position hasn't changed, do not place a tile again
-                //     return;
-                // }
-                //
-                // EngineServices.BrushManager.PreviewAt(position);
-            }
-
         }
     }
 }

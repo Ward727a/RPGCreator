@@ -31,9 +31,6 @@
 * [x] Character animation system:
   Allow the user to define an animation based on the state of the character (moving, idling, ...).
   [This is kinda done, but need some test to confirm it 100%.]
-* [ ] Exporting a game:
-  Allow the user to.. well export a game with the engine. It will not be too complex for now. Probably just a 'build' folder with the Player.exe inside, and the assets in a json format (format used by the engine while in editor).
-  [This **should** be 'easy', as the player.exe is done, and load a gameData.json file, to link the project.json with each assets. But it still need some fix and UI to be OK]
 * [x] Drawing a map.
 * [x] Creating a character, editing it, and saving it.
   [Also kinda done, we can edit the name, the lvl (that is useless as there is no fight or way to gain xp for now, but well, its here), feature. But need to be tested from the ground up to confirm it.]
@@ -55,4 +52,7 @@
 * [ ] Add a way for feature property to 'link' them together with an Id.
 * [ ] Add a way for feature property to call an action method defined inside the feature when a property has changed.
 * [ ] Convert map rendering by using ECS now. Currently we are using an "hybrid" style, the MapRenderingSystem is hardlinked to the POO Definition class, it should not be. The ideal solution would be to 'convert' the map definition by taking it's layer, converting them to an entity, and adding component (like ChunkStorageComponent and LayerHeaderComponent) then adding a componentTag (like 'TileLayerTagComponent' or 'EntityLayerTagComponent').
+* [ ] Exporting a game:
+  Allow the user to.. well export a game with the engine. It will not be too complex for now. Probably just a 'build' folder with the Player.exe inside, and the assets in a json format (format used by the engine while in editor).
+  [This **should** be 'easy', as the player.exe is done, and load a gameData.json file, to link the project.json with each assets. But it still need some fix and UI to be OK]
 

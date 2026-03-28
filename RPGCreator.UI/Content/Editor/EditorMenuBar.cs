@@ -28,6 +28,7 @@ using RPGCreator.SDK;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.UI.Content.AssetsManage;
+using RPGCreator.UI.Content.GameUiEditor;
 using RPGCreator.UI.Content.Preferences;
 
 namespace RPGCreator.UI.Content.Editor;
@@ -105,6 +106,11 @@ public class EditorMenuBar : UserControl
     }
     private void RegisterUiEditorMenuEvents()
     {
+        _uiEditorMenu.Click += (sender, args) =>
+        {
+            var window = new UiEditorWindow();
+            window.Show();
+        };
     }
 
     private MenuItem _fileMenu;

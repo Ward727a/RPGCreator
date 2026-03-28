@@ -30,7 +30,6 @@ namespace RPGCreator.RTP.GameUI;
 
 public class UiManager : IUiManager
 {
-    
     private const float DragThreshold = 5f; // Minimum distance in pixels to start a drag operation.
     
     #region Internal State
@@ -151,6 +150,7 @@ public class UiManager : IUiManager
     }
     
     #region Mouse Testing Methods
+
     private BaseControl? FindControlAt(Vector2 position)
     {
         for (int i = _rootControls.Count - 1; i >= 0; i--)
@@ -158,14 +158,16 @@ public class UiManager : IUiManager
             var hit = _rootControls[i].GetControlAt(position);
             if (hit != null) return hit;
         }
+
         return null;
     }
-    
+
     #endregion
 
     #region EVENTS
     private void OnMouseButtonDown(MouseButton button)
     {
+        if (!_owningViewport.IsInsideImageControl()) return;
         Vector2 mousePos = _mouseState.Position;
         _pressedControl = FindControlAt(mousePos);
         _pressedControl?.CallMouseDown(button);
@@ -174,6 +176,7 @@ public class UiManager : IUiManager
 
     private void OnMouseButtonUp(MouseButton button)
     {
+        if (!_owningViewport.IsInsideImageControl()) return;
         if (_draggedControl != null)
         {
             _draggedControl.CallDragEnd();
@@ -186,6 +189,7 @@ public class UiManager : IUiManager
 
     private void OnMouseClicked(MouseButton button)
     {
+        if (!_owningViewport.IsInsideImageControl()) return;
         Vector2 mousePos = _mouseState.Position;
         
         BaseControl? clickedControl = FindControlAt(mousePos);
@@ -208,6 +212,7 @@ public class UiManager : IUiManager
 
     private void OnMouseDoubleClicked(MouseButton button)
     {
+        if (!_owningViewport.IsInsideImageControl()) return;
         Vector2 mousePos = _mouseState.Position;
         
         BaseControl? clickedControl = FindControlAt(mousePos);
@@ -220,6 +225,7 @@ public class UiManager : IUiManager
 
     private void OnMouseMoved(Vector2 deltaPosition)
     {
+        if (!_owningViewport.IsInsideImageControl()) return;
         Vector2 mousePos = _mouseState.Position;
         
         BaseControl? hoveredControl = FindControlAt(mousePos);
@@ -250,6 +256,7 @@ public class UiManager : IUiManager
 
     private void OnMouseWheelScrolled(int delta)
     {
+        if (!_owningViewport.IsInsideImageControl()) return;
         if(_lastHoveredControl != null)
         {
             _lastHoveredControl.CallMouseWheelScroll(delta);
@@ -258,6 +265,7 @@ public class UiManager : IUiManager
 
     private void OnMouseHorizontalWheelScrolled(int delta)
     {
+        if (!_owningViewport.IsInsideImageControl()) return;
         // Not used for now, as the implementation of the horizontal wheel is not working for some reason.
         // As it's also kinda useless, I won't spend time trying to fix it for now.
     }

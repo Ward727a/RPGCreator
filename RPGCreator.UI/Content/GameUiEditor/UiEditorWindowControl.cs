@@ -18,11 +18,17 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using CommunityToolkit.Diagnostics;
 using Microsoft.Xna.Framework;
+using RPGCreator.SDK;
+using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.GameUI;
+using RPGCreator.UI.Common.Bridge;
 using RPGCreator.UI.Content.GameUiEditor.Components;
 using RPGCreator.UI.Test;
 
@@ -43,11 +49,15 @@ public sealed class UiEditorWindowControl : UserControl
     private UiExplorer Explorer { get; set; } = null!;
     private GridSplitter RightSplitter { get; set; } = null!;
     private UiProperties Properties { get; set; } = null!;
-    private MonoGameControlTest PreviewerControlTest { get; set; } = null!;
+    
     
     private Grid MainBody { get; set; } = null!;
     private Grid ContentGrid { get; set; } = null!;
+    
+    private WriteableBitmap _uiPreviewWriteableBitmap = new(new PixelSize(1172, 827), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
 
+    private Image _previewerImage;
+    private Grid _previewerGrid;
     public UiEditorWindowControl(IGameUiRunner previewer)
     {
         _uiPreviewer = previewer;
@@ -55,6 +65,37 @@ public sealed class UiEditorWindowControl : UserControl
         
         CreateComponents();
         RegisterEvents();
+        
+        using (var buf = _uiPreviewWriteableBitmap.Lock())
+        {
+            var viewport = EditorUiServices.MonogameViewport.CreateNewViewport("UI Preview Viewport", buf.Address,
+                new SDK.Types.Size(1172, 827), ViewportType.Ui);
+            
+            viewport?.LockToImageControl("UiPreviewerImage");
+            
+            _previewerGrid.SizeChanged += (_, _) =>
+            {
+                _uiPreviewWriteableBitmap = new WriteableBitmap(new PixelSize((int)_previewerGrid.Bounds.Width, (int)_previewerGrid.Bounds.Height), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
+                viewport?.Resize(new SDK.Types.Size((int)_previewerGrid.Bounds.Width, (int)_previewerGrid.Bounds.Height));
+                _previewerImage.Source = _uiPreviewWriteableBitmap;
+            };
+            
+            viewport?.OnceUpdatedDo(()=>
+            {
+                Dispatcher.UIThread.Post(()=>
+                {
+                    _previewerImage.InvalidateVisual();
+                }, priority: DispatcherPriority.Render);
+            });
+            
+            viewport?.DoNewFrameAction += () =>
+            {
+                using (var buf = _uiPreviewWriteableBitmap.Lock())
+                {
+                    return buf.Address;
+                }
+            };
+        }
     }
 
     private void CreateComponents()
@@ -90,14 +131,24 @@ public sealed class UiEditorWindowControl : UserControl
         };
         ContentGrid.Children.Add(LeftSplitter);
         Grid.SetColumn(LeftSplitter, ExplorerRow + 1);
-        
-        PreviewerControlTest = new MonoGameControlTest()
+
+        _previewerGrid = new Grid()
         {
-            FallbackBackground = Brushes.DarkSlateGray,
-            // Game = _uiPreviewer as Game
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
         };
-        ContentGrid.Children.Add(PreviewerControlTest);
-        Grid.SetColumn(PreviewerControlTest, PreviewerRow);
+
+        _previewerImage = new Image()
+        {
+            Source = _uiPreviewWriteableBitmap,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+            Focusable = true,
+            Name = "UiPreviewerImage",
+        };
+        _previewerGrid.Children.Add(_previewerImage);
+        ContentGrid.Children.Add(_previewerGrid);
+        Grid.SetColumn(_previewerGrid, PreviewerRow);
         
         RightSplitter = new GridSplitter()
         {
@@ -114,8 +165,12 @@ public sealed class UiEditorWindowControl : UserControl
         Grid.SetColumn(Properties, PropertiesRow);
     }
 
+    private readonly AvaloniaKeyboardBridge _keyboardBridge = new();
+    private readonly AvaloniaMouseBridge _mouseBridge = new();
     private void RegisterEvents()
     {
+        _mouseBridge.RegisterEvents(_previewerImage);
+        _keyboardBridge.RegisterEvents(_previewerImage);
     }
 
 }
