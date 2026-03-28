@@ -24,6 +24,7 @@ using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Systems;
+using RPGCreator.SDK.Extensions;
 using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Types;
 
@@ -134,6 +135,7 @@ public struct MovementComponent : IComponent
     public int Speed;
     public Vector2 Direction;
     public Vector2 DesiredVelocity;
+    public bool GridIsMoving;
 }
 
 public class MovementSystem(int animationStateIdx, int animationDirStateIdx, int walkId, int idleId) : ISystem
@@ -162,7 +164,7 @@ public class MovementSystem(int animationStateIdx, int animationDirStateIdx, int
                 switch (moveComponent.MovementType)
                 {
                     case MovementType.FourDir:
-                        HandleMovement8(ref moveComponent, ref transformComponent, deltaTime);
+                        HandleMovement4(ref moveComponent, ref transformComponent, deltaTime);
                         break;
                     case MovementType.EightDir:
                         HandleMovement8(ref moveComponent, ref transformComponent, deltaTime);
@@ -180,39 +182,43 @@ public class MovementSystem(int animationStateIdx, int animationDirStateIdx, int
             
             stateComponent.GetInt(animationDirStateIdx) = moveComponent.Direction.GetDirectionFromVector();
             
-            // Reset direction
-            moveComponent.Direction = new Vector2();
         }
 
     }
 
     private void HandleMovement4(ref MovementComponent movement, ref TransformComponent transform, TimeSpan deltaTime)
     {
+        if (movement.GridIsMoving)
+        {
+            return;
+        }
+        
         if (movement.Direction.LengthSquared() > 0)
         {
+            movement.GridIsMoving = true;
             Vector2 dir = movement.Direction;
 
             if (MathF.Abs(dir.X) > MathF.Abs(dir.Y))
                 dir = new Vector2(MathF.Sign(dir.X), 0);
             else
                 dir = new Vector2(0, MathF.Sign(dir.Y));
-
-            float dt = (float)deltaTime.TotalSeconds;
-            movement.DesiredVelocity = dir * movement.Speed * dt;
-        
+            
+            movement.DesiredVelocity = transform.Position + (dir * 32);
             movement.Direction = dir;
         }
     }
     private void HandleMovement8(ref MovementComponent movement, ref TransformComponent transform, TimeSpan deltaTime)
     {
+        if (movement.GridIsMoving)
+            return;
+        
         if (movement.Direction.LengthSquared() > 0)
         {
-            var normalizedDir = Vector2.Normalize(movement.Direction);
-            float dt = (float)deltaTime.TotalSeconds;
+            movement.GridIsMoving = true;
         
-            movement.DesiredVelocity = normalizedDir * movement.Speed * dt;
-        
-            movement.Direction = normalizedDir;
+            movement.DesiredVelocity = transform.Position + (movement.Direction * 32);
+            
+            movement.Direction = movement.Direction;
         }
     }
     private void HandleMovementFree(ref MovementComponent movement, ref TransformComponent transform, TimeSpan deltaTime)
@@ -243,9 +249,29 @@ public class FinalMovementSystem() : ISystem
         {
             ref var moveComp = ref _componentManager.GetComponent<MovementComponent>(entityId);
             ref var transformComp = ref _componentManager.GetComponent<TransformComponent>(entityId);
+
+            if (moveComp.GridIsMoving)
+            {
+
+                var targetPosition = moveComp.DesiredVelocity;
+                var currentPos = transformComp.Position;
+                
+                float step = moveComp.Speed * (float)deltaTime.TotalSeconds;
+                transformComp.Position = currentPos.MoveTowards(targetPosition, step);
+
+                if (targetPosition == transformComp.Position)
+                {
+                    moveComp.GridIsMoving = false;
+                    moveComp.DesiredVelocity = Vector2.Zero;
+                    moveComp.Direction = Vector2.Zero;
+                }
+                
+                return;
+            }
             
             transformComp.Position += moveComp.DesiredVelocity;
             moveComp.DesiredVelocity = Vector2.Zero;
+            moveComp.Direction = Vector2.Zero;
         }
     }
 }

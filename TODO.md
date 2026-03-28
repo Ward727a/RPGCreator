@@ -25,7 +25,7 @@
 * [ ] Basic Main menu:
   A basic main menu, that would allow the player to start a new game, load a save, and quit the game. The user should be able to edit some parts of the main menu. It should not be too much edit for now.
   [We already have a basic GameUI Library (Can be found inside the RPGCreator.RTP project), we still need now to have a simple json file, so we don't have to rework it from the ground up when implementing the UI editor.]
-* [ ] Simple movement system:
+* [x] Simple movement system:
   Allow the user to define a movement with 3 types (free, based on 4 grid, and based on 8 grid).
   [Still need some work, mainly for the grid based movement, but the free movement is done.]
 * [x] Character animation system:
@@ -45,7 +45,7 @@
 * [x] Creating a map, editing it, and saving it.
 * [x] Camara system:
   The camera need to be able to lock the player, and follow him. For now this should be this simple, no massive parameters.
-* [ ] Adding a "spawn player point" on the map editor, allowing the user to define where the player will appear on a map when the player access it.
+* [x] Adding a "spawn player point" on the map editor, allowing the user to define where the player will appear on a map when the player access it.
 
 ### Milestone for Preview 02
 

@@ -50,4 +50,19 @@ public static class Vector2Extensions
         int y = (int)Math.Round(vector.Y);
         return (x, y);
     }
+    
+    public static Vector2 MoveTowards(this Vector2 current, Vector2 target, float maxDistanceDelta)
+    {
+        Vector2 toVector = target - current;
+        float distSquared = toVector.LengthSquared();
+
+        if (distSquared == 0 || (maxDistanceDelta >= 0 && distSquared <= maxDistanceDelta * maxDistanceDelta))
+        {
+            return target;
+        }
+
+        float dist = MathF.Sqrt(distSquared);
+    
+        return current + toVector / dist * maxDistanceDelta;
+    }
 }

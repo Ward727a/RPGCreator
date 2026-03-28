@@ -127,6 +127,7 @@ public class StandardControlFeature : BaseGameFeature
     {
         ref var moveComp = ref GetMovementComponent();
 
+        
         if (Unsafe.IsNullRef(ref moveComp))
             return;
         if(x.HasValue)
@@ -177,6 +178,8 @@ public class StandardControlSystem : ISystem
         foreach (var entityId in _componentManager.Query<MovementComponent, PlayerTagComponent>())
         {
             ref var movementComponent = ref _componentManager.GetComponent<MovementComponent>(entityId);
+            if(movementComponent.GridIsMoving)
+                continue;
             movementComponent.Direction.X = x;
             movementComponent.Direction.Y = y;
         }
