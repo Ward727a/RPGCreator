@@ -19,6 +19,7 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System;
+using Apos.Shapes;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.RTP.GameUI;
 using RPGCreator.RTP.GameUI.Controls;
@@ -46,12 +47,12 @@ public class UiViewport : BaseMonogameViewport
     }
 
     
-    public void LoadContent(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
+    public void LoadContent(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch, ShapeBatch shapeBatch)
     {
         _graphicsDevice = graphicsDevice;
         _uiManager = new UiManager(this);
         _uiManager.Initialize(GlobalStates.ViewportMouseState);
-        _uiManager.InitializeRenderer(new UiRendererContext(spriteBatch));
+        _uiManager.InitializeRenderer(new UiRendererContext(spriteBatch, shapeBatch));
 
         var testroot = new TestControl();
         _uiManager.AddRootControl(testroot);
@@ -76,16 +77,17 @@ public class UiViewport : BaseMonogameViewport
 
     public void Update(TimeSpan deltaTime)
     {
+
         _uiManager.Update(deltaTime.Milliseconds);
     }
 
     #region InternalMethods - DO NOT TOUCH
 
-    public override void LoadContent(object graphicsDevice, object spriteBatch)
+    public override void LoadContent(object graphicsDevice, object spriteBatch, object? shapeBatch = null)
     {
         if (graphicsDevice is GraphicsDevice gd && spriteBatch is SpriteBatch sb)
         {
-            LoadContent(gd, sb);
+            LoadContent(gd, sb, shapeBatch as ShapeBatch);
         }
         else
         {

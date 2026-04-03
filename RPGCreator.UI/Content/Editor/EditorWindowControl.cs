@@ -40,10 +40,10 @@ using Avalonia.Threading;
 using RPGCreator.RTP.Services;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
+using RPGCreator.UI.Common;
 using RPGCreator.UI.Common.Bridge;
 using RPGCreator.UI.Content.Editor.LayersListComponents;
 using RPGCreator.UI.Content.Editor.LeftPanel;
-using RPGCreator.UI.Test;
 using Size = System.Drawing.Size;
 using Vector = Avalonia.Vector;
 
@@ -54,7 +54,7 @@ namespace RPGCreator.UI.Content.Editor
         private Window _Host => (Window)this.GetVisualRoot()!;
 
         // private EditorGame? game = (EditorGame)RuntimeServices.GameRunner;
-        private MonoGameControlTest MonoGameScreen;
+        private MonoGameControl MonoGameScreen;
 
         private TilesetSelector tilesetSelector;
         private Vector2 _LastTilePlacePos;
@@ -129,7 +129,7 @@ namespace RPGCreator.UI.Content.Editor
             };
             EditorUiServices.MonogameViewport.Initialize();
             var RenderCore = ((MonogameViewportService)EditorUiServices.MonogameViewport)._core;
-            var mgBrain = new MonoGameControlTest()
+            var mgBrain = new MonoGameControl()
             {
                 Game = RenderCore,
                 Opacity = 0, // Make the control invisible

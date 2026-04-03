@@ -55,7 +55,7 @@ public abstract class BaseMonogameViewport : IDisposable
 
     protected bool _inDrawing = false;
 
-    public abstract void LoadContent(object graphicsDevice, object spriteBatch);
+    public abstract void LoadContent(object graphicsDevice, object spriteBatch, object? shapeBatch = null);
 
     /// <summary>
     /// This is used to lock the viewport to a specific image control.<br/>

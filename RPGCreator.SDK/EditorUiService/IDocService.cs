@@ -24,7 +24,9 @@ namespace RPGCreator.SDK.EditorUiService;
 
 public interface IDocService : IService
 {
+    public static UrnSingleModule DocsUrnModule => "docs".ToUrnSingleModule();
     public string GetDocumentation(URN topicUrn);
+    public bool HasDocumentation(URN topicUrn);
     public bool AddDocumentation(URN topicUrn, string content);
     public bool AddDocumentationFromPath(URN topicUrn, string path);
 }

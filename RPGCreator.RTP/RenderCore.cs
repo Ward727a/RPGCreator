@@ -20,6 +20,7 @@
 
 using System;
 using System.IO;
+using Apos.Shapes;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -41,15 +42,17 @@ public sealed class RenderCore : Game, IGameRenderCore
     private MonogameViewportService _parentService;
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
+    private ShapeBatch _shapeBatch;
     private Texture2D _pixelTexture;
 
     public RenderCore(MonogameViewportService parentService)
     {
         _parentService = parentService;
-        Graphics = new GraphicsDeviceManager(this);
+        _graphics = new GraphicsDeviceManager(this);
         IsMouseVisible = false;
         RuntimeServices.GameRunner = this;
-        
+        Graphics.GraphicsProfile = GraphicsProfile.HiDef;
+        Content.RootDirectory = Path.Combine("Assets", "Content");
     }
 
     protected override void Initialize()
@@ -58,7 +61,7 @@ public sealed class RenderCore : Game, IGameRenderCore
         OnInitialize?.Invoke();
     }
 
-    public GraphicsDeviceManager Graphics { get; set; }
+    public GraphicsDeviceManager Graphics => _graphics;
 
     FontSystem? FontSystem { get; set; } = null!;
     protected override void LoadContent()
@@ -66,6 +69,7 @@ public sealed class RenderCore : Game, IGameRenderCore
         base.LoadContent();
         GraphicsDevice.Reset();
         _spriteBatch = new SpriteBatch(GraphicsDevice);
+        _shapeBatch = new ShapeBatch(GraphicsDevice, Content);
         
         EngineServices.Resources.RegisterLoader<Texture2D>(new Texture2DLoader(GraphicsDevice));
         
@@ -92,7 +96,7 @@ public sealed class RenderCore : Game, IGameRenderCore
 
     public void LoadContent(BaseMonogameViewport viewport)
     {
-        viewport.LoadContent(GraphicsDevice, _spriteBatch);
+        viewport.LoadContent(GraphicsDevice, _spriteBatch, _shapeBatch);
     }
 
     protected override void Draw(GameTime gameTime)

@@ -28,6 +28,7 @@ using RPGCreator.SDK;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.UI.Content.AssetsManage;
+using RPGCreator.UI.Content.Blueprint;
 using RPGCreator.UI.Content.GameUiEditor;
 using RPGCreator.UI.Content.Preferences;
 
@@ -54,11 +55,13 @@ public class EditorMenuBar : UserControl
         
         CreateAssetsManagerMenu();
         CreateUiEditorMenu();
+        CreateBpEditorMenu();
         CreateFileMenu();
         CreateEditMenu();
         CreateHelpMenu();
         _menu.Items.Add(_assetsMgrMenu);
         _menu.Items.Add(_uiEditorMenu);
+        _menu.Items.Add(_bpEditorMenu);
         _menu.Items.Add(_fileMenu);
         _menu.Items.Add(_editMenu);
         _menu.Items.Add(_helpMenu);
@@ -109,6 +112,22 @@ public class EditorMenuBar : UserControl
         _uiEditorMenu.Click += (sender, args) =>
         {
             var window = new UiEditorWindow();
+            window.Show();
+        };
+    }
+
+    private MenuItem _bpEditorMenu;
+
+    private void CreateBpEditorMenu()
+    {
+        _bpEditorMenu = new MenuItem() { Header = "Blueprint Editor", HotKey = new KeyGesture(Key.B, KeyModifiers.Shift) };
+    }
+
+    private void RegisterBpEditorMenuEvents()
+    {
+        _bpEditorMenu.Click += (sender, args) =>
+        {
+            var window = new Blueprint.EditorWindow();
             window.Show();
         };
     }
@@ -221,7 +240,7 @@ public class EditorMenuBar : UserControl
         _editUndoMenuItem.Click += (s, e) => EngineServices.UndoRedoService.UndoLastCommand();
         _editRedoMenuItem.Click += (s, e) => EngineServices.UndoRedoService.RedoLastCommand();
         
-        EngineServices.OnceServiceReady((ICommandManager undoRedoService) =>
+        EngineServices.OnceServiceReady((IUndoRedoService undoRedoService) =>
         {
             undoRedoService.StateChanged += () =>
             {
@@ -299,6 +318,7 @@ public class EditorMenuBar : UserControl
     {
         RegisterAssetsManagerMenuEvents();
         RegisterUiEditorMenuEvents();
+        RegisterBpEditorMenuEvents();
         RegisterFileMenuEvents();
         RegisterEditMenuEvents();
         RegisterHelpMenuEvents();

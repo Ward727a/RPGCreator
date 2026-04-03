@@ -108,7 +108,7 @@ public interface IUiRendererContext
     /// <param name="radius">The radius of the circle, in pixels.</param>
     /// <param name="color">The color to use for the circle outline or fill.</param>
     /// <param name="thickness">The thickness of the circle outline, in pixels. Default is 1 pixel. This parameter is ignored if 'filled' is true.</param>
-    /// <param name="segments">The number of segments to use when approximating the circle outline. Higher values will result in a smoother circle but may impact performance. Default is 16 segments.</param>
+    /// <param name="aaSize">The antialiasing size for the circle. The <b>default</b> is 1.5 pixels. 0 <b>disables</b> antialiasing. 10 and above make the circle look like an halo.</param>
     /// <param name="filled">Whether to draw a filled circle (true) or just an outline (false). Default is false (outline).</param>
-    public void DrawCircle(Vector2 center, float radius, Color color, float thickness = 1f, int segments = 16, bool filled = false);
+    public void DrawCircle(Vector2 center, float radius, Color color, float thickness = 1f, float aaSize = 1.5f, bool filled = false);
 }

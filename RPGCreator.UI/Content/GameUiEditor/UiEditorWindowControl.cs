@@ -30,7 +30,6 @@ using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.GameUI;
 using RPGCreator.UI.Common.Bridge;
 using RPGCreator.UI.Content.GameUiEditor.Components;
-using RPGCreator.UI.Test;
 
 namespace RPGCreator.UI.Content.GameUiEditor;
 

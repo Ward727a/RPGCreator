@@ -39,6 +39,4 @@ public interface IMonogameViewport : IService
     public void ResizeViewport(string viewportId, int width, int height);
     public BaseMonogameViewport GetViewport(string viewportId);
     public void DestroyViewport(string viewportId);
-    public void Tick();
-    public void AttachToWindow(IntPtr avaloniaWindowHandle);
 }

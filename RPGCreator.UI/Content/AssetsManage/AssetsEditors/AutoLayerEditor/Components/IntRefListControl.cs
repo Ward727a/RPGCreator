@@ -601,7 +601,7 @@ public class AutoLayerRuleCreateModal : Window
         public override string Name => "Add Output Tile";
     }
     
-    public CommandManager CommandManager;
+    public UndoRedoService UndoRedoService;
     
     private event Action<IntGridValueRef?>? OnSelectRefChanged;
     public event Action<AutoLayerRule>? OnCreateRuleConfirmed;
@@ -651,7 +651,7 @@ public class AutoLayerRuleCreateModal : Window
     {
         FromRef = @ref;
         Context = context;
-        CommandManager = new CommandManager();
+        UndoRedoService = new UndoRedoService();
         CreateComponents();
         RegisterEvents();
         PopulateTargetGroupPanel();
@@ -850,14 +850,14 @@ public class AutoLayerRuleCreateModal : Window
             Margin = new Thickness(5, 0, 0, 0),
         };
         ButtonsPanel.Children.Add(TestUndoButton);
-        TestUndoButton.Click += (_, _) => CommandManager.UndoLastCommand();
+        TestUndoButton.Click += (_, _) => UndoRedoService.UndoLastCommand();
         TestRedoButton = new Button()
         {
             Content = "Redo",
             Margin = new Thickness(5, 0, 0, 0),
         };
         ButtonsPanel.Children.Add(TestRedoButton);
-        TestRedoButton.Click += (_, _) => CommandManager.RedoLastCommand();
+        TestRedoButton.Click += (_, _) => UndoRedoService.RedoLastCommand();
         
     }
     private void RegisterEvents()
@@ -877,10 +877,10 @@ public class AutoLayerRuleCreateModal : Window
                     (tileData, tileBorder) =>
                     {
                         var removeCmd = new RemoveTileCmd(tileBorder, tileData, this);
-                        CommandManager.ExecuteCommand(removeCmd);
+                        UndoRedoService.ExecuteCommand(removeCmd);
                     }
                 );
-                CommandManager.ExecuteCommand(cmd);
+                UndoRedoService.ExecuteCommand(cmd);
                 
                 tileModal.Close();
                 NotificationManager?.Show(
@@ -928,15 +928,15 @@ public class AutoLayerRuleCreateModal : Window
             OnCreateRuleConfirmed?.Invoke(Rule);
         };
         
-        CommandManager.StateChanged += () =>
+        UndoRedoService.StateChanged += () =>
         {
             Guard.IsNotNull(TestUndoButton);
             Guard.IsNotNull(TestRedoButton);
-            TestUndoButton.IsEnabled = CommandManager.CanUndo;
-            ToolTip.SetTip(TestUndoButton, $"Undo: {CommandManager.GetUndoCommandName()}");
+            TestUndoButton.IsEnabled = UndoRedoService.CanUndo;
+            ToolTip.SetTip(TestUndoButton, $"Undo: {UndoRedoService.GetUndoCommandName()}");
             ToolTip.SetShowOnDisabled(TestUndoButton, true);
-            TestRedoButton.IsEnabled = CommandManager.CanRedo;
-            ToolTip.SetTip(TestRedoButton, $"Redo: {CommandManager.GetRedoCommandName()}");
+            TestRedoButton.IsEnabled = UndoRedoService.CanRedo;
+            ToolTip.SetTip(TestRedoButton, $"Redo: {UndoRedoService.GetRedoCommandName()}");
             ToolTip.SetShowOnDisabled(TestRedoButton, true);
         };
     }
@@ -1209,7 +1209,7 @@ public class AutoLayerRuleCreateModal : Window
                             SetPattern,
                             contraintId_
                         );
-                        CommandManager.ExecuteCommand(deselectCMD);
+                        UndoRedoService.ExecuteCommand(deselectCMD);
                         return;
                     }
 
@@ -1222,7 +1222,7 @@ public class AutoLayerRuleCreateModal : Window
                             SetPattern,
                             contraintId
                         );
-                        CommandManager.ExecuteCommand(selectCMD);
+                        UndoRedoService.ExecuteCommand(selectCMD);
                     }
                 };
                 OnSelectRefChanged += (selectedRef) =>

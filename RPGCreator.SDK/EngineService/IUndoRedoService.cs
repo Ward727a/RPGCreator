@@ -22,7 +22,7 @@ using RPGCreator.SDK.Commands;
 
 namespace RPGCreator.SDK.EngineService;
 
-public interface ICommandManager : IService
+public interface IUndoRedoService : IService
 {
     /// <summary>
     /// Event triggered whenever the state of the command history changes (e.g., after executing, undoing, or redoing a command).

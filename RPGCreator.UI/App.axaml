@@ -35,6 +35,7 @@
 		    <SolidColorBrush x:Key="Warning">Yellow</SolidColorBrush>
 		    <SolidColorBrush x:Key="Error">Red</SolidColorBrush>
 		    <ResourceDictionary.MergedDictionaries>
+			    <ResourceInclude Source="avares://Nodify/Theme.axaml" />
 			    <ResourceInclude Source="avares://LiveMarkdown.Avalonia/Defaults.axaml"/>
 		    </ResourceDictionary.MergedDictionaries>
 	    </ResourceDictionary>

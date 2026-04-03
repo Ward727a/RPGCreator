@@ -153,15 +153,6 @@ public sealed class MonogameViewportService : IMonogameViewport
     }
     private bool _isTicking = false;
 
-    public void Tick()
-    {
-    }
-
-    public void AttachToWindow(IntPtr avaloniaWindowHandle)
-    {
-        // return;
-    }
-
     internal ReadOnlySpan<BaseMonogameViewport> GetAllViewports()
     {
         return CollectionsMarshal.AsSpan(_activeViewports);

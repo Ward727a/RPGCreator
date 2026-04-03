@@ -19,6 +19,7 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System;
+using Apos.Shapes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.RTP.ECS.Systems;
@@ -181,7 +182,7 @@ public class MonogameViewport : BaseMonogameViewport
     private IntPtr? _bitmapControlAddress;
     private uint[]? _internalBuffer;
 
-    public override void LoadContent(object graphicsDevice, object spriteBatch)
+    public override void LoadContent(object graphicsDevice, object spriteBatch, object? shapeBatch = null)
     {
         if (graphicsDevice is GraphicsDevice gd && spriteBatch is SpriteBatch sb)
         {

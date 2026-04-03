@@ -24,7 +24,7 @@ using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types;
 
-namespace RPGCreator.UI.UiService;
+namespace RPGCreator.UI.Services;
 
 public class DocService : IDocService
 {
@@ -49,6 +49,8 @@ public class DocService : IDocService
         
         return File.Exists(documentation) ? File.ReadAllText(documentation) : string.Empty;
     }
+    
+    public bool HasDocumentation(URN topicUrn) => _documentation.ContainsKey(topicUrn);
 
     public bool AddDocumentation(URN topicUrn, string content)
     {

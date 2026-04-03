@@ -189,9 +189,9 @@ public static class EngineServices
         set => RegisterService(value);
     }
     
-    public static ICommandManager UndoRedoService
+    public static IUndoRedoService UndoRedoService
     {
-        get => GetService<ICommandManager>();
+        get => GetService<IUndoRedoService>();
         set => RegisterService(value);
     }
     

@@ -53,7 +53,10 @@ public readonly struct PipedPath : IEquatable<PipedPath>
         }
     }
     
-    public string[] Segments => _path.Split(SeparatorChar);
+    public ReadOnlySpan<string> Segments => _path.Split(SeparatorChar);
+    
+    public bool StartsWith(string prefix) => _path.StartsWith(prefix);
+    
     public string Name => _path.Split(SeparatorChar).Last();
 
     /// <summary>

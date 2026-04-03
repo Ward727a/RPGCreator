@@ -19,9 +19,13 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 
+using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
+using Apos.Shapes;
 using FontStashSharp;
 using FontStashSharp.RichText;
 using Microsoft.Xna.Framework;
@@ -29,6 +33,7 @@ using MonoGame.Extended;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.RTP.Extensions;
 using RPGCreator.RTP.GameUI.Interface;
+using RPGCreator.SDK.Exceptions;
 using RPGCreator.SDK.Types;
 using Color = RPGCreator.SDK.Types.Color;
 using Matrix3x2 = System.Numerics.Matrix3x2;
@@ -55,44 +60,322 @@ public enum DrawCommandType
     DrawThreeSlice
 }
 
-/// <summary>
-/// This struct represents a single draw command that will be stored in the UiRendererContext and executed later in the rendering phase.<br/>
-/// This is a low-level struct that is used to store the draw commands in a compact way, using explicit layout to save memory and improve performance.<br/>
-/// I don't encourage you to edit this struct if you don't know exactly what you're doing, as it can easily lead to memory corruption and crashes if not used correctly.
-/// </summary>
-// This is working for now as I don't need to store more complex, but once I need to, I might need to switch to another approach.
-// But well, for now this is working and it's very efficient
-[StructLayout(LayoutKind.Explicit)]
-internal readonly struct DrawCommand(
-        DrawCommandType type,
-        Matrix3x2 matrixData = default,
-        bool boolData = default,
-        Vector2 vectorData3 = default,
-        Rect rectData = default,
-        NineSliceInfo nineSliceData = default,
-        ThreeSliceInfo threeSliceData = default,
-        object? objectData = null,
-        object? additionalData = null)
+
+public class UiRendererContext(SpriteBatch spriteBatch, ShapeBatch shapeBatch) : IMgUiRendererContext
 {
-    [FieldOffset(0)] public readonly DrawCommandType Type = type;
-    [FieldOffset(4)] public readonly Matrix3x2 MatrixData = matrixData; // The matrixData is used to store a matrix, but also to store other data such as colors, positions, sizes, etc. depending on the type of the command.
-    [FieldOffset(28)] public readonly bool BoolData = boolData;
+
+    public class RendererMemoryBuffer
+    {
+
+        public ref struct MemoryBufferWriter
+        {
+            private readonly RendererMemoryBuffer _parent;
+            private Span<byte> _span;
+            private int _localPos;
+            private bool _submitted;
+
+            public MemoryBufferWriter(RendererMemoryBuffer parent, Span<byte> span)
+            {
+                _parent = parent;
+                _span = span;
+                _localPos = 0;
+                _submitted = false;
+            }
+
+            public void EnsureCapacity(int requiredAdditionalSize)
+            {
+                if (_localPos + requiredAdditionalSize > _span.Length)
+                {
+                    _span = _parent.GetFullSpanFrom(_parent._currentPosition, _localPos + requiredAdditionalSize);
+                }
+            }
+            
+            public void Align(int alignment = 4)
+            {
+                _localPos = (_localPos + (alignment - 1)) & ~(alignment - 1);
+            }
+
+            public void Write<T>(T value) where T : unmanaged
+            {
+                int size = Unsafe.SizeOf<T>();
+                Align(Math.Min(size, 8));
+
+                Unsafe.WriteUnaligned(ref _span[_localPos], value);
+                _localPos += size;
+            }
+
+            public void WriteObject(object value)
+            {
+                var refIndex = _parent.PushObjectReference(value);
+                WriteInt(refIndex);
+            }
+
+            public void WriteByte(byte value)
+            {
+                _span[_localPos] = value;
+                _localPos += 1;
+            }
+
+            public void WriteFloat(float value)
+            {
+                Write(value);
+            }
+
+            public void WriteBool(bool value)
+            {
+                Write(value);
+            }
+            
+            public void WriteVector2(Vector2 value)
+            {
+                Write(value);
+            }
+
+            public void WriteColor(Color value)
+            {
+                Write(value);
+            }
+
+            // ReSharper disable once InconsistentNaming
+            public void WriteMatrix3x2(Matrix3x2 value)
+            {
+                Write(value);
+            }
+
+            public void WriteRect(Rect value)
+            {
+                Write(value);
+            }
+
+            public void WriteNineSliceInfo(NineSliceInfo value)
+            {
+                Write(value);
+            }
+
+            public void WriteThreeSliceInfo(ThreeSliceInfo value)
+            {
+                Write(value);
+            }
+
+            public void WriteInt(int value)
+            {
+                Write(value);
+            }
+
+            public void WriteString(string value)
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    WriteInt(0);
+                    return;
+                }
+
+                int byteCount = Encoding.UTF8.GetByteCount(value);
+                
+                EnsureCapacity(4 + byteCount + 8);
+                
+                WriteInt(byteCount);
+                
+                Span<byte> destination = _span.Slice(_localPos, byteCount);
+                Encoding.UTF8.GetBytes(value, destination);
+                
+                _localPos += byteCount;
+                
+                Align();
+            }
+
+            public void Submit()
+            {
+                if (_submitted) return;
+                _parent.Commit(_localPos);
+                _submitted = true;
+            }
+
+            public void Dispose()
+            {
+                if (!_submitted) Submit(); 
+            }
+        }
+
+        public ref struct MemoryBufferReader
+        {
+            private readonly RendererMemoryBuffer _parent;
+            private readonly Span<byte> _span;
+            
+            private int _localPos;
+            
+            public bool HasData => _localPos < _span.Length;
+            
+            public MemoryBufferReader(RendererMemoryBuffer parent, byte[] buffer, int sizeLimit)
+            {
+                _parent = parent;
+                _span = buffer.AsSpan(0, sizeLimit);
+                _localPos = 0;
+            }
+
+            public void Align(int alignment = 4)
+            {
+                _localPos = (_localPos + (alignment - 1)) & ~(alignment - 1);
+            }
+
+            public T Read<T>()where T : unmanaged
+            {
+                int size = Unsafe.SizeOf<T>();
+                int alignment = Math.Min(size, 8);
     
-    [FieldOffset(32)] public readonly Vector2 VectorData3 = vectorData3;
+                _localPos = (_localPos + (alignment - 1)) & ~(alignment - 1);
+    
+                T value = MemoryMarshal.Read<T>(_span.Slice(_localPos, size));
+    
+                _localPos += size;
+                return value;
+            }
 
-    [FieldOffset(40)] public readonly Rect RectData = rectData;
-    [FieldOffset(40)] public readonly NineSliceInfo NineSliceData = nineSliceData;
-    [FieldOffset(40)] public readonly ThreeSliceInfo ThreeSliceData = threeSliceData;
+            public byte ReadByte()
+            {
+                return _span[_localPos++];
+            }
 
-    [FieldOffset(64)] public readonly object? ObjectData = objectData;
-    [FieldOffset(72)] public readonly object? AdditionalData = additionalData;
-}
+            public int ReadInt()
+            {
+                return Read<int>();
+            }
+            
+            public float ReadFloat()
+            {
+                return Read<float>();
+            }
 
-public class UiRendererContext(SpriteBatch spriteBatch) : IMgUiRendererContext
-{
+            public bool ReadBool()
+            {
+                return Read<bool>();
+            }
+            
+            public Vector2 ReadVector2()
+            {
+                return Read<Vector2>();
+            }
+            
+            public Color ReadColor()
+            {
+                return Read<Color>();
+            }
+
+            // ReSharper disable once InconsistentNaming
+            public Matrix3x2 ReadMatrix3x2()
+            {
+                return Read<Matrix3x2>();
+            }
+
+            public Rect ReadRect()
+            {
+                return Read<Rect>();
+            }
+
+            public NineSliceInfo ReadNineSliceInfo()
+            {
+                return Read<NineSliceInfo>();
+            }
+            
+            public ThreeSliceInfo ReadThreeSliceInfo()
+            {
+                return Read<ThreeSliceInfo>();
+            }
+            
+            public object? ReadObject()
+            {
+                return _parent.GetObjectReference(ReadInt());
+            }
+            
+            public string ReadString()
+            {
+                int byteCount = Read<int>();
+                if (byteCount == 0) return string.Empty;
+
+                string value = Encoding.UTF8.GetString(_span.Slice(_localPos, byteCount));
+        
+                _localPos += byteCount;
+        
+                _localPos = (_localPos + (4 - 1)) & ~(4 - 1);
+        
+                return value;
+            }
+        }
+        
+        private readonly List<object?> _objectReferences = new (256); // List to hold object references, init it to 256, so that we can avoid resizing the list frequently
+        private byte[] _buffer = new byte[1024 * 64]; // Allocating 64KB for now, but this can be adjusted as needed.
+        private int _currentPosition = 0;
+
+        public void EnsureCapacity(int requiredAdditionalSize)
+        {
+            if (_currentPosition + requiredAdditionalSize > _buffer.Length)
+            {
+                int newSize = _buffer.Length * 2;
+                
+                while(newSize < _currentPosition + requiredAdditionalSize)
+                {
+                    newSize *= 2;
+                }
+                
+                byte[] newBuffer = new byte[newSize];
+                
+                Buffer.BlockCopy(_buffer, 0, newBuffer, 0, _currentPosition);
+                
+                _buffer = newBuffer;
+            }
+        }
+        
+        private const int DEFAULT_ALIGNMENT = 8;
+        
+        public MemoryBufferWriter CreateWriter(int estimatedSize)
+        {
+            _currentPosition = (_currentPosition + (7)) & ~(7);
+            EnsureCapacity(estimatedSize);
+
+            Span<byte> slice = _buffer.AsSpan(_currentPosition);
+            return new MemoryBufferWriter(this, slice);
+        }
+
+        public MemoryBufferReader CreateReader()
+        {
+            return new MemoryBufferReader(this, _buffer, _currentPosition);
+        }
+        
+        internal void Commit(int bytesWritten)
+        {
+            _currentPosition += bytesWritten;
+        }
+
+        internal Span<byte> GetFullSpanFrom(int position, int size)
+        {
+            EnsureCapacity(position + size);
+            return _buffer.AsSpan(position, size);
+        }
+
+        internal int PushObjectReference(object? obj)
+        {
+            _objectReferences.Add(obj);
+            return _objectReferences.Count - 1;
+        }
+
+        internal object? GetObjectReference(int index)
+        {
+            return _objectReferences[index];
+        }
+        
+        public void Reset()
+        {
+            _currentPosition = 0;
+            _objectReferences.Clear();
+        }
+        
+    }
+    
+    public RendererMemoryBuffer MemoryBuffer { get; } = new();
+    
     public SpriteBatch SpriteBatch { get; init; } = spriteBatch;
+    public ShapeBatch ShapeBatch { get; init; } = shapeBatch;
 
-    private readonly List<DrawCommand> _drawCommands = new();
     private readonly Stack<Rect> _clipStack = new();
     private readonly Stack<Matrix3x2> _transformStack = new();
 
@@ -109,309 +392,8 @@ public class UiRendererContext(SpriteBatch spriteBatch) : IMgUiRendererContext
     private bool _isSpriteBatchBeginActive = false;
     #endif
     
-    #region MemoryHelpers
-
-    internal Color MatrixDataToColor(float data)
-    {
-        return Unsafe.As<float, Color>(ref data);
-    }
-    
-    internal float ColorToMatrixData(Color color)
-    {
-        return Unsafe.As<Color, float>(ref color);
-    }
-    
-    internal int MatrixDataToInt(float data)
-    {
-        return Unsafe.As<float, int>(ref data);
-    }
-    
-    internal float IntToMatrixData(int value)
-    {
-        return Unsafe.As<int, float>(ref value);
-    }
-    
-    #region DrawRectangle
-    // Position = (M11 M12)
-    // Size = (M21 M22)
-    // Color = (M31)
-    // thickness = (M32)
-    internal (Vector2 position, Vector2 size, Color color, float thickness) GetRectangleData(DrawCommand command)
-    {
-        return (
-            new Vector2(command.MatrixData.M11, command.MatrixData.M12), 
-            new Vector2(command.MatrixData.M21, command.MatrixData.M22),
-            MatrixDataToColor(command.MatrixData.M31),
-            command.MatrixData.M32);
-    }
-    
-    internal Matrix3x2 PutRectangleData(Vector2 position, Vector2 size, Color color, float thickness)
-    {
-        Matrix3x2 matrix = new Matrix3x2
-        {
-            M11 = position.X,
-            M12 = position.Y,
-            M21 = size.X,
-            M22 = size.Y,
-            M31 = ColorToMatrixData(color),
-            M32 = thickness
-        };
-        return matrix;
-    }
-    #endregion
-    
-    #region DrawLine
-    // Start = (M11 M12)
-    // End = (M21 M22)
-    // Color = (M31)
-    // thickness = (M32)
-    internal (Vector2 start, Vector2 end, Color color, float thickness) GetLineData(DrawCommand command)
-    {
-        return (
-            new Vector2(command.MatrixData.M11, command.MatrixData.M12), 
-            new Vector2(command.MatrixData.M21, command.MatrixData.M22),
-            MatrixDataToColor(command.MatrixData.M31),
-            command.MatrixData.M32);
-    }
-    
-    internal Matrix3x2 PutLineData(Vector2 start, Vector2 end, Color color, float thickness)
-    {
-        Matrix3x2 matrix = new Matrix3x2
-        {
-            M11 = start.X,
-            M12 = start.Y,
-            M21 = end.X,
-            M22 = end.Y,
-            M31 = ColorToMatrixData(color),
-            M32 = thickness
-        };
-        return matrix;
-    }
-    
-    #endregion
-    
-    #region DrawCircle
-    // center = (M11 M12)
-    // radius = (M21)
-    // color = (M22)
-    // thickness = (M31)
-    // segments = (M32)
-    internal (Vector2 center, float radius, Color color, float thickness, int segments) GetCircleData(DrawCommand command)
-    {
-        return (
-            new Vector2(command.MatrixData.M11, command.MatrixData.M12), 
-            command.MatrixData.M21,
-            MatrixDataToColor(command.MatrixData.M22),
-            command.MatrixData.M31,
-            MatrixDataToInt(command.MatrixData.M32));
-    }
-    
-    internal Matrix3x2 PutCircleData(Vector2 center, float radius, Color color, float thickness, int segments)
-    {
-        Matrix3x2 matrix = new Matrix3x2
-        {
-            M11 = center.X,
-            M12 = center.Y,
-            M21 = radius,
-            M22 = ColorToMatrixData(color),
-            M31 = thickness,
-            M32 = IntToMatrixData(segments)
-        };
-        return matrix;
-    }
-    #endregion
-    
-    #region DrawTexture
-    // Position = (M11 M12)
-    // Size = (M21 M22)
-    // Color = (M31)
-    internal (Vector2 position, Vector2 size, Color color) GetTextureData(DrawCommand command)
-    {
-        return (
-            new Vector2(command.MatrixData.M11, command.MatrixData.M12),
-            new Vector2(command.MatrixData.M21, command.MatrixData.M22),
-            MatrixDataToColor(command.MatrixData.M31));
-    }
-    
-    internal Matrix3x2 PutTextureData(Vector2 position, Vector2 size, Color color)
-    {
-        Matrix3x2 matrix = new Matrix3x2
-        {
-            M11 = position.X,
-            M12 = position.Y,
-            M21 = size.X,
-            M22 = size.Y,
-            M31 = ColorToMatrixData(color)
-        };
-        return matrix;
-    }
-    #endregion
-    
-    #region DrawTextWithRichTextLayout
-    // Position = (M11 M12)
-    // Color = (M21)
-    internal (Vector2 position, Color color) GetTextDataWithRichTextLayout(DrawCommand command)
-    {
-        return (
-            new Vector2(command.MatrixData.M11, command.MatrixData.M12),
-            MatrixDataToColor(command.MatrixData.M21));
-    }
-    
-    internal Matrix3x2 PutTextDataWithRichTextLayout(Vector2 position, Color color)
-    {
-        Matrix3x2 matrix = new Matrix3x2
-        {
-            M11 = position.X,
-            M12 = position.Y,
-            M21 = ColorToMatrixData(color)
-        };
-        return matrix;
-    }
-    #endregion
-    
-    #region DrawTextWithString
-    // Position = (M11 M12)
-    // Color = (M21)
-    // FontSize = (M31)
-    internal (Vector2 position, Color color, int fontSize) GetTextDataWithString(DrawCommand command)
-    {
-        return (
-            new Vector2(command.MatrixData.M11, command.MatrixData.M12),
-            MatrixDataToColor(command.MatrixData.M21),
-            MatrixDataToInt(command.MatrixData.M31));
-    }
-    
-    internal Matrix3x2 PutTextDataWithString(Vector2 position, Color color, int fontSize)
-    {
-        Matrix3x2 matrix = new Matrix3x2
-        {
-            M11 = position.X,
-            M12 = position.Y,
-            M21 = ColorToMatrixData(color),
-            M31 = IntToMatrixData(fontSize)
-        };
-        return matrix;
-    }
-    #endregion
-    
-    #region DrawSpriteWithIndex
-    // Position = (M11 M12)
-    // Size = (M21 M22)
-    // SpriteIndex = (M31)
-    // Color = (M32)
-    internal (Vector2 position, Vector2 size, int spriteIndex, Color color) GetSpriteDataWithIndex(DrawCommand command)
-    {
-        return (
-            new Vector2(command.MatrixData.M11, command.MatrixData.M12),
-            new Vector2(command.MatrixData.M21, command.MatrixData.M22),
-            MatrixDataToInt(command.MatrixData.M31),
-            MatrixDataToColor(command.MatrixData.M32));
-    }
-    
-    internal Matrix3x2 PutSpriteDataWithIndex(Vector2 position, Vector2 size, int spriteIndex, Color color)
-    {
-        Matrix3x2 matrix = new Matrix3x2
-        {
-            M11 = position.X,
-            M12 = position.Y,
-            M21 = size.X,
-            M22 = size.Y,
-            M31 = IntToMatrixData(spriteIndex),
-            M32 = ColorToMatrixData(color)
-        };
-        return matrix;
-    }
-    
-    #endregion
-    
-    #region DrawSprite
-    
-    // Position = (M11 M12)
-    // Size = (M21 M22)
-    // Color = (M31)
-    internal (Vector2 position, Vector2 size, Color color) GetSpriteData(DrawCommand command)
-    {
-        return (
-            new Vector2(command.MatrixData.M11, command.MatrixData.M12),
-            new Vector2(command.MatrixData.M21, command.MatrixData.M22),
-            MatrixDataToColor(command.MatrixData.M31));
-    }
-    
-    internal Matrix3x2 PutSpriteData(Vector2 position, Vector2 size, Color color)
-    {
-        Matrix3x2 matrix = new Matrix3x2
-        {
-            M11 = position.X,
-            M12 = position.Y,
-            M21 = size.X,
-            M22 = size.Y,
-            M31 = ColorToMatrixData(color)
-        };
-        return matrix;
-    }
-    
-    #endregion
-    
-    #region DrawNineSlice
-    // Position = (M11 M12)
-    // Size = (M21 M22)
-    // Color = (M31)
-    internal (Vector2 position, Vector2 size, Color color) GetNineSliceData(DrawCommand command)
-    {
-        return (
-            new Vector2(command.MatrixData.M11, command.MatrixData.M12),
-            new Vector2(command.MatrixData.M21, command.MatrixData.M22),
-            MatrixDataToColor(command.MatrixData.M31));
-    }
-    
-    internal Matrix3x2 PutNineSliceData(Vector2 position, Vector2 size, Color color)
-    {
-        Matrix3x2 matrix = new Matrix3x2
-        {
-            M11 = position.X,
-            M12 = position.Y,
-            M21 = size.X,
-            M22 = size.Y,
-            M31 = ColorToMatrixData(color)
-        };
-        return matrix;
-    }
-    
-    #endregion
-    
-    #region DrawThreeSlice
-    // Position = (M11 M12)
-    // Size = (M21 M22)
-    // Color = (M31)
-    internal (Vector2 position, Vector2 size, Color color) GetThreeSliceData(DrawCommand command)
-    {
-        return (
-            new Vector2(command.MatrixData.M11, command.MatrixData.M12),
-            new Vector2(command.MatrixData.M21, command.MatrixData.M22),
-            MatrixDataToColor(command.MatrixData.M31));
-    }
-    
-    internal Matrix3x2 PutThreeSliceData(Vector2 position, Vector2 size, Color color)
-    {
-        Matrix3x2 matrix = new Matrix3x2
-        {
-            M11 = position.X,
-            M12 = position.Y,
-            M21 = size.X,
-            M22 = size.Y,
-            M31 = ColorToMatrixData(color)
-        };
-        return matrix;
-    }
-    
-    #endregion
-    
-    #endregion
-    
     public void Execute()
     {
-        if (_drawCommands.Count == 0) return;
-        
         _execClipStack.Clear();
         _execTransformStack.Clear();
         
@@ -419,15 +401,19 @@ public class UiRendererContext(SpriteBatch spriteBatch) : IMgUiRendererContext
         Rect? currentClip = null;
         
         BeginBatch(ref currentTransform, ref currentClip);
-
-        foreach (var cmd in _drawCommands)
+        var reader = MemoryBuffer.CreateReader();
+        while (reader.HasData)
         {
-            switch (cmd.Type)
+            reader.Align(8);
+            DrawCommandType type = (DrawCommandType)reader.ReadByte();
+
+            switch (type)
             {
                 case DrawCommandType.SetClip:
                 {
+                    var newClipping = reader.ReadRect();
                     _execClipStack.Push(currentClip);
-                    currentClip = Rect.Intersect(currentClip, cmd.RectData);
+                    currentClip = Rect.Intersect(currentClip, newClipping);
                     RestartBatch(ref currentTransform, ref currentClip);
                     break;
                 }
@@ -439,18 +425,19 @@ public class UiRendererContext(SpriteBatch spriteBatch) : IMgUiRendererContext
                         currentClip = _execClipStack.Count > 0 ? _execClipStack.Peek() : null;
                         RestartBatch(ref currentTransform, ref currentClip);
                     }
-                    #if DEBUG
+#if DEBUG
                     else
                     {
                         throw new System.InvalidOperationException("No clipping rectangle to pop.");
                     }
-                    #endif
+#endif
                     break;
                 }
                 case DrawCommandType.SetTransform:
                 {
+                    var transformMatrix = reader.ReadMatrix3x2();
                     _execTransformStack.Push(currentTransform);
-                    currentTransform = cmd.MatrixData * currentTransform;
+                    currentTransform = transformMatrix * currentTransform;
                     RestartBatch(ref currentTransform, ref currentClip);
                     break;
                 }
@@ -461,139 +448,145 @@ public class UiRendererContext(SpriteBatch spriteBatch) : IMgUiRendererContext
                         currentTransform = _execTransformStack.Pop();
                         RestartBatch(ref currentTransform, ref currentClip);
                     }
-                    #if DEBUG
+#if DEBUG
                     else
                     {
                         throw new System.InvalidOperationException("No transformation to pop.");
                     }
-                    #endif
+#endif
                     break;
                 }
                 case DrawCommandType.DrawLine:
                 {
-                    var data = GetLineData(cmd);
-                    SpriteBatch.DrawLine(data.start.ToXnaFast(), data.end.ToXnaFast(), data.color.ToMgColor(),
-                        data.thickness);
+                    var start = reader.ReadVector2();
+                    var end = reader.ReadVector2();
+                    var color = reader.ReadColor();
+                    var thickness = reader.ReadFloat();
+                    ShapeBatch.DrawLine(start.ToXnaFast(), end.ToXnaFast(), 0, color.ToMgColor(), color.ToMgColor(),
+                        thickness);
                     break;
                 }
                 case DrawCommandType.DrawRectangle:
                 {
-                    var data = GetRectangleData(cmd);
-                    var isFilled = cmd.BoolData;
+                    var pos = reader.ReadVector2();
+                    var size = reader.ReadVector2();
+                    var color = reader.ReadColor();
+                    var thickness = reader.ReadFloat();
+                    var isFilled = reader.ReadBool();
                     if (isFilled)
                     {
-                        SpriteBatch.FillRectangle(data.position.ToXnaFast(), data.size.ToXnaFast(),
-                            data.color.ToMgColor());
+                        ShapeBatch.FillRectangle(pos.ToXnaFast(), size.ToXnaFast(),
+                            color.ToMgColor(), thickness, aaSize: 0);
+                        break;
+                    }
+
+                    ShapeBatch.BorderRectangle(pos.ToXnaFast(), size.ToXnaFast(),
+                        color.ToMgColor(), thickness, aaSize: 0);
+                    break;
+                }
+                case DrawCommandType.DrawCircle:
+                {
+                    var center = reader.ReadVector2();
+                    var radius = reader.ReadFloat();
+                    var color = reader.ReadColor();
+                    var thickness = reader.ReadFloat();
+                    var aaSize = reader.ReadFloat();
+                    var isFilled = reader.ReadBool();
+
+                    if (isFilled)
+                    {
+                        ShapeBatch.FillCircle(center.ToXnaFast(), radius, color.ToMgColor(), aaSize);
                     }
                     else
                     {
-                        SpriteBatch.DrawRectangle(data.position.ToXnaFast(), data.size.ToXnaFast(),
-                            data.color.ToMgColor(), data.thickness);
+                        ShapeBatch.BorderCircle(center.ToXnaFast(), radius, color.ToMgColor(), thickness, aaSize);
                     }
-                    break;
-                }
-                case DrawCommandType.DrawCircle: // For now, we don't support filled circles, but we can easily add it later if we need to, as the data is already in the command.
-                {
-                    var data = GetCircleData(cmd);
-                    SpriteBatch.DrawCircle(data.center.ToXnaFast(), data.radius,data.segments, data.color.ToMgColor(),
-                        data.thickness);
-                    break;
-                }
-                case DrawCommandType.DrawSprite:
-                {
-                    var data = GetSpriteData(cmd);
-                    var texture = (Texture2D)cmd.ObjectData;
-                    var rect = cmd.RectData;
-                    SpriteBatch.Draw(texture,new Rect(data.position, data.size).ToMGRect(), rect.ToMGRect(), data.color.ToMgColor());
-                    break;
-                }
-                case DrawCommandType.DrawText:
-                {
-                    var data = GetTextDataWithRichTextLayout(cmd);
-                    var textLayout = (RichTextLayout)cmd.ObjectData;
-                    textLayout.Draw(SpriteBatch, data.position.ToXnaFast(), data.color.ToMgColor());
-                    break;
-                }
-                case DrawCommandType.DrawTextWithString:
-                {
-                    var data = GetTextDataWithString(cmd);
-                    var text = (string)cmd.ObjectData;
-                    var font = (SpriteFontBase?)cmd.AdditionalData;
-                    if(font == null)
-                        #if DEBUG
-                        throw new System.InvalidOperationException("NULL FONT IS NOT CURRENTLY SUPPORTED!.");
-                        #else 
-                        break;
-                        #endif
-                    font.DrawText(SpriteBatch, text, data.position.ToXnaFast(), data.color.ToMgColor());
+                    
                     break;
                 }
                 case DrawCommandType.DrawTexture:
                 {
-                    var data = GetTextureData(cmd);
-                    var texture = (Texture2D)cmd.ObjectData;
-                    SpriteBatch.Draw(texture, new Rect(data.position, data.size).ToMGRect(), null, data.color.ToMgColor());
+                    var pos = reader.ReadVector2();
+                    var size = reader.ReadVector2();
+                    var colorMask = reader.ReadColor();
+                    var textureObject = reader.ReadObject();
+                    if (textureObject is not Texture2D texture)
+                    {
+                        break;
+                    }
+
+                    var source = new RectangleF(Vector2.Zero, size.ToXnaFast());
+                    
+                    ShapeBatch.Draw(texture, pos.ToXnaFast(), source, colorMask.ToMgColor());
                     break;
                 }
-                case DrawCommandType.DrawNineSlice:
+                case DrawCommandType.DrawText:
                 {
-                    var data = GetNineSliceData(cmd);
-                    var texture = (Texture2D)cmd.ObjectData;
-                    var nineSliceInfo = cmd.NineSliceData;
-                    RenderNineSlice(texture, data.position, data.size, nineSliceInfo, data.color);
+                    var textLayoutObj = reader.ReadObject();
+                    if (textLayoutObj is not RichTextLayout textLayout)
+                    {
+                        break;
+                    }
+
+                    var pos = reader.ReadVector2();
+                    var color = reader.ReadColor();
+                    // We should probably create an extensionMethod inside RichTextLayout so it could support ShapeBatch directly from textLayout.Draw() method.
+                    ShapeBatch.DrawString(textLayout.Font, textLayout.Text, pos.ToXnaFast(), color.ToMgColor());
                     break;
                 }
-                case DrawCommandType.DrawThreeSlice:
+                case DrawCommandType.DrawTextWithString:
                 {
-                    var data = GetThreeSliceData(cmd);
-                    var texture = (Texture2D)cmd.ObjectData;
-                    var threeSliceInfo = cmd.ThreeSliceData;
-                    var isHorizontal = cmd.BoolData;
-                    RenderThreeSlice(texture, data.position, data.size, threeSliceInfo, isHorizontal, data.color);
+                    var text = reader.ReadString();
+                    var position = reader.ReadVector2();
+                    var textColor = reader.ReadColor();
+                    var fontSize = reader.ReadInt();
+                    var spriteFont = reader.ReadObject();
+                    if (spriteFont is not SpriteFontBase spriteFontObj)
+                    {
+                        break;
+                    }
+                    
+                    ShapeBatch.DrawString(spriteFontObj, text, position.ToXnaFast(), textColor.ToMgColor());
                     break;
                 }
-                case DrawCommandType.DrawSpriteWithIndex:
-                {
-                    var data = GetSpriteDataWithIndex(cmd);
-                    var texture = (Texture2D)cmd.ObjectData;
-                    var rect = cmd.RectData;
-                    var spriteIndex = data.spriteIndex;
-                    var spriteSize = cmd.VectorData3;
-                    var sourceRect = new Rect(
-                        (spriteIndex % (int)(texture.Width / spriteSize.X)) * spriteSize.X,
-                        (spriteIndex / (int)(texture.Width / spriteSize.X)) * spriteSize.Y,
-                        spriteSize.X, spriteSize.Y);
-                    SpriteBatch.Draw(texture, new Rect(data.position, data.size).ToMGRect(), sourceRect.ToMGRect(), data.color.ToMgColor());
-                    break;
-                }
+                default:
+                        break;
             }
         }
-        
         EndBatch();
         
-        _drawCommands.Clear();
+        MemoryBuffer.Reset();
         _currentTransform = Matrix3x2.Identity;
         _currentClip = null;
     }
 
     private void BeginBatch(ref Matrix3x2 transform, ref Rect? clip)
     {
-        #if DEBUG
         if (_isSpriteBatchBeginActive)
+        #if DEBUG
             throw new System.InvalidOperationException("SpriteBatch is already active. Nested batches are not supported.");
-        _isSpriteBatchBeginActive = true;
+        #else
+            return;
         #endif
-        
-        var rasterizerState = clip.HasValue ? _clippingRasterizerState : _defaultRasterizerState;
-        
-        if (clip.HasValue)
+        _isSpriteBatchBeginActive = true;
+        try
         {
-            SpriteBatch.GraphicsDevice.ScissorRectangle = clip.Value.ToMGRect();
-        }
+            var rasterizerState = clip.HasValue ? _clippingRasterizerState : _defaultRasterizerState;
 
-        _currentTransform = transform;
-        _currentClip = clip;
-        SpriteBatch.Begin(transformMatrix: transform.ToXna(), rasterizerState: rasterizerState);
+            if (clip.HasValue)
+            {
+                ShapeBatch.GraphicsDevice.ScissorRectangle = clip.Value.ToMGRect();
+            }
+
+            _currentTransform = transform;
+            _currentClip = clip;
+            ShapeBatch.Begin(view: transform.ToXna(), rasterizerState: rasterizerState);
+        }
+        catch (Exception ex)
+        {
+            _isSpriteBatchBeginActive = false;
+            throw new InvalidOperationException("Error starting SpriteBatch", ex);
+        }
     }
 
     private void EndBatch()
@@ -603,7 +596,7 @@ public class UiRendererContext(SpriteBatch spriteBatch) : IMgUiRendererContext
             throw new System.InvalidOperationException("SpriteBatch is not active. Cannot end batch.");
         _isSpriteBatchBeginActive = false;
         #endif
-        SpriteBatch.End();
+        ShapeBatch.End();
     }
 
     private void RestartBatch(ref Matrix3x2 transform, ref Rect? clip)
@@ -615,10 +608,9 @@ public class UiRendererContext(SpriteBatch spriteBatch) : IMgUiRendererContext
 
     public int PushClip(Rect clippingRect)
     {
-        _drawCommands.Add(new DrawCommand(
-            DrawCommandType.SetClip,
-            rectData: clippingRect
-        ));
+        using var buffer = MemoryBuffer.CreateWriter(RenderSize.SetClip);
+        buffer.WriteByte((byte)DrawCommandType.SetClip);
+        buffer.WriteRect(clippingRect);
         
         _clipStack.Push(clippingRect);
         return _clipStack.Count;
@@ -631,19 +623,17 @@ public class UiRendererContext(SpriteBatch spriteBatch) : IMgUiRendererContext
         if (clipId != _clipStack.Count)
             throw new System.InvalidOperationException("Clipping rectangles must be popped in the correct order (last pushed, first popped).");
         
-        _drawCommands.Add(new DrawCommand(
-            DrawCommandType.UnsetClip
-        ));
+        using var buffer = MemoryBuffer.CreateWriter(1);
+        buffer.WriteByte((byte)DrawCommandType.UnsetClip);
         
         _clipStack.Pop();
     }
 
     public int PushTransform(Matrix3x2 transform)
     {
-        _drawCommands.Add(new DrawCommand(
-            DrawCommandType.SetTransform,
-            matrixData: transform
-        ));
+        using var buffer = MemoryBuffer.CreateWriter(RenderSize.SetTransform);
+        buffer.WriteByte((byte)DrawCommandType.SetTransform);
+        buffer.WriteMatrix3x2(transform);
         
         _transformStack.Push(transform);
         return _transformStack.Count;
@@ -656,109 +646,281 @@ public class UiRendererContext(SpriteBatch spriteBatch) : IMgUiRendererContext
         if (transformId != _transformStack.Count)
             throw new System.InvalidOperationException("Transformations must be popped in the correct order (last pushed, first popped).");
         
-        _drawCommands.Add(new DrawCommand(
-            DrawCommandType.UnsetTransform
-        ));
+        using var buffer = MemoryBuffer.CreateWriter(1);
+        buffer.WriteByte((byte)DrawCommandType.UnsetTransform);
         
         _transformStack.Pop();
     }
 
+    public static class RenderSize
+    {
+        
+        public static readonly int SetClip = ForClip();
+        public static readonly int SetTransform = ForTransform();
+        public static readonly int DrawRectangle = ForRect();
+        public static readonly int DrawLine = ForLine();
+        public static readonly int DrawCircle = ForCircle();
+        public static readonly int DrawTexture = ForTexture();
+        public static readonly int DrawText = ForText();
+        public static readonly int DrawTextWithString = ForTextWithString();
+        public static readonly int DrawSprite = ForSprite();
+        public static readonly int DrawSpriteWithIndex = ForSpriteWithIndex();
+        public static readonly int DrawNineSlice = ForNineSlice();
+        public static readonly int DrawThreeSlice = ForThreeSlice();
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int AddAligned(int currentPos, int size)
+        {
+            int alignment = Math.Min(size, 8);
+            currentPos = (currentPos + (alignment - 1)) & ~(alignment - 1);
+            return currentPos + size;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int FinishAlign(int pos)
+        {
+            return (pos + 7) & ~7;
+        }
+        
+        private static int ForClip()
+        {
+            int p = 1; // Byte flag
+            p = AddAligned(p, Unsafe.SizeOf<Rect>());  // Clipping rect
+            return FinishAlign(p);
+        }
+
+        private static int ForTransform()
+        {
+            int p = 1;
+            p = AddAligned(p, Unsafe.SizeOf<Matrix3x2>());  // Transform matrix
+            return FinishAlign(p);
+        }
+
+        private static int ForRect()
+        {
+            int p = 1; // Byte flag
+            p = AddAligned(p, Unsafe.SizeOf<Vector2>()); // Position
+            p = AddAligned(p, Unsafe.SizeOf<Vector2>()); // Size
+            p = AddAligned(p, Unsafe.SizeOf<Color>());   // Color
+            p = AddAligned(p, Unsafe.SizeOf<float>());   // Thickness
+            p = AddAligned(p, Unsafe.SizeOf<bool>());    // Filled
+            return FinishAlign(p);
+        }
+
+        private static int ForLine()
+        {
+            int p = 1; // Byte Flag
+            p = AddAligned(p, Unsafe.SizeOf<Vector2>()); // Start point
+            p = AddAligned(p, Unsafe.SizeOf<Vector2>()); // End point
+            p = AddAligned(p, Unsafe.SizeOf<Color>());   // Color
+            p = AddAligned(p, Unsafe.SizeOf<float>());   // Thickness
+            return FinishAlign(p);
+        }
+
+        private static int ForCircle()
+        {
+            int p = 1; // Byte Flag
+            p = AddAligned(p, Unsafe.SizeOf<Vector2>()); // Center
+            p = AddAligned(p, Unsafe.SizeOf<float>());   // Radius
+            p = AddAligned(p, Unsafe.SizeOf<Color>());   // Color
+            p = AddAligned(p, Unsafe.SizeOf<float>());   // Thickness
+            p = AddAligned(p, Unsafe.SizeOf<float>());   // aaSize
+            p = AddAligned(p, Unsafe.SizeOf<bool>());    // IsFilled
+            return FinishAlign(p);
+        }
+
+        private static int ForTexture()
+        {
+            int p = 1; // Byte Flag
+            p = AddAligned(p, Unsafe.SizeOf<Vector2>());  // Position
+            p = AddAligned(p, Unsafe.SizeOf<Vector2>());  // Size
+            p = AddAligned(p, Unsafe.SizeOf<int>());      // Texture index
+            p = AddAligned(p, Unsafe.SizeOf<Color>());    // Mask color
+            return FinishAlign(p);
+        }
+
+        private static int ForText()
+        {
+            int p = 1; // Byte Flag
+            p = AddAligned(p, Unsafe.SizeOf<int>()); // TextLayout object index
+            p = AddAligned(p, Unsafe.SizeOf<Vector2>()); // Position
+            p = AddAligned(p, Unsafe.SizeOf<Color>()); // Color
+            return FinishAlign(p);
+        }
+
+        private static int ForTextWithString()
+        {
+            int p = 1; // Byte Flag
+            p = AddAligned(p, 16);                   // String
+            p = AddAligned(p, Unsafe.SizeOf<Vector2>()); // Position
+            p = AddAligned(p, Unsafe.SizeOf<Color>());   // Text color
+            p = AddAligned(p, Unsafe.SizeOf<int>());     // FontSize 
+            p = AddAligned(p, Unsafe.SizeOf<int>());     // SpriteFontBase
+            return FinishAlign(p);
+        }
+
+        private static int ForSpriteWithIndex()
+        {
+            int p = 1;  // Byte Flag
+            p = AddAligned(p, Unsafe.SizeOf<Vector2>()); // Position
+            p = AddAligned(p, Unsafe.SizeOf<Vector2>()); // Size
+            p = AddAligned(p, Unsafe.SizeOf<int>());     // Sprite index
+            p = AddAligned(p, Unsafe.SizeOf<Vector2>()); // Sprite size
+            p = AddAligned(p, Unsafe.SizeOf<int>());     // Atlas Texture index
+            p = AddAligned(p, Unsafe.SizeOf<Color>());   // Mask Color
+            return FinishAlign(p);
+        }
+        
+        private static int ForSprite()
+        {
+            int p = 1;  // Byte Flag
+            p = AddAligned(p, Unsafe.SizeOf<Vector2>()); // Position
+            p = AddAligned(p, Unsafe.SizeOf<Vector2>()); // Size
+            p = AddAligned(p, Unsafe.SizeOf<Rect>());    // Source rect
+            p = AddAligned(p, Unsafe.SizeOf<int>());     // Atlas Texture index
+            p = AddAligned(p, Unsafe.SizeOf<Color>());   // Mask Color
+            return FinishAlign(p);
+        }
+
+        private static int ForNineSlice()
+        {
+            int p = 1; // Byte flag
+            p = AddAligned(p, Unsafe.SizeOf<Vector2>());          // Position
+            p = AddAligned(p, Unsafe.SizeOf<Vector2>());          // Size
+            p = AddAligned(p, Unsafe.SizeOf<int>());              // Texture index
+            p = AddAligned(p, Unsafe.SizeOf<NineSliceInfo>());    // NineSlice info
+            p = AddAligned(p, Unsafe.SizeOf<Color>());            // Mask Color
+            return FinishAlign(p);
+        }
+        
+        private static int ForThreeSlice()
+        {
+            int p = 1; // Byte flag
+            p = AddAligned(p, Unsafe.SizeOf<Vector2>());          // Position
+            p = AddAligned(p, Unsafe.SizeOf<Vector2>());          // Size
+            p = AddAligned(p, Unsafe.SizeOf<int>());              // Texture index
+            p = AddAligned(p, Unsafe.SizeOf<ThreeSliceInfo>());   // ThreeSlice info
+            p = AddAligned(p, Unsafe.SizeOf<bool>());             // IsHorizontal
+            p = AddAligned(p, Unsafe.SizeOf<Color>());            // Mask Color
+            return FinishAlign(p);
+        }
+    }
+
     public void DrawRectangle(Vector2 position, Vector2 size, Color color, float thickness = 1, bool filled = false)
     {
-        _drawCommands.Add(new DrawCommand(
-            DrawCommandType.DrawRectangle,
-            matrixData: PutRectangleData(position, size, color, thickness),
-            boolData: filled
-        ));
+        using var buffer = MemoryBuffer.CreateWriter(RenderSize.DrawRectangle);
+        buffer.WriteByte((byte)DrawCommandType.DrawRectangle);
+        buffer.WriteVector2(position);
+        buffer.WriteVector2(size);
+        buffer.WriteColor(color);
+        buffer.WriteFloat(thickness);
+        buffer.WriteBool(filled);
+        
+        // _drawCommands.Add(new DrawCommand(
+        //     DrawCommandType.DrawRectangle,
+        //     matrixData: PutRectangleData(position, size, color, thickness),
+        //     boolData: filled
+        // ));
     }
 
     public void DrawLine(Vector2 start, Vector2 end, Color color, float thickness = 1)
     {
-        _drawCommands.Add(new DrawCommand(
-            DrawCommandType.DrawLine,
-            matrixData: PutLineData(start, end, color, thickness)
-        ));
+        using var writer = MemoryBuffer.CreateWriter(RenderSize.DrawLine);
+        writer.WriteByte((byte)DrawCommandType.DrawLine);
+        writer.WriteVector2(start);
+        writer.WriteVector2(end);
+        writer.WriteColor(color);
+        writer.WriteFloat(thickness);
     }
 
-    public void DrawCircle(Vector2 center, float radius, Color color, float thickness = 1, int segments = 16, bool filled = false)
+    public void DrawCircle(Vector2 center, float radius, Color color, float thickness = 1, float aaSize = 1.5f, bool filled = false)
     {
-        _drawCommands.Add(new DrawCommand(
-            DrawCommandType.DrawCircle,
-            matrixData: PutCircleData(center, radius, color, thickness, segments),
-            boolData: filled
-        ));
-
+        using var writer = MemoryBuffer.CreateWriter(RenderSize.DrawCircle);
+        writer.WriteByte((byte)DrawCommandType.DrawCircle);
+        writer.WriteVector2(center);
+        writer.WriteFloat(radius);
+        writer.WriteColor(color);
+        writer.WriteFloat(thickness);
+        writer.WriteFloat(aaSize);
+        writer.WriteBool(filled);
     }
 
     public void DrawTexture(Vector2 position, Vector2 size, Texture2D texture, Color? color = null)
     {
-        _drawCommands.Add(new DrawCommand(
-            DrawCommandType.DrawTexture,
-            matrixData: PutTextureData(position, size, Color.GetOrDefault(color)),
-            objectData: texture
-        ));
+        using var writer = MemoryBuffer.CreateWriter(RenderSize.DrawTexture);
+        writer.WriteByte((byte)DrawCommandType.DrawTexture);
+        writer.WriteVector2(position);
+        writer.WriteVector2(size);
+        writer.WriteObject(texture);
+        writer.WriteColor(color ?? Color.White);
     }
 
     public void DrawText(RichTextLayout textLayout, Vector2 position, Color? color = null)
     {
-        _drawCommands.Add(new DrawCommand(
-            DrawCommandType.DrawText,
-            matrixData: PutTextDataWithRichTextLayout(position, Color.GetOrDefault(color)),
-            objectData: textLayout
-        ));
+        using var writer = MemoryBuffer.CreateWriter(RenderSize.DrawText);
+        writer.WriteByte((byte)DrawCommandType.DrawText);
+        writer.WriteObject(textLayout);
+        writer.WriteVector2(position);
+        writer.WriteColor(color ?? Color.White);
     }
 
     public void DrawText(string text, Vector2 position, Color? color = null, int fontSize = 16, SpriteFontBase? font = null)
     {
-        _drawCommands.Add(new DrawCommand(
-            DrawCommandType.DrawTextWithString,
-            matrixData: PutTextDataWithString(position, Color.GetOrDefault(color), fontSize),
-            objectData: text,
-            additionalData: font
-        ));
+        using var writer = MemoryBuffer.CreateWriter(RenderSize.DrawTextWithString);
+        writer.WriteByte((byte)DrawCommandType.DrawTextWithString);
+        writer.WriteString(text);
+        writer.WriteVector2(position);
+        writer.WriteColor(color ?? Color.White);
+        writer.WriteInt(fontSize);
+        writer.WriteObject(font);
     }
 
     public void DrawSprite(Vector2 position, Vector2 size, int spriteIndex, Vector2 spriteSize, Texture2D atlasTexture,
         Color? color = null)
     {
-        _drawCommands.Add(new DrawCommand(
-            DrawCommandType.DrawSpriteWithIndex,
-            matrixData: PutSpriteDataWithIndex(position, size, spriteIndex, Color.GetOrDefault(color)),
-            objectData: atlasTexture,
-            vectorData3: spriteSize
-        ));
+        using var writer = MemoryBuffer.CreateWriter(RenderSize.DrawSpriteWithIndex);
+        writer.WriteByte((byte)DrawCommandType.DrawSpriteWithIndex);
+        writer.WriteVector2(position);
+        writer.WriteVector2(size);
+        writer.WriteInt(spriteIndex);
+        writer.WriteVector2(spriteSize);
+        writer.WriteObject(atlasTexture);
+        writer.WriteColor(color ?? Color.White);
     }
 
     public void DrawSprite(Vector2 position, Vector2 size, Rect sourceRect, Texture2D atlasTexture, Color? color = null)
     {
-        _drawCommands.Add(new DrawCommand(
-            DrawCommandType.DrawSprite,
-            matrixData: PutSpriteData(position, size, Color.GetOrDefault(color)),
-            objectData: atlasTexture,
-            rectData: sourceRect
-        ));
+        using var writer = MemoryBuffer.CreateWriter(RenderSize.DrawSprite);
+        writer.WriteByte((byte)DrawCommandType.DrawSprite);
+        writer.WriteVector2(position);
+        writer.WriteVector2(size);
+        writer.WriteRect(sourceRect);
+        writer.WriteObject(atlasTexture);
+        writer.WriteColor(color ?? Color.White);
     }
 
     public void DrawNineSlice(Vector2 position, Vector2 size, Texture2D texture, NineSliceInfo info, Color? color = null)
     {
-        _drawCommands.Add(new DrawCommand(
-            DrawCommandType.DrawNineSlice,
-            matrixData: PutNineSliceData(position, size, Color.GetOrDefault(color)),
-            objectData: texture,
-            nineSliceData: info
-        ));
+        using var writer = MemoryBuffer.CreateWriter(RenderSize.DrawNineSlice);
+        writer.WriteByte((byte)DrawCommandType.DrawNineSlice);
+        writer.WriteVector2(position);
+        writer.WriteVector2(size);
+        writer.WriteObject(texture);
+        writer.Write(info);
+        writer.WriteColor(color ?? Color.White);
     }
 
     public void DrawThreeSlice(Vector2 position, Vector2 size, Texture2D texture, ThreeSliceInfo info, bool isHorizontal,
         Color? color = null)
     {
-        _drawCommands.Add(new DrawCommand(
-            DrawCommandType.DrawThreeSlice,
-            matrixData: PutThreeSliceData(position, size, Color.GetOrDefault(color)),
-            objectData: texture,
-            threeSliceData: info,
-            boolData: isHorizontal
-        ));
+        using var writer = MemoryBuffer.CreateWriter(RenderSize.DrawThreeSlice);
+        writer.WriteByte((byte)DrawCommandType.DrawThreeSlice);
+        writer.WriteVector2(position);
+        writer.WriteVector2(size);
+        writer.WriteObject(texture);
+        writer.Write(info);
+        writer.WriteBool(isHorizontal);
+        writer.WriteColor(color ?? Color.White);
     }
     
     #region PrivateDrawMethods

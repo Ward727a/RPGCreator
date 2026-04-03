@@ -40,7 +40,7 @@ namespace RPGCreator.Core
         public GameFactory GameFactory { get; private set; }
         public ProjectsManager Projects { get; private set; }
         public ToolService Brush { get; private set; }
-        public CommandManager Commands { get; private set; }
+        public UndoRedoService Commands { get; private set; }
         
         public FeaturesRulesManager FeaturesRules { get; private set; }
 
@@ -53,7 +53,7 @@ namespace RPGCreator.Core
             // Do not delete it, even if you think it's doesn't used.. It is.
             Brush = new ToolService(); 
             FeaturesRules = new FeaturesRulesManager();
-            Commands = new CommandManager();
+            Commands = new UndoRedoService();
             
             EngineServices.AssetsManager = Assets;
             EngineServices.GameFactory = GameFactory;

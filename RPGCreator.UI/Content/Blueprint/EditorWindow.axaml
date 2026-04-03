@@ -1,0 +1,565 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:nodify="https://miroiu.github.io/nodify"
+        xmlns:vm="clr-namespace:RPGCreator.UI.Content.Blueprint"
+        xmlns:bp="clr-namespace:RPGCreator.UI.Blueprints"
+        xmlns:bpLogic="clr-namespace:RPGCreator.SDK.Graph.LOGIC;assembly=RPGCreator.SDK"
+        xmlns:common="clr-namespace:RPGCreator.UI.Common"
+        xmlns:ursa="https://irihi.tech/ursa"
+        xmlns:ursaTheme="https://irihi.tech/ursa/themes/semi"
+        x:Class="RPGCreator.UI.Content.Blueprint.EditorWindow"
+        Title="RPG Creator - Blueprint Editor"
+        Width="1200" Height="800"
+        x:DataType="vm:NodeEditorViewModel">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="GridBrush" Color="#22FFFFFF" />
+        <SolidColorBrush x:Key="ExecTypeBrushColor" Color="Cornsilk"/>
+        <SolidColorBrush x:Key="ExecTypeBackColor" Color="#C37E7A69"/>
+        <SolidColorBrush x:Key="ExecTypeNodeColor" Color="#7BDCD6C0"/>
+        <SolidColorBrush x:Key="BoolTypeBrushColor" Color="Crimson" />
+        <SolidColorBrush x:Key="BoolTypeBackColor" Color="#CF570F1D" />
+        <SolidColorBrush x:Key="BoolTypeNodeColor" Color="#7BDC143C"/>
+        <SolidColorBrush x:Key="IntTypeBrushColor" Color="#34E1FF" />
+        <SolidColorBrush x:Key="IntTypeBackColor" Color="#D11C7080" />
+        <SolidColorBrush x:Key="IntTypeNodeColor" Color="#7B30C0DC" />
+        <SolidColorBrush x:Key="FloatTypeBrushColor" Color="#2818DC" />
+        <SolidColorBrush x:Key="FloatTypeBackColor" Color="#CE140C6E" />
+        <SolidColorBrush x:Key="FloatTypeNodeColor" Color="#7B2A17DC" />
+        <SolidColorBrush x:Key="StringTypeBrushColor" Color="Magenta" />
+        <SolidColorBrush x:Key="StringTypeBackColor" Color="#D06E006E" />
+        <SolidColorBrush x:Key="StringTypeNodeColor" Color="#7BDC00DC" />
+        <SolidColorBrush x:Key="ObjectTypeBrushColor" Color="#00C000"/>
+        <SolidColorBrush x:Key="ObjectTypeBackColor" Color="#D0006E00"/>
+        <SolidColorBrush x:Key="ObjectTypeNodeColor" Color="#7B00DC00"/>
+
+        <GeometryDrawing x:Key="SmallGridGeometry"
+                         Geometry="M0,0 L0,1 0.03,1 0.03,0.03 1,0.03 1,0 Z"
+                         Brush="{StaticResource NodifyEditor.SelectionRectangleBackgroundBrush}" />
+
+        <GeometryDrawing x:Key="LargeGridGeometry"
+                         Geometry="M0,0 L0,1 0.015,1 0.015,0.015 1,0.015 1,0 Z"
+                         Brush="{StaticResource NodifyEditor.SelectionRectangleBackgroundBrush}" />
+
+        <DrawingBrush x:Key="SmallGridLinesDrawingBrush"
+                      TileMode="Tile"
+                      DestinationRect="0 0 20 20"
+                      Drawing="{StaticResource SmallGridGeometry}" />
+
+        <DrawingBrush x:Key="LargeGridLinesDrawingBrush"
+                      TileMode="Tile"
+                      Opacity="0.5"
+                      DestinationRect="0 0 100 100"
+                      Drawing="{StaticResource LargeGridGeometry}" />
+        
+        
+        <DataTemplate x:Key="NodeHeaderTemplate" DataType="bp:GenericNodeViewModel">
+            <Grid ColumnDefinitions="*, Auto">
+                <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
+                <common:HelpButton 
+                    HelpDocsKey="{Binding HelpUrn}"
+                    IsVisible="{Binding HasHelpPage}"
+                    Cursor="Help"
+                    ToolTip.Tip="Click to open the help page for this node."
+                    Width="20" Height="20"
+                    ButtonPadding="4, 0"
+                    ButtonFontSize="8"
+                    Grid.Column="1"/>
+            </Grid>
+        </DataTemplate>
+        
+        <ControlTemplate x:Key="ExecBadgeTemplate">
+            <Border
+                Background="{StaticResource ExecTypeBackColor}"
+                CornerRadius="4"
+                Padding="4, 2"
+                ToolTip.Tip="An execution connector define what is the next node called.">
+                <TextBlock Text="Exec" FontSize="10" VerticalAlignment="Center"/>
+            </Border>
+        </ControlTemplate>
+        
+        <ControlTemplate x:Key="BoolBadgeTemplate">
+            <Border 
+                Background="{StaticResource BoolTypeBackColor}" 
+                CornerRadius="4" 
+                Padding="4,2" 
+                ToolTip.Tip="A boolean value define a value that can only be either TRUE or FALSE."
+            >
+                <TextBlock Text="Bool" FontSize="10" VerticalAlignment="Center"/>
+            </Border>
+        </ControlTemplate>
+        <ControlTemplate x:Key="StringBadgeTemplate">
+            <Border 
+                Background="{StaticResource StringTypeBackColor}" 
+                CornerRadius="4" 
+                Padding="4,2" 
+                ToolTip.Tip="A string value define a value that can be a word, like: 'Hello World!' or character like: 'a'."
+            >
+                <TextBlock Text="Str" FontSize="10" VerticalAlignment="Center"/>
+            </Border>
+        </ControlTemplate>
+        <ControlTemplate x:Key="IntBadgeTemplate">
+            <Border
+                Background="{StaticResource IntTypeBackColor}"
+                CornerRadius="4"
+                Padding="4, 2"
+                ToolTip.Tip="A int value define a numeric value that doesn't have any decimal, like: 1 or 2, but not: 1.2 nor 2.1.">
+                <TextBlock Text="Int" FontSize="10" VerticalAlignment="Center"/>
+            </Border>
+        </ControlTemplate>
+        <ControlTemplate x:Key="FloatBadgeTemplate">
+            <Border
+                Background="{StaticResource FloatTypeBackColor}"
+                CornerRadius="4"
+                Padding="4, 2"
+                ToolTip.Tip="A float value define a decimal value that CAN have a decimal, like: 1, 2.1, or 2.1231.">
+                <TextBlock Text="Float" VerticalAlignment="Center" FontSize="10"/>
+            </Border>
+        </ControlTemplate>
+
+        <vm:BlueprintPinTemplateSelector x:Key="InPinTemplateSelector">
+            <vm:BlueprintPinTemplateSelector.InAvailableTemplates>
+                <DataTemplate x:Key="0" DataType="bp:GenericConnectorViewModel">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
+                        <TemplatedControl Template="{StaticResource ExecBadgeTemplate}"/>
+                    </StackPanel>
+                </DataTemplate>
+                <DataTemplate x:Key="1" DataType="bp:GenericConnectorViewModel">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <CheckBox IsVisible="{Binding CanHaveManualInput}" IsChecked="{Binding Value, Mode=TwoWay}"/>
+                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
+                        <TemplatedControl Template="{StaticResource BoolBadgeTemplate}"/>
+                    </StackPanel>
+                </DataTemplate>
+                <DataTemplate x:Key="2" DataType="bp:GenericConnectorViewModel">
+                    <StackPanel Orientation="Vertical" Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
+                            <TemplatedControl Template="{StaticResource IntBadgeTemplate}"/>
+                        </StackPanel>
+                        <ursa:NumericIntUpDown IsVisible="{Binding CanHaveManualInput}" Value="{Binding Value}"/>
+                    </StackPanel>
+                </DataTemplate>
+                <DataTemplate x:Key="3" DataType="bp:GenericConnectorViewModel">
+                    <StackPanel Orientation="Vertical" Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
+                            <TemplatedControl Template="{StaticResource FloatBadgeTemplate}"/>
+                        </StackPanel>
+                        <ursa:NumericFloatUpDown IsVisible="{Binding CanHaveManualInput}" Value="{Binding Value}"/>
+                    </StackPanel>
+                </DataTemplate>
+                <DataTemplate x:Key="4" DataType="bp:GenericConnectorViewModel">
+                    <StackPanel Orientation="Vertical" Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
+                            <TemplatedControl Template="{StaticResource StringBadgeTemplate}"/>
+                        </StackPanel>
+                        <TextBox IsVisible="{Binding CanHaveManualInput}"
+                                 Text="{Binding Value}" 
+                                 Watermark="Type here..."
+                                 AcceptsReturn="False"/>
+                    </StackPanel>
+                </DataTemplate>
+            </vm:BlueprintPinTemplateSelector.InAvailableTemplates>
+        </vm:BlueprintPinTemplateSelector>
+        
+        <vm:BlueprintPinTemplateSelector x:Key="OutPinTemplateSelector">
+            <vm:BlueprintPinTemplateSelector.OutAvailableTemplates>
+                <DataTemplate x:Key="0" DataType="bp:GenericConnectorViewModel">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TemplatedControl Template="{StaticResource ExecBadgeTemplate}"/>
+                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </DataTemplate>
+                <DataTemplate x:Key="1" DataType="bp:GenericConnectorViewModel">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TemplatedControl Template="{StaticResource BoolBadgeTemplate}"/>
+                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </DataTemplate>
+                <DataTemplate x:Key="2" DataType="bp:GenericConnectorViewModel">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TemplatedControl Template="{StaticResource IntBadgeTemplate}"/>
+                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </DataTemplate>
+                <DataTemplate x:Key="3" DataType="bp:GenericConnectorViewModel">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TemplatedControl Template="{StaticResource FloatBadgeTemplate}"/>
+                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </DataTemplate>
+                <DataTemplate x:Key="4" DataType="bp:GenericConnectorViewModel">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TemplatedControl Template="{StaticResource StringBadgeTemplate}"/>
+                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </DataTemplate>
+            </vm:BlueprintPinTemplateSelector.OutAvailableTemplates>
+        </vm:BlueprintPinTemplateSelector>
+
+        <DataTemplate DataType="bp:GenericNodeViewModel" x:Key="NodeTemplate">
+            <nodify:Node Input="{Binding Inputs}"
+                         Output="{Binding Outputs}"
+                         Tag="real">
+                <nodify:Node.InputConnectorTemplate>
+                    <DataTemplate DataType="bp:GenericConnectorViewModel">
+                        <nodify:NodeInput
+                            IsConnected="{Binding IsConnected}"
+                            Anchor="{Binding Anchor, Mode=OneWayToSource}"
+                            Tag="{Binding Type}">
+                            <nodify:NodeInput.ConnectorTemplate>
+                                <ControlTemplate>
+                                    <Ellipse Name="PART_ConnectorShape"
+                                             Width="14" Height="14"
+                                             HorizontalAlignment="Stretch"
+                                             VerticalAlignment="Stretch"
+                                             StrokeThickness="2"
+                                             Fill="Transparent" />
+                                </ControlTemplate>
+                            </nodify:NodeInput.ConnectorTemplate>
+                        </nodify:NodeInput>
+                    </DataTemplate>
+                </nodify:Node.InputConnectorTemplate>
+
+                <nodify:Node.OutputConnectorTemplate>
+                    <DataTemplate DataType="bp:GenericConnectorViewModel">
+                        <nodify:NodeOutput
+                            IsConnected="{Binding IsConnected}"
+                            Anchor="{Binding Anchor, Mode=OneWayToSource}"
+                            Tag="{Binding Type}">
+                            <nodify:NodeOutput.ConnectorTemplate>
+                                <ControlTemplate>
+                                    <Ellipse Name="PART_ConnectorShape"
+                                             Width="14" Height="14"
+                                             HorizontalAlignment="Stretch"
+                                             VerticalAlignment="Stretch"
+                                             StrokeThickness="2"
+                                             Fill="Transparent" />
+                                </ControlTemplate>
+                            </nodify:NodeOutput.ConnectorTemplate>
+                        </nodify:NodeOutput>
+                    </DataTemplate>
+                </nodify:Node.OutputConnectorTemplate>
+            </nodify:Node>
+        </DataTemplate>
+
+    </Window.Resources>
+
+    <Window.Styles>
+        
+        <Style Selector="nodify|NodeOutput, nodify|NodeInput">
+            <Style Selector="^ Ellipse#PART_ConnectorShape">
+                <Setter Property="Stroke" Value="{StaticResource ObjectTypeBrushColor}" />
+                <Setter Property="Fill" Value="{StaticResource ObjectTypeBackColor}" />
+            </Style>
+            
+            <Style Selector="^[IsConnected=True] Ellipse#PART_ConnectorShape">
+                <Setter Property="Fill" Value="{StaticResource ObjectTypeBrushColor}" />
+            </Style>
+            
+            <Style Selector="^ Border#Highlight">
+                <Setter Property="Background" Value="{StaticResource ObjectTypeNodeColor}"/>
+            </Style>
+        </Style>
+        
+        <Style Selector="nodify|NodeOutput" x:DataType="bp:GenericConnectorViewModel">
+            <Setter Property="Header" Value="{Binding}" />
+            <Setter Property="HeaderTemplate" Value="{StaticResource OutPinTemplateSelector}" />
+        </Style>
+        <Style Selector="nodify|NodeInput" x:DataType="bp:GenericConnectorViewModel">
+            <Setter Property="Header" Value="{Binding}" />
+            <Setter Property="HeaderTemplate" Value="{StaticResource InPinTemplateSelector}" />
+        </Style>
+        
+        <Style Selector="nodify|NodeOutput[Tag=0], nodify|NodeInput[Tag=0]" x:DataType="bp:GenericConnectorViewModel">
+            <Style Selector="^ Ellipse#PART_ConnectorShape">
+                <Setter Property="Stroke" Value="{StaticResource ExecTypeBrushColor}"/>
+                <Setter Property="Fill" Value="{StaticResource ExecTypeBackColor}"/>
+            </Style>
+            
+            <Style Selector="^[IsConnected=True] Ellipse#PART_ConnectorShape">
+                <Setter Property="Fill" Value="{StaticResource ExecTypeBrushColor}"/>
+            </Style>
+            
+            <Style Selector="^ Border#Highlight">
+                <Setter Property="Background" Value="{StaticResource ExecTypeNodeColor}"/>
+            </Style>
+        </Style>
+        
+        <Style Selector="nodify|NodeOutput[Tag=1], nodify|NodeInput[Tag=1]">
+            <Style Selector="^ Ellipse#PART_ConnectorShape">
+                <Setter Property="Stroke" Value="{StaticResource BoolTypeBrushColor}" />
+                <Setter Property="Fill" Value="{StaticResource BoolTypeBackColor}" />
+            </Style>
+            
+            <Style Selector="^[IsConnected=True] Ellipse#PART_ConnectorShape">
+                <Setter Property="Fill" Value="{StaticResource BoolTypeBrushColor}" />
+            </Style>
+            
+            <Style Selector="^ Border#Highlight">
+                <Setter Property="Background" Value="{StaticResource BoolTypeNodeColor}"/>
+            </Style>
+        </Style>
+        
+        <Style Selector="nodify|NodeOutput[Tag=4], nodify|NodeInput[Tag=4]">
+            <Style Selector="^ Ellipse#PART_ConnectorShape">
+                <Setter Property="Stroke" Value="{StaticResource StringTypeBrushColor}" />
+                <Setter Property="Fill" Value="{StaticResource StringTypeBackColor}" />
+            </Style>
+            
+            <Style Selector="^[IsConnected=True] Ellipse#PART_ConnectorShape">
+                <Setter Property="Fill" Value="{StaticResource StringTypeBrushColor}" />
+            </Style>
+            
+            <Style Selector="^ Border#Highlight">
+                <Setter Property="Background" Value="{StaticResource StringTypeNodeColor}"/>
+            </Style>
+        </Style>
+        
+        <Style Selector="nodify|NodeOutput[Tag=2], nodify|NodeInput[Tag=2]">
+            <Style Selector="^ Ellipse#PART_ConnectorShape">
+                <Setter Property="Stroke" Value="{StaticResource IntTypeBrushColor}" />
+                <Setter Property="Fill" Value="{StaticResource IntTypeBackColor}" />
+            </Style>
+            
+            <Style Selector="^[IsConnected=True] Ellipse#PART_ConnectorShape">
+                <Setter Property="Fill" Value="{StaticResource IntTypeBrushColor}" />
+            </Style>
+            
+            <Style Selector="^ Border#Highlight">
+                <Setter Property="Background" Value="{StaticResource IntTypeNodeColor}"/>
+            </Style>
+        </Style>
+        
+        <Style Selector="nodify|NodeOutput[Tag=3], nodify|NodeInput[Tag=3]">
+            <Style Selector="^ Ellipse#PART_ConnectorShape">
+                <Setter Property="Stroke" Value="{StaticResource FloatTypeBrushColor}" />
+                <Setter Property="Fill" Value="{StaticResource FloatTypeBackColor}" />
+            </Style>
+            
+            <Style Selector="^[IsConnected=True] Ellipse#PART_ConnectorShape">
+                <Setter Property="Fill" Value="{StaticResource FloatTypeBrushColor}" />
+            </Style>
+            
+            <Style Selector="^ Border#Highlight">
+                <Setter Property="Background" Value="{StaticResource FloatTypeNodeColor}"/>
+            </Style>
+        </Style>
+        
+        
+        <Style Selector="nodify|Node" x:DataType="bp:GenericNodeViewModel">
+            <Setter Property="Header" Value="{Binding}"/>
+            <Setter Property="HeaderTemplate" Value="{StaticResource NodeHeaderTemplate}"/>
+        </Style>
+
+    </Window.Styles>
+
+
+    <Grid ColumnDefinitions="*">
+        <nodify:NodifyEditor Name="Editor"
+                             ItemsSource="{Binding Nodes}"
+                             Connections="{Binding Connections}"
+                             PendingConnection="{Binding PendingConnection}"
+                             DisconnectConnectorCommand="{Binding DisconnectConnectorCommand}"
+                             SelectedItems="{Binding SelectedNodes}"
+                             Background="{StaticResource SmallGridLinesDrawingBrush}"
+                             DragDrop.AllowDrop="True">
+            <nodify:NodifyEditor.KeyBindings>
+                <KeyBinding Gesture="Delete" Command="{Binding DeleteSelectedNodes}"/>
+            </nodify:NodifyEditor.KeyBindings>
+            <nodify:NodifyEditor.ItemContainerTheme>
+                <ControlTheme TargetType="nodify:ItemContainer"
+                              x:DataType="bp:GenericNodeViewModel"
+                              BasedOn="{StaticResource {x:Type nodify:ItemContainer}}">
+                    <Setter Property="Location" Value="{Binding Location, Mode=TwoWay}" />
+                </ControlTheme>
+            </nodify:NodifyEditor.ItemContainerTheme>
+
+            <nodify:NodifyEditor.ItemTemplate>
+                <DataTemplate DataType="bp:GenericNodeViewModel">
+                    <nodify:Node Input="{Binding Inputs}"
+                                 Output="{Binding Outputs}"
+                                 Tag="real">
+                        <nodify:Node.InputConnectorTemplate>
+                            <DataTemplate DataType="bp:GenericConnectorViewModel">
+                                <nodify:NodeInput
+                                    IsConnected="{Binding IsConnected}"
+                                    Anchor="{Binding Anchor, Mode=OneWayToSource}"
+                                    Tag="{Binding Type}">
+                                    <nodify:NodeInput.ConnectorTemplate>
+                                        <ControlTemplate>
+                                            <Ellipse Name="PART_ConnectorShape"
+                                                     Width="14" Height="14"
+                                                     HorizontalAlignment="Stretch"
+                                                     VerticalAlignment="Stretch"
+                                                     StrokeThickness="2"
+                                                     Fill="Transparent" />
+                                        </ControlTemplate>
+                                    </nodify:NodeInput.ConnectorTemplate>
+                                </nodify:NodeInput>
+                            </DataTemplate>
+                        </nodify:Node.InputConnectorTemplate>
+
+                        <nodify:Node.OutputConnectorTemplate>
+                            <DataTemplate DataType="bp:GenericConnectorViewModel">
+                                <nodify:NodeOutput
+                                    IsConnected="{Binding IsConnected}"
+                                    Anchor="{Binding Anchor, Mode=OneWayToSource}"
+                                    Tag="{Binding Type}">
+                                    <nodify:NodeOutput.ConnectorTemplate>
+                                        <ControlTemplate>
+                                            <Ellipse Name="PART_ConnectorShape"
+                                                     Width="14" Height="14"
+                                                     HorizontalAlignment="Stretch"
+                                                     VerticalAlignment="Stretch"
+                                                     StrokeThickness="2"
+                                                     Fill="Transparent" />
+                                        </ControlTemplate>
+                                    </nodify:NodeOutput.ConnectorTemplate>
+                                </nodify:NodeOutput>
+                            </DataTemplate>
+                        </nodify:Node.OutputConnectorTemplate>
+                    </nodify:Node>
+                </DataTemplate>
+            </nodify:NodifyEditor.ItemTemplate>
+
+            <nodify:NodifyEditor.ConnectionTemplate>
+                <DataTemplate DataType="vm:ConnectionViewModel">
+                    <nodify:LineConnection Source="{Binding Source.Anchor}"
+                                           Target="{Binding Target.Anchor}"
+                                           Focusable="False"/>
+                </DataTemplate>
+            </nodify:NodifyEditor.ConnectionTemplate>
+
+            <nodify:NodifyEditor.PendingConnectionTemplate>
+                <DataTemplate DataType="vm:PendingConnectionViewModel">
+                    <nodify:PendingConnection StartedCommand="{Binding StartCommand}"
+                                              CompletedCommand="{Binding FinishCommand}"
+                                              SourceAnchor="{Binding StartPoint, Mode=TwoWay}"
+                                              AllowOnlyConnectors="True"
+                                              EnablePreview="True"
+                                              PreviewTarget="{Binding PreviewTarget, Mode=OneWayToSource}"
+                                              Stroke="{Binding StrokeBrush}"
+                                              StrokeDashArray="{Binding DashArray}"
+                                              ToolTip.Tip="{Binding ToolTipMessage, Mode=OneWay}"
+                                              ToolTip.IsOpen="{Binding ToolTipIsOpen}"/>
+                </DataTemplate>
+            </nodify:NodifyEditor.PendingConnectionTemplate>
+
+        </nodify:NodifyEditor>
+        <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, *" Margin="16" IsHitTestVisible="{Binding !IsDragging}" ColumnSpacing="4" RowSpacing="4">
+            <StackPanel Spacing="8" Orientation="Horizontal" Background="#51535353">
+                <Button Content="Build" Command="{Binding BuildBlueprintCommand}"/>
+            </StackPanel>
+            
+            <Button Grid.Row="0" Grid.Column="0" Content="Show produced source" HorizontalAlignment="Right" Command="{Binding ShowProducedSourceCommand}"/>
+            <UserControl Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"  DataContext="{Binding BlueprintListVm}">
+                <Border
+                        Background="#51535353"
+                        Padding="8"
+                        CornerRadius="4"
+                        x:DataType="vm:BlueprintListVm">
+                    <Grid RowDefinitions="Auto, *, Auto, Auto"
+                          Width="450" RowSpacing="4">
+                        <Grid ColumnDefinitions="*, Auto" HorizontalAlignment="Stretch" ColumnSpacing="4">
+                            <TextBox Watermark="Search node..." HorizontalAlignment="Stretch" Text="{Binding SearchQuery, Mode=TwoWay}">
+                                <TextBox.KeyBindings>
+                                    <KeyBinding Gesture="Enter" Command="{Binding SearchCommand}"/>
+                                </TextBox.KeyBindings>
+                            </TextBox>
+                            <Button Grid.Column="1" Content="Search" HorizontalAlignment="Right" Command="{Binding SearchCommand}"/>
+                        </Grid>
+                        <ScrollViewer Grid.Row="1"  IsVisible="{Binding !IsLoading}">
+                            <TreeView ItemsSource="{Binding NodeItems}" SelectedItem="{Binding SelectedItem, Mode=OneWayToSource}">
+                                <TreeView.DataTemplates>
+                                    <TreeDataTemplate DataType="vm:TreeViewNodeItemModel"
+                                                      ItemsSource="{Binding Children}">
+                                        <TextBlock Text="{Binding Name}"/>
+                                    </TreeDataTemplate>
+                                </TreeView.DataTemplates>
+                            </TreeView>
+                        </ScrollViewer>
+                        <ursa:Skeleton Grid.Row="1" IsLoading="{Binding IsLoading}" IsActive="{Binding IsLoading}" IsVisible="{Binding IsLoading}">
+                            <StackPanel Orientation="Vertical" Spacing="4">
+                            </StackPanel>
+                        </ursa:Skeleton>
+                        <StackPanel Grid.Row="2" Spacing="4">
+                            <ursa:Divider Content="Preview" Orientation="Horizontal" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                            <Border Background="{DynamicResource WindowDefaultBackground}" Padding="4" CornerRadius="4">
+                                <Border Background="{StaticResource SmallGridLinesDrawingBrush}" Padding="4" MinHeight="200">
+                                    <Grid ColumnDefinitions="*" RowDefinitions="*" IsVisible="{Binding HasPreviewedNode, Mode=OneWay}">
+                                        <Grid RowDefinitions="*, Auto, *" ColumnDefinitions="*, Auto, *" DataContext="{Binding PreviewedNode, Mode=OneWay}">
+                                            <nodify:Node 
+                                                x:DataType="bp:GenericNodeViewModel"
+                                                Grid.Row="1" 
+                                                Grid.Column="1" 
+                                                Output="{Binding Outputs}" 
+                                                Input="{Binding Inputs}"
+                                                IsHitTestVisible="False"
+                                                IsVisible="{Binding !#Editor.((vm:NodeEditorViewModel)DataContext).IsDragging}">
+                                                <nodify:Node.InputConnectorTemplate>
+                                                    <DataTemplate DataType="bp:GenericConnectorViewModel">
+                                                        <nodify:NodeInput
+                                                            IsConnected="{Binding IsConnected}"
+                                                            Anchor="{Binding Anchor, Mode=OneWayToSource}"
+                                                            Tag="{Binding Type}"
+                                                            IsHitTestVisible="False">
+                                                            <nodify:NodeInput.ConnectorTemplate>
+                                                                <ControlTemplate>
+                                                                    <Ellipse Name="PART_ConnectorShape"
+                                                                             Width="14" Height="14"
+                                                                             HorizontalAlignment="Stretch"
+                                                                             VerticalAlignment="Stretch"
+                                                                             StrokeThickness="2"
+                                                                             Fill="Transparent" />
+                                                                </ControlTemplate>
+                                                            </nodify:NodeInput.ConnectorTemplate>
+                                                        </nodify:NodeInput>
+                                                    </DataTemplate>
+                                                </nodify:Node.InputConnectorTemplate>
+                                                <nodify:Node.OutputConnectorTemplate>
+                                                    <DataTemplate DataType="bp:GenericConnectorViewModel">
+                                                        <nodify:NodeOutput
+                                                            IsConnected="{Binding IsConnected}"
+                                                            Anchor="{Binding Anchor, Mode=OneWayToSource}"
+                                                            Tag="{Binding Type}"
+                                                            IsHitTestVisible="False">
+                                                            <nodify:NodeOutput.ConnectorTemplate>
+                                                                <ControlTemplate>
+                                                                    <Ellipse Name="PART_ConnectorShape"
+                                                                             Width="14" Height="14"
+                                                                             HorizontalAlignment="Stretch"
+                                                                             VerticalAlignment="Stretch"
+                                                                             StrokeThickness="2"
+                                                                             Fill="Transparent" />
+                                                                </ControlTemplate>
+                                                            </nodify:NodeOutput.ConnectorTemplate>
+                                                        </nodify:NodeOutput>
+                                                    </DataTemplate>
+                                                </nodify:Node.OutputConnectorTemplate>
+                                            </nodify:Node>
+                                            <Border Grid.Row="1" Grid.Column="1" Background="Transparent" IsHitTestVisible="True" PointerPressed="AddNode_OnPointerPressed"/>
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+                            </Border>
+                            <UserControl IsEnabled="{Binding HasPreviewedNode}">
+                                <UserControl DataContext="{Binding PreviewedNode, Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                                    <common:HelpButton  ButtonText="Open help for this node" HelpDocsKey="{Binding HelpUrn}" IsEnabled="{Binding HasHelpPage}" HorizontalAlignment="Stretch"/>
+                                </UserControl>
+                            </UserControl>
+                        </StackPanel>
+                        <TextBlock Grid.Row="3" IsVisible="{Binding StillLoadingChunk}">
+                            Still loading other nodes, please wait...
+                        </TextBlock>
+                    </Grid>
+                </Border>
+            </UserControl>
+        </Grid>
+        <Canvas x:Name="GhostOverlay" IsHitTestVisible="False" Background="Transparent" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        </Canvas>
+    </Grid>
+</Window>

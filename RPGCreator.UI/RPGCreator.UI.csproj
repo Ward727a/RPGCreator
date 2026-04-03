@@ -15,6 +15,7 @@
         <AvaloniaResource Remove="Content\AssetsManage\AssetsEditors\AutotileEditor\**" />
     </ItemGroup>
 
+
     <ItemGroup>
         <AvaloniaResource Remove="Assets\rpgc-logo.ico" />
     </ItemGroup>
@@ -55,6 +56,7 @@
     <PackageReference Include="LiveMarkdown.Avalonia" Version="1.7.0" />
     <PackageReference Include="LiveMarkdown.Avalonia.Math" Version="1.7.0" />
     <PackageReference Include="MethodTimer.Fody" Version="3.2.3" PrivateAssets="all" />
+    <PackageReference Include="NodifyAvalonia" Version="6.6.0" />
     <PackageReference Include="Projektanker.Icons.Avalonia" Version="9.6.2" />
     <PackageReference Include="Projektanker.Icons.Avalonia.MaterialDesign" Version="9.6.2" />
     <PackageReference Include="Semi.Avalonia" Version="11.3.7.2" />
@@ -71,6 +73,7 @@
 
   <ItemGroup>
     <Folder Include="Assets\GamePlayer\" />
+    <Folder Include="AxamlTemplate\" />
     <Folder Include="Common\AnimEditor\" />
     <Folder Include="Content\AssetsManage\Components\Items\" />
     <Folder Include="Content\Preferences\Components\General\" />
@@ -126,6 +129,14 @@
 	<ItemGroup>
 	  <None Remove="Content\AssetsManage\AssetsEditors\AutotileEditor\**" />
 	</ItemGroup>
+    
+    <ItemGroup>
+        <AvaloniaResource Include="AxamlTemplate\**\*.axaml" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <EmbeddedResource Include="Docs/**/*.md" />
+    </ItemGroup>
 
     <Target Name="CopyAssets" AfterTargets="Build">
         <ItemGroup>

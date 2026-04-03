@@ -29,6 +29,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Apos.Shapes" Version="0.6.8" />
     <PackageReference Include="FontStashSharp.MonoGame" Version="1.5.3" />
     <PackageReference Include="MonoGame.Extended" Version="5.3.1" />
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4.1" />
@@ -45,6 +46,17 @@
     <Exec Command="dotnet tool restore" />
   </Target>
 
+  <Target Name="CopyAssets" AfterTargets="Build">
+    <ItemGroup>
+      <!-- Tous les fichiers dans le dossier Assets -->
+      <AssetFiles Include="bin\Debug\net10.0\Content\**\*.*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(AssetFiles)"
+          DestinationFolder="../RPGCreator.UI/Assets\Content"
+          SkipUnchangedFiles="true" />
+  </Target>
+  
   <ItemGroup>
     <EmbeddedResource Include="Resources/**" />
   </ItemGroup>

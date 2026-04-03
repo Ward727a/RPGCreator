@@ -22,6 +22,7 @@ using System.Diagnostics.CodeAnalysis;
 using RPGCreator.SDK.Editor.Rendering;
 using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Exceptions;
+using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types;
@@ -189,6 +190,16 @@ public static class EditorUiServices
         set => RegisterService(value);
     } = new DefaultMonogameViewport();
 
+    /// <summary>
+    /// One of the rare UI services that is not totally related to UI.<br/>
+    /// But due to its heavy dependency on the Avalonia framework, it's registered here, so plugin authors do not have bad surprises.
+    /// </summary>
+    public static IBpCompilerService BpCompiler
+    {
+        get => GetService<IBpCompilerService>();
+        set => RegisterService(value);
+    }
+
     #region DefaultInstance
     // All instances here SHOULD NOT be used!
     // They are only here to avoid null reference exceptions in case a service is not registered.
@@ -298,6 +309,12 @@ public static class EditorUiServices
             return string.Empty;
         }
 
+        public bool HasDocumentation(URN topicUrn)
+        {
+            Logger.Error("[UI] No IDocService registered. Cannot check for documentation.");
+            return false;
+        }
+
         public bool AddDocumentation(URN topicUrn, string content)
         {
             Logger.Error("[UI] No IDocService registered. Cannot add documentation.");
@@ -342,14 +359,20 @@ public static class EditorUiServices
             Logger.Error("[UI] No IMonogameViewport registered. Cannot destroy viewport.");
         }
 
-        public void Tick()
+    }
+
+    public class DefaultBpCompiler : IBpCompilerService
+    {
+        public string Compile(string blueprintFilePath)
         {
-            Logger.Error("[UI] No IMonogameViewport registered. Cannot tick viewports.");
+            Logger.Error("[UI] No IBpCompilerService registered. Cannot compile blueprint.");
+            return "";
         }
 
-        public void AttachToWindow(IntPtr avaloniaWindowHandle)
+        public string Compile(object blueprintData)
         {
-            Logger.Error("[UI] No IMonogameViewport registered. Cannot attach to window.");
+            Logger.Error("[UI] No IBpCompilerService registered. Cannot compile blueprint.");
+            return "";
         }
     }
     

@@ -204,6 +204,18 @@ public static class RegistryServices
         get => GetService<INativeActionRegistry>();
         set => RegisterService(value);
     }
+
+    public static IBpNodesRegistry BpNodes
+    {
+        get => GetService<IBpNodesRegistry>();
+        set => RegisterService(value);
+    }
+
+    public static IBpConnectorRegistry BpConnector
+    {
+        get => GetService<IBpConnectorRegistry>();
+        set => RegisterService(value);
+    }
     
     #region DefaultInstance
     // All instances here SHOULD NOT be used!

@@ -635,10 +635,6 @@ public abstract class BaseVisual
 
         DrawVisualAt(context, pos, size, out bool handledChildren);
 
-        if (!handledChildren)
-        {
-            foreach (var child in Children) child.DrawVisual(context);
-        }
 
         if (transformId != -1)
             context.PopTransform(transformId);

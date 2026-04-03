@@ -19,6 +19,7 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
@@ -27,21 +28,92 @@ using LiveMarkdown.Avalonia;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.EditorUiService;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types;
+using RPGCreator.UI.Content.GameUiEditor;
 using RPGCreator.UI.Contexts;
+using TextMateSharp.Grammars;
 using Thickness = Avalonia.Thickness;
 
 namespace RPGCreator.UI.Common;
 
 public class HelpButton : UserControl
 {
+    public static readonly StyledProperty<URN> HelpDocsKeyProperty =
+        AvaloniaProperty.Register<HelpButton, URN>(nameof(HelpDocsKey));
     
-    [ExposePropToPlugin("HelpButton")]
-    private Button _helpButton { get; set; } = null!;
+    public static readonly StyledProperty<int> ButtonFontSizeProperty =
+        AvaloniaProperty.Register<HelpButton, int>(nameof(ButtonFontSizeProperty), 12);
+    
+    public static readonly StyledProperty<Thickness> ButtonPaddingProperty =
+        AvaloniaProperty.Register<HelpButton, Thickness>(nameof(ButtonPaddingProperty), new Thickness(4));
+    
+    public static readonly StyledProperty<string> ButtonTextProperty =
+        AvaloniaProperty.Register<HelpButton, string>(nameof(ButtonTextProperty), "?");
+    
+    public static readonly StyledProperty<CornerRadius> ButtonCornerRadiusProperty =
+        AvaloniaProperty.Register<HelpButton, CornerRadius>(nameof(ButtonCornerRadiusProperty), new CornerRadius(4));
     
     [ExposePropToPlugin("HelpButton", canSet: true)]
-    private URN _helpDocsKey { get; set; } = null!;
+    public URN HelpDocsKey
+    {
+        get => GetValue(HelpDocsKeyProperty);
+        set => SetValue(HelpDocsKeyProperty, value);
+    }
+
+    [ExposePropToPlugin("HelpButton", canSet: true)]
+    public int ButtonFontSize
+    {
+        get => GetValue(ButtonFontSizeProperty);
+        set => SetValue(ButtonFontSizeProperty, value);
+    }
+    
+    [ExposePropToPlugin("HelpButton", canSet: true)]
+    public Thickness ButtonPadding
+    {
+        get => GetValue(ButtonPaddingProperty);
+        set => SetValue(ButtonPaddingProperty, value);
+    }
+    
+    [ExposePropToPlugin("HelpButton", canSet: true)]
+    public string ButtonText
+    {
+        get => GetValue(ButtonTextProperty);
+        set
+        {
+            if (value == field) return;
+            if (value == null) value = "?";
+            SetValue(ButtonTextProperty, value);
+            if(_helpButton != null)
+                _helpButton.Content = value;
+        }
+    }
+    
+    [ExposePropToPlugin("HelpButton")]
+    public CornerRadius ButtonCornerRadius
+    {
+        get => GetValue(ButtonCornerRadiusProperty);
+        set
+        {
+            if (value == field) return;
+            SetValue(ButtonCornerRadiusProperty, value);
+            if(_helpButton != null)
+                _helpButton.CornerRadius = value;
+        }
+            
+    }
+
+    [ExposePropToPlugin("HelpButton")]
+    private Button _helpButton { get; set; } = null!;
+
+    public HelpButton()
+    {
+        InitializeIfNeeded();
+        CreateComponent();
+        RegisterEvents();
+        Content = _helpButton;
+    }
     
     public HelpButton(URN helpDocsKey, string buttonText = "?")
     {
@@ -49,13 +121,19 @@ public class HelpButton : UserControl
         RegisterEvents();
         _helpButton!.Content = buttonText;
         Content = _helpButton;
-        _helpDocsKey = helpDocsKey;
+        HelpDocsKey = helpDocsKey;
         
         HelpButtonContext.Config config = new HelpButtonContext.Config
         {
             Get_helpButton = () => _helpButton,
-            Get_helpDocsKey = () => _helpDocsKey,
-            Set_helpDocsKey = (newKey) => _helpDocsKey = newKey
+            GetHelpDocsKey = () => HelpDocsKey,
+            SetHelpDocsKey = (newKey) => HelpDocsKey = newKey,
+            GetButtonFontSize = () => ButtonFontSize,
+            SetButtonFontSize = (value)=> ButtonFontSize = value,
+            GetButtonPadding = () => ButtonPadding,
+            SetButtonPadding = (value)=> ButtonPadding = value,
+            GetButtonText = () => ButtonText,
+            SetButtonText = (value)=> ButtonText = value,
         };
         
         EditorUiServices.ExtensionManager.ApplyExtensions(UIRegion.HelpButton, this, new HelpButtonContext(config));
@@ -63,16 +141,18 @@ public class HelpButton : UserControl
     
     public void SetHelpDocsKey(URN newKey)
     {
-        _helpDocsKey = newKey;
+        HelpDocsKey = newKey;
     }
 
     private void CreateComponent()
     {
         _helpButton = new Button
         {
-            Content = "?",
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
+            FontSize = ButtonFontSize,
+            Padding = ButtonPadding,
+            Content = ButtonText,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
         };
     }
 
@@ -92,11 +172,11 @@ public class HelpButton : UserControl
     /// </summary>
     public void OpenHelp()
     {
-        var helpContent = EditorUiServices.DocService.GetDocumentation(_helpDocsKey);
+        var helpContent = EditorUiServices.DocService.GetDocumentation(HelpDocsKey);
 
         if (string.IsNullOrWhiteSpace(helpContent))
         {
-            EditorUiServices.NotificationService.Error("No help available for this item.", $"The documentation for '{_helpDocsKey}' is missing or empty.");
+            EditorUiServices.NotificationService.Error("No help available for this item.", $"The documentation for '{HelpDocsKey}' is missing or empty.");
             return;
         }
 
@@ -137,7 +217,8 @@ public class HelpWindow : UserControl
         _markdownViewer = new MarkdownRenderer
         {
             Margin = new Thickness(10),
-            LinkCommand = new RelayCommand<LinkClickedEventArgs>(OpenLinkCommand)
+            LinkCommand = new RelayCommand<LinkClickedEventArgs>(OpenLinkCommand),
+            CodeBlockColorTheme = ThemeName.Abbys,
         };
         _markdownViewer.MarkdownBuilder = mkBuilder;
         mkBuilder.Append(content);
@@ -154,6 +235,25 @@ public class HelpWindow : UserControl
 
     private async void OpenLinkCommand(LinkClickedEventArgs? url)
     {
+
+        if (url.HRef?.OriginalString.StartsWith("goto:") ?? false)
+        {
+            // In this case, we need to switch to another documentation (if it exists!)
+            var urn = URN.Parse(url.HRef.OriginalString.Substring(5));
+            if (EditorUiServices.DocService.HasDocumentation(urn))
+            {
+                mkBuilder.Clear();
+                mkBuilder.Append(EditorUiServices.DocService.GetDocumentation(urn));
+            }
+            else
+            {
+                EditorUiServices.NotificationService.Error("Invalid link", "The link you clicked is invalid.");
+                Logger.Error("Invalid link: ", url.HRef.OriginalString, ". No documentation found for it.");
+            }
+
+            return;
+        }
+        
         try
         {
             if(url == null)

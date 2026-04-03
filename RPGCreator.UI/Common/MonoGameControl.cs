@@ -18,18 +18,18 @@ using Avalonia.VisualTree;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace RPGCreator.UI.Test;
+namespace RPGCreator.UI.Common;
 
 // Code from 'AvaloniaInside.MonoGame' package, slightly modified to work with a multi-viewport system.
 
-public sealed class MonoGameControlTest : Control
+public sealed class MonoGameControl : Control
 {
-  public static readonly DirectProperty<MonoGameControlTest, IBrush> FallbackBackgroundProperty = AvaloniaProperty.RegisterDirect<MonoGameControlTest, IBrush>(nameof (FallbackBackground), (Func<MonoGameControlTest, IBrush>) (o => o.FallbackBackground), (Action<MonoGameControlTest, IBrush>) ((o, v) => o.FallbackBackground = v));
-  public static readonly DirectProperty<MonoGameControlTest, Game?> GameProperty = 
-    AvaloniaProperty.RegisterDirect<MonoGameControlTest, Game>(
+  public static readonly DirectProperty<MonoGameControl, IBrush> FallbackBackgroundProperty = AvaloniaProperty.RegisterDirect<MonoGameControl, IBrush>(nameof (FallbackBackground), (Func<MonoGameControl, IBrush>) (o => o.FallbackBackground), (Action<MonoGameControl, IBrush>) ((o, v) => o.FallbackBackground = v));
+  public static readonly DirectProperty<MonoGameControl, Game?> GameProperty = 
+    AvaloniaProperty.RegisterDirect<MonoGameControl, Game>(
       nameof (Game), 
-      (Func<MonoGameControlTest, Game>) (o => o.Game), 
-      (Action<MonoGameControlTest, Game>) ((o, v) => o.Game = v));
+      (Func<MonoGameControl, Game>) (o => o.Game), 
+      (Action<MonoGameControl, Game>) ((o, v) => o.Game = v));
   private readonly Stopwatch _stopwatch = new Stopwatch();
   private readonly GameTime _gameTime = new GameTime();
   private readonly PresentationParameters _presentationParameters = new PresentationParameters()
@@ -45,7 +45,7 @@ public sealed class MonoGameControlTest : Control
   private WriteableBitmap? _bitmap;
   private bool _isInitialized;
 
-  public MonoGameControlTest() => Focusable = true;
+  public MonoGameControl() => Focusable = true;
 
   public IBrush FallbackBackground { get; set; } = (IBrush) Brushes.Purple;
 
