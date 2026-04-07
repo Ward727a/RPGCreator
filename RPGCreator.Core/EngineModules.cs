@@ -164,7 +164,7 @@ namespace RPGCreator.Core
             var moduleFileName = Path.GetFileNameWithoutExtension(modulePath);
             var pdpFileName = $"{moduleFileName}.pdb";
             var moduleDirectory = Path.GetDirectoryName(modulePath);
-            var runningDir = RpgEnv.RunningModules;
+            var runningDir = RpgEnv.Path.RunningModules;
 
             var shadowPdpCopyName = $"_runned_temp_{moduleFileName}.pdb";
             var shadowDllCopyName = $"_runned_temp_{moduleFileName}.dll";

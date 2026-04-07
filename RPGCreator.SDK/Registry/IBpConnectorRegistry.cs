@@ -25,9 +25,20 @@ using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Registry;
 
+/// <summary>
+/// This represents a connector template registration item.
+/// </summary>
+/// <param name="inTemplateObj">The template object for the input connector (must be an Avalonia DataTemplate).</param>
+/// <param name="outTemplateObj">The template object for the output connector (must be an Avalonia DataTemplate).</param>
 public struct ConnectorTemplateObjRegistrationItem(in object inTemplateObj, in object outTemplateObj)
 {
+    /// <summary>
+    /// Need to be an Avalonia DataTemplate.
+    /// </summary>
     public readonly object InConnectorTemplate = inTemplateObj;
+    /// <summary>
+    /// Need to be an Avalonia DataTemplate.
+    /// </summary>
     public readonly object OutConnectorTemplate = outTemplateObj;
 }
 
@@ -46,7 +57,7 @@ public interface IBpConnectorRegistry : IService
     IEnumerable<IConnectorLogic> Connectors { get; }
     IEnumerable<URN> Urns { get; }
 
-    void RegisterConnectorType(Type connectorType);
+    int RegisterConnectorType(Type connectorType);
     public void UnregisterConnectorType(Type connectorType);
     public bool HasConnectorType(Type connectorType);
     public bool TryGetConnectorTypeId(Type connectorType, out int connectorTypeId);

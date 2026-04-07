@@ -22,47 +22,47 @@ using System;
 using Apos.Shapes;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.RTP.GameUI;
-using RPGCreator.RTP.GameUI.Controls;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Editor.Rendering;
+using RPGCreator.SDK.GameUI.Controls;
+using RPGCreator.SDK.GameUI.Interfaces;
 using RPGCreator.SDK.Logging;
 using Color = Microsoft.Xna.Framework.Color;
 
 namespace RPGCreator.RTP.Viewport;
 
-public class UiViewport : BaseMonogameViewport
+public class UiViewport : BaseUiViewport
 {
-    private static ScopedLogger _logger = Logger.ForContext<UiViewport>();
     
+    private static ScopedLogger _logger = Logger.ForContext<UiViewport>();
+
+    public Color BgColor { get; set; } = Color.Transparent;
+
     public RenderTarget2D? RenderTarget { get; set; }
     private uint[]? _internalBuffer;
     private IntPtr? _bitmapControlAddress;
     private Texture2D _pixelTexture;
     GraphicsDevice _graphicsDevice;
+
     private UiManager _uiManager;
+    public override IUiManager UiManager => _uiManager; 
     
     public UiViewport(RenderTarget2D renderTarget)
     {
         RenderTarget = renderTarget;
     }
 
-    
     public void LoadContent(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch, ShapeBatch shapeBatch)
     {
         _graphicsDevice = graphicsDevice;
         _uiManager = new UiManager(this);
         _uiManager.Initialize(GlobalStates.ViewportMouseState);
         _uiManager.InitializeRenderer(new UiRendererContext(spriteBatch, shapeBatch));
-
-        var testroot = new TestControl();
-        _uiManager.AddRootControl(testroot);
-        testroot.AddChild(new TestControl(SDK.Types.Color.Green, SDK.Types.Color.Yellow));
         
         _pixelTexture = new Texture2D(RenderTarget.GraphicsDevice, 1, 1);
         _pixelTexture.SetData(new[] { Color.White });
     }
     
-    private Color bgColor = Color.CornflowerBlue;
     public override void UpdateAvaloniaControl(IntPtr bitmapControlAddress)
     {
         _bitmapControlAddress = bitmapControlAddress;
@@ -71,7 +71,7 @@ public class UiViewport : BaseMonogameViewport
     public void Draw(TimeSpan deltaTime)
     {
         _graphicsDevice.SetRenderTarget(RenderTarget);
-        _graphicsDevice.Clear(bgColor);
+        _graphicsDevice.Clear(BgColor);
         _uiManager.Draw();
     }
 

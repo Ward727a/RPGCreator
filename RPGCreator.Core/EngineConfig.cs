@@ -60,10 +60,10 @@ public class EngineConfig : IEngineConfig
     public event Action? AutoSaveStarted;
 
     public bool IsDirty { get; private set; } = false;
-    public string ConfigPath { get; set; } = Path.Combine(RpgEnv.Config, "config.json");
+    public string ConfigPath { get; set; } = Path.Combine(RpgEnv.Path.Config, "config.json");
 
     private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<EngineConfig>();
-    private readonly string _configPath = Path.Combine(RpgEnv.Config, "config.json");
+    private readonly string _configPath = Path.Combine(RpgEnv.Path.Config, "config.json");
 
     public ObservableCollection<URN> Shortcuts => Get<ObservableCollection<URN>>(Keys.Shortcuts, new ObservableCollection<URN>());
 
@@ -73,7 +73,7 @@ public class EngineConfig : IEngineConfig
     private bool _isAutosaveEnabled = true;
     private bool _notifyOnAutoSave = false;
     
-    private string _modulesPath = RpgEnv.Modules;
+    private string _modulesPath = RpgEnv.Path.Modules;
 
     private Dictionary<string, IConfig> _globalConfigs = new();
     private Dictionary<string, IConfig> _localConfigs = new();
@@ -211,8 +211,13 @@ public class EngineConfig : IEngineConfig
         defaultConfig.Set(Keys.AutoSaveTime, 300);
         defaultConfig.Set(Keys.AutoSaveEnabled, true);
         defaultConfig.Set(Keys.NotifyOnAutoSave, false);
-        defaultConfig.Set(Keys.Paths.Modules, RpgEnv.Modules);
+        defaultConfig.Set(Keys.Paths.Modules, RpgEnv.Path.Modules);
         return defaultConfig;
+    }
+
+    public Version? GetVersion(string key, Version? defaultValue = null)
+    {
+        return Get(key, defaultValue);
     }
 
     public string GetString(string key, string defaultValue = "")
@@ -238,6 +243,11 @@ public class EngineConfig : IEngineConfig
     public T Get<T>(string key, T defaultValue)
     {
         return _data.GetAsOrDefault(key, defaultValue);
+    }
+
+    public IConfig SetVersion(string key, Version value)
+    {
+        return Set(key, value);
     }
 
     public bool TryFrom(string configName, bool isGlobal, [NotNullWhen(true)] out IConfig? config)
@@ -276,7 +286,7 @@ public class EngineConfig : IEngineConfig
     {
         if (_globalConfigs.TryGetValue(configName, out var globalConfig))
             return globalConfig;
-        var globalConfigPath = Path.Combine(RpgEnv.Config, $"{configName}.config.json");
+        var globalConfigPath = Path.Combine(RpgEnv.Path.Config, $"{configName}.config.json");
         if (File.Exists(globalConfigPath))
         {
             EngineServices.Serializer.DeserializeFrom<BaseConfig>(globalConfigPath, out var config);
@@ -356,7 +366,7 @@ public class EngineConfig : IEngineConfig
         }
         else
         {
-            globalConfigPath = Path.Combine(RpgEnv.Config, $"{configName}.config.json");
+            globalConfigPath = Path.Combine(RpgEnv.Path.Config, $"{configName}.config.json");
 
             configData.ConfigPath = globalConfigPath;
         }
@@ -390,8 +400,24 @@ public class EngineConfig : IEngineConfig
             return false;
         }
 
-        var localConfigPath = Path.Combine(GlobalStates.ProjectState.CurrentProject.Path, "config",
-            $"{configName}.config.json");
+        var localConfigDir = Path.Combine(GlobalStates.ProjectState.CurrentProject.Path, "config");
+        
+        if(!Directory.Exists(localConfigDir))
+            Directory.CreateDirectory(localConfigDir);
+
+        string localConfigPath;
+        
+        if (!string.IsNullOrEmpty(configData.ConfigPath))
+        {
+            localConfigPath = configData.ConfigPath;
+        }
+        else
+        {
+            localConfigPath = Path.Combine(localConfigDir,
+                $"{configName}.config.json");
+
+            configData.ConfigPath = localConfigPath;
+        }
 
         try
         {
@@ -434,6 +460,11 @@ public class EngineConfig : IEngineConfig
         ConfigChanged?.Invoke();
         KeyChanged?.Invoke(key);
         return this;
+    }
+
+    public bool HasVersion(string key)
+    {
+        return _data.Has(key);
     }
 
     public bool HasString(string key)
@@ -609,7 +640,7 @@ public class EngineConfig : IEngineConfig
             _data.Set(Keys.NotifyOnAutoSave, false);
         
         if (!_data.Has(Keys.Paths.Modules))
-            _data.Set(Keys.Paths.Modules, RpgEnv.Modules);
+            _data.Set(Keys.Paths.Modules, RpgEnv.Path.Modules);
 
         return CheckDataIntegrity(out checksResults);
     }

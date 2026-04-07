@@ -18,6 +18,7 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using RPGCreator.SDK.GameUI.Controls;
 using RPGCreator.SDK.Inputs;
 
 namespace RPGCreator.SDK.GameUI.Interfaces;
@@ -28,6 +29,9 @@ namespace RPGCreator.SDK.GameUI.Interfaces;
 /// </summary>
 public interface IUiManager
 {
+    public event Action<BaseControl>? RootControlAdded;
+    public event Action<BaseControl>? RootControlRemoved;
+    
     /// <summary>
     /// The UI renderer context provides necessary methods and properties for rendering UI visual elements on the screen.<br/>
     /// It serves as an abstraction layer between the UI system and the underlying rendering engine.
@@ -51,4 +55,10 @@ public interface IUiManager
     /// </summary>
     /// <param name="elapsedTime">The time elapsed since the last update, in seconds.</param>
     public void Update(double elapsedTime);
+
+    public void AddRootControl(BaseControl control);
+    public void RemoveRootControl(BaseControl control);
+    public void BringToFront(BaseControl control);
+    public BaseControl? GetRootControl(int index);
+    public List<BaseControl> GetRootControls();
 }

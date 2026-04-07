@@ -54,6 +54,7 @@ public static class CodeCompiler
         {
             codeContext.InDebugMode = true;
             usings.Add("System.Diagnostics");
+            usings.Add("System.Globalization");
             usings.Add("CommunityToolkit.Diagnostics");
             usings.Add("RPGCreator.SDK.Logging");
         }

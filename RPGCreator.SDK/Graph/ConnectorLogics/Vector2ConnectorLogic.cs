@@ -18,30 +18,20 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using Avalonia.Controls;
+using System.Globalization;
+using System.Numerics;
+using RPGCreator.SDK.Types;
 
-namespace RPGCreator.UI.Content.GameUiEditor.Components;
+namespace RPGCreator.SDK.Graph.ConnectorLogics;
 
-public class UiExplorer : UserControl
+public class Vector2ConnectorLogic(string title = "") : BaseConnectorLogic<Vector2>
 {
-    
-    private Grid ExplorerGrid { get; set; } = null!;
-    
-    public UiExplorer()
-    {
-        MinWidth = 300;
-        CreateComponents();
-        RegisterEvents();
-    }
-    
-    private void CreateComponents()
-    {
-        ExplorerGrid = new Grid();
-        Content = ExplorerGrid;
-    }
+    public override Vector2 Value { get; set; } = Vector2.Zero;
+    public override URN Urn => UrnModule.ToUrnModule("rpgc").ToUrn("vector2_connector");
+    public override string Title { get; set; } = title;
 
-    private void RegisterEvents()
+    public override string GetStringValue()
     {
+        return $"new Vector2({Value.X.ToString(CultureInfo.InvariantCulture)}f, {Value.Y.ToString(CultureInfo.InvariantCulture)}f)";
     }
-    
 }

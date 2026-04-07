@@ -79,6 +79,13 @@ public struct Color : IEquatable<Color>
         return $"#{R:X2}{G:X2}{B:X2}{A:X2}";
     }
     
+    /// <summary>
+    /// Creates a Color from an unsigned integer.<br/>
+    /// Format:<br/>
+    /// 0xRRGGBBAA
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
     public static Color FromUnsignedInt(uint value)
     {
         byte r = (byte)((value >> 24) & 0xFF);
@@ -91,6 +98,11 @@ public struct Color : IEquatable<Color>
     public uint ToUnsignedInt()
     {
         return ((uint)R << 24) | ((uint)G << 16) | ((uint)B << 8) | A;
+    }
+    
+    public override string ToString()
+    {
+        return $"RGBA({R}, {G}, {B}, {A})";
     }
     
     public Color Darken(float factor)

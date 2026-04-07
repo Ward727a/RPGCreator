@@ -18,10 +18,11 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System;
 using System.Collections.Generic;
 using System.Numerics;
-using RPGCreator.RTP.GameUI.Controls;
 using RPGCreator.RTP.Viewport;
+using RPGCreator.SDK.GameUI.Controls;
 using RPGCreator.SDK.GameUI.Interfaces;
 using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Types;
@@ -31,6 +32,9 @@ namespace RPGCreator.RTP.GameUI;
 public class UiManager : IUiManager
 {
     private const float DragThreshold = 5f; // Minimum distance in pixels to start a drag operation.
+    
+    public event Action<BaseControl>? RootControlAdded;
+    public event Action<BaseControl>? RootControlRemoved;
     
     #region Internal State
     
@@ -65,11 +69,13 @@ public class UiManager : IUiManager
     {
         _rootControls.Add(control);
         control.CallAddedAsRoot();
+        RootControlAdded?.Invoke(control);
     }
     public void RemoveRootControl(BaseControl control)
     {
         _rootControls.Remove(control);
         control.CallRemovedAsRoot();
+        RootControlRemoved?.Invoke(control);
     }
     public void BringToFront(BaseControl control)
     {
@@ -80,6 +86,19 @@ public class UiManager : IUiManager
             control.CallBringToFront();
         }
     }
+
+    public List<BaseControl> GetRootControls()
+    {
+        return _rootControls;
+    }
+
+    public BaseControl? GetRootControl(int index)
+    {
+        if (index < 0 || index >= _rootControls.Count)
+            return null;
+        return _rootControls[index];
+    }
+
     #endregion
     
     public void Initialize(IMouseState mouseState, IUiRendererContext? uiRendererContext = null)
@@ -143,6 +162,7 @@ public class UiManager : IUiManager
         
         foreach (var rootControl in _rootControls)
         {
+            if (!rootControl.IsVisible) continue;
             rootControl.DrawControl(_uiRendererContext);
         }
         

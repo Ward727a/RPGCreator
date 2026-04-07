@@ -18,19 +18,22 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System;
-using System.Collections.Generic;
 using System.Numerics;
 using RPGCreator.RTP.GameUI.Enums;
+using RPGCreator.SDK.GameUI.Interfaces;
 using RPGCreator.SDK.Types;
 
-namespace RPGCreator.RTP.GameUI.Visual;
+namespace RPGCreator.SDK.GameUI.Visual;
 
 public abstract class BaseVisual
 {
+    public event Action? DirtyChanged;
+    public event Action? VisualUpdated;
+
     #region Dirty flag
+
     public bool IsDirty { get; protected set; } = true;
-    
+
     /// <summary>
     /// Mark this visual and all of its children as dirty, which means that they need to recalculate their global transform and bounds before the next rendering.<br/>
     /// This should be used with caution, as it can be expensive to mark a large visual tree as dirty (they will need to recalculate their global transform and bounds before the next rendering).<br/>
@@ -39,25 +42,29 @@ public abstract class BaseVisual
     public void MarkDirty()
     {
         IsDirty = true;
+        DirtyChanged?.Invoke();
         foreach (var child in _children)
         {
             child.MarkDirty();
         }
     }
+
     #endregion
-    
+
     // This region need a full rework to take the ECS architecture into account.
     // I put it here as a placeholder.
+
     #region Bindings
+
     private readonly List<IBindingVisual> _bindings = new();
-    
+
     [Obsolete("This method is just a placeholder, and does absolutely nothing.")]
     public BaseVisual RegisterBinding<T>(Func<T> getter, Action<T> setter)
     {
         // _bindings.Add(new PropertyBindingVisualOneWay<T>(getter, setter));
         return this;
     }
-    
+
     // 17/02/2026
     // Ward:
     // THIS NEED A REWRITE!!!
@@ -72,42 +79,45 @@ public abstract class BaseVisual
             _bindings[i].Update();
         }
     }
+
     #endregion
-    
+
     #region Inheritance and hierarchy
+
     /// <summary>
     /// A list of the children of this visual.<br/>
     /// This is a protected field, so yes, you can edit it directly if you want to, but it's recommended to use the provided methods to ensure that the parent-child relationship is properly maintained.<br/>
     /// </summary>
     private readonly List<BaseVisual> _children = new();
-    
+
     /// <summary>
     /// A read-only list of the children of this visual.<br/>
     /// If you need to edit it, check <see cref="AddChild"/>, <see cref="RemoveChild"/> and <see cref="ClearChildren"/>.
     /// </summary>
     public IReadOnlyList<BaseVisual> Children => _children.AsReadOnly();
-    
+
     /// <summary>
     /// The parent of this visual, or null if it has no parent.<br/>
     /// A visual can only have one parent, and a parent can have multiple children.<br/>
     /// To edit this, check <see cref="AddChild"/>, <see cref="RemoveChild"/>, <see cref="AddToParent"/> and <see cref="RemoveFromParent"/>.
     /// </summary>
     public BaseVisual? Parent { get; private set; }
-    
+
     public void AddChild(BaseVisual child)
     {
         if (child.Parent != null)
         {
-            #if DEBUG
+#if DEBUG
             throw new InvalidOperationException("The visual already has a parent.");
-            #endif
+#endif
             return;
         }
+
         _children.Add(child);
         child.Parent = this;
         MarkDirty();
     }
-    
+
     /// <summary>
     /// Remove a child from this parent.<br/>
     /// The child must be a <b>direct</b> child of this parent, otherwise an exception will be thrown in debug mode and the method will do nothing in release mode.<br/>
@@ -119,16 +129,17 @@ public abstract class BaseVisual
     {
         if (child.Parent != this)
         {
-            #if DEBUG
+#if DEBUG
             throw new InvalidOperationException("The visual is not a child of this parent.");
-            #endif
+#endif
             return;
         }
+
         _children.Remove(child);
         child.Parent = null;
         MarkDirty();
     }
-    
+
     /// <summary>
     /// This is doing the same thing as <see cref="AddChild"/>.<br/>
     /// It's just a more convenient method to add a visual to a parent without having to call <see cref="AddChild"/> on the parent.
@@ -141,7 +152,7 @@ public abstract class BaseVisual
     {
         parent.AddChild(this);
     }
-    
+
     /// <summary>
     /// This is doing the same thing as <see cref="RemoveChild"/>.<br/>
     /// It's just a more convenient method to remove a visual from its parent without having to call <see cref="RemoveChild"/> on the parent.
@@ -156,7 +167,7 @@ public abstract class BaseVisual
             Parent.RemoveChild(this);
         }
     }
-    
+
     /// <summary>
     /// Remove all children from this parent.<br/>
     /// If <paramref name="recursive"/> is true, it will also remove all children from the children, and so on recursively.
@@ -172,11 +183,13 @@ public abstract class BaseVisual
                 child.ClearChildren(true);
             }
         }
+
         _children.Clear();
         MarkDirty();
     }
+
     #endregion
-    
+
     #region Look properties
 
     public bool Visible
@@ -191,6 +204,7 @@ public abstract class BaseVisual
             }
         }
     } = true;
+
     /// <summary>
     /// Return if the visual is visible, taking into account the visibility of its parents.<br/>
     /// (So if this visual is visible, but one of its parents is not visible, this method will return false).
@@ -203,6 +217,7 @@ public abstract class BaseVisual
         {
             visible &= Parent.GetAbsoluteVisible();
         }
+
         return visible;
     }
 
@@ -218,7 +233,7 @@ public abstract class BaseVisual
             }
         }
     } = 1f;
-    
+
     /// <summary>
     /// Return the opacity of this visual, taking into account the opacity of its parents.<br/>
     /// (So if this visual has an opacity of 1, and one of its parents has an opacity of 0.5, this method will return 0.5).
@@ -231,20 +246,23 @@ public abstract class BaseVisual
         {
             opacity *= Parent.GetAbsoluteOpacity();
         }
+
         return opacity;
     }
 
     #endregion
-    
+
     #region Placement properties
-    
+
     /// <summary>
     /// Pivot X coordinate.<br/>
     /// This is the point where the visual will be rotated, placed, and scaled from.<br/>
     /// For example, if you have a visual with a width of 100 pixels, and you set the PivotX to 50 pixels, and a X of 0 pixels,<br/>
     /// the visual will be placed in the top-left corner, and it will be "cut" in half, because the pivot is in the middle of the visual.<br/>
     /// </summary>
-    public int PivotX { get;
+    public int PivotX
+    {
+        get;
         set
         {
             if (PivotX != value)
@@ -252,7 +270,7 @@ public abstract class BaseVisual
                 field = value;
                 MarkDirty();
             }
-        } 
+        }
     } = 0;
 
     public EOriginUnitType PivotXUnit
@@ -275,11 +293,11 @@ public abstract class BaseVisual
             EOriginUnitType.Pixels => PivotX,
             EOriginUnitType.Percentage => width * (PivotX / 100f),
             _ =>
-                #if DEBUG
+#if DEBUG
                 throw new NotImplementedException($"The unit type {PivotXUnit} is not implemented yet.")
-                #else
+#else
                 PivotX
-                #endif
+#endif
         };
     }
 
@@ -316,11 +334,11 @@ public abstract class BaseVisual
             EOriginUnitType.Pixels => PivotY,
             EOriginUnitType.Percentage => height * (PivotY / 100f),
             _ =>
-                #if DEBUG
+#if DEBUG
                 throw new NotImplementedException($"The unit type {PivotYUnit} is not implemented yet.")
-                #else
+#else
                 PivotY
-                #endif
+#endif
         };
     }
 
@@ -361,11 +379,11 @@ public abstract class BaseVisual
             EPositionUnitType.PercentageFromRight => width - width * (X / 100f),
             EPositionUnitType.PercentageFromCenter => width / 2f + width * (X / 100f),
             _ =>
-                #if DEBUG
+#if DEBUG
                 throw new NotImplementedException($"The unit type {XUnit} is not implemented yet.")
-                #else
+#else
                 X
-                #endif
+#endif
         };
     }
 
@@ -407,11 +425,11 @@ public abstract class BaseVisual
             EPositionUnitType.PercentageFromBottom => height - height * (Y / 100f),
             EPositionUnitType.PercentageFromCenter => height / 2f + height * (Y / 100f),
             _ =>
-                #if DEBUG
+#if DEBUG
                 throw new NotImplementedException($"The unit type {YUnit} is not implemented yet.")
-                #else
+#else
                 Y
-                #endif
+#endif
         };
     }
 
@@ -450,11 +468,11 @@ public abstract class BaseVisual
             ESizeUnitType.RelativeToParent => parentBounds.Width + Width,
             ESizeUnitType.RelativeToScreen => screenBounds.Width + Width,
             _ =>
-                #if DEBUG
+#if DEBUG
                 throw new NotImplementedException($"The unit type {WidthUnit} is not implemented yet.")
-                #else
+#else
                 Width
-                #endif
+#endif
         };
     }
 
@@ -493,18 +511,19 @@ public abstract class BaseVisual
             ESizeUnitType.RelativeToParent => parentBounds.Height + Height,
             ESizeUnitType.RelativeToScreen => screenBounds.Height + Height,
             _ =>
-                #if DEBUG
+#if DEBUG
                 throw new NotImplementedException($"The unit type {HeightUnit} is not implemented yet.")
-                #else
+#else
                 Height
-                #endif
+#endif
         };
     }
-    
+
     /// <summary>
     /// Rotation of this visual in radians. (Use with caution, no testing has been done with rotation for now.)
     /// </summary>
-    public float Rotation { 
+    public float Rotation
+    {
         get;
         set
         {
@@ -513,9 +532,9 @@ public abstract class BaseVisual
                 field = value;
                 MarkDirty();
             }
-        } 
+        }
     } = 0f;
-    
+
     /// <summary>
     /// Local bounds of this visual, it is linked to the Parent.
     /// </summary>
@@ -535,31 +554,51 @@ public abstract class BaseVisual
         var pixelHeight = CalculatePixelHeight(parentBounds, screenBounds);
         var pixelX = CalculatePixelX(parentBounds.Width);
         var pixelY = CalculatePixelY(parentBounds.Height);
-        var pixelPivotX = CalculatePixelPivotX((int)pixelWidth);
-        var pixelPivotY = CalculatePixelPivotY((int)pixelHeight);
-        
-        var finalX = pixelX - pixelPivotX;
-        var finalY = pixelY - pixelPivotY;
-        
-        LocalBounds = new Rect(finalX, finalY, pixelWidth, pixelHeight);
+
+        LocalBounds = new Rect(pixelX, pixelY, pixelWidth, pixelHeight);
     }
-    
+
     public Rect GlobalBounds { get; private set; }
 
-    private void GetGlobalBounds()
+    public Rect GetGlobalBounds()
     {
-        if (!IsDirty) return;
-        var parentPos = Parent?.GlobalBounds.Position ?? Vector2.Zero;
-        GlobalBounds = new Rect(
-            parentPos.X + LocalBounds.X,
-            parentPos.Y + LocalBounds.Y,
-            LocalBounds.Width,
-            LocalBounds.Height
-        );
+        
+        Span<Vector2> corners = stackalloc Vector2[4]
+        {
+            new(0, 0),
+            new(LocalBounds.Width, 0),
+            new(LocalBounds.Width, LocalBounds.Height),
+            new(0, LocalBounds.Height)
+        };
+
+        float minX = float.MaxValue, minY = float.MaxValue;
+        float maxX = float.MinValue, maxY = float.MinValue;
+
+        for (int i = 0; i < 4; i++)
+        {
+            
+            var worldCorner = Vector2.Transform(corners[i], GlobalTransform);
+        
+            if (worldCorner.X < minX) minX = worldCorner.X;
+            if (worldCorner.X > maxX) maxX = worldCorner.X;
+            if (worldCorner.Y < minY) minY = worldCorner.Y;
+            if (worldCorner.Y > maxY) maxY = worldCorner.Y;
+        }
+
+        GlobalBounds = new Rect(minX, minY, maxX - minX, maxY - minY);
+        return GlobalBounds;
     }
+
     #endregion
-    
+
     #region Global transform
+
+    /// <summary>
+    /// A custom transform to apply to this visual.<br/>
+    /// This can be used to apply a custom transformation to this visual, such as scaling, rotating, moving, etc.
+    /// </summary>
+    public Matrix3x2 CustomTransform { get; set; } = Matrix3x2.Identity;
+
     public Matrix3x2 GlobalTransform { get; private set; } = Matrix3x2.Identity;
 
     /// <summary>
@@ -569,78 +608,96 @@ public abstract class BaseVisual
     public void MakeGlobalTransform()
     {
         if (!IsDirty) return;
+
+        float pX = CalculatePixelPivotX((int)LocalBounds.Width);
+        float pY = CalculatePixelPivotY((int)LocalBounds.Height);
+
+        Matrix3x2 localTransform =
+            Matrix3x2.CreateTranslation(-pX, -pY) * Matrix3x2.CreateRotation(Rotation) *
+            Matrix3x2.CreateTranslation(LocalBounds.X + pX, LocalBounds.Y + pY);
+
+        var parentTransform = Parent?.GlobalTransform ?? Matrix3x2.Identity;
         
-        float pivotX = CalculatePixelPivotX((int)LocalBounds.Width);
-        float pivotY = CalculatePixelPivotY((int)LocalBounds.Height);
-        
-        float anchorX = LocalBounds.X + pivotX;
-        float anchorY = LocalBounds.Y + pivotY;
-        
-        Matrix3x2 LocalTransform = Matrix3x2.CreateTranslation(pivotX, pivotY) *
-                                  Matrix3x2.CreateRotation(Rotation) *
-                                  Matrix3x2.CreateTranslation(anchorX, anchorY);
-        
-        var parentGlobalTransform = Parent?.GlobalTransform ?? Matrix3x2.Identity;
-        GlobalTransform = LocalTransform * parentGlobalTransform;
-        
-        IsDirty = false;
+        GlobalTransform = (localTransform * CustomTransform) * parentTransform;
     }
+
     #endregion
-    
+
     #region Inputs and hit testing
 
     public bool HitTest(float x, float y)
     {
         return HitTest(new Vector2(x, y));
     }
+
     public bool HitTest(Vector2 screenPosition)
     {
         if (!GetAbsoluteVisible()) return false;
-        
+
         if (Rotation == 0)
         {
             return GlobalBounds.Contains(screenPosition);
         }
-        
+
         if (Matrix3x2.Invert(GlobalTransform, out var invertedGlobalTransform))
         {
             var localPosition = Vector2.Transform(screenPosition, invertedGlobalTransform);
-        
+
             var hitRect = new Rect(0, 0, LocalBounds.Width, LocalBounds.Height);
             return hitRect.Contains(localPosition);
         }
-    
+
         return false;
     }
-    
+
     #endregion
-    
+
     public void UpdateVisual(Rect parentBounds, Rect screenBounds)
     {
+        if (!IsDirty)
+            return;
         UpdatePlacementProperties(parentBounds, screenBounds);
-        GetGlobalBounds(); 
+    
         MakeGlobalTransform();
+    
+        GetGlobalBounds(); 
+    
+        VisualUpdated?.Invoke();
     }
 
-    public void DrawVisual(UiRendererContext context)
+    public void DrawVisual(IUiRendererContext context)
     {
         if (!GetAbsoluteVisible() || !Visible) return;
-
+        
+        bool hasComplexTransform = Rotation != 0f || CustomTransform != Matrix3x2.Identity;
+        
         int transformId = -1;
-        if (Rotation != 0f) 
+        if(hasComplexTransform)
             transformId = context.PushTransform(GlobalTransform);
+        
+        // This is working, even if I know that we should use the globaltransform for all.
+        // However, it would require reworking (again) the render context, and I want to
+        // advance and not be locked on one thing for too long.
+        // So for now, it's working like that, but for the next update should fix that.
+        Vector2 drawPos = hasComplexTransform ? Vector2.Zero : LocalBounds.Position;
+        
+        DrawVisualAt(context, drawPos, LocalBounds.Size, out bool handledChildren);
 
-        Vector2 pos = Rotation == 0f ? GlobalBounds.Position : Vector2.Zero;
-        Vector2 size = Rotation == 0f ? GlobalBounds.Size : Vector2.Zero;
+        // If the visual has no children, or if the children were handled, we're done
+        if (!handledChildren || _children.Count == 0)
+        {
+            foreach (var child in _children)
+            {
+                child.DrawVisual(context);
+            }
+        }
 
-        DrawVisualAt(context, pos, size, out bool handledChildren);
-
-
-        if (transformId != -1)
+        if(transformId != -1)
             context.PopTransform(transformId);
     }
 
-    protected virtual void DrawVisualAt(UiRendererContext context, Vector2 drawPosition, Vector2 drawSize, out bool handledChildren)
+    protected virtual void DrawVisualAt(IUiRendererContext context, Vector2 drawPosition, Vector2 drawSize,
+        out bool handledChildren)
     {
         handledChildren = false;
         // This method should be overridden by the derived classes to draw the visual on the screen.
@@ -657,13 +714,13 @@ internal class PropertyBindingVisualOneWay<T> : IBindingVisual
     private readonly Action<T> _setter;
     private readonly Func<T> _getter;
     private T _lastValue;
-    
+
     public PropertyBindingVisualOneWay(Func<T> getter, Action<T> setter)
     {
         _getter = getter;
         _setter = setter;
     }
-    
+
     public void Update()
     {
         var newValue = _getter();

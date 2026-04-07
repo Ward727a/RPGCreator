@@ -24,12 +24,13 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Avalonia;
+using CommunityToolkit.Mvvm.Input;
 using RPGCreator.SDK.Graph.LOGIC;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.UI.Blueprints;
 
-public class GenericNodeViewModel : INotifyPropertyChanged
+public class GenericNodeViewModel : BaseNodeViewModel
 {
     public INodeLogic NodeLogic { get; }
 
@@ -58,15 +59,13 @@ public class GenericNodeViewModel : INotifyPropertyChanged
     
     public Ulid Id => NodeLogic.RuntimeId;
 
-    public Point Location
+    public bool IsFolded
     {
-        set
-        {
-            field = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Location)));
-        }
         get;
+        set => SetField(ref field, value);
     }
+    
+    public RelayCommand ToggleFoldedCommand => new(() => IsFolded = !IsFolded);
 
     public string Title => NodeLogic?.Title ?? "Node";
 
@@ -79,18 +78,4 @@ public class GenericNodeViewModel : INotifyPropertyChanged
     public ObservableCollection<GenericConnectorViewModel> Outputs { get; set; } =
         new ObservableCollection<GenericConnectorViewModel>();
     
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
-    }
 }

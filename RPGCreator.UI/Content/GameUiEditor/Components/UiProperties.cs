@@ -24,11 +24,12 @@ namespace RPGCreator.UI.Content.GameUiEditor.Components;
 
 public class UiProperties : UserControl
 {
-    
+    private readonly UiEditorWindowControl _parent;
     private Grid PropertiesGrid { get; set; } = null!;
     
-    public UiProperties()
+    public UiProperties(UiEditorWindowControl parent)
     {
+        _parent = parent;
         MinWidth = 300;
         CreateComponents();
         RegisterEvents();

@@ -25,6 +25,7 @@ namespace RPGCreator.UI.Content.GameUiEditor.Components;
 
 public class UiTopMenu : UserControl
 {
+    private readonly UiEditorWindowControl _parent;
     
     private ToolBar _toolBar = null!;
 
@@ -32,9 +33,10 @@ public class UiTopMenu : UserControl
     private Button _editButton = null!;
     private Button _viewButton = null!;
     private Button _helpButton = null!;
-    
-    public UiTopMenu()
+
+    public UiTopMenu(UiEditorWindowControl parent)
     {
+        _parent = parent;
         CreateComponents();
         RegisterEvents();
     }

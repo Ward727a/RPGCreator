@@ -20,11 +20,10 @@
 
 using System.Numerics;
 using RPGCreator.RTP.GameUI.Enums;
-using RPGCreator.RTP.GameUI.Visual;
-using RPGCreator.SDK;
+using RPGCreator.SDK.GameUI.Visual;
 using RPGCreator.SDK.Types;
 
-namespace RPGCreator.RTP.GameUI.Controls;
+namespace RPGCreator.SDK.GameUI.Controls;
 
 /// <summary>
 /// This is a test control.<br/>
@@ -32,14 +31,13 @@ namespace RPGCreator.RTP.GameUI.Controls;
 /// </summary>
 public class TestControl : BaseControl
 {
-
     protected TestVisual _Visual => (TestVisual)Visual;
-    
+
     private Color _defaultColor = Color.Red;
     private Color _hoverColor = Color.Blue;
-    
+
     private Vector2 _grabOffset;
-    
+
     public TestControl(Color? color = null, Color? hoverColor = null)
     {
         Visual = new TestVisual();
@@ -51,10 +49,22 @@ public class TestControl : BaseControl
 
         if (hoverColor != null)
             _hoverColor = hoverColor.Value;
-        
+
         ClipHitTestToBounds = false;
     }
-    
+
+    public override URN Urn => _urnModule.ToUrnModule("rpgc").ToUrn("test_control");
+
+    protected override void MakeExposedProperties()
+    {
+        base.MakeExposedProperties();
+
+        RegisterPropertyDescriptor(new ControlPropertyDescriptor<Color>("Background color", () => _defaultColor,
+            "Appearance".ToPipedPath().Extend("Background"), "Define the color of the background.", (value) => _defaultColor = value));
+        RegisterPropertyDescriptor(new ControlPropertyDescriptor<Color>("Hover color", () => _hoverColor,
+            "Appearance".ToPipedPath().Extend("Background"), "Define the color of the background when hovered by the mouse.", (value) => _hoverColor = value));
+    }
+
     public override void OnUpdate()
     {
     }
@@ -70,6 +80,7 @@ public class TestControl : BaseControl
             _Visual.RectColor = _defaultColor;
         }
     }
+
     protected override void OnDragStart()
     {
         _grabOffset = GlobalStates.ViewportMouseState.Position - Visual.GlobalBounds.Position;

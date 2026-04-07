@@ -1,0 +1,82 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:RPGCreator.UI.Content.GameUiEditor.Components.Explorer"
+             xmlns:ursa="https://irihi.tech/ursa"
+             xmlns:icon="https://github.com/projektanker/icons.avalonia"
+             xmlns:gameUi="clr-namespace:RPGCreator.SDK.GameUI;assembly=RPGCreator.SDK"
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="600"
+             x:DataType="vm:UiExplorerVm"
+             x:Class="RPGCreator.UI.Content.GameUiEditor.Components.Explorer.UiExplorer">
+    
+    <UserControl.Resources>
+        <vm:PropertyEditorSelector x:Key="MyEditorSelector">
+        </vm:PropertyEditorSelector>
+        
+        <DataTemplate x:Key="PropertyTemplate" DataType="gameUi:ControlPropertyDescriptor">
+            <Grid ColumnDefinitions="120, *" Margin="0, 4">
+                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Width="120" TextWrapping="WrapWithOverflow" ToolTip.Tip="{Binding Description}"/>
+                <ContentControl Grid.Column="1" Content="{Binding}" 
+                                ContentTemplate="{StaticResource MyEditorSelector}"/>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="GroupTemplate" x:DataType="vm:PropertyGroupViewModel">
+            <Expander Header="{Binding GroupName}" IsExpanded="True" Margin="2,0,0,0">
+                <StackPanel Margin="10,0,0,0">
+                    <ItemsControl ItemsSource="{Binding Properties}" 
+                                  ItemTemplate="{StaticResource PropertyTemplate}"/>
+                    <ItemsControl ItemsSource="{Binding IterableGroups}" 
+                                  ItemTemplate="{StaticResource GroupTemplate}"/>
+                </StackPanel>
+            </Expander>
+        </DataTemplate>
+    </UserControl.Resources>
+    
+    <UserControl.Styles>
+        <Style Selector="Expander[ExpandDirection=Down]:expanded /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Margin" Value="2"/>
+        </Style>
+    </UserControl.Styles>
+    
+    <Grid RowDefinitions="Auto, 200, Auto, *" RowSpacing="4" Margin="4">
+        <Grid ColumnDefinitions="*, Auto" ColumnSpacing="4">
+            <ursa:Divider Content="UI Hierarchy" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch"/>
+            <StackPanel Grid.Column="1" Spacing="4">
+                <Button Classes="Small" ToolTip.Tip="Add new component">
+                    <icon:Icon Value="mdi-plus"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+        <TreeView Grid.Row="1" ItemsSource="{Binding TreeExplorerVm.RootsControls}" SelectedItem="{Binding TreeExplorerVm.SelectedControlVm}" SelectionChanged="OnControlSelectionChanged">
+            <TreeView.DataTemplates>
+                <TreeDataTemplate DataType="vm:UiBaseControlVm"
+                                  ItemsSource="{Binding Children}">
+                    <TextBlock Text="{Binding Name}"/>
+                </TreeDataTemplate>
+            </TreeView.DataTemplates>
+            <TreeView.ItemContainerTheme>
+                <ControlTheme TargetType="TreeViewItem" x:DataType="vm:UiBaseControlVm" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+                </ControlTheme>
+            </TreeView.ItemContainerTheme>
+        </TreeView>
+        <GridSplitter Grid.Row="2" ResizeBehavior="PreviousAndNext">
+            <GridSplitter.Template>
+                <ControlTemplate>
+                    <ursa:Divider Content="Component Property" HorizontalContentAlignment="Center"/>
+                </ControlTemplate>
+            </GridSplitter.Template>
+        </GridSplitter>
+        <ScrollViewer Grid.Row="3">
+            <StackPanel Orientation="Vertical">
+                <ScrollViewer>
+                    <ItemsControl ItemsSource="{Binding TreeExplorerVm.ControlProperties}" 
+                                  ItemTemplate="{StaticResource GroupTemplate}"/>
+                </ScrollViewer>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

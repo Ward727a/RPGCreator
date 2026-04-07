@@ -29,7 +29,6 @@
     <ItemGroup>
       <Folder Include="Assets\Definitions\GameUI\" />
       <Folder Include="GameUI\Services\" />
-      <Folder Include="Graph\VM\" />
       <Folder Include="Modules\ECS\" />
       <Folder Include="Types\Enums\" />
     </ItemGroup>

@@ -23,6 +23,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RPGCreator.SDK", "RPGCreato
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "_BaseModule", "modules\_BaseModule\_BaseModule.csproj", "{38F069D7-2870-4044-94FB-FAFE04E71B0E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{20A4286D-E842-4740-8F38-614E09ABDBC0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RPGCreator.Tests", "RPGCreator.Tests\RPGCreator.Tests.csproj", "{F2C2862D-2F3A-4A42-91CC-D5105D333E8E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -65,6 +69,10 @@ Global
 		{38F069D7-2870-4044-94FB-FAFE04E71B0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38F069D7-2870-4044-94FB-FAFE04E71B0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38F069D7-2870-4044-94FB-FAFE04E71B0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2C2862D-2F3A-4A42-91CC-D5105D333E8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2C2862D-2F3A-4A42-91CC-D5105D333E8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2C2862D-2F3A-4A42-91CC-D5105D333E8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2C2862D-2F3A-4A42-91CC-D5105D333E8E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -72,6 +80,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{34009131-5D03-426F-BD9F-2B6BFBA9AE51} = {B0584DFF-C898-4679-92F5-C059069D448E}
 		{38F069D7-2870-4044-94FB-FAFE04E71B0E} = {B0584DFF-C898-4679-92F5-C059069D448E}
+		{F2C2862D-2F3A-4A42-91CC-D5105D333E8E} = {20A4286D-E842-4740-8F38-614E09ABDBC0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D53E9DA2-1A27-419D-A5F4-EF95690010B9}

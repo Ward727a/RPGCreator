@@ -32,8 +32,8 @@ public abstract class BaseNodeLogic : INodeLogic
 
     public abstract FlowType FlowType { get; }
     public Ulid RuntimeId { get; set; }
-    public virtual IReadOnlyList<IConnectorLogic> Inputs { get; set; }
-    public virtual IReadOnlyList<IConnectorLogic> Outputs { get; set; }
+    public virtual IReadOnlyList<IConnectorLogic> Inputs { get; set; } = [];
+    public virtual IReadOnlyList<IConnectorLogic> Outputs { get; set; } = [];
     public abstract string Title { get; }
     public abstract PipedPath Category { get; }
     public abstract URN Urn { get; }

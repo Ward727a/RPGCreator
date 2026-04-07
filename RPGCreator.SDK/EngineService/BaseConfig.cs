@@ -50,6 +50,11 @@ public class BaseConfig : IConfig
         return new CustomData();
     }
 
+    public Version? GetVersion(string key, Version? defaultValue = null)
+    {
+        return Get(key, defaultValue);
+    }
+
     public string GetString(string key, string defaultValue = "")
     {
         return Get(key, defaultValue);
@@ -78,6 +83,11 @@ public class BaseConfig : IConfig
     public T Get<T>(string key, T defaultValue)
     {
         return Data.GetAsOrDefault(key, defaultValue);
+    }
+
+    public IConfig SetVersion(string key, Version value)
+    {
+        return Set(key, value);  
     }
 
     public IConfig SetString(string key, string value)
@@ -114,36 +124,19 @@ public class BaseConfig : IConfig
         return this;
     }
 
-    public bool HasString(string key)
-    {
-        return Data.Has(key);
-    }
+    public bool HasVersion(string key) => Data.Has(key);
 
-    public bool HasInt(string key)
-    {
-        return Data.Has(key);
-    }
+    public bool HasString(string key) => Data.Has(key);
 
-    public bool HasBool(string key)
-    {
-        return Data.Has(key);
-    }
+    public bool HasInt(string key) => Data.Has(key);
 
-    public bool HasFloat(string key)
-    {
-        return Data.Has(key);
-    }
+    public bool HasBool(string key) => Data.Has(key);
 
-    public bool HasDouble(string key)
-    {
-        return Data.Has(key);
-    }
+    public bool HasFloat(string key) => Data.Has(key);
 
-    public bool Has<T>(string key)
-    {
-        return Data.Has(key);
-    }
+    public bool HasDouble(string key) => Data.Has(key);
 
+    public bool Has<T>(string key) => Data.Has(key);
 
     public bool SaveConfig()
     {

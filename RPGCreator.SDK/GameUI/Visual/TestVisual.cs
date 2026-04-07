@@ -20,9 +20,10 @@
 
 using System.Numerics;
 using RPGCreator.RTP.GameUI.Enums;
+using RPGCreator.SDK.GameUI.Interfaces;
 using RPGCreator.SDK.Types;
 
-namespace RPGCreator.RTP.GameUI.Visual;
+namespace RPGCreator.SDK.GameUI.Visual;
 
 public class TestVisual : BaseVisual
 {
@@ -48,7 +49,7 @@ public class TestVisual : BaseVisual
         Height = 50; // 100 pixels tall
     }
 
-    protected override void DrawVisualAt(UiRendererContext context, Vector2 drawPosition, Vector2 drawSize, out bool handledChildren)
+    protected override void DrawVisualAt(IUiRendererContext context, Vector2 drawPosition, Vector2 drawSize, out bool handledChildren)
     {
         handledChildren = false;
         context.DrawRectangle(drawPosition, drawSize, RectColor, filled: true);

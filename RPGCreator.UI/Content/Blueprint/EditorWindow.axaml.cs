@@ -22,7 +22,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Numerics;
 using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls;
@@ -31,8 +33,10 @@ using Avalonia.Controls.Templates;
 using Avalonia.Input;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.Input;
+using Newtonsoft.Json;
 using Nodify;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Blueprints;
 using RPGCreator.SDK.Commands;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Graph.LOGIC;
@@ -41,6 +45,7 @@ using RPGCreator.SDK.Types;
 using RPGCreator.UI.Blueprints;
 using RPGCreator.UI.Services;
 using Color = Avalonia.Media.Color;
+using Connection = RPGCreator.SDK.Assets.Definitions.Blueprints.Connection;
 using ICommand = System.Windows.Input.ICommand;
 
 namespace RPGCreator.UI.Content.Blueprint;
@@ -233,7 +238,8 @@ public class PendingConnectionViewModel : INotifyPropertyChanged
                 return;
             }
 
-            if (_source?.Type != nodeViewModel.Type || _source?.ConnectorLogic.ValueType != nodeViewModel.ConnectorLogic.ValueType)
+            if (_source?.Type != nodeViewModel.Type ||
+                _source?.ConnectorLogic.ValueType != nodeViewModel.ConnectorLogic.ValueType)
             {
                 StrokeBrush = _invalidBrush;
                 DashArray = _invalidDashArray;
@@ -253,6 +259,9 @@ public class PendingConnectionViewModel : INotifyPropertyChanged
 
 public class NodeEditorViewModel : INotifyPropertyChanged
 {
+    public event Action<string>? BlueprintBuilded;
+    public event Action<BlueprintData>? BlueprintSaved;
+
     #region UndoRedoCommands
 
     private class ConnectCommand : BaseCommand
@@ -376,6 +385,23 @@ public class NodeEditorViewModel : INotifyPropertyChanged
 
     #endregion
 
+    public Ulid CurrentId { get; private set; } = Ulid.Empty;
+    
+    /// <summary>
+    /// If true, the editor will be in dev mode.<br/>
+    /// In dev mode, the editor will show the 'produced source code' button, allowing to have a preview of what the BP editor has produced.
+    /// </summary>
+    public bool IsInDevMode
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsInDevMode)));
+        }
+    } = false;
+    
     public bool IsDragging
     {
         get;
@@ -385,7 +411,7 @@ public class NodeEditorViewModel : INotifyPropertyChanged
             field = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDragging)));
         }
-    }
+    } = false;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -400,9 +426,12 @@ public class NodeEditorViewModel : INotifyPropertyChanged
     public ICommand DisconnectConnectorCommand { get; }
 
     public RelayCommand BuildBlueprintCommand { get; private set; }
+    public RelayCommand SaveBlueprintCommand { get; private set; }
     public RelayCommand ShowProducedSourceCommand { get; private set; }
-    public RelayCommand DeleteSelectedNodes { get; private set; }
-    
+    public RelayCommand DeleteSelectedNodesCommand { get; private set; }
+    public RelayCommand HideToggleSelectedNodesCommand { get; private set; }
+    public RelayCommand CreateCommentGroupNodeCommand { get; private set; }
+
     public NodeEditorViewModel()
     {
         if (RegistryServices.BpNodes is NodeRegistry nodeRegistry)
@@ -411,8 +440,11 @@ public class NodeEditorViewModel : INotifyPropertyChanged
         }
 
         BuildBlueprintCommand = new RelayCommand(BuildBlueprint);
+        SaveBlueprintCommand = new RelayCommand(SaveBlueprint);
         ShowProducedSourceCommand = new RelayCommand(ShowProducedSource);
-        DeleteSelectedNodes = new RelayCommand(OnDeleteSelectedNodes);
+        DeleteSelectedNodesCommand = new RelayCommand(OnDeleteSelectedNodes);
+        HideToggleSelectedNodesCommand = new RelayCommand(HideToggleSelectedNodes);
+        CreateCommentGroupNodeCommand = new RelayCommand(CreateCommentGroupNode);
 
         BlueprintListVm = new BlueprintListVm(_nodeRegistry);
 
@@ -445,7 +477,6 @@ public class NodeEditorViewModel : INotifyPropertyChanged
 
             _connect(start.Outputs[0], print.Inputs[0]);
             _connect(print.Outputs[0], end.Inputs[0]);
-
         }
         else
         {
@@ -453,8 +484,77 @@ public class NodeEditorViewModel : INotifyPropertyChanged
         }
     }
 
+    public void SaveBlueprint()
+    {
+        BlueprintData data;
+
+        if (CurrentId != Ulid.Empty)
+        {
+            data = BlueprintData.Create(CurrentId);
+            data.Name = "My blueprint";
+        }
+        else
+        {
+            data = BlueprintData.Create();
+            data.Name = "My blueprint";
+            CurrentId = data.Id;
+        }
+        
+        foreach (var connectionViewModel in Connections)
+        {
+            var from = connectionViewModel.Source;
+            var to = connectionViewModel.Target;
+
+            var connectionData = ConnectionData.Create(
+                new Connection(from.NodeId, from.ConnectorIndex),
+                new Connection(to.NodeId, to.ConnectorIndex)
+            );
+
+            data.Connections.Add(connectionData);
+        }
+
+        foreach (var node in Nodes)
+        {
+            var nodeData = NodeData.Create(node.Id, node.NodeLogic.Urn, node.IsFolded,
+                new Vector2((float)node.Location.X, (float)node.Location.Y));
+
+            foreach (var input in node.Inputs)
+            {
+                if (input.Value != null)
+                    nodeData.ConnectorData.Add(input.ConnectorIndex, input.Value);
+            }
+
+            data.Nodes.Add(nodeData);
+        }
+
+
+        BlueprintSaved?.Invoke(data);
+    }
+
+    private void HideToggleSelectedNodes()
+    {
+        if (SelectedNodes == null || SelectedNodes.Count == 0)
+        {
+            return;
+        }
+
+        var firstNode = SelectedNodes.First();
+        var newStatus = !firstNode.IsFolded;
+
+        foreach (var node in SelectedNodes)
+        {
+            node.IsFolded = newStatus;
+        }
+    }
+
+    private void CreateCommentGroupNode()
+    {
+        var mousePosition = GlobalStates.MouseState.Position;
+    }
+
     private Window? _producedSourceWindow = null;
     private TextBlock _producedSource;
+
     private void ShowProducedSource()
     {
         if (_producedSourceWindow != null)
@@ -479,18 +579,21 @@ public class NodeEditorViewModel : INotifyPropertyChanged
         _producedSourceWindow.Show();
     }
 
-    private void BuildBlueprint()
+    public void BuildBlueprint()
     {
-        var testService = new BpCompilerService();
-        var x = testService.Compile(this);
+        SaveBlueprint();
+        var compilerService = new BpCompilerService();
+        var buildSource = compilerService.Compile(this);
 
-        Logger.Debug($"\n{x}");
+        Logger.Debug($"\n{buildSource}");
 
         if (_producedSourceWindow != null)
         {
             _producedSource.Text = "GENERATED CODE - This code was generated from a blueprint!\n\n";
-            _producedSource.Text += x;
+            _producedSource.Text += buildSource;
         }
+        
+        BlueprintBuilded?.Invoke(buildSource);
     }
 
     private void OnDeleteSelectedNodes()
@@ -498,12 +601,12 @@ public class NodeEditorViewModel : INotifyPropertyChanged
         Logger.Debug($"Deleted {SelectedNodes.Count} nodes");
         foreach (var node in SelectedNodes.ToList())
         {
-            if(node.NodeLogic.Category.StartsWith("@"))
+            if (node.NodeLogic.Category.StartsWith("@"))
             {
                 Logger.Debug($"Skipping deletion of node '{node.Title}' due to '@' prefix");
                 continue;
             }
-            
+
             foreach (var input in node.Inputs.Where(i => i.IsConnected))
             {
                 _disconnect(input);
@@ -513,8 +616,10 @@ public class NodeEditorViewModel : INotifyPropertyChanged
             {
                 _disconnect(output);
             }
+
             Nodes.Remove(node);
         }
+
         SelectedNodes.Clear();
     }
 
@@ -531,11 +636,11 @@ public class NodeEditorViewModel : INotifyPropertyChanged
         {
             (target, source) = (source, target);
         }
-        
-            
+
+
         var connection = new ConnectionViewModel(source, target);
 
-        if (target.TotalConnections == target.AllowedConnections)
+        if (target.TotalConnections == 1)
         {
             _disconnect(target.Connections.Last());
         }
@@ -548,8 +653,8 @@ public class NodeEditorViewModel : INotifyPropertyChanged
         Connections.Add(connection);
         target.Connections.Add(connection);
         source.Connections.Add(connection);
-        source.IsConnected = source.TotalConnections > 0;
-        target.IsConnected = target.TotalConnections > 0;
+        source.IsConnected = true;
+        target.IsConnected = true;
 
         target.ConnectorLogic.RuntimeParentConnector = source.ConnectorLogic.RuntimeId;
     }
@@ -631,16 +736,118 @@ public class NodeEditorViewModel : INotifyPropertyChanged
 
 public partial class EditorWindow : Window
 {
+    private NodeEditorViewModel _dataContext;
     private ContentControl _dragGhost;
+    private IConfig _bpConfig;
+
+    private string _blueprintSaveFolder = string.Empty;
+    private string _blueprintBuildFolder = string.Empty;
+    private string _blueprintCompiledFolder = string.Empty;
+
+    private bool _inDevMode = false;
 
     public EditorWindow()
     {
-        DataContext = new NodeEditorViewModel();
+        _dataContext = new NodeEditorViewModel();
+        
+        LoadConfig();
+        
+        _dataContext.IsInDevMode = _inDevMode;
+
+        DataContext = _dataContext;
         InitializeComponent();
 
         DragDrop.AddDropHandler(Editor, Editor_Drop);
         DragDrop.AddDragOverHandler(this, GlobalDragOver);
+
+        _dataContext.BlueprintSaved += data =>
+        {
+            var blueprintId = data.Id;
+            
+            var fileName = Path.Combine(_blueprintSaveFolder, $"{data.Name}_{blueprintId}.json");
+            
+            EngineServices.Serializer.SerializeTo(data, fileName);
+            
+            Logger.Debug($"Blueprint saved: {fileName}");
+        };
+
+        _dataContext.BlueprintBuilded += source =>
+        {
+            var blueprintId = _dataContext.CurrentId;
+            var fileName = Path.Combine(_blueprintBuildFolder, $"{blueprintId}.cs");
+
+            File.WriteAllText(fileName, source);
+
+            Logger.Debug($"Blueprint built: {fileName}");
+        };
     }
+
+    private void LoadConfig()
+    {
+        if (!EngineServices.Config.TryFrom("blueprint_config", false, out _bpConfig))
+        {
+            if (EngineServices.Config.CreateConfig("blueprint_config", new BaseConfig()))
+            {
+                _bpConfig = EngineServices.Config.From("blueprint_config")!;
+            }
+            else
+            {
+                throw new InvalidOperationException("Failed to create project configuration");
+            }
+        }
+
+        var bpFolder = Path.Combine(GlobalStates.ProjectState.CurrentProject?.Path ?? RpgEnv.Path.ApplicationData, "Blueprints");
+        
+        _blueprintSaveFolder = _bpConfig.GetString("save_folder",
+            Path.Combine(bpFolder, "Data"));
+        
+        _blueprintBuildFolder = _bpConfig.GetString("build_folder",
+            Path.Combine(bpFolder, "Build"));
+        
+        _blueprintCompiledFolder = _bpConfig.GetString("compiled_folder",
+            Path.Combine(bpFolder, "Compiled"));
+        
+        _inDevMode = _bpConfig.GetBool("dev_mode_enabled", false);
+        
+        if (!_bpConfig.HasString("save_folder"))
+        {
+            _bpConfig.SetString("save_folder", _blueprintSaveFolder);
+            Logger.Info("Created default blueprint save folder (at: {path})", _blueprintSaveFolder);
+        }
+        
+        if (!_bpConfig.HasString("build_folder"))
+        {
+            _bpConfig.SetString("build_folder", _blueprintBuildFolder);
+            Logger.Info("Created default blueprint build folder (at: {path})", _blueprintBuildFolder);
+        }
+        
+        if (!_bpConfig.HasString("compiled_folder"))
+        {
+            _bpConfig.SetString("compiled_folder", _blueprintCompiledFolder);
+            Logger.Info("Created default blueprint compiled folder (at: {path})", _blueprintCompiledFolder);
+        }
+
+        if (!_bpConfig.HasBool("dev_mode_enabled"))
+        {
+            _bpConfig.SetBool("dev_mode_enabled", _inDevMode);
+        }
+        
+        if (!Directory.Exists(_blueprintSaveFolder))
+        {
+            Directory.CreateDirectory(_blueprintSaveFolder);
+        }
+        
+        if (!Directory.Exists(_blueprintBuildFolder))
+        {
+            Directory.CreateDirectory(_blueprintBuildFolder);
+        }
+        
+        if (!Directory.Exists(_blueprintCompiledFolder))
+        {
+            Directory.CreateDirectory(_blueprintCompiledFolder);
+        }
+    }
+
 
     private void GlobalDragOver(object? sender, DragEventArgs e)
     {

@@ -7,13 +7,13 @@
         xmlns:common="clr-namespace:RPGCreator.UI.Common"
         xmlns:ursa="https://irihi.tech/ursa"
         xmlns:ursaTheme="https://irihi.tech/ursa/themes/semi"
+        xmlns:icon="https://github.com/projektanker/icons.avalonia"
         x:Class="RPGCreator.UI.Content.Blueprint.EditorWindow"
         Title="RPG Creator - Blueprint Editor"
         Width="1200" Height="800"
         x:DataType="vm:NodeEditorViewModel">
 
     <Window.Resources>
-        <SolidColorBrush x:Key="GridBrush" Color="#22FFFFFF" />
         <SolidColorBrush x:Key="ExecTypeBrushColor" Color="Cornsilk"/>
         <SolidColorBrush x:Key="ExecTypeBackColor" Color="#C37E7A69"/>
         <SolidColorBrush x:Key="ExecTypeNodeColor" Color="#7BDCD6C0"/>
@@ -27,8 +27,11 @@
         <SolidColorBrush x:Key="FloatTypeBackColor" Color="#CE140C6E" />
         <SolidColorBrush x:Key="FloatTypeNodeColor" Color="#7B2A17DC" />
         <SolidColorBrush x:Key="StringTypeBrushColor" Color="Magenta" />
-        <SolidColorBrush x:Key="StringTypeBackColor" Color="#D06E006E" />
-        <SolidColorBrush x:Key="StringTypeNodeColor" Color="#7BDC00DC" />
+        <SolidColorBrush x:Key="StringTypeBackColor" Color="#D06E006E" /> <!-- Bright: 145 | Opacity: 208 -->
+        <SolidColorBrush x:Key="StringTypeNodeColor" Color="#7BDC00DC" /> <!-- Bright: 35 | Opacity: 123 -->
+        <SolidColorBrush x:Key="Vector2TypeBrushColor" Color="Goldenrod" />
+        <SolidColorBrush x:Key="Vector2TypeBackColor" Color="#D06E401E" />
+        <SolidColorBrush x:Key="Vector2TypeNodeColor" Color="#7BDCA620" />
         <SolidColorBrush x:Key="ObjectTypeBrushColor" Color="#00C000"/>
         <SolidColorBrush x:Key="ObjectTypeBackColor" Color="#D0006E00"/>
         <SolidColorBrush x:Key="ObjectTypeNodeColor" Color="#7B00DC00"/>
@@ -54,17 +57,27 @@
         
         
         <DataTemplate x:Key="NodeHeaderTemplate" DataType="bp:GenericNodeViewModel">
-            <Grid ColumnDefinitions="*, Auto">
+            <Grid ColumnDefinitions="*, Auto" ColumnSpacing="12">
                 <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
-                <common:HelpButton 
-                    HelpDocsKey="{Binding HelpUrn}"
-                    IsVisible="{Binding HasHelpPage}"
-                    Cursor="Help"
-                    ToolTip.Tip="Click to open the help page for this node."
-                    Width="20" Height="20"
-                    ButtonPadding="4, 0"
-                    ButtonFontSize="8"
-                    Grid.Column="1"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                    <Button Command="{Binding ToggleFoldedCommand}" Classes="Small">
+                        <Panel>
+                            <icon:Icon Value="mdi-eye" IsVisible="{Binding !IsFolded}"/>
+                            <icon:Icon Value="mdi-eye-closed" IsVisible="{Binding IsFolded}"/>
+                        </Panel>
+                    </Button>
+                    <common:HelpButton 
+                        HelpDocsKey="{Binding HelpUrn}"
+                        IsVisible="{Binding HasHelpPage}"
+                        Cursor="Help"
+                        ToolTip.Tip="Click to open the help page for this node.">
+                        <common:HelpButton.Button>
+                            <Button Classes="Small">
+                                <icon:Icon Value="mdi-help"></icon:Icon>
+                            </Button>
+                        </common:HelpButton.Button>
+                    </common:HelpButton>
+                </StackPanel>
             </Grid>
         </DataTemplate>
         
@@ -116,24 +129,34 @@
                 <TextBlock Text="Float" VerticalAlignment="Center" FontSize="10"/>
             </Border>
         </ControlTemplate>
+        <ControlTemplate x:Key="Vector2BadgeTemplate">
+            <Border 
+                Background="{StaticResource Vector2TypeBackColor}" 
+                CornerRadius="4" 
+                Padding="4,2" 
+                ToolTip.Tip="A position value define 2 decimal value, one for 'X' (left = negative value, right = positive value), one for 'Y' (bottom = negative value, top = positive value)."
+            >
+                <TextBlock Text="Pos" FontSize="10" VerticalAlignment="Center"/>
+            </Border>
+        </ControlTemplate>
 
         <vm:BlueprintPinTemplateSelector x:Key="InPinTemplateSelector">
             <vm:BlueprintPinTemplateSelector.InAvailableTemplates>
                 <DataTemplate x:Key="0" DataType="bp:GenericConnectorViewModel">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
                         <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
                         <TemplatedControl Template="{StaticResource ExecBadgeTemplate}"/>
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate x:Key="1" DataType="bp:GenericConnectorViewModel">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
                         <CheckBox IsVisible="{Binding CanHaveManualInput}" IsChecked="{Binding Value, Mode=TwoWay}"/>
                         <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
                         <TemplatedControl Template="{StaticResource BoolBadgeTemplate}"/>
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate x:Key="2" DataType="bp:GenericConnectorViewModel">
-                    <StackPanel Orientation="Vertical" Spacing="8">
+                    <StackPanel Orientation="Vertical" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
                             <TemplatedControl Template="{StaticResource IntBadgeTemplate}"/>
@@ -142,7 +165,7 @@
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate x:Key="3" DataType="bp:GenericConnectorViewModel">
-                    <StackPanel Orientation="Vertical" Spacing="8">
+                    <StackPanel Orientation="Vertical" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
                             <TemplatedControl Template="{StaticResource FloatBadgeTemplate}"/>
@@ -151,7 +174,7 @@
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate x:Key="4" DataType="bp:GenericConnectorViewModel">
-                    <StackPanel Orientation="Vertical" Spacing="8">
+                    <StackPanel Orientation="Vertical" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
                             <TemplatedControl Template="{StaticResource StringBadgeTemplate}"/>
@@ -162,41 +185,59 @@
                                  AcceptsReturn="False"/>
                     </StackPanel>
                 </DataTemplate>
+                <!-- <DataTemplate x:Key="5" DataType="bp:GenericConnectorViewModel"> -->
+                <!--     <StackPanel Orientation="Vertical" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}"> -->
+                <!--         <StackPanel Orientation="Horizontal" Spacing="8"> -->
+                <!--             <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/> -->
+                <!--             <TemplatedControl Template="{StaticResource Vector2BadgeTemplate}"/> -->
+                <!--         </StackPanel> -->
+                <!--         <StackPanel Orientation="Horizontal" Spacing="4" IsVisible="{Binding CanHaveManualInput}"> -->
+                <!--             <ursa:NumericFloatUpDown InnerLeftContent="X: " MaxWidth="100" Width="100" Value="0"/> -->
+                <!--             <ursa:NumericFloatUpDown InnerLeftContent="Y: " MaxWidth="100" Width="100" Value="0"/> -->
+                <!--         </StackPanel> -->
+                <!--     </StackPanel> -->
+                <!-- </DataTemplate> -->
             </vm:BlueprintPinTemplateSelector.InAvailableTemplates>
         </vm:BlueprintPinTemplateSelector>
         
         <vm:BlueprintPinTemplateSelector x:Key="OutPinTemplateSelector">
             <vm:BlueprintPinTemplateSelector.OutAvailableTemplates>
                 <DataTemplate x:Key="0" DataType="bp:GenericConnectorViewModel">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
                         <TemplatedControl Template="{StaticResource ExecBadgeTemplate}"/>
                         <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate x:Key="1" DataType="bp:GenericConnectorViewModel">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
                         <TemplatedControl Template="{StaticResource BoolBadgeTemplate}"/>
                         <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate x:Key="2" DataType="bp:GenericConnectorViewModel">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
                         <TemplatedControl Template="{StaticResource IntBadgeTemplate}"/>
                         <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate x:Key="3" DataType="bp:GenericConnectorViewModel">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
                         <TemplatedControl Template="{StaticResource FloatBadgeTemplate}"/>
                         <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate x:Key="4" DataType="bp:GenericConnectorViewModel">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
                         <TemplatedControl Template="{StaticResource StringBadgeTemplate}"/>
                         <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </DataTemplate>
+                <!-- <DataTemplate x:Key="5" DataType="bp:GenericConnectorViewModel"> -->
+                <!--     <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}"> -->
+                <!--         <TemplatedControl Template="{StaticResource Vector2BadgeTemplate}"/> -->
+                <!--         <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/> -->
+                <!--     </StackPanel> -->
+                <!-- </DataTemplate> -->
             </vm:BlueprintPinTemplateSelector.OutAvailableTemplates>
         </vm:BlueprintPinTemplateSelector>
 
@@ -349,6 +390,21 @@
             </Style>
         </Style>
         
+        <Style Selector="nodify|NodeOutput[Tag=5], nodify|NodeInput[Tag=5]">
+            <Style Selector="^ Ellipse#PART_ConnectorShape">
+                <Setter Property="Stroke" Value="{StaticResource Vector2TypeBrushColor}" />
+                <Setter Property="Fill" Value="{StaticResource Vector2TypeBackColor}" />
+            </Style>
+            
+            <Style Selector="^[IsConnected=True] Ellipse#PART_ConnectorShape">
+                <Setter Property="Fill" Value="{StaticResource Vector2TypeBrushColor}" />
+            </Style>
+            
+            <Style Selector="^ Border#Highlight">
+                <Setter Property="Background" Value="{StaticResource Vector2TypeNodeColor}"/>
+            </Style>
+        </Style>
+        
         
         <Style Selector="nodify|Node" x:DataType="bp:GenericNodeViewModel">
             <Setter Property="Header" Value="{Binding}"/>
@@ -368,8 +424,11 @@
                              Background="{StaticResource SmallGridLinesDrawingBrush}"
                              DragDrop.AllowDrop="True">
             <nodify:NodifyEditor.KeyBindings>
-                <KeyBinding Gesture="Delete" Command="{Binding DeleteSelectedNodes}"/>
+                <KeyBinding Gesture="Delete" Command="{Binding DeleteSelectedNodesCommand}"/>
+                <KeyBinding Gesture="Ctrl+H" Command="{Binding HideToggleSelectedNodesCommand}"/>
+                <KeyBinding Gesture="C" Command="{Binding CreateCommentGroupNodeCommand}"/>
             </nodify:NodifyEditor.KeyBindings>
+            
             <nodify:NodifyEditor.ItemContainerTheme>
                 <ControlTheme TargetType="nodify:ItemContainer"
                               x:DataType="bp:GenericNodeViewModel"
@@ -378,11 +437,29 @@
                 </ControlTheme>
             </nodify:NodifyEditor.ItemContainerTheme>
 
-            <nodify:NodifyEditor.ItemTemplate>
+            <nodify:NodifyEditor.DataTemplates>
+                <DataTemplate DataType="bp:GroupingNodeViewModel">
+                    <nodify:GroupingNode>
+                        <nodify:GroupingNode.Header>
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <Button Classes="Small" Command="{Binding ToggleRenameCommand}">
+                                    <icon:Icon Value="mdi-rename-outline"/>
+                                </Button>
+                                <Panel>
+                                    <TextBlock Text="{Binding Header}" IsVisible="{Binding !IsRenaming}"/>
+                                    <TextBox x:Name="RenameBox" Text="{Binding Header}" IsVisible="{Binding IsRenaming}" IsFocused="{Binding IsRenaming}">
+                                        <TextBox.KeyBindings>
+                                            <KeyBinding Gesture="Enter" Command="{Binding ToggleRenameCommand}"/>
+                                        </TextBox.KeyBindings>
+                                    </TextBox>
+                                </Panel>
+                            </StackPanel>
+                        </nodify:GroupingNode.Header>
+                    </nodify:GroupingNode>
+                </DataTemplate>
                 <DataTemplate DataType="bp:GenericNodeViewModel">
                     <nodify:Node Input="{Binding Inputs}"
-                                 Output="{Binding Outputs}"
-                                 Tag="real">
+                                 Output="{Binding Outputs}">
                         <nodify:Node.InputConnectorTemplate>
                             <DataTemplate DataType="bp:GenericConnectorViewModel">
                                 <nodify:NodeInput
@@ -424,7 +501,7 @@
                         </nodify:Node.OutputConnectorTemplate>
                     </nodify:Node>
                 </DataTemplate>
-            </nodify:NodifyEditor.ItemTemplate>
+            </nodify:NodifyEditor.DataTemplates>
 
             <nodify:NodifyEditor.ConnectionTemplate>
                 <DataTemplate DataType="vm:ConnectionViewModel">
@@ -451,11 +528,17 @@
 
         </nodify:NodifyEditor>
         <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, *" Margin="16" IsHitTestVisible="{Binding !IsDragging}" ColumnSpacing="4" RowSpacing="4">
-            <StackPanel Spacing="8" Orientation="Horizontal" Background="#51535353">
-                <Button Content="Build" Command="{Binding BuildBlueprintCommand}"/>
-            </StackPanel>
+            <Grid x:Name="TopMenuBar" ColumnSpacing="8" ColumnDefinitions="Auto, *, Auto" Background="#51535353">
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="4" VerticalAlignment="Center">
+                    <Button Content="Save" Command="{Binding SaveBlueprintCommand}"/>
+                    <Button Content="Build" Command="{Binding BuildBlueprintCommand}"/>
+                </StackPanel>
+                <Border Grid.Column="1"/>
+                <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="4">
+                    <Button Content="Show produced source" HorizontalAlignment="Right" Command="{Binding ShowProducedSourceCommand}" IsVisible="{Binding IsInDevMode}"/>
+                </StackPanel>
+            </Grid>
             
-            <Button Grid.Row="0" Grid.Column="0" Content="Show produced source" HorizontalAlignment="Right" Command="{Binding ShowProducedSourceCommand}"/>
             <UserControl Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"  DataContext="{Binding BlueprintListVm}">
                 <Border
                         Background="#51535353"

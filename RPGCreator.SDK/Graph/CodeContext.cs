@@ -139,8 +139,8 @@ public class CodeContext
             {
                 foreach (var input in nodeMeta.InputConnections)
                 {
-                    if (GeneratedNodes.Contains(input.Value))
-                        return;
+                    if(input.Value == Ulid.Empty || GeneratedNodes.Contains(input.Value))
+                        continue;
                     GeneratePure(context, writer, input.Value);
                 }
             }

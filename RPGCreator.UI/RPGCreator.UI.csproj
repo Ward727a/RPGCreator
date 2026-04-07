@@ -69,11 +69,16 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Remove="Content\AssetsManage\AssetsEditors\AutotileEditor\**" />
+    <Compile Update="Content\GameUiEditor\Components\Explorer\UiExplorer.axaml.cs">
+      <DependentUpon>UiExplorer.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Assets\GamePlayer\" />
-    <Folder Include="AxamlTemplate\" />
+    <Folder Include="Blueprints\Nodes\Game\UI\" />
+    <Folder Include="Blueprints\Nodes\Game\World\" />
     <Folder Include="Common\AnimEditor\" />
     <Folder Include="Content\AssetsManage\Components\Items\" />
     <Folder Include="Content\Preferences\Components\General\" />

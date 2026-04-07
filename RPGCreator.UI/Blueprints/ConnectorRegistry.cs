@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 using Avalonia.Controls.Templates;
 using RPGCreator.SDK.Graph.LOGIC;
 using RPGCreator.SDK.Logging;
@@ -45,7 +46,8 @@ public class ConnectorRegistry : IBpConnectorRegistry
         { typeof(bool), 1 },
         { typeof(int), 2 },
         { typeof(float), 3 },
-        { typeof(string), 4 }
+        { typeof(string), 4 },
+        { typeof(Vector2), 5 }
     };
     
     private readonly Dictionary<int, ConnectorTemplateRegistrationItem> _connectorTemplates = new();
@@ -79,12 +81,13 @@ public class ConnectorRegistry : IBpConnectorRegistry
     public int ConnectorCount => _connectors.Count;
     public IEnumerable<IConnectorLogic> Connectors => _connectors.Values;
     public IEnumerable<URN> Urns => _connectors.Keys;
-    public void RegisterConnectorType(Type connectorType)
+    public int RegisterConnectorType(Type connectorType)
     {
-        if (_connectorTypeMapping.ContainsKey(connectorType))
-            return;
+        if (_connectorTypeMapping.TryGetValue(connectorType, out var type))
+            return type;
         
         _connectorTypeMapping[connectorType] = _connectorTypeMapping.Count;
+        return _connectorTypeMapping[connectorType];
     }
     
     public void UnregisterConnectorType(Type connectorType) => _connectorTypeMapping.Remove(connectorType);

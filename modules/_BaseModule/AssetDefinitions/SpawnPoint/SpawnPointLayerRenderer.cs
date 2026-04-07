@@ -29,7 +29,7 @@ public class SpawnPointLayerRenderer : BaseLayerRenderer<SpawnPointLayer>
     
     public SpawnPointLayerRenderer()
     {
-        _spawnPointTexturePath = Path.Combine(RpgEnv.ExeAssetsFolder, "Icons", "GameIconsNet", "spawn-node-32x.png");
+        _spawnPointTexturePath = Path.Combine(RpgEnv.Path.ExeAssetsFolder, "Icons", "GameIconsNet", "spawn-node-32x.png");
     }
     
     public override void Render(SpawnPointLayer layer, long chunkId)

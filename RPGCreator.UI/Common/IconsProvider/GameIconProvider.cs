@@ -105,7 +105,7 @@ public class GameIconProvider : IIconProvider
     
     private static readonly Regex _viewBoxRegex = new("viewBox=\"([0-9 -]+)\"");
     private static readonly Regex _pathRegex = new("<path fill=\"#000\" d=\"(.+)\"");
-    private static string IconDir => Path.Combine(RpgEnv.ExeAssetsFolder, "Icons", "GameIconsNet");
+    private static string IconDir => Path.Combine(RpgEnv.Path.ExeAssetsFolder, "Icons", "GameIconsNet");
     private const string _Prefix = "gameIcon";
     public string Prefix => _Prefix;
 }

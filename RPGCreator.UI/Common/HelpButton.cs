@@ -55,6 +55,9 @@ public class HelpButton : UserControl
     public static readonly StyledProperty<CornerRadius> ButtonCornerRadiusProperty =
         AvaloniaProperty.Register<HelpButton, CornerRadius>(nameof(ButtonCornerRadiusProperty), new CornerRadius(4));
     
+    public static readonly StyledProperty<Button> ButtonProperty =
+        AvaloniaProperty.Register<HelpButton, Button>(nameof(ButtonProperty), null);
+    
     [ExposePropToPlugin("HelpButton", canSet: true)]
     public URN HelpDocsKey
     {
@@ -85,8 +88,8 @@ public class HelpButton : UserControl
             if (value == field) return;
             if (value == null) value = "?";
             SetValue(ButtonTextProperty, value);
-            if(_helpButton != null)
-                _helpButton.Content = value;
+            if(Button != null)
+                Button.Content = value;
         }
     }
     
@@ -98,34 +101,51 @@ public class HelpButton : UserControl
         {
             if (value == field) return;
             SetValue(ButtonCornerRadiusProperty, value);
-            if(_helpButton != null)
-                _helpButton.CornerRadius = value;
+            if(Button != null)
+                Button.CornerRadius = value;
         }
             
     }
 
     [ExposePropToPlugin("HelpButton")]
-    private Button _helpButton { get; set; } = null!;
+    public Button Button
+    {
+        get => GetValue(ButtonProperty);
+        set
+        {
+            if (value == field) return;
+            if(value != null)
+            {
+                value.Click -= Clicked;
+            }
+            SetValue(ButtonProperty, value);
+            if(value != null)
+            {
+                value.Click += Clicked;
+            }
+            Content = value;
+        }
+    }
 
     public HelpButton()
     {
         InitializeIfNeeded();
         CreateComponent();
         RegisterEvents();
-        Content = _helpButton;
+        Content = Button;
     }
     
     public HelpButton(URN helpDocsKey, string buttonText = "?")
     {
         CreateComponent();
         RegisterEvents();
-        _helpButton!.Content = buttonText;
-        Content = _helpButton;
+        Button.Content = buttonText;
+        Content = Button;
         HelpDocsKey = helpDocsKey;
         
         HelpButtonContext.Config config = new HelpButtonContext.Config
         {
-            Get_helpButton = () => _helpButton,
+            GetButton = () => Button,
             GetHelpDocsKey = () => HelpDocsKey,
             SetHelpDocsKey = (newKey) => HelpDocsKey = newKey,
             GetButtonFontSize = () => ButtonFontSize,
@@ -146,7 +166,7 @@ public class HelpButton : UserControl
 
     private void CreateComponent()
     {
-        _helpButton = new Button
+        Button = new Button
         {
             FontSize = ButtonFontSize,
             Padding = ButtonPadding,
@@ -158,10 +178,10 @@ public class HelpButton : UserControl
 
     private void RegisterEvents()
     {
-        _helpButton.Click += HelpClicked;
+        Button.Click += Clicked;
     }
 
-    private void HelpClicked(object? sender, RoutedEventArgs e)
+    private void Clicked(object? sender, RoutedEventArgs e)
     {
         OpenHelp();
     }

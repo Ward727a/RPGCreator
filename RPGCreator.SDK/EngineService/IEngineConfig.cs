@@ -37,18 +37,21 @@ public interface IConfig : ISerializable, IDeserializable
 
     public CustomData GetDefaultConfig();
 
+    public Version? GetVersion(string key, Version? defaultValue = null);
     public string GetString(string key, string defaultValue = "");
     public int GetInt(string key, int defaultValue = 0);
     public bool GetBool(string key, bool defaultValue = false);
     public double GetDouble(string key, double defaultValue = 0.0);
     public T Get<T>(string key, T defaultValue);
 
+    public IConfig SetVersion(string key, Version value);   
     public IConfig SetString(string key, string value);
     public IConfig SetInt(string key, int value);
     public IConfig SetBool(string key, bool value);
     public IConfig SetDouble(string key, double value);
     public IConfig Set<T>(string key, T value);
     
+    public bool HasVersion(string key);  
     public bool HasString(string key);
     public bool HasInt(string key);
     public bool HasBool(string key);
