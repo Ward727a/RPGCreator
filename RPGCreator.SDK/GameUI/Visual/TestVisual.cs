@@ -38,20 +38,22 @@ public class TestVisual : BaseVisual
         }
     } = Color.Red;
 
+    public bool Filled => (bool)Control.GetExposedProperty("Appearance".ToPipedPath().Extend("Background"), "Filled").Get()!;
+
     public TestVisual()
     {
-        X = 0; // 100 pixels from the left of the parent container
-        Y = 50; // 50% from the top of the parent container
+        X = 0; // 0 pixels from the left
+        Y = 50; // 50% from the bottom
         XUnit = EPositionUnitType.Pixels;
         YUnit = EPositionUnitType.PixelsFromBottom;
-        Width = 100; // 200 pixels wide
+        Width = 100; // 100% wide
         WidthUnit = ESizeUnitType.Percentage;
-        Height = 50; // 100 pixels tall
+        Height = 50; // 50 pixels tall
     }
 
     protected override void DrawVisualAt(IUiRendererContext context, Vector2 drawPosition, Vector2 drawSize, out bool handledChildren)
     {
         handledChildren = false;
-        context.DrawRectangle(drawPosition, drawSize, RectColor, filled: true);
+        context.DrawRectangle(drawPosition, drawSize, RectColor, filled: Filled);
     }
 }

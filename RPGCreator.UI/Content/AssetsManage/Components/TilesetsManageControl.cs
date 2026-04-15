@@ -847,7 +847,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                         {
                         };
                         var editor_control = new TilesetEditorWindowControl(tileset);
-                        var host_ = ((AssetsManageWindow)this.GetVisualRoot()!);
+                        var host_ = ((AssetsManageWindow)TopLevel.GetTopLevel(this)!);
                         editor_control.TilesetSaved += () =>
                         {
                             host_.ShowAssetsPanel("Tilesets");
@@ -860,7 +860,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                 };
                 
 
-                newTilesetDialog.ShowDialog((Window)this.GetVisualRoot()!);
+                newTilesetDialog.ShowDialog((Window)TopLevel.GetTopLevel(this)!);
 
 
                 Console.WriteLine("New button clicked.");
@@ -886,7 +886,7 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                     TilesetEditorWindowControl editor_control =
                         new TilesetEditorWindowControl(tileset);
 
-                    var host_ = ((AssetsManageWindow)this.GetVisualRoot()!);
+                    var host_ = ((AssetsManageWindow)TopLevel.GetTopLevel(this)!);
                     editor_control.TilesetSaved += () =>
                     {
                         host_.ShowAssetsPanel("Tilesets");

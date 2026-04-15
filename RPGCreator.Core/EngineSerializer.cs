@@ -66,7 +66,7 @@ public class EngineSerializer : ISerializerService
                 new OldColorJsonConverter(), 
                 new UrnJsonConverter(),
             },
-            PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+            PreserveReferencesHandling = PreserveReferencesHandling.None,
             DefaultValueHandling = DefaultValueHandling.Ignore
         };
         _serializer = JsonSerializer.Create(_settings);

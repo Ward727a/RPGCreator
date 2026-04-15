@@ -187,6 +187,12 @@ public static class RuntimeServices
         set => RegisterService(value);
     }
     
+    public static IFontService FontService
+    {
+        get => GetService<IFontService>();
+        set => RegisterService(value);
+    }
+    
     /// <summary>
     /// Checks if a service is ready (registered) in the runtime services provider.
     /// </summary>

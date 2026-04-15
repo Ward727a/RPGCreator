@@ -157,7 +157,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                 }
             };
 
-            confirmation.ShowDialog((Window)this.GetVisualRoot()!).ContinueWith(t =>
+            confirmation.ShowDialog((Window)TopLevel.GetTopLevel(this)!).ContinueWith(t =>
             {
                 if (t.IsFaulted)
                 {

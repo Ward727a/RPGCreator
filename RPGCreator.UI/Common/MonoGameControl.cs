@@ -152,7 +152,7 @@ public sealed class MonoGameControl : Control
 
   private void TrySetWindowHandle()
   {
-    if (!(this.GetVisualRoot() is Window visualRoot) || visualRoot.PlatformImpl == null)
+    if (TopLevel.GetTopLevel(this) is not Window visualRoot || visualRoot.PlatformImpl == null)
       return;
     IntPtr? handle = visualRoot.TryGetPlatformHandle()?.Handle;
     if (!handle.HasValue)

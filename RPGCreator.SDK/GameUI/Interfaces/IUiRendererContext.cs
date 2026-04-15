@@ -111,4 +111,7 @@ public interface IUiRendererContext
     /// <param name="aaSize">The antialiasing size for the circle. The <b>default</b> is 1.5 pixels. 0 <b>disables</b> antialiasing. 10 and above make the circle look like an halo.</param>
     /// <param name="filled">Whether to draw a filled circle (true) or just an outline (false). Default is false (outline).</param>
     public void DrawCircle(Vector2 center, float radius, Color color, float thickness = 1f, float aaSize = 1.5f, bool filled = false);
+
+    public void DrawText(object textLayout, Vector2 position, Color? color = null);
+    public void DrawText(string text, Vector2 position, Color? color = null, int fontSize = 16, object? font = null);
 }

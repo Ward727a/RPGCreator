@@ -62,8 +62,16 @@ public class SkillEditorTab : UserControl
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = App.style.Margin
             };
-            _selectBox.Checked += (s, e) => OnSelected?.Invoke();
-            _selectBox.Unchecked += (s, e) => OnDeselected?.Invoke();
+            _selectBox.IsCheckedChanged += (s, e) =>
+            {
+                if(_selectBox.IsChecked.HasValue && _selectBox.IsChecked.Value)
+                {
+                    OnSelected?.Invoke();
+                } else
+                {
+                    OnDeselected?.Invoke();
+                }
+            };
             _body.Children.Add(_selectBox);
             _statName = new TextBlock
             {

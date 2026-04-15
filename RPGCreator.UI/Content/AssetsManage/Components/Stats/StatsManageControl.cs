@@ -193,7 +193,7 @@ public class StatsManageControl : UserControl
     {
         Logger.Debug("Add button clicked. Opening new stat editor.");
         var newStatEditor = new StatsEditorWindowControl(null);
-        var host = ((AssetsManageWindow)this.GetVisualRoot()!);
+        var host = ((AssetsManageWindow)TopLevel.GetTopLevel(this)!);
         host?.OpenCustom(newStatEditor);
     }
     private void OnDeleteButtonClicked(object? sender, RoutedEventArgs e)
@@ -210,7 +210,7 @@ public class StatsManageControl : UserControl
         }
         Logger.Debug("Edit button clicked.");
         var newStatEditor = new StatsEditorWindowControl(SelectedStat);
-        var host = ((AssetsManageWindow)this.GetVisualRoot()!);
+        var host = ((AssetsManageWindow)TopLevel.GetTopLevel(this)!);
         host?.OpenCustom(newStatEditor);
     }
 

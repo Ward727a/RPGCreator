@@ -23,24 +23,87 @@ using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.GameUI;
 
-public class ControlPropertyDescriptor
+public abstract class ControlPropertyDescriptor
 {
-    private static readonly PipedPath _defaultPath = "Default".ToPipedPath();
-    
-    public event Action<object?>? ValueChanged;
-    public event Action<object?, bool>? Validated;
-    public event Action<object?, object?>? Coerced;
-    
+    protected static readonly PipedPath _defaultPath = "Default".ToPipedPath();
+
     public PipedPath Path { get; private init; }
-    public string Name { get; private init; }
+    public string Name { get; private init; } = string.Empty;
     public Type Type { get; private init; }
     public string Description { get; private init; }
     protected readonly Func<object?> _getter;
+
+    public ControlPropertyDescriptor(string name, Type type, Func<object?> getter, PipedPath? path = null,
+        string description = "")
+    {
+        Path = path ?? _defaultPath;
+        Name = name;
+        Type = type;
+        Description = description;
+        _getter = getter;
+    }
+
+    public virtual object? Get() => _getter();
+    
+    public T? Get<T>()
+    {
+        var val = _getter();
+        return val is T typedVal ? typedVal : default;
+    }
+}
+
+public class ReadOnlyControlPropertyDescriptor : ControlPropertyDescriptor
+{
+    public ReadOnlyControlPropertyDescriptor(string name, Type type, Func<object?> getter, PipedPath? path = null, string description = "") : base(name, type, getter, path, description)
+    {
+        Guard.IsNotNull(getter);
+    }
+}
+
+public class ReadOnlyControlPropertyDescriptor<TValue> : ReadOnlyControlPropertyDescriptor
+{
+    public ReadOnlyControlPropertyDescriptor(string name, Func<TValue?> getter, PipedPath path = default, string description = "") : base(name, typeof(TValue), () => getter(), path, description)
+    {
+    }
+    
+    public new TValue? Get()
+    {
+        var val = _getter();
+        return val is TValue typedVal ? typedVal : default;
+    }
+}
+
+public class EditableControlPropertyDescriptor : ControlPropertyDescriptor
+{
+    /// <summary>
+    /// Raised when the value of the property changes.<br/>
+    /// Properties:<br/>
+    /// - newValue: The new value of the property.
+    /// - oldValue: The old value of the property.
+    /// </summary>
+    public event Action<object?, object?>? ValueChanged;
+
+    /// <summary>
+    /// Raised when the value of the property is validated.<br/>
+    /// Properties:<br/>
+    /// - newValue: The new value of the property.
+    /// - isValid: True if the value is valid, false otherwise.
+    /// </summary>
+    public event Action<object?, bool>? Validated;
+
+    /// <summary>
+    /// Raised when the value of the property is coerced.<br/>
+    /// Properties:<br/>
+    /// - newValue: The new value of the property.
+    /// - coercedValue: The coerced value of the property.
+    /// </summary>
+    public event Action<object?, object?>? Coerced;
+
     protected readonly Action<object?> _setter;
     protected readonly Func<object?, bool> _validate;
     protected readonly Func<object?, object?> _coerce;
-    
-    public ControlPropertyDescriptor(
+
+    public EditableControlPropertyDescriptor(
         string name,
         Type type,
         Func<object?> getter,
@@ -49,13 +112,8 @@ public class ControlPropertyDescriptor
         Action<object?>? setter = null,
         Func<object?, bool>? validate = null,
         Func<object?, object?>? coerce = null
-    )
+    ) : base(name, type, getter, path, description)
     {
-        Name = name;
-        Type = type;
-        _getter = getter;
-        Path = path ?? _defaultPath;
-        Description = description;
         _setter = setter ?? (_ => { });
         _validate = validate ?? (_ => true);
         _coerce = coerce ?? (o => o);
@@ -65,12 +123,12 @@ public class ControlPropertyDescriptor
     {
         if (Validate(value))
         {
+            var currentValue = _getter();
             _setter(Coerce(value));
-            RaiseValueChanged(value);
+            RaiseValueChanged(value, currentValue);
         }
     }
-    public virtual object? Get() => _getter();
-    
+
     public virtual bool Validate(object? value)
     {
         var isValid = _validate(value);
@@ -84,16 +142,18 @@ public class ControlPropertyDescriptor
         RaiseCoerced(value, coercedValue);
         return coercedValue;
     }
-    
-    protected void RaiseValueChanged(object? value) => ValueChanged?.Invoke(value);
+
+    protected void RaiseValueChanged(object? newValue, object? oldValue) => ValueChanged?.Invoke(newValue, oldValue);
     protected void RaiseValidated(object? value, bool isValid) => Validated?.Invoke(value, isValid);
     protected void RaiseCoerced(object? value, object? coercedValue) => Coerced?.Invoke(value, coercedValue);
 }
 
-public class ControlPropertyDescriptor<TValue> : ControlPropertyDescriptor
+public class EditableControlPropertyDescriptor<TValue> : EditableControlPropertyDescriptor
 {
-    public ControlPropertyDescriptor(string name, Func<TValue?> getter, PipedPath path = default, string description = "", Action<TValue?>? setter = null,
-        Func<TValue, bool>? validate = null, Func<TValue, TValue>? coerce = null) : base(name, typeof(TValue), () => getter(),
+    public EditableControlPropertyDescriptor(string name, Func<TValue?> getter, PipedPath path = default,
+        string description = "", Action<TValue?>? setter = null,
+        Func<TValue, bool>? validate = null, Func<TValue, TValue>? coerce = null) : base(name, typeof(TValue),
+        () => getter(),
         path,
         description,
         (o) =>
@@ -107,13 +167,13 @@ public class ControlPropertyDescriptor<TValue> : ControlPropertyDescriptor
         }, (o) =>
         {
             if (o is not TValue value) return false;
-            if(validate == null)
+            if (validate == null)
                 return true;
             return validate(value);
         }, (o) =>
         {
             if (o is not TValue value) return o;
-            if(coerce != null)
+            if (coerce != null)
                 return coerce(value);
             return o;
         })
@@ -122,22 +182,24 @@ public class ControlPropertyDescriptor<TValue> : ControlPropertyDescriptor
 
     public void Set(TValue? value)
     {
+        object? currentValue = _getter();
         if (!this.Validate(value)) return;
-        
+
         _setter(this.Coerce(value));
-        
-        RaiseValueChanged(value);
+
+        RaiseValueChanged(value, currentValue);
     }
+
     public new TValue? Get()
     {
         var val = _getter();
-        
-        if(val == null)
+
+        if (val == null)
             return default;
-        
+
         if (val is not TValue typedValue)
             throw new InvalidCastException("Invalid type for getter");
-        
+
         return typedValue;
     }
 
@@ -151,10 +213,10 @@ public class ControlPropertyDescriptor<TValue> : ControlPropertyDescriptor
     public TValue? Coerce(TValue? value)
     {
         var coercedValue = _coerce(value);
-        
+
         if (coercedValue is not TValue typedCoercedValue)
             throw new ArgumentException("Invalid type for coerce", nameof(value));
-        
+
         RaiseCoerced(value, coercedValue);
         return typedCoercedValue;
     }

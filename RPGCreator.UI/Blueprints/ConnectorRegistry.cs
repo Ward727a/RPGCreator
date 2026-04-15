@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Avalonia.Controls.Templates;
+using RPGCreator.SDK.Graph.ConnectorLogics;
 using RPGCreator.SDK.Graph.LOGIC;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Registry;
@@ -42,6 +43,8 @@ public class ConnectorRegistry : IBpConnectorRegistry
 
     private readonly Dictionary<Type, int> _connectorTypeMapping = new()
     {
+        { typeof(IComboBoxLogic), -3 },
+        { typeof(Action), -2 },
         { typeof(void), 0 },
         { typeof(bool), 1 },
         { typeof(int), 2 },

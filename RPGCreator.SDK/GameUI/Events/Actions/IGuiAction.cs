@@ -18,12 +18,18 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-namespace RPGCreator.SDK.Graph;
+using RPGCreator.SDK.GameUI.Events.Contexts;
 
-/// <summary>
-/// Used by compiled blueprints to execute logic.
-/// </summary>
-public abstract class BaseCompiledLogic
+namespace RPGCreator.SDK.GameUI.Events.Actions;
+
+public interface IGuiAction
 {
-    public abstract void Execute(ICompiledBpContext context);
+    string Name { get; }
+    string Description { get; }
+    Type[] SupportedEventContexts { get; }
+
+    void Execute(GuiEventContext context);
+    bool Match(GuiEventContext context);
+
+    IGuiAction Clone();
 }

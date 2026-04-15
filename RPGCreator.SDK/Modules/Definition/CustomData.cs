@@ -148,6 +148,11 @@ public class CustomData : ISerializable, IDeserializable, IDisposable, ICloneabl
             {
                 if (value is T typedValue) return typedValue;
                 
+                if (typeof(T) == typeof(Ulid) && value is string s)
+                {
+                    return (T)(object)Ulid.Parse(s);
+                }
+                
                 return (T)Convert.ChangeType(value, typeof(T), CultureInfo.InvariantCulture);
             } catch
             {

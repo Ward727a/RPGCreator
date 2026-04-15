@@ -368,7 +368,7 @@ public class IntRefListCreateModal : Window
                     }
                     tileModal.Close();
                 };
-                tileModal.ShowDialog((Window?)this.GetVisualRoot()!);
+                tileModal.ShowDialog((Window?)TopLevel.GetTopLevel(this)!);
             };
         }
     }
@@ -895,7 +895,7 @@ public class AutoLayerRuleCreateModal : Window
             {
                 SelectedTilesetIndex = index;
             };
-            tileModal.ShowDialog((Window?)this.GetVisualRoot()!);
+            tileModal.ShowDialog((Window?)TopLevel.GetTopLevel(this)!);
         };
         
         FlipXParameter.IsCheckedChanged += (_, _) =>
@@ -1453,7 +1453,7 @@ public class IntRefListItemControl : UserControl
                 editModal.Close();
             };
             editModal.OnCreateIntRefCancelled += () => { editModal.Close(); };
-            editModal.ShowDialog((Window?)this.GetVisualRoot()!);
+            editModal.ShowDialog((Window?)TopLevel.GetTopLevel(this)!);
         };
         
         refValueSelector.ValueChanged += (_, _) =>
@@ -1483,7 +1483,7 @@ public class IntRefListItemControl : UserControl
                 RefreshDisplay();
             };
             
-            ruleModal.ShowDialog((Window?)this.GetVisualRoot()!);
+            ruleModal.ShowDialog((Window?)TopLevel.GetTopLevel(this)!);
         };
     }
     
@@ -1666,7 +1666,7 @@ public class IntRefListControl : UserControl
 
     private void CreateComponents()
     {
-        NotificationManager = new WindowNotificationManager(this.GetVisualRoot() as Window)
+        NotificationManager = new WindowNotificationManager(TopLevel.GetTopLevel(this) as Window)
         {
             Position = NotificationPosition.TopRight,
             MaxItems = 3,
@@ -1722,7 +1722,7 @@ public class IntRefListControl : UserControl
                 createModal.Close();
             };
             createModal.OnCreateIntRefCancelled += () => { createModal.Close(); };
-            createModal.ShowDialog((Window?)this.GetVisualRoot()!);
+            createModal.ShowDialog((Window?)TopLevel.GetTopLevel(this)!);
         };
 
         MenuPanel.OnSaveTileset += () =>

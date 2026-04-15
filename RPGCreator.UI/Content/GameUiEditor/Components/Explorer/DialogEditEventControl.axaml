@@ -1,0 +1,108 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:RPGCreator.UI.Content.GameUiEditor.Components.Explorer"
+        xmlns:ursa="https://irihi.tech/ursa"
+        xmlns:actions="clr-namespace:RPGCreator.SDK.GameUI.Events.Actions;assembly=RPGCreator.SDK"
+        xmlns:gameUi="clr-namespace:RPGCreator.SDK.GameUI;assembly=RPGCreator.SDK"
+        xmlns:avalonia="https://github.com/projektanker/icons.avalonia"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="RPGCreator.UI.Content.GameUiEditor.Components.Explorer.DialogEditEventControl"
+        ShowInTaskbar="False"
+        CanMaximize="False"
+        CanMinimize="False"
+        CanResize="False"
+        Height="600"
+        Width="1000"
+        x:DataType="vm:DialogEditEventControlVm"
+        WindowStartupLocation="CenterOwner"
+        Title="{Binding WindowTitle}"
+        Padding="8">
+    
+    
+    <Window.Resources>
+
+        <vm:PropertyEditorSelector x:Key="EditablePropertySelector">
+        </vm:PropertyEditorSelector>
+        <vm:PropertyReadOnlySelector x:Key="ReadOnlyPropertySelector"></vm:PropertyReadOnlySelector>
+    </Window.Resources>
+    <Grid RowDefinitions="Auto, 120, Auto, Auto, *" RowSpacing="4">
+        <TextBlock>
+            <TextBlock.Inlines>
+                <Run Text="Event name: " Foreground="DarkGray" FontWeight="DemiBold" />
+                <Run Text="{Binding EventName}" />
+            </TextBlock.Inlines>
+        </TextBlock>
+        <ScrollViewer Grid.Row="1">
+            <TextBlock TextWrapping="WrapWithOverflow">
+                <Run Text="Event description: " Foreground="DarkGray" FontWeight="DemiBold" />
+                <LineBreak />
+                <Run Text="{Binding EventDescription}" />
+            </TextBlock>
+        </ScrollViewer>
+        <Grid Grid.Row="4" ColumnDefinitions="50*, 50*" ColumnSpacing="4">
+            <Grid RowDefinitions="Auto, Auto, *" RowSpacing="4">
+                <ursa:Divider Grid.Column="0" Grid.Row="0" Content="Choose an action to execute"
+                              ToolTip.Tip="Choose an action to execute when this event is called." />
+                <TextBlock Grid.Row="1" Grid.Column="0">
+                    <TextBlock.Inlines>
+                        <Run Text="Current action: " Foreground="DarkGray" FontWeight="DemiBold" />
+                        <Run Text="{Binding SelectedActionName, FallbackValue=No action currently selected.}" />
+                    </TextBlock.Inlines>
+                </TextBlock>
+                <Border Grid.Row="2" Grid.Column="0" Background="{DynamicResource SemiColorBackground1}" Margin="8" CornerRadius="8"
+                        BorderBrush="{DynamicResource SemiColorBorder}" BorderThickness="1"
+                        ClipToBounds="True">
+                    <ScrollViewer>
+                        <ListBox ItemsSource="{Binding AvailableActions}"
+                                 ClipToBounds="True"
+                                 SelectedIndex="{Binding SelectedActionIndex}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate DataType="actions:IGuiAction">
+                                    <TextBlock Text="{Binding Name}" ToolTip.Tip="{Binding Description}"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+            <Grid Grid.Column="1" RowDefinitions="Auto, *" RowSpacing="4">
+                <ursa:Divider Grid.Row="0" Content="Action parameters"
+                              ToolTip.Tip="Some action can be customised based on their parameter."/>
+                <Border Grid.Row="1" Background="{DynamicResource SemiColorBackground1}" Margin="8" CornerRadius="8"
+                        BorderBrush="{DynamicResource SemiColorBorder}" BorderThickness="1"
+                        ClipToBounds="True"
+                        Padding="8, 4">
+                    <ScrollViewer>
+                        <ItemsControl ItemsSource="{Binding ActionProperties}">
+                            <ItemsControl.DataTemplates>
+                                <DataTemplate x:DataType="gameUi:EditableControlPropertyDescriptor" DataType="gameUi:EditableControlPropertyDescriptor">
+                                    <Grid ColumnDefinitions="120, *" Margin="0, 4" x:DataType="gameUi:EditableControlPropertyDescriptor">
+                                        <TextBlock x:DataType="gameUi:ControlPropertyDescriptor"
+                                                   Text="{Binding Name, TargetNullValue=''}" VerticalAlignment="Center" Width="120" 
+                                                   TextWrapping="WrapWithOverflow" ToolTip.Tip="{Binding Description}"/>
+                                        <ContentControl Grid.Column="1" Content="{Binding}" 
+                                                        ContentTemplate="{StaticResource EditablePropertySelector}"/>
+                                    </Grid>
+                                </DataTemplate>
+                                <DataTemplate x:DataType="gameUi:ReadOnlyControlPropertyDescriptor">
+                                    <Grid ColumnDefinitions="120, *" Margin="0, 4">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Width="120" Spacing="4">
+                                            <Border  ToolTip.Tip="This property is read-only and cannot be edited." Background="Transparent" Padding="2">
+                                                <avalonia:Icon Value="mdi-read" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextWrapping="WrapWithOverflow" ToolTip.Tip="{Binding Description}"/>
+                                        </StackPanel>
+                                        <ContentControl Grid.Column="1" Content="{Binding}"
+                                                        ContentTemplate="{StaticResource ReadOnlyPropertySelector}"></ContentControl>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.DataTemplates>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

@@ -46,7 +46,9 @@ using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.MaterialDesign;
 using RPGCreator.RTP.Services;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Blueprints;
 using RPGCreator.SDK.EditorUiService;
+using RPGCreator.SDK.GameUI;
 using RPGCreator.SDK.Graph.ConnectorLogics;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Registry;
@@ -108,6 +110,10 @@ public class App : Application
                 }
             }
         });
+        
+        // DEV NOTE
+        // The section below does lots of registration.
+        // I should probably change the place to some more specialized class.
         
         var bpConnector = new ConnectorRegistry();
         RegistryServices.BpConnector = bpConnector;
@@ -304,10 +310,137 @@ public class App : Application
         // // SOUNDS
         bpNode.RegisterNode(new Blueprints.Nodes.Game.Sounds.PlaySoundNode());
         
+        // REGISTRATION FOR PROPERTY EDITOR CONTROL
+        var propEditCtrl = RegistryServices.PropertyEditorRegistry;
+        propEditCtrl.RegisterPropertyEditor<BlueprintData>((descriptor) =>
+        {
+
+            if (descriptor is ReadOnlyControlPropertyDescriptor readOnlyDescriptor)
+            {
+                return GenerateReadonlyBpDataControl(readOnlyDescriptor);
+            }
+
+            if (descriptor is EditableControlPropertyDescriptor editableDescriptor)
+            {
+                return GenerateEditableBpDataControl(editableDescriptor);
+            }
+
+            return new TextBlock { Text = "ERROR - Given descriptor is not a readOnly nor editable descriptor." };
+        });
+        
+        
         EngineServices.OnceServiceReady((IResourceService ResourcesService) =>
         {
             ResourcesService.RegisterLoader<Avalonia.Media.Imaging.Bitmap>(new AvaloniaBitmapLoader());
         });
+
+        return;
+
+        Control GenerateReadonlyBpDataControl(ReadOnlyControlPropertyDescriptor descriptor)
+        {
+            var grid = new Grid()
+            {
+                RowDefinitions = new RowDefinitions("*, *, Auto"),
+                ColumnDefinitions = new ColumnDefinitions("*, *"),
+                ColumnSpacing = 4
+            };
+
+            var label = new TextBlock()
+            {
+                Text = descriptor.Get<BlueprintData>()?.Name ?? "No BP selected",
+                TextTrimming = TextTrimming.CharacterEllipsis
+            };
+            if (!string.IsNullOrEmpty(descriptor.Get<BlueprintData>()?.Name))
+            {
+                ToolTip.SetTip(label, descriptor.Get<BlueprintData>()?.Name);
+            }
+            
+            var selectBp = new Button()
+            {
+                Content = "Select",
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                IsEnabled = false
+            };
+
+            var createBp = new Button()
+            {
+                Content = "Create",
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                IsEnabled = false
+            };
+            
+            ToolTip.SetTip(createBp, "The property is read-only.");
+            ToolTip.SetTip(selectBp, "The property is read-only.");
+
+            var divider = new Separator();
+            
+            grid.Children.Add(label);
+            Grid.SetColumnSpan(label, 2);
+            
+            grid.Children.Add(selectBp);
+            Grid.SetColumn(selectBp, 0);
+            Grid.SetRow(selectBp, 2);
+            grid.Children.Add(createBp);
+            Grid.SetColumn(createBp, 1);
+            Grid.SetRow(createBp, 2);
+            
+            grid.Children.Add(divider);
+            Grid.SetRow(divider, 3);
+            Grid.SetColumnSpan(divider, 2);
+            
+            
+            return grid;
+        }
+        
+        Control GenerateEditableBpDataControl(EditableControlPropertyDescriptor descriptor)
+        {
+            var grid = new Grid()
+            {
+                RowDefinitions = new RowDefinitions("*, *, Auto"),
+                ColumnDefinitions = new ColumnDefinitions("*, *"),
+                ColumnSpacing = 4
+            };
+
+            var label = new TextBlock()
+            {
+                Text = descriptor.Get<BlueprintData>()?.Name ?? "No BP selected",
+                TextTrimming = TextTrimming.CharacterEllipsis
+            };
+            if (!string.IsNullOrEmpty(descriptor.Get<BlueprintData>()?.Name))
+            {
+                ToolTip.SetTip(label, descriptor.Get<BlueprintData>()?.Name);
+            }
+
+            var selectBp = new Button()
+            {
+                Content = "Select",
+                HorizontalAlignment = HorizontalAlignment.Stretch
+            };
+
+            var createBp = new Button()
+            {
+                Content = "Create",
+                HorizontalAlignment = HorizontalAlignment.Stretch
+            };
+
+            var divider = new Separator();
+            
+            grid.Children.Add(label);
+            Grid.SetColumnSpan(label, 2);
+            
+            grid.Children.Add(selectBp);
+            Grid.SetColumn(selectBp, 0);
+            Grid.SetRow(selectBp, 1);
+            grid.Children.Add(createBp);
+            Grid.SetColumn(createBp, 1);
+            Grid.SetRow(createBp, 1);
+            
+            grid.Children.Add(divider);
+            Grid.SetRow(divider, 2);
+            Grid.SetColumnSpan(divider, 2);
+            
+            return grid;
+        }
     }
 
     
@@ -316,7 +449,6 @@ public class App : Application
     {
         // Line below is needed to remove Avalonia data validation.
         // Without this line you will get duplicate validations from both Avalonia and CT
-        BindingPlugins.DataValidators.RemoveAt(0);
         MarkdownNode.Register<MathInlineNode>();
         MarkdownNode.Register<MathBlockNode>();
         IconProvider.Current
@@ -334,10 +466,7 @@ public class App : Application
 
         base.OnFrameworkInitializationCompleted();
         #if DEBUG
-        this.AttachDevTools(new()
-        {
-            StartupScreenIndex = 1,
-        });
+        this.AttachDeveloperTools();
         #endif
     }
 

@@ -187,7 +187,7 @@ public class SkillManageControlTab : UserControl
     {
         Logger.Debug("Add button clicked. Opening new skill editor.");
         var newSkillEditor = new SkillsEditorWindowControl(null);
-        var host = ((AssetsManageWindow)this.GetVisualRoot()!);
+        var host = ((AssetsManageWindow)TopLevel.GetTopLevel(this)!);
         host?.OpenCustom(newSkillEditor);
     }
     private void OnDeleteButtonClicked(object? sender, RoutedEventArgs e)

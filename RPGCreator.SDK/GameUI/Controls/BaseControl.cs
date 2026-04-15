@@ -21,36 +21,142 @@
 using System.ComponentModel;
 using System.Numerics;
 using RPGCreator.RTP.GameUI.Enums;
+using RPGCreator.SDK.GameUI.Events.Actions;
+using RPGCreator.SDK.GameUI.Events.Contexts;
 using RPGCreator.SDK.GameUI.Interfaces;
 using RPGCreator.SDK.GameUI.Visual;
 using RPGCreator.SDK.Inputs;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.GameUI.Controls;
 
 public abstract class BaseControl
 {
+    public bool IsPropertiesInitialized { get; private set; } = false;
+    public bool IsEventsInitialized { get; private set; } = false;
+    
+    public event Action<ControlPropertyDescriptor>? PropertyDescriptorAdded;
+    public event Action<ControlPropertyDescriptor>? PropertyDescriptorRemoved;
+
+    private Dictionary<(PipedPath category, string name), ControlEventDescriptor> _eventDescriptorsCache = new();
+    private readonly List<ControlEventDescriptor> _eventDescriptors = new();
+
+    public void EmitEvent(PipedPath category, string name, GuiEventContext context)
+    {
+        if (!_eventDescriptorsCache.TryGetValue((category, name), out var descriptor))
+        {
+            throw new ArgumentException($"No event descriptor with name '{name}' is registered in '{category}'.");
+        }
+        
+        if(descriptor.GuiContextType.IsInstanceOfType(context))
+        {
+            if (descriptor.Action is { } action)
+            {
+                if(action.Match(context))
+                    action.Execute(context);
+                else
+                    Logger.Error($"The action '{action.Name}' associated with event '{descriptor.Name}' in category '{descriptor.Category}' could not be executed because the context did not match the action's requirements.");
+            }
+        }
+    }
+    
+    protected T RegisterEventDescriptor<T>(T descriptor, bool overrideIfExists = false) where T : ControlEventDescriptor
+    {
+        if (_eventDescriptorsCache.ContainsKey((descriptor.Category, descriptor.Name)))
+        {
+            
+            if (overrideIfExists)
+            {
+                _eventDescriptors.Remove(_eventDescriptorsCache[(descriptor.Category, descriptor.Name)]);
+                _eventDescriptorsCache.Remove((descriptor.Category, descriptor.Name));
+            } else
+                throw new ArgumentException($"A descriptor with name '{descriptor.Name}' is already registered in '{descriptor.Category}'.");
+        }
+        else
+        {
+            _eventDescriptorsCache.Add((descriptor.Category, descriptor.Name), descriptor);
+            _eventDescriptors.Add(descriptor);
+        }
+        return descriptor;
+    }
+    
+    protected void UnregisterEventDescriptor(PipedPath category, string name)
+    {
+        if (!_eventDescriptorsCache.TryGetValue((category, name), out var descriptor))
+        {
+            throw new ArgumentException($"No descriptor with name '{name}' is registered in '{category}'.");
+        }
+        _eventDescriptorsCache.Remove((category, name));
+        _eventDescriptors.Remove(descriptor);
+    }
+    
+    #region Exposed Events
+
+    public ControlEventDescriptor<GuiClickEventContext> ClickedGuiEvent;
+    
+    #endregion
+    
     private readonly Dictionary<(PipedPath path, string name), ControlPropertyDescriptor> _propertyDescriptorsCache = new();
     private readonly List<ControlPropertyDescriptor> _propertyDescriptors = new();
-
-    protected void RegisterPropertyDescriptor(ControlPropertyDescriptor descriptor)
+    
+    protected T RegisterPropertyDescriptor<T>(T descriptor, bool overrideIfExists = false) where T : ControlPropertyDescriptor
     {
         if (_propertyDescriptorsCache.ContainsKey((descriptor.Path, descriptor.Name)))
         {
-            throw new ArgumentException($"A descriptor with name '{descriptor.Name}' is already registered in '{descriptor.Path}'.");
+            
+            if (overrideIfExists)
+            {
+                _propertyDescriptors.Remove(_propertyDescriptorsCache[(descriptor.Path, descriptor.Name)]);
+                _propertyDescriptorsCache.Remove((descriptor.Path, descriptor.Name));
+            } else
+                throw new ArgumentException($"A descriptor with name '{descriptor.Name}' is already registered in '{descriptor.Path}'.");
         }
         
         if (!_propertyDescriptors.Contains(descriptor))
         {
             _propertyDescriptors.Add(descriptor);
             _propertyDescriptorsCache[(descriptor.Path, descriptor.Name)] = descriptor;
+            PropertyDescriptorAdded?.Invoke(descriptor);
         }
+        return descriptor;
+    }
+    
+    protected void UnregisterPropertyDescriptor(PipedPath path, string name)
+    {
+        if (!_propertyDescriptorsCache.TryGetValue((path, name), out var descriptor))
+        {
+            throw new ArgumentException($"No descriptor with name '{name}' is registered in '{path}'.");
+        }
+        
+        _propertyDescriptors.Remove(descriptor);
+        _propertyDescriptorsCache.Remove((path, name));
+        PropertyDescriptorRemoved?.Invoke(descriptor);
     }
 
     protected static readonly UrnSingleModule _urnModule = "gameUi_control".ToUrnSingleModule();
     protected static readonly PipedPath _defaultPath = "Other".ToPipedPath();
     public abstract URN Urn { get; }
+    
     public virtual PipedPath Category { get; } = _defaultPath;
+    
+    #region ExposedProperties
+    
+    public EditableControlPropertyDescriptor<bool> VisibilityProperty { get; protected set; }
+    public EditableControlPropertyDescriptor<float> OpacityProperty { get; protected set; }
+    public EditableControlPropertyDescriptor<Vector2> PivotProperty { get; protected set; }
+    public EditableControlPropertyDescriptor<EOriginUnitType> PivotXUnitProperty { get; protected set; }
+    public EditableControlPropertyDescriptor<EOriginUnitType> PivotYUnitProperty { get; protected set; }
+    public EditableControlPropertyDescriptor<Vector2> PositionProperty { get; protected set; }
+    public EditableControlPropertyDescriptor<EPositionUnitType> PositionXUnitProperty { get; protected set; }
+    public EditableControlPropertyDescriptor<EPositionUnitType> PositionYUnitProperty { get; protected set; }
+    public EditableControlPropertyDescriptor<Vector2> SizeProperty { get; protected set; }
+    public EditableControlPropertyDescriptor<ESizeUnitType> SizeXUnitProperty { get; protected set; }
+    public EditableControlPropertyDescriptor<ESizeUnitType> SizeYUnitProperty { get; protected set; }
+    public EditableControlPropertyDescriptor<bool> IsHitTestVisibleProperty { get; protected set; }
+    public EditableControlPropertyDescriptor<bool> ClipHitTestToBoundsProperty { get; protected set; }
+    
+    #endregion
 
     /// <summary>
     /// Define the name of the component. This is used to display it in the UI editor.<br/>
@@ -130,6 +236,31 @@ public abstract class BaseControl
 
     #endregion
 
+    public ControlEventDescriptor GetExposedEvent(PipedPath category, string name)
+    {
+        if (!_eventDescriptorsCache.TryGetValue((category, name), out var descriptor))
+            throw new ArgumentException($"No descriptor with name '{name}' is registered in '{category}'.");
+        
+        return descriptor;
+    }
+    
+    public List<ControlEventDescriptor> GetExposedEvents()
+    {
+        if(_eventDescriptors.Count == 0)
+            MakeExposedEvents();
+        
+        return _eventDescriptors;
+    }
+
+    protected virtual void MakeExposedEvents()
+    {
+        if (IsEventsInitialized)
+            return;
+        IsEventsInitialized = true;
+        
+        ClickedGuiEvent = RegisterEventDescriptor(new ControlEventDescriptor<GuiClickEventContext>("OnClicked", "Mouse".ToPipedPath(), "Triggered when the control is clicked with a mouse button."));
+    }
+
     public ControlPropertyDescriptor GetExposedProperty(PipedPath path, string name)
     {
         if(_propertyDescriptors.Count == 0)
@@ -150,8 +281,11 @@ public abstract class BaseControl
     
     protected virtual void MakeExposedProperties()
     {
+        if (IsPropertiesInitialized)
+            return;
+        IsPropertiesInitialized = true;
         // VISIBILITY
-        RegisterPropertyDescriptor(new ControlPropertyDescriptor<bool>("Visibility", () => Visual.Visible,
+        VisibilityProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<bool>("Visibility", () => Visual.Visible,
             "Appearance".ToPipedPath(), "Define if the element is visible or not.", (
                 b =>
                 {
@@ -159,13 +293,13 @@ public abstract class BaseControl
                 })));
         
         // OPACITY
-        RegisterPropertyDescriptor(new ControlPropertyDescriptor<float>("Opacity", () => Visual.Opacity,
+        OpacityProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<float>("Opacity", () => Visual.Opacity,
             "Appearance".ToPipedPath(), "Define the opacity of the element.", (f => Visual.Opacity = f),
             f => { return f is >= 0 and <= 1; },
             (f => { return Math.Clamp(f, 0f, 1f); })));
         
         // PIVOT - PROPERTIES
-        RegisterPropertyDescriptor(new ControlPropertyDescriptor<Vector2>("Pivot",
+        PivotProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<Vector2>("Pivot",
             () => { return new Vector2(Visual.PivotX, Visual.PivotY); },
             "Appearance".ToPipedPath().Extend("Pivots"), "Define the pivot point of the element.",
             v =>
@@ -173,17 +307,17 @@ public abstract class BaseControl
                 Visual.PivotX = (int)MathF.Round(v.X);
                 Visual.PivotY = (int)MathF.Round(v.Y);
             }));
-        RegisterPropertyDescriptor(new ControlPropertyDescriptor<EOriginUnitType>("Pivot X Unit",
+        PivotXUnitProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<EOriginUnitType>("Pivot X Unit",
             () => Visual.PivotXUnit,
             "Appearance".ToPipedPath().Extend("Pivots"), "Define the unit type for the pivot X coordinate.",
             (u => { Visual.PivotXUnit = u; })));
-        RegisterPropertyDescriptor(new ControlPropertyDescriptor<EOriginUnitType>("Pivot Y Unit",
+        PivotYUnitProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<EOriginUnitType>("Pivot Y Unit",
             () => Visual.PivotYUnit,
             "Appearance".ToPipedPath().Extend("Pivots"), "Define the unit type for the pivot Y coordinate.",
             (u => { Visual.PivotYUnit = u; })));
         
         // POSITION - PROPERTIES
-        RegisterPropertyDescriptor(new ControlPropertyDescriptor<Vector2>("Position",
+        PositionProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<Vector2>("Position",
             () => { return new Vector2(Visual.X, Visual.Y); },
             "Appearance".ToPipedPath().Extend("Position"), "Define the position of the element.",
             v =>
@@ -191,17 +325,17 @@ public abstract class BaseControl
                 Visual.X = (int)MathF.Round(v.X);
                 Visual.Y = (int)MathF.Round(v.Y);
             }));
-        RegisterPropertyDescriptor(new ControlPropertyDescriptor<EPositionUnitType>("Position X Unit",
+        PositionXUnitProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<EPositionUnitType>("Position X Unit",
             () => Visual.XUnit,
             "Appearance".ToPipedPath().Extend("Position"), "Define the unit type for the X coordinate of the element's position.",
             (u => { Visual.XUnit = u; })));
-        RegisterPropertyDescriptor(new ControlPropertyDescriptor<EPositionUnitType>("Position Y Unit",
+        PositionYUnitProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<EPositionUnitType>("Position Y Unit",
             () => Visual.YUnit,
             "Appearance".ToPipedPath().Extend("Position"), "Define the unit type for the Y coordinate of the element's position.",
             (u => { Visual.YUnit = u; })));
         
         // SIZE - PROPERTIES
-        RegisterPropertyDescriptor(new ControlPropertyDescriptor<Vector2>("Size",
+        SizeProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<Vector2>("Size",
             () => { return new Vector2(Visual.Width, Visual.Height); },
             "Appearance".ToPipedPath().Extend("Size"), "Define the size of the element.",
             v =>
@@ -209,18 +343,18 @@ public abstract class BaseControl
                 Visual.Width = (int)MathF.Round(v.X);
                 Visual.Height = (int)MathF.Round(v.Y);
             }));
-        RegisterPropertyDescriptor(new ControlPropertyDescriptor<ESizeUnitType>("Size X Unit", () => Visual.WidthUnit,
+        SizeXUnitProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<ESizeUnitType>("Size X Unit", () => Visual.WidthUnit,
             "Appearance".ToPipedPath().Extend("Size"), "Define the unit type for the X coordinate of the element's size.",
             u => { Visual.WidthUnit = u; }));
-        RegisterPropertyDescriptor(new ControlPropertyDescriptor<ESizeUnitType>("Size Y Unit", () => Visual.HeightUnit,
+        SizeYUnitProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<ESizeUnitType>("Size Y Unit", () => Visual.HeightUnit,
             "Appearance".ToPipedPath().Extend("Size"), "Define the unit type for the Y coordinate of the element's size.",
             u => { Visual.HeightUnit = u; }));
         
         // COMPORTMENT MOUSE - PROPERTIES
-        RegisterPropertyDescriptor(new ControlPropertyDescriptor<bool>("Is mouse clickable", () => IsHitTestVisible,
+        IsHitTestVisibleProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<bool>("Is mouse clickable", () => IsHitTestVisible,
             "Comportment".ToPipedPath().Extend("Mouse"), "Define if the element can receive mouse click.",
             b => IsHitTestVisible = b));
-        RegisterPropertyDescriptor(new ControlPropertyDescriptor<bool>("Can click outside bounds", () => ClipHitTestToBounds,
+        ClipHitTestToBoundsProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<bool>("Can click outside bounds", () => ClipHitTestToBounds,
             "Comportment".ToPipedPath().Extend("Mouse"), "Define if the children of this element can receive mouse click even if they are outside the bounds of this element.",
             b => ClipHitTestToBounds = !b));
     }
@@ -519,6 +653,7 @@ public abstract class BaseControl
 
     protected virtual void OnMouseClick(MouseButton button)
     {
+        EmitEvent("Mouse".ToPipedPath(), "Click", new GuiClickEventContext(this, button));
     }
 
     protected virtual void OnMouseDoubleClick(MouseButton button)

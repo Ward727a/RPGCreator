@@ -10,29 +10,87 @@
              x:DataType="vm:UiExplorerVm"
              x:Class="RPGCreator.UI.Content.GameUiEditor.Components.Explorer.UiExplorer">
     
+    
     <UserControl.Resources>
-        <vm:PropertyEditorSelector x:Key="MyEditorSelector">
+        <vm:PropertyEditorSelector x:Key="EditablePropertySelector">
         </vm:PropertyEditorSelector>
-        
-        <DataTemplate x:Key="PropertyTemplate" DataType="gameUi:ControlPropertyDescriptor">
-            <Grid ColumnDefinitions="120, *" Margin="0, 4">
-                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Width="120" TextWrapping="WrapWithOverflow" ToolTip.Tip="{Binding Description}"/>
-                <ContentControl Grid.Column="1" Content="{Binding}" 
-                                ContentTemplate="{StaticResource MyEditorSelector}"/>
-            </Grid>
-        </DataTemplate>
+        <vm:PropertyReadOnlySelector x:Key="ReadOnlyPropertySelector"></vm:PropertyReadOnlySelector>
 
         <DataTemplate x:Key="GroupTemplate" x:DataType="vm:PropertyGroupViewModel">
-            <Expander Header="{Binding GroupName}" IsExpanded="True" Margin="2,0,0,0">
+            <Expander Header="{Binding GroupName}" IsExpanded="False" Margin="2,0,0,0">
                 <StackPanel Margin="10,0,0,0">
-                    <ItemsControl ItemsSource="{Binding Properties}" 
-                                  ItemTemplate="{StaticResource PropertyTemplate}"/>
+                    <ItemsControl ItemsSource="{Binding Properties}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
                     <ItemsControl ItemsSource="{Binding IterableGroups}" 
-                                  ItemTemplate="{StaticResource GroupTemplate}"/>
+                                  ItemTemplate="{StaticResource GroupTemplate}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </StackPanel>
+            </Expander>
+        </DataTemplate>
+        <DataTemplate x:Key="EventGroupTemplate" x:DataType="vm:EventGroupViewModel">
+            <Expander Header="{Binding GroupName}" IsExpanded="False" Margin="2,0,0,0">
+                <StackPanel Margin="10,0,0,0">
+                    <ItemsControl ItemsSource="{Binding Events}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                    <ItemsControl ItemsSource="{Binding IterableGroups}" 
+                                  ItemTemplate="{StaticResource GroupTemplate}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
                 </StackPanel>
             </Expander>
         </DataTemplate>
     </UserControl.Resources>
+    
+    <UserControl.DataTemplates>
+        <DataTemplate x:DataType="gameUi:EditableControlPropertyDescriptor" DataType="gameUi:EditableControlPropertyDescriptor">
+            <Grid ColumnDefinitions="120, *" Margin="0, 4" x:DataType="gameUi:EditableControlPropertyDescriptor">
+                <TextBlock x:DataType="gameUi:ControlPropertyDescriptor"
+                           Text="{Binding Name, TargetNullValue=''}" VerticalAlignment="Center" Width="120" 
+                           TextWrapping="WrapWithOverflow" ToolTip.Tip="{Binding Description}"/>
+                <ContentControl Grid.Column="1" Content="{Binding}" 
+                                ContentTemplate="{StaticResource EditablePropertySelector}"/>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:DataType="gameUi:ReadOnlyControlPropertyDescriptor">
+            <Grid ColumnDefinitions="120, *" Margin="0, 4">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Width="120" Spacing="4">
+                    <Border  ToolTip.Tip="This property is read-only and cannot be edited." Background="Transparent" Padding="2">
+                    <icon:Icon Value="mdi-read" VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextWrapping="WrapWithOverflow" ToolTip.Tip="{Binding Description}"/>
+                </StackPanel>
+                <ContentControl Grid.Column="1" Content="{Binding}"
+                                ContentTemplate="{StaticResource ReadOnlyPropertySelector}"></ContentControl>
+            </Grid>
+        </DataTemplate>
+        
+        <DataTemplate x:DataType="gameUi:ControlEventDescriptor">
+            <Grid ColumnDefinitions="*, Auto" Margin="0, 4">
+                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Width="120" TextWrapping="WrapWithOverflow" ToolTip.Tip="{Binding Description}"/>
+                <Button Grid.Column="1" Content="Edit" Click="EditEventClicked" HorizontalAlignment="Left"/>
+            </Grid>
+        </DataTemplate>
+    </UserControl.DataTemplates>
     
     <UserControl.Styles>
         <Style Selector="Expander[ExpandDirection=Down]:expanded /template/ ContentPresenter#PART_ContentPresenter">
@@ -40,11 +98,20 @@
         </Style>
     </UserControl.Styles>
     
-    <Grid RowDefinitions="Auto, 200, Auto, *" RowSpacing="4" Margin="4">
+    
+    <Grid>
+        <Border
+            Background="{DynamicResource SemiColorBackground1}"
+            BorderBrush="{DynamicResource SemiGrey1}"
+            BorderThickness="1"
+            ClipToBounds="True">
+        </Border>
+        <Grid RowDefinitions="Auto, 200, Auto, *, Auto, 200" RowSpacing="4" Margin="4" x:Name="MyGrid">
+        
         <Grid ColumnDefinitions="*, Auto" ColumnSpacing="4">
             <ursa:Divider Content="UI Hierarchy" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch"/>
             <StackPanel Grid.Column="1" Spacing="4">
-                <Button Classes="Small" ToolTip.Tip="Add new component">
+                <Button Classes="Small" ToolTip.Tip="Add new component" Command="{Binding TreeExplorerVm.AddControlCommand}">
                     <icon:Icon Value="mdi-plus"/>
                 </Button>
             </StackPanel>
@@ -57,7 +124,7 @@
                 </TreeDataTemplate>
             </TreeView.DataTemplates>
             <TreeView.ItemContainerTheme>
-                <ControlTheme TargetType="TreeViewItem" x:DataType="vm:UiBaseControlVm" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+                <ControlTheme TargetType="TreeViewItem" x:DataType="vm:UiBaseControlVm" BasedOn="{StaticResource {x:Type TreeViewItem}}" x:CompileBindings="False">
                     <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
                 </ControlTheme>
@@ -66,7 +133,7 @@
         <GridSplitter Grid.Row="2" ResizeBehavior="PreviousAndNext">
             <GridSplitter.Template>
                 <ControlTemplate>
-                    <ursa:Divider Content="Component Property" HorizontalContentAlignment="Center"/>
+                    <ursa:Divider Content="Component Properties" HorizontalContentAlignment="Center"/>
                 </ControlTemplate>
             </GridSplitter.Template>
         </GridSplitter>
@@ -74,9 +141,37 @@
             <StackPanel Orientation="Vertical">
                 <ScrollViewer>
                     <ItemsControl ItemsSource="{Binding TreeExplorerVm.ControlProperties}" 
-                                  ItemTemplate="{StaticResource GroupTemplate}"/>
+                                  ItemTemplate="{StaticResource GroupTemplate}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
                 </ScrollViewer>
             </StackPanel>
         </ScrollViewer>
+        <GridSplitter Grid.Row="4" ResizeBehavior="PreviousAndNext">
+            <GridSplitter.Template>
+                <ControlTemplate>
+                    <ursa:Divider Content="Component Events" HorizontalContentAlignment="Center"/>
+                </ControlTemplate>
+            </GridSplitter.Template>
+        </GridSplitter>
+        <ScrollViewer Grid.Row="5">
+            <StackPanel Orientation="Vertical">
+                <ScrollViewer>
+                    <ItemsControl ItemsSource="{Binding TreeExplorerVm.ControlEvents}" 
+                                  ItemTemplate="{StaticResource EventGroupTemplate}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </ScrollViewer>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
     </Grid>
 </UserControl>

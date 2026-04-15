@@ -60,6 +60,8 @@ public interface IConnectorLogic
     URN Urn { get; }
 
     public string Title { get; set; }
+    
+    public object? RawValue => GetRawValue();
 
     object? GetRawValue();
     string GetStringValue();

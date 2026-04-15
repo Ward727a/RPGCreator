@@ -37,7 +37,6 @@ public class BlueprintPinTemplateSelector : IDataTemplate
     
     public Control? Build(object? param)
     {
-
         var error = new TextBlock()
         {
             Text = "ERROR"

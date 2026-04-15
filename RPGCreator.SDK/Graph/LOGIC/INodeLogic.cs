@@ -19,6 +19,7 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.CodeDom.Compiler;
+using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Graph.LOGIC;
@@ -95,6 +96,12 @@ public interface INodeLogic
     /// If set, this will be used to open the help page when the user clicks on the '?' icon next to the node title.
     /// </summary>
     public URN HelpUrn { get; }
+    
+    /// <summary>
+    /// Custom data that can be used by the node.<br/>
+    /// It can store specific node-related data, such as configuration settings or additional information.
+    /// </summary>
+    public CustomData CustomData { get; set; }
 
     /// <summary>
     /// This should return a valid C# code snippet, that will be executed when the node is executed.
@@ -102,6 +109,8 @@ public interface INodeLogic
     /// <param name="context">The code generation context, providing necessary information for code generation.</param>
     /// <param name="writer">The IndentedTextWriter to write the generated code to.</param>
     public void GenerateCode(CodeContext context, IndentedTextWriter writer);
+
+    void PlacedInGraph(object? nodeEditorViewModel);
     
     public INodeLogic Clone();
 }

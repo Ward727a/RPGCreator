@@ -20,11 +20,25 @@
 
 namespace RPGCreator.SDK.Graph;
 
+
+public interface ICompiledBpContextArguments
+{
+    int Count { get; }
+
+    void SetArgument(int index, BpValue value);
+
+    BpValue GetArgument(int index);
+    bool IsArgumentOfType(int index, Type type);
+    
+    // Add [x] operator
+    BpValue this[int index] { get => GetArgument(index); set => SetArgument(index, value); }
+}
+
 /// <summary>
 /// For now this is just a placeholder.<br/>
 /// Later on, depending on the implementation of the blueprint, it may contain additional information.
 /// </summary>
 public interface ICompiledBpContext
 {
-    
+    public ICompiledBpContextArguments Arguments { get; }
 }

@@ -271,6 +271,18 @@ public static class EditorUiServices
             Logger.Error("[UI] No IDialogService registered. Cannot show selection dialog.");
             return Task.FromResult<T?>(default);
         }
+
+        public Result<Ulid> ShowLoading(string title, string message, Progress<float>? progress = null, DialogStyle style = new DialogStyle())
+        {
+            Logger.Error("[UI] No IDialogService registered. Cannot show loading dialog.");
+            return Result<Ulid>.Fail("No IDialogService registered");
+        }
+
+        public Result HideLoading(Ulid id)
+        {
+            Logger.Error("[UI] No IDialogService registered. Cannot hide loading dialog.");
+            return Result.Fail("No IDialogService registered");
+        }
     }
     
     public class DefaultNotificationService : INotificationService
@@ -363,16 +375,28 @@ public static class EditorUiServices
 
     public class DefaultBpCompiler : IBpCompilerService
     {
-        public string Compile(string blueprintFilePath)
+        public Result<string> Build(string blueprintFilePath)
         {
             Logger.Error("[UI] No IBpCompilerService registered. Cannot compile blueprint.");
-            return "";
+            return Result<string>.Fail("No IBP Compiler Service registered.");
         }
 
-        public string Compile(object blueprintData)
+        public Result<string> Build(object blueprintData)
         {
             Logger.Error("[UI] No IBpCompilerService registered. Cannot compile blueprint.");
-            return "";
+            return Result<string>.Fail("No IBP Compiler Service registered.");
+        }
+
+        public Task<Result<byte[]>> CompileAllBlueprints(string blueprintFolder = "", IProgress<float>? progress = null)
+        {
+            Logger.Error("[UI] No IBpCompilerService registered. Cannot compile all blueprints.");
+            return Task.FromResult(Result<byte[]>.Fail("No IBP Compiler Service registered."));
+        }
+
+        public Result<(string sourceCode, List<string> referencedBlueprints)> BuildGlobalBlueprintCode(string blueprintFolder = "")
+        {
+            Logger.Error("[UI] No IBpCompilerService registered. Cannot build global blueprint.");
+            return Result<(string sourceCode, List<string> referencedBlueprints)>.Fail("No IBP Compiler Service registered.");
         }
     }
     

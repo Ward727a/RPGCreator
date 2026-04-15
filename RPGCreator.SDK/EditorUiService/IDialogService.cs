@@ -18,6 +18,8 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using RPGCreator.SDK.Types;
+
 namespace RPGCreator.SDK.EditorUiService;
 
 /// <summary>
@@ -89,6 +91,8 @@ public enum DialogSystemDecorations
 /// <param name="X">The X position of the dialog (Only if StartupLocation is Manual).</param>
 /// <param name="Y">The Y position of the dialog (Only if StartupLocation is Manual).</param>
 /// <param name="CanResize">Whether the dialog can be resized.</param>
+/// <param name="CanMaximize">Whether the dialog can be maximized.</param>
+/// <param name="CanMinimize">Whether the dialog can be minimized.</param>
 /// <param name="StartupLocation">The startup location of the dialog.</param>
 /// <param name="SystemDecorations">The system decorations of the dialog.</param>
 public record struct DialogStyle(
@@ -97,6 +101,8 @@ public record struct DialogStyle(
     int X = 0,
     int Y = 0,
     bool CanResize = false,
+    bool CanMaximize = false,
+    bool CanMinimize = false,
     DialogStartupLocation StartupLocation = DialogStartupLocation.CenterScreen,
     DialogSystemDecorations SystemDecorations = DialogSystemDecorations.Full,
     DialogSizeToContent SizeToContent = DialogSizeToContent.WidthAndHeight)
@@ -214,5 +220,7 @@ public interface IDialogService : IService
     /// The item selected by the user, or default(T) if the user canceled the selection.
     /// </returns>
     Task<T?> ShowSelectAsync<T>(string title, string message, IEnumerable<T> items, Func<T, string>? labelSelector = null, DialogStyle style = new(), string confirmButtonText = "OK", string cancelButtonText = "Cancel");
-    
+
+    Result<Ulid> ShowLoading(string title, string message, Progress<float>? progress = null, DialogStyle style = new());
+    Result HideLoading(Ulid id);
 }

@@ -19,16 +19,19 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.CodeDom.Compiler;
+using RPGCreator.SDK.Assets.Definitions.Blueprints;
+using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Graph.LOGIC;
 
 public abstract class BaseNodeLogic : INodeLogic
 {
-    protected static UrnSingleModule DefaultUrnModule = "bp_nodes".ToUrnSingleModule();
+    public static UrnSingleModule DefaultUrnModule = "bp_nodes".ToUrnSingleModule();
     
-    protected static PipedPath DefaultCategory = "Default".ToPipedPath();
-    protected static PipedPath HiddenCategory = "@Hidden".ToPipedPath();
+    public static PipedPath DefaultCategory = "Default".ToPipedPath();
+    public static PipedPath HiddenCategory = "@Hidden".ToPipedPath();
+    public static PipedPath SpecialCategory = "@Special".ToPipedPath();
 
     public abstract FlowType FlowType { get; }
     public Ulid RuntimeId { get; set; }
@@ -38,7 +41,13 @@ public abstract class BaseNodeLogic : INodeLogic
     public abstract PipedPath Category { get; }
     public abstract URN Urn { get; }
     public virtual URN HelpUrn => URN.Empty;
+    public CustomData CustomData { get; set; } = new CustomData();
     public abstract void GenerateCode(CodeContext context, IndentedTextWriter writer);
+
+    public virtual void PlacedInGraph(object? nodeEditorViewModel)
+    {
+        
+    }
     
     public INodeLogic Clone()
     {

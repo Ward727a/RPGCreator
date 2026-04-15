@@ -18,10 +18,18 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using RPGCreator.SDK.Types;
+
 namespace RPGCreator.SDK.Graph;
 
 public interface IBpCompilerService : IService
 {
-    public string Compile(string blueprintFilePath);
-    public string Compile(object blueprintData);
+    public Result<string> Build(string blueprintFilePath);
+    public Result<string> Build(object blueprintData);
+
+    public Task<Result<byte[]>> CompileAllBlueprints(string blueprintFolder = "",
+        IProgress<float>? progress = null);
+
+    public Result<(string sourceCode, List<string> referencedBlueprints)> BuildGlobalBlueprintCode(
+        string blueprintFolder = "");
 }

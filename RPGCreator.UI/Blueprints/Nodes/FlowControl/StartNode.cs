@@ -24,6 +24,7 @@ using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Graph.ConnectorLogics;
 using RPGCreator.SDK.Graph.LOGIC;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.UI.Blueprints.Nodes.FlowControl;
@@ -32,7 +33,11 @@ public class StartNode : BaseNodeLogic
 {
     public override FlowType FlowType => FlowType.Linear;
     public override IReadOnlyList<IConnectorLogic> Inputs { get; set; } = [];
-    public override IReadOnlyList<IConnectorLogic> Outputs { get; set; } = [new ExecConnectorLogic("Begin")];
+    public override IReadOnlyList<IConnectorLogic> Outputs { get; set; } = [new ExecConnectorLogic("Begin"), new ButtonConnectorLogic("Debug",
+        () =>
+        {
+            Logger.Debug("Debug button pressed!");
+        })];
     public override string Title => "Start";
     public override PipedPath Category => HiddenCategory.Extend("Flow Control");
     public override URN Urn => DefaultUrnModule.ToUrnModule("rpgc").ToUrn("start_node");

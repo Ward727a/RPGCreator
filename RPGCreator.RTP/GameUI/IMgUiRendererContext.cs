@@ -18,11 +18,14 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System;
 using System.Numerics;
 using FontStashSharp;
 using FontStashSharp.RichText;
 using Microsoft.Xna.Framework.Graphics;
+using RPGCreator.RTP.Services;
 using RPGCreator.SDK.GameUI.Interfaces;
+using RPGCreator.SDK.RuntimeService;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.RTP.GameUI.Interface;
@@ -47,7 +50,19 @@ public interface IMgUiRendererContext : IUiRendererContext
     /// <param name="position">The position where the text should be drawn, relative to the top-left corner of the screen.</param>
     /// <param name="color">An optional color tint to apply to the text. If not specified, the text will be drawn with its original colors.</param>
     void DrawText(RichTextLayout textLayout, Vector2 position, Color? color = null);
-    
+
+    void IUiRendererContext.DrawText(object textLayout, Vector2 position, Color? color)
+    {
+        if (textLayout is RichTextLayout layout)
+        {
+            DrawText(layout, position, color);
+        }
+        else
+        {
+            throw new ArgumentException("Invalid text layout type. Expected RichTextLayout.", nameof(textLayout));
+        }
+    }
+
     /// <summary>
     /// Draws text at the specified position with an optional color, font size, and font.<br/>
     /// If the color is not specified, it defaults to white (no tint).<br/>
@@ -59,6 +74,23 @@ public interface IMgUiRendererContext : IUiRendererContext
     /// <param name="fontSize"></param>
     /// <param name="font"></param>
     void DrawText(string text, Vector2 position, Color? color = null, int fontSize = 16, SpriteFontBase? font = null);
+
+    void IUiRendererContext.DrawText(string text, Vector2 position, Color? color, int fontSize, object? font)
+    {
+        if (font is RpgFont rpgFont)
+        {
+            font = rpgFont.GetSpriteFont();
+        }
+        
+        if (font != null && font is SpriteFontBase spriteFont)
+        {
+            DrawText(text, position, color, fontSize, spriteFont);
+        }
+        else
+        {
+            DrawText(text, position, color, fontSize, null);
+        }
+    }
 
     /// <summary>
     /// Draws a sprite from a texture atlas at the specified position and size, with an optional color tint.<br/>

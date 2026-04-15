@@ -33,6 +33,7 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using MonoGame.Extended.Collections;
 using RPGCreator.SDK.EditorUiService;
+using RPGCreator.SDK.Types;
 using RPGCreator.UI.Content.Editor;
 
 namespace RPGCreator.UI.Services;
@@ -40,6 +41,9 @@ namespace RPGCreator.UI.Services;
 
 public class DialogService : IDialogService
 {
+    
+    public Dictionary<Ulid, Window> LoadingWindows = new();
+    
     #region Helpers
     
     protected Window GetParent(Window? manualOwner = null) 
@@ -276,7 +280,72 @@ public class DialogService : IDialogService
         window.Content = new SelectWindow<T>(window, message, items, labelSelector, style, confirmButtonText, cancelButtonText);
         return window.ShowDialog<T?>(GetParent());
     }
-    
+
+    public Result<Ulid> ShowLoading(string title, string message = "Loading, please wait...", Progress<float>? progress = null, DialogStyle style = new DialogStyle())
+    {
+        var loadingWindow = new Window { Title = title };
+
+        if (style.IsDefault)
+        {
+            style.SizeToContent = DialogSizeToContent.WidthAndHeight;
+            style.Width = 300;
+            style.Height = 200;
+            style.CanResize = false;
+            style.StartupLocation = DialogStartupLocation.CenterOwner;
+            style.SystemDecorations = DialogSystemDecorations.None;
+            style.CanMaximize = false;
+            style.CanMinimize = false;
+        }
+        
+        ApplyStyle(loadingWindow, style);
+
+
+        var progressbar = new ProgressBar()
+        {
+            Value = 0,
+            IsIndeterminate = true
+        };
+        Grid.SetRow(progressbar, 1);
+
+        if (progress != null)
+        {
+            progressbar.IsIndeterminate = false;
+            progress.ProgressChanged += (_, value) => progressbar.Value = 100*value;
+        }
+        
+        
+        loadingWindow.Content = new Grid()
+        {
+            RowDefinitions = new RowDefinitions("*, Auto"),
+            Children = { new TextBlock()
+                {
+                    Text = message
+                },
+                progressbar
+            }
+        };
+
+        var id = Ulid.NewUlid();
+        
+        LoadingWindows.Add(id, loadingWindow);
+        loadingWindow.Closed += (_, _) => LoadingWindows.Remove(id);
+        loadingWindow.Show();
+        return id;
+    }
+
+    public Result HideLoading(Ulid id)
+    {
+        if (LoadingWindows.TryGetValue(id, out var window))
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                window.Close();
+            });
+            return Result.Ok();
+        }
+        return Result.Fail("Loading window not found");
+    }
+
     public class SelectWindow<T> : UserControl
     {
         private Grid _windowGrid;
@@ -466,6 +535,8 @@ public class DialogService : IDialogService
             window.Width = styleToApply.Width;
         
         window.CanResize = styleToApply.CanResize;
+        window.CanMaximize = styleToApply.CanMaximize;
+        window.CanMinimize = styleToApply.CanMinimize;
 
         window.SizeToContent = styleToApply.SizeToContent switch
         {

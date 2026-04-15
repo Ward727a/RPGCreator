@@ -37,8 +37,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Avalonia" Version="11.3.11" />
-      <PackageReference Include="Irihi.Ursa" Version="1.14.1" />
+      <PackageReference Include="Avalonia" Version="11.3.13" />
+      <PackageReference Include="Irihi.Ursa" Version="1.15.0" />
     </ItemGroup>
 
     <ItemGroup>

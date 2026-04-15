@@ -217,6 +217,30 @@ public static class RegistryServices
         set => RegisterService(value);
     }
     
+    public static IBlueprintRegistry Blueprint
+    {
+        get => GetService<IBlueprintRegistry>();
+        set => RegisterService(value);
+    }
+    
+    public static IGUIControlRegistry GuiControl
+    {
+        get => GetService<IGUIControlRegistry>();
+        set => RegisterService(value);
+    }
+    
+    public static IGuiActionRegistry GuiAction
+    {
+        get => GetService<IGuiActionRegistry>();
+        set => RegisterService(value);
+    }
+
+    public static IGuiPropertyEditorRegistry PropertyEditorRegistry
+    {
+        get => GetService<IGuiPropertyEditorRegistry>();
+        set => RegisterService(value);
+    }
+
     #region DefaultInstance
     // All instances here SHOULD NOT be used!
     // They are only here to avoid null reference exceptions in case a service is not registered.

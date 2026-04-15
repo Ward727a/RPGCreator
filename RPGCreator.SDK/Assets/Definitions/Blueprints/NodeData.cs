@@ -20,6 +20,8 @@
 
 using System.Numerics;
 using Newtonsoft.Json;
+using RPGCreator.SDK.Graph.LOGIC;
+using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Serializer.Converter;
 using RPGCreator.SDK.Types;
 
@@ -34,6 +36,25 @@ public class NodeData
     public URN NodeUrn { get; set; } = URN.Empty;
     public bool IsFolded { get; set; } = false;
     public Dictionary<int, object?> ConnectorData { get; private set; } = new Dictionary<int, object?>();
+    public CustomData StoredData { get; private set; } = new CustomData();
+
+    public static NodeData Create(INodeLogic logic, bool isFolded = false, Vector2 location = default)
+    {
+        var nodeData = NodeData.Create(logic.RuntimeId, logic.Urn, isFolded, location);
+        var nodeStoredData = logic.CustomData;
+        nodeData.StoredData = nodeStoredData;
+        return nodeData;
+    }
+
+    public bool ShouldSerializeStoredData()
+    {
+        return StoredData.Keys.Any();
+    }
+    
+    public bool ShouldSerializeConnectorData()
+    {
+        return ConnectorData.Count > 0;
+    }
     
     public static NodeData Create(Ulid nodeRuntimeId, URN nodeUrn, bool isFolded = false, Vector2 location = default)
     {

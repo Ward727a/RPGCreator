@@ -20,17 +20,29 @@
 
 
 using Newtonsoft.Json;
+using RPGCreator.SDK.Graph;
+using RPGCreator.SDK.Registry;
+using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Blueprints;
 
+
 [JsonObject]
-public class BlueprintData
+public class BlueprintData : IHasTag
 {
+    [JsonIgnore]
+    public bool IsDirty { get; private set; } = true;
+    
+    public StringName TagType = StringName.Empty;
     public Ulid Id { get; private set; } = Ulid.Empty;
     public string Name { get; set; } = string.Empty;
     public List<ConnectionData> Connections { get; private set; } = new List<ConnectionData>();
     public List<NodeData> Nodes { get; private set; } = new List<NodeData>();
+    public List<BlueprintParameters> Parameters { get; private set; } = new List<BlueprintParameters>();
 
+    public string FileCsName => $"{Id}.cs";
+    public string FileJsonName => $"{Name}_{Id}.json";
+    
     public static BlueprintData Create()
     {
         return new BlueprintData()
@@ -45,5 +57,50 @@ public class BlueprintData
         {
             Id = id,
         };
+    }
+
+    /// <summary>
+    /// Marks the blueprint as dirty.<br/>
+    /// This notifies the <see cref="IBlueprintRegistry"/> that the blueprint has been modified, and should be recompiled.
+    /// </summary>
+    public void MarkDirty()
+    {
+        IsDirty = true;
+    }
+    
+    /// <summary>
+    /// Marks the blueprint as clean.<br/>
+    /// <b>This should be used ONLY by the <see cref="IBlueprintRegistry"/> when compiling blueprints.</b><br/>
+    /// Use it ONLY if you know what you're doing.
+    /// </summary>
+    public void MarkClean()
+    {
+        IsDirty = false;
+    }
+
+    public HashSet<StringName> Tags { get; } = [];
+
+    public Result HasTag(StringName tag)
+    {
+        return Tags.Contains(tag) ? Result.Success() : Result.Failure($"The blueprint does not have the tag '{tag}'.");
+    }
+}
+
+public interface IHasTag
+{
+    HashSet<StringName> Tags { get; }
+    public Result HasTag(StringName tag)
+    {
+        return Tags.Contains(tag) ? Result.Success() : Result.Failure($"The object does not have the tag '{tag}'.");
+    }
+
+    public Result AddTag(StringName tag)
+    {
+        return Tags.Add(tag) ? Result.Success() : Result.Failure($"Failed to add tag '{tag}' to the object. Maybe it already exists?");
+    }
+
+    public Result RemoveTag(StringName tag)
+    {
+        return Tags.Remove(tag) ? Result.Success() : Result.Failure($"Failed to remove tag '{tag}' from the object. Maybe it doesn't exist?");
     }
 }

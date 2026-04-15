@@ -25,6 +25,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Avalonia;
 using CommunityToolkit.Mvvm.Input;
+using RPGCreator.SDK.Graph.ConnectorLogics;
 using RPGCreator.SDK.Graph.LOGIC;
 using RPGCreator.SDK.Types;
 
@@ -66,6 +67,16 @@ public class GenericNodeViewModel : BaseNodeViewModel
     }
     
     public RelayCommand ToggleFoldedCommand => new(() => IsFolded = !IsFolded);
+
+    public IRelayCommand<GenericConnectorViewModel> ButtonConnectorCommand =>
+        new RelayCommand<GenericConnectorViewModel>(connector =>
+            {
+                if (connector.ConnectorLogic is ButtonConnectorLogic buttonLogic)
+                {
+                    buttonLogic.Command.Execute(null);
+                }
+            }
+        );
 
     public string Title => NodeLogic?.Title ?? "Node";
 

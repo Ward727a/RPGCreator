@@ -18,23 +18,30 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using RPGCreator.RTP.GameUI;
+using RPGCreator.SDK.GameUI;
 using RPGCreator.SDK.GameUI.Controls;
 using RPGCreator.SDK.GameUI.Interfaces;
+using RPGCreator.SDK.Logging;
+using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.GameUiEditor.Components.Explorer;
 
 public class UiExplorerVm
 {
 
+    private UiEditorContext _context;
     public UiTreeExplorerVm TreeExplorerVm { get; }
 
-    public UiExplorerVm(IEnumerable<BaseControl> rootControls)
+    public UiExplorerVm(UiEditorContext context, IEnumerable<BaseControl> rootControls)
     {
-        TreeExplorerVm = new UiTreeExplorerVm(rootControls);
+        _context = context;
+        TreeExplorerVm = new UiTreeExplorerVm(context, rootControls);
     }
     
 }
@@ -50,7 +57,7 @@ public partial class UiExplorer : UserControl
         _context = context;
         _context.EditorReady += () =>
         {
-            Vm = new UiExplorerVm(context.RootControls);
+            Vm = new UiExplorerVm(context, context.RootControls);
             
             _context.RootControlAdded += (sender, args) =>
             {
@@ -89,5 +96,12 @@ public partial class UiExplorer : UserControl
         var o = e.AddedItems[0];
         if(o is not UiBaseControlVm vm) return;
         _context.RaiseControlSelected(this, vm.Model);
+        Vm.TreeExplorerVm.SelectControl(vm.Model);
+    }
+
+    private async void EditEventClicked(object? sender, RoutedEventArgs e)
+    {
+        if(sender is not Button button || button.DataContext is not ControlEventDescriptor eventDescriptor) return;
+        await new DialogEditEventControl(eventDescriptor).ShowDialog(TopLevel.GetTopLevel(this) as Window ?? throw new InvalidOperationException());
     }
 }

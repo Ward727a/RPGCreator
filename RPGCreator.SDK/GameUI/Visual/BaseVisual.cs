@@ -20,6 +20,7 @@
 
 using System.Numerics;
 using RPGCreator.RTP.GameUI.Enums;
+using RPGCreator.SDK.GameUI.Controls;
 using RPGCreator.SDK.GameUI.Interfaces;
 using RPGCreator.SDK.Types;
 
@@ -29,6 +30,8 @@ public abstract class BaseVisual
 {
     public event Action? DirtyChanged;
     public event Action? VisualUpdated;
+
+    public BaseControl Control { get; set; }
 
     #region Dirty flag
 
@@ -679,7 +682,7 @@ public abstract class BaseVisual
         // However, it would require reworking (again) the render context, and I want to
         // advance and not be locked on one thing for too long.
         // So for now, it's working like that, but for the next update should fix that.
-        Vector2 drawPos = hasComplexTransform ? Vector2.Zero : LocalBounds.Position;
+        Vector2 drawPos = hasComplexTransform ? Vector2.Zero : GlobalBounds.Position;
         
         DrawVisualAt(context, drawPos, LocalBounds.Size, out bool handledChildren);
 

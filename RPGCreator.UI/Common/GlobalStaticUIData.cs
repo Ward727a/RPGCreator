@@ -31,7 +31,7 @@ namespace RPGCreator.UI.Common
 {
     public static class GlobalStaticUiData
     {
-        public static IPopupHostProvider? CurrentContext;
+        public static object? CurrentContext;
 
         public static void OpenContext(Control? hostControl)
         {

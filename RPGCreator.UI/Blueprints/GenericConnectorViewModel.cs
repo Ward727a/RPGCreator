@@ -70,6 +70,7 @@ public class GenericConnectorViewModel : INotifyPropertyChanged
     public bool HasParent => ConnectorLogic.RuntimeHasParent;
     
     public int AllowedConnections => ConnectorLogic.AllowedConnections;
+    public bool HasAnyAllowedConnections => AllowedConnections > 0;
     
     public int Type { get; init; }
 

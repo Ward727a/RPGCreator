@@ -25,12 +25,19 @@ using RPGCreator.SDK.Logging;
 
 namespace RPGCreator.SDK.Graph;
 
+
 public class CodeContext
 {
     public List<Ulid> GeneratedNodes { get; } = new();
     public Dictionary<Ulid, INodeLogic> Nodes { get; } = new();
     public Dictionary<Ulid, IConnectorLogic> Connectors { get; } = new();
     public Dictionary<Ulid, string> VariablesName { get; } = new();
+    
+    /// <summary>
+    /// Global parameters of the blueprint.<br/>
+    /// This can be used to pass data to the blueprint and then be used by the whole blueprint.
+    /// </summary>
+    public List<BlueprintParameters> Parameters { get; } = new();
     
     public bool InPureMode { get; private set; } = true;
     public bool InDebugMode { get; internal set; } = false;

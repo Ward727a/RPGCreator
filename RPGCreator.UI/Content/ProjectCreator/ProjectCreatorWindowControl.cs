@@ -50,7 +50,7 @@ namespace RPGCreator.UI.Content.ProjectCreator
             !string.IsNullOrEmpty(_ProjectName) &&
             !string.IsNullOrEmpty(_ProjectPath);
 
-        private Window _Host => (Window)this.GetVisualRoot()!;
+        private Window _Host => (Window)TopLevel.GetTopLevel(this)!;
         public ProjectCreatorWindowControl()
         {
             // Initialize the control, this could include setting up UI elements, event handlers, etc.

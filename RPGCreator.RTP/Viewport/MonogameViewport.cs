@@ -104,6 +104,7 @@ public class MonogameViewport : BaseMonogameViewport
         RuntimeServices.CameraService = new CameraService();
         RuntimeServices.RenderService = new RenderService(graphicsDevice, _spriteBatch);
         RuntimeServices.PlayerController = new BasePlayerController();
+        RuntimeServices.FontService = new FontService();
         RuntimeServices.CameraService.SetCameraEntity(_ecsWorld.EntityManager.CreateCameraEntity().Id);
         
         GlobalStates.GameSession = new DefaultGameSession();

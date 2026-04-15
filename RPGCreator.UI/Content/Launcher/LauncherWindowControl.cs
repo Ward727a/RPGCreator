@@ -39,7 +39,7 @@ namespace RPGCreator.UI.Content.Launcher
     public class LauncherWindowControl : UserControl
     {
         
-        private Window _Host => (Window)this.GetVisualRoot()!;
+        private Window _Host => (Window)TopLevel.GetTopLevel(this)!;
 
         private IBaseProject? _selectedProject;
         private bool _IsProjectSelected => _selectedProject != null;

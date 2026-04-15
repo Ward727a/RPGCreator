@@ -36,11 +36,28 @@ public class TestControl : BaseControl
     private Color _defaultColor = Color.Red;
     private Color _hoverColor = Color.Blue;
 
-    private Vector2 _grabOffset;
+    private bool _filled = true;
 
+    private Vector2 _grabOffset;
+    
+    public override URN Urn => _urnModule.ToUrnModule("rpgc").ToUrn("test_control");
+
+    #region ExposedProperties
+    
+    public EditableControlPropertyDescriptor<bool> FilledProperty { get; protected set; }
+    public EditableControlPropertyDescriptor<Color> DefaultColorProperty { get; protected set; }
+    public EditableControlPropertyDescriptor<Color> HoverColorProperty { get; protected set; }
+    public ReadOnlyControlPropertyDescriptor<string> TestProperty { get; protected set; }
+    
+    #endregion
+    
     public TestControl(Color? color = null, Color? hoverColor = null)
     {
-        Visual = new TestVisual();
+        Visual = new TestVisual()
+        {
+            Control = this
+        };
+        
         if (color != null)
         {
             _Visual.RectColor = color.Value;
@@ -53,16 +70,19 @@ public class TestControl : BaseControl
         ClipHitTestToBounds = false;
     }
 
-    public override URN Urn => _urnModule.ToUrnModule("rpgc").ToUrn("test_control");
-
     protected override void MakeExposedProperties()
     {
         base.MakeExposedProperties();
 
-        RegisterPropertyDescriptor(new ControlPropertyDescriptor<Color>("Background color", () => _defaultColor,
+        FilledProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<bool>("Filled", () => _filled,
+            "Appearance".ToPipedPath().Extend("Background"), "Define whether the control is filled with color.", (value) => _filled = value));
+        DefaultColorProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<Color>("Background color", () => _defaultColor,
             "Appearance".ToPipedPath().Extend("Background"), "Define the color of the background.", (value) => _defaultColor = value));
-        RegisterPropertyDescriptor(new ControlPropertyDescriptor<Color>("Hover color", () => _hoverColor,
+        HoverColorProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<Color>("Hover color", () => _hoverColor,
             "Appearance".ToPipedPath().Extend("Background"), "Define the color of the background when hovered by the mouse.", (value) => _hoverColor = value));
+        
+        TestProperty = RegisterPropertyDescriptor(new ReadOnlyControlPropertyDescriptor<string>("Test Property", () => "Test Value",
+            "Test".ToPipedPath(), "This is a test property that cannot be edited."));
     }
 
     public override void OnUpdate()

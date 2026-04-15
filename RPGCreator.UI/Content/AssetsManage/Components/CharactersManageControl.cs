@@ -428,7 +428,7 @@ public class CharactersManageControl : UserControl
     
     private void OnAddCharacter(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        var host_ = ((AssetsManageWindow)this.GetVisualRoot()!);
+        var host_ = ((AssetsManageWindow)TopLevel.GetTopLevel(this)!);
         var data = new CharacterData("");
         var characterEditor = new CharacterEditorWindowControl(data);
         host_.OpenCustom(characterEditor);
@@ -446,7 +446,7 @@ public class CharactersManageControl : UserControl
 
     private void EditCharacter(CharacterData data)
     {
-        var host_ = ((AssetsManageWindow)this.GetVisualRoot()!);
+        var host_ = ((AssetsManageWindow)TopLevel.GetTopLevel(this)!);
         var characterEditor = new CharacterEditorWindowControl(data);
         host_.OpenCustom(characterEditor);
     }

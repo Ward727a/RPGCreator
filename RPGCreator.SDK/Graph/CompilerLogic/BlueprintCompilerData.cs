@@ -24,7 +24,10 @@ namespace RPGCreator.SDK.Graph.CompilerLogic;
 
 public readonly record struct BlueprintCompilerData()
 {
+    public Ulid Id { get; init; }
     public INodeLogic StartNode { get; init; }
     public List<INodeLogic> Nodes { get; init; } = new();
     public List<ConnectionLogic> Connections { get; init; } = new();
+    public List<BlueprintParameters> Parameters { get; init; } = new();
+    public List<BlueprintParameters> Arguments { get; init; } = new();
 }

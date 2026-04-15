@@ -51,7 +51,7 @@ namespace RPGCreator.UI.Content.Editor
 {
     public class EditorWindowControl : UserControl
     {
-        private Window _Host => (Window)this.GetVisualRoot()!;
+        private Window _Host => (Window)TopLevel.GetTopLevel(this)!;
 
         // private EditorGame? game = (EditorGame)RuntimeServices.GameRunner;
         private MonoGameControl MonoGameScreen;

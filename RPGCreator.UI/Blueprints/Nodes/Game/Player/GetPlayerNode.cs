@@ -26,6 +26,7 @@ using RPGCreator.SDK.Graph.ConnectorLogics;
 using RPGCreator.SDK.Graph.LOGIC;
 using RPGCreator.SDK.Types;
 using RPGCreator.UI.Blueprints.Connectors;
+using RPGCreator.UI.Content.Blueprint;
 
 namespace RPGCreator.UI.Blueprints.Nodes.Game.Player;
 
@@ -36,7 +37,7 @@ public class GetPlayerNode : BaseNodeLogic
     public override PipedPath Category { get; } = "Game".ToPipedPath().Extend("Player");
     public override URN Urn => DefaultUrnModule.ToUrnModule("rpgc").ToUrn("get_player_node");
     public override IReadOnlyList<IConnectorLogic> Outputs { get; set; } = [
-    new PlayerConnectorLogic("Player")];
+    new PlayerConnectorLogic()];
 
     public override void GenerateCode(CodeContext context, IndentedTextWriter writer)
     {

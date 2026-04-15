@@ -22,12 +22,18 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using AvaloniaEdit.Utils;
+using CommunityToolkit.Mvvm.Input;
+using FontStashSharp;
+using Microsoft.Xna.Framework.Graphics;
+using RPGCreator.SDK;
 using RPGCreator.SDK.GameUI;
 using RPGCreator.SDK.GameUI.Controls;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.RuntimeService;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.UI.Content.GameUiEditor.Components.Explorer;
@@ -116,12 +122,23 @@ public class PropertyGroupViewModel
     public IEnumerable<PropertyGroupViewModel> IterableGroups => SubGroups.Values;
 }
 
+public class EventGroupViewModel
+{
+    public string GroupName { get; set; }
+    public List<ControlEventDescriptor> Events { get; set; } = new();
+    public Dictionary<string, EventGroupViewModel> SubGroups { get; set; } = new();
+
+    public IEnumerable<EventGroupViewModel> IterableGroups => SubGroups.Values;
+}
+
 public class UiTreeExplorerVm : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public event Action<BaseControl>? OnControlSelected;
     public event Action<BaseControl>? OnControlUnselected;
+
+    public RelayCommand AddControlCommand { get; }
 
     public BaseControl? SelectedControl
     {
@@ -136,6 +153,7 @@ public class UiTreeExplorerVm : INotifyPropertyChanged
     }
     
     public ObservableCollection<PropertyGroupViewModel> ControlProperties { get; set; } = new ObservableCollection<PropertyGroupViewModel>();
+    public ObservableCollection<EventGroupViewModel> ControlEvents { get; set; } = new ObservableCollection<EventGroupViewModel>();
 
     public ObservableCollection<UiBaseControlVm> RootsControls { get; set; } =
         new ObservableCollection<UiBaseControlVm>();
@@ -143,10 +161,37 @@ public class UiTreeExplorerVm : INotifyPropertyChanged
     public Dictionary<BaseControl, Ulid> ControlsIdMapping { get; set; } = new Dictionary<BaseControl, Ulid>();
     public Dictionary<Ulid, UiBaseControlVm> ControlVms { get; set; } = new Dictionary<Ulid, UiBaseControlVm>();
 
-    public UiTreeExplorerVm(IEnumerable<BaseControl> rootControls)
+    private UiEditorContext _context;
+    private readonly IRpgFont _font18;
+    
+    public UiTreeExplorerVm(UiEditorContext context, IEnumerable<BaseControl> rootControls)
     {
+        _context = context;
+        AddControlCommand = new RelayCommand(AddControl);
         foreach (var control in rootControls)
             RootsControls.Add(new UiBaseControlVm(control, this));
+
+        var fontService = RuntimeServices.FontService;
+        fontService.LoadFont(@"C:/Windows/Fonts/arial.ttf", "Arial");
+        _font18 = fontService.GetFont("Arial", 18);
+    }
+
+    public void AddControl()
+    {
+        var newControl = new TextControl("test")
+        {
+            Font = _font18
+        };
+        
+        if (SelectedControl != null)
+        {
+            _context.RaiseControlAdded(this, newControl);
+            SelectedControl.AddChild(newControl);
+        }
+        else
+        {
+            _context.RaiseRootControlAdded(this, newControl);
+        }
     }
 
     public bool HasControl(BaseControl control) => ControlsIdMapping.ContainsKey(control);
@@ -174,14 +219,16 @@ public class UiTreeExplorerVm : INotifyPropertyChanged
         SelectedControlVm = ControlVms[ControlsIdMapping[control]];
         SelectedControlVm.IsSelected = true;
         ControlProperties.Clear();
+        ControlEvents.Clear();
         ExplodePropertiesIntoGroups();
+        ExplodeEventsIntoGroups();
 
         OnControlSelected?.Invoke(control);
     }
 
     public void ExplodePropertiesIntoGroups()
     {
-        var properties = SelectedControl.GetExposedProperties();
+        var properties = SelectedControl?.GetExposedProperties();
         var mapping = new Dictionary<string, PropertyGroupViewModel>();
 
         foreach (var property in properties)
@@ -212,6 +259,41 @@ public class UiTreeExplorerVm : INotifyPropertyChanged
         }
         
         ControlProperties.AddRange(mapping.Values);
+    }
+    
+    public void ExplodeEventsIntoGroups()
+    {
+        var properties = SelectedControl?.GetExposedEvents();
+        var mapping = new Dictionary<string, EventGroupViewModel>();
+
+        foreach (var property in properties)
+        {
+            EventGroupViewModel? group = null;
+            foreach (var segment in property.Category.Segments)
+            {
+                if (group == null)
+                {
+                    if (!mapping.TryGetValue(segment, out var existingGroup))
+                    {
+                        existingGroup = new EventGroupViewModel {GroupName = segment};
+                        mapping.Add(segment, existingGroup);
+                    }
+                    group = existingGroup;
+                }
+                else
+                {
+                    if (!group.SubGroups.TryGetValue(segment, out var existingSubGroup))
+                    {
+                        existingSubGroup = new EventGroupViewModel {GroupName = segment};
+                        group.SubGroups.Add(segment, existingSubGroup);
+                    }
+                    group = existingSubGroup;
+                }
+            }
+            group.Events.Add(property);
+        }
+        
+        ControlEvents.AddRange(mapping.Values);
     }
 
     public void UnselectControl()

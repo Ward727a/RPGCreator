@@ -46,7 +46,7 @@ public class AvaloniaMouseBridge
     private void Update(Control control, PointerEventArgs e)
     {
         var localPoint = e.GetPosition(control);
-        var topLevel = control.GetVisualRoot() as Window;
+        var topLevel = TopLevel.GetTopLevel(control) as Window;
         var windowPoint = e.GetPosition(topLevel);
         var p = e.GetCurrentPoint(control).Properties;
 

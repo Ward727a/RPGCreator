@@ -3,23 +3,33 @@
         xmlns:nodify="https://miroiu.github.io/nodify"
         xmlns:vm="clr-namespace:RPGCreator.UI.Content.Blueprint"
         xmlns:bp="clr-namespace:RPGCreator.UI.Blueprints"
-        xmlns:bpLogic="clr-namespace:RPGCreator.SDK.Graph.LOGIC;assembly=RPGCreator.SDK"
+        xmlns:bpLogic="clr-namespace:RPGCreator.SDK.Graph;assembly=RPGCreator.SDK"
+        xmlns:connectorLogic="clr-namespace:RPGCreator.SDK.Graph.ConnectorLogics;assembly=RPGCreator.SDK"
         xmlns:common="clr-namespace:RPGCreator.UI.Common"
         xmlns:ursa="https://irihi.tech/ursa"
         xmlns:ursaTheme="https://irihi.tech/ursa/themes/semi"
         xmlns:icon="https://github.com/projektanker/icons.avalonia"
+        xmlns:converters="clr-namespace:RPGCreator.UI.Common.Converters"
+        xmlns:explorer="clr-namespace:RPGCreator.UI.Content.GameUiEditor.Components.Explorer"
         x:Class="RPGCreator.UI.Content.Blueprint.EditorWindow"
         Title="RPG Creator - Blueprint Editor"
         Width="1200" Height="800"
         x:DataType="vm:NodeEditorViewModel">
 
     <Window.Resources>
-        <SolidColorBrush x:Key="ExecTypeBrushColor" Color="Cornsilk"/>
-        <SolidColorBrush x:Key="ExecTypeBackColor" Color="#C37E7A69"/>
-        <SolidColorBrush x:Key="ExecTypeNodeColor" Color="#7BDCD6C0"/>
+        
+        <!-- CONVERTERS -->
+        
+        <converters:BlueprintParametersToPropertyDescriptor x:Key="BpToDescriptorConverter"/>
+        
+        <!-- COLORS -->
+        
+        <SolidColorBrush x:Key="ExecTypeBrushColor" Color="Cornsilk" />
+        <SolidColorBrush x:Key="ExecTypeBackColor" Color="#C37E7A69" />
+        <SolidColorBrush x:Key="ExecTypeNodeColor" Color="#7BDCD6C0" />
         <SolidColorBrush x:Key="BoolTypeBrushColor" Color="Crimson" />
         <SolidColorBrush x:Key="BoolTypeBackColor" Color="#CF570F1D" />
-        <SolidColorBrush x:Key="BoolTypeNodeColor" Color="#7BDC143C"/>
+        <SolidColorBrush x:Key="BoolTypeNodeColor" Color="#7BDC143C" />
         <SolidColorBrush x:Key="IntTypeBrushColor" Color="#34E1FF" />
         <SolidColorBrush x:Key="IntTypeBackColor" Color="#D11C7080" />
         <SolidColorBrush x:Key="IntTypeNodeColor" Color="#7B30C0DC" />
@@ -32,14 +42,13 @@
         <SolidColorBrush x:Key="Vector2TypeBrushColor" Color="Goldenrod" />
         <SolidColorBrush x:Key="Vector2TypeBackColor" Color="#D06E401E" />
         <SolidColorBrush x:Key="Vector2TypeNodeColor" Color="#7BDCA620" />
-        <SolidColorBrush x:Key="ObjectTypeBrushColor" Color="#00C000"/>
-        <SolidColorBrush x:Key="ObjectTypeBackColor" Color="#D0006E00"/>
-        <SolidColorBrush x:Key="ObjectTypeNodeColor" Color="#7B00DC00"/>
+        <SolidColorBrush x:Key="ObjectTypeBrushColor" Color="#00C000" />
+        <SolidColorBrush x:Key="ObjectTypeBackColor" Color="#D0006E00" />
+        <SolidColorBrush x:Key="ObjectTypeNodeColor" Color="#7B00DC00" />
 
         <GeometryDrawing x:Key="SmallGridGeometry"
                          Geometry="M0,0 L0,1 0.03,1 0.03,0.03 1,0.03 1,0 Z"
                          Brush="{StaticResource NodifyEditor.SelectionRectangleBackgroundBrush}" />
-
         <GeometryDrawing x:Key="LargeGridGeometry"
                          Geometry="M0,0 L0,1 0.015,1 0.015,0.015 1,0.015 1,0 Z"
                          Brush="{StaticResource NodifyEditor.SelectionRectangleBackgroundBrush}" />
@@ -48,25 +57,23 @@
                       TileMode="Tile"
                       DestinationRect="0 0 20 20"
                       Drawing="{StaticResource SmallGridGeometry}" />
-
         <DrawingBrush x:Key="LargeGridLinesDrawingBrush"
                       TileMode="Tile"
                       Opacity="0.5"
                       DestinationRect="0 0 100 100"
                       Drawing="{StaticResource LargeGridGeometry}" />
-        
-        
+
         <DataTemplate x:Key="NodeHeaderTemplate" DataType="bp:GenericNodeViewModel">
             <Grid ColumnDefinitions="*, Auto" ColumnSpacing="12">
-                <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
                     <Button Command="{Binding ToggleFoldedCommand}" Classes="Small">
                         <Panel>
-                            <icon:Icon Value="mdi-eye" IsVisible="{Binding !IsFolded}"/>
-                            <icon:Icon Value="mdi-eye-closed" IsVisible="{Binding IsFolded}"/>
+                            <icon:Icon Value="mdi-eye" IsVisible="{Binding !IsFolded}" />
+                            <icon:Icon Value="mdi-eye-closed" IsVisible="{Binding IsFolded}" />
                         </Panel>
                     </Button>
-                    <common:HelpButton 
+                    <common:HelpButton
                         HelpDocsKey="{Binding HelpUrn}"
                         IsVisible="{Binding HasHelpPage}"
                         Cursor="Help"
@@ -80,35 +87,32 @@
                 </StackPanel>
             </Grid>
         </DataTemplate>
-        
+
         <ControlTemplate x:Key="ExecBadgeTemplate">
             <Border
                 Background="{StaticResource ExecTypeBackColor}"
                 CornerRadius="4"
                 Padding="4, 2"
                 ToolTip.Tip="An execution connector define what is the next node called.">
-                <TextBlock Text="Exec" FontSize="10" VerticalAlignment="Center"/>
+                <TextBlock Text="Exec" FontSize="10" VerticalAlignment="Center" />
             </Border>
         </ControlTemplate>
-        
         <ControlTemplate x:Key="BoolBadgeTemplate">
-            <Border 
-                Background="{StaticResource BoolTypeBackColor}" 
-                CornerRadius="4" 
-                Padding="4,2" 
-                ToolTip.Tip="A boolean value define a value that can only be either TRUE or FALSE."
-            >
-                <TextBlock Text="Bool" FontSize="10" VerticalAlignment="Center"/>
+            <Border
+                Background="{StaticResource BoolTypeBackColor}"
+                CornerRadius="4"
+                Padding="4,2"
+                ToolTip.Tip="A boolean value define a value that can only be either TRUE or FALSE.">
+                <TextBlock Text="Bool" FontSize="10" VerticalAlignment="Center" />
             </Border>
         </ControlTemplate>
         <ControlTemplate x:Key="StringBadgeTemplate">
-            <Border 
-                Background="{StaticResource StringTypeBackColor}" 
-                CornerRadius="4" 
-                Padding="4,2" 
-                ToolTip.Tip="A string value define a value that can be a word, like: 'Hello World!' or character like: 'a'."
-            >
-                <TextBlock Text="Str" FontSize="10" VerticalAlignment="Center"/>
+            <Border
+                Background="{StaticResource StringTypeBackColor}"
+                CornerRadius="4"
+                Padding="4,2"
+                ToolTip.Tip="A string value define a value that can be a word, like: 'Hello World!' or character like: 'a'.">
+                <TextBlock Text="Str" FontSize="10" VerticalAlignment="Center" />
             </Border>
         </ControlTemplate>
         <ControlTemplate x:Key="IntBadgeTemplate">
@@ -117,7 +121,7 @@
                 CornerRadius="4"
                 Padding="4, 2"
                 ToolTip.Tip="A int value define a numeric value that doesn't have any decimal, like: 1 or 2, but not: 1.2 nor 2.1.">
-                <TextBlock Text="Int" FontSize="10" VerticalAlignment="Center"/>
+                <TextBlock Text="Int" FontSize="10" VerticalAlignment="Center" />
             </Border>
         </ControlTemplate>
         <ControlTemplate x:Key="FloatBadgeTemplate">
@@ -126,63 +130,83 @@
                 CornerRadius="4"
                 Padding="4, 2"
                 ToolTip.Tip="A float value define a decimal value that CAN have a decimal, like: 1, 2.1, or 2.1231.">
-                <TextBlock Text="Float" VerticalAlignment="Center" FontSize="10"/>
+                <TextBlock Text="Float" VerticalAlignment="Center" FontSize="10" />
             </Border>
         </ControlTemplate>
         <ControlTemplate x:Key="Vector2BadgeTemplate">
-            <Border 
-                Background="{StaticResource Vector2TypeBackColor}" 
-                CornerRadius="4" 
-                Padding="4,2" 
-                ToolTip.Tip="A position value define 2 decimal value, one for 'X' (left = negative value, right = positive value), one for 'Y' (bottom = negative value, top = positive value)."
-            >
-                <TextBlock Text="Pos" FontSize="10" VerticalAlignment="Center"/>
+            <Border
+                Background="{StaticResource Vector2TypeBackColor}"
+                CornerRadius="4"
+                Padding="4,2"
+                ToolTip.Tip="A position value define 2 decimal value, one for 'X' (left = negative value, right = positive value), one for 'Y' (bottom = negative value, top = positive value).">
+                <TextBlock Text="Pos" FontSize="10" VerticalAlignment="Center" />
             </Border>
         </ControlTemplate>
 
         <vm:BlueprintPinTemplateSelector x:Key="InPinTemplateSelector">
             <vm:BlueprintPinTemplateSelector.InAvailableTemplates>
+                <DataTemplate x:Key="-3" DataType="bp:GenericConnectorViewModel">
+                    <StackPanel Orientation="Horizontal" Spacing="8"
+                                IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
+                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
+                        <ComboBox ItemsSource="{ Binding ((connectorLogic:ComboBoxConnectorLogic)ConnectorLogic).Items}"
+                                  SelectedIndex="{ Binding ((connectorLogic:ComboBoxConnectorLogic)ConnectorLogic).SelectedIndex, Mode=TwoWay}"></ComboBox>
+                    </StackPanel>
+                </DataTemplate>
+                <DataTemplate x:Key="-2" DataType="bp:GenericConnectorViewModel">
+                    <StackPanel Orientation="Horizontal" Spacing="8"
+                                IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
+                        <Button Content="{Binding Title}" VerticalAlignment="Center"
+                                Command="{Binding $parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).ButtonConnectorCommand}"
+                                CommandParameter="{Binding}" />
+                    </StackPanel>
+                </DataTemplate>
                 <DataTemplate x:Key="0" DataType="bp:GenericConnectorViewModel">
-                    <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
-                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
-                        <TemplatedControl Template="{StaticResource ExecBadgeTemplate}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8"
+                                IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
+                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
+                        <TemplatedControl Template="{StaticResource ExecBadgeTemplate}" />
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate x:Key="1" DataType="bp:GenericConnectorViewModel">
-                    <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
-                        <CheckBox IsVisible="{Binding CanHaveManualInput}" IsChecked="{Binding Value, Mode=TwoWay}"/>
-                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
-                        <TemplatedControl Template="{StaticResource BoolBadgeTemplate}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8"
+                                IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
+                        <CheckBox IsVisible="{Binding CanHaveManualInput}" IsChecked="{Binding Value, Mode=TwoWay}" />
+                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
+                        <TemplatedControl Template="{StaticResource BoolBadgeTemplate}" />
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate x:Key="2" DataType="bp:GenericConnectorViewModel">
-                    <StackPanel Orientation="Vertical" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
+                    <StackPanel Orientation="Vertical" Spacing="8"
+                                IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
-                            <TemplatedControl Template="{StaticResource IntBadgeTemplate}"/>
+                            <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
+                            <TemplatedControl Template="{StaticResource IntBadgeTemplate}" />
                         </StackPanel>
-                        <ursa:NumericIntUpDown IsVisible="{Binding CanHaveManualInput}" Value="{Binding Value}"/>
+                        <ursa:NumericIntUpDown IsVisible="{Binding CanHaveManualInput}" Value="{Binding Value}" />
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate x:Key="3" DataType="bp:GenericConnectorViewModel">
-                    <StackPanel Orientation="Vertical" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
+                    <StackPanel Orientation="Vertical" Spacing="8"
+                                IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
-                            <TemplatedControl Template="{StaticResource FloatBadgeTemplate}"/>
+                            <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
+                            <TemplatedControl Template="{StaticResource FloatBadgeTemplate}" />
                         </StackPanel>
-                        <ursa:NumericFloatUpDown IsVisible="{Binding CanHaveManualInput}" Value="{Binding Value}"/>
+                        <ursa:NumericFloatUpDown IsVisible="{Binding CanHaveManualInput}" Value="{Binding Value}" />
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate x:Key="4" DataType="bp:GenericConnectorViewModel">
-                    <StackPanel Orientation="Vertical" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
+                    <StackPanel Orientation="Vertical" Spacing="8"
+                                IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
-                            <TemplatedControl Template="{StaticResource StringBadgeTemplate}"/>
+                            <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
+                            <TemplatedControl Template="{StaticResource StringBadgeTemplate}" />
                         </StackPanel>
                         <TextBox IsVisible="{Binding CanHaveManualInput}"
-                                 Text="{Binding Value}" 
+                                 Text="{Binding Value}"
                                  Watermark="Type here..."
-                                 AcceptsReturn="False"/>
+                                 AcceptsReturn="False" />
                     </StackPanel>
                 </DataTemplate>
                 <!-- <DataTemplate x:Key="5" DataType="bp:GenericConnectorViewModel"> -->
@@ -199,37 +223,49 @@
                 <!-- </DataTemplate> -->
             </vm:BlueprintPinTemplateSelector.InAvailableTemplates>
         </vm:BlueprintPinTemplateSelector>
-        
         <vm:BlueprintPinTemplateSelector x:Key="OutPinTemplateSelector">
             <vm:BlueprintPinTemplateSelector.OutAvailableTemplates>
+                <DataTemplate x:Key="-2" DataType="bp:GenericConnectorViewModel">
+                    <StackPanel Orientation="Horizontal" Spacing="8"
+                                IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
+                        <Button Content="{Binding Title}" VerticalAlignment="Center"
+                                Command="{Binding $parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).ButtonConnectorCommand}"
+                                CommandParameter="{Binding}" />
+                    </StackPanel>
+                </DataTemplate>
                 <DataTemplate x:Key="0" DataType="bp:GenericConnectorViewModel">
-                    <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
-                        <TemplatedControl Template="{StaticResource ExecBadgeTemplate}"/>
-                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8"
+                                IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
+                        <TemplatedControl Template="{StaticResource ExecBadgeTemplate}" />
+                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate x:Key="1" DataType="bp:GenericConnectorViewModel">
-                    <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
-                        <TemplatedControl Template="{StaticResource BoolBadgeTemplate}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8"
+                                IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
+                        <TemplatedControl Template="{StaticResource BoolBadgeTemplate}" />
                         <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate x:Key="2" DataType="bp:GenericConnectorViewModel">
-                    <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
-                        <TemplatedControl Template="{StaticResource IntBadgeTemplate}"/>
-                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8"
+                                IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
+                        <TemplatedControl Template="{StaticResource IntBadgeTemplate}" />
+                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate x:Key="3" DataType="bp:GenericConnectorViewModel">
-                    <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
-                        <TemplatedControl Template="{StaticResource FloatBadgeTemplate}"/>
-                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8"
+                                IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
+                        <TemplatedControl Template="{StaticResource FloatBadgeTemplate}" />
+                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
                     </StackPanel>
                 </DataTemplate>
                 <DataTemplate x:Key="4" DataType="bp:GenericConnectorViewModel">
-                    <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
-                        <TemplatedControl Template="{StaticResource StringBadgeTemplate}"/>
-                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8"
+                                IsVisible="{Binding !$parent[nodify:Node].((bp:GenericNodeViewModel)DataContext).IsFolded}">
+                        <TemplatedControl Template="{StaticResource StringBadgeTemplate}" />
+                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
                     </StackPanel>
                 </DataTemplate>
                 <!-- <DataTemplate x:Key="5" DataType="bp:GenericConnectorViewModel"> -->
@@ -258,7 +294,8 @@
                                              HorizontalAlignment="Stretch"
                                              VerticalAlignment="Stretch"
                                              StrokeThickness="2"
-                                             Fill="Transparent" />
+                                             Fill="Transparent"
+                                             IsVisible="{Binding HasAnyAllowedConnections}" />
                                 </ControlTemplate>
                             </nodify:NodeInput.ConnectorTemplate>
                         </nodify:NodeInput>
@@ -278,7 +315,8 @@
                                              HorizontalAlignment="Stretch"
                                              VerticalAlignment="Stretch"
                                              StrokeThickness="2"
-                                             Fill="Transparent" />
+                                             Fill="Transparent"
+                                             IsVisible="{Binding HasAnyAllowedConnections}" />
                                 </ControlTemplate>
                             </nodify:NodeOutput.ConnectorTemplate>
                         </nodify:NodeOutput>
@@ -290,22 +328,21 @@
     </Window.Resources>
 
     <Window.Styles>
-        
+
         <Style Selector="nodify|NodeOutput, nodify|NodeInput">
             <Style Selector="^ Ellipse#PART_ConnectorShape">
                 <Setter Property="Stroke" Value="{StaticResource ObjectTypeBrushColor}" />
                 <Setter Property="Fill" Value="{StaticResource ObjectTypeBackColor}" />
             </Style>
-            
+
             <Style Selector="^[IsConnected=True] Ellipse#PART_ConnectorShape">
                 <Setter Property="Fill" Value="{StaticResource ObjectTypeBrushColor}" />
             </Style>
-            
+
             <Style Selector="^ Border#Highlight">
-                <Setter Property="Background" Value="{StaticResource ObjectTypeNodeColor}"/>
+                <Setter Property="Background" Value="{StaticResource ObjectTypeNodeColor}" />
             </Style>
         </Style>
-        
         <Style Selector="nodify|NodeOutput" x:DataType="bp:GenericConnectorViewModel">
             <Setter Property="Header" Value="{Binding}" />
             <Setter Property="HeaderTemplate" Value="{StaticResource OutPinTemplateSelector}" />
@@ -314,107 +351,126 @@
             <Setter Property="Header" Value="{Binding}" />
             <Setter Property="HeaderTemplate" Value="{StaticResource InPinTemplateSelector}" />
         </Style>
-        
-        <Style Selector="nodify|NodeOutput[Tag=0], nodify|NodeInput[Tag=0]" x:DataType="bp:GenericConnectorViewModel">
+
+        <Style Selector="nodify|NodeOutput[Tag=-2], nodify|NodeInput[Tag=-2]" x:DataType="bp:GenericConnectorViewModel">
             <Style Selector="^ Ellipse#PART_ConnectorShape">
-                <Setter Property="Stroke" Value="{StaticResource ExecTypeBrushColor}"/>
-                <Setter Property="Fill" Value="{StaticResource ExecTypeBackColor}"/>
+                <Setter Property="Stroke" Value="Transparent" />
+                <Setter Property="Fill" Value="Transparent" />
             </Style>
-            
+
             <Style Selector="^[IsConnected=True] Ellipse#PART_ConnectorShape">
-                <Setter Property="Fill" Value="{StaticResource ExecTypeBrushColor}"/>
+                <Setter Property="Fill" Value="Transparent" />
             </Style>
-            
+
             <Style Selector="^ Border#Highlight">
-                <Setter Property="Background" Value="{StaticResource ExecTypeNodeColor}"/>
+                <Setter Property="Background" Value="Transparent" />
             </Style>
         </Style>
-        
+
+        <Style Selector="nodify|NodeOutput[Tag=0], nodify|NodeInput[Tag=0]" x:DataType="bp:GenericConnectorViewModel">
+            <Style Selector="^ Ellipse#PART_ConnectorShape">
+                <Setter Property="Stroke" Value="{StaticResource ExecTypeBrushColor}" />
+                <Setter Property="Fill" Value="{StaticResource ExecTypeBackColor}" />
+            </Style>
+
+            <Style Selector="^[IsConnected=True] Ellipse#PART_ConnectorShape">
+                <Setter Property="Fill" Value="{StaticResource ExecTypeBrushColor}" />
+            </Style>
+
+            <Style Selector="^ Border#Highlight">
+                <Setter Property="Background" Value="{StaticResource ExecTypeNodeColor}" />
+            </Style>
+        </Style>
+
         <Style Selector="nodify|NodeOutput[Tag=1], nodify|NodeInput[Tag=1]">
             <Style Selector="^ Ellipse#PART_ConnectorShape">
                 <Setter Property="Stroke" Value="{StaticResource BoolTypeBrushColor}" />
                 <Setter Property="Fill" Value="{StaticResource BoolTypeBackColor}" />
             </Style>
-            
+
             <Style Selector="^[IsConnected=True] Ellipse#PART_ConnectorShape">
                 <Setter Property="Fill" Value="{StaticResource BoolTypeBrushColor}" />
             </Style>
-            
+
             <Style Selector="^ Border#Highlight">
-                <Setter Property="Background" Value="{StaticResource BoolTypeNodeColor}"/>
+                <Setter Property="Background" Value="{StaticResource BoolTypeNodeColor}" />
             </Style>
         </Style>
-        
+
         <Style Selector="nodify|NodeOutput[Tag=4], nodify|NodeInput[Tag=4]">
             <Style Selector="^ Ellipse#PART_ConnectorShape">
                 <Setter Property="Stroke" Value="{StaticResource StringTypeBrushColor}" />
                 <Setter Property="Fill" Value="{StaticResource StringTypeBackColor}" />
             </Style>
-            
+
             <Style Selector="^[IsConnected=True] Ellipse#PART_ConnectorShape">
                 <Setter Property="Fill" Value="{StaticResource StringTypeBrushColor}" />
             </Style>
-            
+
             <Style Selector="^ Border#Highlight">
-                <Setter Property="Background" Value="{StaticResource StringTypeNodeColor}"/>
+                <Setter Property="Background" Value="{StaticResource StringTypeNodeColor}" />
             </Style>
         </Style>
-        
+
         <Style Selector="nodify|NodeOutput[Tag=2], nodify|NodeInput[Tag=2]">
             <Style Selector="^ Ellipse#PART_ConnectorShape">
                 <Setter Property="Stroke" Value="{StaticResource IntTypeBrushColor}" />
                 <Setter Property="Fill" Value="{StaticResource IntTypeBackColor}" />
             </Style>
-            
+
             <Style Selector="^[IsConnected=True] Ellipse#PART_ConnectorShape">
                 <Setter Property="Fill" Value="{StaticResource IntTypeBrushColor}" />
             </Style>
-            
+
             <Style Selector="^ Border#Highlight">
-                <Setter Property="Background" Value="{StaticResource IntTypeNodeColor}"/>
+                <Setter Property="Background" Value="{StaticResource IntTypeNodeColor}" />
             </Style>
         </Style>
-        
+
         <Style Selector="nodify|NodeOutput[Tag=3], nodify|NodeInput[Tag=3]">
             <Style Selector="^ Ellipse#PART_ConnectorShape">
                 <Setter Property="Stroke" Value="{StaticResource FloatTypeBrushColor}" />
                 <Setter Property="Fill" Value="{StaticResource FloatTypeBackColor}" />
             </Style>
-            
+
             <Style Selector="^[IsConnected=True] Ellipse#PART_ConnectorShape">
                 <Setter Property="Fill" Value="{StaticResource FloatTypeBrushColor}" />
             </Style>
-            
+
             <Style Selector="^ Border#Highlight">
-                <Setter Property="Background" Value="{StaticResource FloatTypeNodeColor}"/>
+                <Setter Property="Background" Value="{StaticResource FloatTypeNodeColor}" />
             </Style>
         </Style>
-        
+
         <Style Selector="nodify|NodeOutput[Tag=5], nodify|NodeInput[Tag=5]">
             <Style Selector="^ Ellipse#PART_ConnectorShape">
                 <Setter Property="Stroke" Value="{StaticResource Vector2TypeBrushColor}" />
                 <Setter Property="Fill" Value="{StaticResource Vector2TypeBackColor}" />
             </Style>
-            
+
             <Style Selector="^[IsConnected=True] Ellipse#PART_ConnectorShape">
                 <Setter Property="Fill" Value="{StaticResource Vector2TypeBrushColor}" />
             </Style>
-            
+
             <Style Selector="^ Border#Highlight">
-                <Setter Property="Background" Value="{StaticResource Vector2TypeNodeColor}"/>
+                <Setter Property="Background" Value="{StaticResource Vector2TypeNodeColor}" />
             </Style>
         </Style>
-        
+
         
         <Style Selector="nodify|Node" x:DataType="bp:GenericNodeViewModel">
-            <Setter Property="Header" Value="{Binding}"/>
-            <Setter Property="HeaderTemplate" Value="{StaticResource NodeHeaderTemplate}"/>
+            <Setter Property="Header" Value="{Binding}" />
+            <Setter Property="HeaderTemplate" Value="{StaticResource NodeHeaderTemplate}" />
         </Style>
 
     </Window.Styles>
 
-
     <Grid ColumnDefinitions="*">
+        
+        <!--====================-->
+        <!-- NODE EDITOR LAYOUT -->
+        <!--====================-->
+
         <nodify:NodifyEditor Name="Editor"
                              ItemsSource="{Binding Nodes}"
                              Connections="{Binding Connections}"
@@ -424,11 +480,11 @@
                              Background="{StaticResource SmallGridLinesDrawingBrush}"
                              DragDrop.AllowDrop="True">
             <nodify:NodifyEditor.KeyBindings>
-                <KeyBinding Gesture="Delete" Command="{Binding DeleteSelectedNodesCommand}"/>
-                <KeyBinding Gesture="Ctrl+H" Command="{Binding HideToggleSelectedNodesCommand}"/>
-                <KeyBinding Gesture="C" Command="{Binding CreateCommentGroupNodeCommand}"/>
+                <KeyBinding Gesture="Delete" Command="{Binding DeleteSelectedNodesCommand}" />
+                <KeyBinding Gesture="Ctrl+H" Command="{Binding HideToggleSelectedNodesCommand}" />
+                <KeyBinding Gesture="C" Command="{Binding CreateCommentGroupNodeCommand}" />
             </nodify:NodifyEditor.KeyBindings>
-            
+
             <nodify:NodifyEditor.ItemContainerTheme>
                 <ControlTheme TargetType="nodify:ItemContainer"
                               x:DataType="bp:GenericNodeViewModel"
@@ -443,13 +499,14 @@
                         <nodify:GroupingNode.Header>
                             <StackPanel Orientation="Horizontal" Spacing="4">
                                 <Button Classes="Small" Command="{Binding ToggleRenameCommand}">
-                                    <icon:Icon Value="mdi-rename-outline"/>
+                                    <icon:Icon Value="mdi-rename-outline" />
                                 </Button>
                                 <Panel>
-                                    <TextBlock Text="{Binding Header}" IsVisible="{Binding !IsRenaming}"/>
-                                    <TextBox x:Name="RenameBox" Text="{Binding Header}" IsVisible="{Binding IsRenaming}" IsFocused="{Binding IsRenaming}">
+                                    <TextBlock Text="{Binding Header}" IsVisible="{Binding !IsRenaming}" />
+                                    <TextBox x:Name="RenameBox" Text="{Binding Header}"
+                                             IsVisible="{Binding IsRenaming}" IsFocused="{Binding IsRenaming}">
                                         <TextBox.KeyBindings>
-                                            <KeyBinding Gesture="Enter" Command="{Binding ToggleRenameCommand}"/>
+                                            <KeyBinding Gesture="Enter" Command="{Binding ToggleRenameCommand}" />
                                         </TextBox.KeyBindings>
                                     </TextBox>
                                 </Panel>
@@ -473,7 +530,8 @@
                                                      HorizontalAlignment="Stretch"
                                                      VerticalAlignment="Stretch"
                                                      StrokeThickness="2"
-                                                     Fill="Transparent" />
+                                                     Fill="Transparent"
+                                                     IsVisible="{Binding HasAnyAllowedConnections}" />
                                         </ControlTemplate>
                                     </nodify:NodeInput.ConnectorTemplate>
                                 </nodify:NodeInput>
@@ -493,7 +551,8 @@
                                                      HorizontalAlignment="Stretch"
                                                      VerticalAlignment="Stretch"
                                                      StrokeThickness="2"
-                                                     Fill="Transparent" />
+                                                     Fill="Transparent"
+                                                     IsVisible="{Binding HasAnyAllowedConnections}" />
                                         </ControlTemplate>
                                     </nodify:NodeOutput.ConnectorTemplate>
                                 </nodify:NodeOutput>
@@ -507,7 +566,7 @@
                 <DataTemplate DataType="vm:ConnectionViewModel">
                     <nodify:LineConnection Source="{Binding Source.Anchor}"
                                            Target="{Binding Target.Anchor}"
-                                           Focusable="False"/>
+                                           Focusable="False" />
                 </DataTemplate>
             </nodify:NodifyEditor.ConnectionTemplate>
 
@@ -522,64 +581,268 @@
                                               Stroke="{Binding StrokeBrush}"
                                               StrokeDashArray="{Binding DashArray}"
                                               ToolTip.Tip="{Binding ToolTipMessage, Mode=OneWay}"
-                                              ToolTip.IsOpen="{Binding ToolTipIsOpen}"/>
+                                              ToolTip.IsOpen="{Binding ToolTipIsOpen}" />
                 </DataTemplate>
             </nodify:NodifyEditor.PendingConnectionTemplate>
 
         </nodify:NodifyEditor>
-        <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, *" Margin="16" IsHitTestVisible="{Binding !IsDragging}" ColumnSpacing="4" RowSpacing="4">
-            <Grid x:Name="TopMenuBar" ColumnSpacing="8" ColumnDefinitions="Auto, *, Auto" Background="#51535353">
-                <StackPanel Orientation="Horizontal" Spacing="8" Margin="4" VerticalAlignment="Center">
-                    <Button Content="Save" Command="{Binding SaveBlueprintCommand}"/>
-                    <Button Content="Build" Command="{Binding BuildBlueprintCommand}"/>
-                </StackPanel>
-                <Border Grid.Column="1"/>
-                <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="4">
-                    <Button Content="Show produced source" HorizontalAlignment="Right" Command="{Binding ShowProducedSourceCommand}" IsVisible="{Binding IsInDevMode}"/>
-                </StackPanel>
-            </Grid>
-            
-            <UserControl Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"  DataContext="{Binding BlueprintListVm}">
+
+        <!--====================-->
+        <!--  SIDE BARS LAYOUT  -->
+        <!--====================-->
+
+        <Grid ColumnDefinitions="Auto, *, Auto" RowDefinitions="Auto, *" IsHitTestVisible="{Binding !IsDragging}"
+              ColumnSpacing="4" RowSpacing="4">
+
+            <!--====================-->
+            <!--    PARAMETERS BP   -->
+            <!--====================-->
+
+            <UserControl Grid.Row="1" DataContext="{Binding ParametersVm}">
                 <Border
-                        Background="#51535353"
-                        Padding="8"
-                        CornerRadius="4"
-                        x:DataType="vm:BlueprintListVm">
+                    x:DataType="vm:BlueprintParametersViewModel"
+                    Background="#3C3C44"
+                    Padding="8"
+                    CornerRadius="0, 4, 4, 0"
+                    MinWidth="0"
+                    ClipToBounds="True"
+                    Classes.closed="{Binding $parent[Grid].((vm:NodeEditorViewModel)DataContext).IsParametersVisible, FallbackValue=False}">
+                    <Border.Styles>
+                        <Style Selector="Border">
+                            <Setter Property="MaxWidth" Value="500" />
+                        </Style>
+                        <Style Selector="Border.closed">
+                            <Setter Property="MaxWidth" Value="0" />
+                        </Style>
+                    </Border.Styles>
+                    <Border.Transitions>
+                        <Transitions>
+                            <DoubleTransition Property="MaxWidth" Duration="0:0:0.2" />
+                        </Transitions>
+                    </Border.Transitions>
+
+                    <Grid RowDefinitions="Auto, Auto, *, Auto, Auto"
+                          Width="400" RowSpacing="4">
+
+                        <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding CreateParameterCommand}">
+                            <TextBlock>
+                                <TextBlock.Inlines>
+                                    <Run Text="+ Add new variable" />
+                                </TextBlock.Inlines>
+                            </TextBlock>
+                        </Button>
+
+                        <ursa:Divider Grid.Row="1" Orientation="Horizontal" HorizontalContentAlignment="Center"
+                                      VerticalContentAlignment="Center" Content="User Variables"
+                                      ToolTip.Tip="User variables are variable that are added by the user, and can be removed, or edited." />
+                        
+                        <ScrollViewer Grid.Row="2">
+                            <ItemsControl ItemsSource="{Binding UserParameters}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="bpLogic:BlueprintParameters">
+                                        <Grid ColumnDefinitions="4* 30* 20* 46*" ColumnSpacing="4" PointerPressed="AddGetNodePointerPressed">
+                                            <Border Background="Transparent" Classes.ReadOnlyActive="{Binding IsReadOnly}" VerticalAlignment="Center">
+                                                <icon:Icon Value="mdi-read" FontSize="16" VerticalAlignment="Center" />
+                                                <Border.Styles>
+                                                    <Style Selector="Border">
+                                                        <Style Selector="^ icon|Icon">
+                                                            <Setter Property="Foreground" Value="DarkGray" />
+                                                        </Style>
+                                                        <Setter Property="ToolTip.Tip">
+                                                            <Setter.Value>This variable is NOT read-only, you can edit it with blueprint node and get it.</Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                    <Style Selector="Border.ReadOnlyActive">
+                                                        <Style Selector="^ icon|Icon">
+                                                            <Setter Property="Foreground" Value="White" />
+                                                        </Style>
+                                                        <Setter Property="ToolTip.Tip">
+                                                            <Setter.Value>This property is read-only, you can't edit it with blueprint node, but you can get it.</Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                </Border.Styles>
+                                            </Border>
+                                            <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding TypeDisplayName}" VerticalAlignment="Center"/>
+                                            <ContentControl Grid.Column="3" 
+                                                            Content="{Binding Converter={StaticResource BpToDescriptorConverter}}"
+                                                            VerticalAlignment="Center">
+                                                <ContentControl.DataTemplates>
+                                                    <explorer:PropertyEditorSelector />
+                                                </ContentControl.DataTemplates>
+                                            </ContentControl>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                            
+                        <GridSplitter Grid.Row="3" ResizeBehavior="PreviousAndNext">
+                            <GridSplitter.Template>
+                                <ControlTemplate>
+                                    <ursa:Divider Orientation="Horizontal" HorizontalContentAlignment="Center"
+                                                  VerticalContentAlignment="Center" Content="System Variables"
+                                                  ToolTip.Tip="System variables are variable that are added by the blueprint type directly, and as such can't be removed nor edited." />
+                                </ControlTemplate>
+                            </GridSplitter.Template>
+                        </GridSplitter>
+                        
+                        <ScrollViewer Grid.Row="4">
+                            <ItemsControl ItemsSource="{Binding SystemParameters}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="bpLogic:BlueprintParameters">
+                                        <Grid ColumnDefinitions="4* 4* 46* 46*" ColumnSpacing="4" PointerPressed="AddGetNodePointerPressed">
+                                            <Border Background="Transparent" Classes.ReadOnlyActive="{Binding IsReadOnly}" VerticalAlignment="Center">
+                                                <icon:Icon Value="mdi-read" FontSize="16" VerticalAlignment="Center" />
+                                                <Border.Styles>
+                                                    <Style Selector="Border">
+                                                        <Style Selector="^ icon|Icon">
+                                                            <Setter Property="Foreground" Value="DarkGray" />
+                                                        </Style>
+                                                        <Setter Property="ToolTip.Tip">
+                                                            <Setter.Value>This variable is NOT read-only, you can edit it with blueprint node and get it.</Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                    <Style Selector="Border.ReadOnlyActive">
+                                                        <Style Selector="^ icon|Icon">
+                                                            <Setter Property="Foreground" Value="White" />
+                                                        </Style>
+                                                        <Setter Property="ToolTip.Tip">
+                                                            <Setter.Value>This property is read-only, you can't edit it with blueprint node, but you can get it.</Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                </Border.Styles>
+                                            </Border>                                            
+                                            <Border Grid.Column="1" Background="Transparent" Classes.IsArgument="{Binding IsArgument}" VerticalAlignment="Center">
+                                                <icon:Icon Value="mdi-alpha-a" FontSize="28" VerticalAlignment="Center" />
+                                                <Border.Styles>
+                                                    <Style Selector="Border">
+                                                        <Setter Property="IsVisible">
+                                                            False
+                                                        </Setter>
+                                                    </Style>
+                                                    <Style Selector="Border.IsArgument">
+                                                        <Setter Property="IsVisible">
+                                                            True
+                                                        </Setter>
+                                                        <Style Selector="^ icon|Icon">
+                                                            <Setter Property="Foreground" Value="White" />
+                                                        </Style>
+                                                        <Setter Property="ToolTip.Tip">
+                                                            <Setter.Value>This variable is an argument, and will be provided when this blueprint is called. The value could differ depending on when and where this blueprint is used.</Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                </Border.Styles>
+                                            </Border>
+                                            <TextBlock Grid.Column="2" Text="{Binding Name}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding TypeDisplayName}" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+
+                    </Grid>
+                </Border>
+            </UserControl>
+
+            <!--====================-->
+            <!--    TOP BAR MENU    -->
+            <!--====================-->
+
+            <Grid Grid.Column="0" Grid.ColumnSpan="3" x:Name="TopMenuBar" ColumnSpacing="8"
+                  ColumnDefinitions="Auto, *, Auto" Background="#3C3C44">
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="4" VerticalAlignment="Center">
+                    <Button Content="Parameters" Command="{Binding ToggleParameters}" />
+                    <Button Content="Save" Command="{Binding SaveBlueprintCommand}" />
+                    <SplitButton Content="Build" Command="{Binding BuildBlueprintCommand}">
+                        <SplitButton.Flyout>
+                            <MenuFlyout Placement="Bottom">
+                                <MenuItem Header="Compile all" Command="{Binding CompileAllBlueprintsCommand}" ToolTip.Tip="Note: This is also done automatically by the engine."/>
+                            </MenuFlyout>
+                        </SplitButton.Flyout>
+                    </SplitButton>
+                    <!-- <Button Content="Build" Command="{Binding BuildBlueprintCommand}" /> -->
+                    <Button Content="Nodes library" Command="{Binding ToggleNodeLibrary}" />
+                </StackPanel>
+                <Border Grid.Column="1" />
+                <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="4">
+                    <Button Content="Show produced source" HorizontalAlignment="Right"
+                            Command="{Binding ShowProducedSourceCommand}" IsVisible="{Binding IsInDevMode}" />
+                </StackPanel>
+
+            </Grid>
+
+            <!--====================-->
+            <!-- NODES LIBRARY LIST -->
+            <!--====================-->
+
+            <UserControl Grid.Row="1" Grid.Column="2" DataContext="{Binding BlueprintListVm}">
+                <Border
+                    Background="#3C3C44"
+                    Padding="8"
+                    CornerRadius="4, 0, 0, 4"
+                    x:DataType="vm:BlueprintListVm"
+                    MinWidth="0"
+                    ClipToBounds="True"
+                    Classes.closed="{Binding $parent[Grid].((vm:NodeEditorViewModel)DataContext).IsLibraryVisible, FallbackValue=False}">
+                    <Border.Styles>
+                        <Style Selector="Border">
+                            <Setter Property="MaxWidth" Value="500" />
+                        </Style>
+                        <Style Selector="Border.closed">
+                            <Setter Property="MaxWidth" Value="0" />
+                        </Style>
+                    </Border.Styles>
+                    <Border.Transitions>
+                        <Transitions>
+                            <DoubleTransition Property="MaxWidth" Duration="0:0:0.2" />
+                        </Transitions>
+                    </Border.Transitions>
+
                     <Grid RowDefinitions="Auto, *, Auto, Auto"
                           Width="450" RowSpacing="4">
                         <Grid ColumnDefinitions="*, Auto" HorizontalAlignment="Stretch" ColumnSpacing="4">
-                            <TextBox Watermark="Search node..." HorizontalAlignment="Stretch" Text="{Binding SearchQuery, Mode=TwoWay}">
+                            <TextBox Watermark="Search node..." HorizontalAlignment="Stretch"
+                                     Text="{Binding SearchQuery, Mode=TwoWay}">
                                 <TextBox.KeyBindings>
-                                    <KeyBinding Gesture="Enter" Command="{Binding SearchCommand}"/>
+                                    <KeyBinding Gesture="Enter" Command="{Binding SearchCommand}" />
                                 </TextBox.KeyBindings>
                             </TextBox>
-                            <Button Grid.Column="1" Content="Search" HorizontalAlignment="Right" Command="{Binding SearchCommand}"/>
+                            <Button Grid.Column="1" Content="Search" HorizontalAlignment="Right"
+                                    Command="{Binding SearchCommand}" />
                         </Grid>
-                        <ScrollViewer Grid.Row="1"  IsVisible="{Binding !IsLoading}">
-                            <TreeView ItemsSource="{Binding NodeItems}" SelectedItem="{Binding SelectedItem, Mode=OneWayToSource}">
+                        <ScrollViewer Grid.Row="1" IsVisible="{Binding !IsLoading}">
+                            <TreeView ItemsSource="{Binding NodeItems}"
+                                      SelectedItem="{Binding SelectedItem, Mode=OneWayToSource}">
                                 <TreeView.DataTemplates>
                                     <TreeDataTemplate DataType="vm:TreeViewNodeItemModel"
                                                       ItemsSource="{Binding Children}">
-                                        <TextBlock Text="{Binding Name}"/>
+                                        <TextBlock Text="{Binding Name}" />
                                     </TreeDataTemplate>
                                 </TreeView.DataTemplates>
                             </TreeView>
                         </ScrollViewer>
-                        <ursa:Skeleton Grid.Row="1" IsLoading="{Binding IsLoading}" IsActive="{Binding IsLoading}" IsVisible="{Binding IsLoading}">
+                        <ursa:Skeleton Grid.Row="1" IsLoading="{Binding IsLoading}" IsActive="{Binding IsLoading}"
+                                       IsVisible="{Binding IsLoading}">
                             <StackPanel Orientation="Vertical" Spacing="4">
                             </StackPanel>
                         </ursa:Skeleton>
                         <StackPanel Grid.Row="2" Spacing="4">
-                            <ursa:Divider Content="Preview" Orientation="Horizontal" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                            <ursa:Divider Content="Preview" Orientation="Horizontal"
+                                          HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
                             <Border Background="{DynamicResource WindowDefaultBackground}" Padding="4" CornerRadius="4">
-                                <Border Background="{StaticResource SmallGridLinesDrawingBrush}" Padding="4" MinHeight="200">
-                                    <Grid ColumnDefinitions="*" RowDefinitions="*" IsVisible="{Binding HasPreviewedNode, Mode=OneWay}">
-                                        <Grid RowDefinitions="*, Auto, *" ColumnDefinitions="*, Auto, *" DataContext="{Binding PreviewedNode, Mode=OneWay}">
-                                            <nodify:Node 
+                                <Border Background="{StaticResource SmallGridLinesDrawingBrush}" Padding="4"
+                                        MinHeight="200">
+                                    <Grid ColumnDefinitions="*" RowDefinitions="*"
+                                          IsVisible="{Binding HasPreviewedNode, Mode=OneWay}">
+                                        <Grid RowDefinitions="*, Auto, *" ColumnDefinitions="*, Auto, *"
+                                              DataContext="{Binding PreviewedNode, Mode=OneWay}">
+                                            <nodify:Node
                                                 x:DataType="bp:GenericNodeViewModel"
-                                                Grid.Row="1" 
-                                                Grid.Column="1" 
-                                                Output="{Binding Outputs}" 
+                                                Grid.Row="1"
+                                                Grid.Column="1"
+                                                Output="{Binding Outputs}"
                                                 Input="{Binding Inputs}"
                                                 IsHitTestVisible="False"
                                                 IsVisible="{Binding !#Editor.((vm:NodeEditorViewModel)DataContext).IsDragging}">
@@ -624,14 +887,19 @@
                                                     </DataTemplate>
                                                 </nodify:Node.OutputConnectorTemplate>
                                             </nodify:Node>
-                                            <Border Grid.Row="1" Grid.Column="1" Background="Transparent" IsHitTestVisible="True" PointerPressed="AddNode_OnPointerPressed"/>
+                                            <Border Grid.Row="1" Grid.Column="1" Background="Transparent"
+                                                    IsHitTestVisible="True" PointerPressed="AddNode_OnPointerPressed" />
                                         </Grid>
                                     </Grid>
                                 </Border>
                             </Border>
                             <UserControl IsEnabled="{Binding HasPreviewedNode}">
-                                <UserControl DataContext="{Binding PreviewedNode, Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                                    <common:HelpButton  ButtonText="Open help for this node" HelpDocsKey="{Binding HelpUrn}" IsEnabled="{Binding HasHelpPage}" HorizontalAlignment="Stretch"/>
+                                <UserControl DataContext="{Binding PreviewedNode, Mode=OneWay}"
+                                             VerticalAlignment="Center" HorizontalAlignment="Stretch"
+                                             HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                                    <common:HelpButton ButtonText="Open help for this node"
+                                                       HelpDocsKey="{Binding HelpUrn}"
+                                                       IsEnabled="{Binding HasHelpPage}" HorizontalAlignment="Stretch" />
                                 </UserControl>
                             </UserControl>
                         </StackPanel>
@@ -641,8 +909,65 @@
                     </Grid>
                 </Border>
             </UserControl>
+
         </Grid>
-        <Canvas x:Name="GhostOverlay" IsHitTestVisible="False" Background="Transparent" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+
+        <!--====================-->
+        <!--    GHOST OVERLAY   -->
+        <!--====================-->
+        <!-- This is used when drag and dropping node in the editor. -->
+        <!-- This is what allow the editor to show the node before dropping it. -->
+
+        <Canvas x:Name="GhostOverlay" IsHitTestVisible="False" Background="Transparent" VerticalAlignment="Stretch"
+                HorizontalAlignment="Stretch">
         </Canvas>
+
+        <Grid x:Name="ModalOverlay" IsHitTestVisible="True" Background="#80000000" ColumnDefinitions="*, Auto, *"
+              RowDefinitions="*, Auto, *" PointerPressed="ModalOverlay_OnPointerPressed" DataContext="{Binding ParametersVm}" IsVisible="{Binding IsParametersVisible}">
+            
+            <Border Grid.Row="1" Grid.Column="1" Background="{DynamicResource WindowDefaultBackground}"
+                        MinWidth="300" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        DataContext="{Binding AddParameterVm}"
+                        Padding="16" CornerRadius="4" IsHitTestVisible="True" PointerPressed="ModalOverlay_OnPointerPressed">
+                <StackPanel Orientation="Vertical" Spacing="4" HorizontalAlignment="Stretch">
+                    <TextBlock Text="Add a variable" HorizontalAlignment="Center"/>
+                    
+                    <ursa:Divider Orientation="Horizontal"/>
+                    
+                    <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Stretch">
+                        <Label Content="Name" Width="120" Target="VarInputName" VerticalAlignment="Center"/>
+                        <TextBox x:Name="VarInputName" Watermark="Input name here..." HorizontalAlignment="Stretch" Text="{Binding Name}" />
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Stretch">
+                        <Label Content="Is ReadOnly?" Width="120" Target="VarInputReadOnly" VerticalAlignment="Center"
+                               ToolTip.Tip="If on true, the variable can only be set inside the Variables menu, and can't be set from node."/>
+                        <CheckBox x:Name="VarInputReadOnly" ToolTip.Tip="If on true, the variable can only be set inside the Variables menu, and can't be set from node."
+                                  HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" IsChecked="{Binding IsReadOnly}" />
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Stretch">
+                        <Label Content="Variable type" Width="120" Target="VarInputType" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="VarInputType" PlaceholderText="Select a type..."
+                                  SelectedIndex="{Binding Type}"
+                                  HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+                            <ComboBoxItem Content="Int" ToolTip.Tip="Integer variable, can store whole numbers."/>
+                            <ComboBoxItem Content="Float" ToolTip.Tip="Float variable, can store decimal numbers."/>
+                            <ComboBoxItem Content="Bool" ToolTip.Tip="Boolean variable, can store true or false."/>
+                            <ComboBoxItem Content="String" ToolTip.Tip="String variable, can store text."/>
+                        </ComboBox>
+                    </StackPanel>
+                    
+                    <ursa:Divider Orientation="Horizontal"/>
+                    
+                    <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Stretch">
+                        <Button Content="Create" HorizontalAlignment="Stretch" Command="{Binding SaveParameterCommand}"/>
+                        <Button Content="Cancel" Classes="Danger" HorizontalAlignment="Right" PointerPressed="ModalOverlay_OnPointerPressed"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+        </Grid>
+
     </Grid>
 </Window>

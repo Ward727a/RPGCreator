@@ -41,6 +41,8 @@ using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.GameRunner;
+using RPGCreator.SDK.GameUI.Controls;
+using RPGCreator.SDK.GameUI.Events.Actions;
 using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Graph.Nodes;
 using RPGCreator.SDK.Inputs;
@@ -137,6 +139,13 @@ namespace RPGCreator.Core
             RegistryServices.Urn = new UrnRegistry();
             RegistryServices.Tool = new ToolRegistry();
             RegistryServices.NativeAction = new NativeActionRegistry();
+            RegistryServices.GuiControl = new GUIControlRegistry();
+            RegistryServices.GuiControl.RegisterControl(new TestControl());
+            RegistryServices.GuiAction = new GuiActionRegistry();
+            RegistryServices.GuiAction.RegisterAction(new PrintAction());
+            RegistryServices.GuiAction.RegisterAction(new BpAction());
+            RegistryServices.Blueprint = new BlueprintRegistry();
+            RegistryServices.PropertyEditorRegistry = new GuiPropertyEditorRegistry();
             
             Instance = this;
 
