@@ -21,6 +21,7 @@
 using RPGCreator.SDK;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Systems;
+using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Registry;

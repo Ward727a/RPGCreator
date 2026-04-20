@@ -23,6 +23,7 @@
 // 
 #endregion
 using Avalonia.Controls;
+using Avalonia.VisualTree;
 using RPGCreator.UI.Content.Editor;
 using RPGCreator.UI.Content.ProjectCreator;
 using System;
@@ -30,6 +31,7 @@ using Projektanker.Icons.Avalonia;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Projects;
+using RPGCreator.SDK.Types.Collections;
 using RPGCreator.UI.Content.Preferences;
 
 namespace RPGCreator.UI.Content.Launcher

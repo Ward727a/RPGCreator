@@ -20,6 +20,7 @@
 
 using System.Buffers;
 using System.Runtime.InteropServices;
+using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.SDK.Graph;
 

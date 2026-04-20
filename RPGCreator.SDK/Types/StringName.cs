@@ -40,10 +40,10 @@ public readonly struct StringName :
     
     private static readonly StringPool _sharedPool = StringPool.Shared;
 
-    private readonly string? _value = string.Empty;
+    private readonly string _value = string.Empty;
     private readonly int _hashCode = 0;
 
-    public int Length => _value?.Length ?? 0;
+    public int Length => _value.Length;
 
     public StringName(ReadOnlySpan<char> charactersSpan)
     {
@@ -70,19 +70,16 @@ public readonly struct StringName :
 
     public override int GetHashCode() => _hashCode;
 
-    public override string ToString() => _value ?? string.Empty;
+    public override string ToString() => _value;
 
-    public string ToString(string? format, IFormatProvider? formatProvider) => _value ?? string.Empty;
+    public string ToString(string? format, IFormatProvider? formatProvider) => _value;
 
     public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format,
         IFormatProvider? provider)
     {
         if (_value.AsSpan().TryCopyTo(destination))
         {
-            if (_value == null)
-                charsWritten = 0;
-            else
-                charsWritten = Length;
+            charsWritten = _value.Length;
             return true;
         }
 
@@ -93,7 +90,7 @@ public readonly struct StringName :
     public static bool operator ==(StringName left, StringName right) => left.Equals(right);
     public static bool operator !=(StringName left, StringName right) => !left.Equals(right);
 
-    public static implicit operator string(StringName name) => name._value ?? string.Empty;
+    public static implicit operator string(StringName name) => name._value;
     public static implicit operator StringName(string name) => new(name);
 
     /// <summary>

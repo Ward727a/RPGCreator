@@ -18,6 +18,7 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Drawing;
 using RPGCreator.SDK.GameUI.Interfaces;
 
 namespace RPGCreator.SDK.Editor.Rendering;

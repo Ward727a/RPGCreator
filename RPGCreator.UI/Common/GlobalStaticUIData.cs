@@ -24,6 +24,7 @@
 #endregion
 
 using Avalonia.Controls;
+using Avalonia.Controls.Diagnostics;
 using Avalonia.Controls.Primitives;
 
 namespace RPGCreator.UI.Common

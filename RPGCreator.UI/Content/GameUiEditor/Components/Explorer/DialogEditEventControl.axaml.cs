@@ -18,54 +18,53 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Markup.Xaml;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DynamicData;
 using RPGCreator.SDK;
 using RPGCreator.SDK.GameUI;
 using RPGCreator.SDK.GameUI.Events.Actions;
 using RPGCreator.SDK.GameUI.Interfaces;
+using RPGCreator.SDK.Logging;
 
 namespace RPGCreator.UI.Content.GameUiEditor.Components.Explorer;
 
 public partial class DialogEditEventControlVm : ObservableObject
 {
+
     [ObservableProperty] private ControlEventDescriptor _eventDescriptor;
     
-    public string WindowTitle => $"Edit event {EventDescriptor.Name}";
-    public string EventName => EventDescriptor.Name;
-    public string EventDescription => EventDescriptor.Description;
+    public string WindowTitle => $"Edit event {_eventDescriptor.Name}";
+    public string EventName => _eventDescriptor.Name;
+    public string EventDescription => _eventDescriptor.Description;
     
-    public bool HasAction => EventDescriptor.Action != null;
+    public bool HasAction => _eventDescriptor.Action != null;
 
     public ObservableCollection<IGuiAction> AvailableActions { get; set; } = new();
     public ObservableCollection<ControlPropertyDescriptor> ActionProperties { get; set; } = new();
 
     [ObservableProperty] string _selectedActionName;
+    
     [ObservableProperty] int _selectedActionIndex;
     
     public DialogEditEventControlVm(ControlEventDescriptor eventDescriptor)
     {
         _eventDescriptor = eventDescriptor;
-        
-        var actions = RegistryServices.GuiAction.GetActionByContext(_eventDescriptor.GuiContextType);
 
-        if (actions != null)
+        foreach (var action in RegistryServices.GuiAction.GetActionByContext(_eventDescriptor.GuiContextType) ?? [])
         {
-            var mergedActions = actions.Select(action => 
-                HasAction && EventDescriptor.Action?.GetType() == action.GetType() 
-                    ? EventDescriptor.Action 
-                    : action.Clone());
-
-            AvailableActions.AddRange(mergedActions);
+            AvailableActions.Add(action);
         }
         
-        SelectedActionName = EventDescriptor.Action?.Name ?? "No action currently selected.";
+        SelectedActionName = _eventDescriptor.Action?.Name ?? "No action currently selected.";
 
-        if (EventDescriptor.Action != null)
-            SelectedActionIndex = AvailableActions.IndexOf(EventDescriptor.Action);
+        if (_eventDescriptor.Action != null)
+            SelectedActionIndex = AvailableActions.IndexOf(_eventDescriptor.Action);
         else
             SelectedActionIndex = -1;
         RefreshProperties();
@@ -76,9 +75,8 @@ public partial class DialogEditEventControlVm : ObservableObject
     {
         if(AvailableActions.Count == 0) return;
         if (value < 0 || value >= AvailableActions.Count) return;
-        EventDescriptor.Action = AvailableActions[value];
-        EventDescriptor.Action.LinkTo(EventDescriptor.GuiContextType);
-        SelectedActionName = EventDescriptor.Action.Name;
+        _eventDescriptor.Action = AvailableActions[value];
+        SelectedActionName = _eventDescriptor.Action.Name;
         RefreshProperties();
     }
 

@@ -32,11 +32,6 @@ public partial class PrintAction : IGuiAction
     [GuiControlProperty(DisplayName = "Message", Description = "The message to print.")]
     private string _message = "";
 
-    public void LinkTo(Type context)
-    {
-        return;
-    }
-
     public void Execute(GuiEventContext context)
     {
         Console.WriteLine(_message);

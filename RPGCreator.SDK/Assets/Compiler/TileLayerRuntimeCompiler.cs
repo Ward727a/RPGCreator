@@ -18,6 +18,7 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Runtime.CompilerServices;
 using CommunityToolkit.Diagnostics;
 using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
@@ -26,6 +27,7 @@ using RPGCreator.SDK.Assets.Runtime.Tilesets;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Components.Maps;
+using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
 
 namespace RPGCreator.SDK.Assets.Compiler;

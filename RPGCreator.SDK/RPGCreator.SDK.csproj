@@ -30,6 +30,7 @@
 
     <ItemGroup>
       <Folder Include="Assets\Definitions\GameUI\" />
+      <Folder Include="GameUI\Services\" />
       <Folder Include="Modules\ECS\" />
       <Folder Include="Types\Enums\" />
     </ItemGroup>
@@ -42,7 +43,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\RPGCreator.MainGenerator\RPGCreator.MainGenerator\RPGCreator.MainGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
       <ProjectReference Include="..\UiPropertiesGenerators\RPGCreator.UiPropertiesGenerators\RPGCreator.UiPropertiesGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
 

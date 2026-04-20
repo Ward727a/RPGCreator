@@ -34,7 +34,10 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
+using Avalonia.Data.Core.Plugins;
 using Avalonia.Layout;
+using Avalonia.Markup.Xaml;
+using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media;
 using LiveMarkdown.Avalonia;
 using RPGCreator.UI.Content.Launcher;
@@ -54,8 +57,8 @@ using RPGCreator.UI.Blueprints;
 using RPGCreator.UI.Blueprints.Connectors;
 using RPGCreator.UI.Blueprints.Nodes.Debug;
 using RPGCreator.UI.Blueprints.Nodes.FlowControl;
+using RPGCreator.UI.Blueprints.Nodes.Math.Int;
 using RPGCreator.UI.Common.IconsProvider;
-using RPGCreator.UI.Common.Modal.Browser;
 using RPGCreator.UI.Ressources;
 using RPGCreator.UI.Services;
 using Ursa.Controls;
@@ -221,7 +224,7 @@ public class App : Application
         
         var outVector2Template = new FuncDataTemplate<GenericConnectorViewModel>((param, _) =>
         {
-            if (param.ConnectorLogic is Vector2ConnectorLogic)
+            if (param.ConnectorLogic is Vector2ConnectorLogic vector2Logic)
             {
                 var mainPanel = new StackPanel()
                 {
@@ -413,52 +416,11 @@ public class App : Application
                 Content = "Select",
                 HorizontalAlignment = HorizontalAlignment.Stretch
             };
-            
-            selectBp.Click += (sender, args) =>
-            {
-                var browser = new BlueprintBrowser(RegistryServices.Blueprint, descriptor.Match);
-
-                if (TopLevel.GetTopLevel(selectBp) is not Window window)
-                {
-                    Logger.Error("Could not get top level window.");
-                    return;
-                }
-                
-                browser.ShowDialog(window);
-            };
 
             var createBp = new Button()
             {
                 Content = "Create",
                 HorizontalAlignment = HorizontalAlignment.Stretch
-            };
-
-            createBp.Click += async (sender, args) =>
-            {
-                var input = await EditorUiServices.DialogService.PromptTextAsync("Create new blueprint", "Enter the name of the new blueprint.");
-
-                if (string.IsNullOrEmpty(input))
-                {
-                    Logger.Error("No name given for the new blueprint.");
-                    return;
-                }
-
-                descriptor.Factory(input).OnFailure(e =>
-                {
-                    Logger.Error("Error while trying to create a new blueprint: {err}", e);
-                }).OnSuccess(o =>
-                {
-                    if (o is not BlueprintData bpData)
-                    {
-                        Logger.Error("Error while trying to create a new blueprint: {err}", $"Object returned is not a blueprint data. (Type: {o?.GetType()}");
-                        return;
-                    }
-                    
-                    descriptor.Set(bpData);
-                    label.Text = bpData.Name;
-                    Logger.Debug("Blueprint created successfully: {name}", bpData.Name);
-                    RegistryServices.Blueprint.RegisterBlueprint(bpData);
-                });
             };
 
             var divider = new Separator();
@@ -480,6 +442,8 @@ public class App : Application
             return grid;
         }
     }
+
+    
     
     public override void OnFrameworkInitializationCompleted()
     {

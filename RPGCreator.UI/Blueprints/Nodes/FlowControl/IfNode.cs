@@ -18,6 +18,7 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using RPGCreator.SDK.Graph;

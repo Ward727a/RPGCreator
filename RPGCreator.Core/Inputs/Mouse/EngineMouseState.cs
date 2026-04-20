@@ -178,7 +178,7 @@ namespace RPGCreator.Core.Inputs.Mouse
                     ButtonUp?.Invoke(button);
 
                     float distance = Vector2.Distance(Position, meta.LastClickPosition);
-                    bool isWithinTime = (currentTime - meta.LastReleaseTime) < DoubleClickInterval;
+                    bool isWithinTime = (currentTime - meta.LastReleaseTime) < 5000;
 
                     if (isWithinTime && distance < MaxDistance)
                     {

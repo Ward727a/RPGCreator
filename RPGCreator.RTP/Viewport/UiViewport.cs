@@ -24,6 +24,7 @@ using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.RTP.GameUI;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Editor.Rendering;
+using RPGCreator.SDK.GameUI.Controls;
 using RPGCreator.SDK.GameUI.Interfaces;
 using RPGCreator.SDK.Logging;
 using Color = Microsoft.Xna.Framework.Color;

@@ -7,6 +7,7 @@ using _BaseModule.Registry;
 using _BaseModule.Tools;
 using RPGCreator.SDK;
 using RPGCreator.SDK.EditorUiService;
+using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules;
 using RPGCreator.SDK.Registry;
@@ -38,7 +39,7 @@ public class BaseModule : RPGCreator.SDK.Modules.BaseModule
     private static readonly ScopedLogger Logger = RPGCreator.SDK.Logging.Logger.ForContext<BaseModule>();
 
     public static bool FirstTime = false;
-    
+
     private StatModifierRegistry _statModifierRegistry = new(); 
     
     protected override void OnInitialize()

@@ -55,8 +55,6 @@ public readonly record struct URN
         Module = module.AsMemory().Trim();
         Name = name.AsMemory().Trim();
     }
-    
-    public URN(string @namespace, string module, params string[] nameParts) : this(@namespace, module, string.Join("/", nameParts)) { }
 
     /// <summary>
     /// Create a new URN with the specified module and name, using a default namespace.<br/>
@@ -89,8 +87,6 @@ public readonly record struct URN
         Module = result.Module;
         Name = result.Name;
     }
-
-    public URN(URN other, string extend) : this(other.Namespace.ToString(), other.Module.ToString(), $"{other.Name}/{extend}"){}
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override string ToString() => $"{Namespace.Span}://{Module.Span}/{Name.Span}";
@@ -111,17 +107,17 @@ public readonly record struct URN
 
         ReadOnlySpan<char> span = input.AsSpan();
 
-        int namespaceSeparatorIdx = span.IndexOf("://".AsSpan());
-        if (namespaceSeparatorIdx <= 0) return false;
+        int protoIdx = span.IndexOf("://".AsSpan());
+        if (protoIdx <= 0) return false;
 
-        ReadOnlySpan<char> afterNamespace = span.Slice(namespaceSeparatorIdx + 3);
-        int pathIdx = afterNamespace.IndexOf('/');
+        ReadOnlySpan<char> afterProto = span.Slice(protoIdx + 3);
+        int pathIdx = afterProto.IndexOf('/');
         if (pathIdx <= 0) return false;
 
         result = new URN(
-            input.AsMemory(0, namespaceSeparatorIdx),
-            input.AsMemory(namespaceSeparatorIdx + 3, pathIdx),
-            input.AsMemory(namespaceSeparatorIdx + 3 + pathIdx + 1)
+            input.AsMemory(0, protoIdx),
+            input.AsMemory(protoIdx + 3, pathIdx),
+            input.AsMemory(protoIdx + 3 + pathIdx + 1)
         );
 
         return true;

@@ -24,6 +24,7 @@ using Avalonia.Layout;
 using Projektanker.Icons.Avalonia;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Exceptions;
+using RPGCreator.SDK.Logging;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.Editor;

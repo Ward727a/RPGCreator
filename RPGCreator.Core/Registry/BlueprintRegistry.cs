@@ -18,12 +18,14 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.CodeDom.Compiler;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Blueprints;
 using RPGCreator.SDK.Graph;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Registry;
 using RPGCreator.SDK.Types;
 

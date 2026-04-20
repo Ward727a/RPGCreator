@@ -25,6 +25,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using System;
 using RPGCreator.SDK;
 using Ursa.Controls;

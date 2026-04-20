@@ -22,12 +22,17 @@ using System;
 using System.Numerics;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Reactive;
+using RPGCreator.SDK.Editor.Rendering;
 using RPGCreator.SDK.GameUI.Controls;
+using RPGCreator.SDK.GameUI.Interfaces;
+using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Logging;
 using Rect = Avalonia.Rect;
+using Vector = Avalonia.Vector;
 
 namespace RPGCreator.UI.Content.GameUiEditor.Components;
 

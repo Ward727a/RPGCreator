@@ -22,6 +22,7 @@ using System.Numerics;
 using _BaseModule.Enums;
 using _BaseModule.Features.Entity;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;

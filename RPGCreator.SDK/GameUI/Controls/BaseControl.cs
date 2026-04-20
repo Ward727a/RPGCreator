@@ -18,8 +18,10 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.ComponentModel;
 using System.Numerics;
 using RPGCreator.RTP.GameUI.Enums;
+using RPGCreator.SDK.GameUI.Events.Actions;
 using RPGCreator.SDK.GameUI.Events.Contexts;
 using RPGCreator.SDK.GameUI.Interfaces;
 using RPGCreator.SDK.GameUI.Visual;
@@ -37,7 +39,6 @@ public abstract class BaseControl
     public event Action<ControlPropertyDescriptor>? PropertyDescriptorAdded;
     public event Action<ControlPropertyDescriptor>? PropertyDescriptorRemoved;
 
-    #region EventDescriptors
     private Dictionary<(PipedPath category, string name), ControlEventDescriptor> _eventDescriptorsCache = new();
     private readonly List<ControlEventDescriptor> _eventDescriptors = new();
 
@@ -90,15 +91,12 @@ public abstract class BaseControl
         _eventDescriptors.Remove(descriptor);
     }
     
-    #endregion
-    
     #region Exposed Events
 
     public ControlEventDescriptor<GuiClickEventContext> ClickedGuiEvent;
     
     #endregion
     
-    #region PropertyDescriptors
     private readonly Dictionary<(PipedPath path, string name), ControlPropertyDescriptor> _propertyDescriptorsCache = new();
     private readonly List<ControlPropertyDescriptor> _propertyDescriptors = new();
     
@@ -135,20 +133,11 @@ public abstract class BaseControl
         _propertyDescriptorsCache.Remove((path, name));
         PropertyDescriptorRemoved?.Invoke(descriptor);
     }
-    #endregion
 
     protected static readonly UrnSingleModule _urnModule = "gameUi_control".ToUrnSingleModule();
     protected static readonly PipedPath _defaultPath = "Other".ToPipedPath();
     public abstract URN Urn { get; }
     
-    /// <summary>
-    /// Define the name of the component. This is used to display it in the UI editor.<br/>
-    /// It can be renamed by the user in the UI editor.<br/>
-    /// But if the user does not rename it, the name will be what is set by default.
-    /// </summary>
-    public virtual string Name { get; set; } = "Unnamed Control";
-
-    public abstract StringName ControlName { get; }
     public virtual PipedPath Category { get; } = _defaultPath;
     
     #region ExposedProperties
@@ -169,6 +158,12 @@ public abstract class BaseControl
     
     #endregion
 
+    /// <summary>
+    /// Define the name of the component. This is used to display it in the UI editor.<br/>
+    /// It can be renamed by the user in the UI editor.<br/>
+    /// But if the user does not rename it, the name will be what is set by default.
+    /// </summary>
+    public virtual string Name { get; set; } = "Unnamed Control";
 
     public bool IsVisible { get; set; } = true;
     public bool IsHitTestVisible { get; set; } = true;
@@ -658,7 +653,7 @@ public abstract class BaseControl
 
     protected virtual void OnMouseClick(MouseButton button)
     {
-        EmitEvent("Mouse".ToPipedPath(), "OnClicked", new GuiClickEventContext(this, button));
+        EmitEvent("Mouse".ToPipedPath(), "Click", new GuiClickEventContext(this, button));
     }
 
     protected virtual void OnMouseDoubleClick(MouseButton button)

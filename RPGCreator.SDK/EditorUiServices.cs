@@ -26,6 +26,7 @@ using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types;
+using Size = System.Drawing.Size;
 
 namespace RPGCreator.SDK;
 

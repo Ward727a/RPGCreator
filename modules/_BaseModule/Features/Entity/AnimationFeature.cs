@@ -21,6 +21,7 @@
 using Avalonia.Controls;
 using Avalonia.LogicalTree;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Animations;
 using RPGCreator.SDK.Assets.Definitions.Characters;
