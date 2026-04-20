@@ -25,7 +25,7 @@
     <PropertyGroup>
         <SkipAnalyzersWithSingleRelease>true</SkipAnalyzersWithSingleRelease>
 
-        <NoWarn>$(NoWarn);RS2008</NoWarn>
+        <NoWarn>$(NoWarn);RS2007</NoWarn>
     </PropertyGroup>
 
 

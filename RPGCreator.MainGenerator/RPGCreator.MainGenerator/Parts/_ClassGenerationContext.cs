@@ -18,12 +18,21 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-namespace RPGCreator.SDK.Attributes;
+using System.CodeDom.Compiler;
+using RPGCreator.MainGenerator.MetaData;
 
-[AttributeUsage(AttributeTargets.Field)]
-public class ControlReadOnlyPropertyAttribute(string displayName = "", string description = "", string path = "") : Attribute
+namespace RPGCreator.MainGenerator.Parts;
+
+public class GenerationContext(IndentedTextWriter writer, EClassData classData)
 {
-    public string DisplayName { get; } = displayName;
-    public string Description { get; } = description;
-    public string Path { get; } = path;
+    public IndentedTextWriter Writer { get; } = writer;
+    public EClassData ClassData { get; } = classData;
+
+    public bool InClass = false;
+
+    public int Indent
+    {
+        get => Writer.Indent;
+        set => Writer.Indent = value;
+    }
 }

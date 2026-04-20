@@ -22,19 +22,15 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using AvaloniaEdit.Utils;
 using CommunityToolkit.Mvvm.Input;
-using FontStashSharp;
-using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.SDK;
 using RPGCreator.SDK.GameUI;
 using RPGCreator.SDK.GameUI.Controls;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
-using RPGCreator.SDK.Types;
 
 namespace RPGCreator.UI.Content.GameUiEditor.Components.Explorer;
 

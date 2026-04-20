@@ -1,6 +1,4 @@
-﻿using RPGCreator.SDK.EngineService;
-
-namespace RPGCreator.SDK.Projects;
+﻿namespace RPGCreator.SDK.Projects;
 
 public interface IBaseProject
 {

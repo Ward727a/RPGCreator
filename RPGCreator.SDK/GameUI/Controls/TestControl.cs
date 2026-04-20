@@ -41,6 +41,7 @@ public class TestControl : BaseControl
     private Vector2 _grabOffset;
     
     public override URN Urn => _urnModule.ToUrnModule("rpgc").ToUrn("test_control");
+    public override StringName ControlName => "Test Control";
 
     #region ExposedProperties
     

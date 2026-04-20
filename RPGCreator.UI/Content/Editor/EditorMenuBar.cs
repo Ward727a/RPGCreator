@@ -28,7 +28,6 @@ using RPGCreator.SDK;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.UI.Content.AssetsManage;
-using RPGCreator.UI.Content.Blueprint;
 using RPGCreator.UI.Content.GameUiEditor;
 using RPGCreator.UI.Content.Preferences;
 

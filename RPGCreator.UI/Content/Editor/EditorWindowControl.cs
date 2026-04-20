@@ -24,15 +24,9 @@
 #endregion
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Interactivity;
-using Avalonia.VisualTree;
-using RPGCreator.UI.Content.AssetsManage;
 using RPGCreator.UI.Content.Editor.Tabs;
 using RPGCreator.UI.Content.Editor.TilesetSelectorComponents;
 using RPGCreator.UI.Content.Editor.Toolbar;
-using RPGCreator.UI.Content.Preferences;
-using System;
 using System.Numerics;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -44,7 +38,6 @@ using RPGCreator.UI.Common;
 using RPGCreator.UI.Common.Bridge;
 using RPGCreator.UI.Content.Editor.LayersListComponents;
 using RPGCreator.UI.Content.Editor.LeftPanel;
-using Size = System.Drawing.Size;
 using Vector = Avalonia.Vector;
 
 namespace RPGCreator.UI.Content.Editor

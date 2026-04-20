@@ -222,6 +222,18 @@ public static class RegistryServices
         get => GetService<IBlueprintRegistry>();
         set => RegisterService(value);
     }
+
+    public static IReferencesRegistry References
+    {
+        get => GetService(defaultInstance: field);
+        set => RegisterService(value);
+    } = new ReferenceRegistry();
+
+    public static IClassesRegistry Classes
+    {
+        get => GetService(defaultInstance: field);
+        set => RegisterService(value);
+    } = new ClassesRegistry();
     
     public static IGUIControlRegistry GuiControl
     {

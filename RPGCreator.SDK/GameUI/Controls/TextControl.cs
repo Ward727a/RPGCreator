@@ -29,6 +29,7 @@ namespace RPGCreator.SDK.GameUI.Controls;
 public class TextControl : BaseControl
 {
     public override URN Urn => _urnModule.ToUrnModule("rpgc").ToUrn("text_control");
+    public override StringName ControlName => "Text Control";
 
     private bool _hasHeightBeenManuallyChanged;
     private bool _hasWidthBeenManuallyChanged;

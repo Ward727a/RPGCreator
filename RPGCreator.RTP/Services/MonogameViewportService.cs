@@ -24,7 +24,6 @@ using System.Runtime.InteropServices;
 using RPGCreator.RTP.Viewport;
 using RPGCreator.SDK.Editor.Rendering;
 using RPGCreator.SDK.EditorUiService;
-using Size = System.Drawing.Size;
 
 namespace RPGCreator.RTP.Services;
 

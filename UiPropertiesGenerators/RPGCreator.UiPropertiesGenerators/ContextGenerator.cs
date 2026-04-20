@@ -75,6 +75,7 @@ public class ContextGenerator : IIncrementalGenerator
     {
 
         var classDeclaration = (ClassDeclarationSyntax)ctx.Node;
+        
         var classSymbol = ctx.SemanticModel.GetDeclaredSymbol(classDeclaration, token) as INamedTypeSymbol;
 
         if (classSymbol == null) return null;
@@ -179,12 +180,13 @@ public class ContextGenerator : IIncrementalGenerator
     private static void GenerateReadOnlyMethods(IndentedTextWriter sb, IFieldSymbol property, AttributeData attributeData,
         string propertySimpleVarName)
     {
-        sb.WriteLine(CreateGetMethod(property));
-        sb.WriteLine();
-                    
-        sb.WriteLine(CreatePartialGetMethod(property));
-        sb.WriteLine();
-                    
+
+        GetMethod(property, sb);
+        
+        MatchMethod(property, sb);
+        
+        FactoryMethod(property, sb);
+        
         sb.WriteLine(CreateReadOnlyProperty(property, attributeData, propertySimpleVarName));
         sb.WriteLine();
     }
@@ -198,31 +200,73 @@ public class ContextGenerator : IIncrementalGenerator
                 $"Field '{property.Name}' in class '{className}' is marked with ControlEditablePropertyAttribute but is read-only, or const. Only non-readonly fields can be used as editable properties.");
         }
 
-        sb.WriteLine(CreateGetMethod(property));
-        sb.WriteLine();
+        GetMethod(property, sb);
 
-        sb.WriteLine(CreatePartialGetMethod(property));
-        sb.WriteLine();
+        SetMethod(property, sb);
 
-        sb.WriteLine(CreateSetMethod(property));
-        sb.WriteLine();
+        ValidateMethod(property, sb);
 
-        sb.WriteLine(CreatePartialSetMethod(property));
-        sb.WriteLine();
+        CoerceMethod(property, sb);
 
-        sb.WriteLine(CreateValidateMethod(property));
-        sb.WriteLine();
+        MatchMethod(property, sb);
+        
+        FactoryMethod(property, sb);
 
-        sb.WriteLine(CreatePartialValidateMethod(property));
+        sb.WriteLine(CreateEditableProperty(property, attributeData, propertySimpleVarName));
         sb.WriteLine();
+    }
 
+    private static void FactoryMethod(IFieldSymbol property, IndentedTextWriter sb)
+    {
+        sb.WriteLine(CreateFactoryMethod(property));
+        sb.WriteLine();
+        
+        sb.WriteLine(CreatePartialFactoryMethod(property));
+        sb.WriteLine();
+    }
+    
+    private static void MatchMethod(IFieldSymbol property, IndentedTextWriter sb)
+    {
+        sb.WriteLine(CreateMatchMethod(property));
+        sb.WriteLine();
+        
+        sb.WriteLine(CreatePartialMatchMethod(property));
+        sb.WriteLine();
+    }
+
+    private static void CoerceMethod(IFieldSymbol property, IndentedTextWriter sb)
+    {
         sb.WriteLine(CreateCoerceMethod(property));
         sb.WriteLine();
 
         sb.WriteLine(CreatePartialCoerceMethod(property));
         sb.WriteLine();
+    }
 
-        sb.WriteLine(CreateEditableProperty(property, attributeData, propertySimpleVarName));
+    private static void ValidateMethod(IFieldSymbol property, IndentedTextWriter sb)
+    {
+        sb.WriteLine(CreateValidateMethod(property));
+        sb.WriteLine();
+
+        sb.WriteLine(CreatePartialValidateMethod(property));
+        sb.WriteLine();
+    }
+
+    private static void SetMethod(IFieldSymbol property, IndentedTextWriter sb)
+    {
+        sb.WriteLine(CreateSetMethod(property));
+        sb.WriteLine();
+
+        sb.WriteLine(CreatePartialSetMethod(property));
+        sb.WriteLine();
+    }
+
+    private static void GetMethod(IFieldSymbol property, IndentedTextWriter sb)
+    {
+        sb.WriteLine(CreateGetMethod(property));
+        sb.WriteLine();
+
+        sb.WriteLine(CreatePartialGetMethod(property));
         sb.WriteLine();
     }
 
@@ -236,6 +280,7 @@ public class ContextGenerator : IIncrementalGenerator
         sb.WriteLine("#nullable enable");
         sb.WriteLine("using System;");
         sb.WriteLine("using System.Collections.Generic;");
+        sb.WriteLine("using System.Diagnostics.CodeAnalysis;");
         sb.WriteLine("using RPGCreator.SDK.GameUI;");
         sb.WriteLine("using RPGCreator.SDK.GameUI.Interfaces;");
         sb.WriteLine("using RPGCreator.SDK.Types;");
@@ -277,7 +322,8 @@ public class ContextGenerator : IIncrementalGenerator
 
     private static string CreatePartialGetMethod(IFieldSymbol property)
     {
-        return $"partial void UiGet{property.Name}(ref {property.Type} returnValue);";
+        return $"[SuppressMessage(\"ReSharper\", \"RedundantAssignment\")]\n" +
+               $"partial void UiGet{property.Name}(ref {property.Type} returnValue);";
     }
 
     private static string CreateSetMethod(IFieldSymbol property)
@@ -298,7 +344,8 @@ public class ContextGenerator : IIncrementalGenerator
     
     private static string CreatePartialSetMethod(IFieldSymbol property)
     {
-        return $"partial void UiSet{property.Name}(ref object? newValue);";
+        return $"[SuppressMessage(\"ReSharper\", \"RedundantAssignment\")]\n" +
+               $"partial void UiSet{property.Name}(ref object? newValue);";
     }
 
     private static string CreateValidateMethod(IFieldSymbol property)
@@ -315,7 +362,8 @@ public class ContextGenerator : IIncrementalGenerator
     
     private static string CreatePartialValidateMethod(IFieldSymbol property)
     {
-        return $"partial void UiValidate{property.Name}(object? valueToValidate, ref bool isValid);";
+        return $"[SuppressMessage(\"ReSharper\", \"RedundantAssignment\")]\n" +
+               $"partial void UiValidate{property.Name}(object? valueToValidate, ref bool isValid);";
     }
 
     private static string CreateCoerceMethod(IFieldSymbol property)
@@ -332,7 +380,44 @@ public class ContextGenerator : IIncrementalGenerator
     
     private static string CreatePartialCoerceMethod(IFieldSymbol property)
     {
-        return $"partial void UiCoerce{property.Name}(ref object? valueToCoerce);";
+        return $"[SuppressMessage(\"ReSharper\", \"RedundantAssignment\")]\n" +
+               $"partial void UiCoerce{property.Name}(ref object? valueToCoerce);";
+    }
+
+    private static string CreateMatchMethod(IFieldSymbol property)
+    {
+        return $$"""
+                    private bool _uiMatch{{property.Name}}(object? valueToMatch)
+                    {
+                        bool returnValue = true;
+                        UiMatch{{property.Name}}(valueToMatch, ref returnValue);
+                        return returnValue;
+                    }
+                 """;
+    }
+
+    private static string CreatePartialMatchMethod(IFieldSymbol property)
+    {
+        return $"[SuppressMessage(\"ReSharper\", \"RedundantAssignment\")]\n" +
+               $"partial void UiMatch{property.Name}(object? valueToMatch, ref bool isMatch);";
+    }
+
+    private static string CreateFactoryMethod(IFieldSymbol property)
+    {
+        return $$"""
+                 private Result<object?> _uiFactory{{property.Name}}(object? arg)
+                 {
+                    Result<object?>? returnValue = null;
+                    UiFactory{{property.Name}}(arg, ref returnValue);
+                    return returnValue ?? Result<object?>.Failure("No value returned from factory method.");
+                 }
+                 """;
+    }
+
+    private static string CreatePartialFactoryMethod(IFieldSymbol property)
+    {
+        return $"\n" +
+               $"partial void UiFactory{property.Name}(object? arg, [SuppressMessage(\"ReSharper\", \"RedundantAssignment\", Scope = \"type\")] ref Result<object?>? returnValue);";
     }
     
     private static string CreateEditableProperty(IFieldSymbol property, AttributeData data, string varName)
@@ -345,12 +430,14 @@ public class ContextGenerator : IIncrementalGenerator
                  public EditableControlPropertyDescriptor {varName}Property => _{property.Name}Property__cache ??= new EditableControlPropertyDescriptor(
                     name: "{(string.IsNullOrEmpty(data.DisplayName) ? varName : data.DisplayName)}",
                     type: typeof({property.Type.ToString().TrimEnd('?')}),
-                    getter: _uiGet{property.Name}, 
                     path: PipedPath.Parse("{(!string.IsNullOrWhiteSpace(data.Path) ? $"{data.Path}" : "Properties")}"), 
                     description: "{(!string.IsNullOrWhiteSpace(data.Description) ? $"{data.Description}" : "")}",
+                    getter: _uiGet{property.Name},
                     setter: _uiSet{property.Name},
                     validate: _uiValidate{property.Name},
-                    coerce: _uiCoerce{property.Name}
+                    coerce: _uiCoerce{property.Name},
+                    match: _uiMatch{property.Name},
+                    factory: _uiFactory{property.Name}
                  );
                  """;
     }
@@ -364,9 +451,11 @@ public class ContextGenerator : IIncrementalGenerator
                     public ReadOnlyControlPropertyDescriptor {varName}Property => _{property.Name}Property__cache ??= new ReadOnlyControlPropertyDescriptor(
                         name: "{(string.IsNullOrEmpty(data.DisplayName) ? varName : data.DisplayName)}",
                         type: typeof({property.Type.ToString().TrimEnd('?')}),
-                        getter: _uiGet{property.Name}, 
                         path: PipedPath.Parse("{(!string.IsNullOrWhiteSpace(data.Path) ? $"{data.Path}" : "Properties")}"), 
-                        description: "{(!string.IsNullOrWhiteSpace(data.Description) ? $"{data.Description}" : "")}"
+                        description: "{(!string.IsNullOrWhiteSpace(data.Description) ? $"{data.Description}" : "")}",
+                        getter: _uiGet{property.Name}, 
+                        match: _uiMatch{property.Name},
+                        factory: _uiFactory{property.Name}
                     );
                  """;
     }

@@ -27,6 +27,8 @@ public interface IGuiAction
     string Name { get; }
     string Description { get; }
     Type[] SupportedEventContexts { get; }
+    
+    void LinkTo(Type context);
 
     void Execute(GuiEventContext context);
     bool Match(GuiEventContext context);

@@ -74,6 +74,15 @@
       <DependentUpon>UiExplorer.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Common\Modal\Browser\BlueprintBrowserVm.cs">
+      <DependentUpon>BlueprintBrowser.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Content\GameUiEditor\Components\Explorer\UiTreeExplorerVm.cs">
+      <DependentUpon>UiExplorer.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Content\GameUiEditor\Components\Explorer\UiPickerVm.cs">
+      <DependentUpon>UiPicker.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

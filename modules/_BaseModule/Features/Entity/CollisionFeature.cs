@@ -30,7 +30,6 @@ using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.RuntimeService;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
-using Logger = RPGCreator.SDK.Logging.Logger;
 
 namespace _BaseModule.Features.Entity;
 

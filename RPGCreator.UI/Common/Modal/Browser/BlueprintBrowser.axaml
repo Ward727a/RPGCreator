@@ -1,0 +1,45 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:browser="clr-namespace:RPGCreator.UI.Common.Modal.Browser"
+        xmlns:blueprints="clr-namespace:RPGCreator.SDK.Assets.Definitions.Blueprints;assembly=RPGCreator.SDK"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="RPGCreator.UI.Common.Modal.Browser.BlueprintBrowser"
+        Title="BlueprintBrowser"
+        x:DataType="browser:BlueprintBrowserVm">
+    
+    <Grid RowDefinitions="Auto, *">
+        <Grid ColumnDefinitions="*, Auto">
+            <TextBox x:Name="SearchBox" Watermark="Search for blueprint..."
+                     Text="{Binding SearchContent}">
+                <TextBox.KeyBindings>
+                    <KeyBinding Gesture="Enter" 
+                                Command="{Binding SearchForCommand}"
+                                CommandParameter="{Binding SearchContent}">
+                    </KeyBinding>
+                </TextBox.KeyBindings>
+            </TextBox>
+            
+            <Button Grid.Column="1"
+                    Content="Search"
+                    Command="{Binding SearchForCommand}"
+                    CommandParameter="{Binding SearchContent}" />
+        </Grid>
+
+        <ListBox Grid.Row="1" ItemsSource="{Binding ItemsList}"
+                 SelectedItem="{Binding SelectedBlueprint}"
+                 SelectedIndex="{Binding SelectedIndex}">
+            <ListBox.DataTemplates>
+                <DataTemplate DataType="blueprints:BlueprintData">
+                    <Grid RowDefinitions="Auto, Auto">
+                        <TextBlock Text="{Binding Name}" />
+                        <TextBlock Grid.Row="1" Text="{Binding Id}" Foreground="Gray" FontSize="12" FontStyle="Italic" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.DataTemplates>
+
+        </ListBox>
+    </Grid>
+    
+</Window>

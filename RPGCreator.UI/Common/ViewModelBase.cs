@@ -25,7 +25,7 @@
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace RPGCreator.Core.Types;
+namespace RPGCreator.UI.Common;
 
 public class ViewModelBase : ObservableObject
 {

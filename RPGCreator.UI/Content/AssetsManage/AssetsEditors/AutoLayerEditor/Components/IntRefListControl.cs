@@ -10,7 +10,6 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using Avalonia.VisualTree;
 using CommunityToolkit.Diagnostics;
 using Projektanker.Icons.Avalonia;
 using RPGCreator.SDK;

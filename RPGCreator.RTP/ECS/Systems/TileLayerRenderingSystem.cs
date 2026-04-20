@@ -20,7 +20,6 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
@@ -29,7 +28,6 @@ using RPGCreator.SDK.Assets.Runtime.Tilesets;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components.Maps;
 using RPGCreator.SDK.ECS.Systems;
-using RPGCreator.SDK.Types.Collections;
 using Color = RPGCreator.SDK.Types.Color;
 
 namespace RPGCreator.RTP.ECS.Systems;

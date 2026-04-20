@@ -31,6 +31,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Generators", "Generators", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RPGCreator.UiPropertiesGenerators", "UiPropertiesGenerators\RPGCreator.UiPropertiesGenerators\RPGCreator.UiPropertiesGenerators.csproj", "{4C30A5F0-9FA8-4737-8E81-0BDE5AFA25AD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RPGCreator.MainGenerator", "RPGCreator.MainGenerator\RPGCreator.MainGenerator\RPGCreator.MainGenerator.csproj", "{41FFC8C9-A001-4A39-974E-5F26673A6BB7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{4C30A5F0-9FA8-4737-8E81-0BDE5AFA25AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C30A5F0-9FA8-4737-8E81-0BDE5AFA25AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C30A5F0-9FA8-4737-8E81-0BDE5AFA25AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41FFC8C9-A001-4A39-974E-5F26673A6BB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41FFC8C9-A001-4A39-974E-5F26673A6BB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41FFC8C9-A001-4A39-974E-5F26673A6BB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41FFC8C9-A001-4A39-974E-5F26673A6BB7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -91,6 +97,7 @@ Global
 		{F2C2862D-2F3A-4A42-91CC-D5105D333E8E} = {20A4286D-E842-4740-8F38-614E09ABDBC0}
 		{5D8CC5D9-882A-43EC-82F0-E13EAF96C360} = {ADD343A4-8C11-41FF-8022-D55020EAA17D}
 		{4C30A5F0-9FA8-4737-8E81-0BDE5AFA25AD} = {ADD343A4-8C11-41FF-8022-D55020EAA17D}
+		{41FFC8C9-A001-4A39-974E-5F26673A6BB7} = {ADD343A4-8C11-41FF-8022-D55020EAA17D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D53E9DA2-1A27-419D-A5F4-EF95690010B9}

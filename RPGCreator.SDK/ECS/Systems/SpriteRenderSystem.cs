@@ -23,7 +23,6 @@ using RPGCreator.SDK.Assets.Definitions.Animations;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
-using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.ECS.Systems;
 

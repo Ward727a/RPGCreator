@@ -26,7 +26,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Layout;
-using Avalonia.VisualTree;
 using RPGCreator.Core.Types;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor;
 using System;

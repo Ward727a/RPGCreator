@@ -32,29 +32,38 @@ public abstract class ControlPropertyDescriptor
     public Type Type { get; private init; }
     public string Description { get; private init; }
     protected readonly Func<object?> _getter;
-
+    protected readonly Func<object?, bool> _match;
+    protected readonly Func<object?, Result<object?>> _factory;
+    
     public ControlPropertyDescriptor(string name, Type type, Func<object?> getter, PipedPath? path = null,
-        string description = "")
+        string description = "", Func<object?, bool>? match = null, Func<object?, Result<object?>>? factory = null)
     {
         Path = path ?? _defaultPath;
         Name = name;
         Type = type;
         Description = description;
         _getter = getter;
+        _match = match ?? (_ => true);
+        _factory = factory ?? (_ => Result.Fail("No factory provided"));
     }
 
     public virtual object? Get() => _getter();
-    
+
     public T? Get<T>()
     {
         var val = _getter();
         return val is T typedVal ? typedVal : default;
     }
+    
+    public bool Match(object? data) => _match(data);
+    
+    public Result<object?> Factory(object? data) => _factory(data);
 }
 
 public class ReadOnlyControlPropertyDescriptor : ControlPropertyDescriptor
 {
-    public ReadOnlyControlPropertyDescriptor(string name, Type type, Func<object?> getter, PipedPath? path = null, string description = "") : base(name, type, getter, path, description)
+    public ReadOnlyControlPropertyDescriptor(string name, Type type, Func<object?> getter, PipedPath? path = null,
+        string description = "", Func<object?, bool>? match = null, Func<object?, Result<object?>>? factory = null) : base(name, type, getter, path, description, match, factory)
     {
         Guard.IsNotNull(getter);
     }
@@ -62,10 +71,28 @@ public class ReadOnlyControlPropertyDescriptor : ControlPropertyDescriptor
 
 public class ReadOnlyControlPropertyDescriptor<TValue> : ReadOnlyControlPropertyDescriptor
 {
-    public ReadOnlyControlPropertyDescriptor(string name, Func<TValue?> getter, PipedPath path = default, string description = "") : base(name, typeof(TValue), () => getter(), path, description)
+    public ReadOnlyControlPropertyDescriptor(
+        string name, 
+        Func<TValue?> getter, 
+        PipedPath path = default,
+        string description = "",
+        Func<TValue?, bool>? match = null,
+        Func<object?, Result<TValue?>>? factory = null
+        ) : base(name, typeof(TValue), () => getter(), path, description, o =>
+    {
+        if(o is TValue typedValue && match != null)
+            return match(typedValue);
+        return match == null;
+    }, o =>
+    {
+        if(factory != null)
+            return factory(o);
+
+        return Result.Fail("No factory provided");
+    })
     {
     }
-    
+
     public new TValue? Get()
     {
         var val = _getter();
@@ -111,8 +138,10 @@ public class EditableControlPropertyDescriptor : ControlPropertyDescriptor
         string description = "",
         Action<object?>? setter = null,
         Func<object?, bool>? validate = null,
-        Func<object?, object?>? coerce = null
-    ) : base(name, type, getter, path, description)
+        Func<object?, object?>? coerce = null,
+        Func<object?, bool>? match = null,
+        Func<object?, Result<object?>>? factory = null
+    ) : base(name, type, getter, path, description, match, factory)
     {
         _setter = setter ?? (_ => { });
         _validate = validate ?? (_ => true);

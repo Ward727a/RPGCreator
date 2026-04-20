@@ -22,7 +22,6 @@ using _BaseModule.Features.Entity;
 using CommunityToolkit.Mvvm.ComponentModel;
 using RPGCreator.SDK;
 using RPGCreator.SDK.ECS;
-using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Registry;
 using RPGCreator.SDK.Types;

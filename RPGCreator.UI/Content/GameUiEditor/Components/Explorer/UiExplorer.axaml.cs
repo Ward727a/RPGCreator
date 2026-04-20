@@ -23,12 +23,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using RPGCreator.RTP.GameUI;
 using RPGCreator.SDK.GameUI;
 using RPGCreator.SDK.GameUI.Controls;
-using RPGCreator.SDK.GameUI.Interfaces;
-using RPGCreator.SDK.Logging;
-using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.GameUiEditor.Components.Explorer;
 

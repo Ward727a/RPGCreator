@@ -31,7 +31,6 @@ using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.Types;
-using RPGCreator.UI.Content.GameUiEditor;
 using RPGCreator.UI.Contexts;
 using TextMateSharp.Grammars;
 using Thickness = Avalonia.Thickness;

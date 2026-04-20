@@ -9,7 +9,6 @@ using RPGCreator.Core.Types.Project;
 using RPGCreator.Player.ECS.Systems;
 using RPGCreator.Player.Services;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Debug;
 using RPGCreator.SDK.ECS;
@@ -21,7 +20,6 @@ using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
 using RPGCreator.SDK.Types;
 using Color = Microsoft.Xna.Framework.Color;
-using Vector2 = System.Numerics.Vector2;
 
 namespace RPGCreator.Player;
 

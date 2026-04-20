@@ -24,10 +24,7 @@ using _BaseModule.UI.StatsFeature;
 using _BaseModule.UI.StatsModifier;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
-using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
-using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.EditorUiService;
-using RPGCreator.UI.Content.Editor.LayersListComponents;
 using RPGCreator.UI.Extensions;
 
 namespace _BaseModule;

@@ -26,7 +26,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Avalonia.Threading;
-using AvaloniaEdit.Utils;
 using CommunityToolkit.Mvvm.Input;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Graph.LOGIC;

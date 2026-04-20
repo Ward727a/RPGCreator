@@ -21,7 +21,6 @@
 using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using Avalonia.Metadata;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Registry;
 using RPGCreator.UI.Blueprints;

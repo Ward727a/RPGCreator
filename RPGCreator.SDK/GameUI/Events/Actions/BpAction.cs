@@ -18,11 +18,13 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Diagnostics.CodeAnalysis;
 using RPGCreator.SDK.Assets.Definitions.Blueprints;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.GameUI.Events.Contexts;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.GameUI.Events.Actions;
 
@@ -31,7 +33,9 @@ public partial class BpAction : IGuiAction
     public string Name => "Blueprint Action";
     public string Description => "Allows to create a custom action from a blueprint.";
     public Type[] SupportedEventContexts { get; } = [typeof(GuiEventContext)];
-
+    
+    public Type CurrentContext { get; private set; }
+    
     [GuiControlProperty(DisplayName = "Blueprint", Description = "The blueprint to use for this action.")]
     private BlueprintData? _blueprintData;
     
@@ -42,6 +46,40 @@ public partial class BpAction : IGuiAction
     public BpAction()
     {
         
+    }
+
+    partial void UiMatch_blueprintData(object? valueToMatch, ref bool isMatch)
+    {
+        isMatch = false;
+        
+        if (valueToMatch is not BlueprintData blueprintData)
+            return;
+
+        if (blueprintData.Parameters.Where(p => p.IsArgument).All(p => p.Type != CurrentContext))
+            return;
+        
+        isMatch = true;
+    }
+    
+    
+    partial void UiFactory_blueprintData(object? arg, ref Result<object?>? returnValue)
+    {
+        if (arg is not string name)
+        {
+            returnValue = Result.Failure("Blueprint name cannot be null or empty.");
+            return;
+        }
+
+        var bpData = BlueprintData.Create();
+        bpData.Name = name;
+        bpData.Parameters.Add(new BlueprintParameters(Ulid.NewUlid(), "Event context", CurrentContext, true, true, true));
+
+        returnValue = Result<object?>.Success(bpData);
+    }
+
+    public void LinkTo(Type context)
+    {
+        CurrentContext = context;
     }
 
     public void Execute(GuiEventContext context)

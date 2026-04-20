@@ -213,9 +213,6 @@ public class UiManager : IUiManager
         Vector2 mousePos = _mouseState.Position;
         
         BaseControl? clickedControl = FindControlAt(mousePos);
-
-        if (clickedControl != _pressedControl)
-            return;
         
         if (button == MouseButton.Left)
         {
