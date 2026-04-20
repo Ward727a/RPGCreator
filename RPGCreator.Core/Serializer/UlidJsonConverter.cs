@@ -1,23 +1,22 @@
-
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace RPGCreator.Core.Serializer;
 
 public class UlidJsonConverter : JsonConverter<Ulid>
 {
-    public override Ulid Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override void WriteJson(JsonWriter writer, Ulid value, JsonSerializer serializer)
     {
-        if (reader.TokenType == JsonTokenType.String)
+        writer.WriteValue(value.ToString());
+    }
+
+    public override Ulid ReadJson(JsonReader reader, Type objectType, Ulid existingValue, bool hasExistingValue, JsonSerializer serializer)
+    {
+        if(reader.TokenType == JsonToken.String)
         {
-            return Ulid.Parse(reader.GetString());
+            var ulidString = (string)reader.Value!;
+            return Ulid.Parse(ulidString);
         }
 
         return Ulid.Empty;
-    }
-
-    public override void Write(Utf8JsonWriter writer, Ulid value, JsonSerializerOptions options)
-    {
-        writer.WriteStringValue(value.ToString());
     }
 }

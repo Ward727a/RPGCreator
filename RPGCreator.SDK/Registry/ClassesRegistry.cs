@@ -29,17 +29,8 @@ public class ClassesRegistry : IClassesRegistry
     private ConcurrentDictionary<URN, Func<EBaseClass>> _classes = new();
     private ConcurrentDictionary<Type, URN> _typeToUrn = new();
     private IReadOnlyDictionary<URN, Type> _urnToType => _typeToUrn.ToDictionary(x => x.Value, x => x.Key);
-    private ConcurrentDictionary<URN, IReadOnlyDictionary<StringName, EPropertyContext>> _classesProperties = new();
-
-    public ClassesRegistry()
-    {
-        // We disable the warning because we know what we are doing here
-#pragma warning disable CS0618 // Type or member is obsolete
-        Register<TestClass>(TestClass.ClassUrn, TestClass.Create, TestClass.GetProperties());
-#pragma warning restore CS0618 // Type or member is obsolete
-    }
     
-    public Result Register<T>(URN urn, Func<T> constructor, IReadOnlyDictionary<StringName, EPropertyContext>? properties = null) where T : EBaseClass
+    public Result Register<T>(URN urn, Func<T> constructor) where T : EBaseClass
     {
         if(_classes.ContainsKey(urn))
         {
@@ -48,11 +39,6 @@ public class ClassesRegistry : IClassesRegistry
         
         _classes[urn] = constructor;
         _typeToUrn[typeof(T)] = urn;
-
-        if (properties == null)
-            properties = new Dictionary<StringName, EPropertyContext>();
-        
-        _classesProperties[urn] = properties;
         
         return Result.Ok();
     }
@@ -66,7 +52,6 @@ public class ClassesRegistry : IClassesRegistry
         
         _classes.Remove(urn, out _);
         _typeToUrn.Remove(_urnToType[urn], out _);
-        _classesProperties.Remove(urn, out _);
         
         return Result.Ok();
     }
@@ -91,31 +76,14 @@ public class ClassesRegistry : IClassesRegistry
         return Result<EBaseClass>.Fail($"Class with URN '{urn}' has no constructor registered.");
     }
 
-    public Result<T> Instantiate<T>() where T : EBaseClass
+    public Result<EBaseClass> Instantiate<T>() where T : EBaseClass
     {
         if(_classes.TryGetValue(_typeToUrn[typeof(T)], out var ctor))
         {
-            if(ctor() is T typed)
-                return Result<T>.Ok(typed);
-            return Result<T>.Fail($"Failed to cast constructor result to type '{typeof(T)}'");
+            return Result<EBaseClass>.Ok(ctor());
         }
         
-        return Result<T>.Fail($"Class with URN '{_typeToUrn[typeof(T)]}' has no constructor registered.");
-    }
-
-    public Result<List<(Type type, URN urn)>> GetAllClasses()
-    {
-        return Result<List<(Type type, URN urn)>>.Ok(_typeToUrn.Select(c => (c.Key, c.Value)).ToList());
-    }
-
-    public Result<IReadOnlyDictionary<StringName, EPropertyContext>> GetPropertiesOfClass(URN classUrn)
-    {
-        if(_classesProperties.TryGetValue(classUrn, out var properties))
-        {
-            return Result<IReadOnlyDictionary<StringName, EPropertyContext>>.Ok(properties);
-        }
-        
-        return Result<IReadOnlyDictionary<StringName, EPropertyContext>>.Fail($"Class with URN '{classUrn}' has no properties registered.");   
+        return Result<EBaseClass>.Fail($"Class with URN '{_typeToUrn[typeof(T)]}' has no constructor registered.");
     }
 
     public bool HasConstructor(URN urn)

@@ -18,29 +18,47 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RPGCreator.SDK.Types;
+using Logger = RPGCreator.SDK.Logging.Logger;
 
 namespace RPGCreator.Core.Serializer;
 
 public class UrnJsonConverter : JsonConverter<URN>
 {
-    public override URN Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override void WriteJson(JsonWriter writer, URN value, JsonSerializer serializer)
     {
-        if (reader.TokenType == JsonTokenType.String)
-        {
-            var stringValue = reader.GetString();
-            if(string.IsNullOrWhiteSpace(stringValue))
-                throw new JsonException($"URN string cannot be null or whitespace, got \"{stringValue}\"");
-            return URN.Parse(stringValue);
-        }
-        
-        throw new JsonException($"Expected URN string, got {reader.TokenType}.");
+        writer.WriteValue(value.ToString());
     }
 
-    public override void Write(Utf8JsonWriter writer, URN value, JsonSerializerOptions options)
+    public override URN ReadJson(JsonReader reader, Type objectType, URN existingValue, bool hasExistingValue,
+        JsonSerializer serializer)
     {
-        writer.WriteStringValue(value.ToString());
+        string? urnString = reader.Value?.ToString();
+        if (string.IsNullOrEmpty(urnString))
+        {
+            try
+            {
+                var urnObject = JObject.Load(reader);
+
+
+                if (urnObject is JObject jObject)
+                {
+                    urnString = jObject.GetValue("FullName")?.ToString() ?? "";
+                }
+            }
+            catch
+            {
+                // Ignore exceptions and return URN.Empty
+                Logger.Error("Failed to read URN from JSON object.");
+            }
+        }
+        
+        if (!string.IsNullOrEmpty(urnString))
+        {
+            return URN.Parse(urnString);
+        }
+        return URN.Empty;
     }
 }

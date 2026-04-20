@@ -25,13 +25,15 @@ using RPGCreator.SDK.Serializer;
 
 namespace RPGCreator.SDK.EngineService;
 
-[EClass(DisplayName = "Config", Description = "A config object. Store configuration for the engine.", SerializeInProjectFolder = false, SupportDirtyFlag = true)]
-public partial class BaseConfig : IConfig
+[SerializingType("BaseConfig")]
+public class BaseConfig : IConfig
 {
     public event Action<string>? KeyChanged;
     public event Action? ConfigSaved;
     public event Action? ConfigLoaded;
     public event Action? ConfigChanged;
+    
+    public bool IsDirty { get; protected set; } = false;
     
     private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<BaseConfig>();
 
@@ -116,7 +118,7 @@ public partial class BaseConfig : IConfig
     public IConfig Set<T>(string key, T value)
     {
         Data.Set(key, value);
-        MarkDirty();
+        IsDirty = true;
         ConfigChanged?.Invoke();
         KeyChanged?.Invoke(key);
         return this;
@@ -138,9 +140,7 @@ public partial class BaseConfig : IConfig
 
     public bool SaveConfig()
     {
-        this.Serialize();
-        MarkClean();
-        return true;
+        return SaveConfigAt(ConfigPath);
     }
 
     public bool SaveConfigAt(string path)
@@ -154,7 +154,7 @@ public partial class BaseConfig : IConfig
         try
         {
             File.WriteAllText(path, stringData);
-            MarkClean();
+            IsDirty = false;
             return true;
         } catch (Exception ex)
         {

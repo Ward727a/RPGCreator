@@ -18,26 +18,41 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.Core.Serializer;
 
 public class ColorJsonConverter : JsonConverter<Color>
 {
-    public override Color Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override void WriteJson(JsonWriter writer, Color value, JsonSerializer serializer)
     {
-        if (reader.TokenType == JsonTokenType.Number)
-        {
-            return Color.FromUnsignedInt(reader.GetUInt32());
-        }
-        
-        throw new JsonException($"Unexpected token parsing Color. Expected Number, got {reader.TokenType}.");
+        writer.WriteValue(value.ToUnsignedInt());
     }
 
-    public override void Write(Utf8JsonWriter writer, Color value, JsonSerializerOptions options)
+    public override Color ReadJson(JsonReader reader, Type objectType, Color existingValue, bool hasExistingValue,
+        JsonSerializer serializer)
     {
-        writer.WriteNumberValue(value.ToUnsignedInt());
+        if (reader.TokenType == JsonToken.Integer)
+        {
+            try
+            {
+                uint colorValue = Convert.ToUInt32(reader.Value);
+                return Color.FromUnsignedInt(colorValue);
+            }
+            catch (OverflowException)
+            {
+                // In this case, this is still the 'System.Drawing.Color' type, which is not any more supported.
+                // So we do a fallback to a less efficient conversion, but at least it doesn't make the engine crash.
+                // This is a temporary solution, and should be removed before the release of the engine.
+                //
+                // So if you see this message, and the engine was released... I forgot to remove it, shame on me.
+                // Ward.
+                var color = System.Drawing.Color.FromArgb(Convert.ToInt32(reader.Value));
+                return new Color(color.R, color.G, color.B, color.A);
+            }
+        }
+
+        throw new JsonSerializationException($"Unexpected token parsing Color. Expected Integer, got {reader.TokenType}.");
     }
 }

@@ -25,14 +25,12 @@ namespace RPGCreator.SDK.Registry;
 
 public interface IClassesRegistry : IService
 {
-    Result Register<T>(URN urn, Func<T> constructor, IReadOnlyDictionary<StringName, EPropertyContext>? properties = null) where T : EBaseClass;
+    Result Register<T>(URN urn, Func<T> constructor) where T : EBaseClass;
     Result Unregister(URN urn);
     
     Result<Func<EBaseClass>?> GetConstructor(URN urn);
     Result<EBaseClass> Instantiate(URN urn);
-    Result<T> Instantiate<T>() where T : EBaseClass;
-    
-    Result<List<(Type type, URN urn)>> GetAllClasses();
+    Result<EBaseClass> Instantiate<T>() where T : EBaseClass;
     
     bool HasConstructor(URN urn);
     bool HasConstructor<T>() where T : EBaseClass;

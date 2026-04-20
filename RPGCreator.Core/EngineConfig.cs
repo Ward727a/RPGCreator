@@ -32,8 +32,8 @@ using RPGCreator.SDK.Types;
 
 namespace RPGCreator.Core;
 
-[EClass]
-public partial class EngineConfig : IEngineConfig
+[SerializingType("EngineConfig")]
+public class EngineConfig : IEngineConfig
 {
     public static class Keys
     {
@@ -81,6 +81,10 @@ public partial class EngineConfig : IEngineConfig
     private CustomData _data = new();
 
     private Guid _schedulerAutosavingId = Guid.Empty;
+
+    public EngineConfig()
+    {
+    }
 
     private void LoadData()
     {
@@ -173,13 +177,13 @@ public partial class EngineConfig : IEngineConfig
 
                 foreach (var globalConfig in _globalConfigs)
                 {
-                    if (globalConfig.Value.Dirty)
+                    if (globalConfig.Value.IsDirty)
                         globalConfig.Value.SaveConfig();
                 }
 
                 foreach (var localConfig in _localConfigs)
                 {
-                    if (localConfig.Value.Dirty)
+                    if (localConfig.Value.IsDirty)
                         localConfig.Value.SaveConfig();
                 }
 

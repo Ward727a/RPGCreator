@@ -135,8 +135,6 @@ public class ContextGenerator : IIncrementalGenerator
             GenProperties.WriteProperty(context, property);
         }
         
-        GenProperties.WritePropertiesGetter(context, properties);
-        
         GenClass.End(context);
         GenNamespaces.End(context);
         

@@ -19,7 +19,6 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
 
 namespace RPGCreator.MainGenerator.Parts;
 
@@ -36,20 +35,13 @@ public static class GenClass
 
     public static string GenerateHeritage(GenerationContext context)
     {
-        List<string> interfaces = [];
-        if (!context.ClassData.ParentIsEBaseClass)
-        {
-            interfaces.Add("EBaseClass");
-            interfaces.Add("IEBaseClassStatic");
-        }
-
-        interfaces.AddRange([$"IFactorable<{context.ClassData.Class.Name}>"]);
+        List<string> interfaces = ["EBaseClass", $"IFactorable<{context.ClassData.Class.Name}>"];
         
-        if(context.ClassData is { SupportDirtyFlag: true, ParentSupportsDirtyFlag: false })
+        if(context.ClassData.SupportDirtyFlag)
             interfaces.Add("IDirtyable");
         
-        if(context.ClassData is { SupportSerialization: true, ParentSupportsSerialization: false })
-            interfaces.Add($"ISerializable<{context.ClassData.Class.Name}>");
+        if(context.ClassData.SupportSerialization)
+            interfaces.Add("ISerializable");
         
         return string.Join(", ", interfaces);
     }

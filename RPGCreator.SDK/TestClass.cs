@@ -31,3 +31,16 @@ public partial class TestClass
     [EProperty]
     private int _secondProp;
 }
+
+[EModuleStarter]
+public partial class TestModuleClass
+{
+    public override void OnLoad()
+    {
+        RegisterEClasses();
+    }
+
+    public override void OnUnload()
+    {
+    }
+}

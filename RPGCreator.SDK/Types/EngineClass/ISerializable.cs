@@ -22,10 +22,7 @@ namespace RPGCreator.SDK.Types.EngineClass;
 
 public interface ISerializable
 {
-    public void Serialize();
+    public string Serialize();
     public void OnBeforeSerialize();
-}
-
-public interface ISerializable<out T> : ISerializable
-{
+    public void OnAfterDeserialize();
 }

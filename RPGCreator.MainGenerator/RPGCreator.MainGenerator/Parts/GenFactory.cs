@@ -26,6 +26,6 @@ public static class GenFactory
     public static void Write(GenerationContext context)
     {
         context.Writer.WriteLine($"[Obsolete(\"Factory method for {context.ClassData.Class.Name}, do not use it!\\nIf you need to use it, use the ClassesRegister!\")]");
-        context.Writer.WriteLine($"public new static {context.ClassData.Class.Name} Create() => new {context.ClassData.Class.Name}();");
+        context.Writer.WriteLine($"public static {context.ClassData.Class.Name} Create() => new {context.ClassData.Class.Name}();");
     }
 }
