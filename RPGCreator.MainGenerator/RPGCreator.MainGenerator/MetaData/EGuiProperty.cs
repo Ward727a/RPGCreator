@@ -18,14 +18,11 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-namespace RPGCreator.MainGenerator.Parts;
 
-public static class GenFactory
+namespace RPGCreator.MainGenerator.MetaData;
+
+public record struct EGuiProperty(EPropertyData PropertyData)
 {
-    
-    public static void Write(GenerationContext context)
-    {
-        context.Writer.WriteLine($"[Obsolete(\"Factory method for {context.ClassData.Class.Name}, do not use it!\\nIf you need to use it, use the ClassesRegister!\")]");
-        context.Writer.WriteLine($"public new static {context.ClassData.Class.Name} Create() => new {context.ClassData.Class.Name}();");
-    }
+    public string Path = "";
+    public bool IsReadOnly = false;
 }

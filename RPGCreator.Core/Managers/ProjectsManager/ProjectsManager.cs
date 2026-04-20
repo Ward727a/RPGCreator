@@ -28,9 +28,7 @@ using CommunityToolkit.Diagnostics;
 using RPGCreator.Core.Types.Project;
 using RPGCreator.Core.Types.Assets.BaseAssetsPack;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.EngineService;
-using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Projects;
 using Serilog;
 
@@ -150,69 +148,7 @@ namespace RPGCreator.Core.Managers.ProjectsManager
             return _config.AddOrUpdateProject(project);
         }
 
-        [SerializingType("projectConfig")]
-        private class ProjectConfig : BaseConfig
-        {
-            public List<BaseProjectLink> ProjectLinks = new List<BaseProjectLink>();
-
-            private void AddProject(IBaseProject project)
-            {
-                if (project == null)
-                {
-                    throw new ArgumentNullException(nameof(project), "Project cannot be null.");
-                }
-
-                var link = BaseProjectLink.CreateLinkFromProject(project);
-            
-                ProjectLinks.Add(link);
-            }
-
-            public bool AddOrUpdateProject(IBaseProject project)
-            {
-                IsDirty = true;
-                var link = ProjectLinks.Find(link => link.ProjectID == project.Id);
-                
-                if(link == null)
-                {
-                    AddProject(project);
-                    link = ProjectLinks.Last();
-                }
-                
-                string projectFilePath = link.ProjectConfigPath;
-                
-                if (string.IsNullOrEmpty(projectFilePath))
-                {
-                    Logger.Error("Project config path is not set. Cannot save project.");
-                    return false;
-                }
-                
-                var projectDir = Path.GetDirectoryName(projectFilePath);
-
-                if (projectDir == null)
-                {
-                    Logger.Error("Failed to get directory name for project config path: {ProjectConfigPath}", projectFilePath);
-                    return false;
-                }
-                
-                if (!Directory.Exists(projectDir))
-                {
-                    Directory.CreateDirectory(projectDir);
-                }
-                
-                EngineServices.Serializer.SerializeTo(project, projectFilePath);
-                return true;
-            }
-            
-            protected override void _OnLoadedConfig()
-            {
-                ProjectLinks = Get("links", new List<BaseProjectLink>());
-            }
-
-            protected override void _OnSavedConfig()
-            {
-                Set("links", ProjectLinks);
-            }
-        }
+        
         
     }
 }

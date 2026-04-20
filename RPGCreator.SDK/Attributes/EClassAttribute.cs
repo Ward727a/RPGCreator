@@ -67,15 +67,22 @@ public class EClassAttribute : Attribute
     /// </summary>
     public string Category { get; set; } = "EngineClass";
     /// <summary>
-    /// (optional - require <see cref="EClassAttribute.SupportSerialization">SupportSerialization</see>)<br/>
+    /// (optional - default: Class name - require <see cref="EClassAttribute.SupportSerialization">SupportSerialization</see>)<br/>
     /// Define the path to the serialization folder for this class.<br/>
     /// E.g.: "Items/Armor" will be serialized to <c>[PROJECT FOLDER]/Assets/Items/Armor/[ID].json</c><br/>
-    /// If set to an empty string, the folder will be <c>[PROJECT FOLDER]/Assets/[ID].json</c>.
+    /// If set to an empty string, the folder will be <c>[PROJECT FOLDER]/Assets/[Class Name]/[ID].json</c>.<br/>
     /// <remarks>
     /// For this to work, you need to set <see cref="EClassAttribute.SupportSerialization">SupportSerialization</see> to true.
     /// </remarks>
     /// </summary>
     public string SerializationPath { get; set; } = "";
+    /// <summary>
+    /// (optional - default: true - require <see cref="EClassAttribute.SupportSerialization">SupportSerialization</see>)<br/>
+    /// Define if the serialization folder should be created in the project folder, or the ApplicationData folder.<br/>
+    /// If set to true, the serialization folder will be created in the project folder (where the user created the project).<br/>
+    /// If set to false, the serialization folder will be created in the ApplicationData folder (for windows it's <c>%APPDATA%/RPGCreator</c>, for other OS, I don't know).
+    /// </summary>
+    public bool SerializeInProjectFolder { get; set; } = true;
     /// <summary>
     /// (optional)<br/>
     /// Define if the class support serialization.<br/>
@@ -85,7 +92,7 @@ public class EClassAttribute : Attribute
     /// You can also override the serialize and deserialize method by implementing the partial methods "Serialize" and "Deserialize".
     /// </remarks>
     /// </summary>
-    public bool SupportSerialization { get; set; } = false;
+    public bool SupportSerialization { get; set; } = true;
     /// <summary>
     /// (optional)<br/>
     /// Define if the class support dirty flag.<br/>
@@ -106,7 +113,7 @@ public class EClassAttribute : Attribute
     /// Here, MyProperty will be tracked for changes, meaning that when "MyProperty" is modified, the class instance will be marked as dirty.<br/>
     /// To un-mark the class as dirty, either save it or call the "MarkAsClean()" method on the class instance.
     /// </summary>
-    public bool SupportDirtyFlag { get; set; } = false;
+    public bool SupportDirtyFlag { get; set; } = true;
     
     /// <summary>
     /// (optional - default: C# Project Name)<br/>

@@ -32,7 +32,11 @@ public static class GenConstructor
             return;
         }
         
-        context.Writer.WriteLine("private " + context.ClassData.Class.Name + "()");
+        context.Writer.WriteLine("/// <summary>" +
+                                 "/// Constructor for deserialization.<br/>" +
+                                 "/// You should not use it if possible.\n" +
+                                 "/// </summary>");
+        context.Writer.WriteLine("public " + context.ClassData.Class.Name + "()");
         context.Writer.WriteLine("{");
         context.Indent++;
         {
@@ -42,7 +46,11 @@ public static class GenConstructor
         context.Indent--;
         context.Writer.WriteLine("}");
         
-        context.Writer.WriteLine("private " + context.ClassData.Class.Name + "(Ulid id)");
+        context.Writer.WriteLine("/// <summary>" +
+                                 "/// Constructor for deserialization.<br/>" +
+                                 "/// You should not use it if possible.\n" +
+                                 "/// </summary>");
+        context.Writer.WriteLine("public " + context.ClassData.Class.Name + "(Ulid id)");
         context.Writer.WriteLine("{");
         context.Indent++;
         
@@ -52,8 +60,12 @@ public static class GenConstructor
         context.Indent--;
         context.Writer.WriteLine("}");
         
+        context.Writer.WriteLine("/// <summary>" +
+                                 "/// Constructor for deserialization.<br/>" +
+                                 "/// You should not use it if possible.\n" +
+                                 "/// </summary>");
         context.Writer.WriteLine("[JsonConstructor]");
-        context.Writer.WriteLine("private " + context.ClassData.Class.Name + "(Ulid id, URN urn)");
+        context.Writer.WriteLine("public " + context.ClassData.Class.Name + "(Ulid id, URN urn)");
         context.Writer.WriteLine("{");
         context.Indent++;
         

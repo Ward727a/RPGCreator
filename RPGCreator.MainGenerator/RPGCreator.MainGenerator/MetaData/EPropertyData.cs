@@ -20,7 +20,7 @@
 
 using Microsoft.CodeAnalysis;
 
-namespace RPGCreator.MainGenerator;
+namespace RPGCreator.MainGenerator.MetaData;
 
 public record struct EPropertyData(IFieldSymbol Field)
 {
@@ -30,4 +30,5 @@ public record struct EPropertyData(IFieldSymbol Field)
     public bool Serializable = false;
     public string Category = "";
     public string EditorHint = "";
+    public bool HasGuiAttribute = false;
 };

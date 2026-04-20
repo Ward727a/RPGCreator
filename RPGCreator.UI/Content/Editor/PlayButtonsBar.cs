@@ -24,6 +24,7 @@ using Avalonia.Layout;
 using Projektanker.Icons.Avalonia;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Exceptions;
+using RPGCreator.SDK.Types.EngineClass;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.Editor;
@@ -48,6 +49,12 @@ public class PlayButtonsBar : UserControl
     
     public PlayButtonsBar()
     {
+        RegistryServices.Classes.Instantiate<TestClass>().OnSuccess((obj) =>
+        {
+            obj.SecondProp = 10;
+            obj.Test = "Hello World!";
+            obj.Serialize();
+        });
         CreateComponents();
         RegisterEvents();
         LinkToExtension();

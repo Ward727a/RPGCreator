@@ -18,15 +18,22 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Text.Json.Serialization;
 using RPGCreator.SDK.Attributes;
 
 namespace RPGCreator.SDK.Types.EngineClass;
+
+public interface IEBaseClassStatic
+{
+    static abstract IReadOnlyDictionary<StringName, EPropertyContext> GetProperties();
+}
 
 /// <summary>
 /// A base class for all engine classes.<br/>
 /// Note: If possible, use <see cref="EClassAttribute"/> instead of implementing this class.<br/>
 /// The <see cref="EClassAttribute"/> automatically implements this class for you.
 /// </summary>
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 public abstract class EBaseClass
 {
     /// <summary>

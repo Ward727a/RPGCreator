@@ -35,7 +35,17 @@ public static class GenDirty
 
         if (!context.ClassData.SupportDirtyFlag)
         {
+            context.Writer.WriteLine();
             context.Writer.WriteLine("// Dirty flag set to false for this class.");
+            context.Writer.WriteLine();
+            return;
+        }
+
+        if (context.ClassData.ParentSupportsDirtyFlag)
+        {
+            context.Writer.WriteLine();
+            context.Writer.WriteLine("// Dirty flag managed by parent class.");
+            context.Writer.WriteLine();
             return;
         }
 

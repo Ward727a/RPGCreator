@@ -2,12 +2,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:explorer="clr-namespace:RPGCreator.UI.Content.GameUiEditor.Components.Explorer"
         xmlns:controls="clr-namespace:RPGCreator.SDK.GameUI.Controls;assembly=RPGCreator.SDK"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="RPGCreator.UI.Content.GameUiEditor.Components.Explorer.UiPicker"
         Title="UiPicker">
-    <Grid RowDefinitions="Auto, *, Auto" RowSpacing="4" DataContext="{explorer:UiPickerVm}">
+    <Grid RowDefinitions="Auto, *, Auto" RowSpacing="4">
         
         <Grid ColumnDefinitions="*, Auto" ColumnSpacing="4">
             <TextBox x:Name="SearchBox" Watermark="Search..."/>

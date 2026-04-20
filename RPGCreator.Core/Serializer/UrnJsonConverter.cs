@@ -18,47 +18,29 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using RPGCreator.SDK.Types;
-using Logger = RPGCreator.SDK.Logging.Logger;
 
 namespace RPGCreator.Core.Serializer;
 
 public class UrnJsonConverter : JsonConverter<URN>
 {
-    public override void WriteJson(JsonWriter writer, URN value, JsonSerializer serializer)
+    public override URN Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        writer.WriteValue(value.ToString());
-    }
-
-    public override URN ReadJson(JsonReader reader, Type objectType, URN existingValue, bool hasExistingValue,
-        JsonSerializer serializer)
-    {
-        string? urnString = reader.Value?.ToString();
-        if (string.IsNullOrEmpty(urnString))
+        if (reader.TokenType == JsonTokenType.String)
         {
-            try
-            {
-                var urnObject = JObject.Load(reader);
-
-
-                if (urnObject is JObject jObject)
-                {
-                    urnString = jObject.GetValue("FullName")?.ToString() ?? "";
-                }
-            }
-            catch
-            {
-                // Ignore exceptions and return URN.Empty
-                Logger.Error("Failed to read URN from JSON object.");
-            }
+            var stringValue = reader.GetString();
+            if(string.IsNullOrWhiteSpace(stringValue))
+                throw new JsonException($"URN string cannot be null or whitespace, got \"{stringValue}\"");
+            return URN.Parse(stringValue);
         }
         
-        if (!string.IsNullOrEmpty(urnString))
-        {
-            return URN.Parse(urnString);
-        }
-        return URN.Empty;
+        throw new JsonException($"Expected URN string, got {reader.TokenType}.");
+    }
+
+    public override void Write(Utf8JsonWriter writer, URN value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value.ToString());
     }
 }

@@ -73,7 +73,7 @@ public static class GenModule
 
             foreach (var classData in ContextGenerator.EClassDataList.Values)
             {
-                moduleContext.Writer.WriteLine($"RegistryServices.Classes.Register<{classData.Class.Name}>({classData.Class.Name}.ClassUrn, {classData.Class.Name}.Create).OnFailure(e => throw new Exception($\"Error while registering classes for module entry \\\"{firstSymbol.Name}\\\"{{e}}\"));");
+                moduleContext.Writer.WriteLine($"RegistryServices.Classes.Register<{classData.Class.Name}>({classData.Class.Name}.ClassUrn, {classData.Class.Name}.Create, {classData.Class.Name}.GetProperties()).OnFailure(e => throw new Exception($\"Error while registering classes for module entry \\\"{firstSymbol.Name}\\\"{{e}}\"));");
             }
             
             moduleContext.Indent--;

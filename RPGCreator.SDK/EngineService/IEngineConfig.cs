@@ -23,16 +23,17 @@ using System.Diagnostics.CodeAnalysis;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
+using RPGCreator.SDK.Types.EngineClass;
+using ISerializable = RPGCreator.SDK.Serializer.ISerializable;
 
 namespace RPGCreator.SDK.EngineService;
 
-public interface IConfig : ISerializable, IDeserializable
+public interface IConfig : Types.EngineClass.ISerializable, IDirtyable
 {
     public event Action<string>? KeyChanged;
     event Action? ConfigSaved;
     event Action? ConfigLoaded;
     event Action? ConfigChanged;
-    public bool IsDirty { get; }    
     public string ConfigPath { get; set; }
 
     public CustomData GetDefaultConfig();

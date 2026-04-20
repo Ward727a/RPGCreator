@@ -30,9 +30,13 @@ public record struct EClassData(INamedTypeSymbol Class)
     public string Icon = "";
     public string Category = "";
     public string SerializationPath = "";
-    public bool SupportSerialization = false;
-    public bool SupportDirtyFlag = false;
+    public bool SerializeInProjectFolder = true;
+    public bool SupportSerialization = true;
+    public bool SupportDirtyFlag = true;
     public string UrnNamespace = "";
     public string UrnModule = "";
+    public bool ParentIsEBaseClass = false;
+    public bool ParentSupportsSerialization = false;
+    public bool ParentSupportsDirtyFlag = false;
     
 }

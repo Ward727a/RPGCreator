@@ -40,4 +40,9 @@
     <ProjectReference Include="..\RPGCreator.SDK\RPGCreator.SDK.csproj" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <ProjectReference Include="..\RPGCreator.MainGenerator\RPGCreator.MainGenerator\RPGCreator.MainGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
 </Project>

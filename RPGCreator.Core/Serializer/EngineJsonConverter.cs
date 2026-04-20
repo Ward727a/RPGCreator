@@ -1,5 +1,4 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json.Serialization;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions;
@@ -9,9 +8,12 @@ using RPGCreator.SDK.Serializer;
 
 namespace RPGCreator.Core.Serializer;
 
-public class EngineJsonConverter : JsonConverter
+public class EngineJsonConverter
 {
-    public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+}
+
+/*
+    public override void aa(JsonWriter writer, object? value, JsonSerializer serializer)
     {
         if (value is ISerializable serializableObj)
         {
@@ -47,7 +49,7 @@ public class EngineJsonConverter : JsonConverter
         }
     }
 
-    public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+    public override object? bb(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
     {
         if (objectType == typeof(EntityLayerDefinition))
         {
@@ -129,8 +131,8 @@ public class EngineJsonConverter : JsonConverter
         return instance;
     }
 
-    public override bool CanConvert(Type objectType)
+    public override bool cc(Type objectType)
     {
         return typeof(ISerializable).IsAssignableFrom(objectType);
     }
-}
+*/

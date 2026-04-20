@@ -28,7 +28,8 @@ public static class GenNamespaces
     [
         "System", "System.Collections.Generic", "System.Diagnostics.CodeAnalysis", 
         "System.Text.Json", "System.Text.Json.Serialization",
-        "RPGCreator.SDK.GameUI", "RPGCreator.SDK.GameUI.Interfaces", "RPGCreator.SDK.Types", "RPGCreator.SDK.Types.EngineClass",
+        "RPGCreator.SDK", "RPGCreator.SDK.GameUI", "RPGCreator.SDK.GameUI.Interfaces", 
+        "RPGCreator.SDK.Types", "RPGCreator.SDK.Types.EngineClass", "RPGCreator.SDK.Projects"
     ];
 
 
