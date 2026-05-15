@@ -21,13 +21,14 @@ public record struct TileData()
 
     public ITileDef ToTileDef()
     {
-        if(EngineServices.AssetsManager.TryResolveAsset(TilesetId, out BaseTilesetDef? tilesetDef))
-        {
-            return new TileDefinition(
-                new Size((int)TileSize.X, (int)TileSize.Y),
-                TilePosition,
-                tilesetDef);
-        }
-        throw new InvalidOperationException($"Tileset with ID {TilesetId} could not be resolved.");
+        var tileset = EngineServices.AssetsManager.Load<BaseTilesetDef>(TilesetId);
+        
+        if(tileset.IsFailure)
+            throw new InvalidOperationException($"Tileset with ID {TilesetId} could not be resolved. Error: {tileset.Error}");
+        
+        return new TileDefinition(
+            new Size((int)TileSize.X, (int)TileSize.Y),
+            TilePosition,
+            tileset.Value);
     }
 }

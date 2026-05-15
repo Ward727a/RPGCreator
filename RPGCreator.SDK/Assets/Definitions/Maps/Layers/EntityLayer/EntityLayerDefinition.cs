@@ -1,6 +1,7 @@
 using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.PaintTargets;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.Editor;
 using RPGCreator.SDK.Types;
@@ -31,11 +32,10 @@ public class EntityLayerRenderer : BaseLayerRenderer<EntityLayerDefinition>
     }
 }
 
-[SerializingType("EntityLayerDef")]
-public class EntityLayerDefinition() : LayerWithElements<EntitySpawner>
+[EngineClass("rpgc", "assets", "definitions", "maps", "layers", "entity_layer", DisplayName = "Entity Layer Definition")]
+public partial class EntityLayerDefinition : LayerWithElements<EntitySpawner>
 {
     protected override LayerChunk<EntitySpawner> CreateChunkInstance() => new EntityLayerChunk();
-    public override UrnSingleModule UrnModule => "entity_layer".ToUrnSingleModule();
     
     private EntityLayerTarget? _paintTargetCache;
     private readonly EntityLayerRenderer _renderer = new();

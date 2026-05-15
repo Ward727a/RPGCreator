@@ -117,17 +117,6 @@ public class SkillsEffectEditorWindowControl : UserControl
                 return;
             }
             
-            var newEffect = new GraphSkillEffect(generalTabContent.EffectName);
-            newEffect.PackId = generalTabContent.SelectedEffectPackId;
-            newEffect.SetPropertiesDescriptors(generalTabContent.GetProperties());
-            newEffect.SetEvent(effectTabContent.CompiledDocument);
-
-            if (!newEffect.PackId.HasValue)
-                return;
-            Logger.Debug("Saving Skill Effect: {0} with {numberProperties} props and {numberInstructions} instrs in pack {packId}.", newEffect.DisplayName, newEffect.PropertyDescriptors.Count, newEffect.GetEvent().GetInstructions().Count, newEffect.PackId.ToString());
-            
-
-            EngineServices.AssetsManager.RegisterAsset(newEffect);
             
             
         };

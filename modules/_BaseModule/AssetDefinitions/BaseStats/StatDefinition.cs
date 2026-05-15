@@ -20,11 +20,13 @@
 
 using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Types;
 
 namespace _BaseModule.AssetDefinitions.BaseStats;
 
 [SerializingType("Stat")]
+[EngineClass("rpgc", "assets", "definition", "stat", DisplayName = "Stat Definition")]
 public class StatDefinition : BaseStatDefinition
 {
     public override string Description { get; set; } = "Description of the stat.";

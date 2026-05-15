@@ -89,14 +89,14 @@ public class SimpleEventExecutor : ISimpleEventExecutor
         {
             Execute(cachedDefinition, localContext);
         }
-        
-        if(EngineServices.AssetsManager.TryResolveAsset(definitionId, out BaseSimpleEventDefinition? definition))
+
+        EngineServices.AssetsManager.Load<BaseSimpleEventDefinition>(definitionId).OnSuccess((definition) =>
         {
             Execute(definition, localContext);
-        }
-        else
+        })
+        .OnFailure((err) =>
         {
-            Logger.Error($"[SimpleEventExecutor] Warning: Definition with id '{definitionId}' not found.");
-        }
+            Logger.Error("[SimpleEventExecutor] Failed to load definition with id '{Id}' - Error: {err}", args: [definitionId, err]);
+        });
     }
 }

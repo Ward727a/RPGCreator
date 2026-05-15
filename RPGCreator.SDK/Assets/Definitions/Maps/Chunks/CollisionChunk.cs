@@ -295,7 +295,6 @@ public class CollisionChunk : LayerChunk
 
 public class CollisionLayer : BaseAssetDef
 {
-    public override UrnSingleModule UrnModule => "CollisionLayer".ToUrnSingleModule();
     public SerializationInfo GetObjectData()
     {
         return new SerializationInfo(typeof(CollisionLayer)).AddValue(nameof(Elements), _elements);

@@ -156,7 +156,7 @@ public class GamePlayer : Game, IGameRunner
             var projectData = File.ReadAllText(_gameFilePath);
             try
             {
-                EngineServices.Serializer.Deserialize(projectData, out BaseProject? project);
+                EngineServices.Serializer.Deserialize(projectData, out Project? project);
                 if (project == null)
                 {
                     logger.Error("Failed to deserialize project file: Deserialized data is null.");
@@ -165,8 +165,8 @@ public class GamePlayer : Game, IGameRunner
 
                 var data = new DefaultGameData();
                 data.SetProjectPath(_gameFilePath);
-                data.SetModulesHashes(project.Modules);
-                data.SetMainMapId(project.MainMapId);
+                data.SetModulesHashes(project.MetaData.Modules);
+                data.SetMainMapId(project.MetaData.MainMapId);
                 _gameData = data;
             }
             catch (Exception ex)

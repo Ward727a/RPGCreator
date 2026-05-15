@@ -2,7 +2,7 @@
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 
-[SerializingType("IntGridData")]
+[EngineType("rpgc", "sdk", "int_grid_data")]
 public class IntGridData
 {
     public IntGridValueRef IntGridRef { get; set; }

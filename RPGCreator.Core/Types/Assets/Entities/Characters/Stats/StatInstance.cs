@@ -1,4 +1,3 @@
-using RPGCreator.Core.Parser.Graph;
 using RPGCreator.Core.Types.Internal;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Stats;
@@ -46,15 +45,6 @@ public sealed class StatInstance : IReloadable<IStatDef>
         BaseValue = def.DefaultValue;
         CurrentValue = BaseValue;
     }
-    
-    public bool TryRunEvent(string eventName, GraphEvalEnvironment? env = null)
-    {
-        if(StatDefinition.TryGetEvent(eventName, out var eventCompiled) && eventCompiled != null)
-        {
-            return EngineServices.GraphService.Run(eventCompiled, env);
-        }
-        return false;
-    }
 
     public void Reload(IStatDef newDefinition)
     {
@@ -74,6 +64,5 @@ public sealed class StatInstance : IReloadable<IStatDef>
         // For now we use the statCapValue directly from the definition.
         // In the future we might want to calculate it based on the other cap type.
         CurrentValue = Math.Clamp(newValue, StatDefinition.MinValue, _statDefinition.CapSettings.CapValue);
-        TryRunEvent(IStatDef.OnValueChangedEvent);
     }
 }

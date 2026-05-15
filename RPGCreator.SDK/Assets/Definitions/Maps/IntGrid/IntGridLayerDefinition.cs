@@ -4,13 +4,11 @@ using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
-using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.Core.Types.Map;
 
-[SerializingType("IntGridLayerDefinition")]
 public class IntGridLayerDefinition : BaseAssetDef, IMapLayerDef<int>
 {
     public event EventHandler<(Vector2, int)>? ElementAdded;
@@ -108,15 +106,8 @@ public class IntGridLayerDefinition : BaseAssetDef, IMapLayerDef<int>
             .AddValue(nameof(ValueRefs), ValueRefs);
     }
 
-    public List<Ulid> GetReferencedAssetIds()
-    {
-        return [];
-    }
-
     public void SetObjectData(DeserializationInfo info)
     {
         return;
     }
-
-    public override UrnSingleModule UrnModule => "intgrid_layer".ToUrnSingleModule();
 }

@@ -25,7 +25,7 @@ using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.SDK.Modules.SimpleEvents;
 
-public abstract class BaseSimpleEventCondition : IHasUniqueId
+public abstract class BaseSimpleEventCondition : IEngineObject
 {
     public static UrnSingleModule Module => ISimpleEventRegistry.ConditionModule;
     
@@ -33,8 +33,8 @@ public abstract class BaseSimpleEventCondition : IHasUniqueId
     /// The Unique ID of this class. It is used IN the engine, but it should <b>NOT BE USED</b> by the users as it could be changed between different sessions.<br/>
     /// If you need to reference this class, you should use the URN instead, which is a unique and stable identifier that can be used to reference this class!
     /// </summary>
-    public Ulid Unique { get; private set; }
-    public abstract URN Urn { get; }
+    public Ulid Unique { get; set; }
+    public abstract URN ClassUrn { get; set; }
 
     public abstract string Name { get; }
     public abstract string Description { get; }

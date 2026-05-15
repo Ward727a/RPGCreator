@@ -162,8 +162,6 @@ public class SelectionCursorControl : Border
 
 public class TilingPanelControl : UserControl
 {
-    private IAssetScope _scope;
-    
     #region Components
     
     private StackPanel? _body;
@@ -181,7 +179,6 @@ public class TilingPanelControl : UserControl
     
     public TilingPanelControl()
     {
-        _scope = EngineServices.AssetsManager.CreateAssetScope("TilingPanelControl");
         CreateComponents();
         RegisterEvents();
         Content = _body;
@@ -288,7 +285,15 @@ public class TilingPanelControl : UserControl
             ITileDef? tileToPaint = null;
             if (_setSelector?.SelectedItem is SetOptionItem selectedItem)
             {
-                var def = _scope.Load<BaseTilesetDef>(selectedItem.AssetId);
+                var result = EngineServices.AssetsManager.Load<BaseTilesetDef>(selectedItem.AssetId);
+
+                if (result.IsFailure)
+                {
+                    Logger.Error("[TilingPanel] Failed to load tileset: {0}", result.Error);
+                    return;
+                }
+                
+                var def = result.Value;
                 
                 var tilePositionInTileset = new Point( // Row and Column in tileset
                     (int)((position.X + Math.Abs(_canvas.CurrentElementsPosition.X)) / cellSize.Width),
@@ -348,7 +353,15 @@ public class TilingPanelControl : UserControl
         if (_setSelector?.SelectedItem is SetOptionItem selectedItem)
         {
             Logger.Debug("[TilingPanel] Selected tileset: {0}", selectedItem.Name);
-            var def = _scope.Load<BaseTilesetDef>(selectedItem.AssetId);
+            var result = EngineServices.AssetsManager.Load<BaseTilesetDef>(selectedItem.AssetId);
+            
+            if (result.IsFailure)
+            {
+                Logger.Error("[TilingPanel] Failed to load tileset: {0}", result.Error);
+                return;
+            }
+            
+            var def = result.Value;
             if (def is IntGridTilesetDef intgrid)
             {
                 IntGridListBox.IsVisible = true;

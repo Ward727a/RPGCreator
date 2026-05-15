@@ -98,7 +98,7 @@ public class StatsEditorWindowControl : UserControl
                 Logger.Error("No project is currently loaded. Cannot save Stat Definition.");
                 return;
             }
-            string defaultTestPAth = System.IO.Path.Combine(GlobalStates.ProjectState.CurrentProject.Path, "Assets", "Stats");
+            string defaultTestPAth = System.IO.Path.Combine(GlobalStates.ProjectState.CurrentProject.MetaData.Directory, "assets", "stats");
             
             // Create directory if not exists
             if (!System.IO.Directory.Exists(defaultTestPAth))

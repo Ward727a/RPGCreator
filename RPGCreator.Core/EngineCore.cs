@@ -24,13 +24,11 @@
 #endregion
 
 using RPGCreator.Core.Common;
-using RPGCreator.Core.Configs;
 using RPGCreator.Core.ECS;
 using RPGCreator.Core.Inputs;
 using RPGCreator.Core.Inputs.Keyboard;
 using RPGCreator.Core.Inputs.Mouse;
 using RPGCreator.Core.Module;
-using RPGCreator.Core.Parser.Graph;
 using RPGCreator.Core.Parser.PRATT;
 using RPGCreator.Core.Registry;
 using RPGCreator.Core.Scheduler;
@@ -44,12 +42,11 @@ using RPGCreator.SDK.GameRunner;
 using RPGCreator.SDK.GameUI.Controls;
 using RPGCreator.SDK.GameUI.Events.Actions;
 using RPGCreator.SDK.GlobalState;
-using RPGCreator.SDK.Graph.Nodes;
 using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules;
 using RPGCreator.SDK.Types;
-using SDKAutoTileSolver = RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer.AutoTileSolver;
+using SDKAutoTileSolver = RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer.AutoTileSolver;
 
 namespace RPGCreator.Core
 {
@@ -79,7 +76,6 @@ namespace RPGCreator.Core
         static public bool IsRTPReady { get; private set; } = false;
 
         internal EngineScheduler Scheduler { get; private set; }
-        internal EngineConfigs Configs { get; private set; }
         internal EngineManagers Managers { get; private set; }
         internal EngineModules Modules { get; private set; }
         internal EngineSerializer Serializer { get; private set; }
@@ -126,9 +122,9 @@ namespace RPGCreator.Core
             // Doing this as "ScanAllEngineAssemblies" is not implemented inside the IAssetsTypeMapping interface.
             // And we don't want that (or else all modules could do that, and it COULD be a problem...
             // In fact, I didn't check if it could be a problem, but I prefer to not take the risk for now, and we can always change that later if we need to).
-            var typeMapping = new AssetsTypeMapping();
+            var typeMapping = new TypesRegistryDiscriminator();
             typeMapping.ScanAllEngineAssemblies();
-            RegistryServices.AssetsType = typeMapping;
+            RegistryServices.Types = typeMapping;
             RegistryServices.RuntimeCompiler = new RuntimeCompilerRegistry();
             
             EngineServices.Resources = new EngineResourcesService();
@@ -141,11 +137,26 @@ namespace RPGCreator.Core
             RegistryServices.NativeAction = new NativeActionRegistry();
             RegistryServices.GuiControl = new GUIControlRegistry();
             RegistryServices.GuiControl.RegisterControl(new TestControl());
+            RegistryServices.GuiControl.RegisterControl(new TextControl());
+            RegistryServices.GuiControl.RegisterControl(new ButtonControl());
             RegistryServices.GuiAction = new GuiActionRegistry();
             RegistryServices.GuiAction.RegisterAction(new PrintAction());
             RegistryServices.GuiAction.RegisterAction(new BpAction());
             RegistryServices.Blueprint = new BlueprintRegistry();
             RegistryServices.PropertyEditorRegistry = new GuiPropertyEditorRegistry();
+            
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                ClassesRegistry.AnalyzeAsm(assembly);
+            }
+
+            var gameUiControl = ClassesRegistry.GetEngineClassesWithUrnPrefix("game_ui/controls/de", URN.SearchComparisionType.ModuleOnly);
+
+            Logger.Debug("Found {number} UI Controls with prefix {prefixSearchedFor}:", gameUiControl.Count, "game_ui/controls/de");
+            foreach (var engineClass in gameUiControl)
+            {
+                Logger.Debug(engineClass.ToString());
+            }
             
             Instance = this;
 
@@ -162,9 +173,7 @@ namespace RPGCreator.Core
             // In debug mode, we load the engine icons for debug tools (like IconsExplorer).
             Icons = new EngineIcons();
             #endif
-            EngineServices.GraphService = new GraphService();
             EngineServices.PrattFormulaService = new PrattFormulaService();
-            EngineServices.GraphNodeScanner = new GraphNodeScanner();
             EngineServices.ECS = new EcsService();
             EngineServices.InputsService = new InputsService();
             EngineServices.ModulePathResolver = new ModulePathResolver();
@@ -192,31 +201,6 @@ namespace RPGCreator.Core
             
             Modules = new EngineModules();
             EngineServices.ModuleManager = Modules;
-            
-            _logger.Info("Starting scanning for blueprint opcodes handlers...");
-            
-            // Scan the assemblies for all blueprint opcodes handlers
-            // This will register all the handlers in the graph table.
-            GraphTable.ScanAssemblies();
-            
-            _logger.Info("Blueprint opcodes handlers scanning completed.");
-            _logger.Info("Found {Count} handlers.", args: GraphTable.ValidOpcodes.Count);
-            
-            _logger.Info("Starting scanning for graph nodes...");
-            
-            // Scan the assemblies for all graph nodes
-            // This will register all the nodes in the graph node registry.
-            EngineServices.GraphNodeScanner.ScanCurrentAssembly();
-            _logger.Info("Graph nodes scanning completed.");
-            _logger.Info("Found {Count} nodes.", args: GraphNodeRegistry.GetAllNodes().Count);
-            
-            _logger.Info("Checking graph nodes and opcodes handlers consistency...");
-            // Check if all registered handlers have a corresponding node in the graph node registry.
-
-            GraphTable.CheckHandlersAndNodesConsistency();
-            
-            _logger.Info("Graph nodes and opcodes handlers consistency check completed.");
-            _logger.Info("Check above for any errors or warnings.");
             
             _logger.Info("EngineCore initialized at {Time}.", args: DateTime.Now);
         }
@@ -297,7 +281,7 @@ namespace RPGCreator.Core
             
             EngineServices.ProjectsManager.OpenProject(project);
 
-            if (EngineServices.AssetsManager.TryResolveAsset(mainMapId, out IMapDef? _))
+            if (EngineServices.AssetsManager.Has(mainMapId))
                 return (true, mainMapId);
             
             Logger.Critical("Failed to resolve main map with ID: {MapId}", args: mainMapId);

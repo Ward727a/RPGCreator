@@ -62,7 +62,7 @@ public sealed class MapMetaData : BaseMetaData
     public int TileLayerCount => TileLayerIds.Count;
     
     [BsonIgnore]
-    public string DisplayName => string.IsNullOrWhiteSpace(Name) ? $"Map ({UniqueId})" : Name;
+    public string DisplayName => string.IsNullOrWhiteSpace(Name) ? $"Map ({Unique})" : Name;
     
     #endregion
     
@@ -74,7 +74,7 @@ public sealed class MapMetaData : BaseMetaData
 
     public MapMetaData(IMapDef mapDef)
     {
-        UniqueId = mapDef.Unique;
+        Unique = mapDef.Unique;
         ChildMapIds = mapDef.MapDefs.ToArray().Select(m => m.Unique).ToList();
         Name = mapDef.Name;
         Description = mapDef.Description;

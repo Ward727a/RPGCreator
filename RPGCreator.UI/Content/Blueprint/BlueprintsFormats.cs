@@ -19,6 +19,7 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Reflection;
+using Avalonia.Controls;
 using Avalonia.Input;
 using RPGCreator.SDK.Graph.LOGIC;
 
@@ -28,9 +29,10 @@ namespace RPGCreator.UI.Content.Blueprint;
 /// Because Avalonia doesn't support custom data formats,
 /// and their method is private, we have to use reflection to create our own.
 /// </summary>
-public static class BlueprintFormats
+public static class DragDropCustomFormats
 {
     public static readonly DataFormat<INodeLogic> NodeLogicFormat = CreateCustomFormat<INodeLogic>("rpgcreator.nodelogic");
+    public static readonly DataFormat<TreeViewItem> TreeViewItemFormat = CreateCustomFormat<TreeViewItem>("rpgcreator.treeviewitem");
 
     private static DataFormat<T> CreateCustomFormat<T>(string identifier) where T : class
     {

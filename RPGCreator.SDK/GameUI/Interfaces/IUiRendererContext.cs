@@ -19,6 +19,7 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Numerics;
+using RPGCreator.SDK.GameUI.Enums;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.GameUI.Interfaces;
@@ -81,7 +82,7 @@ public interface IUiRendererContext
     /// </summary>
     /// <param name="transformId">The index of the transformation to pop, as returned by the corresponding PushTransform call.</param>
     public void PopTransform(int transformId);
-    
+
     /// <summary>
     /// Draw a rectangle outline at the specified position and size, using the given color and thickness.
     /// </summary>
@@ -90,7 +91,9 @@ public interface IUiRendererContext
     /// <param name="color">The color to use for the rectangle.</param>
     /// <param name="thickness">The thickness of the rectangle outline, in pixels. Default is 1 pixel. This parameter is ignored if 'filled' is true.</param>
     /// <param name="filled">Whether to draw a filled rectangle (true) or just an outline (false). Default is false (outline).</param>
-    public void DrawRectangle(Vector2 position, Vector2 size, Color color, float thickness = 1f, bool filled = false);
+    /// <param name="aaSize"></param>
+    /// <param name="cornerRadius"></param>
+    public void DrawRectangle(Vector2 position, Vector2 size, Color color, float thickness = 1f, bool filled = false, float aaSize = 0f, float cornerRadius = 0f);
     
     /// <summary>
     /// Draw a line between the specified start and end points, using the given color and thickness.

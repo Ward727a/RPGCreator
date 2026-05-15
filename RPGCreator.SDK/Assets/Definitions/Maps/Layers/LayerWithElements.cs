@@ -6,6 +6,7 @@ using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.PaintTargets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Editor;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
@@ -291,11 +292,10 @@ public class TileLayerRenderer : BaseLayerRenderer<TileLayerDefinition>
     }
 }
 
-[SerializingType("TileLayerDef")]
-public class TileLayerDefinition : LayerWithElements<ITileDef>
+[EngineClass("rpgc", "assets", "definitions", "maps", "layers", "tile_layer", DisplayName = "Tile Layer Definition")]
+public partial class TileLayerDefinition : LayerWithElements<ITileDef>
 {
     protected override LayerChunk<ITileDef> CreateChunkInstance() => new TileLayerChunk();
-    public override UrnSingleModule UrnModule => "tile_layer".ToUrnSingleModule();
     
     private TileLayerTarget? _paintTargetCache;
     private readonly TileLayerRenderer _renderer = new();

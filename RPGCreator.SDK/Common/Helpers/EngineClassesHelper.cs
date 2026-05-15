@@ -1,0 +1,54 @@
+﻿// RPG Creator - Open-source RPG Engine.
+// (c) 2026 Ward
+// 
+// This file is part of RPG Creator and is distributed under the Apache 2.0 License.
+// You are free to use, modify, and distribute this file under the terms of the Apache 2.0 License.
+// See LICENSE for details.
+// 
+// ---
+// 
+// Ce fichier fait partie de RPG Creator et est distribué sous licence Apache 2.0.
+// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence Apache 2.0.
+// Voir LICENSE pour plus de détails.
+// 
+// Contact:
+// => Mail: Ward727a@gmail.com
+//    Please use this object: "RPG Creator [YourObject]"
+// => Discord: ward727
+// 
+// For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
+
+using System.Reflection;
+using System.Reflection.Metadata;
+using RPGCreator.SDK.Types;
+
+namespace RPGCreator.SDK.Helpers;
+
+public static class EngineClassesHelper
+{
+    public static URN GetEngineClassUrn<TType>() where TType : class
+    {
+        return GetEngineClassUrn(typeof(TType));
+    }
+
+    public static URN GetEngineClassUrn(Type type)
+    {
+        if (type == null)
+        {
+            throw new ArgumentNullException(nameof(type), "Type cannot be null.");
+        }
+        
+        BindingFlags propertyFlag = BindingFlags.Public | BindingFlags.Static;
+        
+        var classUrnPropertyList = type.GetProperties(propertyFlag)
+            .Where(p => p.Name == "ClassURN" && p.PropertyType == typeof(URN)).ToList();
+        
+        if (classUrnPropertyList.Count == 0)
+        {
+            throw new Exception(
+                $"The class {type.FullName} does not have a public static property named 'ClassURN' of type URN. This property is required to get the URN of the class.");
+        }
+
+        return (URN)(classUrnPropertyList[0].GetValue(URN.Empty) ?? URN.Empty);
+    }
+}

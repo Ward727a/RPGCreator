@@ -14,10 +14,4 @@ public interface ISerializable
     /// </summary>
     /// <returns><see cref="SerializationInfo"/> object containing the data to be serialized</returns>
     public SerializationInfo GetObjectData();
-
-    /// <summary>
-    /// If this class has any references to assets, this method should return a list of their IDs.
-    /// </summary>
-    /// <returns></returns>
-    public List<Ulid> GetReferencedAssetIds();
 }

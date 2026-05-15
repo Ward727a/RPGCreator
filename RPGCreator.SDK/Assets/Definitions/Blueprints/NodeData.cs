@@ -40,7 +40,7 @@ public class NodeData
 
     public static NodeData Create(INodeLogic logic, bool isFolded = false, Vector2 location = default)
     {
-        var nodeData = NodeData.Create(logic.RuntimeId, logic.Urn, isFolded, location);
+        var nodeData = Create(logic.RuntimeId, logic.Urn, isFolded, location);
         var nodeStoredData = logic.CustomData;
         nodeData.StoredData = nodeStoredData;
         return nodeData;

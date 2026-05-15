@@ -35,6 +35,7 @@ using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Types;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor.CollisionEditor;
 using Ursa.Controls;
 
@@ -144,7 +145,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             if(File.Exists(TilesetDefinition.ImagePath))
             {
                 ImagePick.SelectedPathsText = TilesetDefinition.ImagePath;
-                ImagePick.SelectedPaths.Append(TilesetDefinition.ImagePath);
+                ImagePick.SelectedPaths.Append(TilesetDefinition.ImagePath.FullPath);
                 ImagePreview.Source = EngineServices.Resources.Load<Bitmap>(TilesetDefinition.ImagePath);
             }
 
@@ -309,7 +310,7 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
                 EditorUiServices.NotificationService.Error("No image selected!", "Please select an image before opening the collision editor.");
                 return;
             }
-            var imagePath = TilesetDefinition.ImagePath == ImagePick.SelectedPaths[0] ? TilesetDefinition.ImagePath : ImagePick.SelectedPaths[0];
+            var imagePath = TilesetDefinition.ImagePath == ImagePick.SelectedPaths[0] ? TilesetDefinition.ImagePath : new FilePath(ImagePick.SelectedPaths[0]);
             var promptContent = new CollisionEditorControl(TilesetDefinition, imagePath);
             
             var confirmed = await EditorUiServices.DialogService.ConfirmAsync("Collision Editor", promptContent, new DialogStyle(800, 600, CanResize:true, SizeToContent:DialogSizeToContent.None));
@@ -344,21 +345,24 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
                 Margin = new Thickness(0, 0, 10, 0)
             };
-            saveButton.Click += SaveTileset;
+            saveButton.Click += (sender, e)=>
+            {
+                SaveTileset(sender, e);
+            };
             footer.Children.Add(saveButton);
         }
 
-        private void SaveTileset(object? sender, RoutedEventArgs e)
+        private Result SaveTileset(object? sender, RoutedEventArgs e)
         {
             if(string.IsNullOrEmpty(NameInput.Text))
             {
                 // TODO Message box to inform the user that the name cannot be empty
-                return;
+                return Result.Failure("Name cannot be empty");
             }
             if (ImagePick.SelectedPaths.Count == 0 || !File.Exists(ImagePick.SelectedPaths[0]))
             {
                 // TODO Message box to inform the user that the image path is invalid
-                return;
+                return Result.Failure("Image path is invalid");
             }
 
             var imagePath = ImagePick.SelectedPaths[0];
@@ -367,36 +371,50 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             TilesetDefinition.Name = NameInput.Text;
             TilesetDefinition.TileHeight = int.TryParse(TileHeightInput.Text, out var height) ? height : 0;
             TilesetDefinition.TileWidth = int.TryParse(TileWidthInput.Text, out var width) ? width : 0;
-            TilesetDefinition.PackName = EngineServices.AssetsManager.GetDefaultPack().Name;
             
-            if (EngineServices.AssetsManager.TryGetPack(TilesetDefinition.PackName, out var pack))
-            {
+            var imageExtension = Path.GetExtension(imagePath);
+            var classFolderResult = ClassesRegistry.GetEngineClass(TilesetDefinition.ClassUrn);
 
-                var assetFolder = pack.RootFolder;
-                var imageExtension = Path.GetExtension(imagePath);
-                var imageCopyPath = Path.Combine(assetFolder, $"{TilesetDefinition.Unique}{imageExtension}");
-                
-                try
-                {
-                    File.Copy(imagePath, imageCopyPath, true);
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error($"Error copying image: {ex.Message}");
-                    EditorUiServices.NotificationService.Error("Error copying image!", $"An error occurred while copying the image: {ex.Message}");
-                    return;
-                }
-                
-                TilesetDefinition.ImagePath = imageCopyPath;
-                pack.AddOrUpdateAsset(TilesetDefinition);
-            } else
+            string classFolder = "";
+
+            if (classFolderResult.IsSuccess)
             {
-                throw new Exception("Couldn't get the pack from the pack name... INTERNAL ERROR!");
+                classFolder = classFolderResult.Value.SerializationFolder;
+            }
+            else
+            {
+                Logger.Error("Failed to get class folder: {Error}", classFolderResult.Error);
             }
             
-            EngineServices.AssetsManager.RegisterAsset(TilesetDefinition);
+            var importedFiles = RpgEnv.PathFormat.GetImportedFilesPath(classFolder);
 
+            if (importedFiles.IsFailure)
+            {
+                Logger.Error("Failed to get imported files path: {Error}\nAwaited folder should be: {path}", importedFiles.Error, Path.Combine(classFolder, "imported_files"));
+                return Result.Failure($"Failed to get imported files path: {importedFiles.Error}");
+            }
+            
+            var imageCopyPath = Path.Combine(importedFiles.Value, $"{TilesetDefinition.Unique}{imageExtension}");
+            
+            try
+            {
+                File.Copy(imagePath, imageCopyPath, true);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Error copying image: {ex.Message}");
+                EditorUiServices.NotificationService.Error("Error copying image!", $"An error occurred while copying the image: {ex.Message}");
+                return Result.Failure("Failed to copy image");
+            }
+            
+            TilesetDefinition.ImagePath = Path.Combine(importedFiles.Value.PureText, $"{TilesetDefinition.Unique}{imageExtension}");
+            var saveResult = EngineServices.AssetsManager.Save(TilesetDefinition).OnFailure((err) =>
+            {
+                Logger.Error("Failed to save tileset: {err}", err);
+            });
+            
             TilesetSaved?.Invoke();
+            return saveResult;
         }
     }
 }

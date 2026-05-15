@@ -12,7 +12,7 @@
     
     
     <UserControl.Resources>
-        <vm:PropertyEditorSelector x:Key="EditablePropertySelector">
+        <vm:PropertyEditorSelector x:Key="EditablePropertySelector" Context="{Binding #TreeView.((vm:UiExplorerVm)DataContext).Context}">
         </vm:PropertyEditorSelector>
         <vm:PropertyReadOnlySelector x:Key="ReadOnlyPropertySelector"></vm:PropertyReadOnlySelector>
 
@@ -116,19 +116,29 @@
                 </Button>
             </StackPanel>
         </Grid>
-        <TreeView Grid.Row="1" ItemsSource="{Binding TreeExplorerVm.RootsControls}" SelectedItem="{Binding TreeExplorerVm.SelectedControlVm}" SelectionChanged="OnControlSelectionChanged">
+        <TreeView x:Name="TreeView"
+                  Grid.Row="1" 
+                  ItemsSource="{Binding TreeExplorerVm.RootsControls}" 
+                  SelectedItem="{Binding TreeExplorerVm.SelectedControlVm}" 
+                  SelectionChanged="OnControlSelectionChanged"
+                  Background="Transparent">
             <TreeView.DataTemplates>
                 <TreeDataTemplate DataType="vm:UiBaseControlVm"
                                   ItemsSource="{Binding Children}">
-                    <TextBlock Text="{Binding Name}"/>
+                    <Grid ColumnDefinitions="*, Auto">
+                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                    <Button Grid.Column="1" Classes="Small" Click="Button_OnClick">
+                        <icon:Icon Value="mdi-cog"/>
+                    </Button>
+                    </Grid>
                 </TreeDataTemplate>
             </TreeView.DataTemplates>
-            <TreeView.ItemContainerTheme>
-                <ControlTheme TargetType="TreeViewItem" x:DataType="vm:UiBaseControlVm" BasedOn="{StaticResource {x:Type TreeViewItem}}" x:CompileBindings="False">
+            <TreeView.Styles>
+                <Style Selector="TreeViewItem" x:DataType="vm:UiBaseControlVm">
                     <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
-                </ControlTheme>
-            </TreeView.ItemContainerTheme>
+                </Style>
+            </TreeView.Styles>
         </TreeView>
         <GridSplitter Grid.Row="2" ResizeBehavior="PreviousAndNext">
             <GridSplitter.Template>

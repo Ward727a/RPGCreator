@@ -112,7 +112,7 @@ public class BpCompilerService : IBpCompilerService
         dataToCompile.Add(buildGlobalResult.Value.sourceCode);
 
         return await CodeCompiler.CompileToDll(assemblyName, dataToCompile.ToArray(),
-            Path.Combine(RpgEnv.Path.ApplicationData, "compiled_blueprints.dll"), [
+            Path.Combine(RpgEnv.Path.ApplicationDataFolder, "compiled_blueprints.dll"), [
                 typeof(RegistryServices).Assembly.Location,
                 typeof(BaseBpCompiledLogic).Assembly.Location
             ],

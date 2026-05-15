@@ -1,16 +1,16 @@
 using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Parser.PrattFormula;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Skills;
 
-[SerializingType("SkillDef")]
-public class SkillDef : BaseAssetDef, ISkillDef
+[EngineClass("rpgc", "assets", "definition", "skill", DisplayName = "Skill Definition")]
+public partial class SkillDef : BaseAssetDef, ISkillDef
 {
     public string SavePath { get; set; }
-    public override UrnSingleModule UrnModule => "skill".ToUrnSingleModule();
     public Ulid? PackId { get; set; }
     public string Description { get; set; } = string.Empty;
     public string IconPath { get; set; } = string.Empty;
@@ -24,7 +24,6 @@ public class SkillDef : BaseAssetDef, ISkillDef
     
     public SkillDef()
     {
-        SuspendTracking();
     }
 
     public SkillDef(string name) : this()

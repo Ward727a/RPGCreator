@@ -34,11 +34,15 @@ using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.RTP.Extensions;
 using RPGCreator.RTP.GameUI.Interface;
 using RPGCreator.SDK.Exceptions;
+using RPGCreator.SDK.GameUI.Enums;
 using RPGCreator.SDK.Types;
 using Color = RPGCreator.SDK.Types.Color;
 using Matrix3x2 = System.Numerics.Matrix3x2;
 using Vector2 = System.Numerics.Vector2;
 
+// This file manage the UI rendering process.
+// Note: This is a kinda complicated class, so if you are not familiar with the code, or the way thing are working there
+// I highly recommend you to read, understand, test, before trying to do anything there.
 
 namespace RPGCreator.RTP.GameUI;
 
@@ -473,15 +477,17 @@ public class UiRendererContext(SpriteBatch spriteBatch, ShapeBatch shapeBatch) :
                     var color = reader.ReadColor();
                     var thickness = reader.ReadFloat();
                     var isFilled = reader.ReadBool();
+                    var rounding = reader.ReadFloat();
+                    var aaSize = reader.ReadFloat();
                     if (isFilled)
                     {
                         ShapeBatch.FillRectangle(pos.ToXnaFast(), size.ToXnaFast(),
-                            color.ToMgColor(), thickness, aaSize: 0);
+                            color.ToMgColor(), rounding,  aaSize: aaSize);
                         break;
                     }
 
                     ShapeBatch.BorderRectangle(pos.ToXnaFast(), size.ToXnaFast(),
-                        color.ToMgColor(), thickness, aaSize: 0);
+                        color.ToMgColor(), thickness, aaSize: aaSize, rounded: rounding);
                     break;
                 }
                 case DrawCommandType.DrawCircle:
@@ -806,7 +812,8 @@ public class UiRendererContext(SpriteBatch spriteBatch, ShapeBatch shapeBatch) :
         }
     }
 
-    public void DrawRectangle(Vector2 position, Vector2 size, Color color, float thickness = 1, bool filled = false)
+    public void DrawRectangle(Vector2 position, Vector2 size, Color color, float thickness = 1F, bool filled = false,
+        float aaSize = 0, float cornerRadius = 0)
     {
         using var buffer = MemoryBuffer.CreateWriter(RenderSize.DrawRectangle);
         buffer.WriteByte((byte)DrawCommandType.DrawRectangle);
@@ -815,12 +822,8 @@ public class UiRendererContext(SpriteBatch spriteBatch, ShapeBatch shapeBatch) :
         buffer.WriteColor(color);
         buffer.WriteFloat(thickness);
         buffer.WriteBool(filled);
-        
-        // _drawCommands.Add(new DrawCommand(
-        //     DrawCommandType.DrawRectangle,
-        //     matrixData: PutRectangleData(position, size, color, thickness),
-        //     boolData: filled
-        // ));
+        buffer.WriteFloat(cornerRadius);
+        buffer.WriteFloat(aaSize);
     }
 
     public void DrawLine(Vector2 start, Vector2 end, Color color, float thickness = 1)

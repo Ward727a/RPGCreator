@@ -1,7 +1,9 @@
 ﻿using System.Numerics;
+using RPGCreator.SDK.Attributes;
 
 namespace RPGCreator.SDK.Types;
 
+[EngineType("rpgc", "sdk", "types", "rectangle")]
 public struct Rect : IEquatable<Rect>
 {
     public Vector2 Position;

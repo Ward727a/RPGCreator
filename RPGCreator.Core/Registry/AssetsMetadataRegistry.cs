@@ -19,7 +19,6 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using LiteDB;
-using RPGCreator.Core.Types.Assets.BaseAssetsPack;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.MetaData;
 using RPGCreator.SDK.Logging;
@@ -59,8 +58,6 @@ public class AssetsMetadataRegistry : IAssetsMetaDataRegistry
 {
     public event Action<MetaDataChangedArgs>? OnMetaDataChanged;
     
-    private BaseAssetsPack _defaultPack;
-    
     private static ILiteCollection<RegistryEntry> _registryCache;
     private static Dictionary<string, object> _detailsDbCache = new Dictionary<string, object>();
     private static Dictionary<Type, string> _typeToDbTableKeyCache = new Dictionary<Type, string>();
@@ -83,7 +80,7 @@ public class AssetsMetadataRegistry : IAssetsMetaDataRegistry
         
         var db = GetDatabase() ?? throw new InvalidOperationException("The database is not available. This should never happen, as the database should be available when the registry is initialized.");
         var detailsDb = db.GetCollection<T>(dbTableKey);
-        detailsDb.EnsureIndex(x => x.UniqueId);
+        detailsDb.EnsureIndex(x => x.Unique);
         _detailsDbCache[dbTableKey] = detailsDb;
         Logger.Debug($"AssetsMetadataRegistry: Details collection for table key '{dbTableKey}' initialized.");
         return detailsDb;
@@ -96,15 +93,7 @@ public class AssetsMetadataRegistry : IAssetsMetaDataRegistry
     
     public AssetsMetadataRegistry()
     {
-        var pack = EngineServices.AssetsManager.GetDefaultPack();
         
-        if(pack == null)
-            throw new InvalidOperationException("The default assets pack is not loaded. This should never happen, as the default pack should be loaded before the registry.");
-        
-        if(pack is not BaseAssetsPack assetsPack)
-            throw new InvalidOperationException("The default assets pack is not of type BaseAssetsPack. This should never happen, as the default pack should be of type BaseAssetsPack.");
-        
-        _defaultPack = assetsPack;
     }
 
     public void RegisterIfNotExists<T>(T data) where T : BaseMetaData
@@ -112,7 +101,7 @@ public class AssetsMetadataRegistry : IAssetsMetaDataRegistry
         if (!CanEditDb()) return;
         EnsureRegistry();
         
-        if(ContainsMetaData(data.UniqueId))
+        if(ContainsMetaData(data.Unique))
             return;
         
         RegisterMetaData(data);
@@ -125,14 +114,14 @@ public class AssetsMetadataRegistry : IAssetsMetaDataRegistry
         
         _registryCache.Upsert(new RegistryEntry()
         {
-            Id = data.UniqueId,
+            Id = data.Unique,
             DbTableKey = data.DbKey
         });
         
         var detailsDb = GetDetailsCollection<T>(data.DbKey);
         detailsDb.Upsert(data);
-        OnMetaDataChanged?.Invoke(new MetaDataChangedArgs(data.UniqueId, data.DbKey, MetaDataChangeType.Registered));
-        Logger.Debug($"AssetsMetadataRegistry: Registered metadata with unique id {data.UniqueId} in the registry.");
+        OnMetaDataChanged?.Invoke(new MetaDataChangedArgs(data.Unique, data.DbKey, MetaDataChangeType.Registered));
+        Logger.Debug($"AssetsMetadataRegistry: Registered metadata with unique id {data.Unique} in the registry.");
     }
     
     public void UpdateMetaData<T>(T data) where T : BaseMetaData
@@ -140,12 +129,12 @@ public class AssetsMetadataRegistry : IAssetsMetaDataRegistry
         if (!CanEditDb()) return;
         EnsureRegistry();
         
-        if(!ContainsMetaData(data.UniqueId))
-            throw new InvalidOperationException($"The metadata with the unique id {data.UniqueId} is not registered in the registry.");
+        if(!ContainsMetaData(data.Unique))
+            throw new InvalidOperationException($"The metadata with the unique id {data.Unique} is not registered in the registry.");
         
         var detailsDb = GetDetailsCollection<T>(data.DbKey);
         detailsDb.Update(data);
-        OnMetaDataChanged?.Invoke(new MetaDataChangedArgs(data.UniqueId, data.DbKey, MetaDataChangeType.Updated));
+        OnMetaDataChanged?.Invoke(new MetaDataChangedArgs(data.Unique, data.DbKey, MetaDataChangeType.Updated));
         
     }
 
@@ -242,12 +231,21 @@ public class AssetsMetadataRegistry : IAssetsMetaDataRegistry
             throw new InvalidOperationException($"The metadata with the unique id {uniqueId} is not registered in the registry.");
         
         var detailsDb = db.GetCollection<BaseMetaData>(entry.DbTableKey);
-        return detailsDb.Find(x => x.HasReferenceTo(uniqueId)).Select(x => x.UniqueId);
+        return detailsDb.Find(x => x.HasReferenceTo(uniqueId)).Select(x => x.Unique);
     }
     
     private LiteDatabase? GetDatabase()
     {
-        return EngineDB.GetDB(_defaultPack.GetDbId());
+        var result = RpgEnv.PathFormat.GetDbPath("asset_meta");
+        if(result.IsSuccess)
+        {
+            var db = EngineDB.GetDB(result.Value);
+            if (db != null) return db;
+            
+            var dbId = EngineDB.OpenDB(result.Value);
+            return EngineDB.GetDB(dbId);
+        }
+        throw new InvalidOperationException("Failed to retrieve database path.");
     }
     
     private string GetDbTableKey<T>() where T : BaseMetaData, new()

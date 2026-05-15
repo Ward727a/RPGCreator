@@ -24,7 +24,6 @@ using RPGCreator.SDK.Serializer;
 
 namespace RPGCreator.SDK.GameRunner;
 
-[SerializingType("DefaultGameData")]
 public class DefaultGameData : IGameData
 {
     public string ProjectPath { get; private set; } = "";

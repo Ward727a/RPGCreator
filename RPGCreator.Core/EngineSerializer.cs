@@ -1,13 +1,11 @@
 
-using System.ComponentModel;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Unicode;
 using RPGCreator.Core.Serializer;
-using RPGCreator.Core.Serializer.Binder;
-using RPGCreator.SDK;
-using RPGCreator.SDK.Assets;
-using RPGCreator.SDK.Assets.Definitions;
+using RPGCreator.Core.Serializer.ConverterFactory;
+using RPGCreator.Core.Serializer.Converters;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 
@@ -46,78 +44,82 @@ public class EngineSerializer : ISerializerService
     
     private readonly ScopedLogger _logger = Logger.ForContext<EngineSerializer>();
     
-    private readonly JsonSerializerSettings _settings;
-    private readonly JsonSerializer _serializer;
+    private readonly JsonSerializerOptions _settings;
     
     public EngineSerializer()
     {
-        _settings = new JsonSerializerSettings
+        _settings = new JsonSerializerOptions
         {
-            TypeNameHandling = TypeNameHandling.Auto,
-            Formatting = Formatting.Indented,
-            NullValueHandling = NullValueHandling.Ignore,
-            SerializationBinder = new AssetTypeBinder(),
+            WriteIndented = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             Converters = { 
-                new EngineJsonConverter(),
                 new UlidJsonConverter(),
                 new ColorJsonConverter(),
                 // old one, should be removed before first release, but for now we need it to avoid breaking testing data.
                 // (I just don't want to restart the testing data... [Ward727, 22/02/2026])
-                new OldColorJsonConverter(), 
                 new UrnJsonConverter(),
+                new EngineClassConverterFactory(),
+                new FilePathJsonConverter()
             },
-            PreserveReferencesHandling = PreserveReferencesHandling.None,
-            DefaultValueHandling = DefaultValueHandling.Ignore
         };
-        _serializer = JsonSerializer.Create(_settings);
     }
-    
+
+    public void Serialize(object obj, Type objType, out string data)
+    {
+        var json = JsonSerializer.Serialize(obj, objType, _settings);
+        data = json;
+    }
+
     public void Serialize<T>(T obj, out string data)
     {
-        var jo = JObject.FromObject(obj);
-        string? key = RegistryServices.AssetsType.GetKey(obj.GetType());
-        if (key != null)
-        {
-            jo.AddFirst(new JProperty("TypeKey", key));
-        }
-        var json = JsonConvert.SerializeObject(obj, _settings);
+        var json = JsonSerializer.Serialize(obj, _settings);
         data = json;
     }
 
     public void SerializeTo<T>(T obj, string filePath)
     {
-        using var sw = new StreamWriter(filePath);
-        using var writer = new JsonTextWriter(sw);
-        _serializer.Serialize(writer, obj);
+        using var fileStream = File.Open(filePath, FileMode.OpenOrCreate, FileAccess.Write);
+        JsonSerializer.Serialize(fileStream, obj, _settings);
     }
 
+    public object? Deserialize(string data, Type type)
+    {
+        return JsonSerializer.Deserialize(data, type, _settings);
+    }
+    
     public void Deserialize<T>(string data, out T? obj)
     {
-        obj = JsonConvert.DeserializeObject<T>(data, _settings)!;
+        obj = JsonSerializer.Deserialize<T>(data, _settings);
     }
     
     public void Deserialize<T>(string data, out T obj, out Type type)
     {
-        obj = JsonConvert.DeserializeObject<T>(data, _settings)!;
+        obj = JsonSerializer.Deserialize<T>(data, _settings)!;
         type = obj?.GetType() ?? typeof(T);
     }
 
     public void Deserialize<T>(Stream stream, out T? obj)
     {
-        using var sr = new StreamReader(stream);
-        using var reader = new JsonTextReader(sr);
-        obj = _serializer.Deserialize<T>(reader);
-        if (obj is IBaseAssetDef def)
+        if (!stream.CanRead)
         {
-            def.ResumeTracking();
+            obj = default;
+            Logger.Error("Stream is not readable.");
+            return;
         }
+        obj = JsonSerializer.Deserialize<T>(stream, _settings);
     }
     
     public void Deserialize<T>(Stream stream, out T obj, out Type type)
     {
-        using var sr = new StreamReader(stream);
-        using var reader = new JsonTextReader(sr);
-        obj = _serializer.Deserialize<T>(reader)!;
+        if (!stream.CanRead)
+        {
+            obj = default;
+            type = typeof(T);
+            Logger.Error("Stream is not readable.");
+            return;
+        }
+        obj = JsonSerializer.Deserialize<T>(stream, _settings)!;
         type = obj?.GetType() ?? typeof(T);
     }
 
@@ -132,7 +134,7 @@ public class EngineSerializer : ISerializerService
 
         try
         {
-            using Stream stream = File.Open(filePath, FileMode.Open);
+            using Stream stream = File.Open(filePath, FileMode.Open, FileAccess.Read);
             Deserialize(stream, out obj);
             return;
         }
@@ -144,43 +146,4 @@ public class EngineSerializer : ISerializerService
         }
 
     }
-
-    #region Helpers
-
-    private static Type? GetTypeFromJsonData(string data)
-    {
-        if (string.IsNullOrWhiteSpace(data)) return null;
-
-        var jsonObject = JObject.Parse(data);
-        var typeToken = jsonObject["$type"];
-        if (typeToken == null) return null;
-    
-        string typeName = typeToken.ToString();
-
-        // New strategy: Try to resolve the type using the AssetTypeRegistry first
-        var type = RegistryServices.AssetsType.GetType(typeName);
-        if (type != null && type != typeof(GenericBaseAssetStub)) return type;
-
-        // Old strategy: Try to get the type directly
-        type = Type.GetType(typeName);
-        if (type != null) return type;
-
-        // Fallback: Try to loosen the assembly qualification
-        if (typeName.Contains(","))
-        {
-            var parts = typeName.Split(',');
-            var looseTypeName = $"{parts[0].Trim()}, {parts[1].Trim()}";
-            type = Type.GetType(looseTypeName);
-        }
-
-        if (type is GenericBaseAssetStub)
-        {
-            Logger.Error("Failed to resolve type from JSON data: {typeName}, returning GenericBaseAssetStub as fallback.", args: typeName);
-            Logger.Error("Data: {@data}", args: data);
-        }
-
-        return type;
-    }
-    
-    #endregion
 }

@@ -27,7 +27,9 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using System;
+using System.IO;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Helpers;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.ProjectCreator
@@ -156,8 +158,8 @@ namespace RPGCreator.UI.Content.ProjectCreator
                 RefreshState();
                 return;
             }
-            
-            EngineServices.ProjectsManager.CreateProject(_ProjectName, _ProjectPath, _ProjectDescription);
+
+            EngineServices.ProjectsManager.CreateProject(_ProjectName, Path.Combine(_ProjectPath, $"{FileHelper.SanitizeFileName(_ProjectName)}.json"), _ProjectDescription);
 
             ProjectCreated?.Invoke(this, EventArgs.Empty);
         }

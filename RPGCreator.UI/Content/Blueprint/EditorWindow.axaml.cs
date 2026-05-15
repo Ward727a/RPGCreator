@@ -51,6 +51,7 @@ using RPGCreator.SDK.GameUI;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Graph.LOGIC;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Services.EngineService;
 using RPGCreator.SDK.Types;
 using RPGCreator.UI.Blueprints;
 using RPGCreator.UI.Blueprints.Nodes.Variables;
@@ -1191,7 +1192,7 @@ public partial class EditorWindow : Window
             }
         }
 
-        var bpFolder = Path.Combine(GlobalStates.ProjectState.CurrentProject?.Path ?? RpgEnv.Path.ApplicationData,
+        var bpFolder = Path.Combine(GlobalStates.ProjectState.CurrentProject?.MetaData.Directory ?? RpgEnv.Path.ApplicationDataFolder,
             "Blueprints");
 
         _blueprintSaveFolder = _bpConfig.GetString("save_folder",
@@ -1258,7 +1259,7 @@ public partial class EditorWindow : Window
 
     private void Editor_Drop(object? sender, DragEventArgs e)
     {
-        var data = e.DataTransfer.TryGetValue<INodeLogic>(BlueprintFormats.NodeLogicFormat);
+        var data = e.DataTransfer.TryGetValue<INodeLogic>(DragDropCustomFormats.NodeLogicFormat);
         if (data is not null && sender is NodifyEditor && DataContext is NodeEditorViewModel vm &&
             _dragGhost.Content is GenericNodeViewModel nodeVm)
         {
@@ -1321,10 +1322,10 @@ public partial class EditorWindow : Window
 
             var data = new DataTransfer();
             var item = new DataTransferItem();
-            item.Set(BlueprintFormats.NodeLogicFormat, logic);
+            item.Set(DragDropCustomFormats.NodeLogicFormat, logic);
             data.Add(item);
 
-            var result = await DragDrop.DoDragDropAsync(e, data, DragDropEffects.Copy); // Nettoyage final
+            var result = await DragDrop.DoDragDropAsync(e, data, DragDropEffects.Copy); 
             vm.DraggingEnd();
             GhostOverlay.Children.Clear();
             _dragGhost = null;

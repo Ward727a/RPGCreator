@@ -27,6 +27,7 @@ using RPGCreator.Core.Managers.ProjectsManager;
 using RPGCreator.Core.Module;
 using RPGCreator.Core.Registry;
 using RPGCreator.Core.Services;
+using RPGCreator.Core.Services.StorageService;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Commands;
 using RPGCreator.SDK.Logging;
@@ -36,27 +37,21 @@ namespace RPGCreator.Core
     internal class EngineManagers
     {
         private readonly ScopedLogger _logger = Logger.ForContext<EngineManagers>();
-        public AssetsManager Assets { get; private set; }
-        public GameFactory GameFactory { get; private set; }
+        public AssetsManagerRevamp Assets { get; private set; }
         public ProjectsManager Projects { get; private set; }
         public ToolService Brush { get; private set; }
         public UndoRedoService Commands { get; private set; }
         
-        public FeaturesRulesManager FeaturesRules { get; private set; }
-
         internal EngineManagers()
         {
-            Assets = new AssetsManager();
+            Assets = new AssetsManagerRevamp(JsonFileStorageService.Shared);
+            EngineServices.AssetsManager = Assets;
             Projects = new ProjectsManager();
-            GameFactory = new GameFactory();
             // Created because this allow tool to interact with the engine canvas.
             // Do not delete it, even if you think it's doesn't used.. It is.
             Brush = new ToolService(); 
-            FeaturesRules = new FeaturesRulesManager();
             Commands = new UndoRedoService();
             
-            EngineServices.AssetsManager = Assets;
-            EngineServices.GameFactory = GameFactory;
             EngineServices.ProjectsManager = Projects;
             EngineServices.UndoRedoService = Commands;
             EngineServices.FeaturesManager = new FeatureManager();
@@ -74,7 +69,6 @@ namespace RPGCreator.Core
 
         internal void Init()
         {
-            Assets.Init();
         }
 
     }

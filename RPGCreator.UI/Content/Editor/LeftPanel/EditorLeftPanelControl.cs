@@ -148,7 +148,6 @@ public class EditorLeftPanelControl : UserControl
                         if (_tilesetPayload == null)
                         {
                             _tilesetPayload = new TilesetExplorer(
-                                EngineServices.AssetsManager.CreateAssetScope("editor_left_panel"), 
                                 tilesetType: TilesetExplorer.TilesetType.NonAutotileOnly)
                             {
                                 Margin = new Thickness(4, 0, 0, 0),
@@ -163,8 +162,7 @@ public class EditorLeftPanelControl : UserControl
                         
                         if(_characterSelectorPayload == null)
                         {
-                            _characterSelectorPayload = new CharacterExplorer(
-                                EngineServices.AssetsManager.CreateAssetScope("editor_left_panel"))
+                            _characterSelectorPayload = new CharacterExplorer()
                             {
                                 Margin = new Thickness(4, 0, 0, 0),
                                 HorizontalAlignment = HorizontalAlignment.Stretch,

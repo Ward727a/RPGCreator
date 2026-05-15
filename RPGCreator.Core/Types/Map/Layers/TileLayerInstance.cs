@@ -1,4 +1,5 @@
 using System.Numerics;
+using RPGCreator.Core.Types.Assets.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
@@ -38,7 +39,7 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
         if(InstancedElements.TryAdd
             (
                 e.Location,
-                EngineCore.Instance.Managers.Assets.TileFactory.Create(e.Element)
+                new TileInstance(e.Element)
             ))
             Log.Information("[TileLayerInstance: {LayerName}] Added tile instance at {Location}", _def.Name, e.Location);
         else
@@ -52,14 +53,10 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
             foreach (var tile in InstancedElements.ToList())
             {
                 InstancedElements.Remove(tile.Key);
-                EngineCore.Instance.Managers.Assets.TileFactory.Release(tile.Value);
             }
         }
-        
-        if (!InstancedElements.Remove(e.Location, out var removedTile))
-            return;
 
-        EngineCore.Instance.Managers.Assets.TileFactory.Release(removedTile);
+        InstancedElements.Remove(e.Location, out _);
     }
 
     public void Update(TimeSpan gameTime)
@@ -72,11 +69,6 @@ public class TileLayerInstance : IMapLayerInstance<ITileDef, ITileInstance>, IRe
 
     public void Clean()
     {
-        foreach (var tile in InstancedElements.Values)
-        {
-            EngineCore.Instance.Managers.Assets.TileFactory.Release(tile);
-        }
-        
         InstancedElements.Clear();
         
         _def.ElementAdded -= OnElementAdded;

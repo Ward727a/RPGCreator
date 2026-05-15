@@ -1,7 +1,9 @@
 using System.Numerics;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
 
 namespace RPGCreator.Core.Types.Map.Layers.AutoLayer;
@@ -16,7 +18,7 @@ public class AutoTileSolver : IAutoTileSolver
         public bool FlipY { get; set; }
     }
     
-    public ITileDef? Resolve(
+    public Result<ITileDef> Resolve(
         Vector2 position,
         IntGridLayerDefinition intLayer,
         List<AutoLayerRule> rules,
@@ -25,7 +27,7 @@ public class AutoTileSolver : IAutoTileSolver
         int centerValue = intLayer.GetValue(position);
         
         if(centerValue == int.MinValue) // No tile present
-            return null;
+            return Result.Fail("No tile present at position");
         
         List<PatternMatch> matchedRules = new();
         
@@ -56,7 +58,7 @@ public class AutoTileSolver : IAutoTileSolver
             if (bestCandidates.Count == 1)
             {
                 var match = bestCandidates[0];
-                return PickTile(match.Rule, position, null, match.FlipX, match.FlipY);
+                return PickTile(match.Rule, position, match.FlipX, match.FlipY);
             }
 
             var random = new Random(GetSeed(position, intLayer.ZIndex));
@@ -69,12 +71,12 @@ public class AutoTileSolver : IAutoTileSolver
                 randomValue -= match.Rule.Chance;
                 if (randomValue <= 0)
                 {
-                    return PickTile(match.Rule, position, null, match.FlipX, match.FlipY);
+                    return PickTile(match.Rule, position, match.FlipX, match.FlipY);
                 }
             }
     
             var fallback = bestCandidates.Last();
-            return PickTile(fallback.Rule, position, null, fallback.FlipX, fallback.FlipY);
+            return PickTile(fallback.Rule, position, fallback.FlipX, fallback.FlipY);
         }
 
         return null;
@@ -199,11 +201,8 @@ public class AutoTileSolver : IAutoTileSolver
         return true;
     }
     
-    private static ITileDef? PickTile(AutoLayerRule rule, Vector2 position, IAssetScope? scope = null, bool flipX = false, bool flipY = false)
+    private static Result<ITileDef> PickTile(AutoLayerRule rule, Vector2 position, bool flipX = false, bool flipY = false)
     {
-
-        if (scope == null)
-            scope = EngineServices.AssetsManager.CreateAssetScope();
         
         if (rule.OutputTiles.Count == 0)
             return null;
@@ -213,21 +212,25 @@ public class AutoTileSolver : IAutoTileSolver
         
         var tileData = rule.OutputTiles[index];
 
-        var tilesetDef = scope.Load<BaseTilesetDef>(tileData.TilesetId);
-        
-        var tile = tilesetDef.GetTileAt((int)(tileData.TilePosition.X / tilesetDef.TileWidth), (int)(tileData.TilePosition.Y / tilesetDef.TileHeight));
-
-        if (!flipX && !flipY)
-            return tile;
-
-        if (flipX)
+        return EngineServices.AssetsManager.Load<BaseTilesetDef>(tileData.TilesetId).Bind<ITileDef>(def =>
         {
-            tile.Flip |= TileFlip.Horizontal;
-        }
-        if (flipY)
-        {
-            tile.Flip |= TileFlip.Vertical;
-        }
-        return tile;
+            var tile = def.GetTileAt((int)(tileData.TilePosition.X / def.TileWidth), (int)(tileData.TilePosition.Y / def.TileHeight));
+
+            if (tile == null)
+                return Result.Fail("Tile not found in tileset");
+
+            if (!flipX && !flipY)
+                return Result<ITileDef>.Ok(tile);
+
+            if (flipX)
+            {
+                tile.Flip |= TileFlip.Horizontal;
+            }
+            if (flipY)
+            {
+                tile.Flip |= TileFlip.Vertical;
+            }
+            return Result<ITileDef>.Ok(tile);
+        });
     }
 }

@@ -29,6 +29,7 @@ using RPGCreator.SDK.Assets.Runtime.Tilesets;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components.Maps;
 using RPGCreator.SDK.ECS.Systems;
+using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
 using Color = RPGCreator.SDK.Types.Color;
 
@@ -90,19 +91,19 @@ public class TileLayerRenderingSystem : ISystem
                             int tileIndex = bitGroupIndex * 64 + bitIndex;
                             
                             var tile = runtimeChunk.Data[tileIndex];
-                            
-                            var tileset = GetTileset(tile.TilesetId);
 
-                            if (tileset == null)
+                            var tilesetTextureResult = GetTilesetTexture(tile.TilesetId);
+
+                            if (tilesetTextureResult.IsFailure)
                             {
                                 // Later we could add a fallback tileset here
-                                throw new Exception($"Failed to load tileset with ID: {tile.TilesetId}");
+                                throw new Exception($"Failed to load tileset with ID: {tile.TilesetId} - {tilesetTextureResult.Error}");
                             }
 
                             // Need to switch to a buffered drawing system
                             // once it's ready inside the RTP.
                             RuntimeServices.RenderService.DirectDraw(
-                                tileset, tile.PositionInMap,
+                                tilesetTextureResult.Value, tile.PositionInMap,
                                 tile.SourceRect, Color.White * layerHeader.Opacity,
                                 effects: tile.Effects);
                             
@@ -115,22 +116,20 @@ public class TileLayerRenderingSystem : ISystem
         
     }
 
-    private Texture2D? GetTileset(Ulid tilesetId)
+    private Result<Texture2D> GetTilesetTexture(Ulid tilesetId)
     {
         if (_tilesetCache.TryGetValue(tilesetId, out var tileset))
         {
             return tileset;
         }
 
-        if (EngineServices.AssetsManager.TryResolveAsset(tilesetId, out BaseTilesetDef? tilesetDef))
+        return EngineServices.AssetsManager.Load<BaseTilesetDef>(tilesetId).Bind<Texture2D>(def =>
         {
-            var texture = EngineServices.Resources.Load<Texture2D>(tilesetDef.ImagePath);
-            if(texture == null)
-                return null;
+            var texture = EngineServices.Resources.Load<Texture2D>(def.ImagePath);
+            if (texture == null)
+                return Result.Fail($"Failed to load tileset texture: {def.ImagePath}");
             _tilesetCache.Add(tilesetId, texture);
             return texture;
-        }
-
-        return null;
+        });
     }
 }

@@ -29,7 +29,6 @@ public struct PatternConstraint()
     public static PatternConstraint MustNotBeSame() => new(){Condition =  PatternCondition.MustNotBe, TargetValue =  0, IsRelative = true};
 }
 
-[SerializingType("AutoLayerRule")]
 public class AutoLayerRule : IDeserializable, ISerializable
 {
     public int TargetIntGridValue { get; set; }

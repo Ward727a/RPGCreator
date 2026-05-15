@@ -66,7 +66,7 @@ public static class EffectPropertyTypeExtensions
     }
 }
 
-[SerializingType("SkillEffectPropertyDescriptor")]
+[EngineType("rpgc", "sdk", "skill_effect_property_descriptor")]
 public record SkillEffectPropertyDescriptor : ISerializable, IDeserializable
 {
     public string Name {get; set; }

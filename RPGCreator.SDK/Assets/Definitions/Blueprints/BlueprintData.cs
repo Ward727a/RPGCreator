@@ -20,6 +20,7 @@
 
 
 using Newtonsoft.Json;
+using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Registry;
 using RPGCreator.SDK.Types;
@@ -28,7 +29,8 @@ namespace RPGCreator.SDK.Assets.Definitions.Blueprints;
 
 
 [JsonObject]
-public class BlueprintData : IHasTag
+[EngineClass("rpgc", "scripts", "blueprints", "blueprint_def", DisplayName = "Blueprint Definition")]
+public partial class BlueprintData() : BaseAssetDef, IHasTag
 {
     [JsonIgnore]
     public bool IsDirty { get; private set; } = true;

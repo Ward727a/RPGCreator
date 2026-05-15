@@ -2,7 +2,7 @@ using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.SDK.Assets.Definitions.Characters;
 
-public interface ICharacter : IHasSavePath, IHasUniqueId
+public interface ICharacter : IHasSavePath, IEngineObject
 {
     public event EventHandler<string>? PortraitChanged;
     public event EventHandler<int>? LevelChanged;

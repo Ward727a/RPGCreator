@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using RPGCreator.SDK;
 using RPGCreator.SDK.EngineService;
+using RPGCreator.SDK.Services.EngineService;
 using RPGCreator.SDK.Types.Collections;
 using RPGCreator.SDK.Types.Internals;
 
@@ -20,7 +21,7 @@ public class AssetExplorerDialog : Window
     #region Properties
 
     private IAssetsManager _assets = EngineServices.AssetsManager;
-    public List<IHasUniqueId> AssetsList { get; private set; } = new List<IHasUniqueId>();
+    public List<IEngineObject> AssetsList { get; private set; } = new List<IEngineObject>();
     #endregion
     
     #region Components
@@ -126,7 +127,7 @@ public class AssetExplorerDialog : Window
     {
         // This method should be overridden in derived classes to fetch the assets list.
         // For now, we just initialize an empty list.
-        AssetsList = new List<IHasUniqueId>();
+        AssetsList = new List<IEngineObject>();
         
         // Start getting all assets from the different registry
         AddTilesets();
@@ -150,10 +151,10 @@ public class AssetExplorerDialog : Window
         //AddRegistry(_assets.StatsRegistry);
     }
     
-    private void AddRegistry<T>(IAssetRegistry<T> registry) where T : IHasUniqueId
+    private void AddRegistry<T>(IAssetRegistry<T> registry) where T : IEngineObject
     {
         var assets = registry.All();
-        AssetsList.AddRange(assets as IEnumerable<IHasUniqueId>);
+        AssetsList.AddRange(assets as IEnumerable<IEngineObject>);
     }
 
     protected virtual void ReloadView()
@@ -164,7 +165,7 @@ public class AssetExplorerDialog : Window
         {
             var assetButton = new Button
             {
-                Content = $"{RegistryServices.AssetsType.GetKey(asset.GetType())} : {asset.Urn.Name}",
+                Content = $"{RegistryServices.Types.GetKey(asset.GetType())} : {asset.ClassUrn.Name}",
                 Margin = new Avalonia.Thickness(5),
                 HorizontalAlignment = HorizontalAlignment.Stretch
             };

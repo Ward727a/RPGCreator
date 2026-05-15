@@ -34,6 +34,7 @@ using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.GlobalState;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
 using RPGCreator.SDK.RuntimeService;
 using RPGCreator.UI.Contexts;
@@ -270,18 +271,42 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                 var layerName = args.Name;
                 var layerType = args.Key;
                 // Logic to add a new layer with the specified name
-                BaseLayerDef newLayer;
+                BaseLayerDef? newLayer;
                 
                 switch (layerType)
                 {
                     case "tile_layer": // Tile Layer
-                        newLayer = EngineServices.AssetsManager.CreateAsset<TileLayerDefinition>();
+                        newLayer = EngineServices.AssetsManager.Create<TileLayerDefinition>(TileLayerDefinition.ClassURN).Match(def =>
+                        {
+                            newLayer = def;
+                            return def;
+                        }, err =>
+                        {
+                            Logger.Error("Error creating Tile Layer: {err}", err);
+                            return null;
+                        });
                         break;
                     case "auto_layer": // Auto Layer
-                        newLayer = EngineServices.AssetsManager.CreateAsset<AutoLayerDefinition>();
+                        newLayer = EngineServices.AssetsManager.Create<AutoLayerDefinition>(AutoLayerDefinition.ClassURN).Match(def =>
+                        {
+                            newLayer = def;
+                            return def;
+                        }, err =>
+                        {
+                            Logger.Error("Error creating Tile Layer: {err}", err);
+                            return null;
+                        });
                         break;
                     case "entity_layer": // Entity Layer
-                        newLayer = EngineServices.AssetsManager.CreateAsset<EntityLayerDefinition>();
+                        newLayer = EngineServices.AssetsManager.Create<EntityLayerDefinition>(EntityLayerDefinition.ClassURN).Match(def =>
+                        {
+                            newLayer = def;
+                            return def;
+                        }, err =>
+                        {
+                            Logger.Error("Error creating Tile Layer: {err}", err);
+                            return null;
+                        });
                         break;
                     default: // Not supported by default
                         return;

@@ -1,8 +1,11 @@
 using System.Collections;
 using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Modules.Definition;
 
@@ -11,7 +14,7 @@ namespace RPGCreator.SDK.Modules.Definition;
 /// <summary>
 /// A custom data system, also called "data bags" or "property bags", that allows modules to store and retrieve misc data, defined by users or other modules.
 /// </summary>
-[SerializingType("CustomData")]
+[EngineType("rpgc", "sdk", "custom_data")]
 public class CustomData : ISerializable, IDeserializable, IDisposable, ICloneable
 {
     object ICloneable.Clone() => Clone();
@@ -28,33 +31,41 @@ public class CustomData : ISerializable, IDeserializable, IDisposable, ICloneabl
     /// </summary>
     public event Action<string>? OnDataRemoved;
     
-    private Dictionary<string, object> _data = new();
+    [JsonInclude]
+    [JsonPropertyName("Store")]
+    private Dictionary<string, SerializableData> _data = new();
     
-    private CustomData(Dictionary<string, object> initialData) : this()
+    [JsonConstructor]
+    // ReSharper disable once InconsistentNaming
+    private CustomData(Dictionary<string, SerializableData> _data) : this()
     {
-        _data = new Dictionary<string, object>(initialData.Count);
-        foreach (var kvp in initialData)
-        {
-            var val = CloneValue(kvp.Value);
-            if(val != null)
-                _data[kvp.Key] = val;
-            else
-                Logger.Error("Failed to clone value for key {key}(Val: {value}) in CustomData.", kvp.Key, kvp.Value);
-        }
+        this._data = _data;
+        // Maybe not needed anymore with the new SerializableData wrapper. But for now we keep it, need to remove it later on.
+        // this._data = new Dictionary<string, SerializableData>(_data.Count);
+        // foreach (var kvp in _data)
+        // {
+        //     var val = CloneValue(kvp.Value);
+        //     if (val != null)
+        //     {
+        //         this._data[kvp.Key] = new SerializableData();
+        //         this._data[kvp.Key].SetData(val);
+        //     }
+        //     else
+        //         Logger.Error("Failed to clone value for key {key}(Val: {value}) in CustomData.", kvp.Key, kvp.Value);
+        // }
     }
 
-    private object? CloneValue(object? value)
+    private object? CloneValue(object? value, string key = "key_not_provided")
     {
         if (value == null) return null;
-        
-        if (value is string || value.GetType().IsValueType) 
-            return value;
-
-        if (value is ICloneable cloneable)
+        if (value is not SerializableData element)
         {
-            return cloneable.Clone();
+            Logger.Error("Failed to clone value for key {key}(Val: {value}) in CustomData. Value is not a SerializableData.", key, value);
+            return null;
         }
 
+        value = element.GetDirectData();
+        
         if (value is Array arr)
         {
             return arr.Clone();
@@ -83,7 +94,8 @@ public class CustomData : ISerializable, IDeserializable, IDisposable, ICloneabl
     public CustomData Set<T>(string key, T value)
     {
         if (value == null) return this;
-        _data[key] = value;
+
+        _data[key] = new SerializableData<T>(value);
         DataChanged?.Invoke(key);
         return this;
     }
@@ -106,6 +118,7 @@ public class CustomData : ISerializable, IDeserializable, IDisposable, ICloneabl
         return this;
     }
     
+    [JsonIgnore]
     public IEnumerable<string> Keys => _data.Keys;
 
     public void Clear()
@@ -135,7 +148,7 @@ public class CustomData : ISerializable, IDeserializable, IDisposable, ICloneabl
     {
         if (_data.TryGetValue(key, out var value))
         {
-            return value.GetType();
+            return value.Type;
         }
         return null;
     }
@@ -146,14 +159,19 @@ public class CustomData : ISerializable, IDeserializable, IDisposable, ICloneabl
         {
             try
             {
-                if (value is T typedValue) return typedValue;
+                var obj = value.GetDirectData();
                 
-                if (typeof(T) == typeof(Ulid) && value is string s)
+                if(obj is null)
+                    return defaultValue;
+                
+                if (obj is T typedValue) return typedValue;
+                
+                if (typeof(T) == typeof(Ulid) && obj is string s)
                 {
                     return (T)(object)Ulid.Parse(s);
                 }
                 
-                return (T)Convert.ChangeType(value, typeof(T), CultureInfo.InvariantCulture);
+                return (T)Convert.ChangeType(obj, typeof(T), CultureInfo.InvariantCulture);
             } catch
             {
                 return defaultValue;
@@ -174,30 +192,11 @@ public class CustomData : ISerializable, IDeserializable, IDisposable, ICloneabl
     
     public SerializationInfo GetObjectData()
     {
-        return new SerializationInfo(typeof(CustomData)).AddValue("Store", _data ?? new Dictionary<string, object>());
-    }
-
-    public List<Ulid> GetReferencedAssetIds()
-    {
-        var referencedIds = new List<Ulid>();
-        foreach (var value in _data.Values)
-        {
-            if (value is Ulid ulidValue)
-            {
-                referencedIds.Add(ulidValue);
-            }
-            else if (value is IEnumerable<Ulid> ulidEnumerable)
-            {
-                referencedIds.AddRange(ulidEnumerable);
-            }
-        }
-        return referencedIds;
+        return new SerializationInfo(typeof(CustomData));
     }
 
     public void SetObjectData(DeserializationInfo info)
     {
-        info.TryGetDictionary("Store", out _data);
-        _data ??= new Dictionary<string, object>();
     }
     
     public CustomData Clone()
@@ -210,6 +209,7 @@ public class CustomData : ISerializable, IDeserializable, IDisposable, ICloneabl
     {
         DisposeEvents();
         _data.Clear();
+        GC.SuppressFinalize(this);
     }
 
     public void DisposeEvents()

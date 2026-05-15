@@ -27,7 +27,7 @@ using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.SDK.Modules.NativeAction;
 
-public abstract class BaseNativeAction : IHasUniqueId
+public abstract class BaseNativeAction : IEngineObject
 {
     protected UrnSingleModule NativeActionModule => "native_actions".ToUrnSingleModule();
     protected UrnSingleModule SignalItemModule => ISignalRegistry.SignalModuleUrn;
@@ -37,8 +37,8 @@ public abstract class BaseNativeAction : IHasUniqueId
     public Bitmask256 TriggerMask => _triggerMask;
 
     public abstract URN ExpectedSignal { get; }
-    public Ulid Unique { get; private set; }
-    public abstract URN Urn { get; }
+    public Ulid Unique { get; set; }
+    public abstract URN ClassUrn { get; set; }
 
     public bool BuildAction()
     {

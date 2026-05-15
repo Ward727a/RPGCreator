@@ -38,7 +38,6 @@ namespace RPGCreator.UI.Content.Editor.Tabs
     {
 
         private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<MapLevelTab>();
-        private readonly IAssetScope _assetScope = EngineServices.AssetsManager.CreateAssetScope("MapLevelTab");
 
         private Grid _BodyGrid;
         private AutoCompleteBox _SearchBox;
@@ -186,10 +185,18 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
             Guard.IsNotNull(GlobalStates.ProjectState.CurrentProject, "CurrentProject");
 
-            var mapDef = EngineServices.AssetsManager.CreateAsset<MapDefinition>();
+            var creationResult = EngineServices.AssetsManager.Create<MapDefinition>(MapDefinition.ClassURN);
+
+            if (creationResult.IsFailure)
+            {
+                Logger.Error("Failed to create map: {0}", creationResult.Error);
+                return;
+            }
+            
+            var mapDef = creationResult.Value;
             mapDef.Name = result;
 
-            EngineServices.AssetsManager.GetDefaultPack().AddOrUpdateAsset(mapDef);
+            EngineServices.AssetsManager.Save(mapDef);
             
             AddMapToUi(mapDef.GetMetaData() as MapMetaData);
             Logger.Info($"Map '{result}' created.");

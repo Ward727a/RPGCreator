@@ -37,6 +37,7 @@ using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using RPGCreator.SDK.Extensions;
 using RPGCreator.SDK.Helpers;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types.Collections;
 using RPGCreator.UI.Common;
 
@@ -48,14 +49,12 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
         public string Name { get; }
         public int TileWidth { get; }
         public int TileHeight { get; }
-        public string AssetPack { get; }
         public int TilesetType { get; }
-        public NewTilesetDialogOnCreatedEventArgs(string name, int tileWidth, int tileHeight, string assetPack, int tilesetType)
+        public NewTilesetDialogOnCreatedEventArgs(string name, int tileWidth, int tileHeight, int tilesetType)
         {
             Name = name;
             TileWidth = tileWidth;
             TileHeight = tileHeight;
-            AssetPack = assetPack;
             TilesetType = tilesetType;
         }
     }
@@ -183,24 +182,6 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
             Grid.SetRow(assetPackLabel, 4);
             Grid.SetColumn(assetPackLabel, 0);
 
-            var assetPackSelector = new ComboBox
-            {
-                Margin = new Avalonia.Thickness(5),
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Center,
-            };
-
-            EngineServices.AssetsManager.GetLoadedPacks().ForEach(pack =>
-            {
-                assetPackSelector.Items.Add(pack.Name);
-            });
-
-            assetPackSelector.SelectedIndex = 0; // Default to the first asset pack
-
-            Body.Children.Add(assetPackSelector);
-            Grid.SetRow(assetPackSelector, 4);
-            Grid.SetColumn(assetPackSelector, 1);
-
             var createButton = new Button
             {
                 Content = "Create",
@@ -216,7 +197,6 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                     nameTextBox.Text ?? "",
                     int.TryParse(tileWidthTextBox.Text, out var tileWidth) ? tileWidth : 32, // Default to 32 if parsing fails
                     int.TryParse(tileHeightTextBox.Text, out var tileHeight) ? tileHeight : 32, // Default to 32 if parsing fails
-                    assetPackSelector.SelectedItem?.ToString() ?? "",
                     tilesetTypeSelector.SelectedIndex));
                 Console.WriteLine($"Creating new tileset: {nameTextBox.Text}, Width: {tileWidthTextBox.Text}, Height: {tileHeightTextBox.Text}, Type: {tilesetTypeSelector.SelectedItem}");
                 Close();
@@ -514,8 +494,6 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
     public class TilesetsManageControl : UserControl
     {
 
-        private IAssetScope _scope;
-
         #region Events
 
         public event Action? OnSelectedTilesetChanged;
@@ -584,7 +562,6 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
 
         public TilesetsManageControl()
         {
-            _scope = EngineServices.AssetsManager.CreateAssetScope("tilesets_manage_control");
             CreateComponents();
             Content = Body;
         }
@@ -843,9 +820,19 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
                 {
                     if(args.TilesetType == 0) // Tileset
                     {
-                        var tileset = new TilesetDef(string.Empty, args.Name, args.TileWidth, args.TileHeight)
+                        var tilesetResult = EngineServices.AssetsManager.Create<TilesetDef>(TilesetDef.ClassURN);
+                        if (tilesetResult.IsFailure)
                         {
-                        };
+                            Logger.Error($"Failed to create new tileset: {tilesetResult.Error}");
+                            return;
+                        }
+
+                        var tileset = tilesetResult.Value;
+                        
+                        tileset.Name = args.Name;
+                        tileset.TileWidth = args.TileWidth;
+                        tileset.TileHeight = args.TileHeight;
+                        
                         var editor_control = new TilesetEditorWindowControl(tileset);
                         var host_ = ((AssetsManageWindow)TopLevel.GetTopLevel(this)!);
                         editor_control.TilesetSaved += () =>

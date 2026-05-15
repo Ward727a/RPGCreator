@@ -69,56 +69,11 @@ public class SkillEffectTab : UserControl
             // For this, we have the 'PropertyDescriptors' static property in the ISkillEffect interface
             // We can use this to create the input fields for the properties following the EffectPropertyType enum
             var type = _skillEffect.GetType();
-            var isFromGraph = type.IsAssignableTo(typeof(GraphSkillEffect));
             var propertyDescriptorsProperty = type.GetProperty("PropertyDescriptors", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
             
-            // check if the effect is a GraphSkillEffect
-            if(isFromGraph)
-            {
-                // For GraphSkillEffect, we need to get the PropertyDescriptors from the instance
-                propertyDescriptorsProperty = type.GetProperty("PropertyDescriptors", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
-            }
             
             if (propertyDescriptorsProperty != null)
             {
-                var propertyDescriptors = propertyDescriptorsProperty.GetValue(isFromGraph?_skillEffect : null) as IReadOnlyList<SkillEffectPropertyDescriptor>;
-                if (propertyDescriptors != null)
-                {
-
-                    if (propertyDescriptors.Count <= 0)
-                    {
-                        var noProperties = new TextBlock
-                        {
-                            Text = "No properties available for this effect.",
-                            Margin = App.style.Margin,
-                            FontStyle = FontStyle.Italic,
-                            Foreground = Brushes.Gray,
-                        };
-                        _gridBody.Children.Add(noProperties);
-                        Grid.SetColumn(noProperties, 1);
-                        return;
-                    }
-                    var propertiesPanel = new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        Spacing = 5,
-                        Margin = App.style.Margin
-                    };
-                    foreach (var descriptor in propertyDescriptors)
-                    {
-                        var propertyName = descriptor.Name;
-                        var propertyType = descriptor.Type;
-                        var propertyValue = _skillEffect.Properties.ContainsKey(propertyName) ? _skillEffect.Properties[propertyName] : descriptor.DefaultValue;
-
-                        var propertyControl = CreatePropertyControl(propertyName, propertyType, propertyValue);
-                        if (propertyControl != null)
-                        {
-                            propertiesPanel.Children.Add(propertyControl);
-                        }
-                    }
-                    _gridBody.Children.Add(propertiesPanel);
-                    Grid.SetColumn(propertiesPanel, 1);
-                }
             }
             else
             {
@@ -599,17 +554,17 @@ public class SkillEffectTab : UserControl
 
     private void AddEffect(URN effectUrn)
     {
-        var effectDef = EngineServices.AssetsManager.TryResolveAsset(effectUrn, out ISkillEffect? effect) ? effect : null;
-        if (effectDef != null)
-        {
-            var effectControl = new SkillEffectItemControl(effectDef);
-            effectControl.Tag = effectUrn;
-            _effectsListPanel.Children.Add(effectControl);
-        }
-        else
-        {
-            Logger.Warning("SkillEffectTab: Effect with URN '{Urn}' not found in registry.", effectUrn);
-        }
+        // var effectDef = EngineServices.AssetsManager.TryResolveAsset(effectUrn, out ISkillEffect? effect) ? effect : null;
+        // if (effectDef != null)
+        // {
+        //     var effectControl = new SkillEffectItemControl(effectDef);
+        //     effectControl.Tag = effectUrn;
+        //     _effectsListPanel.Children.Add(effectControl);
+        // }
+        // else
+        // {
+        //     Logger.Warning("SkillEffectTab: Effect with URN '{Urn}' not found in registry.", effectUrn);
+        // }
     }
     
     private void ClearEffects()
@@ -643,7 +598,7 @@ public class SkillEffectTab : UserControl
             _effectComboBox.Items.Add(new ComboBoxItem()
             {
                 Content = effect.DisplayName,
-                Tag = effect.Urn
+                Tag = effect.ClassUrn
             });
         }
     }

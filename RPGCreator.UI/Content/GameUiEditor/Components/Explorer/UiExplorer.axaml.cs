@@ -22,33 +22,68 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using RPGCreator.Core.Types;
 using RPGCreator.RTP.GameUI;
+using RPGCreator.SDK;
 using RPGCreator.SDK.GameUI;
 using RPGCreator.SDK.GameUI.Controls;
 using RPGCreator.SDK.GameUI.Interfaces;
 using RPGCreator.SDK.Logging;
+using RPGCreator.UI.Content.Blueprint;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.GameUiEditor.Components.Explorer;
 
-public class UiExplorerVm
+public partial class UiExplorerVm : ViewModelBase
 {
 
-    private UiEditorContext _context;
+    [ObservableProperty] private UiEditorContext _context;
     public UiTreeExplorerVm TreeExplorerVm { get; }
 
     public UiExplorerVm(UiEditorContext context, IEnumerable<BaseControl> rootControls)
     {
-        _context = context;
+        Context = context;
         TreeExplorerVm = new UiTreeExplorerVm(context, rootControls);
     }
-    
+
+    public void OnDragOver(object? sender, DragEventArgs e)
+    {
+        Logger.Debug("DragOver");
+        e.DragEffects = DragDropEffects.Move;
+    }
+}
+
+public partial class UiCtxMenuForControlTree : UserControl
+{
+    private Control? _openedForControl;
+    private readonly ContextMenu _contextMenu = new();
+    public UiCtxMenuForControlTree()
+    {
+        InitializeIfNeeded();
+        _contextMenu.Items.Add(new MenuItem { Header = "Delete" });
+        _contextMenu.Items.Add(new MenuItem { Header = "Duplicate" });
+        _contextMenu.Placement = PlacementMode.Right;
+    }
+
+    public void Open(object? sender)
+    {
+        if (sender is Control ctrl)
+        {
+            _openedForControl = ctrl;
+            _contextMenu.Open(control: ctrl);
+        }
+    }
 }
 
 public partial class UiExplorer : UserControl
 {
     private UiEditorContext _context;
+    private UiCtxMenuForControlTree _ctxMenuForControlTree;
     
     public UiExplorerVm Vm { get; set; } = null!;
     
@@ -88,8 +123,16 @@ public partial class UiExplorer : UserControl
             DataContext = Vm;
             InitializeComponent();
         };
+        
+        _ctxMenuForControlTree = new UiCtxMenuForControlTree();
     }
 
+    private void OnDragOver(object? sender, DragEventArgs e)
+    {
+        Logger.Debug("DragOver");
+        e.DragEffects = DragDropEffects.Move;
+    }
+    
     private void OnControlSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (e.AddedItems.Count == 0) return;
@@ -103,5 +146,22 @@ public partial class UiExplorer : UserControl
     {
         if(sender is not Button button || button.DataContext is not ControlEventDescriptor eventDescriptor) return;
         await new DialogEditEventControl(eventDescriptor).ShowDialog(TopLevel.GetTopLevel(this) as Window ?? throw new InvalidOperationException());
+    }
+
+    private void Button_OnClick(object? sender, RoutedEventArgs e)
+    {
+        _ctxMenuForControlTree.Open(sender: sender);
+    }
+
+    private async void TreeView_OnPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (e.Source is not Control control || control.FindAncestorOfType<TreeViewItem>() is not { } item) return;
+        
+        var data = new DataTransfer();
+        var dataItem = new DataTransferItem();
+        dataItem.Set(DragDropCustomFormats.TreeViewItemFormat, item);
+        data.Add(dataItem);
+
+        var result = await DragDrop.DoDragDropAsync(e, data, DragDropEffects.Copy);
     }
 }

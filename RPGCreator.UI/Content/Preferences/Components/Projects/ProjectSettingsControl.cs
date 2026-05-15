@@ -29,6 +29,7 @@ using Avalonia.Media;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.EditorUiService;
+using RPGCreator.SDK.Logging;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.Preferences.Components.Projects;
@@ -101,14 +102,14 @@ public class ProjectSettingsControl : UserControl
         _projectNameTextBox = new TextBox()
         {
             VerticalAlignment = VerticalAlignment.Center,
-            Text = currentProject.Name
+            Text = currentProject.MetaData.Name
         };
         MakeItem(ref _projectNameLabel, _projectNameTextBox, "Project Name");
         
         _projectDescriptionTextBox = new TextBox()
         {
             VerticalAlignment = VerticalAlignment.Center,
-            Text = currentProject.Description,
+            Text = currentProject.MetaData.Description,
             AcceptsReturn = true,
             Height = 100
         };
@@ -117,7 +118,7 @@ public class ProjectSettingsControl : UserControl
         _projectPathTextBlock = new TextBlock()
         {
             VerticalAlignment = VerticalAlignment.Center,
-            Text = currentProject.Path,
+            Text = currentProject.MetaData.Directory,
             Foreground = Brushes.Gray,
             FontStyle = FontStyle.Italic
         };
@@ -129,7 +130,7 @@ public class ProjectSettingsControl : UserControl
             Watermark = "Add an author and press Enter"
         };
 
-        foreach (var author in currentProject.Authors)
+        foreach (var author in currentProject.MetaData.Authors)
         {
             _projectAuthorsTagInput.Tags.Add(author);
         }
@@ -171,31 +172,31 @@ public class ProjectSettingsControl : UserControl
             return;
         }
         
-        if(currentProject.Name != _projectNameTextBox.Text)
+        if(currentProject.MetaData.Name != _projectNameTextBox.Text)
         {
-            currentProject.Name = _projectNameTextBox.Text;
+            currentProject.MetaData.Name = _projectNameTextBox.Text;
         }
-        if(currentProject.Description != _projectDescriptionTextBox.Text)
+        if(currentProject.MetaData.Description != _projectDescriptionTextBox.Text)
         {
-            currentProject.Description = _projectDescriptionTextBox.Text;
+            currentProject.MetaData.Description = _projectDescriptionTextBox.Text;
         }
         var authors = _projectAuthorsTagInput.Tags.ToList();
-        if(!authors.SequenceEqual(currentProject.Authors))
+        if(!authors.SequenceEqual(currentProject.MetaData.Authors))
         {
-            currentProject.Authors.Clear();
-            currentProject.Authors.AddRange(authors);
+            currentProject.MetaData.Authors.Clear();
+            currentProject.MetaData.Authors.AddRange(authors);
         }
         
         if(_projectMainMapComboBox.SelectedItem is IMapDef selectedMapDef)
         {
-            if(currentProject.MainMapId != selectedMapDef.Unique)
+            if(currentProject.MetaData.MainMapId != selectedMapDef.Unique)
             {
-                currentProject.MainMapId = selectedMapDef.Unique;
+                currentProject.MetaData.MainMapId = selectedMapDef.Unique;
             }
         }
         else
         {
-            currentProject.MainMapId = Ulid.Empty;
+            currentProject.MetaData.MainMapId = Ulid.Empty;
         }
         
         EngineServices.ProjectsManager.SaveProject(currentProject);
@@ -234,13 +235,21 @@ public class ProjectSettingsControl : UserControl
 
     private void LoadMaps()
     {
-        var mapDefs = EngineServices.AssetsManager.GetAssetsOfType<IMapDef>().ToList();
+        var mapDefsResult = EngineServices.AssetsManager.GetAssetsOfClass(new("rpgc", "assets", "definitions", "maps"));
+
+        if (mapDefsResult.IsFailure)
+        {
+            Logger.Error("Failed to load maps: {0}", mapDefsResult.Error);
+            return;
+        }
+        
+        var mapDefs = mapDefsResult.Value;
         
         _projectMainMapComboBox.ItemsSource = mapDefs;
 
         _projectMainMapComboBox.SelectedItem = null;
 
-        var selectedDef = mapDefs.Where(d => d.Unique == GlobalStates.ProjectState.CurrentProject?.MainMapId);
+        var selectedDef = mapDefs.Where(d => d == GlobalStates.ProjectState.CurrentProject?.MetaData.MainMapId);
         
         _projectMainMapComboBox.SelectedItem = selectedDef.FirstOrDefault();
     }

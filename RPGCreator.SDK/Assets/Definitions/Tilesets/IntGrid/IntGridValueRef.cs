@@ -5,7 +5,7 @@ using RPGCreator.SDK.Types.Records;
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 
-[SerializingType("IntGridValueRef")]
+[EngineType("rpgc", "sdk", "int_grid_value_ref")]
 public partial class IntGridValueRef : ObservableObject
 {
     [ObservableProperty]

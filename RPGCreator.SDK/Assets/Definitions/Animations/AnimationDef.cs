@@ -1,12 +1,13 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.SDK.Assets.Definitions.Animations;
 
-[SerializingType("AnimationDef")]
+[EngineClass("rpgc", "assets", "definitions", "animations", "animation", DisplayName = "Animation Definition")]
 public partial class AnimationDef : BaseObservableAssetDef, ISerializable, IDeserializable, IHasSavePath
 {
     [ObservableProperty]
@@ -23,12 +24,6 @@ public partial class AnimationDef : BaseObservableAssetDef, ISerializable, IDese
         get => FrameDuration > 0 ? (int)(1000 / FrameDuration) : 0;
         set => FrameDuration = value > 0 ? 1000.0 / value : 0;
     }
-    
-    public AnimationDef()
-    {
-    }
-
-    public override UrnSingleModule UrnModule => "animation".ToUrnSingleModule();
 
     public SerializationInfo GetObjectData()
     {

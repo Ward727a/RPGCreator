@@ -95,7 +95,7 @@ public class CharacterManageItem : UserControl
         
         UrnTextBlock = new TextBlock
         {
-            Text = CharacterData.Urn.ToString(),
+            Text = CharacterData.ClassUrn.ToString(),
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(5, 0, 0, 0),
             FontSize = 10,

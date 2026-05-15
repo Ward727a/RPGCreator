@@ -108,11 +108,20 @@ public class SpriteRenderSystem : ISystem
             
             if (!_sheetCache.TryGetValue(spriteComponent.SpritesheetId, out var spritesheet))
             {
-                if (EngineServices.AssetsManager.TryResolveAsset(spriteComponent.SpritesheetId, out spritesheet))
+                var id = spriteComponent.SpritesheetId;
+                
+                EngineServices.AssetsManager.Load<SpritesheetDef>(spriteComponent.SpritesheetId).OnSuccess(def =>
                 {
-                    _sheetCache[spriteComponent.SpritesheetId] = spritesheet;
-                }
-                else continue;
+                    spritesheet = def;
+                }).OnFailure(s =>
+                {
+                    Logger.Error("Error when loading spritesheet {id}: {s}", id, s);
+                });
+                
+                if(spritesheet is null)
+                    continue;
+                
+                _sheetCache[spriteComponent.SpritesheetId] = spritesheet;
             }
             
             var frameRect = spritesheet.GetFrameRect(spriteComponent.CurrentFrameIndex);

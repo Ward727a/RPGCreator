@@ -171,9 +171,6 @@ namespace RPGCreator.UI.Content.Editor.TilesetSelectorComponents
             Canvas.SetTop(InnerTilesetCanvas, 0);
 
             RootTilesetCanvas.Children.Add(InnerTilesetCanvas);
-            
-            EngineServices.AssetsManager.OnAssetRegistered += OnAssetChanges;
-            EngineServices.AssetsManager.OnAssetUnregistered += OnAssetChanges;
 
             RefreshComponent();
         }

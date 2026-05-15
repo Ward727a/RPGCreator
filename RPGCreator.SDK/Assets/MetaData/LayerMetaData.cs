@@ -61,7 +61,7 @@ public sealed class LayerMetaData : BaseMetaData
     #region HelperFields
     
     [JsonIgnore]
-    public string DisplayName => string.IsNullOrWhiteSpace(Name) ? $"Layer ({UniqueId})" : Name;
+    public string DisplayName => string.IsNullOrWhiteSpace(Name) ? $"Layer ({Unique})" : Name;
     
     #endregion
     
@@ -74,7 +74,7 @@ public sealed class LayerMetaData : BaseMetaData
     public LayerMetaData(BaseLayerDef def)
     {
         Name = def.Name;
-        UniqueId = def.Unique;
+        Unique = def.Unique;
         LayerIndex = def.LayerIndex;
         ZIndex = def.ZIndex;
         Opacity = def.Opacity;

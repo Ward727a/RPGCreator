@@ -1,12 +1,14 @@
+using System.Text.Json.Serialization;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets;
 
-[SerializingType("Tileset")]
-public sealed class TilesetDef : BaseTilesetDef
+[EngineClass("rpgc", "assets", "definitions", "tilesets", "tileset", DisplayName = "Tileset Definition", ParentType = typeof(BaseTilesetDef))]
+public sealed partial class TilesetDef : BaseTilesetDef
 {
     public TilesetDef()
     {
@@ -60,6 +62,4 @@ public sealed class TilesetDef : BaseTilesetDef
 
         BuildRuntimeCollisionCache();
     }
-
-    public override UrnSingleModule UrnModule => "tileset".ToUrnSingleModule();
 }

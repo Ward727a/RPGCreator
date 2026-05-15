@@ -23,4 +23,13 @@
         </PackageReference>
         <PackageReference Include="xunit.v3.mtp-v2" Version="3.2.2"/>
     </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\RPGCreator.Core\RPGCreator.Core.csproj" />
+      <ProjectReference Include="..\RPGCreator.SDK\RPGCreator.SDK.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Registries\" />
+    </ItemGroup>
 </Project>

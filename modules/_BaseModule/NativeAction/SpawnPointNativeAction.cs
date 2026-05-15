@@ -33,7 +33,7 @@ namespace _BaseModule.NativeAction;
 public class SpawnPointNativeAction : BaseNativeAction
 {
     public override URN ExpectedSignal => SignalItemModule.ToUrnModule("rpgc").ToUrn("entity_spawned");
-    public override URN Urn => NativeActionModule.ToUrnModule("rpgc").ToUrn("spawn_point_native_action");
+    public override URN ClassUrn => NativeActionModule.ToUrnModule("rpgc").ToUrn("spawn_point_native_action");
 
     private Ulid _cachedMapId = Ulid.Empty;
     private Vector2 _cachedPosition = Vector2.Zero;

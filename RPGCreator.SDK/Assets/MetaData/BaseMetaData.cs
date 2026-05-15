@@ -32,7 +32,7 @@ public abstract class BaseMetaData
     public abstract string DbKey { get; }
     
     [BsonId]
-    public Ulid UniqueId { get; set; }
+    public Ulid Unique { get; set; }
     
     public virtual IEnumerable<Ulid> GetReferencedIds()
     {
@@ -46,6 +46,6 @@ public abstract class BaseMetaData
 
     public bool IsReferencedBy(BaseMetaData baseMetaData)
     {
-        return baseMetaData.HasReferenceTo(UniqueId);
+        return baseMetaData.HasReferenceTo(Unique);
     }
 }

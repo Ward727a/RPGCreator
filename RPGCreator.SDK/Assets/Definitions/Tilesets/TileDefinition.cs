@@ -8,7 +8,6 @@ using Size = RPGCreator.SDK.Types.Size;
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets;
 
-[SerializingType("TileDefinition")]
 public class TileDefinition : BaseAssetDef, ITileDef
 {
     public Vector2 Offset { get; set; }
@@ -19,10 +18,9 @@ public class TileDefinition : BaseAssetDef, ITileDef
     public BaseTilesetDef TilesetDef { get; private set; }
     public RuntimeBag Tags { get; } = new RuntimeBag();
 
-    protected override bool ShouldUrnBeRegistered => false;
-
     public TileDefinition()
     {
+        TilesetDef = null!;
     }
 
     public TileDefinition(Size sizeInTileset, Vector2 positionInTileset, BaseTilesetDef tilesetDef)
@@ -31,8 +29,6 @@ public class TileDefinition : BaseAssetDef, ITileDef
         PositionInTileset = positionInTileset;
         TilesetDef = tilesetDef;
     }
-
-    public override UrnSingleModule UrnModule => "tile".ToUrnSingleModule();
 
     public void UpdateTileset(BaseTilesetDef newTilesetDefinition)
     {
@@ -88,13 +84,14 @@ public class TileDefinition : BaseAssetDef, ITileDef
 
         SizeInTileset = sizeInTileset;
         PositionInTileset = positionInTileset;
-        if(EngineServices.AssetsManager.TryResolveAsset(tilesetUnique, out TilesetDef? tileset))
+        EngineServices.AssetsManager.Load<TilesetDef>(tilesetUnique).OnSuccess((tileset) =>
         {
             TilesetDef = tileset;
-        }
-        else
+        }).OnFailure((err) =>
         {
-            Logger.Error("Failed to resolve TilesetDef with Unique ID {TilesetUnique} during TileDefinition deserialization.", tilesetUnique);
-        }
+            Logger.Error(
+                "Failed to load TilesetDef with Unique ID {TilesetUnique} during TileDefinition deserialization. Error: {err}",
+                tilesetUnique, err);
+        });
     }
 }

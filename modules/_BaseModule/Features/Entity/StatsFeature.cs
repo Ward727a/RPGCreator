@@ -33,6 +33,7 @@ using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Registry;
+using RPGCreator.SDK.Services.EngineService;
 using RPGCreator.SDK.Types;
 using RPGCreator.UI.Contexts;
 using Ursa.Controls;
@@ -306,7 +307,7 @@ public class StatsFeature : BaseEntityFeature
         _regenerationStatToTargetStatCache.Clear();
         for (int i = 0; i < _statDefinitions.Count; i++)
         {
-            _resistanceDefIdToIndexCache[_statDefinitions[i].Urn] = i;
+            _resistanceDefIdToIndexCache[_statDefinitions[i].ClassUrn] = i;
             if(_statDefinitions[i] is RegenerationDefinition regenerationDef)
             {
                 _regenerationStatToTargetStatCache[regenerationDef.Unique] = regenerationDef.TargetStat;

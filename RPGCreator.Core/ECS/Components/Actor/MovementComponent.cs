@@ -1,7 +1,7 @@
 using System.Numerics;
 using RPGCreator.SDK.ECS;
 
-namespace RPGCreator.Core.Runtimes.ECS.Components.Actor;
+namespace RPGCreator.Core.ECS.Components.Actor;
 
 public enum MovementMode
 {

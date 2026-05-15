@@ -7,6 +7,7 @@ using RPGCreator.SDK.Serializer;
 
 namespace RPGCreator.SDK.Assets.Definitions.Stats;
 
+
 public abstract class BaseStatDefinition : BaseAssetDef, IStatDef
 {
     // Note: We use JsonExtensionData to store any "old" or "extra" data that might be present in the JSON but is not defined in the current version of the class, to avoid losing data when deserializing and re-serializing with a newer version of the class.
@@ -37,7 +38,6 @@ public abstract class BaseStatDefinition : BaseAssetDef, IStatDef
     
     public BaseStatDefinition()
     {
-        SuspendTracking();
         Unique = Ulid.NewUlid();
         Name = "New Stat";
         Description = string.Empty;
@@ -50,21 +50,7 @@ public abstract class BaseStatDefinition : BaseAssetDef, IStatDef
     
     public IPrattFormula? StatCompiledFormula { get; set; }
     public string StatNonCompiledFormula { get; set; } = string.Empty;
-    private readonly Dictionary<string, IGraphScript> _statGraphEvents = new();
 
-    public virtual void AddEvent(string eventName, IGraphScript eventDocumentCompiled)
-    {
-        _statGraphEvents[eventName] = eventDocumentCompiled;
-    }
-
-    public virtual bool TryGetEvent(string eventName, out IGraphScript? eventCompiled)
-    {
-        return _statGraphEvents.TryGetValue(eventName, out eventCompiled);
-    }
-    public virtual Dictionary<string, IGraphScript> GetAllEvents()
-    {
-        return new Dictionary<string, IGraphScript>(_statGraphEvents);
-    }
 
     public virtual SerializationInfo GetObjectData()
     {
@@ -76,13 +62,7 @@ public abstract class BaseStatDefinition : BaseAssetDef, IStatDef
             .AddValue(nameof(TypeKind), TypeKind)
             .AddValue(nameof(MinValue), MinValue)
             .AddValue(nameof(CapSettings), CapSettings)
-            .AddValue(nameof(StatNonCompiledFormula), StatNonCompiledFormula)
-            .AddValue(nameof(_statGraphEvents), _statGraphEvents.ToDictionary(kv => kv.Key, kv => kv.Value.DocumentPath));
-    }
-
-    public virtual List<Ulid> GetReferencedAssetIds()
-    {
-        return [CapSettings.CapStatUnique];
+            .AddValue(nameof(StatNonCompiledFormula), StatNonCompiledFormula);
     }
 
     public virtual void SetObjectData(DeserializationInfo info)
@@ -105,18 +85,5 @@ public abstract class BaseStatDefinition : BaseAssetDef, IStatDef
         CapSettings = statCapSettings;
         info.TryGetValue(nameof(StatNonCompiledFormula), out var statNonCompiledFormula, string.Empty);
         StatNonCompiledFormula = statNonCompiledFormula;
-        info.TryGetValue(nameof(_statGraphEvents), out Dictionary<string, string> statGraphEventsPaths, new());
-        _statGraphEvents.Clear();
-        foreach (var kv in statGraphEventsPaths)
-        {
-            if(EngineServices.GraphService.TryLoadScript(kv.Value, out var script))
-            {
-                _statGraphEvents[kv.Key] = script;
-            }
-            else
-            {
-                Logger.Error("[StatDefinition] Failed to load graph script for event '{EventName}' at path '{DocumentPath}'.", kv.Key, kv.Value);
-            }
-        }
     }
 }

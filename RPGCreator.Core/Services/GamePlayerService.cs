@@ -48,7 +48,7 @@ public readonly struct GameStartOptions
         
         // For now, all project has a 'project.config.xml' created at the root of the project folder.
         // If in the future we want to allow users to choose where to put the config file, we can add a new property in the project class and use it here.
-        string args = $"--project \"{Path.Combine(GlobalStates.ProjectState.CurrentProject.Path, "project.config.xml")}\"";
+        string args = $"--project \"{Path.Combine(GlobalStates.ProjectState.CurrentProject.MetaData.Directory, "project.config.xml")}\"";
         
         if(!string.IsNullOrEmpty(SaveFilePath) && MapId != Ulid.Empty)
         {

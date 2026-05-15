@@ -20,46 +20,82 @@
 
 using System.Numerics;
 using RPGCreator.RTP.GameUI.Enums;
+using RPGCreator.SDK.Common.Attributes;
+using RPGCreator.SDK.GameUI.Enums;
 using RPGCreator.SDK.GameUI.Visual;
+using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.RuntimeService;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.GameUI.Controls;
 
-public class TextControl : BaseControl
+[EngineClass("rpgc", "game_ui", "controls", "display", "text_control")]
+public partial class TextControl : BaseControl
 {
+    public override string DisplayControlName { get; set; } = "Text Control";
+    public override string Description { get; set; } = "A control that displays text.";
+    public override BaseControl Create()
+    {
+        return new TextControl("Text Control")
+        {
+        };
+    }
+
     public override URN Urn => _urnModule.ToUrnModule("rpgc").ToUrn("text_control");
 
     private bool _hasHeightBeenManuallyChanged;
     private bool _hasWidthBeenManuallyChanged;
     private bool _hasHUnitBeenManuallyChanged;
     private bool _hasWUnitBeenManuallyChanged;
-    
-    public string Text { get; set; }
-    public Color TextColor { get; set; }
-    public IRpgFont Font { get; set; }
 
-    public TextControl() : this(string.Empty)
-    {
-    }
-
-    public TextControl(string text) : this(text, Color.White)
-    {
-    }
+    private bool _vAlignmentDirty = true;
+    private bool _hAlignmentDirty = true;
     
-    public TextControl(string text, Color textColor)
+    public string Text { get; set; } = string.Empty;
+    public Color TextColor { get; set; } = Color.White;
+    public IRpgFont? Font { get; set; }
+    
+    private ETextVAlignment _vAlignment = ETextVAlignment.Top;
+    private ETextHAlignment _hAlignment = ETextHAlignment.Left;
+
+    public TextControl()
     {
-        Text = text;
-        TextColor = textColor;
         Visual = new TextVisual()
         {
             Control = this
         };
+        IRpgFont? font = null;
+        RuntimeServices.OnceServiceReady<IFontService>(
+            (fontService) =>
+            {
+                fontService.GetFont("Arial").OnSuccess((_font) => font = _font).OnFailure((_) =>
+                {
+                    RuntimeServices.FontService.LoadFont(@"C:/Windows/Fonts/arial.ttf", "Arial");
+                    RuntimeServices.FontService.GetFont("Arial").OnSuccess((_font) => font = _font).OnFailure((err) =>
+                    {
+                        Logger.Error("Failed to load font: {0}", err);
+                    });
+                });
 
+                Font = font ?? throw new Exception("Failed to load font");
+            });
+    }
+
+    public TextControl(string text) : this()
+    {
+        Text = text;
+    }
+    
+    public TextControl(string text, Color textColor) : this()
+    {
+        Text = text;
+        TextColor = textColor;
     }
     
     public EditableControlPropertyDescriptor<string> TextProperty { get; protected set; }
     public EditableControlPropertyDescriptor<Color> TextColorProperty { get; protected set; }
+    public EditableControlPropertyDescriptor<ETextVAlignment> VerticalAlignmentProperty { get; protected set; }
+    public EditableControlPropertyDescriptor<ETextHAlignment> HorizontalAlignmentProperty { get; protected set; }
 
     protected override void MakeExposedProperties()
     {
@@ -70,8 +106,15 @@ public class TextControl : BaseControl
         TextColorProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<Color>("Text color", () => TextColor, "Content".ToPipedPath(),
             "The color of the text.", c => TextColor = c));
         
+        VerticalAlignmentProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<ETextVAlignment>("Vertical alignment", () => _vAlignment, "Content".ToPipedPath(),
+            "The vertical alignment of the text.", v => _vAlignment = v));
+        HorizontalAlignmentProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<ETextHAlignment>("Horizontal alignment", () => _hAlignment, "Content".ToPipedPath(),
+            "The horizontal alignment of the text.", h => _hAlignment = h));
+        
         SizeProperty.ValueChanged += (newValue, oldValue) =>
         {
+            _vAlignmentDirty = true;
+            _hAlignmentDirty = true;
             if (newValue is not Vector2 newSizeValue || oldValue is not Vector2 oldSizeValue)
             {
                 return;
@@ -85,6 +128,7 @@ public class TextControl : BaseControl
         
         SizeXUnitProperty.ValueChanged += (newValue, oldValue) =>
         {
+            _hAlignmentDirty = true;
             if (newValue is not ESizeUnitType newUnit || oldValue is not ESizeUnitType oldUnit)
             {
                 return;
@@ -95,6 +139,7 @@ public class TextControl : BaseControl
         
         SizeYUnitProperty.ValueChanged += (newValue, oldValue) =>
         {
+            _vAlignmentDirty = true;
             if (newValue is not ESizeUnitType newUnit || oldValue is not ESizeUnitType oldUnit)
             {
                 return;
@@ -102,6 +147,17 @@ public class TextControl : BaseControl
             
             _hasHUnitBeenManuallyChanged = newUnit != ESizeUnitType.Pixels;
         };
+
+        VerticalAlignmentProperty.ValueChanged += (_, _) =>
+        {
+            _vAlignmentDirty = true;
+        };
+        
+        HorizontalAlignmentProperty.ValueChanged += (_, _) => 
+        {
+            _hAlignmentDirty = true;
+        };
+
     }
 
     public override void OnUpdate()
@@ -110,7 +166,7 @@ public class TextControl : BaseControl
 
     public override void SyncVisual()
     {
-        if(!IsPropertiesInitialized)
+        if(!IsPropertiesInitialized || Font == null)
             return;
         
         var newSize = new Vector2(Visual.Width, Visual.Height);
@@ -122,7 +178,36 @@ public class TextControl : BaseControl
         {
             newSize.X = (int)Math.Round(Font.MeasureString(Text).X);
         }
-        
         SizeProperty.Set(newSize);
+        CalculateAlignment();
+    }
+
+    private void CalculateAlignment()
+    {
+        var sizeValue = Visual.GlobalBounds;
+        
+        if (_hAlignmentDirty)
+        {
+            float newXOffset = (_hAlignment) switch
+            {
+                ETextHAlignment.Center => (sizeValue.Width - Font.MeasureString(Text).X) / 2,
+                ETextHAlignment.Right => sizeValue.Width - Font.MeasureString(Text).X,
+                _ => 0
+            };
+            (Visual as TextVisual).TextOffset = new Vector2(newXOffset, (Visual as TextVisual).TextOffset.Y);
+            _hAlignmentDirty = false;
+        }
+
+        if (_vAlignmentDirty)
+        {
+            float newYOffset = (_vAlignment) switch
+            {
+                ETextVAlignment.Center => (sizeValue.Height - Font.MeasureString(Text).Y) / 2,
+                ETextVAlignment.Bottom => sizeValue.Height - Font.MeasureString(Text).Y,
+                _ => 0
+            };
+            (Visual as TextVisual).TextOffset = new Vector2((Visual as TextVisual).TextOffset.X, newYOffset);
+            _vAlignmentDirty = false;
+        }
     }
 }

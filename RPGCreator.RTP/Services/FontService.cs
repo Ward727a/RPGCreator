@@ -24,6 +24,7 @@ using System.Numerics;
 using FontStashSharp;
 using RPGCreator.RTP.Extensions;
 using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Types;
 
 namespace RPGCreator.RTP.Services;
 
@@ -104,19 +105,19 @@ public class FontService : IFontService
         }
     }
 
-    public IRpgFont GetFont(string fontName, float fontSize = 16)
+    public Result<IRpgFont> GetFont(string fontName, float fontSize = 16)
     {
         var key = (fontName, fontSize);
         if (_fontCache.TryGetValue(key, out var font))
         {
-            return font;
+            return Result<IRpgFont>.Success(font);
         }
         
         fontName = fontName.ToLowerInvariant().Trim();
 
         if (!_loadedFonts.TryGetValue(fontName, out var fontData))
         {
-            throw new KeyNotFoundException($"Font not found: {fontName}");
+            return Result.Fail($"Font not found: {fontName}");
         }
 
         var fontSystem = fontData.font;

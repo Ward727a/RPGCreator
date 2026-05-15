@@ -199,7 +199,7 @@ public class MapItem : StackPanel
 
     private void OnOpenMap()
     {
-        if (!RuntimeServices.MapService.LoadMap(_mapDef.UniqueId))
+        if (!RuntimeServices.MapService.LoadMap(_mapDef.Unique))
         {
             Logger.Error("Failed to load map: {MapName}", args: MapName);
             return;
@@ -313,24 +313,23 @@ public class MapItem : StackPanel
                 Guard.IsNotNull(GlobalStates.ProjectState.CurrentProject, "CurrentProject");
 
                 var assetsManager = EngineServices.AssetsManager;
-                var defaultPack = assetsManager.GetDefaultPack();
                 var metaRegistry = RegistryServices.AssetsMetaDataRegistry;
                 
-                defaultPack.RemoveAsset(_mapDef.UniqueId);
+                assetsManager.Delete(_mapDef.Unique);
 
                 foreach (var mapDefChildMapId in _mapDef.ChildMapIds)
                 {
-                    defaultPack.RemoveAsset(mapDefChildMapId);
+                    assetsManager.Delete(mapDefChildMapId);
                     metaRegistry.UnregisterMetaData(mapDefChildMapId);
                 }
 
                 foreach (var tileLayerId in _mapDef.TileLayerIds)
                 {
-                    defaultPack.RemoveAsset(tileLayerId);
+                    assetsManager.Delete(tileLayerId);
                     metaRegistry.UnregisterMetaData(tileLayerId);
                 }
                 
-                metaRegistry.UnregisterMetaData(_mapDef.UniqueId);
+                metaRegistry.UnregisterMetaData(_mapDef.Unique);
                 
                 OnMapRemoved?.Invoke();
             };
