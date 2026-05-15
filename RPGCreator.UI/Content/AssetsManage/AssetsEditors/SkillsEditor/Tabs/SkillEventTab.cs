@@ -3,10 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using RPGCreator.SDK.Assets.Definitions.Skills;
-using RPGCreator.SDK.Graph;
-using RPGCreator.SDK.Graph.Nodes;
 using RPGCreator.SDK.Logging;
-using RPGCreator.UI.Common.Blueprint;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEditor.Tabs;
 
@@ -20,11 +17,9 @@ public class SkillEventTab : UserControl
     
     #region Properties
     public ISkillDef SkillDef { get; private set; }
-    private GraphDocument _doc = new();
     #endregion
     
     #region Components
-    private GraphView _graph;
     private StackPanel _topMenu;
     private Button _compileAndRunButton;
     private Button _saveGraphButton;
@@ -53,10 +48,6 @@ public class SkillEventTab : UserControl
         };
         Content = grid;
         
-        _graph = new GraphView();
-        grid.Children.Add(_graph);
-        Grid.SetRow(_graph, 1);
-        
         
         _topMenu = new StackPanel()
         {
@@ -78,7 +69,6 @@ public class SkillEventTab : UserControl
             try
             {
                 Logger.Info("Compiling the graph...");
-                _doc.Compile();
                 Logger.Info("Graph compiled & tested successfully.");
             }
             catch (Exception ex)
@@ -97,10 +87,8 @@ public class SkillEventTab : UserControl
             try
             {
                 Logger.Info("Saving the graph...");
-                _doc.Save("test_save_graph.xml");
                 Logger.Info("Graph saved successfully.");
                 
-                _doc.SavePath = "test_save_graph.xml";
             }
             catch (Exception ex)
             {
@@ -118,8 +106,6 @@ public class SkillEventTab : UserControl
             try
             {
                 Logger.Info("Loading the graph...");
-                _doc = GraphDocument.Load("test_save_graph.xml");
-                _graph.SetDocument(_doc);
                 Logger.Info("Graph loaded successfully.");
             }
             catch (Exception ex)
@@ -139,7 +125,6 @@ public class SkillEventTab : UserControl
             {
                 Logger.Info("Compiling the graph...");
                 // _doc.Compile();
-                _doc.Save("test.json");
             }
             catch (Exception ex)
             {
@@ -151,15 +136,12 @@ public class SkillEventTab : UserControl
 
         try
         {
-            _doc.AddNode(GraphNodeRegistry.GetNode("System|End").Clone());
-            _doc.AddNode(GraphNodeRegistry.GetNode("System|Start").Clone());
         }
         catch (Exception ex)
         {
             Logger.Error("Error while adding default nodes to the graph document: " + ex.Message);
         }
 
-        _graph.SetDocument(_doc);
     }
     #endregion
 

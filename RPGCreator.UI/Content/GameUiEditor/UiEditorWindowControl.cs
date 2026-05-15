@@ -86,6 +86,7 @@ public abstract class BaseUiEventArgs
 
 public class UiEditorContext 
 {
+    public UserControl EditorControl => _editorControl;
     public class ControlEventArgs : BaseUiEventArgs
     {
         public readonly BaseControl? Control;
@@ -186,8 +187,6 @@ public class UiEditorContext
         if(args.IsCanceled)
             return args;
         
-        _rootControls.Add(control);
-
         if (caller != this)
         {
             Manager.AddRootControl(control);
@@ -206,8 +205,6 @@ public class UiEditorContext
         
         if(args.IsCanceled)
             return args;
-        
-        _rootControls.Remove(control);
         
         if (caller != this)
             Manager.RemoveRootControl(control);

@@ -31,7 +31,6 @@ public interface IToolButtonInfo : ISerializable, IDeserializable
     string Name { get; set; }
 }
 
-[SerializingType("ToolButtonSeparator")]
 public record struct ToolButtonSeparator() : IToolButtonInfo
 {
     public string Name { get; set; } = "Separator";
@@ -52,7 +51,7 @@ public record struct ToolButtonSeparator() : IToolButtonInfo
     }
 }
 
-[SerializingType("ToolButtonInfo")]
+[EngineType("rpgc", "sdk", "tool_button_info")]
 public record struct ToolButtonInfo : IToolButtonInfo
 {
     public bool HasValidTool;

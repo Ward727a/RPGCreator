@@ -10,8 +10,10 @@ using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
 using RPGCreator.UI.Content.Editor.LeftPanel.TilingPanel;
+using Size = System.Drawing.Size;
 
 namespace RPGCreator.UI.Common.TilesetsCommonComponents;
 
@@ -56,16 +58,13 @@ public class TilesetExplorer : UserControl
     private Image _previewImage;
     private ListBox _intGridGroupsListBox;
     private WrapPanel _tileHistoryPanel;
-    private IAssetScope _scope;
 
     public TilesetExplorer(
-        IAssetScope scope, 
         Panel? parentBody = null, 
         Size? canvasSize = null, 
         int baseSelectedIndex = -1, 
         TilesetType tilesetType = TilesetType.All)
     {
-        _scope = scope ?? throw new ArgumentNullException(nameof(scope), "Asset scope cannot be null.");
         _type = tilesetType;
         if(parentBody == null)
             _body = new StackPanel
@@ -165,17 +164,17 @@ public class TilesetExplorer : UserControl
             ITileDef? tileToPaint = null;
             if (_setSelector?.SelectedItem is SetOptionItem selectedItem)
             {
-                var def = _scope.Load<BaseTilesetDef>(selectedItem.AssetId);
-                
-                var tilePositionInTileset = new Point( // Row and Column in tileset
-                    (int)((position.X + Math.Abs(_canvas.CurrentElementsPosition.X)) / cellSize.Width),
-                    (int)((position.Y + Math.Abs(_canvas.CurrentElementsPosition.Y)) / cellSize.Height)
-                );
+                EngineServices.AssetsManager.Load<BaseTilesetDef>(selectedItem.AssetId).OnSuccess((def) =>
+                {
+                    var tilePositionInTileset = new Point( // Row and Column in tileset
+                        (int)((position.X + Math.Abs(_canvas.CurrentElementsPosition.X)) / cellSize.Width),
+                        (int)((position.Y + Math.Abs(_canvas.CurrentElementsPosition.Y)) / cellSize.Height)
+                    );
 
-                tileToPaint = def.GetTileAt(tilePositionInTileset.X, tilePositionInTileset.Y);
-                Logger.Debug("[TilesetExplorer] Got tile definition at position {0} in tileset {1}", tilePositionInTileset, def.Name);
-                TileSelected?.Invoke(tileToPaint);
-                
+                    tileToPaint = def.GetTileAt(tilePositionInTileset.X, tilePositionInTileset.Y);
+                    Logger.Debug("[TilesetExplorer] Got tile definition at position {0} in tileset {1}", tilePositionInTileset, def.Name);
+                    TileSelected?.Invoke(tileToPaint);
+                });
             }
         };
     }
@@ -189,18 +188,24 @@ public class TilesetExplorer : UserControl
         Logger.Debug("[TilingPanel] Loading tileset options...");
         _ = Task.Run(() =>
         {
-            var searchResults = EngineServices.AssetsManager.GetAssetsOfType<BaseTilesetDef>();
-            foreach (var def in searchResults)
+            var searchResults = EngineServices.AssetsManager.GetAssetsOfClass(new URN("rpgc", "assets", "definitions", "tilesets"));
+            if(searchResults.IsSuccess)
             {
-                bool canAutotile = def is IAutotileDef;
-            
-                if (_type == TilesetType.AutotileOnly && !canAutotile)
-                    continue;
-                if (_type == TilesetType.NonAutotileOnly && canAutotile)
-                    continue;
-            
-                Dispatcher.UIThread.Post(()=>AddTilesetOption(def));
-                Logger.Debug("[TilingPanel] Added tileset option from search: {0}", def.Name);
+                foreach (var idDef in searchResults.Value)
+                {
+                    EngineServices.AssetsManager.Load<BaseTilesetDef>(idDef).OnSuccess((def) =>
+                    {
+                        bool canAutotile = def is IAutotileDef;
+
+                        if (_type == TilesetType.AutotileOnly && !canAutotile)
+                            return;
+                        if (_type == TilesetType.NonAutotileOnly && canAutotile)
+                            return;
+
+                        Dispatcher.UIThread.Post(() => AddTilesetOption(def));
+                        Logger.Debug("[TilingPanel] Added tileset option from search: {0}", def.Name);
+                    });
+                }
             }
             if(_baseSelectedIndex >= 0)
                 _setSelector.SelectedIndex = _baseSelectedIndex;
@@ -216,18 +221,24 @@ public class TilesetExplorer : UserControl
             _type = type;
             Dispatcher.UIThread.Post(ClearTilesetOptions);
             Logger.Debug("[TilingPanel] Loading tileset options for type {0}...", type);
-            var searchResults = EngineServices.AssetsManager.GetAssetsOfType<BaseTilesetDef>();
-            foreach (var result in searchResults)
+            var searchResults = EngineServices.AssetsManager.GetAssetsOfClass(new URN("rpgc", "assets", "definitions", "tilesets"));
+            if(searchResults.IsSuccess)
             {
-                bool canAutotile = result is IAutotileDef;
+                foreach (var idDef in searchResults.Value)
+                {
+                    EngineServices.AssetsManager.Load<BaseTilesetDef>(idDef).OnSuccess((def) =>
+                    {
+                        bool canAutotile = def is IAutotileDef;
 
-                if (_type == TilesetType.AutotileOnly && !canAutotile)
-                    continue;
-                if (_type == TilesetType.NonAutotileOnly && canAutotile)
-                    continue;
+                        if (_type == TilesetType.AutotileOnly && !canAutotile)
+                            return;
+                        if (_type == TilesetType.NonAutotileOnly && canAutotile)
+                            return;
 
-                Dispatcher.UIThread.Post(()=>AddTilesetOption(result));
-                Logger.Debug("[TilingPanel] Added tileset option from search: {0}", result.Name);
+                        Dispatcher.UIThread.Post(() => AddTilesetOption(def));
+                        Logger.Debug("[TilingPanel] Added tileset option from search: {0}", def.Name);
+                    });
+                }
             }
         });
     }
@@ -263,44 +274,50 @@ public class TilesetExplorer : UserControl
         if (_setSelector?.SelectedItem is SetOptionItem selectedItem)
         {
             Logger.Debug("[TilingPanel] Selected tileset: {0}", selectedItem.Name);
-            var def = _scope.Load<BaseTilesetDef>(selectedItem.AssetId);
-            if (def is IntGridTilesetDef gridTilesetDef)
+            EngineServices.AssetsManager.Load<BaseTilesetDef>(selectedItem.AssetId).OnSuccess((def) =>
             {
-                _intGridGroupsListBox.IsVisible = true;
-                _canvas.IsVisible = false;
-                intgrid = gridTilesetDef;
-                
-                var listData = new List<IntGridData>();
-                
-                foreach (var intGridValueRef in intgrid.IntRefs)
+                if (def is IntGridTilesetDef gridTilesetDef)
                 {
-                    var data = new IntGridData()
+                    _intGridGroupsListBox.IsVisible = true;
+                    _canvas.IsVisible = false;
+                    intgrid = gridTilesetDef;
+                
+                    var listData = new List<IntGridData>();
+                
+                    foreach (var intGridValueRef in intgrid.IntRefs)
                     {
-                        IntGridRef = intGridValueRef,
-                        IntGridTilesetDef = gridTilesetDef
-                    };
-                    listData.Add(data);
-                }
+                        var data = new IntGridData()
+                        {
+                            IntGridRef = intGridValueRef,
+                            IntGridTilesetDef = gridTilesetDef
+                        };
+                        listData.Add(data);
+                    }
 
-                _intGridGroupsListBox.ItemsSource = listData;
+                    _intGridGroupsListBox.ItemsSource = listData;
                 
-                if (gridTilesetDef.IntRefs.Count <= 0)
-                {
-                    var noItem = new TextBlock
+                    if (gridTilesetDef.IntRefs.Count <= 0)
                     {
-                        Text = $"No rules group found in this tileset."
-                    };
-                    _intGridGroupsListBox.Items.Add(noItem);
-                    _intGridGroupsListBox.IsEnabled = false;
+                        var noItem = new TextBlock
+                        {
+                            Text = $"No rules group found in this tileset."
+                        };
+                        _intGridGroupsListBox.Items.Add(noItem);
+                        _intGridGroupsListBox.IsEnabled = false;
+                    }
                 }
-            }
-            else
+                else
+                {
+                    _intGridGroupsListBox.IsVisible = false;
+                    _canvas.IsVisible = true;
+                    if (_previewImage != null)
+                        _previewImage.Source = EngineServices.Resources.Load<Bitmap>(def.ImagePath);
+                }
+            }).OnFailure(err =>
             {
-                _intGridGroupsListBox.IsVisible = false;
-                _canvas.IsVisible = true;
-                if (_previewImage != null)
-                    _previewImage.Source = EngineServices.Resources.Load<Bitmap>(def.ImagePath);
-            }
+               Logger.Error("[TilingPanel] Failed to load tileset with ID: {0} with error: {1}", selectedItem.AssetId, err);
+            });
+            
         }
         
     }

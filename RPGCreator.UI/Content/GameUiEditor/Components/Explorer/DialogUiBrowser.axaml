@@ -1,0 +1,48 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:RPGCreator.SDK.GameUI.Controls;assembly=RPGCreator.SDK"
+        xmlns:explorer="clr-namespace:RPGCreator.UI.Content.GameUiEditor.Components.Explorer"
+        xmlns:u="https://irihi.tech/ursa"
+        WindowStartupLocation="CenterOwner"
+        MinHeight="200"
+        MinWidth="200"
+        ShowInTaskbar="False"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="RPGCreator.UI.Content.GameUiEditor.Components.Explorer.DialogUiBrowser"
+        x:DataType="explorer:DialogUiBrowserVm" 
+        Title="DialogUiBrowser">
+    <Window.KeyBindings>
+        <KeyBinding Gesture="escape" Command="{Binding CancelCommand}"/>
+    </Window.KeyBindings>
+    <Grid RowDefinitions="Auto, *, Auto">
+        <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8" Margin="8 8 8 0">
+            <TextBox Watermark="Search..."/>
+            <Button Grid.Column="1" Content="Search"/>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Border Background="{DynamicResource SemiColorBackground1}" Margin="8" CornerRadius="8"
+                    BorderBrush="{DynamicResource SemiColorBorder}" BorderThickness="1"
+                    ClipToBounds="True">
+                <ListBox ItemsSource="{Binding ControlLists}" SelectedItem="{Binding SelectedControl}">
+                    <ListBox.DataTemplates>
+                        <DataTemplate DataType="controls:BaseControl">
+                            <StackPanel Orientation="Vertical">
+                            <TextBlock Text="{Binding DisplayControlName}"/>
+                            <TextBlock Text="{Binding Description}" Foreground="DarkGray" FontSize="12"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.DataTemplates>
+                </ListBox>
+            </Border>
+        </Grid>
+        <Grid Grid.Row="2" RowDefinitions="Auto, *">
+            <u:Divider/>
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="8" Spacing="8">
+                <Button Content="Add control" IsDefault="True" Command="{Binding SelectControlCommand}"/>
+                <Button Content="Cancel" Classes="Danger" IsCancel="True" Command="{Binding CancelCommand}"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

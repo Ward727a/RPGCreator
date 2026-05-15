@@ -26,7 +26,7 @@ namespace _BaseModule.SimpleEvents.Actions;
 
 public class TestSimpleAction : BaseSimpleEventAction
 {
-    public override URN Urn { get; }
+    public override URN ClassUrn { get; }
     public override string Name { get; }
     public override string Description { get; }
     public override void Execute(CustomData context, CustomData data)

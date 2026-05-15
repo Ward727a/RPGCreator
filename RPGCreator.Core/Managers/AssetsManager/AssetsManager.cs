@@ -1,4 +1,5 @@
 ﻿#region LICENSE
+
 //
 // RPG Creator - Open-source RPG Engine.
 // (c) 2025 Ward
@@ -21,710 +22,603 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 // 
 // 
+
 #endregion
 
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using CommunityToolkit.Diagnostics;
-using RPGCreator.Core.Managers.AssetsManager.Factories;
-using RPGCreator.Core.Managers.AssetsManager.Registries;
-using RPGCreator.Core.Types.Assets.BaseAssetsPack;
-using RPGCreator.Core.Types.Map;
-using RPGCreator.Core.Types.Map.Layers;
+using System.Reflection;
+using LiteDB;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
-using RPGCreator.SDK.Assets.Definitions;
-using RPGCreator.SDK.Assets.Definitions.Maps;
-using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
-using RPGCreator.SDK.EngineService;
-using RPGCreator.SDK.Exceptions;
+using RPGCreator.SDK.Debug;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Services.EngineService;
 using RPGCreator.SDK.Types;
-using RPGCreator.SDK.Types.Collections;
 using RPGCreator.SDK.Types.Internals;
-using RPGCreator.SDK.Types.Records;
 
 namespace RPGCreator.Core.Managers.AssetsManager
 {
-    internal class AssetsManager : IAssetsManager
+    internal class AssetsManagerRevamp : IAssetsManager
     {
-
-        private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<AssetsManager>();
-        
-        private struct AssetLocation()
+        public class AssetsManagerDb
         {
-            public IAssetsPack? Pack;
-            public string RelativePath;
-            public string TypeName;
-
-            /// <summary>
-            /// Determines whether the asset is transient (not saved to disk).
-            /// </summary>
-            public bool IsTransient = false;
-        }
-        
-        private readonly Dictionary<Ulid, AssetLocation> _assetLocations = new();
-
-        readonly Dictionary<Ulid, IAssetsPack> _assetsPacks = [];
-        private readonly Dictionary<string, Ulid> _assetsPacksMapping = [];
-
-        
-        #region Registries
-        
-        private readonly Dictionary<string, IAssetRegistry> _registries = new();
-        private readonly Dictionary<Type, string> _registryTypeToName = new();
-        
-        #endregion
-        
-        #region Factories
-        
-        public GenericPooledFactory<TileLayerInstance, TileLayerDefinition> TileLayerFactory = new();
-        public GenericCachedFactory<MapInstance, IMapDef> MapFactory = new();
-        public TileFactory TileFactory { get; } = new();
-        public StatFactory StatFactory { get; } = new();
-        
-        #endregion
-        
-        #region RegistryHelpers
-
-        public event Action<IBaseAssetDef>? OnAssetRegistered;
-        public event Action<IBaseAssetDef>? OnAssetUnregistered;
-
-        public void RegisterRegistry(IAssetRegistry registry)
-        {
-            _registries[registry.ModuleName] = registry;
-
-            foreach (var supportedType in registry.SupportedTypes)
-            {
-                _registryTypeToName[supportedType] = registry.ModuleName;
-            }
+            private Ulid _currentProjectDb = Ulid.Empty;
+            private const string DbName = "AssetsManager.db";
             
-            Logger.Debug("Registered asset registry {RegistryName} for types: {SupportedTypes}", args: [registry.ModuleName, string.Join(", ", registry.SupportedTypes.Select(t => t.FullName))]);
-        }
-
-        public void UnregisterRegistry(IAssetRegistry registry)
-        {
-            _registries.Remove(registry.ModuleName);
-            foreach (var supportedType in registry.SupportedTypes)
-            {
-                _registryTypeToName.Remove(supportedType);
-            }
-            Logger.Debug("Unregistered asset registry {RegistryName}", args: registry.ModuleName);
-        }
-
-        public void RegisterAsset(object asset)
-        {
-            Guard.IsAssignableToType(asset, typeof(IHasUniqueId));
-            Guard.IsAssignableToType(asset, typeof(IBaseAssetDef));
-
-            if (asset is IHasUniqueId uniqueIdAsset)
-            {
-
-                if(uniqueIdAsset.Unique == Ulid.Empty)
-                {
-                    uniqueIdAsset.Init(Ulid.NewUlid());
-                    Logger.Warning("Registered asset of type {AssetType} had an empty Unique ID. A new ID has been generated: {NewID}", args: [asset.GetType().FullName, uniqueIdAsset.Unique]);
-                }
-            }
+            private LiteDatabase? _db = null;
             
-            var type = asset.GetType();
-            if (TryResolveRegistry(type, out var assetRegistry))
-            {
-                assetRegistry.RegisterUntyped((IHasUniqueId)asset, true);
-                Guard.IsAssignableToType(asset, typeof(IBaseAssetDef));
-                // OnAssetRegistered?.Invoke((IBaseAssetDef)asset);
-                if(asset is BaseAssetDef baseAssetDef)
-                    baseAssetDef.UpdateUrn();
-                Logger.Info("Registered asset {unique} ({URN}) of type {AssetType} in registry {RegistryName}",  args: [((IHasUniqueId)asset).Unique, ((IHasUniqueId)asset).Urn, type.FullName, assetRegistry.ModuleName]);
-                return;
-            }
-            
-            // Check if the asset has a inheritance relationship with any of the supported types of the registries
-            var inherited = type.BaseType;
+            private ILiteCollection<AssetRelation>? _assetRelations = null;
+            private ILiteCollection<AssetIndex>? _assetIndexes = null;
+            private ILiteCollection<ClassChildren>? _classChildren = null;
 
-            if (inherited != null)
+            [SuppressMessage("ReSharper", "FieldCanBeMadeReadOnly.Local")]
+            private class AssetRelation
             {
-                if (TryResolveRegistry(inherited, out var inheritedRegistry))
-                {
-                    Guard.IsAssignableToType(asset, typeof(IHasUniqueId));
-                    inheritedRegistry.RegisterUntyped((IHasUniqueId)asset, true);
-                    Guard.IsAssignableToType(asset, typeof(IBaseAssetDef));
-                    OnAssetRegistered?.Invoke((IBaseAssetDef)asset);
-                    Logger.Info("Registered asset of type {AssetType} in registry {RegistryName} with inherited type {inherited}",  args: [type.FullName, inheritedRegistry.ModuleName, inherited.FullName]);
-                    return;
-                }
+                [BsonId]
+                public Ulid Id { get; set; }
+                public List<Ulid> References { get; set; } = new List<Ulid>();
+                public List<Ulid> BackRefs { get; set; } = new List<Ulid>();
+                
+                public AssetRelation() { }
+                public AssetRelation(Ulid id) => Id = id;
             }
-            
-            Logger.Warning("No registry found for asset type {AssetType} - inherited: {inherited}", args: [type.FullName, inherited?.FullName ?? "NONE"]);
-        }
-        
-        public void UnregisterAsset(object asset)
-        {
-            var type = asset.GetType();
-            if (TryResolveRegistry(type, out var assetRegistry))
+                
+            [SuppressMessage("ReSharper", "FieldCanBeMadeReadOnly.Local")]
+            private class AssetIndex
             {
-                assetRegistry.UnregisterUntyped((IHasUniqueId)asset);
-                Guard.IsAssignableToType(asset, typeof(IBaseAssetDef));
-                OnAssetUnregistered?.Invoke((IBaseAssetDef)asset);
-                Logger.Info("Unregistered asset of type {AssetType} from registry {RegistryName}", args:[type.FullName, assetRegistry.ModuleName]);
-                return;
-            }
-            Logger.Warning("No registry found for asset type {AssetType}", args: type.FullName);
-        }
-
-        public bool TryResolveRegistry(string moduleName, [NotNullWhen(true)] out IAssetRegistry? registry)
-        {
-            return _registries.TryGetValue(moduleName, out registry);
-        }
-        
-        public bool TryResolveRegistry(Type type, [NotNullWhen(true)] out IAssetRegistry? registry)
-        {
-            registry = null;
-            if (type == null)
-            {
-                Logger.Critical("TryResolveRegistry called with null type.");
-                return false;
-            }
-            
-            if (_registryTypeToName.TryGetValue(type, out var registryName))
-            {
-                return _registries.TryGetValue(registryName, out registry);
-            }
-            return false;
-        }
-
-        public bool TryResolveRegistry<T>(string moduleName, [NotNullWhen(true)] out T? registry) where T : IAssetRegistry
-        {
-            registry = default;
-            if (_registries.TryGetValue(moduleName, out var _registry) && _registry is T typedRegistry)
-            {
-                registry = typedRegistry;
-                return true;
-            }
-            return false;
-        }
-        
-        public bool TryResolveRegistry<T>(Type type, [NotNullWhen(true)] out T? registry) where T : IAssetRegistry
-        {
-            registry = default;
-
-            if (type == null)
-            {
-                Logger.Critical("TryResolveRegistry called with null type.");
-                return false;
-            }
-            
-            if (_registryTypeToName.TryGetValue(type, out var registryName))
-            {
-                if (_registries.TryGetValue(registryName, out var _registry) && _registry is T typedRegistry)
-                {
-                    registry = typedRegistry;
-                    return true;
-                }
-            }
-            return false;
-        }
-        
-        [Obsolete("Use 'AssetScope.Load()' instead for better scope management.")]
-        public bool TryResolveAsset<T>(URN urn, [NotNullWhen(true)] out T? result) where T : class, IHasUniqueId
-        {
-            result = null;
-            if (_registryTypeToName.TryGetValue(typeof(T), out var registryName))
-            {
-                if (_registries.TryGetValue(registryName, out var registry))
-                {
-                    if (registry.TryResolveUrnUntyped(urn, out var asset))
-                    {
-                        result = asset as T;
-                        return result != null;
-                    }
-                }
-            }
-            return false;
-        }
-
-        public string GetRegistryFromTypeOrInherited(Type type)
-        {
-            if (_registryTypeToName.TryGetValue(type, out var registryName))
-            {
-                return registryName;
-            }
-            
-            var baseType = type.BaseType;
-            
-            if(baseType != null)
-            {
-                if (_registryTypeToName.TryGetValue(baseType, out registryName))
-                {
-                    return registryName;
+                [BsonId]
+                public Ulid Id { get; set; }
+                public URN ClassUrn { get; set; }
+                
+                public AssetIndex() { }
+                public AssetIndex(Ulid id, URN classUrn) 
+                { 
+                    Id = id; 
+                    ClassUrn = classUrn; 
                 }
             }
 
-            return "";
-        }
-        
-        [Obsolete("Use 'AssetScope.Load()' instead for better scope management.", false)]
-        public bool TryResolveAsset<T>(Ulid uniqueId, [NotNullWhen(true)] out T? result) where T : class, IHasUniqueId
-        {
-            result = null;
-            var registryName = GetRegistryFromTypeOrInherited(typeof(T));
-            if (!string.IsNullOrEmpty(registryName))
+            private class ClassChildren(URN parentUrn)
             {
-                if (_registries.TryGetValue(registryName, out var registry))
-                {
-                    if (registry.TryGetUntyped(uniqueId, out var asset))
-                    {
-                        result = asset as T;
-                        return result != null;
-                    }
-                }
-            }
-            else
-            {
-                Logger.Error("No registry found for asset type {AssetType} or its direct inherited type.", args: typeof(T).FullName);
+                public URN ParentUrn { get; set; } = parentUrn;
+                public List<URN> ChildrenUrns { get; set; } = new List<URN>();
             }
 
-            if (_assetLocations.TryGetValue(uniqueId, out AssetLocation location))
+            public class AssetsIndexes : IAssetsManager.IAssetIndexes
             {
-                if (location.Pack == null)
+                private AssetsManagerDb _assetsManagerDb;
+                private ILiteCollection<AssetIndex>? AssetIndexes => _assetsManagerDb._assetIndexes;
+                private bool IsReady => AssetIndexes != null;
+                
+                [Obsolete("Do not use this constructor directly, use the AssetsManagerDb created variable for this!")]
+                internal AssetsIndexes(AssetsManagerDb assetsManagerDb)
                 {
-                    Logger.Error("Failed to load asset with ID {AssetId}: Pack is null.", args: uniqueId);
-                    return false;
+                    _assetsManagerDb = assetsManagerDb;
                 }
-                try
-                {
-                    object? loadedObject = location.Pack.LoadAsset(uniqueId);
 
-                    if(loadedObject == null)
-                    {
-                        Logger.Error("Failed to load asset with ID {AssetID} from pack {PackName}: LoadAssetDirect returned null.", args:[uniqueId,
-                            location.Pack.Name]);
+                public bool Has(Ulid id)
+                {
+                    if(!IsReady)
                         return false;
-                    }
-                    RegisterAsset(loadedObject);
-
-                    if (loadedObject is T typedAsset)
-                    {
-                        result = typedAsset;
-                        return true;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error(ex, "Failed to load asset with ID {AssetID} from pack {PackName}", args:[uniqueId,
-                        location.Pack?.Name ?? "UNKNOWN PACK"]);
-                }
-            }
-            return false;
-        }
-
-        public T CreateAsset<T>() where T : IBaseAssetDef, IHasUniqueId, new()
-        {
-            var newAsset = new T();
-            
-            newAsset.IsDirty = true;
-            newAsset.Init(Ulid.NewUlid());
-            
-            RegisterAsset(newAsset);
-            newAsset.ResumeTracking();
-
-            var pack = GetDefaultPack();
-            
-            pack.AddOrUpdateAsset(newAsset);
-            
-            Logger.Debug("Created asset of type {AssetType} with ID {AssetID}", args:[typeof(T).FullName, newAsset.Unique]);
-            
-            return newAsset;
-        }
-
-        public IAssetScope CreateAssetScope(string? name = null)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                name = Ulid.NewUlid().ToString();
-            }
-            return new AssetScope(this, name);
-        }
-        
-        public T CreateTransientAsset<T>(IAssetScope? scope = null) where T : IBaseAssetDef, new()
-        {
-            var typeKey = RegistryServices.AssetsType.GetKey(typeof(T));
-            if(typeKey == null)
-            {
-                Logger.Error("Cannot create transient asset of type {AssetType} because it is not registered in the AssetTypeRegistry.", args: typeof(T).FullName);
-                return new T();
-            }
-            var newAsset = new T();
-            
-            newAsset.IsTransient = true;
-            
-            RegisterAsset(newAsset);
-            
-            newAsset.IsDirty = true;
-            newAsset.Init(Ulid.NewUlid());
-            AddNewAssetLocation(newAsset.Unique, null, "", typeKey, true);
-            scope?.Track(newAsset);
-
-            Logger.Info("Created transient asset of type {AssetType} with ID {AssetID}", args: [typeof(T).FullName, newAsset.Unique]);
-            
-            return newAsset;
-        }
-
-        public void DestroyTransientAsset<T>(T asset) where T : IBaseAssetDef
-        {
-            if (!asset.IsTransient)
-            {
-                Logger.Warning("Attempted to destroy a non-transient asset of type {AssetType} with ID {AssetID}",
-                    args:[typeof(T).FullName, asset.Unique]);
-                return;
-            }
-
-            UnregisterAsset(asset);
-        }
-
-        public void CommitAsset(BaseAssetDef baseAsset, AssetScope? fromScope = null)
-        {
-            if (!baseAsset.IsTransient)
-            {
-                Logger.Warning("Attempted to commit a non-transient asset of type {AssetType} with ID {AssetID}",
-                    args: [baseAsset.GetType().FullName, baseAsset.Unique]);
-                return;
-            }
-            
-            fromScope?.Untrack(baseAsset);
-
-            var pack = GetDefaultPack();
-            
-            baseAsset.IsTransient = false;
-            pack.AddOrUpdateAsset(baseAsset);
-            Logger.Info("Commited transient asset of type {AssetType} with ID {AssetID} to pack {PackName}",
-                args:[baseAsset.GetType().FullName, baseAsset.Unique, pack.Name]);
-        }
-        
-        /// <summary>
-        /// Retains an asset in memory. If the asset is not already loaded in RAM, it will be loaded from the appropriate Assets Pack.
-        /// </summary>
-        /// <param name="id">The unique ID of the asset to retain.</param>
-        /// <returns>>The retained asset object.</returns>
-        /// <exception cref="InvalidOperationException">Thrown if the asset is not found in RAM or on disk.</exception>
-        internal object RetainAsset(Ulid id)
-        {
-            if (_assetLocations.TryGetValue(id, out var location))
-            {
                 
-                Type? type = RegistryServices.AssetsType.GetType(location.TypeName);
-                if(type == null)
-                    type = Type.GetType(location.TypeName)!;
-                
-                if (TryResolveRegistry(type, out var registry))
-                {
-                    if (registry.TryRetainUntyped(id, out var cachedAsset))
-                    {
-                        return cachedAsset!;
-                    }
+                    return AssetIndexes!.Exists(x => x.Id == id);
+                }
 
-                    if (location.IsTransient)
-                    {
-                        Logger.Error("Attempted to retain a transient asset with ID {AssetID} which is not loaded in RAM.", args: id);
-                        throw new CriticalEngineException($"Transient asset with ID {id} is not loaded in RAM. How did it get inside the _assetLocations without being registered?", _assetLocations);
-                    }
-                    Logger.Info($"Asset {id} not in RAM. Loading from Pack...");
-            
-                    var loadedAsset = location.Pack.LoadAsset(id);
+                public Result<List<Ulid>> GetAssetsOfClass(URN classUrn)
+                {
+                    if(!IsReady)
+                        return Result<List<Ulid>>.Failure("Database is not ready");
                     
-                    RegisterAsset(loadedAsset); 
-
-                    return loadedAsset;
+                    return Result<List<Ulid>>.Success(AssetIndexes!.Query().Where(x => x.ClassUrn == classUrn || x.ClassUrn.ToString().StartsWith(classUrn)).Select(x => x.Id).ToList());
                 }
-                if (!TryResolveRegistry(type, out _))
+
+                public Result<URN> GetClassUrn(Ulid id)
                 {
-                    throw new CriticalEngineException($"No registry found for asset type '{type.FullName}'. Did you forget to register the AssetRegistry for this type?", _registries);
+                    if(!IsReady)
+                        return Result<URN>.Failure("Database is not ready");
+                    
+                    if(!Has(id))
+                        return Result<URN>.Fail($"Asset with ID '{id}' not found in database");
+                
+                    var assetIndex = AssetIndexes!.FindOne(x => x.Id == id);
+                
+                    return Result<URN>.Success(assetIndex.ClassUrn);
                 }
-                throw new CriticalEngineException($"Asset with ID {id} not found in RAM or on disk. How did it get inside the _assetLocations without being registered?", _assetLocations);
-            }
-            
-            throw new KeyNotFoundException($"No asset found with ID: {id}");
-        }
 
-        internal void ReleaseAsset(Ulid id)
-        {
-            if (_assetLocations.TryGetValue(id, out var location))
+                public Result AddAsset(IEngineClass asset)
+                {
+                    if(!IsReady)
+                        return Result.Failure("Database is not ready");
+                
+                    var assetId = asset.Unique;
+                    var assetClassUrn = asset.ClassUrn;
+                
+                    if(Has(assetId))
+                        return Result.Fail($"Asset with ID '{assetId}' already exists in database");
+                
+                    var assetIndex = new AssetIndex(assetId, assetClassUrn);
+                    AssetIndexes!.Insert(assetIndex);
+                
+                    return Result.Success();
+                }
+
+                public Result RemoveAsset(Ulid id)
+                {
+                    if(!IsReady)
+                        return Result.Failure("Database is not ready");
+                
+                    if(!Has(id))
+                        return Result.Fail($"Asset with ID '{id}' not found in database");
+
+                    var count = AssetIndexes!.Count(x => x.Id == id);
+                
+                    if(count > 1)
+                        return Result.Fail($"More than one asset with ID '{id}' found in database");
+                
+                    var deleted = AssetIndexes!.DeleteMany(x => x.Id == id);
+                
+                    if(deleted <= 0)
+                        return Result.Fail($"Failed to delete asset with ID '{id}' from database");
+
+                    return Result.Success();
+                }
+            }
+
+            public class AssetsRelations : IAssetsManager.IAssetRelations
             {
-                Type? type = RegistryServices.AssetsType.GetType(location.TypeName);
+                private readonly AssetsManagerDb _assetsManagerDb;
+                private ILiteCollection<AssetRelation>? AssetRelations => _assetsManagerDb._assetRelations;
+                private bool IsReady => AssetRelations != null;
                 
-                if(type == null)
-                    type = Type.GetType(location.TypeName);
-                
-                if(type == null)
+                [Obsolete("Do not use this constructor directly, use the AssetsManagerDb created variable for this!")]
+                internal AssetsRelations(AssetsManagerDb assetsManagerDb)
                 {
-                    Logger.Warning("Unable to determine type for asset ID {AssetID} with type name {TypeName}", args: [id, location.TypeName]);
-                    return;
+                    _assetsManagerDb = assetsManagerDb;
                 }
                 
-                if (TryResolveRegistry(type, out var registry))
+                public bool HasRelationData(Ulid id)
                 {
-                    registry.ReleaseUntyped(id);
+                    if (!IsReady) return false;
+                    
+                    return AssetRelations!.Exists(x => x.Id == id);
                 }
-            }
-        }
-        #endregion
-        
-        public AssetsManager()
-        {
-            
-            // Register default registries
-            RegisterRegistry(new SkillEffectsRegistry());
-            RegisterRegistry(new TilesetRegistry());
-            RegisterRegistry(new CharacterRegistry());
-            RegisterRegistry(new MapRegistry());
-            RegisterRegistry(new SkillsRegistry());
-            RegisterRegistry(new StatsRegistry());
-            RegisterRegistry(new AnimationRegistry());
-            RegisterRegistry(new SpriteSheetRegistry());
-        }
 
-        internal void Init()
-        {
-            if (TryResolveRegistry("skill_effects", out var registry) && registry is SkillEffectsRegistry skillEffectsRegistry)
-            {   
-                skillEffectsRegistry.ReloadData();
-            }
-            
-            GlobalStates.ProjectState.PropertyChanged += (object? sender, System.ComponentModel.PropertyChangedEventArgs e) =>
-            {
-                if (e.PropertyName == nameof(IProjectState.CurrentProject))
+                private void _createRelationData(Ulid id)
                 {
-                    if (GlobalStates.ProjectState.CurrentProject == null)
+                    if (HasRelationData(id))
+                        return;
+                    
+                    var relationData = new AssetRelation(id);
+                    AssetRelations!.Insert(relationData);
+                }
+
+                private AssetRelation GetRelationData(Ulid id)
+                {
+                    return AssetRelations.Find(x => x.Id == id).FirstOrDefault();
+                }
+
+                public List<Ulid> GetReferences(Ulid id)
+                {
+                    return GetRelationData(id).References;
+                }
+
+                public List<Ulid> GetBackRefs(Ulid id)
+                {
+                    return GetRelationData(id).BackRefs;
+                }
+
+                public RelationKind GetRelationBetween(Ulid firstId, Ulid secondId)
+                {
+                    if (!IsReady)
+                        return RelationKind.InternalError;
+                    
+                    if (firstId == secondId || !HasRelationData(firstId) || !HasRelationData(secondId))
+                        return RelationKind.NoRelation;
+
+                    var firstRelation = GetRelationData(firstId);
+                    var secondRelation = GetRelationData(secondId);
+
+                    if (firstRelation.References.Contains(secondId) || secondRelation.References.Contains(firstId))
                     {
-                        var copyPacks = _assetsPacks.ToArray();
-                        foreach (var pack in copyPacks)
-                        {
-                            pack.Value.Dispose();
-                        }
-                        _assetsPacks.Clear();
-                        _assetsPacksMapping.Clear();
-                        _assetLocations.Clear();
-                        Logger.Info("Unloaded all assets packs due to project change.");
-                    }
-                    else
-                    {
-                        var loadedProject = GlobalStates.ProjectState.CurrentProject;
-                        // Loading handled in LoadedProject event
-                        foreach (string packPath in loadedProject.AssetsPackPath)
-                        {
-                            try
-                            {
-                                BaseAssetsPack pack = new(packPath);
+                        if (firstRelation.References.Contains(secondId) && secondRelation.References.Contains(firstId))
+                            return RelationKind.CircularReference;
 
-                                // RegisterPack(pack, false, false);
-                                _assetsPacks[pack.Id] = pack;
-                                _assetsPacksMapping[pack.Name] = pack.Id;
+                        if (firstRelation.References.Contains(secondId))
+                            return secondRelation.BackRefs.Contains(firstId)
+                                ? RelationKind.FirstReferenceSecond
+                                : RelationKind.UnexpectedRelation;
 
-                                foreach (var record in pack.EnumerateIndexOnly())
-                                {
-                                    _assetLocations[record.Id] = new AssetLocation
-                                    {
-                                        Pack = pack,
-                                        RelativePath = record.RelativePath
-                                    };
-                                }
-                            
-                                Logger.Info("Loaded assets pack from path: {packPath}", args: packPath);
-                            }
-                            catch (Exception ex)
-                            {
-                                Logger.Error(ex, "Failed to load assets pack from path: {packPath}", args: packPath);
-                                return;
-                            }
-                        }
+                        if (secondRelation.References.Contains(firstId))
+                            return firstRelation.BackRefs.Contains(secondId)
+                                ? RelationKind.SecondReferenceFirst
+                                : RelationKind.UnexpectedRelation;
                     }
+
+                    return RelationKind.NoRelation;
                 }
-            };
-            Logger.Info("AssetsManager initialized.");
-        }
-        
-        #region AssetsPackManagement
-
-        public void AddPack(string dbPath)
-        {
-            BaseAssetsPack pack = new(dbPath);
-
-            _assetsPacks[pack.Id] = pack;
-            _assetsPacksMapping[pack.Name] = pack.Id;
-
-            foreach (var record in pack.EnumerateIndexOnly())
-            {
-                _assetLocations[record.Id] = new AssetLocation
+                
+                public Result AddRelation(Ulid id, Ulid referencedAssetId)
                 {
-                    Pack = pack,
-                    RelativePath = record.RelativePath,
-                    TypeName = record.TypeName
-                };
-            }
-                            
-            Logger.Info("Loaded assets pack from path: {packPath}", args: pack.DbFilePath);
-        }
+                    if(!IsReady)
+                        return Result.Failure("Database is not ready");
+                    
+                    if(!HasRelationData(id))
+                        _createRelationData(id);
 
-        public void RegisterPack(IAssetsPack pack)
-        {
-            if (_assetsPacks.ContainsKey(pack.Id))
+                    if(!HasRelationData(referencedAssetId))
+                        _createRelationData(referencedAssetId);
+                    
+                    var parentData = GetRelationData(id);
+                    var refData = GetRelationData(referencedAssetId);
+                    
+                    if(parentData.BackRefs.Contains(referencedAssetId))
+                        return Result.Failure($"Asset with ID '{id}' already has a back-reference to asset with ID '{referencedAssetId}' - Circular References!");
+                    
+                    if(parentData.References.Contains(referencedAssetId))
+                        return Result.Failure($"Asset with ID '{id}' already has a reference to asset with ID '{referencedAssetId}'");
+                    
+                    parentData.References.Add(referencedAssetId);
+                    refData.BackRefs.Add(id);
+                    
+                    AssetRelations!.Update(parentData);
+                    AssetRelations!.Update(refData);
+                    
+                    return Result.Success();
+                }
+
+                public Result RemoveRelation(Ulid id, Ulid referencedAssetId)
+                {
+                    if(!IsReady)
+                        return Result.Failure("Database is not ready");
+                    
+                    if(!HasRelationData(id))
+                        return Result.Failure($"Asset with ID '{id}' does not exist in database");
+                    
+                    if(!HasRelationData(referencedAssetId))
+                        return Result.Failure($"Asset with ID '{referencedAssetId}' does not exist in database");
+                    
+                    var parentData = GetRelationData(id);
+                    var refData = GetRelationData(referencedAssetId);
+                    
+                    parentData.References.Remove(referencedAssetId);
+                    refData.BackRefs.Remove(id);
+                    AssetRelations!.Update(parentData);
+                    AssetRelations!.Update(refData);
+                    
+                    return Result.Success();
+                }
+
+                public Result ClearRelations(Ulid id)
+                {
+                    if(!IsReady)
+                        return Result.Failure("Database is not ready");
+
+                    if (!HasRelationData(id))
+                        return Result.Ok();
+
+                    var data = GetRelationData(id);
+
+                    var references = data.References.ToList();
+                    var backRefs = data.BackRefs.ToList();
+
+                    foreach (var reference in references)
+                    {
+                        RemoveRelation(id, reference);
+                    }
+
+                    foreach (var backRef in backRefs)
+                    {
+                        RemoveRelation(backRef, id);
+                    }
+                    
+                    return Result.Ok();
+                }
+
+                public bool HasRelation(Ulid id, Ulid referencedAssetId) => GetRelationBetween(id, referencedAssetId) is RelationKind.FirstReferenceSecond or RelationKind.SecondReferenceFirst;
+            }
+
+            public AssetsIndexes Indexes;
+            public AssetsRelations Relations;
+
+            public AssetsManagerDb()
             {
-                Logger.Warning("Assets pack with ID {PackID} is already registered.", args: pack.Id);
-                return;
+#pragma warning disable CS0618 // Type or member is obsolete
+                Indexes = new AssetsIndexes(this);
+                Relations = new AssetsRelations(this);
+#pragma warning restore CS0618 // Type or member is obsolete
             }
             
-            _assetsPacks[pack.Id] = pack;
-
-            if (!_assetsPacksMapping.ContainsKey(pack.Name))
+            public Result CheckDb()
             {
-                _assetsPacksMapping[pack.Name] = pack.Id;
-            }
-            else
-            {
-                Logger.Warning("Assets pack with name {PackName} is already registered.", pack.Name);
-            }
-            
-            Logger.Info("Pack {PackName} with ID {PackID} registered.", args:[pack.Name, pack.Id]);
-        }
-        
-        public void UnregisterPack(Ulid packId)
-        {
-            if (_assetsPacks.TryGetValue(packId, out IAssetsPack? pack))
-            {
-                _assetsPacks.Remove(packId);
-                _assetsPacksMapping.Remove(pack.Name);
-                
-                pack.Dispose();
-                
-                Logger.Info("Pack {PackName} with ID {PackID} unregistered.", args: [pack.Name, pack.Id]);
-            }
-            else
-            {
-                Logger.Warning("No assets pack found with ID: {PackID}", args: packId);
-            }
-        }
-
-        public IAssetsPack GetDefaultPack()
-        {
-            if(_assetsPacksMapping.TryGetValue("assets_pack", out Ulid packId))
-                return _assetsPacks[packId];
-            throw new CriticalEngineException("Default assets pack with name 'assets_pack' not found. Make sure it is included in the project and loaded correctly.",
-                (_assetsPacksMapping, _assetsPacks));
-        }
-
-        public void OnceDefaultPackReady(Action<IAssetsPack> action)
-        {
-            if(_assetsPacksMapping.TryGetValue("assets_pack", out Ulid packId) && _assetsPacks.TryGetValue(packId, out IAssetsPack? pack))
-            {
-                action(pack);
-            }
-            else
-            {
-                void Handler(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+                if(_currentProjectDb == GlobalStates.ProjectState.CurrentProject?.MetaData.Unique && _db != null)
                 {
-                    if (e.PropertyName == nameof(GlobalStates.ProjectState.CurrentProject))
-                    {
-                        if(_assetsPacksMapping.TryGetValue("assets_pack", out Ulid newPackId) && _assetsPacks.TryGetValue(newPackId, out IAssetsPack? newPack))
-                        {
-                            action(newPack);
-                            GlobalStates.ProjectState.PropertyChanged -= Handler;
-                        }
-                    }
+                    return Result.Success();
                 }
-                GlobalStates.ProjectState.PropertyChanged += Handler;
+
+                if (GlobalStates.ProjectState.CurrentProject != null &&
+                    GlobalStates.ProjectState.CurrentProject.MetaData.Unique != Ulid.Empty)
+                {
+                    return InitializeDb();
+                }
+                
+                return Result.Failure("Database is not initialized for current project");
+            }
+
+            public Result InitializeDb()
+            {
+                if(GlobalStates.ProjectState.CurrentProject == null)
+                    return Result.Failure("No project is currently open");
+
+                var currentProjectData = GlobalStates.ProjectState.CurrentProject.MetaData;
+                var projectId = currentProjectData.Unique;
+                
+                if(projectId == Ulid.Empty)
+                    return Result.Failure("Project ID is empty");
+
+                var folder = currentProjectData.Directory;
+                
+                if(!Directory.Exists(folder))
+                    return Result.Failure($"Project folder '{folder}' does not exist");
+
+                var dbPath = RpgEnv.PathFormat.GetDbPath(DbName);
+
+                if (dbPath.IsFailure)
+                {
+                    return Result.Fail($"Error while trying to get database path for project: {dbPath.Error}");
+                }
+
+                if (EngineDB.IsDBOpen(dbPath.Value))
+                {
+                    _db = EngineDB.GetDB(dbPath.Value);
+                }
+                else
+                {
+                    var dbId = EngineDB.OpenDB(dbPath.Value);
+                    _db = EngineDB.GetDB(dbId);
+                }
+                
+                _assetIndexes = _db!.GetCollection<AssetIndex>("AssetIndexes");
+                _assetRelations = _db!.GetCollection<AssetRelation>("AssetRelations");
+                _classChildren = _db!.GetCollection<ClassChildren>("ClassChildren");
+                _currentProjectDb = projectId;
+                return Result.Success();
             }
         }
         
-        public bool TryGetPack(string? packName, [NotNullWhen(true)] out IAssetsPack? pack)
+        private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<AssetsManagerRevamp>();
+
+        private readonly Dictionary<Ulid, IEngineClass> _loadedAssets = new();
+        public IReadOnlyCollection<Ulid> LoadedUids => _loadedAssets.Keys;
+        public IReadOnlyCollection<IEngineClass> LoadedAssets => _loadedAssets.Values;
+        public IFileStorageService FileStorageService { get; }
+        private AssetsManagerDb ManagerDb { get; set; }
+        
+        public IAssetsManager.IAssetIndexes AssetIndexes => ManagerDb.Indexes;
+        public IAssetsManager.IAssetRelations AssetRelations => ManagerDb.Relations;
+
+        public AssetsManagerRevamp(IFileStorageService storageService)
         {
-            pack = null;
-            if(packName == null)
-                return false;
-            if (_assetsPacksMapping.TryGetValue(packName, out Ulid packId))
-            {
-                return _assetsPacks.TryGetValue(packId, out pack);
-            }
-            return false;
+            FileStorageService = storageService;
+            ManagerDb = new AssetsManagerDb();
+            ManagerDb.InitializeDb();
         }
         
-        public bool TryGetPack(Ulid packId, [NotNullWhen(true)] out IAssetsPack? pack)
+        public void RefreshAssets()
         {
-            return _assetsPacks.TryGetValue(packId, out pack);
+            _loadedAssets.Clear();
+            ManagerDb.InitializeDb();
         }
-
-        public IAssetsPack GetPack(Ulid packId)
-        {
-            if (_assetsPacks.TryGetValue(packId, out IAssetsPack? pack))
-            {
-                return pack;
-            }
-            throw new KeyNotFoundException($"No assets pack found with ID: {packId}");
-        }
-
-
-        public void AddNewAssetLocation(Ulid assetId, IAssetsPack? pack, string relativePath, string typeName, bool isTransient = false)
-        {
-            _assetLocations[assetId] = new AssetLocation
-            {
-                Pack = pack,
-                RelativePath = relativePath,
-                TypeName = typeName,
-                IsTransient = isTransient
-            };
-        }
-
-        public List<IAssetsPack> GetLoadedPacks()
-        {
-            return _assetsPacks.Values.ToList();
-        }
-
         
+        public override string ToString()
+        {
+            return $"AssetsManager: {LoadedUids.Count} assets loaded. Storage Type used: {FileStorageService.StorageType}";
+        }
+
+        public Result<T> Create<T>(URN classUrn, object? argument) where T : class, IEngineClass
+        {
+            if (!ClassesRegistry.HasUrn(classUrn))
+                return Result<T>.Fail($"Class with URN '{classUrn}' not found in registry");
+
+            var engineClass = ClassesRegistry.GetEngineClass(classUrn);
+
+            return engineClass
+                .Bind(@class =>
+                    argument is null ? @class.Factory.DefaultConstructor() : @class.Factory.CreateInstance(argument))
+                .Bind<T>(value =>
+                {
+                    if (value is T typedValue)
+                    {
+                        typedValue.ClassUrn = classUrn;
+                        typedValue.Unique = Ulid.NewUlid();
+                        return Result<T>.Success(typedValue);
+                    }
+
+                    return Result<T>.Fail(
+                        $"Value is not of the correct type! Expected: {typeof(T).FullName}, Got: {value?.GetType().FullName ?? "NULL"}");
+                }).OnSuccess(value =>
+                {
+                    AssetIndexes.AddAsset(value);
+                    AddToCache(value.Unique, value);
+                });
+        }
+
+        public Result Save<T>(T instance) where T : class, IEngineClass
+        {
+            if (!ClassesRegistry.HasUrn(instance.ClassUrn))
+                return Result.Fail($"Class with URN '{instance.ClassUrn}' not found in registry");
+
+            return ClassesRegistry.GetEngineClass(instance.ClassUrn).Bind(@class =>
+            {
+                var projectFolderResult = RpgEnv.PathFormat.GetAssetsPath();
+                if(projectFolderResult.IsFailure)
+                    return Result.Fail($"Error while trying to get project assets folder: {projectFolderResult.Error}");
+                var folder = Path.Combine(projectFolderResult.Value, @class.SerializationFolder);
+                
+                        
+                if(!Directory.Exists(folder))
+                {
+                    Directory.CreateDirectory(folder);
+                }
+
+                return FileStorageService.FormatFilename(instance.Unique.ToString())
+                    .Bind(fileName => FileStorageService.MakeValidPath(folder, fileName))
+                    .Bind(filePath =>
+                    {
+                        DebugMemory.Set("filepath", filePath);
+                        
+                        return FileStorageService.Save(filePath, instance);
+                    }).OnSuccess(() =>
+                    {
+                        Logger.Debug("Asset saved at {path}", args: DebugMemory.Get<string>("filepath") ?? "NONE FILE FOUND");
+                        DebugMemory.Unset("filepath");
+                        SyncRelation(instance);
+                    });
+            });
+        }
+
+        private void SyncRelation<T>(T instance) where T : class, IEngineClass
+        {
+            AssetRelations.ClearRelations(instance.Unique);
+            
+            var type = typeof(T);
+            const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic;
+
+            var props = type.GetProperties(flags)
+                .Where(p => IsAssetReference(p.PropertyType));
+                
+            foreach (var prop in props)
+                ProcessRef(prop.GetValue(instance), instance.Unique);
+            
+            var fields = type.GetFields(flags)
+                .Where(f => IsAssetReference(f.FieldType));
+            
+            foreach (var field in fields)
+                ProcessRef(field.GetValue(instance), instance.Unique);
+
+            return;
+            
+            bool IsAssetReference(Type t) => 
+                t.IsGenericType && t.GetGenericTypeDefinition() == typeof(AssetReference<>);
+
+            void ProcessRef(object? value, Ulid sourceId)
+            {
+                if (value == null) return;
+                
+                var idProp = value.GetType().GetProperty("Id", BindingFlags.Public | BindingFlags.Instance);
+                var targetId = (Ulid)idProp!.GetValue(value)!;
+
+                if (targetId != Ulid.Empty)
+                {
+                    AssetRelations.AddRelation(sourceId, targetId);
+                }
+            }
+        }
+
+        public Result<T> Load<T>(Ulid id) where T : class, IEngineClass
+        {
+            if (HasInCache(id))
+                return GetFromCache<T>(id);
+
+            var classUrnResult = AssetIndexes.GetClassUrn(id);
+            
+            if(classUrnResult.IsFailure)
+                return Result<T>.Fail(classUrnResult.Error);
+            
+            var classUrn = classUrnResult.Value;
+            
+            if(!ClassesRegistry.HasUrn(classUrn))
+                return Result<T>.Fail($"Class with type '{classUrn}' not found in registry");
+            
+            return ClassesRegistry.GetEngineClass(classUrn).Bind<T>(@class =>
+            {
+                var folder = @class.SerializationFolder;
+                
+                return FileStorageService.FormatFilename(id.ToString())
+                    .Bind(fileName => FileStorageService.MakeValidPath(folder, fileName))
+                    .Bind(filePath => FileStorageService.Load<T>(filePath)).OnSuccess((typedValue) =>
+                    {
+                        AssetIndexes.AddAsset(typedValue);
+                        AddToCache(id, typedValue);
+                    });
+            });
+        }
+
+        public Result<List<Ulid>> GetAssetsOfClass(URN classUrn) => AssetIndexes.GetAssetsOfClass(classUrn);
+
         /// <summary>
-        /// Search all packs for assets of type T.
+        /// Delete the asset from the folder, indexes, and relations.<br/>
+        /// Warning: This operation is irreversible and will PERMANENTLY delete the asset from the disk!<br/>
+        /// This does not check if the asset is referenced by any other asset, it will delete the asset regardless of references!<br/>
+        /// Please check if the asset is referenced by any other asset before calling this method!
         /// </summary>
-        /// <typeparam name="T"> Type of asset to search for.</typeparam>
-        /// <returns> <see cref="IEnumerable{t}"/> of <see cref="PackSearchResult"/> containing the found assets.</returns>
-        public IEnumerable<PackSearchResult> SearchAllPacks<T>()
+        /// <param name="id">The ID of the asset to delete.</param>
+        /// <returns>
+        /// A <see cref="Result"/> indicating whether the asset was successfully deleted.
+        /// </returns>
+        public Result Delete(Ulid id)
         {
-            var targetType = typeof(T);
-            foreach (var pack in _assetsPacks.Values)
+            if(!AssetIndexes.Has(id))
+                return Result.Fail($"Asset with ID '{id}' not found in indexes");
+            
+            var classUrnResult = AssetIndexes.GetClassUrn(id);
+            
+            if(classUrnResult.IsFailure)
+                return Result.Fail(classUrnResult.Error);
+            
+            var classUrn = classUrnResult.Value;
+            
+            return ClassesRegistry.GetEngineClass(classUrn).Bind(@class =>
             {
-                foreach (var asset in pack.SearchIndexByType(targetType))
-                {
-                    yield return new PackSearchResult(asset.Id, pack.Id, asset.TypeName, asset.RelativePath);
-                }
-            }
-        }
-
-        public IEnumerable<T> GetFromAllPacks<T>()
-        {
-            var list = new List<T>();
-            foreach (var pack in _assetsPacks.Values)
-            {
-                list.AddRange(pack.LoadAssetsByType<T>());
-            }
-            return list;
+                var folder = @class.SerializationFolder;
+                return FileStorageService.FormatFilename(id.ToString())
+                    .Bind(fileName => FileStorageService.MakeValidPath(folder, fileName))
+                    .Bind(path => FileStorageService.Delete(path))
+                    .OnSuccess(() =>
+                    {
+                        AssetIndexes.RemoveAsset(id);
+                        AssetRelations.ClearRelations(id);
+                        RemoveFromCache(id);
+                    });
+            });
         }
         
-        public IEnumerable<T> GetAssetsOfType<T>() where T : class, IBaseAssetDef, IHasUniqueId
+        public Result CanDelete(Ulid id)
         {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            foreach (var result in SearchAllPacks<T>())
+            if (!AssetRelations.HasRelationData(id)) 
+                return Result.Success();
+
+            var relations = AssetRelations.GetBackRefs(id);
+            if (relations.Count > 0)
             {
-                if (TryResolveAsset(result.AssetId, out T? asset))
-                {
-                    yield return asset;
-                }
+                return Result.Failure($"This asset is used by {relations.Count} other assets.");
             }
-            stopwatch.Stop();
-            Logger.Info("Retrieved all assets of type {AssetType} in {ElapsedMilliseconds} ms", args: [typeof(T).FullName, stopwatch.ElapsedMilliseconds]);
-        }
 
-        public IEnumerable<T> GetAssetsOfType<T>(T valueForType) where T : class, IBaseAssetDef, IHasUniqueId
+            return Result.Success();
+        }
+        
+        public bool Has(Ulid id) => AssetIndexes.Has(id);
+        
+        private bool HasInCache(Ulid id) => _loadedAssets.ContainsKey(id);
+        
+        private void RemoveFromCache(Ulid id)
         {
-            return GetAssetsOfType<T>();
+            _loadedAssets.Remove(id);
         }
 
-        #endregion
+        private void AddToCache(Ulid id, IEngineClass value)
+        {
+            _loadedAssets[id] = value;
+        }
+
+        private Result<T> GetFromCache<T>(Ulid id) where T : class, IEngineClass
+        {
+            if(!_loadedAssets.TryGetValue(id, out var value))
+                return Result<T>.Fail($"Asset with ID '{id}' not found in cache");
+            
+            if(value is T typedValue)
+                return Result<T>.Success(typedValue);
+            
+            return Result<T>.Fail($"Asset with ID '{id}' is not of type '{typeof(T).FullName}'");
+        }
     }
 }

@@ -45,7 +45,7 @@ namespace RPGCreator.UI.Content.Launcher
 
             stackPanel.Children.Add(new TextBlock
             {
-                Text = project.Name,
+                Text = project.MetaData.Name,
                 FontSize = 16,
                 FontWeight = FontWeight.Bold,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,

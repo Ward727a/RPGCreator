@@ -27,6 +27,7 @@ using Microsoft.CodeAnalysis.Emit;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.MethodExtensions;
+using RPGCreator.SDK.Services.EngineService;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Graph.CompilerLogic;

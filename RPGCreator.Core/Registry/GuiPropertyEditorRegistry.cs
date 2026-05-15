@@ -34,12 +34,12 @@ namespace RPGCreator.Core.Registry;
 /// </summary>
 public class GuiPropertyEditorRegistry : IGuiPropertyEditorRegistry
 {
-    private readonly Dictionary<Type, Func<ControlPropertyDescriptor, object>> _propertyEditors = new();
+    private readonly Dictionary<Type, Func<ControlPropertyDescriptor, object?, object>> _propertyEditors = new();
 
-    public IReadOnlyDictionary<Type, Func<ControlPropertyDescriptor, object>> PropertyEditors => _propertyEditors.AsReadOnly();
+    public IReadOnlyDictionary<Type, Func<ControlPropertyDescriptor, object?, object>> PropertyEditors => _propertyEditors.AsReadOnly();
     public int PropertyEditorCount => _propertyEditors.Count;
 
-    public Result RegisterPropertyEditor(Type propertyType, Func<ControlPropertyDescriptor, object> propertyDescriptorFactory, bool overrideIfExist = false)
+    public Result RegisterPropertyEditor(Type propertyType, Func<ControlPropertyDescriptor, object?, object> propertyDescriptorFactory, bool overrideIfExist = false)
     {
         if (propertyType == null) return Result.Fail("Property type cannot be null");
         if (propertyDescriptorFactory == null) return Result.Fail("Property descriptor factory cannot be null");
@@ -53,7 +53,7 @@ public class GuiPropertyEditorRegistry : IGuiPropertyEditorRegistry
         return Result.Success();
     }
 
-    public Result RegisterPropertyEditor<T>(Func<ControlPropertyDescriptor, object> propertyDescriptorFactory, bool overrideIfExist = false)
+    public Result RegisterPropertyEditor<T>(Func<ControlPropertyDescriptor, object?, object> propertyDescriptorFactory, bool overrideIfExist = false)
     {
         if (propertyDescriptorFactory == null) return Result.Fail("Property descriptor factory cannot be null");
         
@@ -89,29 +89,34 @@ public class GuiPropertyEditorRegistry : IGuiPropertyEditorRegistry
 
     public Result<object> GeneratePropertyEditor(ControlPropertyDescriptor propertyDescriptor)
     {
+        throw new NotImplementedException();
+    }
+
+    public Result<object> GeneratePropertyEditor(ControlPropertyDescriptor propertyDescriptor, object? context = null)
+    {
         if (propertyDescriptor == null) return Result.Fail("Property descriptor cannot be null");
 
         var propertyType = propertyDescriptor.Type;
         
         if (_propertyEditors.TryGetValue(propertyType, out var editor))
         {
-            return editor(propertyDescriptor);
+            return editor(propertyDescriptor, context);
         }
         
         return Result<object>.Fail($"Property editor not found for type: {propertyType.FullName}");
     }
     
-    public Result<Func<ControlPropertyDescriptor, object>> GetPropertyEditor(Type propertyType)
+    public Result<Func<ControlPropertyDescriptor, object?, object>> GetPropertyEditor(Type propertyType)
     {
         if (_propertyEditors.TryGetValue(propertyType, out var editor))
         {
-            return Result<Func<ControlPropertyDescriptor, object>>.Ok(editor);
+            return Result<Func<ControlPropertyDescriptor, object?, object>>.Ok(editor);
         }
         
-        return Result<Func<ControlPropertyDescriptor, object>>.Fail($"Property editor not found for type: {propertyType.FullName}");
+        return Result<Func<ControlPropertyDescriptor, object?, object>>.Fail($"Property editor not found for type: {propertyType.FullName}");
     }
 
-    public Result<Func<ControlPropertyDescriptor, object>> GetPropertyEditor<T>()
+    public Result<Func<ControlPropertyDescriptor, object?, object>> GetPropertyEditor<T>()
     {
         return GetPropertyEditor(typeof(T));
     }

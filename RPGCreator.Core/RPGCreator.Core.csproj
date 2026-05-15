@@ -20,12 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Managers\CommandManager\" />
-    <Folder Include="Managers\RTP\" />
     <Folder Include="Types\Assets\Skills\" />
     <Folder Include="Types\Assets\Tilesets\IntGridTileset\" />
-    <Folder Include="Types\Blueprint\Nodes\Entity\Position\" />
-    <Folder Include="Types\Blueprint\Nodes\Entity\Stats\" />
     <Folder Include="Types\Editor\Interfaces\" />
     <Folder Include="Types\Editor\Visual\" />
   </ItemGroup>
@@ -38,6 +34,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RPGCreator.SDK\RPGCreator.SDK.csproj" />
+    <ProjectReference Include="..\EngineClassGenerator\EngineClassGenerator\EngineClassGenerator.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>

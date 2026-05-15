@@ -25,7 +25,7 @@ using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Editor;
 
-[SerializingType("ShortcutButtonInfo")]
+[EngineType("rpgc", "sdk", "shortcut_button_info")]
 public record struct ShortcutButtonInfo : ISerializable, IDeserializable
 {
     public string Name { get; set; }

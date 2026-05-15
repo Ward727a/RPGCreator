@@ -235,45 +235,45 @@ public class CharacterEditorWindowControl : UserControl
     
     private void OnSaveButtonClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        Logger.Info("Character '{characterName}' saved.", Data.Name);
         
         Logger.Debug("Character Data: {@characterData}", Data);
 
-        HashSet<Ulid> animationSpritesheet = new HashSet<Ulid>();
-        
         foreach (var animationsMappingValue in Data.AnimationsMapping.Values)
         {
             foreach (var ulid in animationsMappingValue.Animations.Values)
             {
-                if (EngineServices.AssetsManager.TryResolveAsset(ulid, out AnimationDef? animationDef))
+                EngineServices.AssetsManager.Load<AnimationDef>(ulid).OnSuccess(animationDef =>
                 {
-                    EngineServices.AssetsManager.RegisterAsset(animationDef);
-                    if (EngineServices.AssetsManager.TryGetPack("assets_pack", out var animPack))
+                    EngineServices.AssetsManager.Load<SpritesheetDef>(animationDef.SpritesheetId).OnSuccess(spritesheetDef =>
                     {
-                        animPack.AddOrUpdateAsset(animationDef);
-                        animationSpritesheet.Add(animationDef.SpritesheetId);
-                    }
-                }
-            }
-        }
-
-        foreach (var ulid in animationSpritesheet)
-        {
-            if (EngineServices.AssetsManager.TryResolveAsset(ulid, out SpritesheetDef? spriteSheet))
-            {
-                EngineServices.AssetsManager.RegisterAsset(spriteSheet);
-                if (EngineServices.AssetsManager.TryGetPack("assets_pack", out var spritePack))
+                        EngineServices.AssetsManager.Save(spritesheetDef).OnSuccess(() =>
+                        {
+                            EngineServices.AssetsManager.Save(animationDef).OnFailure((err) =>
+                            {
+                                Logger.Error("[CharacterEditor] Failed to save animation: {err}", err);
+                            });
+                        }).OnFailure(err =>
+                        {
+                            Logger.Error("[CharacterEditor] Failed to save spritesheet: {err}", err);
+                        });
+                    }).OnFailure((err) =>
+                    {
+                        Logger.Error("[CharacterEditor] Failed to save spritesheet: {err}", err);
+                    });
+                }).OnFailure((err) =>
                 {
-                    spritePack.AddOrUpdateAsset(spriteSheet);
-                }
+                    Logger.Error("[CharacterEditor] Failed to save animation: {err}", err);
+                });
             }
         }
         
-        EngineServices.AssetsManager.RegisterAsset(Data);
-        if (EngineServices.AssetsManager.TryGetPack("assets_pack", out var pack))
+        EngineServices.AssetsManager.Save(Data).OnSuccess(() =>
         {
-            pack.AddOrUpdateAsset(Data);
-        }
+            Logger.Info("Character '{characterName}' saved.", Data.Name);
+        }).OnFailure((err) =>
+        {
+            Logger.Error("Failed to save character: {err}", err);
+        });
     }
     #endregion
     

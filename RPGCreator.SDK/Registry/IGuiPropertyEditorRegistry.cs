@@ -34,7 +34,7 @@ public interface IGuiPropertyEditorRegistry : IService
     /// <remark>
     /// If possible, try to use <see cref="GetPropertyEditor{T}"/> or <see cref="GeneratePropertyEditor"/> instead of accessing this property directly for security reasons.
     /// </remark>
-    public IReadOnlyDictionary<Type, Func<ControlPropertyDescriptor, object>> PropertyEditors { get; }
+    public IReadOnlyDictionary<Type, Func<ControlPropertyDescriptor, object?, object>> PropertyEditors { get; }
     
     /// <summary>
     /// Returns the number of registered property editors.
@@ -52,7 +52,7 @@ public interface IGuiPropertyEditorRegistry : IService
     /// Return a <see cref="Result"/> object indicating the success or failure of the operation.<br/>
     /// In case of failure, the <see cref="Result.Error"/> property will contain the error message.
     /// </returns>
-    public Result RegisterPropertyEditor(Type propertyType, Func<ControlPropertyDescriptor, object> propertyDescriptorFactory, bool overrideIfExist = false);
+    public Result RegisterPropertyEditor(Type propertyType, Func<ControlPropertyDescriptor, object?, object> propertyDescriptorFactory, bool overrideIfExist = false);
     
     /// <summary>
     /// Register a new property editor factory.<br/>
@@ -65,7 +65,7 @@ public interface IGuiPropertyEditorRegistry : IService
     /// Return a <see cref="Result"/> object indicating the success or failure of the operation.<br/>
     /// In case of failure, the <see cref="Result.Error"/> property will contain the error message.
     /// </returns>
-    public Result RegisterPropertyEditor<T>(Func<ControlPropertyDescriptor, object> propertyDescriptorFactory, bool overrideIfExist = false);
+    public Result RegisterPropertyEditor<T>(Func<ControlPropertyDescriptor, object?, object> propertyDescriptorFactory, bool overrideIfExist = false);
     
     /// <summary>
     /// Unregister a property editor factory.
@@ -107,19 +107,19 @@ public interface IGuiPropertyEditorRegistry : IService
     /// </summary>
     /// <param name="propertyDescriptor">The descriptor of the property to get the editor for.</param>
     /// <returns>A <see cref="Result{object}"/> object containing the property editor if found, or an error message if not found.</returns>
-    public Result<object> GeneratePropertyEditor(ControlPropertyDescriptor propertyDescriptor);
+    public Result<object> GeneratePropertyEditor(ControlPropertyDescriptor propertyDescriptor, object? context = null);
 
     /// <summary>
     /// Get the property editor from a registered factory for the given type.
     /// </summary>
     /// <param name="propertyType">The type of the property to get the editor for.</param>
     /// <returns>A <see cref="Result{object}"/> object containing the property editor if found, or an error message if not found.</returns>
-    public Result<Func<ControlPropertyDescriptor, object>> GetPropertyEditor(Type propertyType);
+    public Result<Func<ControlPropertyDescriptor, object?, object>> GetPropertyEditor(Type propertyType);
     
     /// <summary>
     /// Get the property editor from a registered factory for the given type.
     /// </summary>
     /// <typeparam name="T">The type of the property to get the editor for.</typeparam>
     /// <returns>A <see cref="Result{object}"/> object containing the property editor if found, or an error message if not found.</returns>
-    public Result<Func<ControlPropertyDescriptor, object>> GetPropertyEditor<T>();
+    public Result<Func<ControlPropertyDescriptor, object?, object>> GetPropertyEditor<T>();
 }

@@ -31,6 +31,7 @@ using Projektanker.Icons.Avalonia;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Projects;
+using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
 using RPGCreator.UI.Content.Preferences;
 
@@ -54,29 +55,40 @@ namespace RPGCreator.UI.Content.Launcher
         private TextBlock _ProjectName;
         private TextBlock _ProjectDescription;
         private TextBlock _ProjectLastModified;
+        private Grid _mainGrid;
+        private Grid _contentGrid;
+        private TextBlock _header;
+        private Button _openPreferences;
+        private TextBlock _footer;
+        private Grid _projectListGrid;
+        private Grid _projectListOptionsGrid;
+        private TextBox _searchBox;
+        private Button _newProjectButton;
+        private StackPanel _projectDetailsPanel;
+        private Grid _detailButtons;
 
         #endregion
 
         public LauncherWindowControl() : base()
         {
-            var MainGrid = new Grid
+            _mainGrid = new Grid
             {
                 ShowGridLines = true,
                 RowDefinitions = new RowDefinitions("Auto, *, Auto")
             };
 
 
-            var ContentGrid = new Grid
+            _contentGrid = new Grid
             {
                 ShowGridLines = true,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
                 ColumnDefinitions = new ColumnDefinitions("*, Auto")
             };
-            MainGrid.Children.Add(ContentGrid);
-            Grid.SetRow(ContentGrid, 1);
+            _mainGrid.Children.Add(_contentGrid);
+            Grid.SetRow(_contentGrid, 1);
 
-            var header = new TextBlock
+            _header = new TextBlock
             {
                 Text = "RPG Creator Launcher",
                 FontSize = App.style.TitleFontSize,
@@ -84,10 +96,10 @@ namespace RPGCreator.UI.Content.Launcher
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
                 Margin = App.style.Margin
             };
-            MainGrid.Children.Add(header);
-            Grid.SetRow(header, 0);
+            _mainGrid.Children.Add(_header);
+            Grid.SetRow(_header, 0);
 
-            var openPreferences = new Button()
+            _openPreferences = new Button()
             {
                 Content = "Preferences",
                 FontSize = App.style.TextFontSize,
@@ -95,16 +107,16 @@ namespace RPGCreator.UI.Content.Launcher
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
                 Margin = new(0, 0, 10, 0)
             };
-            MainGrid.Children.Add(openPreferences);
-            Grid.SetRow(openPreferences, 0);
+            _mainGrid.Children.Add(_openPreferences);
+            Grid.SetRow(_openPreferences, 0);
 
-            openPreferences.Click += (sender, e) =>
+            _openPreferences.Click += (sender, e) =>
             {
                 var preferencesWindow = new PreferencesWindow();
                 preferencesWindow.ShowDialog(_Host);
             };
 
-            var footer = new TextBlock
+            _footer = new TextBlock
             {
                 Text = "RPG Creator - Open-source RPG Engine. (c) 2025 Ward",
                 FontSize = App.style.SmallTextFontSize,
@@ -112,29 +124,29 @@ namespace RPGCreator.UI.Content.Launcher
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Bottom,
                 Margin = App.style.Margin
             };
-            MainGrid.Children.Add(footer);
-            Grid.SetRow(footer, 2);
+            _mainGrid.Children.Add(_footer);
+            Grid.SetRow(_footer, 2);
 
-            var projectListGrid = new Grid
+            _projectListGrid = new Grid
             {
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
                 RowDefinitions = new RowDefinitions("Auto, *"),
             };
-            ContentGrid.Children.Add(projectListGrid);
-            Grid.SetColumn(projectListGrid, 0);
+            _contentGrid.Children.Add(_projectListGrid);
+            Grid.SetColumn(_projectListGrid, 0);
 
-            var projectListOptionsGrid = new Grid
+            _projectListOptionsGrid = new Grid
             {
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
                 Margin = App.style.Margin,
                 ColumnDefinitions = new ColumnDefinitions("*, Auto")
             };
-            projectListGrid.Children.Add(projectListOptionsGrid);
-            Grid.SetRow(projectListOptionsGrid, 0);
+            _projectListGrid.Children.Add(_projectListOptionsGrid);
+            Grid.SetRow(_projectListOptionsGrid, 0);
 
-            var searchBox = new TextBox
+            _searchBox = new TextBox
             {
                 Watermark = "Search projects...",
                 FontSize = App.style.TextFontSize,
@@ -142,18 +154,18 @@ namespace RPGCreator.UI.Content.Launcher
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
                 Margin = new(0, 0, 10, 0)
             };
-            projectListOptionsGrid.Children.Add(searchBox);
+            _projectListOptionsGrid.Children.Add(_searchBox);
             
-            var newProjectButton = new Button
+            _newProjectButton = new Button
             {
                 Content = "New Project",
                 FontSize = App.style.TextFontSize,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
             };
-            projectListOptionsGrid.Children.Add(newProjectButton);
-            newProjectButton.Click += OnNewProjectButtonClick;
-            Grid.SetColumn(newProjectButton, 1);
+            _projectListOptionsGrid.Children.Add(_newProjectButton);
+            _newProjectButton.Click += OnNewProjectButtonClick;
+            Grid.SetColumn(_newProjectButton, 1);
 
             _ProjectStackPanel = new StackPanel
             {
@@ -163,10 +175,10 @@ namespace RPGCreator.UI.Content.Launcher
                 Margin = App.style.Margin,
                 Spacing = 0
             };
-            projectListGrid.Children.Add(_ProjectStackPanel);
+            _projectListGrid.Children.Add(_ProjectStackPanel);
             Grid.SetRow(_ProjectStackPanel, 1);
 
-            var projectDetailsPanel = new StackPanel
+            _projectDetailsPanel = new StackPanel
             {
                 Orientation = Avalonia.Layout.Orientation.Vertical,
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
@@ -174,10 +186,9 @@ namespace RPGCreator.UI.Content.Launcher
                 Margin = App.style.Margin
             };
 
-            ContentGrid.Children.Add(projectDetailsPanel);
-            Grid.SetColumn(projectDetailsPanel, 1);
+            _contentGrid.Children.Add(_projectDetailsPanel);
+            Grid.SetColumn(_projectDetailsPanel, 1);
             
-
             _ProjectName = new TextBlock
             {
                 Text = "Project Name: None",
@@ -185,7 +196,7 @@ namespace RPGCreator.UI.Content.Launcher
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top
             };
-            projectDetailsPanel.Children.Add(_ProjectName);
+            _projectDetailsPanel.Children.Add(_ProjectName);
 
             _ProjectDescription = new TextBlock
             {
@@ -194,25 +205,16 @@ namespace RPGCreator.UI.Content.Launcher
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top
             };
-            projectDetailsPanel.Children.Add(_ProjectDescription);
+            _projectDetailsPanel.Children.Add(_ProjectDescription);
 
-            // _ProjectLastModified = new TextBlock
-            // {
-            //     Text = "Last Modified (WIP): " + DateTime.Now.ToString("g"),
-            //     FontSize = App.style.MediumTextFontSize,
-            //     HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
-            //     VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top
-            // };
-            // projectDetailsPanel.Children.Add(_ProjectLastModified);
-
-            var detail_buttons = new Grid
+            _detailButtons = new Grid
             {
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
                 VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
                 Margin = App.style.Margin,
                 ColumnDefinitions = new ColumnDefinitions("Auto, 4, Auto")
             };
-            projectDetailsPanel.Children.Add(detail_buttons);
+            _projectDetailsPanel.Children.Add(_detailButtons);
 
             _OpenButton = new Button
             {
@@ -222,7 +224,7 @@ namespace RPGCreator.UI.Content.Launcher
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 IsEnabled = _IsProjectSelected // Initially disabled, enable when a project is selected
             };
-            detail_buttons.Children.Add(_OpenButton);
+            _detailButtons.Children.Add(_OpenButton);
             _OpenButton.Click += OnOpenButtonClick;
 
             _DeleteButton = new Button
@@ -233,18 +235,13 @@ namespace RPGCreator.UI.Content.Launcher
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
                 IsEnabled = _IsProjectSelected // Initially disabled, enable when a project is selected
             };
-            detail_buttons.Children.Add(_DeleteButton);
+            _detailButtons.Children.Add(_DeleteButton);
             _DeleteButton.Click += OnDeleteButtonClick;
             Grid.SetColumn(_DeleteButton, 2);
 
             RefreshProjectList();
 
-            Content = MainGrid;
-            var testIcon = new Icon()
-            {
-                Value = "gameIcon-spawn-node"
-            };
-            projectDetailsPanel.Children.Add(testIcon);
+            Content = _mainGrid;
         }
 
         private void RefreshProjectDetails()
@@ -253,15 +250,13 @@ namespace RPGCreator.UI.Content.Launcher
             // Update the project details panel with the selected project's information
             if (_selectedProject != null)
             {
-                _ProjectName.Text = $"Project Name: {_selectedProject.Name}";
-                _ProjectDescription.Text = $"Description: {_selectedProject.Description}";
-                // _ProjectLastModified.Text = $"Last Modified: {DateTime.Now.ToString("g")}"; // Placeholder for last modified date
+                _ProjectName.Text = $"Project Name: {_selectedProject.MetaData.Name}";
+                _ProjectDescription.Text = $"Description: {_selectedProject.MetaData.Description}";
             }
             else
             {
-                _ProjectName.Text = "No project selected.";
+                _ProjectName.Text = new StringName("No project selected.");
                 _ProjectDescription.Text = string.Empty;
-                // _ProjectLastModified.Text = string.Empty;
             }
         }
 
@@ -293,17 +288,12 @@ namespace RPGCreator.UI.Content.Launcher
 
             foreach (var projectLink in projectLinks)
             {
-                if (EngineServices.ProjectsManager.TryGetProject(projectLink.ProjectConfigPath, out var project))
-                {
-                    var projectItem = new LauncherProjectItem(project);
-                    _ProjectStackPanel.Children.Add(projectItem);
-                    projectItem.ProjectSelected += OnSelectProject;
-                    Logger.Info($"Found project: {project.Name} at path {project.Path}");
-                }
-                else
-                {
-                    Logger.Error("Project link with Project ID {projectId}({path}) could not be resolved to a project.", projectLink.ProjectID, projectLink.ProjectConfigPath);
-                }
+                if (!EngineServices.ProjectsManager.TryGetProject(projectLink.ProjectLastKnownPath, out var project))
+                    continue;
+                
+                var projectItem = new LauncherProjectItem(project);
+                _ProjectStackPanel.Children.Add(projectItem);
+                projectItem.ProjectSelected += OnSelectProject;
             }
         }
 
@@ -365,7 +355,7 @@ namespace RPGCreator.UI.Content.Launcher
         {
             // Logic to handle project selection
             // Enable buttons and update details panel with the selected project's information
-            Logger.Info($"Project selected: {project.Name}");
+            Logger.Info($"Project selected: {project.MetaData.Name}");
             _selectedProject = project;
 
             RefreshButtonsState();

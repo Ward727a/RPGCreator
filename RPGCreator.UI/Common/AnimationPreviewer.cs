@@ -8,38 +8,35 @@ using Avalonia.Media.Imaging;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Animations;
 using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.Types.Collections;
 using RPGCreator.SDK.Types.Internals;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Common;
 
-public class AvaloniaAnimationDrawer : IDrawer<AnimationInstance>, IDisposable
+public class AvaloniaAnimationDrawer : IDrawer<AnimationInstance>
 {
 
     private Image _targetImage;
-    private IAssetScope _assetScope;
     private SpritesheetDef? _cachedSpritesheet;
     private Bitmap? _cachedSpritesheetImage;
     
     public AvaloniaAnimationDrawer(Image targetImage)
     {
         _targetImage = targetImage;
-        _assetScope = EngineServices.AssetsManager.CreateAssetScope();
     }
     
     public void Draw(IRenderContext context, AnimationInstance animation)
     {
         if(_cachedSpritesheet == null || _cachedSpritesheet.Unique != animation.Definition.SpritesheetId)
         {
-            _cachedSpritesheet = _assetScope.Load<SpritesheetDef>(animation.Definition.SpritesheetId);
-            _cachedSpritesheetImage = EngineServices.Resources.Load<Bitmap>(_cachedSpritesheet.ImagePath);
-            
-            if (_cachedSpritesheet == null)
+            EngineServices.AssetsManager.Load<SpritesheetDef>(animation.Definition.SpritesheetId).OnSuccess(def =>
             {
-                Logger.Error("[AvaloniaAnimationDrawer] Failed to load spritesheet with ID: " + animation.Definition.SpritesheetId);
-                return;
-            }
+                _cachedSpritesheet = def;
+                _cachedSpritesheetImage = EngineServices.Resources.Load<Bitmap>(_cachedSpritesheet.ImagePath);
+            }).OnFailure(err =>
+            {
+                Logger.Error("[AvaloniaAnimationDrawer] Failed to load spritesheet with ID: {id} with error: {error} ", animation.Definition.SpritesheetId, err);
+            });
         }
 
         if (_cachedSpritesheetImage == null)
@@ -52,11 +49,6 @@ public class AvaloniaAnimationDrawer : IDrawer<AnimationInstance>, IDisposable
         var croppedBitmap = new CroppedBitmap(_cachedSpritesheetImage, new PixelRect((int)rect.X, (int)rect.Y, (int)rect.Width, (int)rect.Height));
     
         _targetImage.Source = croppedBitmap;
-    }
-
-    public void Dispose()
-    {
-        _assetScope.Dispose();
     }
 }
 
@@ -98,7 +90,7 @@ public class AnimationPreviewer : UserControl
                 return;
             }
 
-            AnimationInstance = EngineServices.GameFactory.CreateInstance<AnimationInstance>(_animationDef);
+            AnimationInstance = new(_animationDef);
             
             UpdateFrame();
         }
@@ -329,12 +321,8 @@ public class AnimationPreviewer : UserControl
     
     private void OnAnimationPathChanged(Ulid newSpriteSheetId)
     {
-        if (AnimationInstance != null)
-        {
-            EngineServices.GameFactory.ReleaseInstance(AnimationInstance);
-        }
         
-        AnimationInstance = EngineServices.GameFactory.CreateInstance<AnimationInstance>(_animationDef);
+        AnimationInstance = new(_animationDef);
         
         Stop();
         // Load animation from newSpriteSheetId and set TotalFrames accordingly
@@ -344,12 +332,7 @@ public class AnimationPreviewer : UserControl
     
     private void OnAnimationPathChanged(string newPath)
     {
-        if (AnimationInstance != null)
-        {
-            EngineServices.GameFactory.ReleaseInstance(AnimationInstance);
-        }
-
-        AnimationInstance = EngineServices.GameFactory.CreateInstance<AnimationInstance>(_animationDef);
+        AnimationInstance = new(_animationDef);
         Stop();
         // Load animation from newPath and set TotalFrames accordingly
         // Reset CurrentFrame to 0

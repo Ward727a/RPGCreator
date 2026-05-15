@@ -2,6 +2,7 @@ using LiteDB;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Types;
 
 namespace RPGCreator.Core;
 
@@ -14,24 +15,15 @@ public class DataBaseMetaData()
 
 public class EngineDB
 {
-
     static EngineDB()
     {
         BsonMapper.Global.RegisterType(
             serialize: (ulid) => ulid.ToString(),
-            deserialize: (bson) => 
-            {
-                if (bson.IsString) return Ulid.Parse(bson.AsString);
-                
-                if (bson.IsDocument)
-                {
-                    var idValue = bson.AsDocument["_id"] ?? bson.AsDocument["$value"];
-                    if (idValue != null && idValue.IsString)
-                        return Ulid.Parse(idValue.AsString);
-                }
-                
-                return Ulid.Parse(bson.ToString().Trim('"'));
-            }
+            deserialize: (bson) => Ulid.Parse(bson.AsString)
+        );
+        BsonMapper.Global.RegisterType(
+            serialize: (urn) => urn.ToString(),
+            deserialize: (bson) => URN.Parse(bson.AsString)
         );
     }
     
@@ -41,37 +33,6 @@ public class EngineDB
         public string FilePath { get; set; } = string.Empty;
         public DateTime LastModified { get; set; }
         public Dictionary<string, string> MetaDatas { get; set; } = new Dictionary<string, string>();
-    }
-
-    public class AssetRefrenceIdsRecord()
-    {
-        [BsonId]
-        public Ulid AssetId { get; set; }
-        public List<Ulid> RefrencedIds { get; set; } = new List<Ulid>();
-    }
-
-    public class AssetIndexRecord() : IAssetIndexRecord
-    {
-        /// <summary>
-        /// The unique identifier of the asset.
-        /// </summary>
-        [BsonId]
-        public Ulid Id { get; set; }
-        public string RelativePath { get; set; } = string.Empty;
-        public string TypeName { get; set; } = string.Empty;
-        public DateTime LastIndexed { get; set; }
-    }
-
-    public class ModuleAuthRecord()
-    {
-        [BsonId]
-        public Ulid ModuleKey { get; set; }
-        public string ModuleHash { get; set; } = string.Empty;
-        
-        public string ModuleUrn { get; set; } = string.Empty;
-        public DateTime GrantedAt { get; set; } = DateTime.UtcNow;
-        public DateTime LastUsedAt { get; set; }
-        public bool IsAllowed { get; set; } = false;
     }
     
     const string DbHashExtension = ".dbhash";
@@ -83,7 +44,6 @@ public class EngineDB
     {
         { "@settings", "engine_settings.db" },
         { "@projects", "engine_projects.db" },
-        { "@auth", "engine_auth.db" },
     };
     
     private enum ERegisterDbStatus
@@ -468,39 +428,6 @@ public class EngineDB
             return ECreateDbHashStatus.UnexpectedError;
         }
         return ECreateDbHashStatus.Success;
-    }
-    
-    private static ECheckDbHashStatus CheckDbHash(string dbFilePath)
-    {
-        var hashFilePath = dbFilePath + DbHashExtension;
-        var existingHash = string.Empty;
-        var currentHash = string.Empty;
-
-        if (!File.Exists(dbFilePath) || !File.Exists(hashFilePath))
-            return ECheckDbHashStatus.FileNotFound;
-
-        try
-        {
-            existingHash = new string(File.ReadAllText(hashFilePath).Where(c => !char.IsControl(c)).ToArray()).ToLowerInvariant();
-
-            // Compute current hash of database file
-            using (var stream = File.OpenRead(dbFilePath))
-            {
-                using (var sha256 = System.Security.Cryptography.SHA256.Create())
-                {
-                    var hashBytes = sha256.ComputeHash(stream);
-                    currentHash = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
-                }
-            }
-
-            // Compare hashes
-            return existingHash == currentHash ? ECheckDbHashStatus.HashMatch : ECheckDbHashStatus.HashMismatch;
-        }
-        catch (Exception ex)
-        {
-            _logger.Error("Failed to check DB hash for {dbFilePath}: {errorMessage}", args: [dbFilePath, ex.Message]);
-            return ECheckDbHashStatus.UnexpectedError;
-        }
     }
     
     private static string CheckReservedPath(string dbFilePath)

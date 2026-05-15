@@ -40,8 +40,6 @@ public class CharacterExplorer : UserControl
 {
     public event Action<CharacterData>? CharacterSelected;
     
-    private IAssetScope _scope;
- 
     private ObservableCollection<CharacterData> _characters = new();
     private ObservableCollection<CharacterData> _sortedCharacters = new();
     
@@ -54,11 +52,8 @@ public class CharacterExplorer : UserControl
     
     #endregion
     
-    public CharacterExplorer(
-        IAssetScope scope)
+    public CharacterExplorer()
     {
-        _scope = scope ?? throw new ArgumentNullException(nameof(scope), "Asset scope cannot be null.");
-        
         CreateComponents();
         RegisterEvents();
         LinkToExtension();
@@ -75,7 +70,16 @@ public class CharacterExplorer : UserControl
     {
         _sortedCharacters.Clear();
         _characters.Clear();
-        _characters.AddRange(EngineServices.AssetsManager.GetAssetsOfType<CharacterData>());
+        EngineServices.AssetsManager.GetAssetsOfClass(CharacterData.ClassURN).OnSuccess(elements =>
+        {
+            foreach (var element in elements)
+            {
+                EngineServices.AssetsManager.Load<CharacterData>(element).OnSuccess((character) =>
+                {
+                    _characters.Add(character);
+                });
+            }
+        });
         _sortedCharacters.AddRange(_characters.OrderBy(c => c.Name));
     }
 

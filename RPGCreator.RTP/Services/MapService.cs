@@ -16,8 +16,6 @@ public class MapService : IMapService
 {
     private readonly ScopedLogger _logger = Logger.ForContext<MapService>();
     
-    private readonly IAssetScope _assetScope;
-    
     public event Action<Ulid>? MapLoaded;
     public event Action? OnMapUnloaded;
     public event Action<float, float>? OnMapEdited;
@@ -41,7 +39,6 @@ public class MapService : IMapService
 
     public MapService()
     {
-        _assetScope = EngineServices.AssetsManager.CreateAssetScope("MapServiceScope");
         // When the map is edited, set the dirty flag
         OnMapEdited += (_, _) =>
         {
@@ -54,13 +51,15 @@ public class MapService : IMapService
     {
         if (HasLoadedMap)
             return false;
-        var mapDef = _assetScope.Load<IMapDef>(mapId);
-        MapState.HasCurrentMap = true;
-        MapState.CurrentMapDef = mapDef;
-        MapState.CurrentMapData = CreateMapData(mapDef);
-        ClearDirtyFlag();
-        MapLoaded?.Invoke(mapId);
-        return true;
+        var mapDef = EngineServices.AssetsManager.Load<IMapDef>(mapId).OnSuccess((map) =>
+        {
+            MapState.HasCurrentMap = true;
+            MapState.CurrentMapDef = map;
+            MapState.CurrentMapData = CreateMapData(map);
+            ClearDirtyFlag();
+            MapLoaded?.Invoke(mapId); 
+        });
+        return mapDef.IsSuccess;
     }
     
     public bool SaveMap()
@@ -68,12 +67,7 @@ public class MapService : IMapService
         if (!HasLoadedMap || CurrentLoadedMapDefinition == null)
             return false;
         
-        // Here we would implement the logic to save the CurrentLoadedMapData back to the asset system.
-        // This is a placeholder for demonstration purposes.
-        
-        // Getting the first assetpack (it should be the default project assetpack)
-        var assetPacks = EngineServices.AssetsManager.GetLoadedPacks()[0];
-        assetPacks.AddOrUpdateAsset(CurrentLoadedMapDefinition);
+        EngineServices.AssetsManager.Save(CurrentLoadedMapDefinition);
         
         ClearDirtyFlag();
         _logger.Info("Map '{mapName}' (ID: {mapId}) has been saved.", 

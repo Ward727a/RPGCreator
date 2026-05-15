@@ -21,7 +21,7 @@ namespace TestModule.TestCustomSkillEffect;
 public class TestSkillEffect : ISkillEffect
 {
     public Ulid Unique { get; private set; }
-    public URN Urn { get; } = new URN("test_module", "skill_effect","test_skill_effect");
+    public URN ClassUrn { get; set; }
     public string DisplayName { get; } = "Test Skill Effect";
 
     public Dictionary<string, object> Properties { get; set; } = new Dictionary<string, object>()

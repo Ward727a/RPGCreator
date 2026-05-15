@@ -158,11 +158,11 @@ public class PlayButtonsBar : UserControl
     {
         // This is also a temporary way to set the current map id for the project.
         // We will need to implement a way for the user to set the starting map for the project in the project settings, or from the map tab.
-        GlobalStates.ProjectState.CurrentProject?.MainMapId = GlobalStates.MapState.CurrentMapId;
+        GlobalStates.ProjectState.CurrentProject?.MetaData.MainMapId = GlobalStates.MapState.CurrentMapId;
         // This is a temporary way to give the module hash to the project player.
         // We will need to implement a way to get the module hashes from the project, and not hardcode them like this.
-        if(!GlobalStates.ProjectState.CurrentProject!.Modules.Contains("51DEC8E658C4C507504F38CA06F6794DBF90EB13E16C50D47142A4EF5C4FEBBB"))
-            GlobalStates.ProjectState.CurrentProject?.Modules.Add("51DEC8E658C4C507504F38CA06F6794DBF90EB13E16C50D47142A4EF5C4FEBBB");
+        if(!GlobalStates.ProjectState.CurrentProject!.MetaData.Modules.Contains("51DEC8E658C4C507504F38CA06F6794DBF90EB13E16C50D47142A4EF5C4FEBBB"))
+            GlobalStates.ProjectState.CurrentProject?.MetaData.Modules.Add("51DEC8E658C4C507504F38CA06F6794DBF90EB13E16C50D47142A4EF5C4FEBBB");
         if (GlobalStates.ProjectState.CurrentProject == null)
         {
             throw new CriticalEngineException("Project is null!", GlobalStates.ProjectState);

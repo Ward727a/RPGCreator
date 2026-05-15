@@ -25,6 +25,7 @@ using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Parser.PrattFormula;
 using RPGCreator.SDK.Resources;
 using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Services.EngineService;
 
 namespace RPGCreator.SDK;
 
@@ -144,12 +145,6 @@ public static class EngineServices
         get => GetService<IEngineConfig>();
         set => RegisterService(value);
     }
-    
-    public static IGameFactory GameFactory
-    {
-        get => GetService<IGameFactory>();
-        set => RegisterService(value);
-    }
 
     public static IAssetsManager AssetsManager
     {
@@ -171,16 +166,6 @@ public static class EngineServices
     public static IProjectsManager ProjectsManager
     {
         get => GetService<IProjectsManager>();
-        set => RegisterService(value);
-    }
-    public static IGraphService GraphService
-    {
-        get => GetService<IGraphService>();
-        set => RegisterService(value);
-    }
-    public static IGraphNodeScanner GraphNodeScanner
-    {
-        get => GetService<IGraphNodeScanner>();
         set => RegisterService(value);
     }
     public static IPrattFormulaService PrattFormulaService

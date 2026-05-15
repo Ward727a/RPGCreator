@@ -4,7 +4,7 @@ using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps;
 
-[SerializingType("SGridParameter")]
+[EngineType("rpgc", "sdk", "grid_parameter")]
 public struct GridParameter : ISerializable, IDeserializable
 {
     public float CellWidth;

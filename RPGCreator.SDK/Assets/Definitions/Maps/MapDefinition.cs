@@ -6,16 +6,17 @@ using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.MetaData;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Helpers;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps;
 
-[SerializingType("Map")]
-public class MapDefinition : BaseAssetDef, IMapDef
+[EngineClass("rpgc", "assets", "definitions", "maps", "map", DisplayName = "Map Definition")]
+public partial class MapDefinition : BaseAssetDef, IMapDef
 {
-    private List<IMapDef> _mapDefs = new List<IMapDef>();
+    private List<IMapDef> _mapDefs = new();
     [JsonProperty(ItemTypeNameHandling = TypeNameHandling.All)]
     private ObservableCollection<BaseLayerDef> _tileLayers = [];
 
@@ -25,7 +26,6 @@ public class MapDefinition : BaseAssetDef, IMapDef
     
     public CollisionLayer CollisionChunk { get; set; } = new();
 
-    public override UrnSingleModule UrnModule => "maps".ToUrnSingleModule();
     public string Description { get; set; }
     public IReadOnlyList<IMapDef> MapDefs => _mapDefs;
     
@@ -45,7 +45,6 @@ public class MapDefinition : BaseAssetDef, IMapDef
     
     public MapDefinition()
     {
-        SuspendTracking();
         Unique = Ulid.NewUlid();
         Name = "New Map";
         Description = "";
@@ -62,7 +61,7 @@ public class MapDefinition : BaseAssetDef, IMapDef
                     var metaData = newLayer.GetMetaData();
                     if (metaData is LayerMetaData layerMeta)
                         layerMeta.MapId = Unique;
-                    if (metaRegistry.ContainsMetaData(metaData.UniqueId))
+                    if (metaRegistry.ContainsMetaData(metaData.Unique))
                     {
                         metaRegistry.UpdateMetaData(metaData);
                     }
@@ -174,20 +173,6 @@ public class MapDefinition : BaseAssetDef, IMapDef
             .AddValue(nameof(Size), Size)
             .AddValue(nameof(GridParameter), GridParameter)
             .AddValue(nameof(BackgroundColor), BackgroundColor);
-    }
-
-    public List<Ulid> GetReferencedAssetIds()
-    {
-        var referencedIds = new List<Ulid>();
-        foreach (var mapDef in _mapDefs)
-        {
-            referencedIds.AddRange(mapDef.GetReferencedAssetIds());
-        }
-        foreach (var layer in _tileLayers)
-        {
-            referencedIds.AddRange(layer.GetReferencedAssetIds());
-        }
-        return referencedIds.Distinct().ToList();
     }
 
     // public void AddLayer(TileLayer layer)

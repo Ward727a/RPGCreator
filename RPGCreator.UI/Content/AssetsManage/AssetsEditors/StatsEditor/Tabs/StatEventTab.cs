@@ -6,10 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Layout;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Stats;
-using RPGCreator.SDK.Graph;
-using RPGCreator.SDK.Graph.Nodes;
 using RPGCreator.SDK.Logging;
-using RPGCreator.UI.Common.Blueprint;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor.Tabs;
 
@@ -26,12 +23,10 @@ public class StatEventTab : UserControl
     
     #region Properties
     public IStatDef StatDef { get; private set; }
-    private GraphDocument _doc = new();
     #endregion
     
     #region Components
 
-    private GraphView _graph;
     private StackPanel _topMenu;
     private Button _compileAndRunButton;
     private Button _saveGraphButton;
@@ -61,11 +56,6 @@ public class StatEventTab : UserControl
         };
         Content = grid;
         
-        _graph = new GraphView();
-        grid.Children.Add(_graph);
-        Grid.SetRow(_graph, 1);
-        
-        
         _topMenu = new StackPanel()
         {
             Orientation = Orientation.Horizontal,
@@ -86,7 +76,6 @@ public class StatEventTab : UserControl
             try
             {
                 Logger.Info("Compiling the graph...");
-                _doc.Compile();
                 Logger.Info("Graph compiled & tested successfully.");
             }
             catch (Exception ex)
@@ -104,10 +93,6 @@ public class StatEventTab : UserControl
         {
             try
             {
-                _doc.Save("test_save_graph.xml");
-
-                var compiledDocument = EngineServices.GraphService.Compile(_doc);
-                StatDef.AddEvent("test", compiledDocument);
             }
             catch (Exception ex)
             {
@@ -127,13 +112,6 @@ public class StatEventTab : UserControl
                 Logger.Info("Loading the graph...");
                 if (File.Exists("test_save_graph.xml"))
                 {
-                    if(EngineServices.GraphService.TryLoadDocument("test_save_graph.xml", out var loadedDoc))
-                    {
-                        _graph.SetDocument(loadedDoc);
-                        _doc = loadedDoc; // Update the current document reference
-                        Logger.Info("Graph loaded successfully.");
-                        return;
-                    }
                     Logger.Error("Loaded object is not a GraphDocument.");
                 }
                 else
@@ -158,7 +136,6 @@ public class StatEventTab : UserControl
             {
                 Logger.Info("Compiling the graph...");
                 // _doc.Compile();
-                _doc.Save("test.json");
             }
             catch (Exception ex)
             {
@@ -168,14 +145,6 @@ public class StatEventTab : UserControl
         grid.Children.Add(testbutton);
         Grid.SetRow(testbutton, 0);
         
-        var start = GraphNodeRegistry.GetNode("@hide|Start");
-        _doc.AddNode(start);
-        
-        var end = GraphNodeRegistry.GetNode("@hide|End");
-        _doc.AddNode(end);
-        _doc.MoveNode(end.Id, 200, 0);
-
-        _graph.SetDocument(_doc);
     }
     #endregion
 

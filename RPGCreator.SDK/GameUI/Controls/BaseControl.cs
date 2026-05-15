@@ -33,9 +33,11 @@ namespace RPGCreator.SDK.GameUI.Controls;
 
 public abstract class BaseControl
 {
+    public bool IsInternal { get; init; } = false;
     public bool IsPropertiesInitialized { get; private set; } = false;
     public bool IsEventsInitialized { get; private set; } = false;
-    
+
+    public event Action? PropertyDescriptorsExposed;
     public event Action<ControlPropertyDescriptor>? PropertyDescriptorAdded;
     public event Action<ControlPropertyDescriptor>? PropertyDescriptorRemoved;
 
@@ -142,6 +144,8 @@ public abstract class BaseControl
     
     #region ExposedProperties
     
+    public EditableControlPropertyDescriptor<string> NameProperty { get; protected set; }
+    public EditableControlPropertyDescriptor<BaseControl?> ParentProperty { get; protected set; }
     public EditableControlPropertyDescriptor<bool> VisibilityProperty { get; protected set; }
     public EditableControlPropertyDescriptor<float> OpacityProperty { get; protected set; }
     public EditableControlPropertyDescriptor<Vector2> PivotProperty { get; protected set; }
@@ -164,7 +168,12 @@ public abstract class BaseControl
     /// But if the user does not rename it, the name will be what is set by default.
     /// </summary>
     public virtual string Name { get; set; } = "Unnamed Control";
+    
+    public virtual string DisplayControlName { get; set; } = "Base Control";
+    public virtual string Description { get; set; } = "A basic control that does nothing by default.";
 
+    public abstract BaseControl Create();
+    
     public bool IsVisible { get; set; } = true;
     public bool IsHitTestVisible { get; set; } = true;
 
@@ -284,6 +293,24 @@ public abstract class BaseControl
         if (IsPropertiesInitialized)
             return;
         IsPropertiesInitialized = true;
+        
+        NameProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<string>("Name", () => Name,
+            "General".ToPipedPath(), "Name of the control.", (s =>
+            {
+                if (string.IsNullOrWhiteSpace(s)) s = "Unnamed Control";
+                Name = s;
+            })));
+        ParentProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<BaseControl?>("Parent",
+            () => Parent,
+            "General".ToPipedPath(), "Parent of the control.", c =>
+            {
+                Parent?.RemoveChild(this);
+
+                c?.AddChild(this);
+            },
+            onAskedClean: () => Parent?.RemoveChild(this),
+            editorHint:"only-existing"));
+        
         // VISIBILITY
         VisibilityProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<bool>("Visibility", () => Visual.Visible,
             "Appearance".ToPipedPath(), "Define if the element is visible or not.", (
@@ -357,7 +384,9 @@ public abstract class BaseControl
         ClipHitTestToBoundsProperty = RegisterPropertyDescriptor(new EditableControlPropertyDescriptor<bool>("Can click outside bounds", () => ClipHitTestToBounds,
             "Comportment".ToPipedPath().Extend("Mouse"), "Define if the children of this element can receive mouse click even if they are outside the bounds of this element.",
             b => ClipHitTestToBounds = !b));
+        PropertyDescriptorsExposed?.Invoke();
     }
+    
 
     public BaseControl? GetControlAt(Vector2 screenPosition)
     {

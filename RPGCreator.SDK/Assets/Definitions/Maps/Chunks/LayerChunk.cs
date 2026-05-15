@@ -29,12 +29,10 @@ using RPGCreator.SDK.Serializer;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 
-[SerializingType("TileLayerChunk")]
 public class TileLayerChunk() : LayerChunk<ITileDef>
 {
 }
 
-[SerializingType("EntityLayerChunk")]
 public class EntityLayerChunk() : LayerChunk<EntitySpawner>
 {
 }

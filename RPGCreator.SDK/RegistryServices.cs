@@ -151,9 +151,9 @@ public static class RegistryServices
         set => RegisterService(value);
     }
     
-    public static IAssetTypeRegistry AssetsType
+    public static ITypesRegistry Types
     {
-        get => GetService<IAssetTypeRegistry>();
+        get => GetService<ITypesRegistry>();
         set => RegisterService(value);
     }
 

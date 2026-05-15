@@ -37,8 +37,6 @@ public class CharacterDisplayTab : UserControl
     
     private Button? _currentDirectionButton;
     
-    private readonly IAssetScope _assetScope;
-
     private readonly CharacterData _data;
     
     private AnimationDef? _selectedAnimationData;
@@ -100,7 +98,6 @@ public class CharacterDisplayTab : UserControl
     #region Constructors
     public CharacterDisplayTab(CharacterData data)
     {
-        _assetScope = EngineServices.AssetsManager.CreateAssetScope("CharacterDisplayTabScope");
         
         _data = data;
         Name = "Display";
@@ -207,73 +204,7 @@ public class CharacterDisplayTab : UserControl
 
         AnimationBulkImportButton.Click += (_, _) =>
         {
-            
             EditorUiServices.NotificationService.Error("WIP Feature", "This feature is currently unavailable as it is still in development. We apologize for the inconvenience.", new NotificationOptions(5000));
-            return;
-            
-            var bulkImportDialog = new ConfirmDialog()
-            {
-                Title = "Bulk Import Animations",
-                MinWidth = 1050,
-                MinHeight = 400,
-                Width = 1050,
-                Height = 400,
-                CanMinimize = false,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                SizeToContent = SizeToContent.Manual
-            };
-            
-            List<string> existingAnimationNames = new List<string>();
-            
-            existingAnimationNames.AddRange(_basicAnimationsNames);
-            existingAnimationNames.AddRange(_availableAnimationsNames);
-            
-            bulkImportDialog.Content = new BulkAnimationImportControl((importedAnimations, bulkAssetScope) =>
-            {
-                foreach (var anim in importedAnimations)
-                {
-                    var animName = anim.Key;
-                    var animDef = anim.Value;
-                    EngineServices.AssetsManager.TryResolveAsset(animDef.SpritesheetId, out SpritesheetDef? spritesheetDef);
-                    if (spritesheetDef == null)
-                    {
-                        Logger.Error("Failed to resolve spritesheet with ID {SpriteSheetId} for animation {AnimName}", animDef.SpritesheetId, animName);
-                        continue;
-                    }
-                    
-                    bulkAssetScope.TransferTo(_assetScope, animDef);
-                    bulkAssetScope.TransferTo(_assetScope, spritesheetDef);
-                    
-                    if(existingAnimationNames.Contains(animName))
-                    {
-                        // If it already exists we need to get the ListBoxItem and update it
-                        foreach (ListBoxItem? existingItem in AnimationList.Items.ToList())
-                        {
-                            if(existingItem?.Content == null)
-                                continue;
-
-                            if (existingItem.Content.ToString() != animName) continue;
-                            
-                            existingItem.Tag = animDef;
-                            break;
-                        }
-                        continue;
-                    }
-                    
-                    var item = new ListBoxItem
-                    {
-                        Content = anim.Value.Name,
-                        Tag = anim
-                    };
-                    AnimationList.Items.Add(item);
-                }
-                
-                // Close the dialog
-                bulkImportDialog.Close();
-            }, existingAnimationNames);
-            
-            
-            bulkImportDialog.ShowDialog(AssetsManageWindow.Instance);
         };
         
         AddAnimationLabel = new TextBox()
@@ -624,18 +555,30 @@ public class CharacterDisplayTab : UserControl
         Ulid animationId = directionalAnimationsSet.GetAnimation(_currentAnimationDirection);
         if (animationId == Ulid.Empty)
         {
-            _selectedAnimationData = EngineServices.AssetsManager.CreateAsset<AnimationDef>();
-            _selectedAnimationData.Name = _currentAnimationName;
-            directionalAnimationsSet.SetAnimation(_currentAnimationDirection, _selectedAnimationData.Unique);
+            var result = EngineServices.AssetsManager.Create<AnimationDef>(AnimationDef.ClassURN).OnSuccess((animationDef) =>
+            {
+                _selectedAnimationData = animationDef;
+                _selectedAnimationData.Name = _currentAnimationName;
+                directionalAnimationsSet.SetAnimation(_currentAnimationDirection, _selectedAnimationData.Unique);
+            }).OnFailure((err) =>
+            {
+                Logger.Error("Failed to create animation: {Error}", err);
+            });
+            if (result.IsFailure)
+                return;
         }
         else
         {
-            if (!EngineServices.AssetsManager.TryResolveAsset<AnimationDef>(animationId, out var animationData))
+            var result = EngineServices.AssetsManager.Load<AnimationDef>(animationId).OnSuccess(animationDef =>
             {
-                Logger.Error("Failed to resolve animation with ID {AnimationId}", animationId);
+                _selectedAnimationData = animationDef;
+            });
+
+            if (result.IsFailure)
+            {
+                Logger.Error("Failed to load animation with ID {AnimationId} | error: {err}", animationId, result.Error);
                 return;
             }
-            _selectedAnimationData = animationData;
         }
         AnimationPreviewer.Stop(false);
         AnimationPreviewer.ClearImage();
@@ -690,7 +633,7 @@ public class CharacterDisplayTab : UserControl
             tempSpriteSheetDef.FrameWidth = 16;
             tempSpriteSheetDef.FrameHeight = 32;
             tempSpriteSheetDef.CalculateValues();
-            EngineServices.AssetsManager.GetDefaultPack().AddOrUpdateAsset(tempSpriteSheetDef);
+            EngineServices.AssetsManager.Save(tempSpriteSheetDef);
 
             _selectedAnimationData.FrameIndexes = tempSpriteSheetDef.GetAllRowIndexes(0);
             _selectedAnimationData.SpritesheetId = tempSpriteSheetDef.Unique;
@@ -716,18 +659,24 @@ public class CharacterDisplayTab : UserControl
         Ulid animationId = directionalAnimationSet.GetAnimation(_currentAnimationDirection);
         if (animationId == Ulid.Empty)
         {
-            _selectedAnimationData = EngineServices.AssetsManager.CreateAsset<AnimationDef>();
-            _selectedAnimationData.Name = _currentAnimationName;
-            directionalAnimationSet.SetAnimation(_currentAnimationDirection, _selectedAnimationData.Unique);
+            EngineServices.AssetsManager.Create<AnimationDef>(AnimationDef.ClassURN).OnSuccess(animationDef =>
+            {
+                _selectedAnimationData = animationDef;
+                _selectedAnimationData.Name = _currentAnimationName;
+                directionalAnimationSet.SetAnimation(_currentAnimationDirection, _selectedAnimationData.Unique);
+            });
         }
         else
         {
-            if (!EngineServices.AssetsManager.TryResolveAsset<AnimationDef>(animationId, out var animationData))
+            var result = EngineServices.AssetsManager.Load<AnimationDef>(animationId).OnSuccess(animationData =>
             {
-                Logger.Error("Failed to resolve animation with ID {AnimationId}", animationId);
+                _selectedAnimationData = animationData;
+            });
+            if (result.IsFailure)
+            {
+                Logger.Error("Failed to resolve animation with ID {AnimationId} | Error: {err}", animationId, result.Error);
                 return;
             }
-            _selectedAnimationData = animationData;
         }
         
         SetAnimationPossibleDirection(animation.Direction);

@@ -18,8 +18,11 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Reflection;
 using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Types;
 using SysPath = System.IO.Path;
 
 namespace RPGCreator.SDK;
@@ -63,7 +66,7 @@ public static class RpgEnv
             }
         } = "";
         
-        public static string ApplicationData
+        public static string ApplicationDataFolder
         {
             get
             {
@@ -80,14 +83,30 @@ public static class RpgEnv
                 return field;
             }
         } = "";
+
+        public static string TempFolder
+        {
+            get
+            {
+                if(field == "")
+                {
+                    field = SysPath.Combine(SysPath.GetTempPath(), "RPGCreator");
+                    if (!Directory.Exists(field))
+                    {
+                        Directory.CreateDirectory(field);
+                    }
+                }
+                return field;
+            }
+        }
         
-        public static string Config
+        public static string ConfigFolder
         {
             get
             {
                 if (field == "")
                 {
-                    field = SysPath.Combine(ApplicationData, "config");
+                    field = SysPath.Combine(ApplicationDataFolder, "config");
                     if (!Directory.Exists(field))
                     {
                         Directory.CreateDirectory(field);
@@ -98,13 +117,13 @@ public static class RpgEnv
             }
         } = "";
         
-        public static string Modules
+        public static string ModulesFolder
         {
             get
             {
                 if (field == "")
                 {
-                    field = SysPath.Combine(ApplicationData, "modules");
+                    field = SysPath.Combine(ApplicationDataFolder, "modules");
                     if (!Directory.Exists(field))
                     {
                         Directory.CreateDirectory(field);
@@ -132,7 +151,7 @@ public static class RpgEnv
             {
                 if (field == "")
                 {
-                    field = SysPath.Combine(ApplicationData, "_runningModules");
+                    field = SysPath.Combine(ApplicationDataFolder, "_runningModules");
                     if (!Directory.Exists(field))
                     {
                         Directory.CreateDirectory(field);
@@ -144,6 +163,107 @@ public static class RpgEnv
                 return field;
             }
         } = "";
+    }
+
+    public static class PathFormat
+    {
+        private static string? DbFolder = null;
+        public static Result<string> GetDbPath(string dbName)
+        {
+            if (DbFolder == null)
+            {
+                if (GlobalStates.ProjectState.CurrentProject is not { } currentProject)
+                {
+                    return Result.Fail("No project is currently open");
+                }
+                
+                DbFolder = SysPath.Combine(currentProject.MetaData.Directory, "_db");
+                
+                if (!Directory.Exists(DbFolder))
+                    Directory.CreateDirectory(DbFolder);
+                
+                GlobalStates.ProjectState.PropertyChanged -= OnPropertyChanged;
+                GlobalStates.ProjectState.PropertyChanged += OnPropertyChanged;
+            }
+            
+            if(!dbName.EndsWith(".db"))
+                dbName += ".db";
+            
+            return SysPath.Combine(DbFolder, dbName);
+            
+            void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+            {
+                if (e.PropertyName == nameof(GlobalStates.ProjectState.CurrentProject))
+                {
+                    DbFolder = null;
+                }
+            }
+        }
+        private static string? AssetFolder = null;
+        public static Result<string> GetAssetsPath()
+        {
+            if (AssetFolder == null)
+            {
+                if (GlobalStates.ProjectState.CurrentProject is not { } currentProject)
+                {
+                    return Result.Fail("No project is currently open");
+                }
+                
+                AssetFolder = SysPath.Combine(currentProject.MetaData.Directory, "assets_data");
+                
+                if (!Directory.Exists(AssetFolder))
+                    Directory.CreateDirectory(AssetFolder);
+                
+                GlobalStates.ProjectState.PropertyChanged -= OnPropertyChanged;
+                GlobalStates.ProjectState.PropertyChanged += OnPropertyChanged;
+            }
+            
+            return AssetFolder;
+            
+            void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+            {
+                if (e.PropertyName == nameof(GlobalStates.ProjectState.CurrentProject))
+                {
+                    AssetFolder = null;
+                }
+            }
+        }
+        
+        private static FilePath? ImportedFiles = null;
+        public static Result<FilePath> GetImportedFilesPath(string additionalFolder = "")
+        {
+            if (ImportedFiles == null)
+            {
+                if (GlobalStates.ProjectState.CurrentProject is not { } currentProject)
+                {
+                    return Result.Fail("No project is currently open");
+                }
+                
+                ImportedFiles = SysPath.Combine("#project#", "imported_files");
+                
+                if (!Directory.Exists(ImportedFiles))
+                    Directory.CreateDirectory(ImportedFiles);
+                
+                GlobalStates.ProjectState.PropertyChanged -= OnPropertyChanged;
+                GlobalStates.ProjectState.PropertyChanged += OnPropertyChanged;
+            }
+            
+            if(string.IsNullOrWhiteSpace(additionalFolder))
+                return Result<FilePath>.Success(ImportedFiles.Value);
+            
+            var path = new FilePath(SysPath.Combine(ImportedFiles.Value.PureText, additionalFolder));
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+            return Result<FilePath>.Success(path);
+
+            void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+            {
+                if (e.PropertyName == nameof(GlobalStates.ProjectState.CurrentProject))
+                {
+                    ImportedFiles = null;
+                }
+            }
+        }
     }
 
     public static class Versions
@@ -167,5 +287,80 @@ public static class RpgEnv
         {
             get;
         } = new Version(0, 0, 1);
+    }
+
+    public static class TypesDiscriminator
+    {
+        private static readonly IReadOnlyDictionary<string, Type> StringToTypes = new Dictionary<string, Type>()
+        {
+            { "string", typeof(string) },
+            { "int", typeof(int) },
+            { "float", typeof(float) },
+            { "bool", typeof(bool) },
+            { "double", typeof(double) },
+            { "long", typeof(long) },
+            { "short", typeof(short) },
+            { "byte", typeof(byte) },
+            { "decimal", typeof(decimal) },
+            { "sbyte", typeof(sbyte) },
+            { "uint", typeof(uint) },
+            { "ulong", typeof(ulong) },
+            { "ushort", typeof(ushort) },
+            { "char", typeof(char) },
+            { "object", typeof(object) },
+            { "array", typeof(Array) },
+            { "OCollection", typeof(ObservableCollection<>)}
+        };
+
+        private static readonly IReadOnlyDictionary<Type, string> TypeToStrings = StringToTypes.ToDictionary(x => x.Value, x => x.Key);
+
+        public static string TypeToString(Type? type)
+        {
+            if(type is null)
+                return "object";
+            
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ObservableCollection<>))
+            {
+                var genericType = type.GetGenericArguments()[0];
+                return $"OCollection<{TypeToString(genericType)}>";
+            }
+
+            if (type.IsArray)
+            {
+                return $"{TypeToString(type.GetElementType())}[]";
+            }
+
+            if (!TypeToStrings.TryGetValue(type, out var stringType))
+            {
+                Logger.Error("Type {0} is not supported", type);
+                return $"NotSupportedTypeDiscriminator({type.Name})";
+            }
+    
+            return stringType;
+        }
+
+        private const int OCollectionSizeString = 12; // Size for "OCollection<"
+        private const int OCollectionSizeStringWithBrackets = 13; // Size for "OCollection<>"
+        
+        public static Type StringToType(string type)
+        {
+            var span = type.AsSpan();
+
+            if (span.StartsWith("OCollection<") && span.EndsWith(">"))
+            {
+                var innerContent = span.Slice(OCollectionSizeString, span.Length - OCollectionSizeStringWithBrackets);
+                var innerType = StringToType(innerContent.ToString());
+        
+                return typeof(ObservableCollection<>).MakeGenericType(innerType);
+            }
+            
+            if (!StringToTypes.TryGetValue(type, out var stringType))
+            {
+                Logger.Error("Type {0} is not supported", type);
+                return typeof(object);
+            }
+            
+            return stringType;
+        }
     }
 }

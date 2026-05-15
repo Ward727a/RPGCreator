@@ -20,6 +20,7 @@
 
 using System.Numerics;
 using RPGCreator.RTP.GameUI.Enums;
+using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.GameUI.Visual;
 using RPGCreator.SDK.Types;
 
@@ -29,8 +30,16 @@ namespace RPGCreator.SDK.GameUI.Controls;
 /// This is a test control.<br/>
 /// This should NEVER be used in production code and is only meant for testing purposes. It may be removed without warning at any time.
 /// </summary>
-public class TestControl : BaseControl
+[EngineClass("rpgc", "game_ui", "controls", "debug", "test_panel_control")]
+public partial class TestControl() : BaseControl
 {
+    public override string DisplayControlName { get; set; } = "Test Control";
+    public override string Description { get; set; } = "A control that is used for testing purposes only.";
+    public override BaseControl Create()
+    {
+        return new TestControl();
+    }
+
     protected TestVisual _Visual => (TestVisual)Visual;
 
     private Color _defaultColor = Color.Red;
@@ -51,7 +60,7 @@ public class TestControl : BaseControl
     
     #endregion
     
-    public TestControl(Color? color = null, Color? hoverColor = null)
+    public TestControl(Color? color = null, Color? hoverColor = null) : this()
     {
         Visual = new TestVisual()
         {

@@ -69,11 +69,6 @@ public interface IStatDef : IBaseAssetDef, ISerializable, IDeserializable, IHasS
     /// For example, a derived stat like "Attack Power" could be defined as a non-compiled formula like "AttackPower = (Strength * 1.5) + (Agility * 0.5)" or similar expressions.
     /// </summary>
     public string StatNonCompiledFormula { get; set; }
-
-    public abstract void AddEvent(string eventName, IGraphScript eventDocumentCompiled);
-    public abstract bool TryGetEvent(string eventName, out IGraphScript? eventCompiled);
-
-    public abstract Dictionary<string, IGraphScript> GetAllEvents();
 }
 
 public record struct StatCapSettings()

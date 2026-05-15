@@ -1,12 +1,13 @@
 using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 
-[SerializingType("IntGridTileset")]
-public class IntGridTilesetDef : BaseTilesetDef, IAutotileDef
+[EngineClass("rpgc", "assets", "definitions", "tilesets", "int_grid_tileset", DisplayName = "IntGrid Tileset Definition")]
+public partial class IntGridTilesetDef : BaseTilesetDef, IAutotileDef
 {
     public List<IntGridValueRef> IntRefs { get; set; } = new();
     public List<AutoLayerRule> Rules { get; set; } = new();
@@ -27,6 +28,4 @@ public class IntGridTilesetDef : BaseTilesetDef, IAutotileDef
         info.TryGetValue("IntRefs", out List<IntGridValueRef> intRefs);
         IntRefs = intRefs ?? new();
     }
-
-    public override UrnSingleModule UrnModule => "int_grid_tileset".ToUrnSingleModule();
 }

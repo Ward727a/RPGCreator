@@ -25,15 +25,16 @@
 
 using System.Diagnostics.CodeAnalysis;
 using CommunityToolkit.Diagnostics;
-using RPGCreator.Core.Configs.Helpers;
 using RPGCreator.Core.Types.Project;
-using RPGCreator.Core.Types.Assets.BaseAssetsPack;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.MetaData;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Projects;
-using Serilog;
+using RPGCreator.SDK.Services.EngineService;
+using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.Core.Managers.ProjectsManager
 {
@@ -45,14 +46,14 @@ namespace RPGCreator.Core.Managers.ProjectsManager
         
         public ProjectsManager()
         {
-            if (EngineServices.Config.TryFrom<ProjectConfig>("projects", true, out var config))
+            if (EngineServices.Config.TryFrom<BaseConfig>("projects", true, out var config))
             {
-                _config = config;
+                _config = new(config);
             }
             else
             {
                 _config = new ProjectConfig();
-                EngineServices.Config.CreateConfig("projects", _config, true);
+                EngineServices.Config.CreateConfig("projects", _config.Config, true);
             }
             
         }
@@ -61,37 +62,27 @@ namespace RPGCreator.Core.Managers.ProjectsManager
         {
             Guard.IsNotNullOrWhiteSpace(projectName);
             Guard.IsNotNullOrWhiteSpace(projectPath);
+
+            var projectMeta = ProjectMetaData.Create(projectPath);
+            projectMeta.Name = projectName;
+            projectMeta.Description = description;
             
-            var newProject = new BaseProject(projectName)
-            {
-                Path = projectPath,
-                Description = description
-            };
-            
-            // Create a new asset pack for the project
-            var assetsPack = new BaseAssetsPack(Path.Combine(newProject.Path, "assets_pack.pack"));
-            assetsPack.Name = $"{projectName} Assets Pack";
-            assetsPack.Description = $"Default assets pack for the project {projectName}";
-            assetsPack.Save();
-            
-            newProject.AssetsPackPath.Add(assetsPack.DbFilePath);
-            
-            _config.AddOrUpdateProject(newProject);
+            _config.AddOrUpdateProject(projectMeta);
             // Here we force save, as we don't want to wait for the save loop.
             _config.SaveConfig();
 
-            return newProject;
+            return new Project(projectMeta);
         }
 
 
-        public List<BaseProjectLink> GetAllProjects()
+        public List<ProjectLink> GetAllProjects()
         {
             if (EngineServices.Config.TryFrom("projects", true, out var config))
             {
-                return config.Get("links", new List<BaseProjectLink>());
+                return config.Get("links", new List<ProjectLink>());
             }
             
-            EngineServices.Config.CreateConfig("projects", new ProjectConfig(), true);
+            EngineServices.Config.CreateConfig("projects", new ProjectConfig().Config, true);
             return [];
         }
         
@@ -100,12 +91,12 @@ namespace RPGCreator.Core.Managers.ProjectsManager
             project = null;
             if (File.Exists(configPath))
             {
-                EngineServices.Serializer.DeserializeFrom<BaseProject>(configPath, out var projectObject);
+                EngineServices.Serializer.DeserializeFrom<ProjectMetaData>(configPath, out var projectObject);
 
                 if (projectObject == null)
                     return false;
             
-                project = projectObject;
+                project = new Project(projectObject);
         
                 return true;
             }
@@ -121,17 +112,7 @@ namespace RPGCreator.Core.Managers.ProjectsManager
 
             GlobalStates.ProjectState.CurrentProject = project;
             
-            foreach (string packPath in project.AssetsPackPath)
-            {
-                try
-                {
-                    EngineCore.Instance.Managers.Assets.AddPack(packPath);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("Failed to load assets pack at {packPath}: {Message}", packPath, ex.Message);
-                }
-            }
+            EngineServices.AssetsManager.RefreshAssets();
 
             OnProjectOpened?.Invoke(project);
         }
@@ -148,38 +129,53 @@ namespace RPGCreator.Core.Managers.ProjectsManager
 
         public bool SaveProject(IBaseProject project)
         {
-            return _config.AddOrUpdateProject(project);
+            return _config.AddOrUpdateProject(project.MetaData);
         }
 
-        [SerializingType("projectConfig")]
-        private class ProjectConfig : BaseConfig
+        [EngineClass("rpgc", "files", "configs", "projects" )]
+        private partial class ProjectConfig
         {
-            public List<BaseProjectLink> ProjectLinks = new List<BaseProjectLink>();
+            public readonly BaseConfig Config;
+            public List<ProjectLink> ProjectLinks = new List<ProjectLink>();
 
-            private void AddProject(IBaseProject project)
+            public ProjectConfig()
+            {
+                Config = new BaseConfig();
+                Config.ConfigLoaded += _OnLoadedConfig;
+                Config.ConfigSaved += _OnSavedConfig;
+            }
+            
+            public ProjectConfig(BaseConfig config)
+            {
+                Config = config;
+                config.ConfigLoaded += _OnLoadedConfig;
+                config.ConfigSaved += _OnSavedConfig;
+            }
+
+            private ProjectLink AddProject(ProjectMetaData project)
             {
                 if (project == null)
                 {
                     throw new ArgumentNullException(nameof(project), "Project cannot be null.");
                 }
 
-                var link = BaseProjectLink.CreateLinkFromProject(project);
+                var link = new ProjectLink(project);
             
                 ProjectLinks.Add(link);
+                return link;
             }
 
-            public bool AddOrUpdateProject(IBaseProject project)
+            public bool AddOrUpdateProject(ProjectMetaData project)
             {
-                IsDirty = true;
-                var link = ProjectLinks.Find(link => link.ProjectID == project.Id);
+                Config.MarkDirty();
+                var link = ProjectLinks.Find(link => link.ProjectId == project.Unique);
                 
-                if(link == null)
+                if(link == default)
                 {
-                    AddProject(project);
-                    link = ProjectLinks.Last();
+                    link = AddProject(project);
                 }
                 
-                string projectFilePath = link.ProjectConfigPath;
+                string projectFilePath = link.ProjectLastKnownPath;
                 
                 if (string.IsNullOrEmpty(projectFilePath))
                 {
@@ -204,14 +200,19 @@ namespace RPGCreator.Core.Managers.ProjectsManager
                 return true;
             }
             
-            protected override void _OnLoadedConfig()
+            protected  void _OnLoadedConfig()
             {
-                ProjectLinks = Get("links", new List<BaseProjectLink>());
+                ProjectLinks = Config.Get("links", new List<ProjectLink>());
             }
 
-            protected override void _OnSavedConfig()
+            protected  void _OnSavedConfig()
             {
-                Set("links", ProjectLinks);
+                Config.Set("links", ProjectLinks);
+            }
+
+            public void SaveConfig()
+            {
+                Config.SaveConfig();
             }
         }
         

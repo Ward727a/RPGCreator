@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using RPGCreator.SDK.Assets.Definitions.Skills;
 using RPGCreator.SDK.Assets.Definitions.Stats;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.Extensions;
@@ -16,134 +17,6 @@ using RPGCreator.SDK.Types;
 namespace RPGCreator.SDK.Assets.Definitions.Characters;
 
 #region Should be moved to a more appropriate location
-
-/// <summary>
-/// Basic character stats structure. <br/>
-/// This structure is just a simple container for now, but it will be changed and extended in the future.
-/// </summary>
-public class CharacterStats : ISerializable, IDeserializable
-{
-    public Ulid Unique => StatDef.Unique;
-    public IStatDef StatDef { get; private set; }
-    public double CurrentValue { get; set; } 
-    public double MaxValue { get; set; } 
-    public double MinValue { get; set; } 
-
-    public IStatDef GenerateDefinition()
-    {
-        return null;
-        // if(Math.Abs(CurrentValue - def.DefaultValue) < 0.001 && Math.Abs(MaxValue - def.CapSettings.CapValue) < 0.001 && Math.Abs(MinValue - def.MinValue) < 0.001)
-        // {
-        //     return StatDef;
-        // }
-        
-        // var statDef = new BaseStatDefinition
-        // {
-        //     Name = StatDef.Name,
-        //     Description = StatDef.Description,
-        //     DefaultValue = CurrentValue,
-        //     StatTypeKind = StatDef.StatTypeKind,
-        //     StatMinValue = MinValue,
-        //     StatCapSettings = new CapSettings()
-        //     {
-        //         StatCapType = EStatTypeCap.ByValue,
-        //         StatCapValue = MaxValue,
-        //         StatCapStatUnique = StatDef.StatCapSettings.StatCapStatUnique,
-        //     },
-        //     IsVisible = StatDef.IsVisible,
-        //     PackId = StatDef.PackId,
-        //     StatCompiledFormula = StatDef.StatCompiledFormula,
-        //     StatNonCompiledFormula = StatDef.StatNonCompiledFormula,
-        //     SavePath = StatDef.SavePath
-        // };
-        //
-        // foreach (var graphDocumentCompiled in StatDef.GetAllEvents())
-        // {
-        //     statDef.AddEvent(graphDocumentCompiled.Key, graphDocumentCompiled.Value);
-        // }
-        //
-        // return statDef;
-    }
-
-    public CharacterStats()
-    {
-    }
-    
-    public bool IsStatDefDifferent(IStatDef otherDef)
-    {
-        if(otherDef.Unique != StatDef.Unique) return false;
-        if(Math.Abs(otherDef.DefaultValue - StatDef.DefaultValue) > 0.001) return true;
-        if(Math.Abs(otherDef.CapSettings.CapValue - StatDef.CapSettings.CapValue) > 0.001) return true;
-        if(Math.Abs(otherDef.MinValue - StatDef.MinValue) > 0.001) return true;
-        if(otherDef.IsVisible != StatDef.IsVisible) return true;
-        if(otherDef.PackId != StatDef.PackId) return true;
-        if(otherDef.Name != StatDef.Name) return true;
-        if(otherDef.Description != StatDef.Description) return true;
-        if(otherDef.TypeKind != StatDef.TypeKind) return true;
-        if(otherDef.CapSettings.CapType != StatDef.CapSettings.CapType) return true;
-        if(otherDef.CapSettings.CapStatUnique != StatDef.CapSettings.CapStatUnique) return true;
-        if(otherDef.StatNonCompiledFormula != StatDef.StatNonCompiledFormula) return true;
-        if(otherDef.GetAllEvents() != StatDef.GetAllEvents()) return true;
-        return false;
-    }
-
-    public void SetDef(IStatDef newDef)
-    {
-        if (newDef.Unique != StatDef.Unique)
-        {
-            throw new InvalidOperationException("Cannot set CharacterStats with a different StatDefinition unique ID.");
-        }
-        var oldDef = StatDef;
-        StatDef = newDef;
-        
-        if(Math.Abs(MaxValue - oldDef.CapSettings.CapValue) < 0.001)
-        {
-            MaxValue = newDef.CapSettings.CapValue;
-        }
-
-        if (Math.Abs(MinValue - oldDef.MinValue) < 0.001)
-        {
-            MinValue = newDef.MinValue;
-        }
-        if (Math.Abs(CurrentValue - oldDef.DefaultValue) < 0.001)
-        {
-            CurrentValue = newDef.DefaultValue;
-        }
-    }
-    public SerializationInfo GetObjectData()
-    {
-        return new SerializationInfo(typeof(CharacterStats))
-            .AddValue("StatDefId", StatDef.Unique)
-            .AddValue("CurrentValue", CurrentValue)
-            .AddValue("MaxValue", MaxValue)
-            .AddValue("MinValue", MinValue);
-    }
-
-    public List<Ulid> GetReferencedAssetIds()
-    {
-        return [StatDef.Unique];
-    }
-
-    public void SetObjectData(DeserializationInfo info)
-    {
-        info.TryGetValue("CurrentValue", out float current, 0);
-        info.TryGetValue("MaxValue", out float max, 0);
-        info.TryGetValue("MinValue", out float min, 0);
-        
-        CurrentValue = current;
-        MaxValue = max;
-        MinValue = min;
-
-        info.TryGetValue("StatDefId", out Ulid statId, Ulid.Empty);
-        if (statId != Ulid.Empty)
-        {
-            if (EngineServices.AssetsManager.TryResolveAsset<IStatDef>(statId, out var def))
-            {
-                StatDef = def;
-            }
-        }
-    }
-}
 
 public class CharacterSkill(ISkillDef def) : ISerializable, IDeserializable
 {
@@ -184,17 +57,16 @@ public class CharacterSkill(ISkillDef def) : ISerializable, IDeserializable
         info.TryGetValue("SkillDefId", out Ulid skillId, Ulid.Empty);
         if (skillId != Ulid.Empty)
         {
-            if (EngineServices.AssetsManager.TryResolveAsset<ISkillDef>(skillId, out var def))
+            EngineServices.AssetsManager.Load<ISkillDef>(skillId).OnSuccess((skill) =>
             {
-                SkillDef = def;
-            }
+                SkillDef = skill;
+            });
         }
     }
 }
 
 #endregion
 
-[SerializingType("DirectionalAnimationSet")]
 public class DirectionalAnimationSet : ISerializable, IDeserializable
 {
 
@@ -258,7 +130,6 @@ public class DirectionalAnimationSet : ISerializable, IDeserializable
 /// This doesn't affect the gameplay directly, but it is used to enhance the role-play experience.<br/>
 /// This structure is just a simple container for the role-play information, but it will be changed and extended in the future.
 /// </summary>
-[SerializingType("CharacterRolePlayInfo")]
 public struct CharacterRolePlayInfo() : ISerializable, IDeserializable
 {
     public string Description { get; set; } = string.Empty;
@@ -327,7 +198,6 @@ public struct CharacterRolePlayInfo() : ISerializable, IDeserializable
     }
 }
 
-[SerializingType("CharacterEquipSlot")]
 public struct CharacterEquipSlot(string slotName, int slotIndex, string itemType, string itemId = "") : ISerializable, IDeserializable
 {
     public string SlotName { get; set; } = slotName; // Name of the slot (e.g., "Head", "Chest", "Legs", etc.)
@@ -368,8 +238,8 @@ public struct CharacterEquipSlot(string slotName, int slotIndex, string itemType
     }
 }
 
-[SerializingType("EntityFeatureData")]
-public class EntityFeatureData() : ISerializable, IDeserializable
+[EngineClass("rpgc", "assets", "definitions", "characters", "entity_feature", DisplayName = "Entity Feature Data")]
+public partial class EntityFeatureData() : BaseAssetDef, ISerializable, IDeserializable
 {
     public EntityFeatureData(URN featureUrn, CustomData configuration) : this()
     {
@@ -446,8 +316,8 @@ public class EntityFeatureData() : ISerializable, IDeserializable
 /// <summary>
 /// This class represents a character in the game.
 /// </summary>
-[SerializingType("Character")]
-public class CharacterData : BaseAssetDef, IEntityDefinition, ICharacter, ISerializable, IDeserializable
+[EngineClass("rpgc", "assets", "definitions", "characters", "character", DisplayName = "Character Data")]
+public partial class CharacterData : BaseAssetDef, IEntityDefinition, ICharacter, ISerializable, IDeserializable
 {
     public event Action? OnFeaturesChanged;
     
@@ -466,7 +336,6 @@ public class CharacterData : BaseAssetDef, IEntityDefinition, ICharacter, ISeria
     #region Properties
 
     public string SpritePath => _portraitPath;
-    public override UrnSingleModule UrnModule => "character".ToUrnSingleModule();
     public CustomData Properties { get; } = new CustomData();
 
     public ObservableCollection<EntityFeatureData> Features => _features;
@@ -565,7 +434,6 @@ public class CharacterData : BaseAssetDef, IEntityDefinition, ICharacter, ISeria
     // Needed for serialization
     public CharacterData()
     {
-        SuspendTracking();
         _features = new ObservableCollection<EntityFeatureData>();
         Tags = new List<string>();
     }
@@ -574,7 +442,6 @@ public class CharacterData : BaseAssetDef, IEntityDefinition, ICharacter, ISeria
     {
         Name = name;
         RefreshStats();
-        UpdateUrn();
     }
     
     #endregion

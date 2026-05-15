@@ -1,6 +1,8 @@
 using System.Numerics;
+using System.Text.Json.Serialization;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.Collision;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Helpers;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
@@ -53,22 +55,21 @@ public static class CollisionPhysicsExtensions
     }
 }
 
-[SerializingType("BaseTilesetDef")]
-public abstract class BaseTilesetDef : BaseAssetDef, ISerializable, IDeserializable, IHasSavePath
+[EngineClass("rpgc", "assets", "definitions", "tilesets", "base_tileset", DisplayName = "Tileset Definition")]
+public abstract partial class BaseTilesetDef : BaseAssetDef, ISerializable, IDeserializable, IHasSavePath
 {
-    
     public event Action? ImageChanged;
     public string SavePath { get; set; } = null!;
 
-    public string PackName { get; set; } = "";
-    public virtual IAssetsPack Pack { get; set; } = null!;
-    public virtual string ImagePath { get; set; } = null!;
+    public virtual FilePath ImagePath { get; set; } = null!;
     public virtual int ImageWidth { get; set; }
     public virtual int ImageHeight { get; set; }
     public virtual int TileWidth { get; set; }
     public virtual int TileHeight { get; set; }
 
     public Dictionary<long, CollisionData> Collisions { get; set; } = new Dictionary<long, CollisionData>();
+
+    [JsonIgnore]
     public Dictionary<long, List<Rect>> RuntimeCollisionCache { get; private set; } = new();
     
     public void ClearRuntimeCollisionCache() => RuntimeCollisionCache.Clear();
@@ -88,7 +89,6 @@ public abstract class BaseTilesetDef : BaseAssetDef, ISerializable, IDeserializa
     {
         var info = new SerializationInfo(GetType());
         info.AddValue("Unique", Unique);
-        info.AddValue("PackName", string.IsNullOrWhiteSpace(PackName) ? Pack?.Name ?? string.Empty : PackName);
         info.AddValue("Name", Name);
         info.AddValue("ImagePath", ImagePath);
         info.AddValue("ImageWidth", ImageWidth);
@@ -99,20 +99,10 @@ public abstract class BaseTilesetDef : BaseAssetDef, ISerializable, IDeserializa
         return info;
     }
 
-    public List<Ulid> GetReferencedAssetIds()
-    {
-        var referencedIds = new List<Ulid>();
-        if (Pack != null)
-            referencedIds.Add(Pack.Id);
-        return referencedIds;
-    }
-
     public virtual void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue("Unique", out Ulid unique, Ulid.Empty);
         Unique = unique;
-        info.TryGetValue("PackName", out string packName, string.Empty);
-        PackName = packName;
         info.TryGetValue("Name", out string name, string.Empty);
         Name = name;
         info.TryGetValue("ImagePath", out string imagePath, string.Empty);
@@ -128,16 +118,6 @@ public abstract class BaseTilesetDef : BaseAssetDef, ISerializable, IDeserializa
         info.TryGetValue("Collisions", out Dictionary<long, CollisionData> collisions, new Dictionary<long, CollisionData>());
         Collisions = collisions;
         
-        //Get the assets pack
-        if (EngineServices.AssetsManager.TryGetPack(PackName, out var pack))
-        {
-            Pack = pack;
-        }
-        else
-        {
-            Logger.Warning("Tileset {TilesetName} ({Unique}) references missing pack {PackName}", Name, Unique, PackName);
-        }
-
         BuildRuntimeCollisionCache();
     }
     

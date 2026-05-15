@@ -1,12 +1,14 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using CommunityToolkit.HighPerformance;
+using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Logging;
 
 namespace RPGCreator.SDK.Types;
 
 [DebuggerDisplay("{ToString()}")]
-public readonly record struct URN
+[EngineType("rpgc", "sdk", "types", "urn")]
+public record struct URN
 {
     public readonly ReadOnlyMemory<char> Namespace;
     public readonly ReadOnlyMemory<char> Module;
@@ -29,10 +31,15 @@ public readonly record struct URN
         Module = ReadOnlyMemory<char>.Empty;
         Name = ReadOnlyMemory<char>.Empty;
     }
-    
+
+    public URN(params string[] parts) : this(parts[0], parts[1],
+        string.Join("/", parts.Skip(2)).TrimStart("/").ToString())
+    {
+    }
+
     /// <summary>
     /// Create a new URN with the specified namespace, module, and name.<br/>
-    /// The namespace, module, and name are normalized to lowercase and trimmed of whitespace.<br/>
+    /// The namespace, module, and name are trimmed of whitespace.<br/>
     /// If any of the parts are empty or null, an error is logged and the URN will not be created.<br/>
     /// The URN format is: "namespace://module/name".<br/>
     /// Example: "rpgc://characters/hero".<br/>
@@ -51,6 +58,11 @@ public readonly record struct URN
             return;
         }
 
+        if (@namespace.Contains("://") || module.Contains('/'))
+        {
+            throw new ArgumentException("Namespace and/or module cannot contain '://' or '/'.");
+        }
+
         Namespace = @namespace.AsMemory().Trim();
         Module = module.AsMemory().Trim();
         Name = name.AsMemory().Trim();
@@ -66,9 +78,9 @@ public readonly record struct URN
 
     public bool Equals(URN other)
     {
-        return Namespace.Span.Equals(other.Namespace.Span, StringComparison.OrdinalIgnoreCase) &&
-               Module.Span.Equals(other.Module.Span, StringComparison.OrdinalIgnoreCase) &&
-               Name.Span.Equals(other.Name.Span, StringComparison.OrdinalIgnoreCase);
+        return Namespace.Span.SequenceEqual(other.Namespace.Span) &&
+               Module.Span.SequenceEqual(other.Module.Span) &&
+               Name.Span.SequenceEqual(other.Name.Span);
     }
     
     public URN(string fullUrn)
@@ -91,13 +103,21 @@ public readonly record struct URN
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override string ToString() => $"{Namespace.Span}://{Module.Span}/{Name.Span}";
 
+    private int _hashCode = int.MinValue;
+    
     public override int GetHashCode()
     {
+        if (_hashCode != int.MinValue) return _hashCode;
+        
         var h = new HashCode();
-        h.AddBytes(Namespace.Span.AsBytes());
-        h.AddBytes(Module.Span.AsBytes());
-        h.AddBytes(Name.Span.AsBytes());
-        return h.ToHashCode();
+        h.Add(Namespace.Span);
+        h.Add("://"); 
+        h.Add(Module.Span);
+        h.Add("/");
+        h.Add(Name.Span);
+        var result = h.ToHashCode();
+        _hashCode = (result == int.MinValue) ? (int.MinValue + 1) : result;
+        return _hashCode;
     }
 
     public static bool TryParse(string? input, out URN result)
@@ -128,6 +148,68 @@ public readonly record struct URN
         if (TryParse(urn, out var result)) return result;
         
         return Empty;
+    }
+
+    [Flags]
+    public enum SearchComparisionType
+    {
+        NamespaceOnly = 1,
+        ModuleOnly = 2,
+        Full = NamespaceOnly | ModuleOnly,
+    }
+    public bool StartsWith(string prefix, SearchComparisionType type = SearchComparisionType.Full)
+    {
+        if (string.IsNullOrWhiteSpace(prefix)) return false;
+
+        ReadOnlySpan<char> prefixSpan = prefix.AsSpan();
+
+        if (type.HasFlag(SearchComparisionType.NamespaceOnly))
+        {
+            if (!Namespace.Span.StartsWith(prefixSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                if (prefixSpan.Length > Namespace.Length)
+                {
+                    if (!prefixSpan.StartsWith(Namespace.Span, StringComparison.OrdinalIgnoreCase)) return false;
+
+                    prefixSpan = prefixSpan.Slice(Namespace.Length);
+
+                    if (prefixSpan.StartsWith("://".AsSpan()))
+                    {
+                        prefixSpan = prefixSpan.Slice(3);
+                    }
+                    else return false; // Namespace is wrong (e.g. searching for "rpgca" on a "rgpc" URN)
+                }
+                else
+                    return
+                        false; // Namespace is wrong (Size are not right, too short, e.g. searching for "rpg" on a "rpgc" URN)
+            }
+            else
+                return
+                    true; // Namespace is correct (e.g. "rpgc://module/name".StartsWith("rpgc") == true - because Namespace ("rpgc") is the same as prefixSpan ("rpgc"))
+        }
+
+        if (prefixSpan.IsEmpty) return true; // If prefix is empty, then we can't have a module, and in this case we can return true.
+
+        if (!Module.Span.StartsWith(prefixSpan, StringComparison.OrdinalIgnoreCase) && type.HasFlag(SearchComparisionType.ModuleOnly))
+        {
+            if (prefixSpan.Length > Module.Length)
+            {
+                if (!prefixSpan.StartsWith(Module.Span, StringComparison.OrdinalIgnoreCase)) return false;
+            
+                prefixSpan = prefixSpan.Slice(Module.Length);
+            
+                if (prefixSpan.StartsWith("/".AsSpan()))
+                {
+                    prefixSpan = prefixSpan.Slice(1);
+                }
+                else return false; // Module is wrong (e.g. searching for "rpgc://module_a" on a "rpgc://module/name" URN)
+            }
+            else return false; // Module is wrong (Size are not right, too short, e.g. searching for "rpgc://mod/" on a "rpgc://module/name" URN)
+        }
+        else return true; // Module is right (this need to not end with a slash for this return to work, like: "rpgc://module/name".StartsWith("rpgc://module") == true)
+
+        if (prefixSpan.IsEmpty) return true; // If prefix is empty, then we can't have a name, and in this case we can return true.
+        return Name.Span.StartsWith(prefixSpan, StringComparison.OrdinalIgnoreCase);
     }
     
     public static implicit operator string(URN urn) => urn.ToString();

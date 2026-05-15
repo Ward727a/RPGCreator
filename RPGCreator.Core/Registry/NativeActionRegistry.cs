@@ -38,12 +38,12 @@ public class NativeActionRegistry : INativeActionRegistry
     {
         if (action.BuildAction())
         {
-            if (_nativeActions.TryAdd(action.Urn, action))
+            if (_nativeActions.TryAdd(action.ClassUrn, action))
             {
                 if (_nativeActionTriggers.TryGetValue(action.TriggerMask, out var urns))
-                    urns.Add(action.Urn);
+                    urns.Add(action.ClassUrn);
                 else
-                    _nativeActionTriggers.Add(action.TriggerMask, new List<URN> {action.Urn});
+                    _nativeActionTriggers.Add(action.TriggerMask, new List<URN> {action.ClassUrn});
                 return true;
             }
             Logger.Error("Couldn't register native action: URN already exists.");

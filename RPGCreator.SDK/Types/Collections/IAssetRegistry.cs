@@ -9,14 +9,14 @@ public interface IAssetRegistry
     
     IEnumerable<Type> SupportedTypes { get; }
     
-    bool HasAsset(IHasUniqueId asset);
+    bool HasAsset(IEngineObject asset);
     bool HasAsset(Ulid unique);
     
-    void RegisterUntyped(IHasUniqueId asset, bool overwrite = false);
-    void UnregisterUntyped(IHasUniqueId asset);
+    void RegisterUntyped(IEngineObject asset, bool overwrite = false);
+    void UnregisterUntyped(IEngineObject asset);
     
-    bool TryResolveUrnUntyped(URN urn, out IHasUniqueId? asset);
-    bool TryGetUntyped(Ulid unique, out IHasUniqueId? asset);
+    bool TryResolveUrnUntyped(URN urn, out IEngineObject? asset);
+    bool TryGetUntyped(Ulid unique, out IEngineObject? asset);
     
     bool TryRetainUntyped(Ulid id, out object? asset);
     void ReleaseUntyped(Ulid id);
@@ -28,7 +28,7 @@ public interface IAssetRegistry
 /// ALL REGISTRIES WITHOUT EXCEPTIONS MUST IMPLEMENT THIS INTERFACE.<br/>
 /// This is used to ensure that all registries have a common structure and can be used interchangeably in the system.
 /// </summary>
-public interface IAssetRegistry<TDef> : IAssetRegistry where TDef : IHasUniqueId
+public interface IAssetRegistry<TDef> : IAssetRegistry where TDef : IEngineObject
 {
     
     event EventHandler<TDef>? AssetRegistered;

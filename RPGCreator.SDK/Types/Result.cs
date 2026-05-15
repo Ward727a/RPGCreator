@@ -237,4 +237,9 @@ public readonly struct Result<T>
     {
         return IsSuccess ? binder(Value) : Result<U>.Failure(Error);
     }
+
+    public Result Bind(Func<T, Result> binder)
+    {
+        return IsSuccess ? binder(Value) : Result.Failure(Error);
+    }
 }

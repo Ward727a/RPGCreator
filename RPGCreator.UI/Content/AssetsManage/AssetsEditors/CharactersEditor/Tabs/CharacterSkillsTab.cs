@@ -308,14 +308,19 @@ public class CharacterSkillsTab : UserControl
                 }
 
                 var skillUnique = itemTag.Value;
-                
-                var skillDef = EngineServices.AssetsManager.TryResolveAsset(skillUnique, out ISkillDef? result) ? result : null;
-                if (skillDef != null && !Data.Skills.ContainsKey(skillUnique))
+
+                EngineServices.AssetsManager.Load<ISkillDef>(skillUnique).OnSuccess((skillDef) =>
                 {
-                    var skillData = new CharacterSkill(skillDef);
-                    Data.Skills.Add(skillUnique, skillData);
-                    SkillsListPanel.Children.Add(new CharaSkillItem(skillDef, skillData));
-                }
+                    if (Data.Skills.ContainsKey(skillUnique))
+                    {
+                        var skillData = new CharacterSkill(skillDef);
+                        Data.Skills.Add(skillUnique, skillData);
+                        SkillsListPanel.Children.Add(new CharaSkillItem(skillDef, skillData));
+                    }
+                }).OnFailure((err) =>
+                {
+                    Logger.Error("Failed to load skill definition: {err}", err);
+                });
             }
         };
     }
@@ -346,11 +351,13 @@ public class CharacterSkillsTab : UserControl
         SkillsListPanel.Children.Clear();
         foreach (var skillEntry in Data.Skills)
         {
-            var skillDef = EngineServices.AssetsManager.TryResolveAsset(skillEntry.Key, out ISkillDef? result) ? result : null;
-            if (skillDef != null)
+            EngineServices.AssetsManager.Load<ISkillDef>(skillEntry.Key).OnSuccess((skillDef) =>
             {
                 SkillsListPanel.Children.Add(new CharaSkillItem(skillDef, skillEntry.Value));
-            }
+            }).OnFailure((err) =>
+            {
+                Logger.Error("Failed to load skill definition: {err}", err);
+            });
         }
     }
     

@@ -26,11 +26,12 @@ namespace RPGCreator.SDK.GameUI.Visual;
 
 public class TextVisual : BaseVisual
 {
+    public Vector2 TextOffset { get; set; } = Vector2.Zero;
     private TextControl _textControl => (TextControl) Control;
     
     protected override void DrawVisualAt(IUiRendererContext context, Vector2 drawPosition, Vector2 drawSize, out bool handledChildren)
     {
         handledChildren = false;
-        context.DrawText(text: _textControl.Text, drawPosition, _textControl.TextColor, font: _textControl.Font);
+        context.DrawText(text: _textControl.Text, drawPosition + TextOffset, _textControl.TextColor, font: _textControl.Font);
     }
 }

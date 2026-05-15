@@ -34,7 +34,7 @@ namespace _BaseModule.SimpleEvents.Conditions;
 
 public class StatValueSimpleCondition : BaseSimpleEventCondition
 {
-    public override URN Urn => Module.ToUrnModule("rpgc").ToUrn("stat_value_condition");
+    public override URN ClassUrn => Module.ToUrnModule("rpgc").ToUrn("stat_value_condition");
     public override string Name => "Stat Value Condition";
     public override string Description => "Checks if a stat value meets a certain condition.";
     public override bool ResultExpected => true;

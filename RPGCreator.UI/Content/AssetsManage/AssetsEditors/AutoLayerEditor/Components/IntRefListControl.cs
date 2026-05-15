@@ -6,7 +6,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
 using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -92,7 +91,6 @@ public class IntRefListCreateModal : Window
 
     public class IntRefSelectDefaultTile : Window
     {
-        private IAssetScope _scope;
         private ITileDef? _selectedTile = null;
         
         public Action<ITileDef?>? OnTileSelected;
@@ -104,8 +102,6 @@ public class IntRefListCreateModal : Window
         Button? CancelButton;
         public IntRefSelectDefaultTile()
         {
-            
-            _scope = EngineServices.AssetsManager.CreateAssetScope();
             
             Title = "Select Default Tile";
             SizeToContent = SizeToContent.WidthAndHeight;
@@ -127,7 +123,7 @@ public class IntRefListCreateModal : Window
             };
             Content = Body;
             
-            TilesetExplorer = new TilesetExplorer(_scope, tilesetType: TilesetExplorer.TilesetType.NonAutotileOnly);
+            TilesetExplorer = new TilesetExplorer(tilesetType: TilesetExplorer.TilesetType.NonAutotileOnly);
             Body.Children.Add(TilesetExplorer);
             Grid.SetRow(TilesetExplorer, 0);
             
@@ -164,15 +160,7 @@ public class IntRefListCreateModal : Window
                 OnTileSelected?.Invoke(_selectedTile);
             };
         }
-
-        protected override void OnUnloaded(RoutedEventArgs e)
-        {
-            base.OnUnloaded(e);
-            _scope.Dispose();
-        }
     }
-    
-    private readonly IAssetScope _scope;
     
     [ExposeEventToPlugin("AutoLayerEditor.IntRefList.CreateModal")]
     public event Action? OnCreateIntRefConfirmed;
@@ -197,7 +185,6 @@ public class IntRefListCreateModal : Window
     
     public IntRefListCreateModal(IntGridValueRef? @ref = null) 
     {
-        _scope = EngineServices.AssetsManager.CreateAssetScope();
         FromRef = @ref;
         if(IsEdit)
         {
@@ -280,9 +267,7 @@ public class IntRefListCreateModal : Window
         }
         else
         {
-            var tileset = _scope.Load<BaseTilesetDef>(FromRef.DefaultTileData.TilesetId);
-
-            if (tileset != null)
+            EngineServices.AssetsManager.Load<BaseTilesetDef>(FromRef.DefaultTileData.TilesetId).OnSuccess((tileset) =>
             {
                 var bitmap = EngineServices.Resources.Load<Bitmap>(tileset.ImagePath);
 
@@ -299,10 +284,13 @@ public class IntRefListCreateModal : Window
                 }
                 else
                 {
-                    // Fallback image si le chargement échoue
                     DefaultTileImage.Source = EditorAssets.FallbackImage;
                 }
-            }
+            }).OnFailure((err) =>
+            {
+                Logger.Error("[AutoLayerEditor] Failed to load tileset image: {err}", err);
+                DefaultTileImage.Source = EditorAssets.FallbackImage;
+            });
         }
         
         ButtonsPanel = new StackPanel()
@@ -412,8 +400,6 @@ public class AutoLayerRuleSelectOutputTileModal : Window
     public Button? ConfirmButton;
     public Button? CancelButton;
 
-    private IAssetScope _scope = EngineServices.AssetsManager.CreateAssetScope();
-    
     public AutoLayerRuleSelectOutputTileModal(int baseTilesetIndex = -1)
     {
         SizeToContent = SizeToContent.WidthAndHeight;
@@ -431,7 +417,7 @@ public class AutoLayerRuleSelectOutputTileModal : Window
         };
         Content = Body;
         
-        TilesetExplorer = new TilesetExplorer(_scope, canvasSize: new Size(1024, 640), baseSelectedIndex:baseTilesetIndex);
+        TilesetExplorer = new TilesetExplorer(canvasSize: new Size(1024, 640), baseSelectedIndex:baseTilesetIndex);
         Body.Children.Add(TilesetExplorer);
         Grid.SetRow(TilesetExplorer, 0);
         
@@ -1264,8 +1250,6 @@ public class AutoLayerRuleCreateModal : Window
 public class IntRefListItemControl : UserControl
 {
 
-    private IAssetScope _scope;
-    
     [ExposePropToPlugin("AutoLayerEditor.IntRefList.Item")]
     public IntGridValueRef IntRef { get; }
 
@@ -1289,7 +1273,6 @@ public class IntRefListItemControl : UserControl
     
     public IntRefListItemControl(IntGridValueRef intRef, IntRefContext context)
     {
-        _scope = EngineServices.AssetsManager.CreateAssetScope();
         Context = context;
         IntRef = intRef;
         CreateComponents();
@@ -1331,9 +1314,7 @@ public class IntRefListItemControl : UserControl
         }
         else
         {
-            var tileset = _scope.Load<BaseTilesetDef>(IntRef.DefaultTileData.TilesetId);
-
-            if (tileset != null)
+            EngineServices.AssetsManager.Load<BaseTilesetDef>(IntRef.DefaultTileData.TilesetId).OnSuccess((tileset) =>
             {
                 var bitmap = EngineServices.Resources.Load<Bitmap>(tileset.ImagePath);
 
@@ -1353,7 +1334,7 @@ public class IntRefListItemControl : UserControl
                     // Fallback image si le chargement échoue
                     DefaultTileImage.Source = EditorAssets.FallbackImage;
                 }
-            }
+            });
         }
 
         IconDisplay = new Icon()
@@ -1730,7 +1711,10 @@ public class IntRefListControl : UserControl
             OnCreateTileset?.Invoke(Context);
             if(selectedTileset == null)
             {
-                selectedTileset = EngineServices.AssetsManager.CreateAsset<IntGridTilesetDef>();
+                var result = EngineServices.AssetsManager.Create<IntGridTilesetDef>(IntGridTilesetDef.ClassURN);
+                if(result.IsFailure)
+                    Logger.Error("[IntRefListControl] Failed to create IntGridTilesetDef : {Error}", result.Error);
+                selectedTileset = result.Value;
             }
 
             if (Context.IntRefs.FirstOrDefault()?.DefaultTileData.TilesetId != Ulid.Empty)
@@ -1741,7 +1725,7 @@ public class IntRefListControl : UserControl
 
             selectedTileset.Rules = Context.RulesByIntRefValue.Values.SelectMany(r => r).ToList();
             selectedTileset.IntRefs = Context.IntRefs.ToList();
-            EngineServices.AssetsManager.GetDefaultPack().AddOrUpdateAsset(selectedTileset);
+            EngineServices.AssetsManager.Save(selectedTileset);
         };
         
         AddedIntRef += (_) => RefreshList();

@@ -1,0 +1,33 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:templateAxaml="clr-namespace:RPGCreator.UI.Factories.TemplateAxaml"
+        xmlns:controls="clr-namespace:RPGCreator.SDK.GameUI.Controls;assembly=RPGCreator.SDK"
+        xmlns:converters="clr-namespace:RPGCreator.UI.Common.Converters"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:DataType="templateAxaml:GuiBaseControlFlyoutVm"
+        x:Class="RPGCreator.UI.Factories.TemplateAxaml.GuiBaseControlFlyout">
+    <UserControl.Resources>
+        <converters:IsEqualObjectOrMultiConverter x:Key="EqualityConverter"/>
+    </UserControl.Resources>
+    <Grid RowDefinitions="Auto, *, Auto" x:Name="Grid">
+        <TextBlock Text="Choose a parent"/>
+        <TreeView Grid.Row="1" ItemsSource="{Binding Controls}">
+            <TreeView.DataTemplates>
+                <TreeDataTemplate DataType="controls:BaseControl" ItemsSource="{Binding Children}">
+                    <TextBlock Text="{Binding DisplayControlName}">
+                        <TextBlock.IsEnabled>
+                            <MultiBinding Converter="{StaticResource EqualityConverter}" ConverterParameter="True">
+                                <Binding Path=""/>
+                                <Binding Path="#Grid.((templateAxaml:GuiBaseControlFlyoutVm)DataContext).CurrentControl"/>
+                                <Binding Path="IsInternal"/>
+                            </MultiBinding>
+                        </TextBlock.IsEnabled>
+                    </TextBlock>
+                </TreeDataTemplate>
+            </TreeView.DataTemplates>
+        </TreeView>
+        <Button Grid.Row="2" Content="Confirm"/>
+    </Grid>
+</UserControl>

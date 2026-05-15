@@ -64,7 +64,7 @@ namespace RPGCreator.Core.Types.Map
             {
                 if (layerDef is TileLayerDefinition tileLayerDef)
                 {
-                    var layerInstance = EngineCore.Instance.Managers.Assets.TileLayerFactory.Create(tileLayerDef);
+                    var layerInstance = new TileLayerInstance(tileLayerDef);
                     _tileLayers.Add(layerInstance);
                 }
             }
@@ -80,7 +80,6 @@ namespace RPGCreator.Core.Types.Map
             if (layerToRemove != null)
             {
                 _tileLayers.Remove(layerToRemove);
-                EngineCore.Instance.Managers.Assets.TileLayerFactory.Release(layerToRemove);
             }
             else
             {
@@ -96,13 +95,13 @@ namespace RPGCreator.Core.Types.Map
                     throw new ArgumentNullException(nameof(e), "Tile layer definition cannot be null.");
                 case AutoLayerDefinition autoLayerDefinition:
                 {
-                    var newLayer = EngineCore.Instance.Managers.Assets.TileLayerFactory.Create(autoLayerDefinition.InternalTileLayer);
+                    var newLayer = new TileLayerInstance(autoLayerDefinition.InternalTileLayer);
                     _tileLayers.Add(newLayer);
                     return;
                 }
                 case TileLayerDefinition tileLayerDefinition:
                 {
-                    var newLayer = EngineCore.Instance.Managers.Assets.TileLayerFactory.Create(tileLayerDefinition);
+                    var newLayer = new TileLayerInstance(tileLayerDefinition);
                     _tileLayers.Add(newLayer);
                     break;
                 }

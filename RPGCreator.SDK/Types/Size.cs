@@ -5,7 +5,7 @@ using RPGCreator.SDK.Serializer;
 
 namespace RPGCreator.SDK.Types;
 
-[SerializingType("Size")]
+[EngineType("rpgc", "sdk", "types", "size")]
 public record struct Size : ISerializable, IDeserializable
 {
     public float Width { get; set; }

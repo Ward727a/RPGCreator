@@ -18,28 +18,38 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.ComponentModel;
 using CommunityToolkit.Diagnostics;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.GameUI;
 
-public abstract class ControlPropertyDescriptor
+public abstract class ControlPropertyDescriptor : INotifyPropertyChanged, INotifyPropertyChanging
 {
     protected static readonly PipedPath _defaultPath = "Default".ToPipedPath();
 
     public PipedPath Path { get; private init; }
+    /// <summary>
+    /// A hint that can help the editor to display a more appropriate UI for the property.
+    /// </summary>
+    public StringName EditorHint { get; set; } = string.Empty;
+    /// <summary>
+    /// The name shown in the editor.
+    /// </summary>
     public string Name { get; private init; } = string.Empty;
     public Type Type { get; private init; }
     public string Description { get; private init; }
     protected readonly Func<object?> _getter;
+    public object? Value => Get();
 
     public ControlPropertyDescriptor(string name, Type type, Func<object?> getter, PipedPath? path = null,
-        string description = "")
+        string description = "", string editorHint = "")
     {
         Path = path ?? _defaultPath;
         Name = name;
         Type = type;
         Description = description;
+        EditorHint = editorHint;
         _getter = getter;
     }
 
@@ -50,11 +60,17 @@ public abstract class ControlPropertyDescriptor
         var val = _getter();
         return val is T typedVal ? typedVal : default;
     }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public event PropertyChangingEventHandler? PropertyChanging;
+    
+    protected void RaisePropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    protected void RaisePropertyChanging(string propertyName) => PropertyChanging?.Invoke(this, new PropertyChangingEventArgs(propertyName));
 }
 
 public class ReadOnlyControlPropertyDescriptor : ControlPropertyDescriptor
 {
-    public ReadOnlyControlPropertyDescriptor(string name, Type type, Func<object?> getter, PipedPath? path = null, string description = "") : base(name, type, getter, path, description)
+    public ReadOnlyControlPropertyDescriptor(string name, Type type, Func<object?> getter, PipedPath? path = null, string description = "", string editorHint = "") : base(name, type, getter, path, description, editorHint)
     {
         Guard.IsNotNull(getter);
     }
@@ -62,7 +78,7 @@ public class ReadOnlyControlPropertyDescriptor : ControlPropertyDescriptor
 
 public class ReadOnlyControlPropertyDescriptor<TValue> : ReadOnlyControlPropertyDescriptor
 {
-    public ReadOnlyControlPropertyDescriptor(string name, Func<TValue?> getter, PipedPath path = default, string description = "") : base(name, typeof(TValue), () => getter(), path, description)
+    public ReadOnlyControlPropertyDescriptor(string name, Func<TValue?> getter, PipedPath path = default, string description = "", string editorHint = "") : base(name, typeof(TValue), () => getter(), path, description, editorHint)
     {
     }
     
@@ -99,9 +115,12 @@ public class EditableControlPropertyDescriptor : ControlPropertyDescriptor
     /// </summary>
     public event Action<object?, object?>? Coerced;
 
+    public event Action ValueCleaned;
+
     protected readonly Action<object?> _setter;
     protected readonly Func<object?, bool> _validate;
     protected readonly Func<object?, object?> _coerce;
+    protected readonly Action _onCleanAsked;
 
     public EditableControlPropertyDescriptor(
         string name,
@@ -111,21 +130,26 @@ public class EditableControlPropertyDescriptor : ControlPropertyDescriptor
         string description = "",
         Action<object?>? setter = null,
         Func<object?, bool>? validate = null,
-        Func<object?, object?>? coerce = null
-    ) : base(name, type, getter, path, description)
+        Func<object?, object?>? coerce = null,
+        Action? onAskedClean = null,
+        string editorHint = ""
+    ) : base(name, type, getter, path, description, editorHint)
     {
         _setter = setter ?? (_ => { });
         _validate = validate ?? (_ => true);
         _coerce = coerce ?? (o => o);
+        _onCleanAsked = onAskedClean ?? (() => { });
     }
 
     public virtual void Set(object? value)
     {
         if (Validate(value))
         {
+            RaisePropertyChanging(nameof(Value));
             var currentValue = _getter();
             _setter(Coerce(value));
             RaiseValueChanged(value, currentValue);
+            RaisePropertyChanged(nameof(Value));
         }
     }
 
@@ -143,6 +167,12 @@ public class EditableControlPropertyDescriptor : ControlPropertyDescriptor
         return coercedValue;
     }
 
+    public virtual void AskClean()
+    {
+        _onCleanAsked();
+        ValueCleaned?.Invoke();
+    }
+
     protected void RaiseValueChanged(object? newValue, object? oldValue) => ValueChanged?.Invoke(newValue, oldValue);
     protected void RaiseValidated(object? value, bool isValid) => Validated?.Invoke(value, isValid);
     protected void RaiseCoerced(object? value, object? coercedValue) => Coerced?.Invoke(value, coercedValue);
@@ -152,7 +182,7 @@ public class EditableControlPropertyDescriptor<TValue> : EditableControlProperty
 {
     public EditableControlPropertyDescriptor(string name, Func<TValue?> getter, PipedPath path = default,
         string description = "", Action<TValue?>? setter = null,
-        Func<TValue, bool>? validate = null, Func<TValue, TValue>? coerce = null) : base(name, typeof(TValue),
+        Func<TValue, bool>? validate = null, Func<TValue, TValue>? coerce = null, Action? onAskedClean = null, string editorHint = "") : base(name, typeof(TValue),
         () => getter(),
         path,
         description,
@@ -176,7 +206,9 @@ public class EditableControlPropertyDescriptor<TValue> : EditableControlProperty
             if (coerce != null)
                 return coerce(value);
             return o;
-        })
+        },
+        onAskedClean ?? (() => { }),
+        editorHint)
     {
     }
 
@@ -185,9 +217,11 @@ public class EditableControlPropertyDescriptor<TValue> : EditableControlProperty
         object? currentValue = _getter();
         if (!this.Validate(value)) return;
 
+        RaisePropertyChanging(nameof(Value));
         _setter(this.Coerce(value));
 
         RaiseValueChanged(value, currentValue);
+        RaisePropertyChanged(nameof(Value));
     }
 
     public new TValue? Get()

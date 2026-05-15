@@ -20,20 +20,23 @@
 
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 using CommunityToolkit.Diagnostics;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Services.EngineService;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.Core;
 
-[SerializingType("EngineConfig")]
-public class EngineConfig : IEngineConfig
+[EngineClass("rpgc", "files", "configs", "engine_config", DisplayName = "Engine Configuration")]
+public partial class EngineConfig : IEngineConfig
 {
     public static class Keys
     {
@@ -60,30 +63,45 @@ public class EngineConfig : IEngineConfig
     public event Action? AutoSaveStarted;
 
     public bool IsDirty { get; private set; } = false;
-    public string ConfigPath { get; set; } = Path.Combine(RpgEnv.Path.Config, "config.json");
+    
+    [JsonIgnore]
+    public string ConfigPath { get; set; } = Path.Combine(RpgEnv.Path.ConfigFolder, "config.json");
 
     private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<EngineConfig>();
-    private readonly string _configPath = Path.Combine(RpgEnv.Path.Config, "config.json");
+    private readonly string _configPath = Path.Combine(RpgEnv.Path.ConfigFolder, "config.json");
 
+    [JsonIgnore]
     public ObservableCollection<URN> Shortcuts => Get<ObservableCollection<URN>>(Keys.Shortcuts, new ObservableCollection<URN>());
 
+    [JsonIgnore]
     public ObservableCollection<URN> ToolsShortcuts => Get<ObservableCollection<URN>>(Keys.ToolsShortcuts, new ObservableCollection<URN>());
 
     private double _autosavingTime = 300;
     private bool _isAutosaveEnabled = true;
     private bool _notifyOnAutoSave = false;
     
-    private string _modulesPath = RpgEnv.Path.Modules;
+    private string _modulesPath = RpgEnv.Path.ModulesFolder;
 
     private Dictionary<string, IConfig> _globalConfigs = new();
     private Dictionary<string, IConfig> _localConfigs = new();
 
+    [JsonInclude]
+    [JsonPropertyName("Settings")]
+    [JsonPropertyOrder(100)]
     private CustomData _data = new();
 
     private Guid _schedulerAutosavingId = Guid.Empty;
 
     public EngineConfig()
     {
+        Logger.Error("EngineConfig should not be instantiated directly. Use EngineServices.Config instead.");
+    }
+
+    [JsonConstructor]
+    // ReSharper disable once InconsistentNaming
+    public EngineConfig(CustomData _data)
+    {
+        this._data = _data;
     }
 
     private void LoadData()
@@ -211,13 +229,13 @@ public class EngineConfig : IEngineConfig
         defaultConfig.Set(Keys.AutoSaveTime, 300);
         defaultConfig.Set(Keys.AutoSaveEnabled, true);
         defaultConfig.Set(Keys.NotifyOnAutoSave, false);
-        defaultConfig.Set(Keys.Paths.Modules, RpgEnv.Path.Modules);
+        defaultConfig.Set(Keys.Paths.Modules, RpgEnv.Path.ModulesFolder);
         return defaultConfig;
     }
 
     public Version? GetVersion(string key, Version? defaultValue = null)
     {
-        return Get(key, defaultValue);
+        return Get(key, defaultValue ?? new Version(-1, -1, -1, -1));
     }
 
     public string GetString(string key, string defaultValue = "")
@@ -286,7 +304,7 @@ public class EngineConfig : IEngineConfig
     {
         if (_globalConfigs.TryGetValue(configName, out var globalConfig))
             return globalConfig;
-        var globalConfigPath = Path.Combine(RpgEnv.Path.Config, $"{configName}.config.json");
+        var globalConfigPath = Path.Combine(RpgEnv.Path.ConfigFolder, $"{configName}.config.json");
         if (File.Exists(globalConfigPath))
         {
             EngineServices.Serializer.DeserializeFrom<BaseConfig>(globalConfigPath, out var config);
@@ -320,8 +338,9 @@ public class EngineConfig : IEngineConfig
             return null;
         }
 
-        var localConfigPath = Path.Combine(GlobalStates.ProjectState.CurrentProject.Path, "config",
+        var localConfigPath = Path.Combine(GlobalStates.ProjectState.CurrentProject.MetaData.Directory, "config",
             $"{configName}.config.json");
+        
         if (File.Exists(localConfigPath))
         {
             EngineServices.Serializer.DeserializeFrom<BaseConfig>(localConfigPath, out var config);
@@ -366,7 +385,7 @@ public class EngineConfig : IEngineConfig
         }
         else
         {
-            globalConfigPath = Path.Combine(RpgEnv.Path.Config, $"{configName}.config.json");
+            globalConfigPath = Path.Combine(RpgEnv.Path.ConfigFolder, $"{configName}.config.json");
 
             configData.ConfigPath = globalConfigPath;
         }
@@ -400,7 +419,7 @@ public class EngineConfig : IEngineConfig
             return false;
         }
 
-        var localConfigDir = Path.Combine(GlobalStates.ProjectState.CurrentProject.Path, "config");
+        var localConfigDir = Path.Combine(GlobalStates.ProjectState.CurrentProject.MetaData.Directory, "config");
         
         if(!Directory.Exists(localConfigDir))
             Directory.CreateDirectory(localConfigDir);
@@ -499,7 +518,7 @@ public class EngineConfig : IEngineConfig
 
     public bool SaveConfigAt(string path)
     {
-        EngineServices.Serializer.Serialize(this, out var stringData);
+        EngineServices.Serializer.Serialize(this, this.GetType(), out var stringData);
 
         if (string.IsNullOrEmpty(stringData))
             return false;
@@ -608,12 +627,15 @@ public class EngineConfig : IEngineConfig
                            data.Has(Keys.AutoSaveEnabled) && data.Has(Keys.NotifyOnAutoSave) && data.Has(Keys.Paths.Modules);
         checksResults |= (byte)(keyIntegrity ? 0 : 1);
 
+        // Here the data integrity doesn't work with the new serializer. As the type getten from the new serializer is an "Array" not a "ObservableCollection<URN>"
+        // Need to fix that later on.
         var dataIntegrity = data.GetTypeOf(Keys.Shortcuts) == typeof(ObservableCollection<URN>) &&
                             data.GetTypeOf(Keys.ToolsShortcuts) == typeof(ObservableCollection<URN>) &&
-                            data.GetTypeOf(Keys.AutoSaveTime) == typeof(double) &&
+                            data.GetTypeOf(Keys.AutoSaveTime) == typeof(int) &&
                             data.GetTypeOf(Keys.AutoSaveEnabled) == typeof(bool) &&
                             data.GetTypeOf(Keys.NotifyOnAutoSave) == typeof(bool) &&
                             data.GetTypeOf(Keys.Paths.Modules) == typeof(string);
+
         checksResults |= (byte)(dataIntegrity ? 0 : 2);
 
         return keyIntegrity && dataIntegrity;
@@ -640,7 +662,7 @@ public class EngineConfig : IEngineConfig
             _data.Set(Keys.NotifyOnAutoSave, false);
         
         if (!_data.Has(Keys.Paths.Modules))
-            _data.Set(Keys.Paths.Modules, RpgEnv.Path.Modules);
+            _data.Set(Keys.Paths.Modules, RpgEnv.Path.ModulesFolder);
 
         return CheckDataIntegrity(out checksResults);
     }

@@ -1,4 +1,4 @@
-using RPGCreator.Core.Runtimes.ECS.Components.Actor;
+using RPGCreator.Core.ECS.Components.Actor;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Systems;

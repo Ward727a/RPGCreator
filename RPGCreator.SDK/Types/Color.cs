@@ -18,8 +18,12 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using RPGCreator.SDK.Attributes;
+
 namespace RPGCreator.SDK.Types;
 
+
+[EngineType("rpgc", "sdk", "types", "color")]
 public struct Color : IEquatable<Color>
 {
     public byte R, G, B, A;

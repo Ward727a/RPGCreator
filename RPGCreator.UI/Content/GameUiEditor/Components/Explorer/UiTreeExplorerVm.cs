@@ -25,6 +25,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Avalonia.Controls;
 using AvaloniaEdit.Utils;
 using CommunityToolkit.Mvvm.Input;
 using FontStashSharp;
@@ -44,16 +45,7 @@ public class UiBaseControlVm : INotifyPropertyChanged
 
     public Ulid Id { get; private set; }
 
-    public string Name
-    {
-        get => Model.Name;
-        set
-        {
-            if (Model.Name == value) return;
-            Model.Name = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
-        }
-    }
+    public string Name => Model.Name;
 
     public bool IsExpanded
     {
@@ -89,7 +81,7 @@ public class UiBaseControlVm : INotifyPropertyChanged
         TreeExplorerVm.ControlsIdMapping[Model] = Id;
         TreeExplorerVm.ControlVms[Id] = this;
 
-        foreach (var child in Model.Children)
+        foreach (var child in Model.Children.Where(c => !c.IsInternal))
             Children.Add(new UiBaseControlVm(child, treeExplorerVm));
     }
 
@@ -97,6 +89,18 @@ public class UiBaseControlVm : INotifyPropertyChanged
     {
         Model.AddedChildren += (child) => Children.Add(new UiBaseControlVm(child, TreeExplorerVm));
         Model.RemovedChildren += (child) => Children.Remove(Children.First(x => x.Model == child));
+        Model.PropertyDescriptorsExposed += OnPropertyDescriptorsExposed;
+
+        void OnPropertyDescriptorsExposed()
+        {
+            void OnNamePropertyOnPropertyChanged(object? sender, PropertyChangedEventArgs args) => OnPropertyChanged(nameof(Name));
+
+            Model.NameProperty.PropertyChanged -= OnNamePropertyOnPropertyChanged;
+            Model.NameProperty.PropertyChanged += OnNamePropertyOnPropertyChanged;
+            
+            Model.PropertyDescriptorsExposed -= OnPropertyDescriptorsExposed;
+        }
+
     }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -168,29 +172,35 @@ public class UiTreeExplorerVm : INotifyPropertyChanged
     {
         _context = context;
         AddControlCommand = new RelayCommand(AddControl);
-        foreach (var control in rootControls)
+        foreach (var control in rootControls.Where(c => !c.IsInternal))
             RootsControls.Add(new UiBaseControlVm(control, this));
-
-        var fontService = RuntimeServices.FontService;
-        fontService.LoadFont(@"C:/Windows/Fonts/arial.ttf", "Arial");
-        _font18 = fontService.GetFont("Arial", 18);
     }
 
     public void AddControl()
     {
-        var newControl = new TextControl("test")
-        {
-            Font = _font18
-        };
+        var dialog = new DialogUiBrowser();
+
+        dialog.ControlSubmitted += OnControlSubmitted;
         
-        if (SelectedControl != null)
+        dialog.ShowDialog(TopLevel.GetTopLevel(_context.EditorControl) as Window ?? throw new InvalidOperationException("No window found to show the dialog"));
+        
+        return;
+
+        void OnControlSubmitted(BaseControl control)
         {
-            _context.RaiseControlAdded(this, newControl);
-            SelectedControl.AddChild(newControl);
-        }
-        else
-        {
-            _context.RaiseRootControlAdded(this, newControl);
+            var createdControl = control.Create();
+
+            if (SelectedControl != null)
+            {
+                _context.RaiseControlAdded(this, createdControl);
+                SelectedControl.AddChild(createdControl);
+            }
+            else
+            {
+                _context.RaiseRootControlAdded(this, createdControl);
+            }
+            
+            dialog.ControlSubmitted -= OnControlSubmitted;
         }
     }
 

@@ -39,6 +39,7 @@ using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules;
+using RPGCreator.SDK.Services.EngineService;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.Core

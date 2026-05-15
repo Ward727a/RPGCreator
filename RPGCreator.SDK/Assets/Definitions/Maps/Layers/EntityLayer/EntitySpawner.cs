@@ -1,29 +1,25 @@
 using System.Numerics;
-using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.ECS;
-using RPGCreator.SDK.EngineService;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
+using RPGCreator.SDK.Services.EngineService;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 
-[SerializingType("EntitySpawner")]
 public class EntitySpawner : ILayerElem, IDisposable, ISerializable, IDeserializable
 {
-    private IEntityDefinition _entityDefinition;
-
     /// <summary>
     /// Entity being represented visually in the editor.
     /// </summary>
     public IEntityDefinition EntityDefinition
     {
-        get => _entityDefinition;
+        get;
         private set
         {
-            _entityDefinition = value;
-            if (_entityDefinition.Unique != Ulid.Empty && _entityDefinition.Unique != EntityUnique)
+            field = value;
+            if (field.Unique != Ulid.Empty && field.Unique != EntityUnique)
             {
-                EntityUnique = _entityDefinition.Unique;
+                EntityUnique = field.Unique;
             }
         }
     }
@@ -78,10 +74,8 @@ public class EntitySpawner : ILayerElem, IDisposable, ISerializable, IDeserializ
     public void SetObjectData(DeserializationInfo info)
     {
         info.TryGetValue(nameof(EntityUnique), out EntityUnique);
-        float posX = 0;
-        float posY = 0;
-        info.TryGetValue("PositionX", out posX);
-        info.TryGetValue("PositionY", out posY);
+        info.TryGetValue("PositionX", out float posX);
+        info.TryGetValue("PositionY", out float posY);
         Offset = new Vector2(posX, posY);
 
         EngineServices.OnceServiceReady((IAssetsManager assetManager) =>
@@ -91,15 +85,14 @@ public class EntitySpawner : ILayerElem, IDisposable, ISerializable, IDeserializ
                 Logger.Error("EntityUnique is null or empty during deserialization of EntitySpawner.");
                 return;
             }
-            
-            if (assetManager.TryResolveAsset(EntityUnique.Value, out IEntityDefinition? entityDef))
+
+            assetManager.Load<IEntityDefinition>(EntityUnique.Value).OnSuccess((entityDef) =>
             {
                 EntityDefinition = entityDef;
-            }
-            else
+            }).OnFailure((s) =>
             {
-                Logger.Error($"Failed to resolve entity definition with Unique ID: {EntityUnique}");
-            }
+                Logger.Error($"Failed to load entity definition with Unique ID: {EntityUnique} - {s}");
+            });
         });
     }
 }

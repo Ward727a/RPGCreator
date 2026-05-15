@@ -24,6 +24,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -31,6 +32,7 @@ using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Controls.Recycling;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
@@ -49,6 +51,7 @@ using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Blueprints;
 using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.GameUI;
+using RPGCreator.SDK.GameUI.Controls;
 using RPGCreator.SDK.Graph.ConnectorLogics;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Registry;
@@ -59,6 +62,7 @@ using RPGCreator.UI.Blueprints.Nodes.Debug;
 using RPGCreator.UI.Blueprints.Nodes.FlowControl;
 using RPGCreator.UI.Blueprints.Nodes.Math.Int;
 using RPGCreator.UI.Common.IconsProvider;
+using RPGCreator.UI.Content.GameUiEditor;
 using RPGCreator.UI.Ressources;
 using RPGCreator.UI.Services;
 using Ursa.Controls;
@@ -312,21 +316,8 @@ public class App : Application
         
         // REGISTRATION FOR PROPERTY EDITOR CONTROL
         var propEditCtrl = RegistryServices.PropertyEditorRegistry;
-        propEditCtrl.RegisterPropertyEditor<BlueprintData>((descriptor) =>
-        {
+        Factories.PropertyEditorControlFactories.RegisterFactories();
 
-            if (descriptor is ReadOnlyControlPropertyDescriptor readOnlyDescriptor)
-            {
-                return GenerateReadonlyBpDataControl(readOnlyDescriptor);
-            }
-
-            if (descriptor is EditableControlPropertyDescriptor editableDescriptor)
-            {
-                return GenerateEditableBpDataControl(editableDescriptor);
-            }
-
-            return new TextBlock { Text = "ERROR - Given descriptor is not a readOnly nor editable descriptor." };
-        });
         
         
         EngineServices.OnceServiceReady((IResourceService ResourcesService) =>
@@ -335,112 +326,6 @@ public class App : Application
         });
 
         return;
-
-        Control GenerateReadonlyBpDataControl(ReadOnlyControlPropertyDescriptor descriptor)
-        {
-            var grid = new Grid()
-            {
-                RowDefinitions = new RowDefinitions("*, *, Auto"),
-                ColumnDefinitions = new ColumnDefinitions("*, *"),
-                ColumnSpacing = 4
-            };
-
-            var label = new TextBlock()
-            {
-                Text = descriptor.Get<BlueprintData>()?.Name ?? "No BP selected",
-                TextTrimming = TextTrimming.CharacterEllipsis
-            };
-            if (!string.IsNullOrEmpty(descriptor.Get<BlueprintData>()?.Name))
-            {
-                ToolTip.SetTip(label, descriptor.Get<BlueprintData>()?.Name);
-            }
-            
-            var selectBp = new Button()
-            {
-                Content = "Select",
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                IsEnabled = false
-            };
-
-            var createBp = new Button()
-            {
-                Content = "Create",
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                IsEnabled = false
-            };
-            
-            ToolTip.SetTip(createBp, "The property is read-only.");
-            ToolTip.SetTip(selectBp, "The property is read-only.");
-
-            var divider = new Separator();
-            
-            grid.Children.Add(label);
-            Grid.SetColumnSpan(label, 2);
-            
-            grid.Children.Add(selectBp);
-            Grid.SetColumn(selectBp, 0);
-            Grid.SetRow(selectBp, 2);
-            grid.Children.Add(createBp);
-            Grid.SetColumn(createBp, 1);
-            Grid.SetRow(createBp, 2);
-            
-            grid.Children.Add(divider);
-            Grid.SetRow(divider, 3);
-            Grid.SetColumnSpan(divider, 2);
-            
-            
-            return grid;
-        }
-        
-        Control GenerateEditableBpDataControl(EditableControlPropertyDescriptor descriptor)
-        {
-            var grid = new Grid()
-            {
-                RowDefinitions = new RowDefinitions("*, *, Auto"),
-                ColumnDefinitions = new ColumnDefinitions("*, *"),
-                ColumnSpacing = 4
-            };
-
-            var label = new TextBlock()
-            {
-                Text = descriptor.Get<BlueprintData>()?.Name ?? "No BP selected",
-                TextTrimming = TextTrimming.CharacterEllipsis
-            };
-            if (!string.IsNullOrEmpty(descriptor.Get<BlueprintData>()?.Name))
-            {
-                ToolTip.SetTip(label, descriptor.Get<BlueprintData>()?.Name);
-            }
-
-            var selectBp = new Button()
-            {
-                Content = "Select",
-                HorizontalAlignment = HorizontalAlignment.Stretch
-            };
-
-            var createBp = new Button()
-            {
-                Content = "Create",
-                HorizontalAlignment = HorizontalAlignment.Stretch
-            };
-
-            var divider = new Separator();
-            
-            grid.Children.Add(label);
-            Grid.SetColumnSpan(label, 2);
-            
-            grid.Children.Add(selectBp);
-            Grid.SetColumn(selectBp, 0);
-            Grid.SetRow(selectBp, 1);
-            grid.Children.Add(createBp);
-            Grid.SetColumn(createBp, 1);
-            Grid.SetRow(createBp, 1);
-            
-            grid.Children.Add(divider);
-            Grid.SetRow(divider, 2);
-            Grid.SetColumnSpan(divider, 2);
-            
-            return grid;
-        }
     }
 
     

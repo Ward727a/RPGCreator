@@ -104,7 +104,7 @@ public interface IMapLayerDef<TLayerElement> : IMapLayerDef
     public void ClearElements();
 }
 
-public interface IMapLayerDef : IHasUniqueId, ISerializable, IDeserializable
+public interface IMapLayerDef : IEngineObject, ISerializable, IDeserializable
 {
     string Name { get; set; }
     int ZIndex { get; }

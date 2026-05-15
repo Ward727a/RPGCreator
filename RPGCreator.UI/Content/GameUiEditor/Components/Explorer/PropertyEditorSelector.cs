@@ -52,16 +52,23 @@ internal static class PropertyEditorCommonData
     
 }
 
-public class PropertyEditorSelector: IDataTemplate
+public class PropertyEditorSelector: AvaloniaObject, IDataTemplate
 {
     
     public IDataTemplate? BooleanTemplate { get; set; }
     public IDataTemplate? Vector2Template { get; set; }
     public IDataTemplate? ColorTemplate { get; set; }
     public IDataTemplate? StringTemplate { get; set; }
-    
     public IDataTemplate? IntegerTemplate { get; set; }
     public IDataTemplate? FloatTemplate { get; set; }
+    
+    public static readonly StyledProperty<UiEditorContext?> ContextProperty =
+        AvaloniaProperty.Register<PropertyEditorSelector, UiEditorContext?>(nameof(Context));
+    public UiEditorContext? Context
+    {
+        get => GetValue(ContextProperty);
+        set => SetValue(ContextProperty, value);
+    }
     
     public PropertyEditorSelector()
     {
@@ -241,7 +248,7 @@ public class PropertyEditorSelector: IDataTemplate
 
     private Control FindOrDefault(EditableControlPropertyDescriptor descriptor)
     {
-        var generationResult = RegistryServices.PropertyEditorRegistry.GeneratePropertyEditor(descriptor);
+        var generationResult = RegistryServices.PropertyEditorRegistry.GeneratePropertyEditor(descriptor, Context);
 
         if (generationResult.Value is not Control && generationResult.IsFailure)
         {

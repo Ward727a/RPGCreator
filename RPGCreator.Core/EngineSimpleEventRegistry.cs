@@ -35,23 +35,23 @@ public class EngineSimpleEventRegistry : ISimpleEventRegistry
     
     public bool RegisterSimpleEventCondition(BaseSimpleEventCondition condition, bool overwriteIfExists = false)
     {
-        _conditions.TryGetValue(condition.Urn, out var existingCondition);
+        _conditions.TryGetValue(condition.ClassUrn, out var existingCondition);
         if (existingCondition != null && !overwriteIfExists)
         {
             return false; // Condition with the same URN already exists and overwrite is not allowed
         }
-        _conditions[condition.Urn] = condition; // Add or overwrite the condition
+        _conditions[condition.ClassUrn] = condition; // Add or overwrite the condition
         return true;
     }
 
     public bool RegisterSimpleEventAction(BaseSimpleEventAction action, bool overwriteIfExists = false)
     {
-        _actions.TryGetValue(action.Urn, out var existingAction);
+        _actions.TryGetValue(action.ClassUrn, out var existingAction);
         if (existingAction != null && !overwriteIfExists)
         {
             return false; // Action with the same URN already exists and overwrite is not allowed
         }
-        _actions[action.Urn] = action; // Add or overwrite the action
+        _actions[action.ClassUrn] = action; // Add or overwrite the action
         return true;
     }
 

@@ -5,6 +5,7 @@ using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.PaintTargets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Editor;
 using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types;
@@ -39,8 +40,8 @@ public class AutoLayerRenderer : BaseLayerRenderer<AutoLayerDefinition>
     }
 }
 
-[SerializingType("AutoLayerDefinition")]
-public class AutoLayerDefinition : BaseLayerDef
+[EngineClass("rpgc", "assets", "definitions", "maps", "layers", "auto_layer", DisplayName = "Auto Layer Definition" )]
+public partial class AutoLayerDefinition : BaseLayerDef
 {
     public IntGridLayerDefinition SourceIntGrid { get; set; } = new();
     public TileLayerDefinition InternalTileLayer { get; private set; } = new();
@@ -101,26 +102,27 @@ public class AutoLayerDefinition : BaseLayerDef
             for (var y = center.Y - radius; y <= center.Y + radius; y++)
             {
                 var position = new Vector2(x, y);
-                var newTile = AutoTileSolver.Resolve(position, SourceIntGrid, IntGridSet.Rules);
                 
-                if (newTile != null)
+                AutoTileSolver.Resolve(position, SourceIntGrid, IntGridSet.Rules).OnSuccess((tile) =>
                 {
-                    InternalTileLayer.AddElement(newTile, position);
-                    BakeDirtyTiles(CheckAround(position));
-                }
-                else if(SourceIntGrid.HasElement(position))
-                {
-                    var defaultTile = IntGridSet.IntRefs[SourceIntGrid.GetValue(position)].DefaultTileData;
-                    var tile = defaultTile.ToTileDef();
-
                     InternalTileLayer.AddElement(tile, position);
                     BakeDirtyTiles(CheckAround(position));
-                }
-                else if (!SourceIntGrid.HasElement(position))
+                }).OnFailure((s) =>
                 {
-                    InternalTileLayer.TryRemoveElement(position, out _);
-                    BakeDirtyTiles(CheckAround(position));
-                }
+                    if(SourceIntGrid.HasElement(position))
+                    {
+                        var defaultTile = IntGridSet.IntRefs[SourceIntGrid.GetValue(position)].DefaultTileData;
+                        var tile = defaultTile.ToTileDef();
+
+                        InternalTileLayer.AddElement(tile, position);
+                        BakeDirtyTiles(CheckAround(position));
+                    }
+                    else if (!SourceIntGrid.HasElement(position))
+                    {
+                        InternalTileLayer.TryRemoveElement(position, out _);
+                        BakeDirtyTiles(CheckAround(position));
+                    }
+                });
             }
         }
     }
@@ -181,33 +183,32 @@ public class AutoLayerDefinition : BaseLayerDef
         foreach (var position in context.Positions)
         {
             var currentTile = InternalTileLayer.GetElement(position);
-            var newTile = AutoTileSolver.Resolve(position, SourceIntGrid, IntGridSet.Rules);
-
-            if (newTile != null)
+            var newTile = AutoTileSolver.Resolve(position, SourceIntGrid, IntGridSet.Rules).OnSuccess((tile) =>
             {
-
                 if (currentTile == null)
                 {
-                    InternalTileLayer.AddElement(newTile, position);
+                    InternalTileLayer.AddElement(tile, position);
                     BakeDirtyTiles(CheckAround(position, context));
-                    continue;
+                    return;
                 }
                 
-                if (newTile.SizeInTileset != currentTile.SizeInTileset || newTile.PositionInTileset != currentTile.PositionInTileset ||
-                        newTile.TilesetDef.Unique != currentTile.TilesetDef.Unique)
+                if (tile.SizeInTileset != currentTile.SizeInTileset || tile.PositionInTileset != currentTile.PositionInTileset ||
+                    tile.TilesetDef.Unique != currentTile.TilesetDef.Unique)
                 {
-                    InternalTileLayer.AddElement(newTile, position);
+                    InternalTileLayer.AddElement(tile, position);
                     BakeDirtyTiles(CheckAround(position, context));
                 }
-            }
-            else if(InternalTileLayer.GetElement(position) != null)
+            }).OnFailure((s) =>
             {
-                var defaultTile = IntGridSet.IntRefs[SourceIntGrid.GetValue(position)].DefaultTileData;
-                var tile = defaultTile.ToTileDef();
+                if(InternalTileLayer.GetElement(position) != null)
+                {
+                    var defaultTile = IntGridSet.IntRefs[SourceIntGrid.GetValue(position)].DefaultTileData;
+                    var tile = defaultTile.ToTileDef();
 
-                // VERY IMPORTANT HERE: Do not add a "BakeDirtyTiles" call here, or it will create an infinite loop!
-                InternalTileLayer.AddElement(tile, position);
-            }
+                    // VERY IMPORTANT HERE: Do not add a "BakeDirtyTiles" call here, or it will create an infinite loop!
+                    InternalTileLayer.AddElement(tile, position);
+                }
+            });
         }
     }
     
@@ -245,6 +246,4 @@ public class AutoLayerDefinition : BaseLayerDef
 
         return context;
     }
-
-    public override UrnSingleModule UrnModule => "autolayer".ToUrnSingleModule();
 }

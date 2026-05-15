@@ -181,14 +181,14 @@ public class EditorMenuBar : UserControl
                 return;
             }
             
-            if (string.IsNullOrEmpty(currentProject.Path))
+            if (string.IsNullOrEmpty(currentProject.MetaData.Directory))
             {
                 Logger.Error("No project path found inside the actually opened project. Cannot open project folder.");
                 EditorUiServices.NotificationService.Error("Couldn't open project folder", "No project path found inside the actually opened project.");
                 return;
             }
             
-            OpenFolder(currentProject.Path);
+            OpenFolder(currentProject.MetaData.Directory);
         };
         
         _fileSaveMenuItem.Click += (s, e) =>
@@ -203,11 +203,6 @@ public class EditorMenuBar : UserControl
             }
             
             RuntimeServices.MapService.SaveMap();
-            
-            foreach (var pack in EngineServices.AssetsManager.GetLoadedPacks())
-            {
-                pack.Save();
-            }
             
             EngineServices.ProjectsManager.SaveProject(currentProject);
         };

@@ -20,6 +20,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Modules.SimpleEvents;
@@ -28,21 +29,19 @@ using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.SimpleEvent;
 
-[SerializingType("SimpleEventConditionEntry")]
 public class SimpleEventConditionEntry
 {
     public bool ExpectedResult { get; set; }
     public CustomData Parameters { get; set; } = new();
 }
 
-[SerializingType("SimpleEventActionEntry")]
 public class SimpleEventActionEntry
 {
     public CustomData Parameters { get; set; } = new();
 }
 
-[SerializingType("SimpleEventDefinition")]
-public class BaseSimpleEventDefinition : BaseAssetDef, ISerializable, IDeserializable
+[EngineClass("rpgc", "assets", "definitions", "simple_events", "simple_event", DisplayName = "Simple Event Definition")]
+public partial class BaseSimpleEventDefinition : BaseAssetDef, ISerializable, IDeserializable
 {
     #region SAVED PROPERTIES
     /// <summary>
@@ -73,8 +72,6 @@ public class BaseSimpleEventDefinition : BaseAssetDef, ISerializable, IDeseriali
     
     #endregion
     
-    public override UrnSingleModule UrnModule => "simple_event".ToUrnSingleModule();
-
     public SerializationInfo GetObjectData()
     {
         return new SerializationInfo(typeof(BaseSimpleEventDefinition))
@@ -90,7 +87,7 @@ public class BaseSimpleEventDefinition : BaseAssetDef, ISerializable, IDeseriali
         
         expectedResult = entry?.ExpectedResult ?? false;
         
-        if (!expectedResultFound) throw new Exception($"Condition with URN {condition} not found in simple event definition with URN {Urn}!");
+        if (!expectedResultFound) throw new Exception($"Condition with URN {condition} not found in simple event definition with URN {ClassURN}!");
         
         if (!_conditionsByUrnCache.TryGetValue(condition, out expectedCondition))
         {
@@ -111,7 +108,7 @@ public class BaseSimpleEventDefinition : BaseAssetDef, ISerializable, IDeseriali
         
         var expectedResultFound = ThenActions.TryGetValue(action, out var entry);
         
-        if (!expectedResultFound) throw new Exception($"Then action with URN {action} not found in simple event definition with URN {Urn}!");
+        if (!expectedResultFound) throw new Exception($"Then action with URN {action} not found in simple event definition with URN {ClassURN}!");
         
         if (!_thenActionsByUrnCache.TryGetValue(action, out actionDefinition))
         {
@@ -131,7 +128,7 @@ public class BaseSimpleEventDefinition : BaseAssetDef, ISerializable, IDeseriali
     {
         var expectedResultFound = ThenActions.TryGetValue(action, out var entry);
         
-        if (!expectedResultFound) throw new Exception($"Then action with URN {action} not found in simple event definition with URN {Urn}!");
+        if (!expectedResultFound) throw new Exception($"Then action with URN {action} not found in simple event definition with URN {ClassURN}!");
         
         if (!_elseActionsByUrnCache.TryGetValue(action, out actionDefinition))
         {
