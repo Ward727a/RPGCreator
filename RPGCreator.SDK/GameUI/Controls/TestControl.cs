@@ -31,13 +31,17 @@ namespace RPGCreator.SDK.GameUI.Controls;
 /// This should NEVER be used in production code and is only meant for testing purposes. It may be removed without warning at any time.
 /// </summary>
 [EngineClass("rpgc", "game_ui", "controls", "debug", "test_panel_control")]
-public partial class TestControl() : BaseControl
+public partial class TestControl : BaseControl
 {
     public override string DisplayControlName { get; set; } = "Test Control";
     public override string Description { get; set; } = "A control that is used for testing purposes only.";
     public override BaseControl Create()
     {
         return new TestControl();
+    }
+
+    public TestControl() : this(null, null)
+    {
     }
 
     protected TestVisual _Visual => (TestVisual)Visual;
@@ -60,7 +64,7 @@ public partial class TestControl() : BaseControl
     
     #endregion
     
-    public TestControl(Color? color = null, Color? hoverColor = null) : this()
+    public TestControl(Color? color = null, Color? hoverColor = null)
     {
         Visual = new TestVisual()
         {

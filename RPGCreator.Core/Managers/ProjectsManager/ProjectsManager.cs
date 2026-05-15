@@ -132,8 +132,7 @@ namespace RPGCreator.Core.Managers.ProjectsManager
             return _config.AddOrUpdateProject(project.MetaData);
         }
 
-        [EngineClass("rpgc", "files", "configs", "projects" )]
-        private partial class ProjectConfig
+        private class ProjectConfig
         {
             public readonly BaseConfig Config;
             public List<ProjectLink> ProjectLinks = new List<ProjectLink>();

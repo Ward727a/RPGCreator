@@ -51,15 +51,19 @@ public partial class TextControl : BaseControl
     private bool _vAlignmentDirty = true;
     private bool _hAlignmentDirty = true;
     
-    public string Text { get; set; }
-    public Color TextColor { get; set; }
-    public IRpgFont Font { get; set; }
+    public string Text { get; set; } = string.Empty;
+    public Color TextColor { get; set; } = Color.White;
+    public IRpgFont? Font { get; set; }
     
     private ETextVAlignment _vAlignment = ETextVAlignment.Top;
     private ETextHAlignment _hAlignment = ETextHAlignment.Left;
 
-    public TextControl() : this(string.Empty)
+    public TextControl()
     {
+        Visual = new TextVisual()
+        {
+            Control = this
+        };
         IRpgFont? font = null;
         RuntimeServices.OnceServiceReady<IFontService>(
             (fontService) =>
@@ -72,26 +76,20 @@ public partial class TextControl : BaseControl
                         Logger.Error("Failed to load font: {0}", err);
                     });
                 });
-        
-                if (font == null)
-                    throw new Exception("Failed to load font");
-                Font = font;
+
+                Font = font ?? throw new Exception("Failed to load font");
             });
     }
 
-    public TextControl(string text) : this(text, Color.White)
+    public TextControl(string text) : this()
     {
+        Text = text;
     }
     
-    public TextControl(string text, Color textColor)
+    public TextControl(string text, Color textColor) : this()
     {
         Text = text;
         TextColor = textColor;
-        Visual = new TextVisual()
-        {
-            Control = this
-        };
-
     }
     
     public EditableControlPropertyDescriptor<string> TextProperty { get; protected set; }
@@ -168,7 +166,7 @@ public partial class TextControl : BaseControl
 
     public override void SyncVisual()
     {
-        if(!IsPropertiesInitialized)
+        if(!IsPropertiesInitialized || Font == null)
             return;
         
         var newSize = new Vector2(Visual.Width, Visual.Height);

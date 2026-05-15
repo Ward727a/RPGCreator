@@ -35,7 +35,6 @@ using RPGCreator.SDK.Types;
 
 namespace RPGCreator.Core;
 
-[EngineClass("rpgc", "files", "configs", "engine_config", DisplayName = "Engine Configuration")]
 public partial class EngineConfig : IEngineConfig
 {
     public static class Keys
