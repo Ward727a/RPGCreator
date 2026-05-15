@@ -66,10 +66,29 @@ public class GenericEngineClassConverter<T> : JsonConverter<T> where T : class, 
 
     public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
     {
+        var type = value.GetType();
         var innerOptions = new JsonSerializerOptions(options);
         var factory = innerOptions.Converters.FirstOrDefault(c => c is EngineClassConverterFactory);
         if (factory != null) innerOptions.Converters.Remove(factory);
+        
+        writer.WriteStartObject();
+        
+        var urn = ClassesRegistry.GetUrn(type);
+        if (urn.IsSuccess)
+        {
+            writer.WriteString("ClassUrn", urn.Value.ToString());
+        }
+        
+        using (JsonDocument doc = JsonSerializer.SerializeToDocument(value, type, innerOptions))
+        {
+            foreach (var prop in doc.RootElement.EnumerateObject())
+            {
+                if (prop.NameEquals("ClassUrn")) continue;
+            
+                prop.WriteTo(writer);
+            }
+        }
 
-        JsonSerializer.Serialize(writer, (object)value, innerOptions);
+        writer.WriteEndObject();
     }
 }

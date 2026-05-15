@@ -22,6 +22,7 @@ public class TypesRegistryDiscriminator : ITypesRegistry
     /// </summary>
     private static readonly IReadOnlyDictionary<URN, Type> _internalTypeMapping = new Dictionary<URN, Type>()
     {
+        { "rpgc://sdk/common/ulid", typeof(Ulid)},
         {"rpgc://sdk/common/int", typeof(int)},
         {"rpgc://sdk/common/float", typeof(float)},
         {"rpgc://sdk/common/string", typeof(string)},

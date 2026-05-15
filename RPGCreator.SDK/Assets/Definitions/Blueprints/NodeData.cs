@@ -19,24 +19,20 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Numerics;
-using Newtonsoft.Json;
 using RPGCreator.SDK.Graph.LOGIC;
 using RPGCreator.SDK.Modules.Definition;
-using RPGCreator.SDK.Serializer.Converter;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Blueprints;
 
-[JsonObject]
 public class NodeData
 {
     public Ulid Id { get; set; } = Ulid.Empty;
     public Vector2 Location { get; set; }
-    [JsonConverter(typeof(StringUrnConverter))]
     public URN NodeUrn { get; set; } = URN.Empty;
     public bool IsFolded { get; set; } = false;
-    public Dictionary<int, object?> ConnectorData { get; private set; } = new Dictionary<int, object?>();
-    public CustomData StoredData { get; private set; } = new CustomData();
+    public Dictionary<int, object?> ConnectorData { get; private set; } = new();
+    public CustomData StoredData { get; private set; } = new();
 
     public static NodeData Create(INodeLogic logic, bool isFolded = false, Vector2 location = default)
     {

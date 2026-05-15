@@ -65,8 +65,10 @@ public partial class BaseConfig : IConfig
 
     [JsonConstructor]
     // ReSharper disable once InconsistentNaming
-    public BaseConfig(CustomData Data)
+    public BaseConfig(CustomData? Data)
     {
+        if(Data == null)
+            Data = new CustomData();
         this.Data = Data;
     }
 

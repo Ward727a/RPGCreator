@@ -18,18 +18,17 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Text.Json.Serialization;
 using CommunityToolkit.HighPerformance.Buffers;
-using Newtonsoft.Json;
 using RPGCreator.SDK.GameUI;
 using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Graph;
 
-[JsonObject]
 public record BlueprintParameters(
     Ulid Id,
     string Name,
-    Type Type,
+    URN TypeUrn,
     // Define if the parameter has been set as readonly and then can't be modified by a node.
     bool IsReadOnly = false,
     // Define if the parameter has been added by the system (aka the engine) and then can't be deleted by the user.
@@ -41,6 +40,9 @@ public record BlueprintParameters(
     public string Name { get; set; } = Name;
     public bool IsReadOnly { get; set; } = IsReadOnly;
     public object? DefaultValue { get; set; } = null;
+    
+    [JsonIgnore]
+    public Type Type => RegistryServices.Types.GetType(TypeUrn).Value ?? throw new Exception($"Type not found: {TypeUrn}");
 
     [JsonIgnore]
     public string TypeDisplayName
