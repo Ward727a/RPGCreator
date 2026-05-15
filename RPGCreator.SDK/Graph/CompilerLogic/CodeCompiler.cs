@@ -111,7 +111,7 @@ public static class CodeCompiler
 
 #if DEBUG
                 {
-                    data.Arguments.Add(new BlueprintParameters(Ulid.NewUlid(), "testArgString", typeof(string),
+                    data.Arguments.Add(new BlueprintParameters(Ulid.NewUlid(), "testArgString", "rpgc://sdk/common/string",
                         IsArgument: true));
                 }
 #endif

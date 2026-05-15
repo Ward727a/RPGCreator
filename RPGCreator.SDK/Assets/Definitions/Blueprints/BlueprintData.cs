@@ -19,7 +19,7 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Registry;
@@ -28,7 +28,6 @@ using RPGCreator.SDK.Types;
 namespace RPGCreator.SDK.Assets.Definitions.Blueprints;
 
 
-[JsonObject]
 [EngineClass("rpgc", "scripts", "blueprints", "blueprint_def", DisplayName = "Blueprint Definition")]
 public partial class BlueprintData() : BaseAssetDef, IHasTag
 {
@@ -36,20 +35,22 @@ public partial class BlueprintData() : BaseAssetDef, IHasTag
     public bool IsDirty { get; private set; } = true;
     
     public StringName TagType = StringName.Empty;
-    public Ulid Id { get; private set; } = Ulid.Empty;
-    public string Name { get; set; } = string.Empty;
+    public Ulid Id => Unique;
     public List<ConnectionData> Connections { get; private set; } = new List<ConnectionData>();
     public List<NodeData> Nodes { get; private set; } = new List<NodeData>();
     public List<BlueprintParameters> Parameters { get; private set; } = new List<BlueprintParameters>();
 
+    [JsonIgnore]
     public string FileCsName => $"{Id}.cs";
+    
+    [JsonIgnore]
     public string FileJsonName => $"{Name}_{Id}.json";
     
     public static BlueprintData Create()
     {
         return new BlueprintData()
         {
-            Id = Ulid.NewUlid(),
+            Unique = Ulid.NewUlid(),
         };
     }
 
@@ -57,7 +58,7 @@ public partial class BlueprintData() : BaseAssetDef, IHasTag
     {
         return new BlueprintData()
         {
-            Id = id,
+            Unique = id,
         };
     }
 

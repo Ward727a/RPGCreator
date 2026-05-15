@@ -60,7 +60,8 @@ public class EngineSerializer : ISerializerService
                 // (I just don't want to restart the testing data... [Ward727, 22/02/2026])
                 new UrnJsonConverter(),
                 new EngineClassConverterFactory(),
-                new FilePathJsonConverter()
+                new FilePathJsonConverter(),
+                new Vector2JsonConverter()
             },
         };
     }

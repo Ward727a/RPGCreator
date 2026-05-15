@@ -403,7 +403,7 @@ public partial class AddParameterViewModel : ViewModelBase
 
         var parameter = new BlueprintParameters(Ulid.NewUlid(),
             Name: finalName,
-            Type: finalType,
+            TypeUrn: RegistryServices.Types.GetKey(finalType).Value,
             IsReadOnly: ReadOnly,
             BySystem: false
         );
@@ -809,7 +809,7 @@ public class NodeEditorViewModel : INotifyPropertyChanged
         ParametersVm.ParametersCache.AddOrUpdate(new BlueprintParameters(
             Id: Ulid.NewUlid(),
             Name: "TestStringArg",
-            Type: typeof(string),
+            TypeUrn: "rpgc://sdk/common/string",
             IsReadOnly: true,
             BySystem: true,
             IsArgument: true

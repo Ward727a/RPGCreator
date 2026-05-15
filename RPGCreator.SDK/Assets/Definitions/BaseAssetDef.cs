@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using PropertyChanged;
 using PropertyChanging;
@@ -26,9 +27,12 @@ public abstract class BaseObservableAssetDef : ObservableObject, IBaseAssetDef
 public abstract class BaseAssetDef : IHasMetadata, IBaseAssetDef
 {
     
+    [JsonInclude]
     public string Name { get; set; } = string.Empty;
+    [JsonInclude]
     public Ulid Unique { get; set; }
 
+    [JsonInclude]
     public URN ClassUrn { get; set; }
     
     public virtual BaseMetaData? GetMetaData()
