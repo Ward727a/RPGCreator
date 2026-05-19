@@ -26,16 +26,11 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using RPGCreator.Core.Types;
-using RPGCreator.RTP.GameUI;
-using RPGCreator.SDK;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.GameUI;
 using RPGCreator.SDK.GameUI.Controls;
-using RPGCreator.SDK.GameUI.Interfaces;
-using RPGCreator.SDK.Logging;
+using RPGCreator.UI.Common;
 using RPGCreator.UI.Content.Blueprint;
-using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.GameUiEditor.Components.Explorer;
 

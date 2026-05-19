@@ -28,16 +28,17 @@ using Avalonia.Threading;
 using CommunityToolkit.Diagnostics;
 using Microsoft.Xna.Framework;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Editor.Rendering;
-using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.GameUI;
 using RPGCreator.SDK.GameUI.Controls;
 using RPGCreator.SDK.GameUI.Interfaces;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Services.EditorUiService;
 using RPGCreator.UI.Common.Bridge;
 using RPGCreator.UI.Content.GameUiEditor.Components;
 using RPGCreator.UI.Content.GameUiEditor.Components.Explorer;
 using Color = Avalonia.Media.Color;
+using Size = RPGCreator.Shared.Types.Size;
 
 namespace RPGCreator.UI.Content.GameUiEditor;
 
@@ -371,7 +372,7 @@ public sealed class UiEditorWindowControl : UserControl
         using (var buf = _uiPreviewWriteableBitmap.Lock())
         {
             var viewport = EditorUiServices.MonogameViewport.CreateNewViewport("UI Preview Viewport", buf.Address,
-                new SDK.Types.Size(1172, 827), ViewportType.Ui);
+                new Size(1172, 827), ViewportType.Ui);
 
             if (viewport is BaseUiViewport uiViewport)
             {
@@ -390,7 +391,7 @@ public sealed class UiEditorWindowControl : UserControl
                     new PixelSize((int)_previewerGrid.Bounds.Width, (int)_previewerGrid.Bounds.Height),
                     new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
                 viewport?.Resize(
-                    new SDK.Types.Size((int)_previewerGrid.Bounds.Width, (int)_previewerGrid.Bounds.Height));
+                    new Size((int)_previewerGrid.Bounds.Width, (int)_previewerGrid.Bounds.Height));
                 _previewerImage.Source = _uiPreviewWriteableBitmap;
             };
 

@@ -1,8 +1,9 @@
 using System.Numerics;
-using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets;
 

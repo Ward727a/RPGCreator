@@ -22,7 +22,7 @@ using MetadataExtractor;
 using MetadataExtractor.Formats.Jpeg;
 using MetadataExtractor.Formats.Png;
 
-namespace RPGCreator.SDK.Helpers;
+namespace RPGCreator.SDK.Common.Helpers;
 
 public static class ImageHelper
 {

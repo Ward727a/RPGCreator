@@ -1,4 +1,4 @@
-﻿namespace RPGCreator.SDK.Types.Interfaces;
+﻿namespace RPGCreator.SDK.Projects;
 
 public interface IBaseProjectLink
 {

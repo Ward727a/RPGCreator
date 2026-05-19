@@ -18,13 +18,13 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Graph.ConnectorLogics;
 using RPGCreator.SDK.Graph.LOGIC;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.UI.Blueprints.Nodes.FlowControl;
 

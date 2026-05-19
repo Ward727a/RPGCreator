@@ -30,14 +30,14 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Attributes;
-using RPGCreator.SDK.EngineService;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Attributes;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Modules.UIModule;
+using RPGCreator.SDK.Services.EngineService;
 using RPGCreator.UI.Contexts;
 using Ursa.Controls;
-using Size = RPGCreator.SDK.Types.Size;
+using Size = RPGCreator.Shared.Types.Size;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;
 

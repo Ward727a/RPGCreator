@@ -20,7 +20,6 @@
 
 
 using System;
-using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -31,12 +30,10 @@ using FontStashSharp.RichText;
 using Microsoft.Xna.Framework;
 using MonoGame.Extended;
 using Microsoft.Xna.Framework.Graphics;
-using RPGCreator.RTP.Extensions;
-using RPGCreator.RTP.GameUI.Interface;
-using RPGCreator.SDK.Exceptions;
-using RPGCreator.SDK.GameUI.Enums;
+using RPGCreator.RTP.MethodsExtension;
 using RPGCreator.SDK.Types;
-using Color = RPGCreator.SDK.Types.Color;
+using RPGCreator.Shared.Types;
+using Color = RPGCreator.Shared.Types.Color;
 using Matrix3x2 = System.Numerics.Matrix3x2;
 using Vector2 = System.Numerics.Vector2;
 

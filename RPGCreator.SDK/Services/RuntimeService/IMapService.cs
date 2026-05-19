@@ -3,9 +3,10 @@ using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Types;
-using Size = RPGCreator.SDK.Types.Size;
+using RPGCreator.Shared.Types;
+using Size = RPGCreator.Shared.Types.Size;
 
-namespace RPGCreator.SDK.RuntimeService;
+namespace RPGCreator.SDK.Services.RuntimeService;
 
 public record struct MapData(Ulid MapId, string MapName, string MapDescription, Size MapSize, float CellWidth, float CellHeight, Color BackgroundColor);
 

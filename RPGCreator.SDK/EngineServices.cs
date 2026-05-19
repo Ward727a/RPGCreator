@@ -19,9 +19,8 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Diagnostics.CodeAnalysis;
-using RPGCreator.SDK.EngineService;
-using RPGCreator.SDK.Exceptions;
-using RPGCreator.SDK.Graph;
+using RPGCreator.SDK.Assets.Runtime;
+using RPGCreator.SDK.Common.Exceptions;
 using RPGCreator.SDK.Parser.PrattFormula;
 using RPGCreator.SDK.Resources;
 using RPGCreator.SDK.Serializer;
@@ -219,6 +218,12 @@ public static class EngineServices
     public static IScheduler Scheduler
     {
         get => GetService<IScheduler>();
+        set => RegisterService(value);
+    }
+    
+    public static IRuntimeMaker RuntimeMaker
+    {
+        get => GetService<IRuntimeMaker>();
         set => RegisterService(value);
     }
 

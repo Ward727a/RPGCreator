@@ -2,17 +2,17 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using RPGCreator.SDK.Assets.Definitions.Skills;
 using RPGCreator.SDK.Assets.Definitions.Stats;
-using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Common.Attributes;
-using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.Common.MethodExtensions;
 using RPGCreator.SDK.ECS.Components;
-using RPGCreator.SDK.Extensions;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.Modules;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Characters;
 
@@ -246,7 +246,7 @@ public partial class EntityFeatureData() : BaseAssetDef, ISerializable, IDeseria
         FeatureUrn = featureUrn;
         Configuration = configuration;
     }
-    private static readonly ScopedLogger Logger = Logging.Logger.ForContext<EntityFeatureData>();
+    private static readonly ScopedLogger Logger = Common.Logging.Logger.ForContext<EntityFeatureData>();
     
     public Ulid InstanceId { get; set; } = Ulid.NewUlid();
     public URN FeatureUrn { get; set; }

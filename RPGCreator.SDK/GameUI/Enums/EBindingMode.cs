@@ -18,7 +18,7 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-namespace RPGCreator.RTP.GameUI.Enums;
+namespace RPGCreator.SDK.GameUI.Enums;
 
 public enum EBindingMode
 {

@@ -23,8 +23,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.SDK;
 using RPGCreator.SDK.ECS.Systems;
+using Color = RPGCreator.Shared.Types.Color;
 
-namespace RPGCreator.RTP.Extensions;
+namespace RPGCreator.RTP.MethodsExtension;
 
 public static class SystemManagerExtensions
 {
@@ -46,8 +47,8 @@ public static class SystemManagerExtensions
             drawingSystem.Update(deltaTime);
         }
         var render = RuntimeServices.RenderService;
-        render.DrawDebugLine(new System.Numerics.Vector2(-10000, 0), new System.Numerics.Vector2(10000, 0), 2f, SDK.Types.Color.Red);
-        render.DrawDebugLine(new System.Numerics.Vector2(0, -10000), new Vector2(0, 10000).ToNumerics(), 2f, SDK.Types.Color.Green);
+        render.DrawDebugLine(new System.Numerics.Vector2(-10000, 0), new System.Numerics.Vector2(10000, 0), 2f, Color.Red);
+        render.DrawDebugLine(new System.Numerics.Vector2(0, -10000), new Vector2(0, 10000).ToNumerics(), 2f, Color.Green);
         
         spriteBatch.End();
     }

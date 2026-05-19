@@ -23,10 +23,10 @@ using System.Collections.Generic;
 using CommunityToolkit.Diagnostics;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.SimpleEvent;
-using RPGCreator.SDK.EngineService;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Modules.Definition;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Registry;
+using RPGCreator.SDK.Services.RuntimeService;
 
 namespace RPGCreator.Player.Services;
 

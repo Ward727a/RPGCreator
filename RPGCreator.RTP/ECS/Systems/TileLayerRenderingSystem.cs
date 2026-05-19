@@ -20,18 +20,18 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Runtime.Tilesets;
 using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Components.Maps;
 using RPGCreator.SDK.ECS.Systems;
 using RPGCreator.SDK.Types;
-using RPGCreator.SDK.Types.Collections;
-using Color = RPGCreator.SDK.Types.Color;
+using RPGCreator.Shared.Types;
+using Color = RPGCreator.Shared.Types.Color;
 
 namespace RPGCreator.RTP.ECS.Systems;
 

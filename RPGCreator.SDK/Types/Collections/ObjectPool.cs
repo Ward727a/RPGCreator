@@ -1,7 +1,7 @@
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Types.Internals;
 
-namespace RPGCreator.Core.Types.Internal;
+namespace RPGCreator.SDK.Types.Collections;
 
 public class ObjectPool<T> where T : class, ICleanable
 {

@@ -19,10 +19,11 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Numerics;
-using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Assets.Runtime.Tilesets;
 

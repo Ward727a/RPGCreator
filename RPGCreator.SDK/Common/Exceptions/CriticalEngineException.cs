@@ -20,7 +20,7 @@
 
 using Newtonsoft.Json;
 
-namespace RPGCreator.SDK.Exceptions;
+namespace RPGCreator.SDK.Common.Exceptions;
 
 /// <summary>
 /// A critical exception that should never happen during normal engine operation.<br/>

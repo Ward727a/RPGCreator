@@ -4,9 +4,8 @@ using System.IO;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
-using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Stats;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor.Tabs;
 

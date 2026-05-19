@@ -18,7 +18,7 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.GameUI.Events.Contexts;
 
 namespace RPGCreator.SDK.GameUI.Events.Actions;

@@ -1,4 +1,5 @@
 ﻿using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Editor.Brushes;
 

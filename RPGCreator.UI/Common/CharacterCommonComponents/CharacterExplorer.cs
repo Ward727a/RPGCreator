@@ -26,13 +26,11 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Layout;
-using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using AvaloniaEdit.Utils;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Characters;
-using RPGCreator.SDK.Types.Collections;
 
 namespace RPGCreator.UI.Common.CharacterCommonComponents;
 

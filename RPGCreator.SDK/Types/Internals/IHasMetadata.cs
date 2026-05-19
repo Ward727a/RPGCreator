@@ -18,11 +18,8 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGCreator.SDK.Assets.MetaData;
-
 namespace RPGCreator.SDK.Types.Internals;
 
 public interface IHasMetadata
 {
-    public BaseMetaData? GetMetaData();
 }

@@ -22,6 +22,7 @@ using System.Numerics;
 using RPGCreator.SDK.Graph.LOGIC;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Blueprints;
 

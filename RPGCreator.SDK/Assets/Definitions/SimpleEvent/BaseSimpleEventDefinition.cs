@@ -19,13 +19,13 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Diagnostics.CodeAnalysis;
-using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Common.Attributes;
-using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Modules.SimpleEvents;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.SimpleEvent;
 

@@ -22,5 +22,5 @@ using System.Runtime.CompilerServices;
 
 // This file is here literally to make internal members of this assembly visible to the Core assembly.
 // It's his only purpose. And no, you should not remove it, or else the EngineSecurityToken will not be accessible from the Core assembly.
-[assembly: InternalsVisibleTo("RPGCreator.Core")] 
+[assembly: InternalsVisibleTo("RPGCreator.EngineLib")] 
 [assembly: InternalsVisibleTo("RPGCreator.UI")]

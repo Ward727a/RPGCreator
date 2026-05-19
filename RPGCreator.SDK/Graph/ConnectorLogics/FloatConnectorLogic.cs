@@ -20,6 +20,7 @@
 
 using System.Globalization;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Graph.ConnectorLogics;
 

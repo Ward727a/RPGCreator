@@ -18,16 +18,15 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.ComponentModel;
 using System.Numerics;
-using RPGCreator.RTP.GameUI.Enums;
-using RPGCreator.SDK.GameUI.Events.Actions;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.GameUI.Enums;
 using RPGCreator.SDK.GameUI.Events.Contexts;
 using RPGCreator.SDK.GameUI.Interfaces;
 using RPGCreator.SDK.GameUI.Visual;
 using RPGCreator.SDK.Inputs;
-using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.GameUI.Controls;
 

@@ -28,15 +28,14 @@ using System.Linq;
 using Avalonia;
 using Avalonia.Layout;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
-using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Common.Attributes;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.GlobalState;
-using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Services.RuntimeService;
 using RPGCreator.UI.Contexts;
 
 namespace RPGCreator.UI.Content.Editor.LayersListComponents
@@ -209,7 +208,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
             RuntimeServices.OnceServiceReady((IMapService mapService) =>
             {
                 if (mapService.CurrentLoadedMapDefinition == null) return;
-                foreach (var layer in mapService.CurrentLoadedMapDefinition.TileLayers.OrderBy(l=>l.ZIndex))
+                foreach (var layer in mapService.CurrentLoadedMapDefinition.Layers.OrderBy(l=>l.ZIndex))
                 {
                     LayerItem layerItem = new LayerItem(layer);
                     LayersList.Items.Add(layerItem);
@@ -313,7 +312,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                 }
                 
                 newLayer.Name = layerName;
-                newLayer.ZIndex = RuntimeServices.MapService.CurrentLoadedMapDefinition!.TileLayers.Count; // Set ZIndex to the last index
+                newLayer.ZIndex = RuntimeServices.MapService.CurrentLoadedMapDefinition!.Layers.Count; // Set ZIndex to the last index
                 newLayer.LayerIndex = RuntimeServices.MapService.GetLastLayerIndex() + 1; // Set LayerIndex to the next available index
                 if(!RuntimeServices.MapService.HasLoadedMap)
                 {

@@ -18,8 +18,8 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Types.Collections;
 
 namespace RPGCreator.SDK.Assets.Runtime.Tilesets;

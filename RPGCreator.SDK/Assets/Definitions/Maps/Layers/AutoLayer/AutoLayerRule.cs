@@ -1,8 +1,7 @@
-using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types.Records;
 
-namespace RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
+namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 
 public enum PatternCondition
 {

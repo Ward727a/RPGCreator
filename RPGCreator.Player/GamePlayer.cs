@@ -4,24 +4,23 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using RPGCreator.Core;
-using RPGCreator.Core.Types.Project;
+using RPGCreator.EngineLib;
+using RPGCreator.EngineLib.Types.Project;
 using RPGCreator.Player.ECS.Systems;
 using RPGCreator.Player.Services;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
-using RPGCreator.SDK.Debug;
+using RPGCreator.SDK.Common.Debug;
+using RPGCreator.SDK.Common.Exceptions;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Systems;
-using RPGCreator.SDK.Exceptions;
 using RPGCreator.SDK.GameRunner;
 using RPGCreator.SDK.Inputs;
-using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Services.RuntimeService;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 using Color = Microsoft.Xna.Framework.Color;
-using Vector2 = System.Numerics.Vector2;
 
 namespace RPGCreator.Player;
 
@@ -191,7 +190,7 @@ public class GamePlayer : Game, IGameRunner
             if (def == null)
                 return;
 
-            foreach (var baseLayerDef in def.TileLayers.Where(l => l is EntityLayerDefinition))
+            foreach (var baseLayerDef in def.Layers.Where(l => l is EntityLayerDefinition))
             {
                 var layerDef = (EntityLayerDefinition)baseLayerDef;
                 foreach (var chunkData in layerDef.Chunks)
@@ -361,7 +360,7 @@ public class GamePlayer : Game, IGameRunner
             RuntimeServices.RenderService.DrawDebugRect(
                 collisionRectangle.Position,
                 collisionRectangle.Size,
-                SDK.Types.Color.Green * 0.5f,
+                Shared.Types.Color.Green * 0.5f,
                 2f
             );
         }
@@ -371,7 +370,7 @@ public class GamePlayer : Game, IGameRunner
             RuntimeServices.RenderService.DrawDebugRect(
                 worldCollisionRect.Position,
                 worldCollisionRect.Size,
-                SDK.Types.Color.Blue * 0.5f,
+                Shared.Types.Color.Blue * 0.5f,
                 2f
             );
         }

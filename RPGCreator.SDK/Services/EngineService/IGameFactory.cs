@@ -21,7 +21,7 @@
 using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions;
 
-namespace RPGCreator.SDK.EngineService;
+namespace RPGCreator.SDK.Services.EngineService;
 
 public interface IGameFactory : IService
 {

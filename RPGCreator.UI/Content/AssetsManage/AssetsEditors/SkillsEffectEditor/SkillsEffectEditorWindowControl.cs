@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
-using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Skills;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEffectEditor.Tabs;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEffectEditor;

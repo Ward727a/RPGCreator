@@ -1,3 +1,4 @@
+using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.Types.Collections;
 
 namespace RPGCreator.SDK.ECS;

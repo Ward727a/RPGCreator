@@ -22,9 +22,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using FontStashSharp;
-using RPGCreator.RTP.Extensions;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.RTP.MethodsExtension;
+using RPGCreator.SDK.Services.RuntimeService;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.RTP.Services;
 

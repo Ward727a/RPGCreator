@@ -21,8 +21,9 @@
 using System.Runtime.CompilerServices;
 using RPGCreator.SDK.Modules;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
-namespace RPGCreator.SDK.EngineService;
+namespace RPGCreator.SDK.Services.EngineService;
 
 public interface IModuleManager : IService
 {

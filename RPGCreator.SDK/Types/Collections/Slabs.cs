@@ -20,7 +20,7 @@
 
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 
 namespace RPGCreator.SDK.Types.Collections;
 

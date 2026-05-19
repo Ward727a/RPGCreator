@@ -1,4 +1,4 @@
-﻿namespace RPGCreator.SDK.RuntimeService;
+﻿namespace RPGCreator.SDK.Services.RuntimeService;
 
 public interface IGameRunner : IService
 {

@@ -9,10 +9,9 @@ using Avalonia.Controls.Templates;
 using Avalonia.Layout;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
-using Avalonia.VisualTree;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Characters;
-using RPGCreator.SDK.Extensions;
+using RPGCreator.SDK.Common.MethodExtensions;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor;
 using AutoCompleteBox = Avalonia.Controls.AutoCompleteBox;
 

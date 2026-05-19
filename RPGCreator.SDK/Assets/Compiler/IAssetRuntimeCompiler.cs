@@ -74,7 +74,7 @@ public abstract class BaseAssetRuntimeCompiler<TSource> : IAssetRuntimeCompiler<
     
     /// <summary>
     /// A generic implementation of <see cref="IAssetRuntimeCompiler.Compile(object, IEcsWorld, ICompilerContext?)"/>.<br/>
-    /// This implementation has been made to work with the <see cref="IRuntimeCompilerRegistry"/> interface (real implementation in RPGCreator.Core.RuntimeCompilerRegistry class).<br/>
+    /// This implementation has been made to work with the <see cref="IRuntimeCompilerRegistry"/> interface (real implementation in RPGCreator.EngineLib.RuntimeCompilerRegistry class).<br/>
     /// Generally, you should not use this method directly.
     /// </summary>
     /// <param name="source">The source asset to compile.</param>

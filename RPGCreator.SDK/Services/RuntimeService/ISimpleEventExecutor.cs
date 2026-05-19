@@ -21,7 +21,7 @@
 using RPGCreator.SDK.Assets.Definitions.SimpleEvent;
 using RPGCreator.SDK.Modules.Definition;
 
-namespace RPGCreator.SDK.RuntimeService;
+namespace RPGCreator.SDK.Services.RuntimeService;
 
 public interface ISimpleEventExecutor : IService
 {

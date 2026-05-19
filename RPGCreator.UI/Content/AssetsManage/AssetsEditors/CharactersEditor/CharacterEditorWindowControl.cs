@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using Avalonia;
@@ -6,7 +5,7 @@ using Avalonia.Controls;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Animations;
 using RPGCreator.SDK.Assets.Definitions.Characters;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;
 using Ursa.Controls;
 

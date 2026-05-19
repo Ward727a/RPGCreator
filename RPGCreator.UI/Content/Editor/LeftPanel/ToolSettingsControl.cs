@@ -30,8 +30,8 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.GlobalState;
-using RPGCreator.SDK.Logging;
 using RPGCreator.UI.Common;
 using Ursa.Controls;
 

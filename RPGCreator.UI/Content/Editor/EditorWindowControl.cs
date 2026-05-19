@@ -24,27 +24,21 @@
 #endregion
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Interactivity;
-using Avalonia.VisualTree;
-using RPGCreator.UI.Content.AssetsManage;
 using RPGCreator.UI.Content.Editor.Tabs;
 using RPGCreator.UI.Content.Editor.TilesetSelectorComponents;
 using RPGCreator.UI.Content.Editor.Toolbar;
-using RPGCreator.UI.Content.Preferences;
-using System;
 using System.Numerics;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using RPGCreator.RTP.Services;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.UI.Common;
 using RPGCreator.UI.Common.Bridge;
 using RPGCreator.UI.Content.Editor.LayersListComponents;
 using RPGCreator.UI.Content.Editor.LeftPanel;
-using Size = System.Drawing.Size;
+using Size = RPGCreator.Shared.Types.Size;
 using Vector = Avalonia.Vector;
 
 namespace RPGCreator.UI.Content.Editor
@@ -90,12 +84,12 @@ namespace RPGCreator.UI.Content.Editor
                 using (var buf = _realTimePlayerWriteableBitmap.Lock())
                 {
                     var viewport = EditorUiServices.MonogameViewport.CreateNewViewport("Editor MonoGame Viewport", buf.Address,
-                        new SDK.Types.Size(1172, 827));
+                        new Size(1172, 827));
                     viewport?.LockToImageControl("MonoGameImage");
                     monogameGrid.SizeChanged += (_, _) =>
                     {
                         _realTimePlayerWriteableBitmap = new WriteableBitmap(new PixelSize((int)monogameGrid.Bounds.Width, (int)monogameGrid.Bounds.Height), new Vector(96, 96), Avalonia.Platform.PixelFormat.Rgba8888, Avalonia.Platform.AlphaFormat.Premul);
-                        viewport?.Resize(new SDK.Types.Size((int)monogameGrid.Bounds.Width, (int)monogameGrid.Bounds.Height));
+                        viewport?.Resize(new Size((int)monogameGrid.Bounds.Width, (int)monogameGrid.Bounds.Height));
                         mgImage.Source = _realTimePlayerWriteableBitmap;
                     };
                     viewport?.OnceUpdatedDo(()=>

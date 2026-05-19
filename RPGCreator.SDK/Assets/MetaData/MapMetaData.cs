@@ -21,6 +21,7 @@
 using LiteDB;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Assets.MetaData;
 
@@ -75,10 +76,10 @@ public sealed class MapMetaData : BaseMetaData
     public MapMetaData(IMapDef mapDef)
     {
         Unique = mapDef.Unique;
-        ChildMapIds = mapDef.MapDefs.ToArray().Select(m => m.Unique).ToList();
+        ChildMapIds = mapDef.ChildMaps.ToArray().Select(m => m.Unique).ToList();
         Name = mapDef.Name;
         Description = mapDef.Description;
-        TileLayerIds = mapDef.TileLayers.ToArray().Select(l => l.Unique).ToList();
+        TileLayerIds = mapDef.Layers.ToArray().Select(l => l.Unique).ToList();
         MapSize = mapDef.Size;
         GridParameter = mapDef.GridParameter;
         BackgroundColor = mapDef.BackgroundColor;

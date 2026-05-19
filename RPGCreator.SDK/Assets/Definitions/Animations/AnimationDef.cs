@@ -1,8 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Serializer;
-using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.SDK.Assets.Definitions.Animations;

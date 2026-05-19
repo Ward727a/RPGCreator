@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
-using RPGCreator.Core.Types;
 using RPGCreator.SDK.Assets.Definitions.Skills;
+using RPGCreator.UI.Common;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEffectEditor.Tabs;
 

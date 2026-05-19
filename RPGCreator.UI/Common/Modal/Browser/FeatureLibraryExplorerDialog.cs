@@ -30,6 +30,7 @@ using Avalonia.Threading;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.UI.Common.Modal.Browser;
 

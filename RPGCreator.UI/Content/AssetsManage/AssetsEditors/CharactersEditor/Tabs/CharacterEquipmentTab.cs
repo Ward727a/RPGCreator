@@ -1,7 +1,7 @@
 using Avalonia.Controls;
 using RPGCreator.SDK.Assets.Definitions.Characters;
 
-namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor;
+namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.CharactersEditor.Tabs;
 
 public class CharacterEquipmentTab : UserControl
 {

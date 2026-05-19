@@ -23,11 +23,12 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Avalonia.Controls.Templates;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Graph.ConnectorLogics;
 using RPGCreator.SDK.Graph.LOGIC;
-using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Registry;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.UI.Blueprints;
 

@@ -18,187 +18,114 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Numerics;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Inputs;
-using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.GlobalState;
 
-public interface IToolParameter : INotifyPropertyChanged, INotifyPropertyChanging
+public interface IToolParameter
 {
     Type ValueType { get; }
-    
     string DisplayName { get; }
     string Description { get; }
-
-    object? Value { get; }
     object? DefaultValue { get; }
-
-    void Reset();
 }
 
-public abstract class BaseToolParameter(
-    Type valueType,
-    string displayName,
-    string description,
-    object? value,
-    object? defaultValue)
-    : BaseState, IToolParameter
+public record IntParameter(
+    string DisplayName,
+    string Description,
+    int DefaultValue,
+    int Min,
+    int Max,
+    int Step) : IToolParameter
 {
-    public Type ValueType { get; protected set; } = valueType;
-    public string DisplayName { get; protected set; } = displayName;
-    public string Description { get; protected set; } = description;
+    public Type ValueType => typeof(int);
+    object? IToolParameter.DefaultValue => DefaultValue;
+}
 
-    public object? Value
+public record FloatParameter(
+    string DisplayName,
+    string Description,
+    float DefaultValue,
+    float Min,
+    float Max,
+    float Step) : IToolParameter
+{
+    public Type ValueType => typeof(float);
+    object? IToolParameter.DefaultValue => DefaultValue;
+}
+
+public record DoubleParameter(
+    string DisplayName,
+    string Description,
+    double DefaultValue,
+    double Min,
+    double Max,
+    double Step) : IToolParameter
+{
+    public Type ValueType => typeof(double);
+    object? IToolParameter.DefaultValue => DefaultValue;
+}
+
+public record BoolParameter(
+    string DisplayName,
+    string Description,
+    bool DefaultValue) : IToolParameter
+{
+    public Type ValueType => typeof(bool);
+    object? IToolParameter.DefaultValue => DefaultValue;
+}
+public record StringParameter(
+    string DisplayName,
+    string Description,
+    string DefaultValue) : IToolParameter
+{
+    public Type ValueType => typeof(string);
+    object? IToolParameter.DefaultValue => DefaultValue;
+}
+
+public interface ICustomObjectParameter : IToolParameter
+{
+    object? GetValidUiControl();
+}
+
+public record CustomObjectParameter<T>(
+    string DisplayName,
+    string Description,
+    T DefaultValue,
+    Type ValidAvaloniaControlType
+) : ICustomObjectParameter
+{
+    public Type ValueType => typeof(T);
+
+    object? IToolParameter.DefaultValue => DefaultValue;
+
+    public object GetValidUiControl()
     {
-        get;
-        set
+        try
         {
-            if (Equals(field, value)) return;
-            SetProperty(ref field, value);
+            return Activator.CreateInstance(ValidAvaloniaControlType) 
+                   ?? throw new InvalidOperationException($"Instance creation returned null for {ValidAvaloniaControlType.FullName}");
         }
-    } = value;
-
-    public object? DefaultValue { get; protected set; } = defaultValue;
-    
-    public T? GetValueAs<T>(out bool success)
-    {
-        success = Value is T;
-        if (Value is T typedValue)
+        catch (Exception ex)
         {
-            return typedValue;
+            throw new InvalidOperationException(
+                $"Failed to create UI control for custom parameter '{DisplayName}'. " +
+                $"Ensure {ValidAvaloniaControlType.Name} has a parameterless constructor.", ex);
         }
-        return default;
     }
-}
-
-public class RangeParameter(
-    string displayName,
-    string description,
-    double defaultValue,
-    double min,
-    double max,
-    double step)
-    : BaseToolParameter(typeof(double), displayName, description, defaultValue, defaultValue)
-{
-    public double Min { get; protected set; } = min;
-    public double Max { get; protected set; } = max;
-    public double Step { get; protected set; } = step;
-
-    public override void Reset()
-    {
-        Value = defaultValue;
-    }
-}
-
-public class IntParameter(
-    string displayName,
-    string description,
-    int defaultValue,
-    int min,
-    int max,
-    int step)
-    : BaseToolParameter(typeof(int), displayName, description, defaultValue, defaultValue)
-{
-    public int Min { get; protected set; } = min;
-    public int Max { get; protected set; } = max;
-    public int Step { get; protected set; } = step;
-
-    public override void Reset()
-    {
-        Value = defaultValue;
-    }
-}
-
-public class FloatParameter(
-    string displayName,
-    string description,
-    float defaultValue,
-    float min,
-    float max,
-    float step)
-    : BaseToolParameter(typeof(float), displayName, description, defaultValue, defaultValue)
-{
-    public float Min { get; protected set; } = min;
-    public float Max { get; protected set; } = max;
-    public float Step { get; protected set; } = step;
-
-    public override void Reset()
-    {
-        Value = defaultValue;
-    }
-}
-
-public class DoubleParameter(
-    string displayName,
-    string description,
-    double defaultValue,
-    double min,
-    double max,
-    double step)
-    : BaseToolParameter(typeof(double), displayName, description, defaultValue, defaultValue)
-{
-    public double Min { get; protected set; } = min;
-    public double Max { get; protected set; } = max;
-    public double Step { get; protected set; } = step;
-
-    public override void Reset()
-    {
-        Value = defaultValue;
-    }
-}
-
-public class BoolParameter(
-    string displayName,
-    string description,
-    bool defaultValue)
-    : BaseToolParameter(typeof(bool), displayName, description, defaultValue, defaultValue)
-{
-    public override void Reset()
-    {
-        Value = defaultValue;
-    }
-}
-
-public class StringParameter(
-    string displayName,
-    string description,
-    string defaultValue)
-    : BaseToolParameter(typeof(string), displayName, description, defaultValue, defaultValue)
-{
-    public override void Reset()
-    {
-        Value = defaultValue;
-    }
-}
-
-public interface ICustomObjectParameter
-{
-    string DisplayName { get; }
-    string Description { get; }
-    object GetValidUiControl();
-}
-
-public abstract class CustomObjectParameter<T>(
-    string displayName,
-    string description,
-    T defaultValue)
-    : BaseToolParameter(typeof(T), displayName, description, defaultValue, defaultValue), ICustomObjectParameter
-{
-    public override void Reset()
-    {
-        Value = defaultValue;
-    }
-    
-    public abstract object GetValidUiControl();
 }
 
 [Flags]
 public enum EPayloadType
 {
+    None = 0,
     /// <summary>
     /// Allow the user to select a tile from a tileset.<br/>
     /// If you want to access the intgrid autotiles, use the <see cref="AutoTile"/>!
@@ -229,7 +156,7 @@ public enum EPayloadType
     Custom = 1 << 4
 }
 
-public abstract class ToolLogic : BaseState
+public abstract class ToolLogic
 {
     public static URN NoHelp = "rpgc".ToUrnNamespace().ToUrnModule("help").ToUrn("no_help_defined");
     protected static UrnSingleModule ToolUrnModule => "tools".ToUrnSingleModule();
@@ -246,9 +173,7 @@ public abstract class ToolLogic : BaseState
     public abstract EPayloadType PayloadType { get; }
     public virtual URN HelpKey { get; } = NoHelp;
     
-    public object? Payload { get; set => SetProperty(ref field, value); }
-    
-    public abstract ObservableCollection<IToolParameter> GetParameters();
+    public abstract IImmutableList<IToolParameter> GetDefaultParameters();
 
     /// <summary>
     /// Return a custom payload UI control for this tool.<br/>
@@ -259,7 +184,7 @@ public abstract class ToolLogic : BaseState
     /// A valid <b>AVALONIA</b> control!<br/>
     /// If you return null, or any other type than a valid Avalonia control, the editor UI will give an error to the user when they try to use the tool.
     /// </returns>
-    // Due to the fact that the SDK should not have a direct reference to Avalonia,
+    // Since the SDK should not have a direct reference to Avalonia,
     // we can't use Avalonia.Controls.Control as the return type of this method, otherwise it would create a hard dependency on Avalonia.
     public virtual object? GetCustomPayloadUiControl()
     {
@@ -281,25 +206,9 @@ public abstract class ToolLogic : BaseState
     public virtual void MoveInsideViewport(Vector2 absolutePosition, Vector2 deltaPosition)
     {
     }
-
+    
     public virtual void OnActivate() { }
     public virtual void OnDeactivate() { }
-    
-    public Vector2 AbsolutePositionToMapPosition(Vector2 absolutePosition)
-    {
-        return RuntimeServices.MapService.WorldToMapCoordinates(RuntimeServices.CameraService.ScreenToWorld(absolutePosition));
-    }
-    
-    public override void Reset()
-    {
-        foreach (var parameter in GetParameters())
-        {
-            parameter.Reset();
-        }
-        
-        // for safety, we reset the payload after resetting parameters, in case some parameters are used to generate the payload
-        Payload = null;
-    }
 }
 
 #if DEBUG
@@ -333,15 +242,6 @@ public class MockupTool : ToolLogic
         "Hello World"
     );
     
-    private RangeParameter RangeParameter { get; } = new RangeParameter(
-        "range parameter",
-        "double with 0 default, 0 min, 1 max, step 0.1.",
-        0,
-        0,
-        1,
-        0.1
-    );
-    
     private FloatParameter FloatParameter { get; } = new FloatParameter(
         "float parameter",
         "float with 0 default, 0 min, 1 max, step 0.1.",
@@ -360,13 +260,12 @@ public class MockupTool : ToolLogic
         0.1
     );
     
-    public override ObservableCollection<IToolParameter> GetParameters()
+    public override IImmutableList<IToolParameter> GetDefaultParameters()
     {
         return [
             SizeParameter,
             ShowPreviewParameter,
             StringParameter,
-            RangeParameter,
             FloatParameter,
             DoubleParameter
         ];
@@ -385,75 +284,75 @@ public interface IToolState : IState
     object? Payload { get; set; }
     ObservableCollection<IToolParameter> ActiveToolParameters { get; }
 }
-
-public class BaseToolState : BaseState, IToolState
-{
-    public ToolLogic? ActiveTool
-    {
-        get;
-        set
-        {
-            if(field == value) return;
-            
-            CallPropertyChanging(nameof(ActiveTool));
-            CallPropertyChanging(nameof(Payload));
-            CallPropertyChanging(nameof(ActiveToolParameters));
-            
-            if(field != null)
-            {
-                field.PropertyChanging -= OnActiveToolParametersChanging;
-                field.PropertyChanged -= OnActiveToolParametersChanged;
-                field.OnDeactivate();
-            }
-            
-            field = value;
-            
-            if(field != null)
-            {
-                field.OnActivate();
-                field.PropertyChanging += OnActiveToolParametersChanging;
-                field.PropertyChanged += OnActiveToolParametersChanged;
-            }
-            CallPropertyChanged(nameof(ActiveTool));
-            CallPropertyChanged(nameof(Payload));
-            CallPropertyChanged(nameof(ActiveToolParameters));
-            
-        }
-    }
-    
-    public object? Payload
-    {
-        get => ActiveTool?.Payload;
-        set
-        {
-            if (ActiveTool?.Payload == value) return;
-            CallPropertyChanging(nameof(Payload));
-            ActiveTool?.Payload = value;
-            CallPropertyChanged(nameof(Payload));
-        }
-    }
-
-    public ObservableCollection<IToolParameter> ActiveToolParameters => ActiveTool?.GetParameters() ?? [];
-    
-    public override void Reset()
-    {
-        ActiveTool?.Reset();
-        ActiveTool = null;
-    }
-    
-    private void OnActiveToolParametersChanging(object? sender, PropertyChangingEventArgs e)
-    {
-        if (e.PropertyName == nameof(IToolParameter.Value))
-        {
-            CallPropertyChanging(nameof(ActiveToolParameters));
-        }
-    }
-    
-    private void OnActiveToolParametersChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(IToolParameter.Value))
-        {
-            CallPropertyChanged(nameof(ActiveToolParameters));
-        }
-    }
-}
+//
+// public class BaseToolState : BaseState, IToolState
+// {
+//     public ToolLogic? ActiveTool
+//     {
+//         get;
+//         set
+//         {
+//             if(field == value) return;
+//             
+//             CallPropertyChanging(nameof(ActiveTool));
+//             CallPropertyChanging(nameof(Payload));
+//             CallPropertyChanging(nameof(ActiveToolParameters));
+//             
+//             if(field != null)
+//             {
+//                 field.PropertyChanging -= OnActiveToolParametersChanging;
+//                 field.PropertyChanged -= OnActiveToolParametersChanged;
+//                 field.OnDeactivate();
+//             }
+//             
+//             field = value;
+//             
+//             if(field != null)
+//             {
+//                 field.OnActivate();
+//                 field.PropertyChanging += OnActiveToolParametersChanging;
+//                 field.PropertyChanged += OnActiveToolParametersChanged;
+//             }
+//             CallPropertyChanged(nameof(ActiveTool));
+//             CallPropertyChanged(nameof(Payload));
+//             CallPropertyChanged(nameof(ActiveToolParameters));
+//             
+//         }
+//     }
+//     
+//     public object? Payload
+//     {
+//         get => ActiveTool?.Payload;
+//         set
+//         {
+//             if (ActiveTool?.Payload == value) return;
+//             CallPropertyChanging(nameof(Payload));
+//             ActiveTool?.Payload = value;
+//             CallPropertyChanged(nameof(Payload));
+//         }
+//     }
+//
+//     public ObservableCollection<IToolParameter> ActiveToolParameters => ActiveTool?.GetParameters() ?? [];
+//     
+//     public override void Reset()
+//     {
+//         ActiveTool?.Reset();
+//         ActiveTool = null;
+//     }
+//     
+//     private void OnActiveToolParametersChanging(object? sender, PropertyChangingEventArgs e)
+//     {
+//         if (e.PropertyName == nameof(IToolParameter.Value))
+//         {
+//             CallPropertyChanging(nameof(ActiveToolParameters));
+//         }
+//     }
+//     
+//     private void OnActiveToolParametersChanged(object? sender, PropertyChangedEventArgs e)
+//     {
+//         if (e.PropertyName == nameof(IToolParameter.Value))
+//         {
+//             CallPropertyChanged(nameof(ActiveToolParameters));
+//         }
+//     }
+// }

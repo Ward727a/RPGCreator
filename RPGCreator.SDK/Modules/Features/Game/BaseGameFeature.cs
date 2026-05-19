@@ -21,6 +21,7 @@
 using System.Runtime.CompilerServices;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Modules.Features.Game;
 

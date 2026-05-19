@@ -1,5 +1,7 @@
-﻿using RPGCreator.SDK.Attributes;
+﻿using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Attributes;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Assets;
 

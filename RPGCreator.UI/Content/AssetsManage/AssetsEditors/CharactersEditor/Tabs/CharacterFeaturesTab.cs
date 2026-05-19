@@ -8,11 +8,12 @@ using CommunityToolkit.Diagnostics;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.SDK.Commands;
-using RPGCreator.SDK.EditorUiService;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Modules.Features.Entity;
+using RPGCreator.SDK.Services.EditorUiService;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 using RPGCreator.UI.Common.Modal.Browser;
 using Thickness = Avalonia.Thickness;
 

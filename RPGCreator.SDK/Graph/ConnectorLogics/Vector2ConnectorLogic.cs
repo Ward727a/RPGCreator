@@ -21,6 +21,7 @@
 using System.Globalization;
 using System.Numerics;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Graph.ConnectorLogics;
 

@@ -18,19 +18,14 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System;
 using System.Collections.ObjectModel;
-using System.Linq;
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DynamicData;
 using RPGCreator.SDK;
 using RPGCreator.SDK.GameUI;
 using RPGCreator.SDK.GameUI.Events.Actions;
 using RPGCreator.SDK.GameUI.Interfaces;
-using RPGCreator.SDK.Logging;
 
 namespace RPGCreator.UI.Content.GameUiEditor.Components.Explorer;
 

@@ -22,12 +22,12 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Linq;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Graph.ConnectorLogics;
 using RPGCreator.SDK.Graph.LOGIC;
-using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 using RPGCreator.UI.Content.Blueprint;
 
 namespace RPGCreator.UI.Blueprints.Nodes.Variables;

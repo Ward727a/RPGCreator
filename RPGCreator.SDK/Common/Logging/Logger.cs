@@ -1,4 +1,4 @@
-﻿namespace RPGCreator.SDK.Logging;
+﻿namespace RPGCreator.SDK.Common.Logging;
 
 public static class Logger
 {

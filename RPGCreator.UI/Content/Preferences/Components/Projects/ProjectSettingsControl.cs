@@ -28,8 +28,8 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
-using RPGCreator.SDK.EditorUiService;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.Services.EditorUiService;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.Preferences.Components.Projects;

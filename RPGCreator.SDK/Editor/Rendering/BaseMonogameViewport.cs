@@ -18,8 +18,8 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.Drawing;
 using RPGCreator.SDK.GameUI.Interfaces;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Editor.Rendering;
 
@@ -32,7 +32,7 @@ public abstract class BaseMonogameViewport : IDisposable
 {
     public Ulid Id { get; } = Ulid.NewUlid();
     
-    public SDK.Types.Size Size { get; set; }
+    public Size Size { get; set; }
 
     public event Func<IntPtr>? DoNewFrameAction;
     
@@ -45,7 +45,7 @@ public abstract class BaseMonogameViewport : IDisposable
     public event EventHandler<TimeSpan>? Drawn;
     public event EventHandler<TimeSpan>? Updated;
     
-    public event EventHandler<SDK.Types.Size>? Resized;
+    public event EventHandler<Size>? Resized;
     public event EventHandler? Disposed;
     
     public bool DrawFrameByFrame { get; set; } = false;
@@ -160,7 +160,7 @@ public abstract class BaseMonogameViewport : IDisposable
     public void Focus() => ViewportFocused?.Invoke(this, EventArgs.Empty);
     public void Close() => ViewportClosed?.Invoke(this, EventArgs.Empty);
     
-    public void Resize(SDK.Types.Size newSize)
+    public void Resize(Size newSize)
     {
 
         PauseDrawing();

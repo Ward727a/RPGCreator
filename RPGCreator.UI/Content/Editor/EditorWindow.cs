@@ -26,7 +26,7 @@ using Avalonia.Controls;
 using System;
 using Avalonia.Input;
 using RPGCreator.SDK;
-using RPGCreator.SDK.EditorUiService;
+using RPGCreator.SDK.Services.EditorUiService;
 
 namespace RPGCreator.UI.Content.Editor
 {

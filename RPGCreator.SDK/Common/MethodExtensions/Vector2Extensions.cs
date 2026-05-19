@@ -21,7 +21,7 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace RPGCreator.SDK.Extensions;
+namespace RPGCreator.SDK.Common.MethodExtensions;
 
 public static class Vector2Extensions
 {

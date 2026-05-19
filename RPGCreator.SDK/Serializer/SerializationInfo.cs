@@ -1,4 +1,4 @@
-﻿using RPGCreator.SDK.Logging;
+﻿using RPGCreator.SDK.Common.Logging;
 
 namespace RPGCreator.SDK.Serializer;
 

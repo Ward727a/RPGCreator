@@ -24,16 +24,17 @@ using System.Numerics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
-using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.Services.RuntimeService;
 using RPGCreator.SDK.Types;
-using Size = RPGCreator.SDK.Types.Size;
+using RPGCreator.Shared.Types;
+using Size = RPGCreator.Shared.Types.Size;
 
 namespace RPGCreator.RTP.Services;
 
 public partial class ChunkService : ObservableObject, IChunkService
 {
-    private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<ChunkService>();
+    private static readonly ScopedLogger Logger = SDK.Common.Logging.Logger.ForContext<ChunkService>();
     
     public event Action<long>? OnChunkLoaded;
     public event Action<long>? OnChunkUnloaded;

@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using RPGCreator.SDK.Assets.Definitions.Stats;
 
-namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.StatsEditor;
+namespace RPGCreator.UI.Content.AssetsManage.Components.Stats;
 
 public class StatsManageItemControl : UserControl
 {

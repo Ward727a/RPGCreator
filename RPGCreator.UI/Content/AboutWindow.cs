@@ -25,7 +25,7 @@ using Avalonia.Controls.Primitives;
 using CommunityToolkit.Mvvm.Input;
 using LiveMarkdown.Avalonia;
 using RPGCreator.SDK;
-using RPGCreator.SDK.EditorUiService;
+using RPGCreator.SDK.Services.EditorUiService;
 
 namespace RPGCreator.UI.Content;
 

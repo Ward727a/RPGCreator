@@ -1,7 +1,7 @@
 
 using System.Numerics;
 
-namespace RPGCreator.SDK.Assets.Definitions.Maps;
+namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 
 public interface ILayerElem
 {

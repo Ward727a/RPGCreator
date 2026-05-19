@@ -1,17 +1,13 @@
+using System.Collections.ObjectModel;
 using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
-using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
-using RPGCreator.SDK.Types.Internals;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps;
 
-public interface IMapDef : IBaseAssetDef, ISerializable, IDeserializable, IHasSavePath, IHasMetadata
+public interface IMapDef : IBaseAssetDef
 {
-    public Ulid PackId { get; set; }
-    
-    event Action<BaseLayerDef> TileLayerAdded;
-    event Action<BaseLayerDef> TileLayerRemoved;
     
     public CollisionLayer CollisionChunk { get; set; }
     
@@ -22,11 +18,11 @@ public interface IMapDef : IBaseAssetDef, ISerializable, IDeserializable, IHasSa
     /// <summary>
     /// Other maps that are part of this map definition, such as levels or sub-maps.
     /// </summary>
-    public IReadOnlyList<IMapDef> MapDefs { get; }
+    public List<IMapDef> ChildMaps { get; }
     /// <summary>
     /// List of tile layers in the map, which can include background, foreground, and other layers.
     /// </summary>
-    public IReadOnlyList<BaseLayerDef> TileLayers { get; }
+    public ObservableCollection<BaseLayerDef> Layers { get; }
     /// <summary>
     /// Size of the map in tiles, represented as a width and height.
     /// </summary>
@@ -39,18 +35,23 @@ public interface IMapDef : IBaseAssetDef, ISerializable, IDeserializable, IHasSa
     /// Background color of the map, which can be used to set a default background or for visual effects.
     /// </summary>
     public Color BackgroundColor { get; set; }
-    
-    /// <summary>
-    /// Adds a new tile layer to the map definition.
-    /// </summary>
-    /// <param name="layer">The layer to add.</param>
-    /// <returns>True if the layer was added successfully; false if it already exists.</returns>
-    bool AddLayer(BaseLayerDef layer);
-    
-    /// <summary>
-    /// Removes a tile layer from the map definition.
-    /// </summary>
-    /// <param name="layer">The layer to remove.</param>
-    /// <returns>True if the layer was removed successfully; false if it was not found.</returns>
-    bool RemoveLayer(BaseLayerDef layer);
+}
+
+public static class IMapDefExtension
+{
+    extension(IMapDef map)
+    {
+        public bool AddLayer(BaseLayerDef layer)
+        {
+            if(map.Layers.Contains(layer))
+                return false;
+            map.Layers.Add(layer);
+            return true;
+        }
+
+        public bool RemoveLayer(BaseLayerDef layer)
+        {
+            return map.Layers.Remove(layer);
+        }
+    }
 }

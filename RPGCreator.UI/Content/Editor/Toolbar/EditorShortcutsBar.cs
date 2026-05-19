@@ -24,11 +24,11 @@ using Avalonia.Controls.Documents;
 using Avalonia.Controls.Primitives;
 using Avalonia.Layout;
 using Projektanker.Icons.Avalonia;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Editor;
-using RPGCreator.SDK.Logging;
 using Ursa.Controls;
 
-namespace RPGCreator.UI.Content.Editor;
+namespace RPGCreator.UI.Content.Editor.Toolbar;
 
 public class EditorShortcutsBar : UserControl
 {

@@ -24,8 +24,8 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Avalonia;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Graph.LOGIC;
-using RPGCreator.SDK.Logging;
 using RPGCreator.UI.Content.Blueprint;
 
 namespace RPGCreator.UI.Blueprints;

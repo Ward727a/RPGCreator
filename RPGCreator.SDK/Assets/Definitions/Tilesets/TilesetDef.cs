@@ -1,9 +1,6 @@
-using System.Text.Json.Serialization;
-using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Common.Attributes;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Serializer;
-using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets;
 

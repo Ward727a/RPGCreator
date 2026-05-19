@@ -25,10 +25,9 @@ using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Input;
 using RPGCreator.SDK;
-using RPGCreator.SDK.EngineService;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.Services.EngineService;
 using RPGCreator.UI.Content.AssetsManage;
-using RPGCreator.UI.Content.Blueprint;
 using RPGCreator.UI.Content.GameUiEditor;
 using RPGCreator.UI.Content.Preferences;
 

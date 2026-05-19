@@ -25,10 +25,10 @@ using FontStashSharp.RichText;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.RTP.Services;
 using RPGCreator.SDK.GameUI.Interfaces;
-using RPGCreator.SDK.RuntimeService;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
-namespace RPGCreator.RTP.GameUI.Interface;
+namespace RPGCreator.RTP.GameUI;
 
 public interface IMgUiRendererContext : IUiRendererContext
 {

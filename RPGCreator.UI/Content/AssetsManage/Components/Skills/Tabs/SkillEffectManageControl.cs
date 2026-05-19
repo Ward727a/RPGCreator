@@ -1,12 +1,11 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.VisualTree;
-using RPGCreator.Core.Types;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Skills;
-using RPGCreator.SDK.Extensions;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.Common.MethodExtensions;
+using RPGCreator.UI.Common;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEffectEditor;
 
 namespace RPGCreator.UI.Content.AssetsManage.Components.Skills.Tabs;

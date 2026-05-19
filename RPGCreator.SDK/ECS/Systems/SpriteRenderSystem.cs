@@ -20,10 +20,9 @@
 
 using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Animations;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.ECS.Components;
-using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.RuntimeService;
-using RPGCreator.SDK.Types;
+using RPGCreator.SDK.Services.RuntimeService;
 
 namespace RPGCreator.SDK.ECS.Systems;
 

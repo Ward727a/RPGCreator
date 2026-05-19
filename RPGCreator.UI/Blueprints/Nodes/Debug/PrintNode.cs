@@ -20,11 +20,12 @@
 
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using RPGCreator.SDK.EditorUiService;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Graph.ConnectorLogics;
 using RPGCreator.SDK.Graph.LOGIC;
+using RPGCreator.SDK.Services.EditorUiService;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.UI.Blueprints.Nodes.Debug;
 

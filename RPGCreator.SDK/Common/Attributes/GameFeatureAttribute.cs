@@ -18,7 +18,7 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-namespace RPGCreator.SDK.Attributes;
+namespace RPGCreator.SDK.Common.Attributes;
 
 /// <summary>
 /// Attribute to mark a class as a Game Feature.<br/>

@@ -26,8 +26,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Layout;
-using Avalonia.VisualTree;
-using RPGCreator.Core.Types;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor;
 using System;
 using System.Collections.Generic;
@@ -35,10 +33,8 @@ using Avalonia.Media.Imaging;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
-using RPGCreator.SDK.Extensions;
-using RPGCreator.SDK.Helpers;
-using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.Types.Collections;
+using RPGCreator.SDK.Common.Helpers;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.UI.Common;
 
 namespace RPGCreator.UI.Content.AssetsManage.Components
@@ -725,13 +721,13 @@ namespace RPGCreator.UI.Content.AssetsManage.Components
         {
             ViewPanel.Children.Clear();
 
-            var searchResults = EngineServices.AssetsManager.GetAssets<BaseTilesetDef>();
+            var searchResults = EngineServices.AssetsManager.GetAssetsOfClass(new("rpgc", "assets", "definitions", "tilesets")).Value;
 
             foreach (var result in searchResults)
             {
                 if (result is IntGridTilesetDef)
                     continue;
-                var item = new TilesetViewListItem(result);
+                var item = new TilesetViewListItem(EngineServices.AssetsManager.Load<BaseTilesetDef>(result).Value);
                 item.OnSelected += () => { SelectedTilesetViewItem = item; };
                 item.OnDeselected += () =>
                 {

@@ -18,13 +18,11 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using RPGCreator.SDK.Assets;
-using RPGCreator.SDK.Attributes;
-using RPGCreator.SDK.Helpers;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Types;
 

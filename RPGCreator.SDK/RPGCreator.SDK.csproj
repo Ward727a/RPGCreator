@@ -12,6 +12,7 @@
       <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.0" />
       <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.4.0" />
       <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+      <PackageReference Include="Fluxor" Version="6.9.0" />
       <PackageReference Include="Fody" Version="6.9.3">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -30,11 +31,10 @@
 
     <ItemGroup>
       <Folder Include="Common\" />
-      <Folder Include="Database\" />
+      <Folder Include="Interfaces\" />
       <Folder Include="Modules\ECS\" />
       <Folder Include="Services\" />
       <Folder Include="Types\Enums\" />
-      <Folder Include="Types\Interfaces\" />
     </ItemGroup>
 
     <ItemGroup>
@@ -45,8 +45,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\EngineClassGenerator\EngineClassGenerator\EngineClassGenerator.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-      <ProjectReference Include="..\UiPropertiesGenerators\RPGCreator.UiPropertiesGenerators\RPGCreator.UiPropertiesGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+      <ProjectReference Include="..\Generators\EngineClassGenerator\EngineClassGenerator\EngineClassGenerator.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+      <ProjectReference Include="..\Generators\UiPropertiesGenerators\RPGCreator.UiPropertiesGenerators\RPGCreator.UiPropertiesGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+      <ProjectReference Include="..\RPGCreator.Shared\RPGCreator.Shared.csproj" />
     </ItemGroup>
 
 </Project>

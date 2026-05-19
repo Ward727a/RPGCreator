@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace RPGCreator.SDK.Logging;
+namespace RPGCreator.SDK.Common.Logging;
 
 /// <summary>
 /// Gets a logger that automatically scopes log messages to the class and method they were logged from.<br/>

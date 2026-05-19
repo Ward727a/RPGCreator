@@ -22,10 +22,11 @@ using System.Buffers;
 using System.Reflection;
 using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Common.Debug;
-using RPGCreator.SDK.Exceptions;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Exceptions;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Internals;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK;
 

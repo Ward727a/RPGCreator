@@ -24,6 +24,7 @@ using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Registry;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Blueprints;
 

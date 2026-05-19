@@ -21,8 +21,9 @@
 using System.ComponentModel;
 using System.Numerics;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
-namespace RPGCreator.SDK.RuntimeService;
+namespace RPGCreator.SDK.Services.RuntimeService;
 
 /// <summary>
 /// The camera service interface for managing camera-related functionalities.<br/>

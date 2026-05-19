@@ -21,8 +21,9 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 using SysPath = System.IO.Path;
 
 namespace RPGCreator.SDK;

@@ -1,10 +1,8 @@
 using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.PaintTargets;
-using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Common.Attributes;
-using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.Editor;
-using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 

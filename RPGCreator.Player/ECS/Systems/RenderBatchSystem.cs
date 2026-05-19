@@ -22,7 +22,7 @@ using System;
 using RPGCreator.SDK;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Systems;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Services.RuntimeService;
 
 namespace RPGCreator.Player.ECS.Systems;
 

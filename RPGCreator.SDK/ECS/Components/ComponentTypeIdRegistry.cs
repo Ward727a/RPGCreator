@@ -1,4 +1,4 @@
-namespace RPGCreator.SDK.ECS;
+namespace RPGCreator.SDK.ECS.Components;
 
 public static class ComponentTypeIdRegistry
 {

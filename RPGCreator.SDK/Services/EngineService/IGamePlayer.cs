@@ -18,7 +18,7 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-namespace RPGCreator.SDK.EngineService;
+namespace RPGCreator.SDK.Services.EngineService;
 
 public interface IGamePlayerService : IService
 {

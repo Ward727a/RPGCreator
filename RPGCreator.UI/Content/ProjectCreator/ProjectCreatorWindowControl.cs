@@ -25,11 +25,10 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.VisualTree;
 using System;
 using System.IO;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Helpers;
+using RPGCreator.SDK.Common.Helpers;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.ProjectCreator

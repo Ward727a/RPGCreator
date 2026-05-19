@@ -3,7 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using RPGCreator.SDK.Assets.Definitions.Skills;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.SkillsEditor.Tabs;
 

@@ -1,6 +1,5 @@
 ﻿using RPGCreator.SDK.Assets.Definitions;
 using RPGCreator.SDK.Serializer;
-using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets;
 

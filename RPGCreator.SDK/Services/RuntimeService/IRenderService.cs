@@ -25,10 +25,11 @@ using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.Editor;
 using RPGCreator.SDK.Types;
-using Color = RPGCreator.SDK.Types.Color;
-using Size = RPGCreator.SDK.Types.Size;
+using RPGCreator.Shared.Types;
+using Color = RPGCreator.Shared.Types.Color;
+using Size = RPGCreator.Shared.Types.Size;
 
-namespace RPGCreator.SDK.RuntimeService;
+namespace RPGCreator.SDK.Services.RuntimeService;
 
     
 public struct RenderCommand()

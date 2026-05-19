@@ -1,10 +1,10 @@
 using System.Numerics;
-using RPGCreator.SDK.Attributes;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
-using Size = RPGCreator.SDK.Types.Size;
+using RPGCreator.Shared.Types;
+using Size = RPGCreator.Shared.Types.Size;
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets;
 

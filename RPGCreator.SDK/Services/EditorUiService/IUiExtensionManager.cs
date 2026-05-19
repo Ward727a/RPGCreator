@@ -20,7 +20,7 @@
 
 using RPGCreator.SDK.Modules.UIModule;
 
-namespace RPGCreator.SDK.EditorUiService;
+namespace RPGCreator.SDK.Services.EditorUiService;
 
 public enum UiMessageType
 {

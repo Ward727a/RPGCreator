@@ -24,11 +24,11 @@ using CommunityToolkit.HighPerformance.Buffers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
-using RPGCreator.SDK.EngineService;
-using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.MethodExtensions;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.Common.MethodExtensions;
 using RPGCreator.SDK.Services.EngineService;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Graph.CompilerLogic;
 

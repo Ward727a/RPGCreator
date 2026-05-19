@@ -21,7 +21,7 @@
 using System.ComponentModel;
 using System.Numerics;
 
-namespace RPGCreator.SDK.RuntimeService;
+namespace RPGCreator.SDK.Services.RuntimeService;
 
 public interface IChunkService : INotifyPropertyChanged, INotifyPropertyChanging, IDisposable, IService
 {

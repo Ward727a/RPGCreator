@@ -19,7 +19,6 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System;
-using Apos.Shapes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RPGCreator.RTP.ECS.Systems;
@@ -27,12 +26,13 @@ using RPGCreator.RTP.Services;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
+using RPGCreator.SDK.Assets.Runtime.Maps;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Systems;
 using RPGCreator.SDK.Editor.Rendering;
 using RPGCreator.SDK.Inputs;
-using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Services.RuntimeService;
 using Vector2 = System.Numerics.Vector2;
 
 namespace RPGCreator.RTP.Viewport;
@@ -118,6 +118,8 @@ public class MonogameViewport : BaseMonogameViewport
     {
         _bitmapControlAddress = bitmapControlAddress;
     }
+    
+    RuntimeMap _runtimeMap;
 
     public void Draw(TimeSpan deltaTime)
     {
@@ -128,47 +130,55 @@ public class MonogameViewport : BaseMonogameViewport
         
         if (RuntimeServices.MapService.CurrentLoadedMapDefinition is MapDefinition mapDef)
         {
-            if (mapDef.CollisionChunk.Elements.Count <= 0)
-            {
-                mapDef.BakeCollisionChunk();
-                // Need another way to detect non-baked collision chunk, because if the map has no collision at all, it will always be empty, even after baking, so we can't rely on the count to check if it's baked or not.
-                // _logger.Debug("Baked {number} collisions for collision chunk",
-                //     args: [mapDef.CollisionChunk.Elements.Count]);
-            }
-            else
-            {
-                var elements = mapDef.CollisionChunk.Elements;
-                RuntimeServices.RenderService.PrepareDrawing();
-                foreach (var element in elements)
+            EngineServices.RuntimeMaker.CreateRuntime<RuntimeMap, MapDefinition>(mapDef)
+                .Match(
+                onSuccess: (map) =>
                 {
-                    var chunkId = element.Key;
-                    var chunk = element.Value;
-                    if (chunk.IsEmpty) continue;
-                    var index = 0;
-                    foreach (var colDataList in chunk.GetAllElementsSpan())
+                    _runtimeMap = map;
+                    if (mapDef.CollisionChunk.Elements.Count <= 0)
+                        map.BakeCollisionChunk();
+                    else
                     {
-                        if (!colDataList.HasValue)
+                        var elements = mapDef.CollisionChunk.Elements;
+                        RuntimeServices.RenderService.PrepareDrawing();
+                        foreach (var element in elements)
                         {
+                            var chunkId = element.Key;
+                            var chunk = element.Value;
+                            if (chunk.IsEmpty) continue;
+                            var index = 0;
+                            foreach (var colDataList in chunk.GetAllElementsSpan())
+                            {
+                                if (!colDataList.HasValue)
+                                {
                             
-                            index++;
-                            continue;
-                        };
-                        Vector2 worldPos = LayerChunk.GetWorldPosition(chunkId, index);
-                        foreach (var data in colDataList.Value.Collisions)
-                        {
-                            RuntimeServices.RenderService.DrawDebugRect(
-                                worldPos + data.Position,
-                                data.Size,
-                                SDK.Types.Color.Red * 0.5f,
-                                2f
-                            );
-                        }
+                                    index++;
+                                    continue;
+                                };
+                                Vector2 worldPos = LayerChunk.GetWorldPosition(chunkId, index);
+                                foreach (var data in colDataList.Value.Collisions)
+                                {
+                                    RuntimeServices.RenderService.DrawDebugRect(
+                                        worldPos + data.Position,
+                                        data.Size,
+                                        Shared.Types.Color.Red * 0.5f,
+                                        2f
+                                    );
+                                }
                         
-                        index++;
+                                index++;
+                            }
+                        }
+                        RuntimeServices.RenderService.FinishDrawing();
                     }
+                    return map;
+                },
+                onFailure: (error) =>
+                {
+                    Logger.Error("Couldn't draw map: {Error}", args: error);
+                    return null;
                 }
-                RuntimeServices.RenderService.FinishDrawing();
-            }
+            );
         }
     }
 

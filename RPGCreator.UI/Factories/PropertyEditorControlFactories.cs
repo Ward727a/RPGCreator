@@ -24,10 +24,8 @@ using System.ComponentModel;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
-using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media;
 using Projektanker.Icons.Avalonia;
 using RPGCreator.SDK;
@@ -36,6 +34,7 @@ using RPGCreator.SDK.GameUI;
 using RPGCreator.SDK.GameUI.Controls;
 using RPGCreator.SDK.Registry;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 using RPGCreator.UI.Content.GameUiEditor;
 using RPGCreator.UI.Factories.TemplateAxaml;
 

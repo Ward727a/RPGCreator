@@ -20,8 +20,9 @@
 
 using System.Numerics;
 using RPGCreator.SDK.ECS.Components;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Services.RuntimeService;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.ECS.Systems;
 

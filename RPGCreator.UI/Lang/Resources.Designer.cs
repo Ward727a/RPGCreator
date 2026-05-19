@@ -8,10 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RPGCreator.UI.OLD.Lang {
-    using System;
-    
-    
+namespace RPGCreator.UI.Lang {
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>

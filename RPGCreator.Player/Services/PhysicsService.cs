@@ -23,9 +23,10 @@ using System.Numerics;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
-using RPGCreator.SDK.Helpers;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Common.Helpers;
+using RPGCreator.SDK.Services.RuntimeService;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.Player.Services;
 

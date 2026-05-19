@@ -1,4 +1,4 @@
-namespace RPGCreator.SDK.ECS;
+namespace RPGCreator.SDK.ECS.Components;
 
 /// <summary>
 /// A marker interface for ECS components.<br/>

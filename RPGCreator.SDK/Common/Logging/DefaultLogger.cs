@@ -1,4 +1,4 @@
-﻿namespace RPGCreator.SDK.Logging;
+﻿namespace RPGCreator.SDK.Common.Logging;
 
 public class DefaultLogger : ILoggerImplementation
 {

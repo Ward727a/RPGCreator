@@ -21,6 +21,7 @@
 using RPGCreator.SDK.Services.EngineService;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Internals;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Assets;
 

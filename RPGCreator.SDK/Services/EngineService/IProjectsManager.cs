@@ -19,7 +19,6 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Diagnostics.CodeAnalysis;
-using RPGCreator.SDK.Assets.MetaData;
 using RPGCreator.SDK.Projects;
 
 namespace RPGCreator.SDK.Services.EngineService;

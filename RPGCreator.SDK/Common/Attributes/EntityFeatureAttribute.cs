@@ -18,10 +18,10 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
-namespace RPGCreator.SDK.Attributes;
+namespace RPGCreator.SDK.Common.Attributes;
 
 /// <summary>
 /// Attribute to mark a class as an entity feature for entities.

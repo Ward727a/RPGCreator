@@ -1,4 +1,5 @@
-﻿using RPGCreator.SDK.Attributes;
+﻿using RPGCreator.SDK.Common.Attributes;
+using RPGCreator.Shared.Attributes;
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 

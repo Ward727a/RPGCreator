@@ -1,14 +1,11 @@
 using System.Numerics;
 using CommunityToolkit.Diagnostics;
-using RPGCreator.Core.Types.Map;
-using RPGCreator.SDK.Assets.Definitions.Maps.AutoLayer;
+using RPGCreator.SDK.Assets.Definitions.Maps.IntGrid;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.PaintTargets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
-using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Common.Attributes;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Editor;
-using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 

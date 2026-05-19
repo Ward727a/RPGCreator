@@ -1,9 +1,9 @@
 using RPGCreator.SDK.Assets.Definitions.Stats;
-using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Parser.PrattFormula;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Skills;
 

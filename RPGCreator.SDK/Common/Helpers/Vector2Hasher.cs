@@ -20,7 +20,7 @@
 
 using System.Numerics;
 
-namespace RPGCreator.SDK.Helpers;
+namespace RPGCreator.SDK.Common.Helpers;
 
 public static class Vector2Hasher
 {

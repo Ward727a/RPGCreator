@@ -1,15 +1,15 @@
 using System;
-using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
-using RPGCreator.Core.Types;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Skills;
-using RPGCreator.SDK.Extensions;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.Common.MethodExtensions;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
+using RPGCreator.UI.Common;
 using Ursa.Controls;
 using Thickness = Avalonia.Thickness;
 

@@ -1,9 +1,7 @@
-﻿using RPGCreator.SDK.Assets.Definitions;
-using RPGCreator.SDK.EngineService;
-using RPGCreator.SDK.Services.EngineService;
+﻿using RPGCreator.SDK.Services.EngineService;
 using RPGCreator.SDK.Types.Internals;
 
-namespace RPGCreator.SDK.Extensions;
+namespace RPGCreator.SDK.Common.MethodExtensions;
 
 public static class AssetManagerExtensions
 {

@@ -20,6 +20,7 @@
 
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Modules.Features.World;
 

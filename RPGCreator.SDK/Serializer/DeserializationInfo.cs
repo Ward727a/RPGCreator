@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 
 namespace RPGCreator.SDK.Serializer;
 public sealed class DeserializationInfo

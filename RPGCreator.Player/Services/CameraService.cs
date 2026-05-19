@@ -23,10 +23,10 @@ using System.Numerics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Xna.Framework;
 using RPGCreator.SDK;
-using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Services.RuntimeService;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = System.Numerics.Vector3;
 

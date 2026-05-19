@@ -21,6 +21,7 @@
 using System.ComponentModel;
 using CommunityToolkit.Diagnostics;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.GameUI;
 

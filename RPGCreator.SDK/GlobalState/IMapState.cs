@@ -19,7 +19,7 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using RPGCreator.SDK.Assets.Definitions.Maps;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Services.RuntimeService;
 
 namespace RPGCreator.SDK.GlobalState;
 

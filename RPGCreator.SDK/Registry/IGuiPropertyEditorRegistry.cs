@@ -20,6 +20,7 @@
 
 using RPGCreator.SDK.GameUI;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Registry;
 

@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using RPGCreator.SDK.Exceptions;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Common.Exceptions;
+using RPGCreator.SDK.Services.RuntimeService;
 
 namespace RPGCreator.SDK;
 

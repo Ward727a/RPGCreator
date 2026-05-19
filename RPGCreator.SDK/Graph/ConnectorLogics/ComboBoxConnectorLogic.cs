@@ -22,6 +22,7 @@ using System.Collections;
 using CommunityToolkit.Mvvm.Input;
 using RPGCreator.SDK.Graph.LOGIC;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Graph.ConnectorLogics;
 

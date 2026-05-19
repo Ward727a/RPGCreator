@@ -9,12 +9,12 @@ using Avalonia.Styling;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
-using RPGCreator.SDK.Extensions;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.Common.MethodExtensions;
 using RPGCreator.SDK.Modules.UIModule;
-using RPGCreator.SDK.Types.Collections;
 using RPGCreator.UI.Common;
 using Ursa.Controls;
+using Size = RPGCreator.Shared.Types.Size;
 
 namespace RPGCreator.UI.Content.Editor.LeftPanel.TilingPanel;
 
@@ -312,7 +312,7 @@ public class TilingPanelControl : UserControl
     {
         base.OnInitialized();
         
-        _canvas.SetGridCellSize(new SDK.Types.Size(32, 32));
+        _canvas.SetGridCellSize(new Size(32, 32));
         ClearTilesetOptions();
         Logger.Debug("[TilingPanel] Loading tileset options...");
         var searchResults = EngineServices.AssetsManager.GetAssets<BaseTilesetDef>();

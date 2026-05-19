@@ -25,9 +25,8 @@ using Avalonia.Input;
 using CommunityToolkit.Diagnostics;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
-using RPGCreator.SDK.Assets.MetaData;
-using RPGCreator.SDK.EditorUiService;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.Services.EditorUiService;
 
 namespace RPGCreator.UI.Content.Editor.Tabs;
 public class MapItem : StackPanel
@@ -41,9 +40,9 @@ public class MapItem : StackPanel
     
     #region Properties
     
-    private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<MapItem>();
+    private static readonly ScopedLogger Logger = SDK.Common.Logging.Logger.ForContext<MapItem>();
     private string MapName => _mapDef.Name;
-    private readonly MapMetaData _mapDef;
+    private readonly MapDefinition _mapDef;
     
     #endregion
 
@@ -57,7 +56,7 @@ public class MapItem : StackPanel
     
     #region Constructors
     
-    public MapItem(MapMetaData metaData)
+    public MapItem(MapDefinition metaData)
     {
         _mapDef = metaData;
         
@@ -69,14 +68,6 @@ public class MapItem : StackPanel
         Guard.IsNotNull(_leftLine);
         
         RegisterEvents();
-
-        
-        foreach(var levelChildItem in metaData.ChildMapIds)
-        {
-            if (!RegistryServices.AssetsMetaDataRegistry.ContainsMetaData(levelChildItem)) continue;
-            // AddLevelToUi(levelDef);
-        }
-
     }
     
     #endregion
@@ -126,17 +117,6 @@ public class MapItem : StackPanel
         _header!.PointerEntered += OnHeaderHover;
 
         _header!.PointerExited += OnHeaderUnhover;
-    }
-    
-    private void AddLevelToUi(MapDefinition levelDef)
-    {
-        var levelItem = new LevelItem(levelDef);
-        levelItem.OnLevelRemoved += () => 
-        {
-            _levelsList!.Children.Remove(levelItem);
-            _mapDef.ChildMapIds.Remove(levelDef.Unique);
-        };
-        _levelsList!.Children.Add(levelItem);
     }
     
     #endregion
@@ -223,7 +203,7 @@ public class MapItem : StackPanel
 
                     var levelItem = new LevelItem(levelName);
                     _levelsList!.Children.Add(levelItem);
-                    _mapDef.ChildMapIds.Add(levelItem.Level.Unique); // Add the level to the map's levels
+                    _mapDef.ChildMaps.Add(levelItem.Level); // Add the level to the map's levels
                 }
             }, TaskScheduler.FromCurrentSynchronizationContext());
         
@@ -317,16 +297,14 @@ public class MapItem : StackPanel
                 
                 assetsManager.Delete(_mapDef.Unique);
 
-                foreach (var mapDefChildMapId in _mapDef.ChildMapIds)
+                foreach (var childMap in _mapDef.ChildMaps)
                 {
-                    assetsManager.Delete(mapDefChildMapId);
-                    metaRegistry.UnregisterMetaData(mapDefChildMapId);
+                    assetsManager.Delete(childMap.Unique);
                 }
 
-                foreach (var tileLayerId in _mapDef.TileLayerIds)
+                foreach (var layer in _mapDef.Layers)
                 {
-                    assetsManager.Delete(tileLayerId);
-                    metaRegistry.UnregisterMetaData(tileLayerId);
+                    assetsManager.Delete(layer.Unique);
                 }
                 
                 metaRegistry.UnregisterMetaData(_mapDef.Unique);

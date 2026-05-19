@@ -20,8 +20,9 @@
 
 using System.Diagnostics.CodeAnalysis;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
-namespace RPGCreator.SDK.EngineService;
+namespace RPGCreator.SDK.Services.EngineService;
 
 /// <summary>
 /// The global path data interface provides features and module the possibility to store ULID<br/>

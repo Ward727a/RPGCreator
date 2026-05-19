@@ -9,9 +9,9 @@ using Avalonia.Threading;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Types;
-using RPGCreator.SDK.Types.Collections;
+using RPGCreator.Shared.Types;
 using RPGCreator.UI.Content.Editor.LeftPanel.TilingPanel;
 using Size = System.Drawing.Size;
 
@@ -183,7 +183,7 @@ public class TilesetExplorer : UserControl
     {
         base.OnInitialized();
         
-        _canvas.SetGridCellSize(new SDK.Types.Size(32, 32));
+        _canvas.SetGridCellSize(new Shared.Types.Size(32, 32));
         ClearTilesetOptions();
         Logger.Debug("[TilingPanel] Loading tileset options...");
         _ = Task.Run(() =>

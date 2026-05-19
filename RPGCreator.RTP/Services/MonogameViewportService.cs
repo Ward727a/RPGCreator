@@ -23,8 +23,8 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using RPGCreator.RTP.Viewport;
 using RPGCreator.SDK.Editor.Rendering;
-using RPGCreator.SDK.EditorUiService;
-using Size = System.Drawing.Size;
+using RPGCreator.SDK.Services.EditorUiService;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.RTP.Services;
 
@@ -36,7 +36,7 @@ public sealed class MonogameViewportService : IMonogameViewport
     private Dictionary<string, BaseMonogameViewport> ViewportsMap { get; } = new();
     private readonly List<BaseMonogameViewport> _activeViewports = [];
 
-    private Queue<(string ViewportId, IntPtr bitmapControlAddress, SDK.Types.Size InitialSize)> _pendingViewports = new();
+    private Queue<(string ViewportId, IntPtr bitmapControlAddress, Size InitialSize)> _pendingViewports = new();
     private Queue<(string ViewportId, int Width, int Height)> _pendingResizes = new();
     
     public void Initialize()
@@ -64,7 +64,7 @@ public sealed class MonogameViewportService : IMonogameViewport
         OnCoreReady?.Invoke();
     }
     
-    public BaseMonogameViewport? CreateNewViewport(string viewportId, IntPtr bitmapControlAddress, SDK.Types.Size initialSize, ViewportType viewportType = ViewportType.Game)
+    public BaseMonogameViewport? CreateNewViewport(string viewportId, IntPtr bitmapControlAddress, Size initialSize, ViewportType viewportType = ViewportType.Game)
     {
         if (ViewportsMap.ContainsKey(viewportId))
         {
@@ -127,7 +127,7 @@ public sealed class MonogameViewportService : IMonogameViewport
             throw new Exception($"Viewport with ID '{viewportId}' not found.");
         }
         
-        viewport.Resize(new SDK.Types.Size(width, height));
+        viewport.Resize(new Size(width, height));
     }
 
     public BaseMonogameViewport GetViewport(string viewportId)

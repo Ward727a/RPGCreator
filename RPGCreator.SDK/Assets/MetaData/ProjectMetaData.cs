@@ -20,20 +20,13 @@
 
 using System.Text.Json.Serialization;
 using RPGCreator.SDK.Common.Attributes;
-using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.MetaData;
 
 [EngineClass("rpgc", "metadata", "project", DisplayName = "Project Metadata")]
-public partial class ProjectMetaData : BaseMetaData
+public partial class ProjectMetaData
 {
-    public readonly struct AssetsStruct()
-    {
-        public readonly string DbName { get; } = "AssetsManager.db";
-        public readonly string RootFolder { get; } = "Content";
-    }
     
-    public override string DbKey => "metadata_project";
     public string Name { get; set; } = "";
     public string Description { get; set; } = "";
     [JsonPropertyName("Path")]
@@ -46,7 +39,6 @@ public partial class ProjectMetaData : BaseMetaData
     public bool IsFavorite { get; set; } = false;
     public string? Copyright { get; set; } = "";
     public List<string> Authors { get; set; } = [];
-    public AssetsStruct Assets { get; set; } = new();
     public List<string> Modules { get; set; } = [];
     public Ulid MainMapId { get; set; } = Ulid.Empty;
 
@@ -75,5 +67,15 @@ public partial class ProjectMetaData : BaseMetaData
         {
             Unique = Ulid.NewUlid()
         };
+    }
+
+    public ProjectMetaData Clone()
+    {
+        var clone = (ProjectMetaData)MemberwiseClone();
+        
+        clone.Authors = new List<string>(Authors);
+        clone.Modules = new List<string>(Modules);
+        
+        return clone;
     }
 }

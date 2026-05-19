@@ -1,5 +1,5 @@
 using System.Runtime.CompilerServices;
-using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.ECS.Components;
 
 namespace RPGCreator.SDK.Types.Collections;
 public interface IEcsSparseSet

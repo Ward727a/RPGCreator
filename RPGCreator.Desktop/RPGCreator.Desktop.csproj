@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RPGCreator.Core\RPGCreator.Core.csproj" />
+    <ProjectReference Include="..\Libraries\RPGCreator.EngineLib\RPGCreator.EngineLib.csproj" />
     <ProjectReference Include="..\RPGCreator.UI\RPGCreator.UI.csproj" />
   </ItemGroup>
     <Target Name="CopyUIAssets" AfterTargets="Build">

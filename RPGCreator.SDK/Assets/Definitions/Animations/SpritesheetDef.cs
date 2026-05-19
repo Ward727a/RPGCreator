@@ -1,11 +1,9 @@
 using System.Numerics;
 using System.Runtime.Serialization;
-using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Common.Attributes;
-using RPGCreator.SDK.Helpers;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Helpers;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Serializer;
-using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Internals;
 using ISerializable = RPGCreator.SDK.Serializer.ISerializable;
 using Rectangle = System.Drawing.Rectangle;

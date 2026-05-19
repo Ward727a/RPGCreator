@@ -4,10 +4,10 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.AutoLayerEditor.Components;

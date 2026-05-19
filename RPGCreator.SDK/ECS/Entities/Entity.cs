@@ -1,4 +1,5 @@
-using RPGCreator.SDK.Exceptions;
+using RPGCreator.SDK.Common.Exceptions;
+using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.Types.Internals;
 
 namespace RPGCreator.SDK.ECS.Entities;

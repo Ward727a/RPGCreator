@@ -23,9 +23,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using RPGCreator.Core.Types;
 using RPGCreator.SDK;
 using RPGCreator.SDK.GameUI.Controls;
+using RPGCreator.UI.Common;
 
 namespace RPGCreator.UI.Content.GameUiEditor.Components.Explorer;
 

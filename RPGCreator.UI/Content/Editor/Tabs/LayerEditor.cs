@@ -23,7 +23,7 @@
 // 
 #endregion
 using Avalonia.Controls;
-using RPGCreator.Core.Types;
+using RPGCreator.UI.Common;
 using RPGCreator.UI.Content.Editor.LayersListComponents;
 
 namespace RPGCreator.UI.Content.Editor.Tabs

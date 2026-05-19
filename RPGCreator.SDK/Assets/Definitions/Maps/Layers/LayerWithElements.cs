@@ -5,12 +5,10 @@ using System.Runtime.CompilerServices;
 using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.PaintTargets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
-using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Common.Attributes;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Editor;
-using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Serializer;
-using RPGCreator.SDK.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 
@@ -18,7 +16,7 @@ namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 public abstract class LayerWithElements<TDef> : BaseLayerDef
     where TDef : class, ILayerElem
 {
-    protected static readonly ScopedLogger Logger = Logging.Logger.ForContext<LayerWithElements<TDef>>();
+    protected static readonly ScopedLogger Logger = Common.Logging.Logger.ForContext<LayerWithElements<TDef>>();
     
     protected Dictionary<long, LayerChunk<TDef>> _chunks = new();
 

@@ -1,3 +1,4 @@
+using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.ECS.Factories;
 using RPGCreator.SDK.ECS.Systems;

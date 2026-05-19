@@ -19,8 +19,9 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Reflection;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 
+namespace RPGCreator.SDK.Fody;
 
 /// <summary>
 /// Needed by fody to log the execution time of methods.

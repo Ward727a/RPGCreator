@@ -1,8 +1,9 @@
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.ECS;
 

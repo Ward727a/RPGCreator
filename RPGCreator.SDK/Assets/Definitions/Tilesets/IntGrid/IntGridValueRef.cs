@@ -1,7 +1,8 @@
 ﻿using System.Drawing;
 using CommunityToolkit.Mvvm.ComponentModel;
-using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Types.Records;
+using RPGCreator.Shared.Attributes;
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets.IntGrid;
 

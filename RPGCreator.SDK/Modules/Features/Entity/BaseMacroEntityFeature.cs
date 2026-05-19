@@ -21,11 +21,12 @@
 using System.Runtime.CompilerServices;
 using CommunityToolkit.Diagnostics;
 using RPGCreator.SDK.Assets.Definitions.Characters;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.ECS;
-using RPGCreator.SDK.ECS.Components;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Modules.Features.Entity;
 

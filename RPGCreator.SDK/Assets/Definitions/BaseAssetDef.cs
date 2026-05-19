@@ -2,9 +2,9 @@ using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using PropertyChanged;
 using PropertyChanging;
-using RPGCreator.SDK.Assets.MetaData;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Internals;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions;
 
@@ -24,7 +24,7 @@ public abstract class BaseObservableAssetDef : ObservableObject, IBaseAssetDef
 
 [AddINotifyPropertyChangedInterface]
 [ImplementPropertyChanging]
-public abstract class BaseAssetDef : IHasMetadata, IBaseAssetDef
+public abstract class BaseAssetDef : IBaseAssetDef
 {
     
     [JsonInclude]
@@ -34,9 +34,4 @@ public abstract class BaseAssetDef : IHasMetadata, IBaseAssetDef
 
     [JsonInclude]
     public URN ClassUrn { get; set; }
-    
-    public virtual BaseMetaData? GetMetaData()
-    {
-        return null;
-    }
 }

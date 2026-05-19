@@ -4,11 +4,11 @@ using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.GlobalState;
-using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Services.RuntimeService;
 using RPGCreator.SDK.Types;
-using RPGCreator.SDK.Types.Collections;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.RTP.Services;
 
@@ -208,9 +208,9 @@ public class MapService : IMapService
     {
         if (!HasLoadedMap || CurrentLoadedMapDefinition == null)
             return false;
-        if (layerIndex < 0 || layerIndex >= CurrentLoadedMapDefinition.TileLayers.Count)
+        if (layerIndex < 0 || layerIndex >= CurrentLoadedMapDefinition.Layers.Count)
             return false;
-        var layerDef = CurrentLoadedMapDefinition.TileLayers[layerIndex];
+        var layerDef = CurrentLoadedMapDefinition.Layers[layerIndex];
         if (CurrentLoadedMapDefinition.RemoveLayer(layerDef))
         {
             RemovedLayer?.Invoke(layerDef);
@@ -223,18 +223,18 @@ public class MapService : IMapService
     {
         if (!HasLoadedMap || CurrentLoadedMapDefinition == null)
             throw new InvalidOperationException("No map loaded.");
-        if (CurrentLayerIndex < 0 || CurrentLayerIndex >= CurrentLoadedMapDefinition.TileLayers.Count)
+        if (CurrentLayerIndex < 0 || CurrentLayerIndex >= CurrentLoadedMapDefinition.Layers.Count)
             throw new InvalidOperationException("Selected layer index is out of bounds.");
-        return CurrentLoadedMapDefinition.TileLayers[CurrentLayerIndex];
+        return CurrentLoadedMapDefinition.Layers[CurrentLayerIndex];
     }
 
     public BaseLayerDef GetLayerAt(int layerIndex)
     {
         if (!HasLoadedMap || CurrentLoadedMapDefinition == null)
             throw new InvalidOperationException("No map loaded.");
-        if (layerIndex < 0 || layerIndex >= CurrentLoadedMapDefinition.TileLayers.Count)
+        if (layerIndex < 0 || layerIndex >= CurrentLoadedMapDefinition.Layers.Count)
             throw new InvalidOperationException("Layer index is out of bounds.");
-        return CurrentLoadedMapDefinition.TileLayers[layerIndex];
+        return CurrentLoadedMapDefinition.Layers[layerIndex];
     }
 
     #region Helpers

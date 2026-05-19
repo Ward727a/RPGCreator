@@ -19,8 +19,9 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Numerics;
-using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.ECS.Components;
 

@@ -1,11 +1,11 @@
 using System;
 using Avalonia.Controls;
-using RPGCreator.Core.Types;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.SDK.Assets.Definitions.Skills;
-using RPGCreator.SDK.Extensions;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.Common.MethodExtensions;
+using RPGCreator.UI.Common;
 using Brushes = Avalonia.Media.Brushes;
 using NumericUpDown = Avalonia.Controls.NumericUpDown;
 

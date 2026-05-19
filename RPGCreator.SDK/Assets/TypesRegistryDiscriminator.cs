@@ -1,10 +1,12 @@
 using System.Collections.ObjectModel;
 using System.Numerics;
 using System.Reflection;
-using RPGCreator.Core.Module;
-using RPGCreator.SDK.Attributes;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Attributes;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.Modules;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Attributes;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Assets;
 
@@ -15,7 +17,7 @@ public class TypesRegistryDiscriminator : ITypesRegistry
     private const char GenericCharGroupEnd = '>';
     
     
-    private static readonly ScopedLogger Logger = Logging.Logger.ForContext<TypesRegistryDiscriminator>();
+    private static readonly ScopedLogger Logger = Common.Logging.Logger.ForContext<TypesRegistryDiscriminator>();
     
     /// <summary>
     /// Internal types mapping. Define types where we can't put the attribute on (like System types).

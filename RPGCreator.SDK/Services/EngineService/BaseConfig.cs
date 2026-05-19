@@ -19,9 +19,8 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Text.Json.Serialization;
-using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Common.Attributes;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Serializer;
 
@@ -44,7 +43,7 @@ public partial class BaseConfig : IConfig
         ConfigChanged?.Invoke();
     }
     
-    private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<BaseConfig>();
+    private static readonly ScopedLogger Logger = Common.Logging.Logger.ForContext<BaseConfig>();
     
     [JsonIgnore]
     public virtual string ConfigPath

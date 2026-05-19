@@ -20,7 +20,7 @@
 
 using System.Reflection;
 
-namespace RPGCreator.SDK.Attributes;
+namespace RPGCreator.SDK.Common.Attributes;
 
 /// <summary>
 /// Specifies a description for a property or event.

@@ -1,14 +1,13 @@
 using System.Numerics;
 using System.Text.Json.Serialization;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.Collision;
-using RPGCreator.SDK.Attributes;
 using RPGCreator.SDK.Common.Attributes;
-using RPGCreator.SDK.Helpers;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Helpers;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Collections;
 using RPGCreator.SDK.Types.Internals;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Tilesets;
 

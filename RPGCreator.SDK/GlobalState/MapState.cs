@@ -19,7 +19,7 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using RPGCreator.SDK.Assets.Definitions.Maps;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Services.RuntimeService;
 
 namespace RPGCreator.SDK.GlobalState;
 
@@ -64,7 +64,7 @@ public class MapState : BaseState, IMapState
         get
         {
             if(CurrentMapDef == null) return false;
-            return CurrentLayerIndex >= 0 && CurrentLayerIndex < CurrentMapDef.TileLayers.Count;
+            return CurrentLayerIndex >= 0 && CurrentLayerIndex < CurrentMapDef.Layers.Count;
         }
     }
     
@@ -73,7 +73,7 @@ public class MapState : BaseState, IMapState
         get
         {
             if(CurrentMapDef == null) return false;
-            return CurrentMapDef.TileLayers.Count > 0;
+            return CurrentMapDef.Layers.Count > 0;
         }
     }
     
@@ -87,7 +87,7 @@ public class MapState : BaseState, IMapState
         get
         {
             if(CurrentMapDef == null) return 0;
-            return CurrentMapDef.TileLayers.Count;
+            return CurrentMapDef.Layers.Count;
         }
     }
 

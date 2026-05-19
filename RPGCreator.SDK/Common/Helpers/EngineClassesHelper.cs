@@ -19,10 +19,10 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Reflection;
-using System.Reflection.Metadata;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
-namespace RPGCreator.SDK.Helpers;
+namespace RPGCreator.SDK.Common.Helpers;
 
 public static class EngineClassesHelper
 {

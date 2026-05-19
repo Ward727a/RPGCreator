@@ -30,6 +30,7 @@ using Avalonia.Layout;
 using CommunityToolkit.Mvvm.Input;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 using RPGCreator.UI.Content.Preferences.Components.Modules;
 using RPGCreator.UI.Content.Preferences.Components.Projects;
 using Ursa.Controls;

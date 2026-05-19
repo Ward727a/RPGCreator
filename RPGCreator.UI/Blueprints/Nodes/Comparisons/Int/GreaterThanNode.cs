@@ -25,6 +25,7 @@ using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Graph.ConnectorLogics;
 using RPGCreator.SDK.Graph.LOGIC;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.UI.Blueprints.Nodes.Comparisons.Int;
 

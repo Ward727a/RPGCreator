@@ -20,11 +20,9 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
-using RPGCreator.Core.Types;
 using RPGCreator.SDK.GameUI.Controls;
+using RPGCreator.UI.Common;
 
 namespace RPGCreator.UI.Factories.TemplateAxaml;
 

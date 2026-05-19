@@ -32,7 +32,7 @@ using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Systems;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Services.RuntimeService;
 
 namespace RPGCreator.Player.ECS.Systems;
 
@@ -56,10 +56,10 @@ public class MapDrawingSystem() : BaseMapDrawingSystem
 
     private void PrecalculateLayerRenderingMode(IMapDef map)
     {
-        var entityLayer = map.TileLayers.FirstOrDefault(l => l is EntityLayerDefinition);
+        var entityLayer = map.Layers.FirstOrDefault(l => l is EntityLayerDefinition);
         int spawnLayerZIndex = entityLayer?.LayerIndex ?? 0;
 
-        foreach (var layer in map.TileLayers)
+        foreach (var layer in map.Layers)
         {
             if (layer is EntityLayerDefinition) continue;
             if(layer.IsForeground && layer is not EntityLayerDefinition)
@@ -91,7 +91,7 @@ public class MapDrawingSystem() : BaseMapDrawingSystem
 
         List<(long X, long Y, long ID)> visibleChunks = new();
 
-        var sortedLayersZIndex = MapService.CurrentLoadedMapDefinition.TileLayers
+        var sortedLayersZIndex = MapService.CurrentLoadedMapDefinition.Layers
             .OrderBy(layer => layer.ZIndex)
             .ToList();
 

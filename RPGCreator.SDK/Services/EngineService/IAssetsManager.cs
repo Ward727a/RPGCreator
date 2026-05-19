@@ -20,6 +20,7 @@
 
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Internals;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Services.EngineService;
 

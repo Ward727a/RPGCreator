@@ -21,11 +21,11 @@
 using System.Diagnostics.CodeAnalysis;
 using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Assets.MetaData;
-using RPGCreator.SDK.EngineService;
-using RPGCreator.SDK.Exceptions;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Exceptions;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Registry;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK;
 
@@ -144,22 +144,10 @@ public static class RegistryServices
             }
         }
     }
-
-    public static IUrnRegistry Urn
-    {
-        get => GetService<IUrnRegistry>();
-        set => RegisterService(value);
-    }
     
     public static ITypesRegistry Types
     {
         get => GetService<ITypesRegistry>();
-        set => RegisterService(value);
-    }
-
-    public static IEventsRegisterService Events
-    {
-        get => GetService<IEventsRegisterService>();
         set => RegisterService(value);
     }
 

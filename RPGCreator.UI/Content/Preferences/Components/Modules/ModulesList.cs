@@ -33,7 +33,7 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using Projektanker.Icons.Avalonia;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Modules;
 using Ursa.Controls;
 using Color = Avalonia.Media.Color;
@@ -194,7 +194,7 @@ public class ModulesList : UserControl
 
         private Border MakeTagBorder(Color color)
         {
-            var borderRpg = new SDK.Types.Color(color.R, color.G, color.B, color.A).Darken(.2f);
+            var borderRpg = new Shared.Types.Color(color.R, color.G, color.B, color.A).Darken(.2f);
             var borderColor = new Color(borderRpg.A, borderRpg.R, borderRpg.G, borderRpg.B);
 
             return new Border()

@@ -21,7 +21,7 @@
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace RPGCreator.SDK.RuntimeService;
+namespace RPGCreator.SDK.Services.RuntimeService;
 
 public interface IPlayerController : INotifyPropertyChanged, INotifyPropertyChanging, IService
 {

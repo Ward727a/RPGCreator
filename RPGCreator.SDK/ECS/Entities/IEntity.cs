@@ -1,3 +1,5 @@
+using RPGCreator.SDK.ECS.Components;
+
 namespace RPGCreator.SDK.ECS.Entities;
 
 public interface IEntity

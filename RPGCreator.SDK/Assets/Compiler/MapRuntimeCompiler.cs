@@ -34,7 +34,7 @@ public class MapRuntimeCompiler : BaseAssetRuntimeCompiler<IMapDef>
         Guard.IsNotNull(world);
 
         var mapCompilerContext = new MapCompilerContext(source.Unique);
-        foreach (var layer in source.TileLayers)
+        foreach (var layer in source.Layers)
         {
             RegistryServices.RuntimeCompiler.Compile(layer.GetType(), layer, world, mapCompilerContext);
         }

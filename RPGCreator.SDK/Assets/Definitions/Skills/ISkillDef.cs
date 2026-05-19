@@ -3,6 +3,7 @@ using RPGCreator.SDK.Parser.PrattFormula;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Internals;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Skills;
 

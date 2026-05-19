@@ -112,7 +112,7 @@ public interface IMouseState : IState
     
     /// <summary>
     /// Updates the mouse state with the provided raw mouse data.<br/>
-    /// This should be automatically called by the <see cref="RPGCreator.Core"/> engine part at each <see cref="IMouseProvider"/> update.
+    /// This should be automatically called by the <see cref="RPGCreator.EngineLib"/> engine part at each <see cref="IMouseProvider"/> update.
     /// </summary>
     /// <param name="rawMouseData"></param>
     /// <exception cref="NotImplementedException">

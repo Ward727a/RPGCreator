@@ -19,10 +19,10 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using RPGCreator.SDK.Assets.Definitions.Blueprints;
-using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Common.Attributes;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.GameUI.Events.Contexts;
 using RPGCreator.SDK.Graph;
-using RPGCreator.SDK.Logging;
 
 namespace RPGCreator.SDK.GameUI.Events.Actions;
 

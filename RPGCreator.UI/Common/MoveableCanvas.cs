@@ -5,7 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Media;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.UI.Common.CustomBrush;
 using Color = Avalonia.Media.Color;
 using Point = Avalonia.Point;
@@ -15,7 +15,7 @@ public class EditorGridLayer : Control
 {
     // On peut binder ça ou le passer en propriété
     public Point Offset { get; set; } = new Point(0, 0);
-    public SDK.Types.Size GridCellSize { get; set; } = new (32, 32);
+    public Shared.Types.Size GridCellSize { get; set; } = new (32, 32);
     public bool ShowGrid { get; set; } = true;
 
     // Stylos (Cached pour la perf)
@@ -69,7 +69,7 @@ public class MoveableCanvas : UserControl
     public bool LimitTo00Coordinates { get; set; } = true;
     
     public bool ShowGrid { get; set; } = false;
-    public SDK.Types.Size GridCellSize { get; private set; } = new (32, 32);
+    public Shared.Types.Size GridCellSize { get; private set; } = new (32, 32);
 
     private bool _showCheckboard = false;
     public bool ShowCheckboard { 
@@ -120,7 +120,7 @@ public class MoveableCanvas : UserControl
         }
     }
     
-    public void SetGridCellSize(SDK.Types.Size cellSize)
+    public void SetGridCellSize(Shared.Types.Size cellSize)
     {
         GridCellSize = cellSize;
         _gridLayer.GridCellSize = GridCellSize;

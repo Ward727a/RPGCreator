@@ -89,8 +89,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RPGCreator.Core\RPGCreator.Core.csproj" />
-    <ProjectReference Include="..\RPGCreator.PluginGenerators\RPGCreator.PluginGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\Generators\RPGCreator.PluginGenerators\RPGCreator.PluginGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\Libraries\RPGCreator.EditorLib\RPGCreator.EditorLib.csproj" />
     <ProjectReference Include="..\RPGCreator.RTP\RPGCreator.RTP.csproj" />
   </ItemGroup>
 

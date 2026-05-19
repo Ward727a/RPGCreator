@@ -1,6 +1,6 @@
 using System.Numerics;
-using RPGCreator.SDK.ECS;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Services.EngineService;
 

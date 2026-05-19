@@ -20,7 +20,7 @@
 
 using RPGCreator.SDK.Commands;
 
-namespace RPGCreator.SDK.EngineService;
+namespace RPGCreator.SDK.Services.EngineService;
 
 public interface IUndoRedoService : IService
 {

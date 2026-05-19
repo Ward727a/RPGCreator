@@ -1,9 +1,7 @@
-
 using System.Numerics;
-using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Types.Internals;
 
-namespace RPGCreator.SDK.Assets.Definitions.Maps;
+namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 
 public interface IMapLayerInstance<TLayerDefElement, TLayerInstanceElement> : IMapLayerInstance
 {

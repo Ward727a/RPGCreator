@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using Avalonia;
-using RPGCreator.Core;
+using RPGCreator.EngineLib;
 using RPGCreator.UI;
 
 namespace RPGCreator.Desktop;

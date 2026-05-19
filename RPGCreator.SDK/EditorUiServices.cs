@@ -19,14 +19,14 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Diagnostics.CodeAnalysis;
+using RPGCreator.SDK.Common.Exceptions;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Editor.Rendering;
-using RPGCreator.SDK.EditorUiService;
-using RPGCreator.SDK.Exceptions;
 using RPGCreator.SDK.Graph;
-using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Modules.UIModule;
+using RPGCreator.SDK.Services.EditorUiService;
 using RPGCreator.SDK.Types;
-using Size = System.Drawing.Size;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK;
 
@@ -349,7 +349,7 @@ public static class EditorUiServices
         {
             Logger.Error("[UI] No IMonogameViewport registered. Cannot initialize viewport.");
         }
-        public BaseMonogameViewport? CreateNewViewport(string viewportId, IntPtr bitmapControlAddress, SDK.Types.Size sizeWanted, ViewportType viewportType)
+        public BaseMonogameViewport? CreateNewViewport(string viewportId, IntPtr bitmapControlAddress, Size sizeWanted, ViewportType viewportType)
         {
             Logger.Error("[UI] No IMonogameViewport registered. Cannot create new viewport.");
             return null;

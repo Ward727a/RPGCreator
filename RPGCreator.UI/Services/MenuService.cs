@@ -21,14 +21,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Controls;
-using RPGCreator.SDK.EditorUiService;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.Services.EditorUiService;
 
 namespace RPGCreator.UI.Services;
 
 public class MenuService : IMenuService
 {
-    private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<MenuService>();
+    private static readonly ScopedLogger Logger = SDK.Common.Logging.Logger.ForContext<MenuService>();
     public void OpenContextMenu(object host, IEnumerable<MenuAction> actions)
     {
         if (host is not Control hostControl) return;

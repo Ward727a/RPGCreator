@@ -18,7 +18,7 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGRect = RPGCreator.SDK.Types.Rect;
+using RPGRect = RPGCreator.Shared.Types.Rect;
 using MGRect = Microsoft.Xna.Framework.Rectangle;
 
 namespace RPGCreator.Player.MethodsExtension;

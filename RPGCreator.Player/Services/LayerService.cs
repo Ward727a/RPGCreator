@@ -1,9 +1,10 @@
 ﻿using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Assets.Definitions.Maps;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
-using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.Services.RuntimeService;
 
 namespace RPGCreator.Player.Services;
 
@@ -149,7 +150,7 @@ public class LayerService : ObservableObject, ILayerService
         if (mapDef == null)
             throw new InvalidOperationException("No map is currently loaded.");
         
-        return mapDef.TileLayers[layerIndex];
+        return mapDef.Layers[layerIndex];
     }
 
     #endregion
@@ -179,7 +180,7 @@ public class LayerService : ObservableObject, ILayerService
         var mapDef = RuntimeServices.MapService.CurrentLoadedMapDefinition;
         if (mapDef != null)
         {
-            LayerCount = mapDef.TileLayers.Count;
+            LayerCount = mapDef.Layers.Count;
             CanSelectLayer = LayerCount > 0;
             CurrentLayerIndex = CanSelectLayer ? 0 : -1;
             HasSelectedLayer = CanSelectLayer;

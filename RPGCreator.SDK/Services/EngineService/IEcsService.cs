@@ -20,7 +20,7 @@
 
 using RPGCreator.SDK.ECS;
 
-namespace RPGCreator.SDK.EngineService;
+namespace RPGCreator.SDK.Services.EngineService;
 
 public interface IEcsService : IService
 {

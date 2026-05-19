@@ -32,8 +32,9 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using MonoGame.Extended.Collections;
-using RPGCreator.SDK.EditorUiService;
+using RPGCreator.SDK.Services.EditorUiService;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 using RPGCreator.UI.Content.Editor;
 
 namespace RPGCreator.UI.Services;

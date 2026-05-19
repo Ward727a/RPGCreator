@@ -22,7 +22,7 @@ using System.Numerics;
 using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Inputs;
 
-namespace RPGCreator.SDK.EngineService;
+namespace RPGCreator.SDK.Services.EngineService;
 
 
 /// <summary>

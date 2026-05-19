@@ -21,12 +21,12 @@
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using Avalonia.Logging;
 using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Graph.ConnectorLogics;
 using RPGCreator.SDK.Graph.LOGIC;
 using RPGCreator.SDK.Types;
-using Logger = RPGCreator.SDK.Logging.Logger;
+using RPGCreator.Shared.Types;
+using Logger = RPGCreator.SDK.Common.Logging.Logger;
 
 namespace RPGCreator.UI.Blueprints.Nodes.Converter.BoolTo;
 

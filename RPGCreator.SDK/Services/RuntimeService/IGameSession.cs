@@ -21,7 +21,7 @@
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.GlobalState;
 
-namespace RPGCreator.SDK.RuntimeService;
+namespace RPGCreator.SDK.Services.RuntimeService;
 
 public interface IGameSession : IState
 {

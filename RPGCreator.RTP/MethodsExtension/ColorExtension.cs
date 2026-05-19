@@ -18,10 +18,10 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGColor = RPGCreator.SDK.Types.Color;
+using RPGColor = RPGCreator.Shared.Types.Color;
 using MGColor = Microsoft.Xna.Framework.Color;
 
-namespace RPGCreator.RTP.Extensions;
+namespace RPGCreator.RTP.MethodsExtension;
 
 public static class ColorExtension
 {

@@ -23,7 +23,7 @@ using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace RPGCreator.RTP.Extensions;
+namespace RPGCreator.RTP.MethodsExtension;
 
 /// <summary>
 /// Extensions for fast conversion between MonoGame and System.Numerics math types.<br/>

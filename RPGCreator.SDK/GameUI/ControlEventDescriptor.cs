@@ -18,10 +18,10 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using CommunityToolkit.Mvvm.Input;
 using RPGCreator.SDK.GameUI.Events.Actions;
 using RPGCreator.SDK.GameUI.Events.Contexts;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.GameUI;
 

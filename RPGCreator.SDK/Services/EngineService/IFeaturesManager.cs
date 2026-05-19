@@ -20,13 +20,14 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using RPGCreator.SDK.Attributes;
+using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Modules.Features.Game;
 using RPGCreator.SDK.Modules.Features.World;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
-namespace RPGCreator.SDK.EngineService;
+namespace RPGCreator.SDK.Services.EngineService;
 
 public sealed record EntityFeaturePropertyMetadata(
     PropertyInfo PropertyInfo,

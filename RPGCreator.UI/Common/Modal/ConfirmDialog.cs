@@ -22,13 +22,13 @@
 // 
 // 
 #endregion
+
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
-using System;
-using RPGCreator.UI;
 
-namespace RPGCreator.Core.Types.Windows
+namespace RPGCreator.UI.Common.Modal
 {
     public class ConfirmDialog : Window
     {

@@ -18,11 +18,10 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.Drawing;
 using RPGCreator.SDK.Editor.Rendering;
-using Size = RPGCreator.SDK.Types.Size;
+using Size = RPGCreator.Shared.Types.Size;
 
-namespace RPGCreator.SDK.EditorUiService;
+namespace RPGCreator.SDK.Services.EditorUiService;
 
 public enum ViewportType
 {

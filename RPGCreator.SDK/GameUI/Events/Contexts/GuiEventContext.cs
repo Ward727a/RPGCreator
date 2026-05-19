@@ -21,6 +21,7 @@
 using RPGCreator.SDK.Assets.Definitions.Blueprints;
 using RPGCreator.SDK.GameUI.Controls;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.GameUI.Events.Contexts;
 

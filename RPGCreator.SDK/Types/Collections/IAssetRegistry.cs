@@ -1,4 +1,5 @@
 using RPGCreator.SDK.Types.Internals;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Types.Collections;
 

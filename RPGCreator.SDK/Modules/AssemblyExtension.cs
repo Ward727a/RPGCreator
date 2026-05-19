@@ -20,7 +20,7 @@
 
 using System.Reflection;
 
-namespace RPGCreator.Core.Module;
+namespace RPGCreator.SDK.Modules;
 
 public static class AssemblyExtension
 {

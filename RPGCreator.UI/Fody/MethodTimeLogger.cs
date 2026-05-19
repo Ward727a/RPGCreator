@@ -20,8 +20,9 @@
 
 using System;
 using System.Reflection;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 
+namespace RPGCreator.UI.Fody;
 
 /// <summary>
 /// Needed by fody to log the execution time of methods.

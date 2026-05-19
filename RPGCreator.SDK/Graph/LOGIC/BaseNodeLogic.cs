@@ -19,9 +19,9 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.CodeDom.Compiler;
-using RPGCreator.SDK.Assets.Definitions.Blueprints;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Graph.LOGIC;
 

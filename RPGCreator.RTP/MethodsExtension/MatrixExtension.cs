@@ -21,7 +21,7 @@
 using System.Numerics;
 using Microsoft.Xna.Framework;
 
-namespace RPGCreator.RTP.Extensions;
+namespace RPGCreator.RTP.MethodsExtension;
 
 public static class MatrixExtension
 {

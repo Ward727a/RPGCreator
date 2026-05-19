@@ -29,7 +29,7 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using RPGCreator.SDK.GameUI.Controls;
 using Ursa.Controls;
-using Color = RPGCreator.SDK.Types.Color;
+using Color = RPGCreator.Shared.Types.Color;
 
 namespace RPGCreator.UI.Content.GameUiEditor.Components;
 

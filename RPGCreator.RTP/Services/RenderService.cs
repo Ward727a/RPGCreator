@@ -22,18 +22,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
-using Apos.Shapes;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
-using RPGCreator.RTP.Extensions;
+using RPGCreator.RTP.MethodsExtension;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Editor;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Services.RuntimeService;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
-using Size = RPGCreator.SDK.Types.Size;
+using Size = RPGCreator.Shared.Types.Size;
 
 namespace RPGCreator.RTP.Services;
 

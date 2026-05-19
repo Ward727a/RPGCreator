@@ -1,12 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.SDK.Common.Exceptions;
 using RPGCreator.SDK.Editor.Brushes;
-using RPGCreator.SDK.Exceptions;
 using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Projects;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Services.RuntimeService;
 
 namespace RPGCreator.SDK;
 
@@ -28,7 +28,6 @@ public interface IBrushState : IState
 
 public interface IEditorState : IState
 {
-    bool InEditorMode { get; set; }
     ITileDef? CurrentTile { get; set; }
 }
 

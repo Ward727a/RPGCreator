@@ -7,10 +7,10 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
-using RPGCreator.SDK.ECS;
-using RPGCreator.SDK.EditorUiService;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.Modules.UIModule;
+using RPGCreator.SDK.Services.EditorUiService;
 using RPGCreator.UI.Common.Modal.Browser;
 using Ursa.Controls;
 
@@ -19,7 +19,7 @@ namespace RPGCreator.UI.Content.Editor.LeftPanel.EntitiesPanel;
 public partial class EntitiesPanelControl : UserControl
 {
 
-    private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<EntitiesPanelControl>();
+    private static readonly ScopedLogger Logger = SDK.Common.Logging.Logger.ForContext<EntitiesPanelControl>();
 
 
     public IEntityDefinition? SelectedEntityDefinition;

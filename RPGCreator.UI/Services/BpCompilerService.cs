@@ -30,6 +30,7 @@ using RPGCreator.SDK.Graph;
 using RPGCreator.SDK.Graph.CompilerLogic;
 using RPGCreator.SDK.Graph.LOGIC;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 using RPGCreator.UI.Content.Blueprint;
 
 namespace RPGCreator.UI.Services;

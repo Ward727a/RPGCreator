@@ -32,10 +32,11 @@ using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.Editor;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Services.RuntimeService;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
-using Size = RPGCreator.SDK.Types.Size;
+using Size = RPGCreator.Shared.Types.Size;
 
 namespace RPGCreator.Player.Services;
 

@@ -23,8 +23,6 @@
 // 
 #endregion
 using Avalonia.Controls;
-using Avalonia.VisualTree;
-using RPGCreator.Core.Types.Windows;
 using System;
 using Avalonia.Controls.Documents;
 using Avalonia.Media;
@@ -33,6 +31,7 @@ using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.UI.Common;
+using RPGCreator.UI.Common.Modal;
 using Ursa.Controls;
 using MenuItem = Avalonia.Controls.MenuItem;
 
@@ -152,7 +151,7 @@ namespace RPGCreator.UI.Content.Editor.LayersListComponents
                 if (Layer != null && Layer is BaseLayerDef mapLayer)
                 {
                     // Remove the layer from the engine data
-                    GlobalStates.MapState.CurrentMapDef?.RemoveLayer(mapLayer);
+                    GlobalStates.MapState.CurrentMapDef?.Layers.Remove(mapLayer);
                     LayerRemoved?.Invoke();
                 }
             };

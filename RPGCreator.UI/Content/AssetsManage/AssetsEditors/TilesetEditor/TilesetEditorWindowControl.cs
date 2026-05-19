@@ -27,15 +27,17 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using RPGCreator.Core.Types;
 using System;
 using System.IO;
 using System.Linq;
+using RPGCreator.EngineLib.Common;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
-using RPGCreator.SDK.EditorUiService;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.Services.EditorUiService;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
+using RPGCreator.UI.Common;
 using RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor.CollisionEditor;
 using Ursa.Controls;
 
@@ -396,17 +398,43 @@ namespace RPGCreator.UI.Content.AssetsManage.AssetsEditors.TilesetEditor
             
             var imageCopyPath = Path.Combine(importedFiles.Value, $"{TilesetDefinition.Unique}{imageExtension}");
             
-            try
+            // Dirty thing, but well, it work.
+            if (File.Exists(imageCopyPath))
             {
-                File.Copy(imagePath, imageCopyPath, true);
+                var hash = ShaUtil.ComputeSha256(imageCopyPath);
+                var newHash = ShaUtil.ComputeSha256(imagePath);
+                if (hash != newHash)
+                {
+                    File.Delete(imageCopyPath);
+                    
+                    try
+                    {
+                        File.Copy(imagePath, imageCopyPath, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error($"Error copying image: {ex.Message}");
+                        EditorUiServices.NotificationService.Error("Error copying image!",
+                            $"An error occurred while copying the image: {ex.Message}");
+                        return Result.Failure("Failed to copy image");
+                    }
+                }
             }
-            catch (Exception ex)
+            else
             {
-                Logger.Error($"Error copying image: {ex.Message}");
-                EditorUiServices.NotificationService.Error("Error copying image!", $"An error occurred while copying the image: {ex.Message}");
-                return Result.Failure("Failed to copy image");
+                try
+                {
+                    File.Copy(imagePath, imageCopyPath, true);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error($"Error copying image: {ex.Message}");
+                    EditorUiServices.NotificationService.Error("Error copying image!",
+                        $"An error occurred while copying the image: {ex.Message}");
+                    return Result.Failure("Failed to copy image");
+                }
             }
-            
+
             TilesetDefinition.ImagePath = Path.Combine(importedFiles.Value.PureText, $"{TilesetDefinition.Unique}{imageExtension}");
             var saveResult = EngineServices.AssetsManager.Save(TilesetDefinition).OnFailure((err) =>
             {

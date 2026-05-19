@@ -3,7 +3,7 @@ using RPGCreator.SDK.Assets.Definitions;
 using RPGCreator.SDK.Assets.Definitions.Characters;
 using RPGCreator.SDK.Modules.Definition;
 
-namespace RPGCreator.SDK.ECS;
+namespace RPGCreator.SDK.ECS.Entities;
 
 /// <summary>
 /// Represents the data for a base entity in the ECS system.

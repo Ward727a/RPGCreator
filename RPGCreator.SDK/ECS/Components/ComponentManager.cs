@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.Types.Collections;
 
-namespace RPGCreator.SDK.ECS;
+namespace RPGCreator.SDK.ECS.Components;
 
 public readonly ref struct DirtyQueryView
 {

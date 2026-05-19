@@ -22,9 +22,10 @@
 // 
 // 
 #endregion
+
 using Avalonia.Controls;
 
-namespace RPGCreator.Core.Types
+namespace RPGCreator.UI.Common
 {
     public class VSeparator : UserControl
     {

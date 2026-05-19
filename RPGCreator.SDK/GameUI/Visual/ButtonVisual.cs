@@ -21,6 +21,7 @@
 using System.Numerics;
 using RPGCreator.SDK.GameUI.Interfaces;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.GameUI.Visual;
 

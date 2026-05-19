@@ -27,7 +27,7 @@ using RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Systems;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Services.RuntimeService;
 
 namespace RPGCreator.Player.ECS.Systems;
 
@@ -45,7 +45,7 @@ public class MapForegroundSystem : ISystem
     {
         if (!MapService.HasLoadedMap) return;
         
-        var sortedLayersZIndex = MapService.CurrentLoadedMapDefinition!.TileLayers;
+        var sortedLayersZIndex = MapService.CurrentLoadedMapDefinition!.Layers;
         
         var range = RuntimeServices.ChunkService.GetVisibleChunkBounds(IChunkService.ChunkLoadDistance);
         

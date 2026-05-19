@@ -24,6 +24,7 @@ using System.Text.Json.Serialization;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Services.EngineService;
 

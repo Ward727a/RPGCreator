@@ -1,11 +1,11 @@
 using System.Collections;
 using System.Globalization;
-using System.Text.Json;
 using System.Text.Json.Serialization;
-using RPGCreator.SDK.Attributes;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Attributes;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Attributes;
 
 namespace RPGCreator.SDK.Modules.Definition;
 

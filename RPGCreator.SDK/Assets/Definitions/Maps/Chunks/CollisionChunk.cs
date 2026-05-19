@@ -21,10 +21,11 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
-using RPGCreator.SDK.Extensions;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.Common.MethodExtensions;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
 
@@ -44,7 +45,7 @@ public class CollisionChunk : LayerChunk
             "or reimplement SanitizeLocalCoord using modulo or your own system!");
     }
     
-    private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<CollisionChunk>();
+    private static readonly ScopedLogger Logger = Common.Logging.Logger.ForContext<CollisionChunk>();
     
     public bool IsEmpty => _localElements.All(e => e == null);
     

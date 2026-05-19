@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 
 namespace RPGCreator.SDK.Modules;

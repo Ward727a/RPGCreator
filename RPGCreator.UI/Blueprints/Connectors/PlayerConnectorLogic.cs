@@ -20,6 +20,7 @@
 
 using RPGCreator.SDK.Graph.ConnectorLogics;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.UI.Blueprints.Connectors;
 

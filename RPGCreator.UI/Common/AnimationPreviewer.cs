@@ -7,7 +7,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Animations;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Types.Internals;
 using Ursa.Controls;
 

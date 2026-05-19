@@ -21,6 +21,7 @@
 using System.Collections.ObjectModel;
 using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Registry;
 

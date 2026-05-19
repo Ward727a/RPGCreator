@@ -1,6 +1,6 @@
 using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
-using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.Editor;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps.Layers.PaintTargets;

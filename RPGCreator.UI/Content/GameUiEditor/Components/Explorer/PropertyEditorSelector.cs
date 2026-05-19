@@ -26,12 +26,11 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
-using Avalonia.Markup.Xaml.Templates;
-using Avalonia.VisualTree;
 using RPGCreator.SDK;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.GameUI;
-using RPGCreator.SDK.Logging;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 using Ursa.Controls;
 
 namespace RPGCreator.UI.Content.GameUiEditor.Components.Explorer;

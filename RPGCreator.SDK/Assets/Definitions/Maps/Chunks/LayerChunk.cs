@@ -20,11 +20,11 @@
 
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using RPGCreator.SDK.Assets.Definitions.Maps.Layers;
 using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
-using RPGCreator.SDK.Attributes;
-using RPGCreator.SDK.Extensions;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.Common.MethodExtensions;
 using RPGCreator.SDK.Serializer;
 
 namespace RPGCreator.SDK.Assets.Definitions.Maps.Chunks;
@@ -60,7 +60,7 @@ public class LayerChunk<TDef> : LayerChunk, ISerializable, IDeserializable where
             "or reimplement SanitizeLocalCoord using modulo or your own system!");
     }
     
-    private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<LayerChunk<TDef>>();
+    private static readonly ScopedLogger Logger = Common.Logging.Logger.ForContext<LayerChunk<TDef>>();
     
     public bool IsEmpty => _localElements.All(e => e == null);
     

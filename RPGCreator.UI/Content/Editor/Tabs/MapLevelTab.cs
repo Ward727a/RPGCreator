@@ -26,10 +26,8 @@ using CommunityToolkit.Diagnostics;
 using MethodTimer;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Maps;
-using RPGCreator.SDK.Assets.MetaData;
-using RPGCreator.SDK.EditorUiService;
-using RPGCreator.SDK.Logging;
-using RPGCreator.SDK.Types.Collections;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.Services.EditorUiService;
 using RPGCreator.UI.Common;
 
 namespace RPGCreator.UI.Content.Editor.Tabs
@@ -37,7 +35,7 @@ namespace RPGCreator.UI.Content.Editor.Tabs
     public class MapLevelTab : UserControl
     {
 
-        private static readonly ScopedLogger Logger = SDK.Logging.Logger.ForContext<MapLevelTab>();
+        private static readonly ScopedLogger Logger = SDK.Common.Logging.Logger.ForContext<MapLevelTab>();
 
         private Grid _BodyGrid;
         private AutoCompleteBox _SearchBox;
@@ -45,42 +43,6 @@ namespace RPGCreator.UI.Content.Editor.Tabs
         private Grid _ContentGrid;
         private ScrollViewer _Scroller;
         private StackPanel _MapList;
-
-        private class PopupMap : Window
-        {
-            public PopupMap()
-            {
-                Title = "Add Map";
-                Width = 300;
-                Height = 200;
-                Content = new TextBox
-                {
-                    Watermark = "Map Name",
-                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                    Margin = App.style.Margin
-                };
-                WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            }
-        }
-
-        private class PopupLevel : Window
-        {
-            public PopupLevel()
-            {
-                Title = "Add Level";
-                Width = 300;
-                Height = 200;
-                Content = new TextBox
-                {
-                    Watermark = "Level Name",
-                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch,
-                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                    Margin = App.style.Margin
-                };
-                WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            }
-        }
 
         public MapLevelTab()
         {
@@ -169,10 +131,11 @@ namespace RPGCreator.UI.Content.Editor.Tabs
             _MapList.Children.Clear();
             if (project != null)
             {
-                var maps = RegistryServices.AssetsMetaDataRegistry.GetAllMetaDataOfType<MapMetaData>();
-                foreach (var map in maps)
+                var maps = EngineServices.AssetsManager.GetAssetsOfClass(MapDefinition.ClassURN);
+                
+                foreach (var map in maps.Value)
                 {
-                    AddMapToUi(map);
+                    AddMapToUi(EngineServices.AssetsManager.Load<MapDefinition>(map).Value);
                 }
             }
         }
@@ -198,11 +161,11 @@ namespace RPGCreator.UI.Content.Editor.Tabs
 
             EngineServices.AssetsManager.Save(mapDef);
             
-            AddMapToUi(mapDef.GetMetaData() as MapMetaData);
+            AddMapToUi(mapDef);
             Logger.Info($"Map '{result}' created.");
         }
         
-        private void AddMapToUi(MapMetaData? mapMetaData)
+        private void AddMapToUi(MapDefinition? mapMetaData)
         {
             if (mapMetaData == null) return;
             var map = new MapItem(mapMetaData);

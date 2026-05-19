@@ -1,6 +1,6 @@
 using System.Drawing;
 
-namespace RPGCreator.Core.ModuleSDK.Definition;
+namespace RPGCreator.SDK.Modules.Definition;
 
 public record TagCategory(string Id)
 {

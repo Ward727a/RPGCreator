@@ -37,11 +37,13 @@ using Avalonia.Styling;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.Assets.Definitions.Tilesets.Collision;
-using RPGCreator.SDK.Helpers;
+using RPGCreator.SDK.Common.Helpers;
 using RPGCreator.UI.Common;
 using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Types;
 using Ursa.Controls;
 using Color = Avalonia.Media.Color;
+using Size = RPGCreator.Shared.Types.Size;
 
 #pragma warning disable CS0414 // Field is assigned but its value is never used
 
@@ -256,7 +258,7 @@ public class CollisionEditorControl : UserControl
     {
         base.OnInitialized();
         
-        _editorCanvas.SetGridCellSize(new SDK.Types.Size(32, 32));
+        _editorCanvas.SetGridCellSize(new Size(32, 32));
     }
 
     private void RegisterEvents()

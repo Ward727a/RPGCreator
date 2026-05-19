@@ -1,12 +1,12 @@
-using RPGCreator.Core.Types.Internal;
+using Microsoft.Extensions.ObjectPool;
+using RPGCreator.SDK.Common.Exceptions;
 using RPGCreator.SDK.ECS.Components;
-using RPGCreator.SDK.Exceptions;
 
 namespace RPGCreator.SDK.ECS.Entities;
 
 public class EntityManager(ComponentManager componentManager)
 {
-    private readonly ObjectPool<Entity> _entityPool = new(() => new Entity());
+    private readonly ObjectPool<Entity> _entityPool = new DefaultObjectPool<Entity>(new DefaultPooledObjectPolicy<Entity>(), 1000);
     private Entity?[] _entitiesById = new Entity?[1024];
     
     private int _nextEntityId;
@@ -30,7 +30,7 @@ public class EntityManager(ComponentManager componentManager)
     
     private Entity CreateEntityInternal()
     {
-        var entity = _entityPool.Rent();
+        var entity = _entityPool.Get();
         entity.Id = GetNextEntityId();
         entity.SetManager(this, componentManager);
         

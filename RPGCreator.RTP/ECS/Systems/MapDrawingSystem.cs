@@ -28,7 +28,7 @@ using RPGCreator.SDK.Assets.Definitions.Maps.Layers.EntityLayer;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Systems;
-using RPGCreator.SDK.RuntimeService;
+using RPGCreator.SDK.Services.RuntimeService;
 
 namespace RPGCreator.RTP.ECS.Systems;
 
@@ -51,7 +51,7 @@ public class MapDrawingSystem : BaseMapDrawingSystem
 
         List<(long X, long Y, long ID)> visibleChunks = new();
 
-        var sortedLayersZIndex = MapService.CurrentLoadedMapDefinition.TileLayers
+        var sortedLayersZIndex = MapService.CurrentLoadedMapDefinition.Layers
             .OrderBy(layer => layer.ZIndex)
             .ToList();
         

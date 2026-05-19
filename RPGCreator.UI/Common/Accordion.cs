@@ -22,11 +22,11 @@
 // 
 // 
 #endregion
-using Avalonia.Controls;
-using System;
-using RPGCreator.UI;
 
-namespace RPGCreator.Core.Types
+using System;
+using Avalonia.Controls;
+
+namespace RPGCreator.UI.Common
 {
     public class Accordion : UserControl
     {

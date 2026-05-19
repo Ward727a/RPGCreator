@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using RPGCreator.SDK.Assets.Definitions.Tilesets;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Types.Records;
 

@@ -7,11 +7,11 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using AvaloniaEdit;
 using AvaloniaEdit.TextMate;
-using RPGCreator.Core.Types;
 using RPGCreator.SDK;
 using RPGCreator.SDK.Assets.Definitions.Skills;
 using RPGCreator.SDK.Assets.Definitions.Stats;
-using RPGCreator.SDK.Logging;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.UI.Common;
 using TextMateSharp.Grammars;
 using Ursa.Controls;
 
