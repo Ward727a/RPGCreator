@@ -18,17 +18,32 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.Collections.ObjectModel;
-using System.Numerics;
-using RPGCreator.SDK.GlobalState;
+using RPGCreator.RuntimeLib.ECS;
+using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.Services.RuntimeService;
 
-namespace RPGCreator.SDK.States.Actions;
+namespace RPGCreator.RuntimeLib.Services;
 
-public static class ToolActions
+public class GameSimulationService : IGameSimulationService
 {
-    public record ChangeToolAction(ToolLogic NewTool);
-    public record ChangeToolPayloadAction(object? NewPayload);
-    public record ClearToolPayloadAction();
-    public record UpdateToolParameterValueAction(string ParameterName, object? NewValue);
-    public record SetToolLastDrawAtAction(Vector2 NewLastDrawAt);
+    public IEcsWorld World { get; private set; }
+    public void InitializeNewSession()
+    {
+        World = new EcsWorld();
+    }
+
+    public void LoadSession(IEcsWorld world)
+    {
+        World = world;
+    }
+
+    public void Tick(float deltaTime)
+    {
+        World.Update(TimeSpan.FromSeconds(deltaTime));
+    }
+
+    public void ShutdownSession()
+    {
+        World.Dispose();
+    }
 }

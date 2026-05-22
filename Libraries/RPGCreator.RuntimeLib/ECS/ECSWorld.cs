@@ -1,13 +1,12 @@
+using System.Numerics;
+using RPGCreator.RuntimeLib.Factories;
 using RPGCreator.SDK.ECS;
+using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.ECS.Factories;
 using RPGCreator.SDK.ECS.Systems;
-using Serilog;
-using System.Numerics;
-using RPGCreator.EngineLib.Runtimes.Factories;
-using RPGCreator.SDK.ECS.Components;
 
-namespace RPGCreator.EngineLib.ECS;
+namespace RPGCreator.RuntimeLib.ECS;
 
 public class EcsWorld : IEcsWorld
 {
@@ -116,8 +115,17 @@ public class EcsWorld : IEcsWorld
     /// <returns>A WorldQuery for the specified component type.</returns>
     public WorldQuery<T> Query<T>() where T : struct, IComponent
     {
-        Log.Error("ECSWorld.Query<T> is not implemented yet.");
-        Log.Error("ECSWorld.Query<T> Asked for: " + typeof(T).FullName);
         return null;
+    }
+
+    public void Dispose()
+    {
+        SystemManager.Dispose();
+        ComponentManager.Dispose();
+        CommandBuffer.Dispose();
+        EntityManager.Dispose();
+        WorldBlobManager.Dispose();
+        
+        GC.SuppressFinalize(this);
     }
 }

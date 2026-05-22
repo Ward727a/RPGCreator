@@ -5,10 +5,9 @@ using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Entities;
 using RPGCreator.SDK.ECS.Factories;
 using RPGCreator.SDK.Modules;
-using RPGCreator.SDK.Types;
 using RPGCreator.Shared.Types;
 
-namespace RPGCreator.EngineLib.Runtimes.Factories;
+namespace RPGCreator.RuntimeLib.Factories;
 
 public class EntityFactory : IEntityFactory
 {
@@ -60,5 +59,11 @@ public class EntityFactory : IEntityFactory
             feature.SetConfiguration(featureData.Configuration, new EngineSecurityToken());
             feature.OnInject(entity, entityDefinitionData);
         }
+    }
+
+    public void Dispose()
+    {
+        _worldInjectedFeatures.Clear();
+        GC.SuppressFinalize(this);
     }
 }

@@ -1,16 +1,16 @@
-using RPGCreator.EngineLib.ECS.Components.Actor;
+using RPGCreator.RuntimeLib.ECS.Components.Actor;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.ECS.Components;
 using RPGCreator.SDK.ECS.Systems;
-using Serilog;
-using Animation_CharStateComponent = RPGCreator.EngineLib.ECS.Components.Display.Animation.CharStateComponent;
+using Animation_CharStateComponent = RPGCreator.RuntimeLib.ECS.Components.CharStateComponent;
 using Vector2 = System.Numerics.Vector2;
 
-namespace RPGCreator.EngineLib.ECS.Systems;
+namespace RPGCreator.RuntimeLib.ECS.Systems;
 
 public class MovementSystem : ISystem
 {
-    private readonly ILogger _logger = Log.ForContext<MovementSystem>();
+    private readonly ScopedLogger _logger = Logger.ForContext<MovementSystem>();
     
     private readonly ComponentManager _componentManager;
     public override int Priority { get; } = 100;
@@ -23,7 +23,7 @@ public class MovementSystem : ISystem
     
     public override void Initialize(IEcsWorld ecsWorld)
     {
-        _logger.Information("MovementSystem initialized.");
+        _logger.Info("MovementSystem initialized.");
     }
 
     public override void Update(TimeSpan deltaTime)
@@ -70,7 +70,7 @@ public class MovementSystem : ISystem
                     transform.Position += movement.TargetDirection * (float)deltaTime.TotalSeconds * movement.Speed;
                     break;
                 default:
-                    _logger.Warning("Entity {entityId} has unknown movement mode {mode}.", entityId, movement.Mode);
+                    _logger.Warning("Entity {entityId} has unknown movement mode {mode}.", args: [entityId, movement.Mode]);
                     break;
             }
         }
@@ -109,7 +109,7 @@ public class MovementSystem : ISystem
         }
 
         transform.Position += dir * movement.Speed;
-        _logger.Debug("Entity {entityId} moved to position {position} using grid movement.", entityId, transform.Position);
+        _logger.Debug("Entity {entityId} moved to position {position} using grid movement.", args: [entityId, transform.Position]);
     }
 
     private EntityDirection GetDirectionFromVector(Vector2 dir)

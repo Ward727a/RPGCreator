@@ -3,7 +3,7 @@ using RPGCreator.SDK.ECS.Entities;
 
 namespace RPGCreator.SDK.ECS.Factories;
 
-public interface IEntityFactory
+public interface IEntityFactory : IDisposable
 {
     public BufferedEntity SpawnEntity(IEntityDefinition entityDefinitionData, Vector2 position);
     public void InitializeEntity(BufferedEntity entity, IEntityDefinition entityDefinitionData, Vector2 position);

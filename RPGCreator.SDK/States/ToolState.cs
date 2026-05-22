@@ -19,6 +19,7 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Collections.Immutable;
+using System.Numerics;
 using Fluxor;
 using RPGCreator.SDK.GlobalState;
 
@@ -27,7 +28,8 @@ namespace RPGCreator.SDK.States;
 public record ToolState(
     ToolLogic? ActiveTool,
     object? Payload,
-    IImmutableDictionary<string, object?> ParameterValue
+    IImmutableDictionary<string, object?> ParameterValue,
+    Vector2 LastDrawAt
 )
 {
     public bool HasActiveTool => ActiveTool != null;
@@ -41,5 +43,5 @@ public class FeatureToolState : Feature<ToolState>
 {
     public override string GetName() => "ToolState";
 
-    protected override ToolState GetInitialState() => new(null, null, ImmutableDictionary<string, object?>.Empty);
+    protected override ToolState GetInitialState() => new(null, null, ImmutableDictionary<string, object?>.Empty, Vector2.Zero);
 }

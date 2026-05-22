@@ -210,4 +210,10 @@ public sealed class DefaultCommandBuffer(IEcsWorld world) : IEcsCommandBuffer
         _commands.Clear();
         _tempEntityId = -1;
     }
+
+    public void Dispose()
+    {
+        _commands.Clear();
+        _tempEntityId = -1;
+    }
 }

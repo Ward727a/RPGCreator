@@ -1,6 +1,6 @@
 namespace RPGCreator.SDK.ECS.Systems;
 
-public class SystemManager(IEcsWorld world)
+public class SystemManager(IEcsWorld world) : IDisposable
 {
     private IEcsWorld _world = world;
     
@@ -109,5 +109,20 @@ public class SystemManager(IEcsWorld world)
         }
         
         RuntimeServices.RenderService.FinishDrawing();
+    }
+
+    public void Dispose()
+    {
+        _systemsById.Clear();
+        _systemIdsBySystem.Clear();
+        _systemsByType.Clear();
+        _updateSystems.Clear();
+        _drawingSystems.Clear();
+        _toAdd.Clear();
+        _toRemove.Clear();
+        
+        _world = null;
+        
+        GC.SuppressFinalize(this);
     }
 }

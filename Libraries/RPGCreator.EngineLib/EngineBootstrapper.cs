@@ -20,7 +20,6 @@
 
 using Fluxor;
 using Microsoft.Extensions.DependencyInjection;
-using RPGCreator.EngineLib.ECS;
 using RPGCreator.EngineLib.Inputs;
 using RPGCreator.EngineLib.Managers.AssetsManager;
 using RPGCreator.EngineLib.Managers.ProjectsManager;
@@ -54,7 +53,6 @@ public static class EngineBootstrapper
                 ToolService>(); // Need to clean that maybe, will check that later. [Used, but weirdly, where it should not need a full service]
         services.AddSingleton<IScheduler, EngineScheduler>();
         services.AddSingleton<IPrattFormulaService, PrattFormulaService>();
-        services.AddSingleton<IEcsService, EcsService>();
         services.AddSingleton<IInputsService, InputsService>();
         services.AddSingleton<IModulePathResolver, ModulePathResolver>();
         services.AddSingleton<IGamePlayerService, GamePlayerService>();

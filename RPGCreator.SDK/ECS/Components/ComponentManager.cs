@@ -174,7 +174,7 @@ public record struct Bitmask256
     public void Clear() => _b0 = _b1 = _b2 = _b3 = 0;
 }
 
-public class ComponentManager(EcsEventBus eventBus)
+public class ComponentManager(EcsEventBus eventBus) : IDisposable
 {
     
     public const int MaxComponents = 256;
@@ -719,5 +719,13 @@ public class ComponentManager(EcsEventBus eventBus)
             _entityMasks[entityId].Clear();
         }
     }
-    
+
+    public void Dispose()
+    {
+        _dirtyEntities.Clear();
+        _removeActions.Clear();
+        _entityMasks = null;
+        
+        GC.SuppressFinalize(this);
+    }
 }

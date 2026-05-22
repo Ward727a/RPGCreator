@@ -59,4 +59,10 @@ public static class ToolReducers
         
         return state with { ParameterValue = state.ParameterValue.SetItem(action.ParameterName, action.NewValue) };
     }
+
+    [ReducerMethod]
+    public static ToolState ReduceSetToolLastDrawAt(ToolState state, ToolActions.SetToolLastDrawAtAction action)
+    {
+        return state with { LastDrawAt = action.NewLastDrawAt };
+    }
 }

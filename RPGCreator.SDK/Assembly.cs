@@ -24,3 +24,4 @@ using System.Runtime.CompilerServices;
 // It's his only purpose. And no, you should not remove it, or else the EngineSecurityToken will not be accessible from the Core assembly.
 [assembly: InternalsVisibleTo("RPGCreator.EngineLib")] 
 [assembly: InternalsVisibleTo("RPGCreator.UI")]
+[assembly: InternalsVisibleTo("RPGCreator.RuntimeLib")]

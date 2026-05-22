@@ -1,14 +1,14 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using RPGCreator.RuntimeLib.ECS;
 using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.ECS;
 using RPGCreator.SDK.Modules.Features.Entity;
 using RPGCreator.SDK.Services.EngineService;
-using RPGCreator.SDK.Types;
 using RPGCreator.Shared.Types;
 using Logger = RPGCreator.SDK.Common.Logging.Logger;
 
-namespace RPGCreator.EngineLib.ECS;
+namespace RPGCreator.RuntimeLib.Services;
 
 public class EcsService : IEcsService
 {

@@ -24,7 +24,7 @@ using RPGCreator.SDK.Types.Collections;
 
 namespace RPGCreator.SDK.ECS;
 
-public class BlobManager
+public class BlobManager : IDisposable
 {
     const int BlobSize = 16;
     private Dictionary<Type, ISlab> Blobs { get; } = new();
@@ -261,5 +261,15 @@ public class BlobManager
     public bool Contains<T>(SlabItemPointer index) where T : struct, ISlabItem
     {
         return GetSlab<T>().ContainsItem(index);
+    }
+
+    public void Dispose()
+    {
+        foreach (var slab in Blobs.Values)
+        {
+            slab.Clear();
+        }
+        Blobs.Clear();
+        GC.SuppressFinalize(this);
     }
 }

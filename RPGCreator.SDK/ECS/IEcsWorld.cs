@@ -80,7 +80,7 @@ public struct BufferedEntity(int temporaryId, IEcsCommandBuffer buffer)
 /// The command buffer interface, allowing deferred execution of ECS commands.<br/>
 /// This is useful for batching entity/component operations to improve performance and avoid issues during iteration, or multithreading.
 /// </summary>
-public interface IEcsCommandBuffer
+public interface IEcsCommandBuffer : IDisposable
 {
     /// <summary>
     /// Create a new entity.
@@ -138,7 +138,7 @@ public interface IEcsCommandBuffer
     void Execute(IEcsWorld? world = null);
 }
 
-public interface IEcsWorld
+public interface IEcsWorld : IDisposable
 {
     /// <summary>
     /// The entity manager for this world.

@@ -4,7 +4,7 @@ using RPGCreator.SDK.ECS.Components;
 
 namespace RPGCreator.SDK.ECS.Entities;
 
-public class EntityManager(ComponentManager componentManager)
+public class EntityManager(ComponentManager componentManager) : IDisposable
 {
     private readonly ObjectPool<Entity> _entityPool = new DefaultObjectPool<Entity>(new DefaultPooledObjectPolicy<Entity>(), 1000);
     private Entity?[] _entitiesById = new Entity?[1024];
@@ -97,5 +97,22 @@ public class EntityManager(ComponentManager componentManager)
         {
             Array.Resize(ref _entitiesById, _entitiesById.Length * 2);
         }
+    }
+
+    public void Dispose()
+    {
+        foreach (var entity in _entitiesById)
+        {
+            if (entity != null)
+            {
+                componentManager.RemoveAllComponents(entity.Id);
+                _entityPool.Return(entity);
+            }
+        }
+
+        _entitiesById = Array.Empty<Entity?>();
+        _freeIds.Clear();
+        
+        GC.SuppressFinalize(this);
     }
 }

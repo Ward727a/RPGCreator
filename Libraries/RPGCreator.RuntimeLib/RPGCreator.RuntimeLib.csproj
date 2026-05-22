@@ -6,4 +6,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\RPGCreator.SDK\RPGCreator.SDK.csproj" />
+    </ItemGroup>
+
 </Project>

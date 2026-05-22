@@ -19,20 +19,18 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using Fluxor;
-using RPGCreator.SDK.ECS;
 
 namespace RPGCreator.SDK.States;
 
 public record GameSessionState(
-    IEcsWorld? World,
-    BlobManager Blob,
-    bool IsPaused,
-    int CurrentPlayerId);
+    bool IsSessionActive,
+    int CurrentPlayerId,
+    Ulid CurrentMapId);
 
 
 public class FeatureGameSessionState : Feature<GameSessionState>
 {
     public override string GetName() => "GameSessionState";
 
-    protected override GameSessionState GetInitialState() => new(null, new BlobManager(), false, 0);
+    protected override GameSessionState GetInitialState() => new(false, -1, Ulid.Empty);
 }

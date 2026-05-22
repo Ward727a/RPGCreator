@@ -24,8 +24,9 @@ namespace RPGCreator.SDK.States.Actions;
 
 public static class GameSessionActions
 {
-    
-    public record StartNewSessionAction(IEcsWorld NewWorld, BlobManager? NewBlobManager = null);
+    public record StartNewSessionAction;
+    public record SetPlayerEntityIdAction(int EntityId);
+    public record SetMapIdAction(Ulid MapId);
     public record StopSessionAction;
     
 }

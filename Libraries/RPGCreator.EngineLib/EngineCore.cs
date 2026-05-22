@@ -24,18 +24,11 @@
 #endregion
 
 using RPGCreator.EngineLib.Common;
-using RPGCreator.EngineLib.ECS;
-using RPGCreator.EngineLib.Inputs;
 using RPGCreator.EngineLib.Inputs.Keyboard;
 using RPGCreator.EngineLib.Inputs.Mouse;
-using RPGCreator.EngineLib.Module;
-using RPGCreator.EngineLib.Parser.PRATT;
-using RPGCreator.EngineLib.Registry;
 using RPGCreator.EngineLib.Scheduler;
-using RPGCreator.EngineLib.Services;
 using RPGCreator.EngineLib.Types.Map.Layers.AutoLayer;
 using RPGCreator.SDK;
-using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.GameRunner;
 using RPGCreator.SDK.GameUI.Controls;
@@ -44,7 +37,6 @@ using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Inputs;
 using RPGCreator.SDK.Modules;
 using RPGCreator.SDK.Services.EngineService;
-using RPGCreator.SDK.Types;
 using RPGCreator.Shared.Types;
 using SDKAutoTileSolver = RPGCreator.SDK.Assets.Definitions.Maps.Layers.AutoLayer.AutoTileSolver;
 
@@ -69,22 +61,11 @@ namespace RPGCreator.EngineLib
         static internal EngineCore Instance { get; private set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-        static public bool HasInstance => Instance != null;
-
         static public bool IsCoreReady { get; private set; } = false;
-        static public bool IsUIReady { get; private set; } = false;
-        static public bool IsRTPReady { get; private set; } = false;
 
-        internal EngineScheduler Scheduler { get; private set; }
         internal EngineManagers Managers { get; private set; }
         internal EngineModules Modules { get; private set; }
-        internal EngineSerializer Serializer { get; private set; }
         internal EngineIcons Icons { get; private set; }
-
-        public static bool ManagersReady = false;
-        public static bool ModulesReady = false;
-
-        private int _openedWindowsCount = 0; // Count of opened windows, used to know if the engine is ready to be closed or not.
 
         private EngineCore(EEngineMode mode) 
         {
@@ -102,7 +83,6 @@ namespace RPGCreator.EngineLib
             GlobalStates.EditorState = new EditorState();
             GlobalStates.ProjectState = new ProjectState();
             GlobalStates.MapState = new MapState();
-            GlobalStates.ToolState = new BaseToolState();
             
             GlobalStates.MouseState = new EngineMouseState();
             GlobalStates.KeyboardState = new EngineKeyboardState();
