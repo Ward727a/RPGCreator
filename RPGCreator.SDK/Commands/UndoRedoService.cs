@@ -1,7 +1,11 @@
+using Microsoft.Extensions.DependencyInjection;
 using RPGCreator.SDK.Services.EngineService;
+using RPGCreator.Shared.Attributes;
+using RPGCreator.Shared.Enums;
 
 namespace RPGCreator.SDK.Commands;
 
+[EngineService(typeof(IUndoRedoService), ServiceLifetime.Singleton, EngineModeFlags.Editor)]
 public class UndoRedoService : IUndoRedoService
 {
     private const int MaxCommandHistory = 100;

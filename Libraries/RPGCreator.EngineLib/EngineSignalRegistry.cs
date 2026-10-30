@@ -19,14 +19,12 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using RPGCreator.SDK.Registry;
-using RPGCreator.SDK.Types;
 using RPGCreator.Shared.Types;
 
 namespace RPGCreator.EngineLib;
 
 public class EngineSignalRegistry : ISignalRegistry
 {
-    
     private readonly Dictionary<URN, int> _signalToIndex = new();
     
     public void RegisterSignal(URN signal)

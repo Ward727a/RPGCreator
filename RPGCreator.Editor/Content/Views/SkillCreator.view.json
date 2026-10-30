@@ -1,0 +1,5 @@
+﻿{
+  "ViewId": "rpgc://views/asset_creator/skill_creator",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.AssetsCreator.SkillCreator",
+  "Name": "Skill Creator"
+}

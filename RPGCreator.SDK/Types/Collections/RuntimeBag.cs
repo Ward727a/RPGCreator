@@ -19,14 +19,13 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Diagnostics.CodeAnalysis;
-using RPGCreator.SDK.Assets.Definitions.Tilesets;
 
 namespace RPGCreator.SDK.Types.Collections;
 
 /// <summary>
 /// This class allows to store runtime data in a bag-like structure.<br/>
 /// It can be used to store various types of data that need to be accessed during runtime.<br/>
-/// Note: This is used for example inside the <see cref="BaseTilesetDef"/> for the Tags runtime storage.
+/// Note: This is used for example inside the <see cref="Assets.Tilesets.BaseTilesetDef"/> for the Tags runtime storage.
 /// </summary>
 public class RuntimeBag
 {

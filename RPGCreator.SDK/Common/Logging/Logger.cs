@@ -2,11 +2,61 @@
 
 public static class Logger
 {
+    private static readonly HashSet<int> LOGGED_ONCE_HASHES = [];
+    
+    public static OnceLogger Once => new();
+
+    public readonly struct OnceLogger
+    {
+        private static bool ShouldLog(LogLevel level, string message, object[] args)
+        {
+            var hash = new HashCode();
+            hash.Add(level);
+            hash.Add(message);
+            foreach (var arg in args)
+                hash.Add(arg);
+
+            lock (LOGGED_ONCE_HASHES)
+            {
+                return LOGGED_ONCE_HASHES.Add(hash.ToHashCode());
+            }
+        }
+
+        public void Info(string message, params object[] args)
+        {
+            if (ShouldLog(LogLevel.Info, message, args))
+                Logger.Info(message, args);
+        }
+
+        public void Warning(string message, params object[] args)
+        {
+            if (ShouldLog(LogLevel.Warning, message, args))
+                Logger.Warning(message, args);
+        }
+
+        public void Error(string message, params object[] args)
+        {
+            if (ShouldLog(LogLevel.Error, message, args))
+                Logger.Error(message, args);
+        }
+        
+        public void Error(Exception ex, string message, params object[] args)
+        {
+            if (ShouldLog(LogLevel.Error, message, args))
+                Logger.Error(ex, message, args);
+        }
+    }
+    
     // ReSharper disable once MemberCanBePrivate.Global
     public static ILoggerImplementation? Implementation { get; set; } = new DefaultLogger();
     public static ScopedLogger ForContext<T>()
     {
         return new ScopedLogger(typeof(T).FullName ?? "Unknown", typeof(T).Assembly.GetName().Name ?? "Unknown");
+    }
+
+    public static ScopedLogger ForContext(string className, string asmName)
+    {
+        return new ScopedLogger(className, asmName);
     }
     
     public static void Trace(string message, params object[] args)

@@ -1,0 +1,5 @@
+﻿{
+  "ViewId": "rpgc://views/resource_selector",
+  "TargetClass": "RPGCreator.Editor.UI.Views.ResourceSelector",
+  "Name": "Resource Selector"
+}

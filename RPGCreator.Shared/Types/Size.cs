@@ -1,10 +1,10 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Numerics;
 using RPGCreator.Shared.Attributes;
 
 namespace RPGCreator.Shared.Types;
 
-[EngineType("rpgc", "sdk", "types", "size")]
+[TypeDiscriminator("rpgc", "sdk", "types", "size")]
 public record struct Size
 {
     public float Width { get; set; }
@@ -20,6 +20,10 @@ public record struct Size
     {
         Width = width;
         Height = height;
+    }
+
+    public Size(float both) : this(both, both)
+    {
     }
     
     public static readonly Size Zero = new(0, 0);

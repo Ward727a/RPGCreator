@@ -1,8 +1,10 @@
 ﻿using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Parser.PrattFormula;
+using RPGCreator.Shared.Attributes;
 
 namespace RPGCreator.EngineLib.Parser.PRATT;
 
+[EngineService(typeof(IPrattFormulaService))]
 public class PrattFormulaService : IPrattFormulaService
 {
     public double Evaluate(IPrattFormula formula, IDictionary<string, double> variables)

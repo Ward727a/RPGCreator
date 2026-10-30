@@ -18,15 +18,35 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Reflection;
+using RPGCreator.SDK.GameUI.Core;
 using RPGCreator.SDK.GameUI.Events.Actions;
-using RPGCreator.SDK.GameUI.Events.Contexts;
+using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Registry;
 
-public interface IGuiActionRegistry : IService
+public interface IGuiActionRegistry
 {
-    public void RegisterAction(IGuiAction action);
-    public void UnregisterAction(IGuiAction action);
-    public IEnumerable<IGuiAction>? GetActionByContext<TEventContext>() where TEventContext : GuiEventContext;
-    public IEnumerable<IGuiAction>? GetActionByContext(Type contextType);
+    public int ActionCount { get; }
+    public IReadOnlyCollection<GuiActionMeta> Actions { get; }
+    
+    public Result RegisterAction<T>(bool overwriteIfExists = false) where T : IGuiAction;
+    public Result UnregisterAction<T>() where T : IGuiAction;
+    
+    public Result ScanAndRegisterActions(Assembly assembly, bool overwriteIfExists = false);
+    public Result ScanAndUnregisterActions(Assembly assembly);
+    
+    public Result ScanAndRegisterActions(IEnumerable<Assembly> assemblies, bool overwriteIfExists = false);
+    public Result ScanAndUnregisterActions(IEnumerable<Assembly> assemblies);
+    
+    public Result<GuiActionMeta> GetAction(URN actionUrn);
+    
+    public bool HasAction<T>() where T : IGuiAction;
+    public bool HasAction(Type actionType);
+    public bool HasAction(URN actionUrn);
+    
+    public Result<IGuiAction> CreateAction(URN actionUrn);
+    public Result<IGuiAction> CreateAction(URN actionUrn, params object[] parameters);
+    public T CreateAction<T>() where T : IGuiAction;
+    public T CreateAction<T>(params object[] args) where T : IGuiAction;
 }

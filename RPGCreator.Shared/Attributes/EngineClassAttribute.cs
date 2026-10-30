@@ -18,7 +18,7 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-namespace RPGCreator.SDK.Common.Attributes;
+namespace RPGCreator.Shared.Attributes;
 
 /// <summary>
 /// Attribute to mark a class as an engine class.
@@ -29,8 +29,8 @@ public class EngineClassAttribute : Attribute
     /// <summary>
     /// Unique URN of the class.
     /// </summary>
-    public string Urn;
-    public Type ParentType;
+    public readonly string Urn;
+    public Type? InstanceType;
     public string? DisplayName;
     public string? Description;
     public string? Icon;
@@ -39,6 +39,9 @@ public class EngineClassAttribute : Attribute
 
     public EngineClassAttribute(params string[] urnParts)
     {
-        Urn = $"{urnParts[0]}://{string.Join('/', urnParts.AsSpan(1))}";
+        if(urnParts[0].Contains("://"))
+            Urn = urnParts[0];
+        else
+            Urn = $"{urnParts[0]}://{string.Join('/', urnParts.AsSpan(1))}";
     }
 }

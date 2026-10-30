@@ -7,13 +7,11 @@
         <TieredCompilation>false</TieredCompilation>
         <Nullable>enable</Nullable>
         <LangVersion>14</LangVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
     <PropertyGroup>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <ApplicationIcon>Icon.ico</ApplicationIcon>
-    </PropertyGroup>
-    <PropertyGroup>
-        <DotNetMgcbCommand>mgcb</DotNetMgcbCommand>
     </PropertyGroup>
     <ItemGroup>
         <None Remove="Icon.ico"/>
@@ -27,36 +25,29 @@
             <LogicalName>Icon.bmp</LogicalName>
         </EmbeddedResource>
     </ItemGroup>
+
     <ItemGroup>
-        <PackageReference Include="MonoGame.Extended" Version="5.3.1" />
-        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*"/>
-        <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.*"/>
-    </ItemGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\Libraries\RPGCreator.EngineLib\RPGCreator.EngineLib.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Modules\" />
+        <ProjectReference Include="..\Libraries\RPGCreator.EngineLib\RPGCreator.EngineLib.csproj" />
+        <ProjectReference Include="..\Libraries\RPGCreator.RuntimeLib\RPGCreator.RuntimeLib.csproj" />
+        <ProjectReference Include="..\Thirdparty\FNA\FNA.Core.csproj" />
     </ItemGroup>
 
-    <Target Name="CopyUIAssets" AfterTargets="Build">
-        <ItemGroup>
-            <UIAssets Include="..\RPGCreator.UI\Assets\Modules\**\*.*" />
-        </ItemGroup>
+    <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <PackageReference Include="Hexa.NET.ImGui" Version="2.2.9" />
+    </ItemGroup>
 
-        <Copy SourceFiles="@(UIAssets)"
-              DestinationFolder="$(OutputPath)Modules\%(RecursiveDir)"
-              SkipUnchangedFiles="true" />
-    </Target>
-
+    <ItemGroup Condition=" '$(Configuration)' == 'Release' ">
+        <Compile Remove="DebugUI\**\*.cs" />
+    </ItemGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-        <TargetFramework>net10.0</TargetFramework>
-        <OutputPath>../RPGCreator.UI/Assets/GamePlayer/Debug/</OutputPath>
+        <OutputPath>../RPGCreator.Editor/bin/$(Configuration)/net10.0/Assets/GamePlayer/$(Configuration)/</OutputPath>
     </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-        <TargetFramework>net10.0</TargetFramework>
-        <OutputPath>../RPGCreator.UI/Assets/GamePlayer/Release/</OutputPath>
-    </PropertyGroup>
+    <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+        <Content Include="..\Thirdparty\DLLs\fnalibs\x64\*.*">
+            <Link>%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
 </Project>

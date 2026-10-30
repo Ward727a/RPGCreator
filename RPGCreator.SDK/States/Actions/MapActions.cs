@@ -18,15 +18,18 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGCreator.SDK.Assets.Definitions.Maps;
+using RPGCreator.SDK.Assets.Map;
 
 namespace RPGCreator.SDK.States.Actions;
 
 public static class MapActions
 {
-    public record OpenMapAction(IMapDef MapDef);
+    public record OpenMapAction(MapDefinition MapDef);
     public record CloseMapAction();
     
     public record SelectLayerAction(int LayerIndex);
     public record DeselectLayerAction();
+    
+    public record SetMapDirtyAction();
+    public record ClearMapDirtyAction();
 }

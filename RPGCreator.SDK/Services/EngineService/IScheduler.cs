@@ -23,7 +23,7 @@ namespace RPGCreator.SDK.Services.EngineService;
 public abstract class BaseTask
 {
     public Action Callback;
-    public Guid Id { get; } = Guid.NewGuid();
+    public Ulid Id { get; } = Ulid.NewUlid();
     public abstract void Update(float deltaTime);
     public abstract bool IsCompleted();
     public abstract void Execute();
@@ -32,9 +32,9 @@ public abstract class BaseTask
 
 public interface IScheduler : IService
 { 
-    public Guid WaitSecond(float seconds, Action callback, bool loop = false);
-    public Guid WaitUntil(Func<bool> condition, Action callback);
-    public Guid AddTask(BaseTask task);
-    public void CancelTask(Guid taskId);
+    public Ulid WaitSecond(float seconds, Action callback, bool loop = false);
+    public Ulid WaitUntil(Func<bool> condition, Action callback);
+    public Ulid AddTask(BaseTask task);
+    public void CancelTask(Ulid taskId);
     public void Update(float deltaTime);
 }

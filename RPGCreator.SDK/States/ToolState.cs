@@ -18,30 +18,19 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.Collections.Immutable;
-using System.Numerics;
 using Fluxor;
-using RPGCreator.SDK.GlobalState;
+using RPGCreator.SDK.Tools;
 
 namespace RPGCreator.SDK.States;
 
 public record ToolState(
-    ToolLogic? ActiveTool,
-    object? Payload,
-    IImmutableDictionary<string, object?> ParameterValue,
-    Vector2 LastDrawAt
-)
-{
-    public bool HasActiveTool => ActiveTool != null;
-    public bool HasPayload => Payload != null;
-    
-    public Type PayloadType => Payload?.GetType() ?? typeof(void);
-    public EPayloadType ToolPayloadType => ActiveTool?.PayloadType ?? EPayloadType.None;
-}
+    Tool? ActiveTool,
+    IToolLogic? ActiveToolLogic
+);
 
 public class FeatureToolState : Feature<ToolState>
 {
     public override string GetName() => "ToolState";
 
-    protected override ToolState GetInitialState() => new(null, null, ImmutableDictionary<string, object?>.Empty, Vector2.Zero);
+    protected override ToolState GetInitialState() => new(null, null);
 }

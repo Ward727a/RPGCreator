@@ -1,0 +1,34 @@
+﻿{
+  "ViewId": "rpgc://views/game_preview",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.GamePreview",
+  "Name": "Game Preview",
+  "DeclareBinders": [
+    {
+      "BindId": "inside_button",
+      "DataTemplates": [
+        {
+          "Name": "button_text",
+          "Type": "rpgc://sdk/common/string"
+        },
+        {
+          "Name": "button_description",
+          "Type": "rpgc://sdk/common/string",
+          "Optional": true
+        }
+      ]
+    },
+    {
+      "BindId": "right_section",
+      "DataTemplates": [
+        {
+          "Name": "section_title",
+          "Type": "rpgc://sdk/common/string"
+        },
+        {
+          "Name": "section_description",
+          "Type": "rpgc://sdk/common/string"
+        }
+      ]
+    }
+  ]
+}

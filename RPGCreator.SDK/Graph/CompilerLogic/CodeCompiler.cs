@@ -27,36 +27,31 @@ using Microsoft.CodeAnalysis.Emit;
 using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Common.MethodExtensions;
 using RPGCreator.SDK.Services.EngineService;
-using RPGCreator.SDK.Types;
 using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Graph.CompilerLogic;
 
-public static class CodeCompiler
+public class CodeCompiler
 {
-    private static IConfig _config;
+    private readonly IEngineConfig _engineConfig;
 
-    static CodeCompiler()
+    public CodeCompiler(IEngineConfig engineConfig)
     {
-        if (!EngineServices.Config.TryFrom("blueprint", true, out _config))
+        _engineConfig = engineConfig;
+        if (_engineConfig.Local == null)
         {
-            if (!EngineServices.Config.CreateConfig("blueprint", new BaseConfig(), true))
-            {
-                throw new Exception("Failed to create config");
-            }
-
-            _config = EngineServices.Config.From("blueprint", true)!;
+            throw new Exception("EngineConfig is not initialized or no project is loaded.");
         }
     }
 
-    public static Result<string> CompileToCSharp(BlueprintCompilerData data)
+    public Result<string> CompileToCSharp(BlueprintCompilerData data)
     {
         var usings = new SortedSet<string>();
         var (success, startNode, inDegree, metadataMap) = CodePreCompiler.SortConnectors(data);
 
         var codeContext = new CodeContext(data, metadataMap);
 
-        var debugInfo = _config.GetBool("compile_debug_info", true);
+        var debugInfo = _engineConfig.Local.Blueprints.CompileDebugInfo;
         if (debugInfo)
         {
             codeContext.InDebugMode = true;
@@ -67,11 +62,11 @@ public static class CodeCompiler
             usings.Add("RPGCreator.SDK.Logging");
         }
 
-        var defaultUsings = _config.Get<string[]>("compile_default_usings", []);
+        var defaultUsings = _engineConfig.Local.Blueprints.CompileDefaultUsings;
         foreach (var usingNamespace in defaultUsings)
             usings.Add(usingNamespace);
 
-        var allowAddingUsings = _config.GetBool("compile_allow_adding_usings", false);
+        var allowAddingUsings = _engineConfig.Local.Blueprints.CompileAllowAddingUsings;
         if (allowAddingUsings)
         {
             Logger.Warning("ALLOWING USING STATEMENTS IN COMPILED CODE!");

@@ -69,6 +69,36 @@ public readonly struct Result
     /// </returns>
     public static Result Failure(string message = "No error message provided.") => new(false, message);
 
+    public static Result IsEqual<T>(T value, T expectedValue, string errorMessage = "")
+    {
+        if(value != null && value.Equals(expectedValue))
+            return Ok();
+        return Fail(string.IsNullOrEmpty(errorMessage) ? $"AssertEqual failed: {value} is not equal to expected value {expectedValue}" : errorMessage);
+    }
+
+    public static Result IsEqual<T>(Result<T> result, T expectedValue, string errorMessage = "")
+    {
+        if(result.IsFailure)
+            return Fail(result.Error);
+        
+        if(result.Value != null && result.Value.Equals(expectedValue))
+            return Ok();
+        return Fail(string.IsNullOrEmpty(errorMessage) ? $"AssertEqual failed: {result.Value} is not equal to expected value {expectedValue}" : errorMessage);
+    }
+
+    public static Result DoesNotThrow<T>(Func<T> func)
+    {
+        try
+        {
+            func();
+            return Ok();
+        }
+        catch (Exception e)
+        {
+            return Fail($"Exception thrown: {e.Message}");
+        }
+    }
+
     public override string ToString()
     {
         return IsSuccess ? $"Success" : $"Failure: {Error}";
@@ -154,6 +184,28 @@ public readonly struct Result<T>
     /// </returns>
     /// <typeparam name="T">The type of the value to return.</typeparam>
     public static Result<T> Failure(string message = "No error message provided.") => new(false, message, default);
+
+    public static Result<T> IsOfType<TValueType>(TValueType? value, string errorMessage = "")
+    {
+        if (value is null)
+            return Failure("Value is null");
+        
+        if(value is T typedValue)
+            return Success(typedValue);
+        
+        return Failure(string.IsNullOrEmpty(errorMessage) ? $"Value is not of type {typeof(TValueType).Name}" : errorMessage);
+    }
+    
+    public static Result<T> IsOfType<TValueType>(Result<TValueType> result, string errorMessage = "")
+    {
+        if (result.IsFailure)
+            return Failure(result.Error);
+        
+        if(result.Value is T typedValue)
+            return Success(typedValue);
+        
+        return Failure(string.IsNullOrEmpty(errorMessage) ? $"Value is not of type {typeof(TValueType).Name}" : errorMessage);
+    }
     
     public static implicit operator Result<T>(Result result) => result.IsSuccess ? Failure("You can't return a result directly without specifying a value while awaiting a Result<T>!") : Failure(result.Error);
     public static implicit operator Result<T>(T value) => Success(value);
@@ -241,5 +293,16 @@ public readonly struct Result<T>
     public Result Bind(Func<T, Result> binder)
     {
         return IsSuccess ? binder(Value) : Result.Failure(Error);
+    }
+
+    public Result<TNewType> Cast<TNewType>()
+    {
+        if(IsFailure)
+            return Result<TNewType>.Failure(Error);
+        
+        if (Value is TNewType newValueTyped)
+            return Result<TNewType>.Success(newValueTyped);
+        
+        return Result<TNewType>.Failure($"Cannot cast {Value?.GetType().Name ?? "null"} to {typeof(TNewType).Name}.");
     }
 }

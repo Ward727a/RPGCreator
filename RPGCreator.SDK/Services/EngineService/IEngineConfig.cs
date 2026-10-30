@@ -21,14 +21,14 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
+using RPGCreator.SDK.IO.Config;
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Serializer;
-using RPGCreator.SDK.Types;
 using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Services.EngineService;
 
-public interface IConfig : ISerializable, IDeserializable
+public interface IConfig
 {
     public event Action<string>? KeyChanged;
     event Action? ConfigSaved;
@@ -69,68 +69,20 @@ public interface IConfig : ISerializable, IDeserializable
     public void OnSavedConfig();
 }
 
-public interface IEngineConfig : IConfig, IService, ISerializable, IDeserializable
+public interface IEngineConfig
 {
-    event Action? AutoSaveStarted;
-
-    public ObservableCollection<URN> Shortcuts { get; }
-    public ObservableCollection<URN> ToolsShortcuts { get; }
-
+    public enum ConfigScope { Global, Local }
     
-    /// <summary>
-    /// Try to open a config from its name.
-    /// </summary>
-    /// <param name="configName">The name of the config to open.</param>
-    /// <param name="isGlobal">If the config is a global config (i.e. located in the app config folder) or a project config (i.e. located in the current project config folder).</param>
-    /// <param name="config">The config if found, null otherwise.</param>
-    /// <returns>
-    /// True if the config was found, false otherwise.
-    /// </returns>
-    /// <remarks>
-    /// For example, check <see cref="From"/>
-    /// </remarks>
-    public bool TryFrom(string configName, bool isGlobal, [NotNullWhen(true)] out IConfig? config);
+    public EngineConfigData Global { get; }
+    public LocalConfigData? Local { get; }
     
-    /// <summary>
-    /// Try to open a config from its name.
-    /// </summary>
-    /// <param name="configName">The name of the config to open.</param>   
-    /// <param name="isGlobal">If the config is a global config (i.e. located in the app config folder) or a project config (i.e. located in the current project config folder).</param>  
-    /// <param name="config">The config if found, null otherwise.</param> 
-    /// <typeparam name="T">The type of the config to open.</typeparam>
-    /// <returns>
-    /// True if the config was found, false otherwise.
-    /// </returns>
-    /// <remarks>
-    /// For example, check <see cref="From"/>
-    /// </remarks>
-    public bool TryFrom<T>(string configName, bool isGlobal, [NotNullWhen(true)] out T? config) where T : class, IConfig;
     
-    /// <summary>
-    /// Allow opening another config from its name.<br/>
-    /// E.g. EngineConfig.From("MyConfig") will look for a config named "MyConfig" in the project config folder.<br/>
-    /// E.g. EngineConfig.From("MyConfig", true) will look for a config named "MyConfig" in the global config folder of the app.
-    /// </summary>
-    /// <param name="configName">The name of the config to open.</param>
-    /// <param name="isGlobal">Whether the config is a global config (i.e. located in the app config folder) or a project config (i.e. located in the current project config folder).</param>
-    /// <returns>
-    /// Return the config if found, null otherwise.
-    /// </returns>
-    public IConfig? From(string configName, bool isGlobal = false);
+    Task LoadGlobalAsync();
+    Task SaveGlobalAsync();
+    Task LoadProjectAsync(string projectDirectory);
+    Task SaveProjectAsync();
+    void UnloadProject();
+    Task<T> GetPluginConfigAsync<T>(string pluginKey, T defaultValue, ConfigScope scope);
+    Task SetPluginConfigAsync<T>(string pluginKey, T pluginConfig, ConfigScope scope);
     
-    /// <summary>
-    /// Allow creating a new config from config data.<br/>
-    /// E.g. EngineConfig.CreateConfig("MyConfig", new MyConfig()) will create a new config named "MyConfig" with the data of MyConfig.<br/>
-    /// E.g. EngineConfig.CreateConfig("MyConfig", new MyConfig(), true) will create a new global config named "MyConfig" with the data of MyConfig.
-    /// </summary>
-    /// <param name="configName">The name of the config to create.</param>
-    /// <param name="configData">The data of the config to create. This data will be serialized and saved in the config file.</param>
-    /// <param name="isGlobal">Whether the config is a global config (i.e. located in the app config folder) or a project config (i.e. located in the current project config folder).</param>
-    /// <returns>
-    /// Return true if the config was created successfully, false otherwise.
-    /// </returns>
-    public bool CreateConfig(string configName, IConfig configData, bool isGlobal = false);
-    
-    public bool LoadConfig();
-    public bool LoadConfigFrom(string path);
 }

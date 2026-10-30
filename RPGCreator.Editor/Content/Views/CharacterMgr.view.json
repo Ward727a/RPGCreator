@@ -1,0 +1,15 @@
+﻿{
+  "ViewId": "rpgc://views/asset_manager/character",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.AssetsManager.CharacterMgr",
+  "Name": "Characters",
+  "Binders": [
+    {
+      "TargetViewId": "rpgc://views/asset_manager",
+      "TargetBindId": "Menu",
+      "Data": {
+        "MenuName": "Characters",
+        "MenuDescription": "Manager of characters"
+      }
+    }
+  ]
+}

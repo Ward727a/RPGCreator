@@ -1,0 +1,5 @@
+﻿{
+  "ViewId": "rpgc://views/asset_editor/character_editor",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.AssetsEditor.CharacterEditor",
+  "Name": "Character Editor"
+}

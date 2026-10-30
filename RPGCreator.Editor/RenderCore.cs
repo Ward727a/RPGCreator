@@ -1,0 +1,154 @@
+﻿// RPG Creator - Open-source RPG Engine.
+// (c) 2026 Ward
+// 
+// This file is part of RPG Creator and is distributed under the Apache 2.0 License.
+// You are free to use, modify, and distribute this file under the terms of the Apache 2.0 License.
+// See LICENSE for details.
+// 
+// ---
+// 
+// Ce fichier fait partie de RPG Creator et est distribué sous licence Apache 2.0.
+// Vous êtes libre de l'utiliser, de le modifier et de le distribuer sous les termes de la licence Apache 2.0.
+// Voir LICENSE pour plus de détails.
+// 
+// Contact:
+// => Mail: Ward727a@gmail.com
+//    Please use this object: "RPG Creator [YourObject]"
+// => Discord: ward727
+// 
+// For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
+
+using System;
+using System.IO;
+using Apos.Shapes;
+using FontStashSharp;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using RPGCreator.EngineLib.Scheduler;
+using RPGCreator.RTP.Services;
+using RPGCreator.SDK;
+using RPGCreator.SDK.Editor.Rendering;
+using RPGCreator.SDK.Resources;
+using RPGCreator.SDK.Services.EngineService;
+
+namespace RPGCreator.RTP;
+
+public sealed class RenderCore : Game, IGameRenderCore
+{
+    public event Action? OnInitialize;
+    public event Action? OnLoad;
+    public event Action<TimeSpan>? OnUpdate;
+    public event Action<TimeSpan>? OnDraw;
+    
+    public event Action? DeviceReady;
+    
+    private readonly MonogameViewportService _parentService;
+    private readonly IInputsService _inputsService;
+    private readonly IResourceService _resourceService;
+    private readonly IScheduler _scheduler;
+    private readonly GraphicsDeviceManager _graphics;
+    private SpriteBatch _spriteBatch;
+    private ShapeBatch _shapeBatch;
+    private Texture2D _pixelTexture;
+
+    public RenderCore(MonogameViewportService parentService, IInputsService inputsService, IResourceService resourceService, IScheduler scheduler)
+    {
+        _parentService = parentService;
+        _inputsService = inputsService;
+        _resourceService = resourceService;
+        _scheduler = scheduler;
+        _graphics = new GraphicsDeviceManager(this);
+        IsMouseVisible = false;
+        Graphics.GraphicsProfile = GraphicsProfile.HiDef;
+        Content.RootDirectory = Path.Combine("Assets", "Content");
+    }
+
+    protected override void Initialize()
+    {
+        base.Initialize();
+        OnInitialize?.Invoke();
+    }
+
+    public GraphicsDeviceManager Graphics => _graphics;
+
+    FontSystem? FontSystem { get; set; } = null!;
+    protected override void LoadContent()
+    {
+        base.LoadContent();
+        GraphicsDevice.Reset();
+        _spriteBatch = new SpriteBatch(GraphicsDevice);
+        _shapeBatch = new ShapeBatch(GraphicsDevice, Content);
+        
+        _resourceService.RegisterLoader<Texture2D>(new Texture2DLoader(GraphicsDevice));
+        
+        if (FontSystem == null)
+        {
+            var settings = new FontSystemSettings()
+            {
+                FontResolutionFactor = 2f,
+                KernelWidth = 2,
+                KernelHeight = 2,
+            };
+            FontSystem = new FontSystem(settings);
+            FontSystem.AddFont(File.ReadAllBytes(@"C:\\Windows\Fonts\arial.ttf"));
+        }
+
+        OnLoad?.Invoke();
+    }
+
+
+    public RenderTarget2D CreateNewRenderTarget2D(int width, int height)
+    {
+        return new RenderTarget2D(GraphicsDevice, width, height);
+    }
+
+    public void LoadContent(BaseMonogameViewport viewport)
+    {
+        viewport.LoadContent(GraphicsDevice, _spriteBatch, _shapeBatch);
+    }
+
+    protected override void Draw(GameTime gameTime)
+    {
+        DeviceReady?.Invoke();
+        DeviceReady = null;
+        OnDraw?.Invoke(gameTime.ElapsedGameTime);
+        base.Draw(gameTime);
+        
+        if (GraphicsDevice == null) return;
+        
+        var viewports = _parentService.GetAllViewports();
+        
+        foreach (var viewport in viewports)
+        {
+            if(viewport is { IsDrawingPaused: true, FrameAsked: false } || viewport.InternalIsDrawingPaused) continue;
+
+            viewport.DrawViewport(gameTime.ElapsedGameTime);
+        }
+        GraphicsDevice.SetRenderTarget(null);
+    }
+
+    protected override void Update(GameTime gameTime)
+    {
+        // GlobalStates.ElapsedTime = gameTime.ElapsedGameTime;
+        // GlobalStates.TotalTime = gameTime.TotalGameTime;
+        
+        OnUpdate?.Invoke(gameTime.ElapsedGameTime);
+        var viewports = _parentService.GetAllViewports();
+        var deltaTime = gameTime.ElapsedGameTime;
+
+        for (int i = 0; i < viewports.Length; i++)
+        {
+            var viewport = viewports[i];
+
+            if (viewport.IsUpdatingPaused || viewport.InternalIsUpdatingPaused) continue;
+
+            viewport.UpdateViewport(deltaTime);
+        }
+
+        _inputsService.MouseState.ResetDeltas();
+        
+        _scheduler.Update((float)deltaTime.Milliseconds / 1000);
+        
+        base.Update(gameTime);
+    }
+}

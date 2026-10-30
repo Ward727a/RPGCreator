@@ -19,10 +19,12 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using RPGCreator.SDK.Common.Attributes;
+using RPGCreator.SDK.GameUI.Core;
 using RPGCreator.SDK.GameUI.Events.Contexts;
 
 namespace RPGCreator.SDK.GameUI.Events.Actions;
 
+[GuiActionMeta("rpgc://gui/actions/print_action", "Print", "Prints a message in the console.", supportedContexts: typeof(GuiEventContext))]
 public partial class PrintAction : IGuiAction
 {
     public string Name => "Print";
@@ -40,10 +42,5 @@ public partial class PrintAction : IGuiAction
     public bool Match(GuiEventContext context)
     {
         return true;
-    }
-
-    public IGuiAction Clone()
-    {
-        return new PrintAction();
     }
 }

@@ -1,0 +1,14 @@
+﻿{
+  "ViewId": "rpgc://views/resources_viewer",
+  "TargetClass": "RPGCreator.Editor.UI.Views.ResourcesViewerUiWindow",
+  "Name": "Resources Viewer",
+  "Binders": [
+    {
+      "TargetViewId": "rpgc://views/editor_window",
+      "TargetBindId": "menu_item",
+      "Data": {
+        "menu": "File|Resources Viewer"
+      }
+    }
+  ]
+}

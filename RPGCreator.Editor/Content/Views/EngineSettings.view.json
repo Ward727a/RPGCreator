@@ -1,0 +1,14 @@
+﻿{
+  "ViewId": "rpgc://views/engine_settings",
+  "TargetClass": "RPGCreator.Editor.UI.Views.EngineSettings",
+  "Name": "Engine Settings",
+  "Binders": [
+    {
+      "TargetViewId": "rpgc://views/editor_window",
+      "TargetBindId": "menu_item",
+      "Data": {
+        "menu": "Edit|Settings"
+      }
+    }
+  ]
+}

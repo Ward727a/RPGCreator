@@ -19,14 +19,19 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Diagnostics;
-using RPGCreator.SDK;
+using Fluxor;
+using Microsoft.Extensions.DependencyInjection;
 using RPGCreator.SDK.Common.Logging;
-using RPGCreator.SDK.GlobalState;
+using RPGCreator.SDK.Scenes;
 using RPGCreator.SDK.Services.EngineService;
+using RPGCreator.SDK.States;
+using RPGCreator.SDK.States.Actions;
+using RPGCreator.Shared.Attributes;
+using RPGCreator.Shared.Enums;
 
 namespace RPGCreator.EngineLib.Services;
 
-public readonly struct GameStartOptions
+public readonly struct GameStartOptions(IState<ProjectState> projectState)
 {
     public bool IsDebug { get; init; }
     public string SaveFilePath { get; init; }
@@ -40,7 +45,7 @@ public readonly struct GameStartOptions
     public string ToExecutableArguments()
     {
 
-        if (GlobalStates.ProjectState.CurrentProject == null)
+        if (!projectState.Value.HasProject)
         {
             Logger.Error("Error: No project is currently loaded. Cannot start the game without a project.");
             return string.Empty;
@@ -48,7 +53,7 @@ public readonly struct GameStartOptions
         
         // For now, all project has a 'project.config.xml' created at the root of the project folder.
         // If in the future we want to allow users to choose where to put the config file, we can add a new property in the project class and use it here.
-        string args = $"--project \"{Path.Combine(GlobalStates.ProjectState.CurrentProject.MetaData.Directory, "project.config.xml")}\"";
+        string args = $"--project \"{Path.Combine(projectState.Value.Directory, "project.config.json")}\"";
         
         if(!string.IsNullOrEmpty(SaveFilePath) && MapId != Ulid.Empty)
         {
@@ -65,17 +70,26 @@ public readonly struct GameStartOptions
     }
 }
 
+[EngineService(typeof(IGamePlayerService), ServiceLifetime.Singleton, EngineModeFlags.Editor)]
 public class GamePlayerService : IGamePlayerService
 {
+    public IDispatcher Dispatcher { get; }
+    private readonly IState<GamePlayerState> _gamePlayerState;
+    private readonly IState<ProjectState> _projectState;
+    private readonly IState<SceneState> _sceneState;
     private const string PathToDebugExecutable = "./Assets/GamePlayer/Debug/net10.0/RPGCreator.Player.exe";
     private const string PathToReleaseExecutable = "./Assets/GamePlayer/Release/net10.0/RPGCreator.Player.exe";
 
-    private readonly GamePlayerState _gamePlayerState;
-
-    public GamePlayerService()
+    public GamePlayerService(
+        IState<GamePlayerState> gamePlayerState,
+        IState<ProjectState> projectState,
+        IState<SceneState> sceneState,
+        IDispatcher dispatcher)
     {
-        _gamePlayerState = new GamePlayerState();
-        GlobalStates.GamePlayerState = _gamePlayerState;
+        Dispatcher = dispatcher;
+        _gamePlayerState = gamePlayerState;
+        _projectState = projectState;
+        _sceneState = sceneState;
     }
     
     public void CheckForExecutablePath(out bool hasDebug, out bool hasRelease)
@@ -84,16 +98,40 @@ public class GamePlayerService : IGamePlayerService
         hasRelease = File.Exists(PathToReleaseExecutable);
     }
 
-    public void StartGame()
+    public void StartDebugGame()
     {
-        CheckForExecutablePath(out var hasDebug, out var hasRelease);
-        if(!hasRelease)
+        CheckForExecutablePath(out var hasDebug, out _);
+        if (!hasDebug)
         {
-            Logger.Error("Error: Couldn't find any valid executable to start.");
+            Logger.Error("Error: Couldn't find any valid Debug executable to start.");
             return;
         }
 
-        var exe = PathToReleaseExecutable;
+        var options = new GameStartOptions(_projectState)
+        {
+            IsDebug = true,
+            MapId = _sceneState.Value.CurrentMapId
+        }.ToExecutableArguments();
+
+        LaunchExecutable(PathToDebugExecutable, options, true);
+    }
+
+    public void StartGame()
+    {
+        CheckForExecutablePath(out _, out var hasRelease);
+        if (!hasRelease)
+        {
+            Logger.Error("Error: Couldn't find any valid Release executable to start.");
+            return;
+        }
+
+        var options = new GameStartOptions(_projectState)
+        {
+            IsDebug = false,
+            MapId = _sceneState.Value.CurrentMapId
+        }.ToExecutableArguments();
+
+        LaunchExecutable(PathToReleaseExecutable, options, false);
     }
 
     public void LoadGame(string saveFilePath)
@@ -120,27 +158,9 @@ public class GamePlayerService : IGamePlayerService
         var exe = PathToReleaseExecutable;
     }
 
-    public void StartDebugGame()
-    {
-        CheckForExecutablePath(out var hasDebug, out var hasRelease);
-        if(!hasDebug)
-        {
-            Logger.Error("Error: Couldn't find any valid executable to start.");
-            return;
-        }
-
-        var options = new GameStartOptions()
-        {
-            IsDebug = true
-        }.ToExecutableArguments();
-        
-        LaunchExecutable(PathToDebugExecutable, options);
-        _gamePlayerState.IsDebugging = true;
-    }
-
     public void StopGame()
     {
-        if (_gamePlayerState.GameProcess == null || _gamePlayerState.GameProcess.HasExited)
+        if (_gamePlayerState.Value.GameProcess == null || _gamePlayerState.Value.GameProcess.HasExited)
         {
             Logger.Warning("No game process is currently running.");
             return;
@@ -148,8 +168,7 @@ public class GamePlayerService : IGamePlayerService
 
         try
         {
-            _gamePlayerState.GameProcess.Kill(entireProcessTree: true);
-            Logger.Info($"Game process with PID {_gamePlayerState.GameProcess.Id} has been terminated.");
+            Dispatcher.Dispatch(new GamePlayerActions.RequestStopGameAction());
         }
         catch (Exception ex)
         {
@@ -158,7 +177,7 @@ public class GamePlayerService : IGamePlayerService
     }
 
 
-    private void LaunchExecutable(string exe, string args)
+    private void LaunchExecutable(string exe, string args, bool debug = false)
     {
         try
         {
@@ -172,59 +191,39 @@ public class GamePlayerService : IGamePlayerService
                 RedirectStandardOutput = true,
                 RedirectStandardError = true
             };
-            
-            _gamePlayerState.GameProcess = Process.Start(startInfo);
-            _gamePlayerState.GameProcess.OutputDataReceived += (s, e) => { if(e.Data != null) Logger.Info($"[Game] {e.Data}"); };
-            _gamePlayerState.GameProcess.ErrorDataReceived += (s, e) => { if(e.Data != null) Logger.Error($"[Game Error] {e.Data}"); };
 
-            _gamePlayerState.GameProcess.BeginOutputReadLine();
-            _gamePlayerState.GameProcess.BeginErrorReadLine();
-            if (_gamePlayerState.GameProcess == null)
+            
+            var gameProcess = Process.Start(startInfo);
+            
+            if(gameProcess is null)
+                throw new Exception("Failed to start the game process.");
+            
+            gameProcess.OutputDataReceived += (s, e) =>
             {
-                Logger.Error("Failed to start the game process. Process.Start returned null.");
-            }
-            else
+                if (e.Data != null) Logger.Info($"[Game] {e.Data}");
+            };
+            gameProcess.ErrorDataReceived += (s, e) =>
             {
-                Logger.Info($"Game started with PID: {_gamePlayerState.GameProcess.Id}");
-                _gamePlayerState.GameProcess.EnableRaisingEvents = true;
-                _gamePlayerState.GameProcess.Exited += (sender, e) =>
-                {
-                    Logger.Info($"Game process with PID {_gamePlayerState.GameProcess?.Id} has exited with code {_gamePlayerState.GameProcess?.ExitCode}.");
-                    _gamePlayerState.Reset();
-                };
-                _gamePlayerState.IsPlaying = true;
-            }
-        } catch (Exception ex)
+                if (e.Data != null) Logger.Error($"[Game Error] {e.Data}");
+            };
+
+            gameProcess.BeginOutputReadLine();
+            gameProcess.BeginErrorReadLine();
+            
+            Logger.Info($"Game started with PID: {gameProcess.Id}");
+            gameProcess.EnableRaisingEvents = true;
+            gameProcess.Exited += (sender, e) =>
+            {
+                Logger.Info(
+                    $"Game process with PID {gameProcess?.Id} has exited with code {gameProcess?.ExitCode}.");
+            };
+            
+            
+            Dispatcher.Dispatch(new GamePlayerActions.StartGameAction(debug, gameProcess));
+        }
+        catch (Exception ex)
         {
             Logger.Error("An error occurred while trying to start the game process: {message}", args: ex.Message);
         }
-    }
-}
-
-public class GamePlayerState : BaseState, IGamePlayerState
-{
-    public override void Reset()
-    {
-        IsPlaying = false;
-        IsDebugging = false;
-        GameProcess = null;
-    }
-
-    public bool IsPlaying
-    {
-        get;
-        internal set => SetProperty(ref field, value);
-    }
-
-    public bool IsDebugging
-    {
-        get;
-        internal set => SetProperty(ref field, value);
-    }
-
-    public Process? GameProcess
-    {
-        get;
-        internal set => SetProperty(ref field, value);
     }
 }

@@ -1,0 +1,95 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RollForward>Major</RollForward>
+    <PublishReadyToRun>false</PublishReadyToRun>
+    <TieredCompilation>false</TieredCompilation>
+    <Nullable>enable</Nullable>
+    <LangVersion>14</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>RPGCreator.Editor</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="GameUI\**" />
+    <None Remove="Factory\**" />
+    <None Remove="Viewport\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="GameUI\**" />
+    <EmbeddedResource Remove="Factory\**" />
+    <EmbeddedResource Remove="Viewport\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Hexa.NET.ImGui" Version="2.2.9" />
+    <PackageReference Include="Hexa.NET.ImNodes" Version="2.2.9" />
+    <PackageReference Include="Hexa.NET.ImPlot" Version="2.2.9" />
+    <PackageReference Include="Hexa.NET.Utilities" Version="2.2.12" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Libraries\RPGCreator.EngineLib\RPGCreator.EngineLib.csproj" />
+    <ProjectReference Include="..\Libraries\RPGCreator.RuntimeLib\RPGCreator.RuntimeLib.csproj" />
+    <ProjectReference Include="..\RPGCreator.SDK\RPGCreator.SDK.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="EditorGame.cs" />
+    <Compile Remove="Viewport\UiViewport.cs" />
+    <Compile Remove="RenderCore.cs" />
+    <Compile Remove="GameUI\**" />
+    <Compile Remove="Factory\**" />
+    <Compile Remove="Viewport\**" />
+    <Compile Remove="Services\CameraService.cs" />
+    <Compile Remove="Services\ChunkService.cs" />
+    <Compile Remove="Services\FontService.cs" />
+    <Compile Remove="Services\LayerService.cs" />
+    <Compile Remove="Services\MapService.cs" />
+    <Compile Remove="Services\MonogameViewportService.cs" />
+    <Compile Remove="Services\RenderService.cs" />
+    <Compile Remove="Services\Texture2DLoader.cs" />
+    <Compile Update="UI\Views\Widgets\AssetsManager\TilePicker.cs">
+      <DependentUpon>AutoTileAssetManager.cs</DependentUpon>
+    </Compile>
+    <Compile Update="UI\Views\Widgets\AssetsManager\AutoTileMakerModal.cs">
+      <DependentUpon>AutoTileAssetManager.cs</DependentUpon>
+    </Compile>
+    <Compile Update="UI\Models\Widgets\AssetsManager\AutoTileMakerModal.cs">
+      <DependentUpon>AutoTileAssetManagerModel.cs</DependentUpon>
+    </Compile>
+    <Compile Update="UI\Controllers\Widgets\AssetsManager\AutoTileMakerController.cs">
+      <DependentUpon>AutoTileAssetManagerController.cs</DependentUpon>
+    </Compile>
+    <Compile Update="UI\Controllers\Widgets\AssetsManager\AutoTileTilePickerController.cs">
+      <DependentUpon>AutoTileAssetManagerController.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <Target Name="CopyAssets" AfterTargets="Build">
+    <ItemGroup>
+      <!-- Tous les fichiers dans le dossier Assets -->
+      <AssetFiles Include="bin\Debug\net10.0\Content\**\*.*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(AssetFiles)" DestinationFolder="../RPGCreator.UI/Assets\Content" SkipUnchangedFiles="true" />
+  </Target>
+  
+  <ItemGroup>
+    <EmbeddedResource Include="Resources/**" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <Content Include="..\Thirdparty\DLLs\fnalibs\x64\*.*">
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="Content\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+</Project>

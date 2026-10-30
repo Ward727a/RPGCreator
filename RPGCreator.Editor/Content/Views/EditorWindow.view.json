@@ -1,0 +1,32 @@
+﻿{
+  "ViewId": "rpgc://views/editor_window",
+  "TargetClass": "RPGCreator.Editor.UI.Views.MainEditorUiWindow",
+  "Name": "Editor",
+  "DeclareBinders": [
+    {
+      // Show a menu item in the top menu bar.
+      "BindId": "menu_item",
+      "DataTemplates": [
+        {
+          "Name": "menu",
+          "Type": "rpgc://sdk/common/string"
+        },
+        {
+          /*
+            This messageId is called when the menu item is clicked.
+            This needs to be a valid URN, and the property 'menuType' must be set to 1.
+            Arguments given: [NONE].
+          */
+          "Name": "menuClick_MessageId",
+          "Type": "rpgc://sdk/types/urn",
+          "Optional": true
+        },
+        {
+          "Name": "menuType",
+          "Type": "rpgc://sdk/common/int",
+          "Optional": true
+        }
+      ]
+    }
+  ]
+}

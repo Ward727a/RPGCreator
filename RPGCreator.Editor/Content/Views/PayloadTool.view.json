@@ -1,0 +1,25 @@
+﻿{
+  "ViewId": "rpgc://views/payload_tool",
+  "TargetClass": "RPGCreator.Editor.UI.Views.EditorTools.PayloadTool",
+  "Name": "Payload Tool",
+  "Binders": [
+    {
+      "TargetViewId": "rpgc://views/editor_window",
+      "TargetBindId": "menu_item",
+      "Data": {
+        "menu": "Tools|Payload"
+      }
+    }
+  ],
+  "DeclareBinders": [
+    {
+      "BindId": "tileset_type_payload",
+      "DataTemplates": [
+        {
+          "Name": "tileset_type",
+          "Type": "rpgc://sdk/types/urn"
+        }
+      ]
+    }
+  ]
+}

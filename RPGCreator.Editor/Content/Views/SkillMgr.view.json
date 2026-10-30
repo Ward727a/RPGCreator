@@ -1,0 +1,15 @@
+﻿{
+  "ViewId": "rpgc://views/assets_manager/skills",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.AssetsManager.SkillMgr",
+  "Name": "Skills",
+  "Binders": [
+    {
+      "TargetViewId": "rpgc://views/asset_manager",
+      "TargetBindId": "Menu",
+      "Data": {
+        "MenuName": "Skills",
+        "MenuDescription": "Manager of skills"
+      }
+    }
+  ]
+}

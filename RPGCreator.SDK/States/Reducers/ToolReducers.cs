@@ -32,37 +32,18 @@ public static class ToolReducers
         return state with
         {
             ActiveTool = action.NewTool,
-            ParameterValue = action.NewTool.GetDefaultParameters().ToImmutableDictionary(p => p.DisplayName, p => p.DefaultValue),
-            Payload = null
         };
     }
-
+    
     [ReducerMethod]
-    public static ToolState ReduceChangeToolPayload(ToolState state, ToolActions.ChangeToolPayloadAction action)
+    public static ToolState ReduceChangeToolLogic(ToolState state, ToolActions.ChangeToolLogicAction action)
     {
-        return state with { Payload = action.NewPayload };
+        return state with { ActiveToolLogic = action.NewToolLogic };
     }
     
     [ReducerMethod]
-    public static ToolState ReduceClearToolPayload(ToolState state, ToolActions.ClearToolPayloadAction action)
+    public static ToolState ReduceClearTool(ToolState state, ToolActions.ClearToolAction action)
     {
-        return state with { Payload = null };
-    }
-    
-    [ReducerMethod]
-    public static ToolState ReduceUpdateToolParameterValue(ToolState state, ToolActions.UpdateToolParameterValueAction action)
-    {
-        if (!state.ParameterValue.ContainsKey(action.ParameterName))
-        {
-            return state;
-        }
-        
-        return state with { ParameterValue = state.ParameterValue.SetItem(action.ParameterName, action.NewValue) };
-    }
-
-    [ReducerMethod]
-    public static ToolState ReduceSetToolLastDrawAt(ToolState state, ToolActions.SetToolLastDrawAtAction action)
-    {
-        return state with { LastDrawAt = action.NewLastDrawAt };
+        return state with { ActiveTool = null};
     }
 }

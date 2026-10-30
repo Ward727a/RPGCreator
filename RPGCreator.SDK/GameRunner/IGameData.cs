@@ -26,7 +26,7 @@ namespace RPGCreator.SDK.GameRunner;
 /// Represents game data paths and accepted module hashes.<br/>
 /// This is destined to be implemented by the game runner, to provide necessary paths and security checks for the RPG Creator SDK to run the game.
 /// </summary>
-public interface IGameData : ISerializable, IDeserializable
+public interface IGameData
 {
     public string ProjectPath { get; }
     public string ModulesPath { get; }

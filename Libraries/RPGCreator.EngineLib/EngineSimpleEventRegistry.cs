@@ -21,7 +21,6 @@
 using System.Diagnostics.CodeAnalysis;
 using RPGCreator.SDK.Modules.SimpleEvents;
 using RPGCreator.SDK.Registry;
-using RPGCreator.SDK.Types;
 using RPGCreator.Shared.Types;
 
 namespace RPGCreator.EngineLib;

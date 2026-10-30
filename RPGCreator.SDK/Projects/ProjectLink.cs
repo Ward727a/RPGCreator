@@ -22,6 +22,7 @@ using System.Text.Json.Serialization;
 using RPGCreator.SDK.Assets.MetaData;
 using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Types.Internals;
+using RPGCreator.Shared.Attributes;
 
 namespace RPGCreator.SDK.Projects;
 

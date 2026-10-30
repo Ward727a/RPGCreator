@@ -1,0 +1,15 @@
+﻿{
+  "ViewId": "rpgc://views/asset_manager/tileset",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.AssetsManager.TilesetWidgetAsset",
+  "Name": "Tileset",
+  "Binders": [
+    {
+      "TargetViewId": "rpgc://views/asset_manager",
+      "TargetBindId": "Menu",
+      "Data": {
+        "MenuName": "Tileset",
+        "MenuDescription": "Manager of tilesets"
+      }
+    }
+  ]
+}

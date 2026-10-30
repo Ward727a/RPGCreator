@@ -25,9 +25,10 @@ using RPGCreator.SDK.Assets.MetaData;
 namespace RPGCreator.SDK.States;
 
 public record ProjectState(
-    ProjectMetaData? ProjectMetaData
+    ProjectMetaData? ProjectMetaData = null
 )
 {
+    public Ulid Unique => ProjectMetaData?.Unique ?? Ulid.Empty;
     public string Name => ProjectMetaData?.Name ?? "Unnamed Project";
     public string Description => ProjectMetaData?.Description ?? "No description";
     public string ConfigFilePath => ProjectMetaData?.JsonFilePath ?? "";
@@ -42,6 +43,8 @@ public record ProjectState(
     public IImmutableList<string> Modules => ProjectMetaData?.Modules.ToImmutableList() ?? ImmutableList<string>.Empty;
     
     public Ulid MainMapId => ProjectMetaData?.MainMapId ?? Ulid.Empty;
+    
+    public bool HasProject => ProjectMetaData != null;
 }
 
 public class FeatureProjectState : Feature<ProjectState>

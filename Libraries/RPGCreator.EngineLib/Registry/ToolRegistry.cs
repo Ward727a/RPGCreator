@@ -18,123 +18,109 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.Collections.ObjectModel;
-using RPGCreator.SDK;
+using Microsoft.Extensions.DependencyInjection;
+using RPGCreator.SDK.AssetsPre;
 using RPGCreator.SDK.Common.Logging;
-using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Registry;
-using RPGCreator.SDK.Types;
+using RPGCreator.SDK.Tools;
+using RPGCreator.Shared.Attributes;
 using RPGCreator.Shared.Types;
 
 namespace RPGCreator.EngineLib.Registry;
 
+[EngineService(typeof(IToolRegistry))]
 public class ToolRegistry : IToolRegistry
 {
-    private IToolState? _toolState;
-    private readonly Dictionary<URN, ToolLogic> _tools = new();
+    private readonly IServiceProvider _provider;
+    private readonly Dictionary<URN, Tool> _tools = new();
+    private readonly Dictionary<URN, IToolLogic> _toolLogics = new();
     private static readonly ScopedLogger Logger = SDK.Common.Logging.Logger.ForContext<ToolRegistry>();
 
-    private IToolState GetToolState()
+    public ToolRegistry(IServiceProvider provider)
     {
-        _toolState ??= GlobalStates.ToolState;
-        return _toolState;
+        _provider = provider;
     }
 
-    public ObservableCollection<ToolLogic> RegisteredTools { get; private set; } = new ObservableCollection<ToolLogic>();
+    public IEnumerable<Tool> RegisteredTools =>_tools.Values;
+    public IEnumerable<IToolLogic> RegisteredToolLogics =>_toolLogics.Values;
 
-    public void ActivateTool(URN toolUrn)
+    public void RegisterToolLogic(URN targetLayerUrn, Type toolLogicType, bool overrideIfExists = false)
     {
-        var toolState = GetToolState();
-        if (toolState.ActiveTool?.ToolUrn == toolUrn)
-            return;
-
-        if (!_tools.TryGetValue(toolUrn, out var tool))
+        if (ActivatorUtilities.CreateInstance(_provider, toolLogicType) is not IToolLogic toolLogic)
         {
-            Logger.Warning($"Attempted to activate unregistered tool: {toolUrn}");
+            Logger.Error("Tool logic {logicType} for layer {layerUrn} is not of type IToolLogic", args: [toolLogicType, targetLayerUrn]);
             return;
         }
 
-        toolState.ActiveTool = tool;
-    }
-    
-    public void ActivateTool(ToolLogic toolLogic)
-    {
-        var toolState = GetToolState();
-        if (toolState.ActiveTool?.ToolUrn == toolLogic.ToolUrn)
-            return;
-        GetToolState().ActiveTool = toolLogic;
-    }
-
-    public void DeactivateTool(URN toolUrn)
-    {
-        var toolState = GetToolState();
-        if (toolState.ActiveTool?.ToolUrn != toolUrn)
-            return;
-
-        toolState.ActiveTool = null;
-    }
-    
-    public void DeactivateTool(ToolLogic toolLogic)
-    {
-        var toolState = GetToolState();
-        if (toolState.ActiveTool?.ToolUrn != toolLogic.ToolUrn)
-            return;
-
-        toolState.ActiveTool = null;
-    }
-
-    public ToolLogic? GetActiveTool()
-    {
-        var toolState = GetToolState();
-        return toolState.ActiveTool;
-    }
-
-    public void RegisterTool(ToolLogic toolLogic, bool overrideIfExists = false)
-    {
-        if (_tools.ContainsKey(toolLogic.ToolUrn))
+        if (_toolLogics.ContainsKey((targetLayerUrn)) && !overrideIfExists)
         {
-            if (!overrideIfExists)
-            {
-                Logger.Warning($"Attempted to register a tool with an already existing URN: {toolLogic.ToolUrn}");
-                return;
-            }
-            else
-            {
-                Logger.Info($"Overriding existing tool with URN: {toolLogic.ToolUrn}");
-            }
-        }
-
-        _tools[toolLogic.ToolUrn] = toolLogic;
-        if (!RegisteredTools.Contains(toolLogic))
-        {
-            RegisteredTools.Add(toolLogic);
-            Logger.Info("Registered tool: " + toolLogic.ToolUrn);
+            Logger.Warning("Tool logic {logicType} for layer {layerUrn} already registered", args: [toolLogicType, targetLayerUrn]);
             return;
         }
-        Logger.Error("Tool couldn't be registered: " + toolLogic.ToolUrn);
+        
+        _toolLogics[targetLayerUrn] = toolLogic;
+        Logger.Info("Registered tool logic {logicType} for layer {layerUrn}.", args: [toolLogicType, targetLayerUrn]);
+    }
+
+    public void UnregisterToolLogic(URN targetLayerUrn)
+    {
+        _toolLogics.Remove(targetLayerUrn);
+    }
+
+    public void RegisterTool(URN toolUrn, Type toolLogic, bool overrideIfExists = false)
+    {
+        if (ActivatorUtilities.CreateInstance(_provider, toolLogic) is not Tool tool)
+        {
+            Logger.Error("Tool {toolUrn} of type {toolType} is not of type Tool", args: [toolUrn, toolLogic]);
+            return;
+        }
+
+        if (_tools.ContainsKey(toolUrn) && !overrideIfExists)
+        {
+            Logger.Warning("Tool {toolUrn} already registered", args: toolUrn);
+            return;
+        }
+
+        tool.ToolUrn = toolUrn;
+        _tools[toolUrn] = tool;
+        Logger.Info("Registered tool {toolUrn}.", args: toolUrn);
     }
 
     public void UnregisterTool(URN toolUrn)
     {
-        if (!_tools.Remove(toolUrn))
-        {
-            Logger.Warning($"Attempted to unregister a tool with a non-existing URN: {toolUrn}");
-        }
+        _tools.Remove(toolUrn);
     }
 
-    public ToolLogic? GetTool(URN toolUrn)
+    public IToolLogic? GetToolLogic(URN targetLayerUrn)
     {
-        if (_tools.TryGetValue(toolUrn, out var tool))
-        {
-            return tool;
-        }
-        
-        Logger.Warning($"Attempted to get a tool with a non-existing URN: {toolUrn}");
-        return null;
+        return _toolLogics.GetValueOrDefault(targetLayerUrn);
+    }
+    
+    public Tool? GetTool(URN toolUrn)
+    {
+        return _tools.GetValueOrDefault(toolUrn);
     }
     
     public bool HasTool(URN toolUrn)
     {
         return _tools.ContainsKey(toolUrn);
     }
+    
+    public bool HasToolLogic(URN targetLayerUrn)
+    {
+        return _toolLogics.ContainsKey(targetLayerUrn);
+    }
+    
+    #region Helpers
+    public URN GetToolUrn(ITypesRegistry registryDiscriminator, Type type)
+    {
+        var result = registryDiscriminator.GetKey(type);
+        if (result.IsFailure)
+        {
+            Logger.Error("Failed to get tool urn for type {type}", args: type);
+            return URN.Empty;
+        }
+        return result.Value;
+    }
+    #endregion
 }

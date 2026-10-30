@@ -1,9 +1,5 @@
 ﻿namespace RPGCreator.SDK.Services.RuntimeService;
 
-public interface IGameRunner : IService
+public interface IGameRunner
 {
-    event Action? OnInitialize;
-    event Action? OnLoad;
-    event Action<TimeSpan>? OnUpdate;
-    event Action<TimeSpan>? OnDraw;
 }

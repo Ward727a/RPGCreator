@@ -18,9 +18,13 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Reflection;
+using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.Factories;
 using RPGCreator.SDK.GameUI.Controls;
+using RPGCreator.SDK.GameUI.Core;
 using RPGCreator.SDK.Registry;
-using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Attributes;
 using RPGCreator.Shared.Types;
 
 namespace RPGCreator.EngineLib.Registry;
@@ -31,43 +35,150 @@ namespace RPGCreator.EngineLib.Registry;
 /// GUI Controls are used to create the UI of the <b>Game</b> (not the editor!).<br/>
 /// This allows the user to be able to use those controls in the game UI editor.
 /// </summary>
-public class GUIControlRegistry : IGUIControlRegistry
+[EngineService(typeof(IGuiControlRegistry))]
+public class GUIControlRegistry(IGuiControlFactory controlFactory) : IGuiControlRegistry
 {
-    private readonly Dictionary<URN, BaseControl> _controls = new();
-
-    public event Action<BaseControl>? ControlRegistered;
-    public event Action<BaseControl>? ControlUnregistered;
+    private readonly IGuiControlFactory _controlFactory = controlFactory;
+    private readonly Dictionary<URN, GuiControlMeta> _controls = new();
 
     public int ControlCount => _controls.Count;
-    public IEnumerable<BaseControl> Controls => _controls.Values;
+    public IReadOnlyCollection<GuiControlMeta> Controls => _controls.Values;
 
-    public void RegisterControl(BaseControl control, bool overwriteIfExists = false)
+    public Result RegisterControl<T>(bool overwriteIfExists = false) where T : BaseControl
     {
-        if (_controls.ContainsKey(control.Urn) && !overwriteIfExists)
+        var metaResult = GetControlMeta(typeof(T));
+        if (metaResult.IsFailure)
+            return Result.Fail(metaResult.Error);
+
+        if (_controls.ContainsKey(metaResult.Value.Urn) && !overwriteIfExists)
         {
-            return;
+            return Result.Fail($"Control with URN {metaResult.Value.Urn} is already registered.");
+        }
+        
+        _controls[metaResult.Value.Urn] = metaResult.Value;
+        
+        return Result.Ok();
+    }
+
+    public Result UnregisterControl<T>() where T : BaseControl
+    {
+        var metaResult = GetControlMeta(typeof(T));
+        
+        if (metaResult.IsFailure)
+            return Result.Fail(metaResult.Error);
+        
+        if (!_controls.Remove(metaResult.Value.Urn))
+            return Result.Fail($"Control with URN {metaResult.Value.Urn} is not registered.");
+
+        return Result.Ok();
+    }
+
+    public Result ScanAndRegisterControls(Assembly assembly, bool overwriteIfExists = false)
+    {
+        var controlTypes = assembly.GetTypes()
+            .Where(t => t.IsClass && !t.IsAbstract && typeof(BaseControl).IsAssignableFrom(t))
+            .Where(t => t.GetCustomAttribute<GuiControlMetaAttribute>() != null);
+
+        List<Type> errors = new List<Type>();
+        
+        foreach (var type in controlTypes)
+        {
+            var metaResult = GetControlMeta(type);
+
+            if (metaResult.IsFailure)
+            {
+                errors.Add(type);
+                continue;
+            }
+
+            if (_controls.ContainsKey(metaResult.Value.Urn) && !overwriteIfExists)
+            {
+                Logger.Warning($"Control with URN {metaResult.Value.Urn} is already registered.");
+                errors.Add(type);
+                continue;
+            }
+            
+            _controls[metaResult.Value.Urn] = metaResult.Value;
         }
 
-        _controls[control.Urn] = control;
-        ControlRegistered?.Invoke(control);
+        return errors.Count > 0 ? Result.Fail($"Failed to register controls:\n- {string.Join("\n- ", errors.Select(t => t.Name))}") : Result.Ok();
     }
 
-    public void UnregisterControl(URN controlUrn)
+    public Result ScanAndUnregisterControls(Assembly assembly)
     {
-        if (_controls.Remove(controlUrn, out var control))
+        var controlTypes = assembly.GetTypes()
+            .Where(t => t.IsClass && !t.IsAbstract && typeof(BaseControl).IsAssignableFrom(t))
+            .Where(t => t.GetCustomAttribute<GuiControlMetaAttribute>() != null);
+
+        List<Type> errors = new List<Type>();
+        
+        foreach (var type in controlTypes)
         {
-            ControlUnregistered?.Invoke(control);
+            var metaResult = GetControlMeta(type);
+            
+            if (metaResult.IsFailure)
+            {
+                errors.Add(type);
+                continue;
+            }
+            
+            if (!_controls.Remove(metaResult.Value.Urn))
+            {
+                Logger.Warning($"Control with URN {metaResult.Value.Urn} is not registered.");
+                errors.Add(type);
+            }
         }
+
+        return errors.Count > 0 ? Result.Fail($"Failed to unregister controls:\n- {string.Join("\n- ", errors.Select(t => t.Name))}") : Result.Ok();
     }
 
-    public BaseControl? GetControl(URN controlUrn)
+    public Result ScanAndRegisterControls(IEnumerable<Assembly> assemblies, bool overwriteIfExists = false)
     {
-        return _controls.GetValueOrDefault(controlUrn);
+        foreach (var assembly in assemblies)
+        {
+            var result = ScanAndRegisterControls(assembly, overwriteIfExists);
+            if (result.IsFailure)
+            {
+                return Result.Fail($"Failed to scan assembly {assembly.GetName().Name} for controls. Error: {result.Error}");
+            }
+        }
+
+        return Result.Ok();
     }
 
-    public bool TryGetControl(URN controlUrn, out BaseControl? control)
+    public Result ScanAndUnregisterControls(IEnumerable<Assembly> assemblies)
     {
-        return _controls.TryGetValue(controlUrn, out control);
+        foreach (var assembly in assemblies)
+        {
+            var result = ScanAndUnregisterControls(assembly);
+            if (result.IsFailure)
+            {
+                return Result.Fail($"Failed to scan assembly {assembly.GetName().Name} for controls. Error: {result.Error}");
+            }
+        }
+
+        return Result.Ok();
+    }
+
+    public Result<GuiControlMeta> GetControl(URN controlUrn)
+    {
+        _controls.TryGetValue(controlUrn, out var meta);
+        
+        if (meta == null)
+            return Result<GuiControlMeta>.Fail($"Control with URN {controlUrn} is not registered.");
+
+        return meta;
+    }
+
+    public bool HasControl<T>() where T : BaseControl
+    {
+        return HasControl(typeof(T));
+    }
+
+    public bool HasControl(Type controlType)
+    {
+        var metaResult = GetControlMeta(controlType);
+        return metaResult.IsSuccess && _controls.ContainsKey(metaResult.Value.Urn);
     }
 
     public bool HasControl(URN controlUrn)
@@ -75,8 +186,36 @@ public class GUIControlRegistry : IGUIControlRegistry
         return _controls.ContainsKey(controlUrn);
     }
 
-    public void ClearControls()
+    public Result<BaseControl> CreateControl(URN controlUrn, params object[] parameters)
+    {
+        var metaResult = GetControl(controlUrn);
+        if (!metaResult.IsSuccess)
+            return Result<BaseControl>.Fail(metaResult.Error);
+
+        return _controlFactory.CreateControl(metaResult.Value.ControlType, parameters);
+    }
+
+    public void Clear()
     {
         _controls.Clear();
     }
+
+    #region Helpers
+
+    private Result<GuiControlMeta> GetControlMeta(Type controlType)
+    {
+        var attr = controlType.GetCustomAttribute<GuiControlMetaAttribute>();
+
+        if (attr == null)
+        {
+            return Result<GuiControlMeta>.Fail("Control type does not have a GuiControlMetaAttribute");
+        }
+
+        return Result<GuiControlMeta>.Ok(CreateMeta(attr, controlType));
+    }
+
+    private static GuiControlMeta CreateMeta(GuiControlMetaAttribute attribute, Type controlType) => new(attribute.Urn,
+        controlType, attribute.DisplayName, attribute.Description, attribute.Icon);
+
+    #endregion
 }

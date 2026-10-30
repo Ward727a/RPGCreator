@@ -1,0 +1,15 @@
+﻿{
+  "ViewId": "rpgc://views/auto_tile_ruleset/main_window",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.AssetsManager.AutoTileAssetManager+MainWindow",
+  "Name": "AutoTile Manager",
+  "Binders": [
+    {
+      "TargetViewId": "rpgc://views/asset_manager",
+      "TargetBindId": "Menu",
+      "Data": {
+        "MenuName": "AutoTile",
+        "MenuDescription": "Manager of autotiles"
+      }
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+﻿{
+  "ViewId": "rpgc://views/tileset_selector",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.TilesetSelector",
+  "Name": "Tileset Selector"
+}

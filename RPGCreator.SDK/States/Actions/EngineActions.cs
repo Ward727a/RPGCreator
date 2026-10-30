@@ -18,9 +18,11 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using RPGCreator.Shared.Enums;
+
 namespace RPGCreator.SDK.States.Actions;
 
 public static class EngineActions
 {
-    public record ChangeModeAction(EEngineMode Mode);
+    public record ChangeModeAction(EngineModeFlags Mode);
 }

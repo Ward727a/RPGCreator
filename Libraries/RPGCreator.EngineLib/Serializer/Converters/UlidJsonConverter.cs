@@ -21,4 +21,15 @@ public class UlidJsonConverter : JsonConverter<Ulid>
     {
         writer.WriteStringValue(value.ToString());
     }
+    
+    public override Ulid ReadAsPropertyName(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        var ulidString = reader.GetString();
+        return string.IsNullOrEmpty(ulidString) ? Ulid.Empty : Ulid.Parse(ulidString);
+    }
+
+    public override void WriteAsPropertyName(Utf8JsonWriter writer, Ulid value, JsonSerializerOptions options)
+    {
+        writer.WritePropertyName(value.ToString());
+    }
 }

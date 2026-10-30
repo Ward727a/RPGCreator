@@ -1,0 +1,5 @@
+﻿{
+  "ViewId": "rpgc://views/asset_creator/sprite_animation_creator",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.AssetsCreator.SpriteAnimationCreator",
+  "Name": "Sprite Animation Creator"
+}

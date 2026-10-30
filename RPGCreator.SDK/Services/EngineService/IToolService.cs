@@ -19,7 +19,6 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Numerics;
-using RPGCreator.SDK.GlobalState;
 using RPGCreator.SDK.Inputs;
 
 namespace RPGCreator.SDK.Services.EngineService;
@@ -30,15 +29,6 @@ namespace RPGCreator.SDK.Services.EngineService;
 /// </summary>
 public interface IToolService : IService
 {
-    /// <summary>
-    /// Gets the currently selected brush.<br/>
-    /// Returns null if no brush is selected.
-    /// </summary>
-    /// <returns>
-    /// The currently selected brush info if any; otherwise, null.
-    /// </returns>
-    public ToolLogic? GetSelectedTool();
-
     /// <summary>
     /// Use the selected tool at the specified position.<br/>
     /// This method uses the current brush selected in the brush state to perform the using action.

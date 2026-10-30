@@ -1,0 +1,15 @@
+﻿{
+  "ViewId": "rpgc://views/tools_parameter",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.PreviewSections.ToolsParameter",
+  "Name": "Tools Parameter",
+  "Binders": [
+    {
+      "TargetViewId": "rpgc://views/game_preview",
+      "TargetBindId": "right_section",
+      "Data": {
+        "section_title": "Tools Parameter",
+        "section_description": "Parameters for the current tool used in the editor."
+      }
+    }
+  ]
+}

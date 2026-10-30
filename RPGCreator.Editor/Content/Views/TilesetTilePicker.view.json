@@ -1,0 +1,5 @@
+﻿{
+  "ViewId": "rpgc://views/tileset_tile_picker",
+  "TargetClass": "RPGCreator.Editor.UI.Views.EditorTools.Payload.TilesetTilePicker",
+  "Name": "Tileset Tile Picker"
+}

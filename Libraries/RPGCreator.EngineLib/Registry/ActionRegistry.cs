@@ -20,7 +20,6 @@
 
 using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Registry;
-using RPGCreator.SDK.Types;
 using RPGCreator.Shared.Types;
 
 namespace RPGCreator.EngineLib.Registry;

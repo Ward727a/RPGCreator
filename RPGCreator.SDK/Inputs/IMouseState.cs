@@ -1,5 +1,4 @@
 ﻿using System.Numerics;
-using RPGCreator.SDK.GlobalState;
 
 namespace RPGCreator.SDK.Inputs;
 
@@ -16,7 +15,7 @@ public enum MouseButton
     XButton2 = 16 /* 0x10 */,
 }
 
-public interface IMouseState : IState
+public interface IMouseState
 {
     event Action<MouseButton>? ButtonDown;
     event Action<MouseButton>? ButtonUp;

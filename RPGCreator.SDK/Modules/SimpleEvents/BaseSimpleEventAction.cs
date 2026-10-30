@@ -20,7 +20,6 @@
 
 using RPGCreator.SDK.Modules.Definition;
 using RPGCreator.SDK.Registry;
-using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Internals;
 using RPGCreator.Shared.Types;
 

@@ -18,26 +18,28 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.Collections.ObjectModel;
-using RPGCreator.SDK.GlobalState;
-using RPGCreator.SDK.Types;
+using RPGCreator.SDK.Tools;
 using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Registry;
 
 public interface IToolRegistry : IService
 {
+    IEnumerable<Tool> RegisteredTools { get; }
     
-    ObservableCollection<ToolLogic> RegisteredTools { get; }
-    
-    public void ActivateTool(URN toolUrn);
-    public void ActivateTool(ToolLogic toolLogic);
-    public void DeactivateTool(URN toolUrn);
-    public void DeactivateTool(ToolLogic toolLogic);
-    public ToolLogic? GetActiveTool();
-    
-    public void RegisterTool(ToolLogic toolLogic, bool overrideIfExists = false);
+    public void RegisterTool(URN toolUrn, Type toolLogic, bool overrideIfExists = false);
     public void UnregisterTool(URN toolUrn);
-    public ToolLogic? GetTool(URN toolUrn);
+    public Tool? GetTool(URN toolUrn);
     public bool HasTool(URN toolUrn);
+    
+    
+    // TOOL LOGIC
+    
+    
+    IEnumerable<IToolLogic> RegisteredToolLogics { get; }
+    
+    void RegisterToolLogic(URN targetLayerUrn, Type toolLogicType, bool overrideIfExists = false);
+    void UnregisterToolLogic(URN targetLayerUrn);
+    IToolLogic? GetToolLogic(URN targetLayerUrn);
+    bool HasToolLogic(URN targetLayerUrn);
 }

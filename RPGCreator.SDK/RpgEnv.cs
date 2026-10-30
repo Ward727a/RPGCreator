@@ -21,7 +21,10 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
+using Fluxor;
+using Microsoft.Extensions.DependencyInjection;
 using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.States;
 using RPGCreator.SDK.Types;
 using RPGCreator.Shared.Types;
 using SysPath = System.IO.Path;
@@ -60,7 +63,7 @@ public static class RpgEnv
             {
                 if (field == "")
                 {
-                    field = SysPath.Combine(ExecutableFolder, "assets");
+                    field = SysPath.Combine(ExecutableFolder, "Content");
                 }
 
                 return field;
@@ -168,23 +171,56 @@ public static class RpgEnv
 
     public static class PathFormat
     {
+        private static IState<ProjectState> _projectState = null!;
+        public static void Boot(IState<ProjectState> projectState)
+        {
+            _projectState = projectState;
+        }
+
+        private static string? _cacheDirectory = null;
+        public static string GetCacheFolder()
+        {
+            if (_cacheDirectory == null)
+            {
+                _cacheDirectory = SysPath.Combine(GetProjectFolder(), ".cache");
+                
+                _projectState.StateChanged -= OnPropertyChanged;
+                _projectState.StateChanged += OnPropertyChanged;
+            }
+            
+            if(!Directory.Exists(_cacheDirectory))
+                Directory.CreateDirectory(_cacheDirectory);
+            
+            return _cacheDirectory;
+            
+            void OnPropertyChanged(object? sender, EventArgs e)
+            {
+                _cacheDirectory = null;
+            }
+        }
+
+        public static string GetProjectFolder()
+        {
+            return _projectState.Value.Directory;
+        }
+        
         private static string? DbFolder = null;
         public static Result<string> GetDbPath(string dbName)
         {
             if (DbFolder == null)
             {
-                if (GlobalStates.ProjectState.CurrentProject is not { } currentProject)
+                if (!_projectState.Value.HasProject)
                 {
                     return Result.Fail("No project is currently open");
                 }
                 
-                DbFolder = SysPath.Combine(currentProject.MetaData.Directory, "_db");
+                DbFolder = SysPath.Combine(_projectState.Value.Directory, "_db");
                 
                 if (!Directory.Exists(DbFolder))
                     Directory.CreateDirectory(DbFolder);
                 
-                GlobalStates.ProjectState.PropertyChanged -= OnPropertyChanged;
-                GlobalStates.ProjectState.PropertyChanged += OnPropertyChanged;
+                _projectState.StateChanged -= OnPropertyChanged;
+                _projectState.StateChanged += OnPropertyChanged;
             }
             
             if(!dbName.EndsWith(".db"))
@@ -192,12 +228,9 @@ public static class RpgEnv
             
             return SysPath.Combine(DbFolder, dbName);
             
-            void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+            void OnPropertyChanged(object? sender, EventArgs e)
             {
-                if (e.PropertyName == nameof(GlobalStates.ProjectState.CurrentProject))
-                {
-                    DbFolder = null;
-                }
+                DbFolder = null;
             }
         }
         private static string? AssetFolder = null;
@@ -205,64 +238,87 @@ public static class RpgEnv
         {
             if (AssetFolder == null)
             {
-                if (GlobalStates.ProjectState.CurrentProject is not { } currentProject)
+                if (!_projectState.Value.HasProject)
                 {
                     return Result.Fail("No project is currently open");
                 }
-                
-                AssetFolder = SysPath.Combine(currentProject.MetaData.Directory, "assets_data");
+
+                AssetFolder = SysPath.Combine(_projectState.Value.Directory, "assets_data");
                 
                 if (!Directory.Exists(AssetFolder))
                     Directory.CreateDirectory(AssetFolder);
                 
-                GlobalStates.ProjectState.PropertyChanged -= OnPropertyChanged;
-                GlobalStates.ProjectState.PropertyChanged += OnPropertyChanged;
+                _projectState.StateChanged -= OnPropertyChanged;
+                _projectState.StateChanged += OnPropertyChanged;
             }
             
             return AssetFolder;
             
-            void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+            void OnPropertyChanged(object? sender, EventArgs e)
             {
-                if (e.PropertyName == nameof(GlobalStates.ProjectState.CurrentProject))
-                {
-                    AssetFolder = null;
-                }
+                AssetFolder = null;
             }
         }
         
-        private static FilePath? ImportedFiles = null;
-        public static Result<FilePath> GetImportedFilesPath(string additionalFolder = "")
+        private static string? _resourcesFiles = null;
+        public static Result<string> GetResourcesPath(string additionalFolder = "")
         {
-            if (ImportedFiles == null)
+            if (_resourcesFiles == null)
             {
-                if (GlobalStates.ProjectState.CurrentProject is not { } currentProject)
+                if (!_projectState.Value.HasProject)
                 {
                     return Result.Fail("No project is currently open");
                 }
                 
-                ImportedFiles = SysPath.Combine("#project#", "imported_files");
+                _resourcesFiles = SysPath.Combine(_projectState.Value.Directory, "resources");
                 
-                if (!Directory.Exists(ImportedFiles))
-                    Directory.CreateDirectory(ImportedFiles);
+                if (!Directory.Exists(_resourcesFiles))
+                    Directory.CreateDirectory(_resourcesFiles);
                 
-                GlobalStates.ProjectState.PropertyChanged -= OnPropertyChanged;
-                GlobalStates.ProjectState.PropertyChanged += OnPropertyChanged;
+                _projectState.StateChanged -= OnPropertyChanged;
+                _projectState.StateChanged += OnPropertyChanged;
             }
             
             if(string.IsNullOrWhiteSpace(additionalFolder))
-                return Result<FilePath>.Success(ImportedFiles.Value);
+                return Result<string>.Success(_resourcesFiles);
             
-            var path = new FilePath(SysPath.Combine(ImportedFiles.Value.PureText, additionalFolder));
+            var path = SysPath.Combine(_resourcesFiles, additionalFolder);
+            
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
-            return Result<FilePath>.Success(path);
-
-            void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+            
+            return Result<string>.Success(path);
+            
+            void OnPropertyChanged(object? sender, EventArgs e)
             {
-                if (e.PropertyName == nameof(GlobalStates.ProjectState.CurrentProject))
+                _resourcesFiles = null;
+            }
+        }
+
+        private static string? _moduleCache = null;
+        public static Result<string> GetModuleCachePath()
+        {
+            if (_moduleCache == null)
+            {
+                if (!_projectState.Value.HasProject)
                 {
-                    ImportedFiles = null;
+                    return Result.Fail("No project is currently open");
                 }
+                
+                _moduleCache = SysPath.Combine(_projectState.Value.Directory, ".moduleCache");
+                
+                if (!Directory.Exists(_moduleCache))
+                    Directory.CreateDirectory(_moduleCache);
+                
+                _projectState.StateChanged -= OnPropertyChanged;
+                _projectState.StateChanged += OnPropertyChanged;
+            }
+            
+            return Result<string>.Success(_moduleCache);
+            
+            void OnPropertyChanged(object? sender, EventArgs e)
+            {
+                _moduleCache = null;
             }
         }
     }
@@ -290,78 +346,9 @@ public static class RpgEnv
         } = new Version(0, 0, 1);
     }
 
-    public static class TypesDiscriminator
+    public static class FileExtension
     {
-        private static readonly IReadOnlyDictionary<string, Type> StringToTypes = new Dictionary<string, Type>()
-        {
-            { "string", typeof(string) },
-            { "int", typeof(int) },
-            { "float", typeof(float) },
-            { "bool", typeof(bool) },
-            { "double", typeof(double) },
-            { "long", typeof(long) },
-            { "short", typeof(short) },
-            { "byte", typeof(byte) },
-            { "decimal", typeof(decimal) },
-            { "sbyte", typeof(sbyte) },
-            { "uint", typeof(uint) },
-            { "ulong", typeof(ulong) },
-            { "ushort", typeof(ushort) },
-            { "char", typeof(char) },
-            { "object", typeof(object) },
-            { "array", typeof(Array) },
-            { "OCollection", typeof(ObservableCollection<>)}
-        };
-
-        private static readonly IReadOnlyDictionary<Type, string> TypeToStrings = StringToTypes.ToDictionary(x => x.Value, x => x.Key);
-
-        public static string TypeToString(Type? type)
-        {
-            if(type is null)
-                return "object";
-            
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ObservableCollection<>))
-            {
-                var genericType = type.GetGenericArguments()[0];
-                return $"OCollection<{TypeToString(genericType)}>";
-            }
-
-            if (type.IsArray)
-            {
-                return $"{TypeToString(type.GetElementType())}[]";
-            }
-
-            if (!TypeToStrings.TryGetValue(type, out var stringType))
-            {
-                Logger.Error("Type {0} is not supported", type);
-                return $"NotSupportedTypeDiscriminator({type.Name})";
-            }
-    
-            return stringType;
-        }
-
-        private const int OCollectionSizeString = 12; // Size for "OCollection<"
-        private const int OCollectionSizeStringWithBrackets = 13; // Size for "OCollection<>"
-        
-        public static Type StringToType(string type)
-        {
-            var span = type.AsSpan();
-
-            if (span.StartsWith("OCollection<") && span.EndsWith(">"))
-            {
-                var innerContent = span.Slice(OCollectionSizeString, span.Length - OCollectionSizeStringWithBrackets);
-                var innerType = StringToType(innerContent.ToString());
-        
-                return typeof(ObservableCollection<>).MakeGenericType(innerType);
-            }
-            
-            if (!StringToTypes.TryGetValue(type, out var stringType))
-            {
-                Logger.Error("Type {0} is not supported", type);
-                return typeof(object);
-            }
-            
-            return stringType;
-        }
+        public const string Tileset = ".r.tsets";
+        public const string Config = ".r.cfg";
     }
 }

@@ -1,0 +1,5 @@
+﻿{
+  "ViewId": "rpgc://views/asset_creator/stats",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.AssetsCreator.StatAssetCreator",
+  "Name": "Stat Creator"
+}

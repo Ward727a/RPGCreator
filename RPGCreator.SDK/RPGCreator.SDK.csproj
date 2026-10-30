@@ -5,9 +5,12 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>14</LangVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Arch" Version="2.1.0" />
+      <PackageReference Include="Arch.System" Version="1.1.0" />
       <PackageReference Include="Caseless.Fody" Version="1.9.1" PrivateAssets="All"/>
       <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.0" />
       <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.4.0" />
@@ -18,6 +21,7 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="LiteDB" Version="5.0.21" />
+      <PackageReference Include="MediatR" Version="14.1.0" />
       <PackageReference Include="MetadataExtractor" Version="2.9.0" />
       <PackageReference Include="MethodTimer.Fody" Version="3.2.3" PrivateAssets="All"/>
       <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.3.0" />
@@ -31,9 +35,9 @@
 
     <ItemGroup>
       <Folder Include="Common\" />
-      <Folder Include="Interfaces\" />
+      <Folder Include="GameUI\Events\Actions\Core\" />
       <Folder Include="Modules\ECS\" />
-      <Folder Include="Services\" />
+      <Folder Include="Types\Assets\" />
       <Folder Include="Types\Enums\" />
     </ItemGroup>
 
@@ -48,6 +52,7 @@
       <ProjectReference Include="..\Generators\EngineClassGenerator\EngineClassGenerator\EngineClassGenerator.csproj"  OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
       <ProjectReference Include="..\Generators\UiPropertiesGenerators\RPGCreator.UiPropertiesGenerators\RPGCreator.UiPropertiesGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
       <ProjectReference Include="..\RPGCreator.Shared\RPGCreator.Shared.csproj" />
+      <ProjectReference Include="..\Thirdparty\FNA\FNA.Core.csproj" />
     </ItemGroup>
 
 </Project>

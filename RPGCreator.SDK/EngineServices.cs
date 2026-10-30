@@ -19,17 +19,17 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Diagnostics.CodeAnalysis;
-using RPGCreator.SDK.Assets.Runtime;
 using RPGCreator.SDK.Common.Exceptions;
 using RPGCreator.SDK.Parser.PrattFormula;
 using RPGCreator.SDK.Resources;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Services.EngineService;
+using RPGCreator.SDK.Services.ModuleServices;
 
 namespace RPGCreator.SDK;
 
 
-public class EngineServicesProvider : IServiceProvider
+public class EngineServicesProvider
 {
     private readonly Dictionary<Type, Dictionary<string, IService>> _services = new();
 
@@ -90,8 +90,7 @@ public class EngineServicesProvider : IServiceProvider
     }
 }
 
-
-public static class EngineServices
+static class EngineServices_legacy
 {
     private static readonly EngineServicesProvider ServiceProvider = new();
     private static readonly Dictionary<Type, List<Action<IService>>> ServiceReadyCallbacks = new();
@@ -137,94 +136,6 @@ public static class EngineServices
                 ServiceReadyCallbacks.Remove(typeof(T));
             }
         }
-    }
-
-    public static IEngineConfig Config
-    {
-        get => GetService<IEngineConfig>();
-        set => RegisterService(value);
-    }
-
-    public static IAssetsManager AssetsManager
-    {
-        get => GetService<IAssetsManager>();
-        set => RegisterService(value);
-    }
-
-    public static ISerializerService Serializer
-    {
-        get => GetService<ISerializerService>();
-        set => RegisterService(value);
-    }
-
-    public static IResourceService Resources
-    {
-        get => GetService<IResourceService>();
-        set => RegisterService(value);
-    }
-    public static IProjectsManager ProjectsManager
-    {
-        get => GetService<IProjectsManager>();
-        set => RegisterService(value);
-    }
-    public static IPrattFormulaService PrattFormulaService
-    {
-        get => GetService<IPrattFormulaService>();
-        set => RegisterService(value);
-    }
-    
-    public static IUndoRedoService UndoRedoService
-    {
-        get => GetService<IUndoRedoService>();
-        set => RegisterService(value);
-    }
-    
-    public static IEcsService ECS
-    {
-        get => GetService<IEcsService>();
-        set => RegisterService(value);
-    }
-    
-    public static IInputsService InputsService
-    {
-        get => GetService<IInputsService>();
-        set => RegisterService(value);
-    }
-    
-    public static IModulePathResolver ModulePathResolver
-    {
-        get => GetService<IModulePathResolver>();
-        set => RegisterService(value);
-    }
-    
-    public static IModuleManager ModuleManager
-    {
-        get => GetService<IModuleManager>();
-        set => RegisterService(value);
-    }
-    
-    public static IFeaturesManager FeaturesManager
-    {
-        get => GetService<IFeaturesManager>();
-        set => RegisterService(value);
-    }
-
-    public static IGamePlayerService GamePlayerService
-    {
-        get => GetService<IGamePlayerService>();
-        set => RegisterService(value);
-    }
-
-    public static IScheduler Scheduler
-    {
-        get => GetService<IScheduler>();
-        set => RegisterService(value);
-    }
-    
-    public static IRuntimeMaker RuntimeMaker
-    {
-        get => GetService<IRuntimeMaker>();
-        set => RegisterService(value);
     }
 
     /// <summary>

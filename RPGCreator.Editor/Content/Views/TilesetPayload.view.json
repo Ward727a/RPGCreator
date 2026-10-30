@@ -1,0 +1,14 @@
+﻿{
+  "ViewId": "rpgc://views/tileset_payload",
+  "TargetClass": "RPGCreator.Editor.UI.Views.EditorTools.Payload.TilesetPayload",
+  "Name": "Tileset Payload",
+  "Binders": [
+    {
+      "TargetViewId": "rpgc://views/payload_tool",
+      "TargetBindId": "tileset_type_payload",
+      "Data": {
+        "tileset_type": "rpgc://layer_type/tile_layer"
+      }
+    }
+  ]
+}

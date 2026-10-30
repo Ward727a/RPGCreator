@@ -1,0 +1,5 @@
+﻿{
+  "ViewId": "rpgc://views/auto_tile_creator",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.AssetsCreator.AutoTileCreator",
+  "Name": "AutoTileCreator"
+}

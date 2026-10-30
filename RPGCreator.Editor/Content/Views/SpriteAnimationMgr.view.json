@@ -1,0 +1,15 @@
+﻿{
+  "ViewId": "rpgc://views/asset_manager/sprite_animation",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.AssetsManager.SpriteAnimationMgr",
+  "Name": "Sprite Animation",
+  "Binders": [
+    {
+      "TargetViewId": "rpgc://views/asset_manager",
+      "TargetBindId": "Menu",
+      "Data": {
+        "MenuName": "Sprite Animation",
+        "MenuDescription": "Manager of sprite animations"
+      }
+    }
+  ]
+}

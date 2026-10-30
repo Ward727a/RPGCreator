@@ -24,7 +24,6 @@
 #endregion
 
 using RPGCreator.SDK.Assets.MetaData;
-using RPGCreator.SDK.Assets.Runtime.Maps;
 using RPGCreator.SDK.Projects;
 
 namespace RPGCreator.EngineLib.Types.Project
@@ -33,8 +32,6 @@ namespace RPGCreator.EngineLib.Types.Project
     {
         public ProjectMetaData MetaData { get; set; }
        
-        private RuntimeMap? _editMap = null;
-        
         public Project()
         {
             MetaData = ProjectMetaData.Create();

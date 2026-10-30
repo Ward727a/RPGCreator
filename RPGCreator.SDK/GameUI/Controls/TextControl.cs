@@ -24,7 +24,7 @@ using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.GameUI.Enums;
 using RPGCreator.SDK.GameUI.Visual;
 using RPGCreator.SDK.Services.RuntimeService;
-using RPGCreator.SDK.Types;
+using RPGCreator.Shared.Attributes;
 using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.GameUI.Controls;
@@ -36,9 +36,7 @@ public partial class TextControl : BaseControl
     public override string Description { get; set; } = "A control that displays text.";
     public override BaseControl Create()
     {
-        return new TextControl("Text Control")
-        {
-        };
+        return null!;
     }
 
     public override URN Urn => _urnModule.ToUrnModule("rpgc").ToUrn("text_control");
@@ -58,35 +56,35 @@ public partial class TextControl : BaseControl
     private ETextVAlignment _vAlignment = ETextVAlignment.Top;
     private ETextHAlignment _hAlignment = ETextHAlignment.Left;
 
-    public TextControl()
+    public TextControl(IFontService fontService)
     {
         Visual = new TextVisual()
         {
             Control = this
         };
+        
         IRpgFont? font = null;
-        RuntimeServices.OnceServiceReady<IFontService>(
-            (fontService) =>
+        
+        
+        fontService.GetFont("Arial").OnSuccess((_font) => font = _font).OnFailure((_) =>
+        {
+            fontService.LoadFont(@"C:/Windows/Fonts/arial.ttf", "Arial");
+            fontService.GetFont("Arial").OnSuccess((_font) => font = _font).OnFailure((err) =>
             {
-                fontService.GetFont("Arial").OnSuccess((_font) => font = _font).OnFailure((_) =>
-                {
-                    RuntimeServices.FontService.LoadFont(@"C:/Windows/Fonts/arial.ttf", "Arial");
-                    RuntimeServices.FontService.GetFont("Arial").OnSuccess((_font) => font = _font).OnFailure((err) =>
-                    {
-                        Logger.Error("Failed to load font: {0}", err);
-                    });
-                });
-
-                Font = font ?? throw new Exception("Failed to load font");
+                Logger.Error("Failed to load font: {0}", err);
             });
+        });
+
+        Font = font ?? throw new Exception("Failed to load font");
+        
     }
 
-    public TextControl(string text) : this()
+    public TextControl(IFontService fontService, string text) : this(fontService)
     {
         Text = text;
     }
     
-    public TextControl(string text, Color textColor) : this()
+    public TextControl(IFontService fontService, string text, Color textColor) : this(fontService)
     {
         Text = text;
         TextColor = textColor;

@@ -19,6 +19,7 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Diagnostics.CodeAnalysis;
+using RPGCreator.SDK.Assets.MetaData;
 using RPGCreator.SDK.Projects;
 
 namespace RPGCreator.SDK.Services.EngineService;
@@ -29,9 +30,10 @@ public interface IProjectsManager : IService
     
     List<ProjectLink> GetAllProjects();
     public IBaseProject CreateProject(string projectName, string projectPath, string description = "");
+    public void DeleteProject(IBaseProject project);
     public bool TryGetProject(string configPath, [NotNullWhen(true)] out IBaseProject? project);
     public void OpenProject(IBaseProject project);
     public void CloseCurrentProject();
-    public IBaseProject? GetCurrentProject();
+    public ProjectMetaData? GetCurrentProject();
     public bool SaveProject(IBaseProject project);
 }

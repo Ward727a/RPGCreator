@@ -18,27 +18,34 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
+using System.Reflection;
 using RPGCreator.SDK.GameUI.Controls;
-using RPGCreator.SDK.Types;
+using RPGCreator.SDK.GameUI.Core;
 using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Registry;
 
-public interface IGUIControlRegistry : IService
+public interface IGuiControlRegistry
 {
-    public event Action<BaseControl>? ControlRegistered;
-    public event Action<BaseControl>? ControlUnregistered;
-
     public int ControlCount { get; }
-    public IEnumerable<BaseControl> Controls { get; }
+    public IReadOnlyCollection<GuiControlMeta> Controls { get; }
     
-    public void RegisterControl(BaseControl control, bool overwriteIfExists = false);
-    public void UnregisterControl(URN controlUrn);
+    public Result RegisterControl<T>(bool overwriteIfExists = false) where T : BaseControl;
+    public Result UnregisterControl<T>() where T : BaseControl;
     
-    public BaseControl? GetControl(URN controlUrn);
-    public bool TryGetControl(URN controlUrn, out BaseControl? control);
+    public Result ScanAndRegisterControls(Assembly assembly, bool overwriteIfExists = false);
+    public Result ScanAndUnregisterControls(Assembly assembly);
     
+    public Result ScanAndRegisterControls(IEnumerable<Assembly> assemblies, bool overwriteIfExists = false);
+    public Result ScanAndUnregisterControls(IEnumerable<Assembly> assemblies);
+    
+    public Result<GuiControlMeta> GetControl(URN controlUrn);
+    
+    public bool HasControl<T>() where T : BaseControl;
+    public bool HasControl(Type controlType);
     public bool HasControl(URN controlUrn);
     
-    public void ClearControls();
+    public Result<BaseControl> CreateControl(URN controlUrn, params object[] parameters);
+
+    public void Clear();
 }

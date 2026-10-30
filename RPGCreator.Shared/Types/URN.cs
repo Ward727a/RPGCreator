@@ -7,7 +7,7 @@ using RPGCreator.Shared.Attributes;
 namespace RPGCreator.Shared.Types;
 
 [DebuggerDisplay("{ToString()}")]
-[EngineType("rpgc", "sdk", "types", "urn")]
+[TypeDiscriminator("rpgc", "sdk", "types", "urn")]
 public record struct URN
 {
     public readonly ReadOnlyMemory<char> Namespace;

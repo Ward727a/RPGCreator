@@ -147,4 +147,28 @@ public class ScopedLogger
         if (method == ".ctor")
             method = "Constructor";
     }
+    
+    
+    /// <summary>
+    /// In the case where you need to put a value in 'args' you need to follow this:<br/>
+    /// - First situation "You have 1 arg to put inside the 'args' parameter":<br/>
+    /// >>> Easy! Just before your arg, put a 'args:' like: Info("Message {arg}", args: myArg);<br/>
+    /// - Second situation "You have 2 or + to put inside the 'args' parameter":<br/>
+    /// >>> Just before your args, put a 'args: [{ARG1}, {ARG2}, ...]' like: <br/>
+    /// >>> Info("Message {arg1}, {arg2}", args: [MyArg, SecondArg]);
+    ///</summary>
+    public void ErrorOnce(string message, [CallerMemberName] string method = "", params object[] args)
+    {
+        SimplifyMethodName(ref method);
+        Logger.Once.Error($"[{_asmName}.{_className}.{method}] {_customPrefix}{message}", args);
+    }
+    
+    public void ErrorOnce(Exception exception, string message = "", [CallerMemberName] string method = "", params object[] args)
+    {
+        SimplifyMethodName(ref method);
+        if(string.IsNullOrEmpty(message))
+            Logger.Once.Error(exception, $"[{_asmName}.{_className}.{method}] {_customPrefix}An exception occurred.", args);
+        else
+            Logger.Once.Error(exception, $"[{_asmName}.{_className}.{method}] {_customPrefix}{message}", args);
+    }
 }

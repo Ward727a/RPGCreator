@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Globalization;
 using System.Text.Json.Serialization;
-using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Types;
@@ -14,8 +13,8 @@ namespace RPGCreator.SDK.Modules.Definition;
 /// <summary>
 /// A custom data system, also called "data bags" or "property bags", that allows modules to store and retrieve misc data, defined by users or other modules.
 /// </summary>
-[EngineType("rpgc", "sdk", "custom_data")]
-public class CustomData : ISerializable, IDeserializable, IDisposable, ICloneable
+[TypeDiscriminator("rpgc", "sdk", "custom_data")]
+public class CustomData : IDisposable, ICloneable
 {
     object ICloneable.Clone() => Clone();
 
@@ -188,15 +187,6 @@ public class CustomData : ISerializable, IDeserializable, IDisposable, ICloneabl
         
         OnDataRemoved?.Invoke(key);
         return true;
-    }
-    
-    public SerializationInfo GetObjectData()
-    {
-        return new SerializationInfo(typeof(CustomData));
-    }
-
-    public void SetObjectData(DeserializationInfo info)
-    {
     }
     
     public CustomData Clone()

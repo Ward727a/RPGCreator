@@ -22,26 +22,13 @@ namespace RPGCreator.SDK.Types;
 
 public readonly struct FilePath(string path) : IEquatable<FilePath>
 {
-    public readonly string PureText = path;
-    public readonly string FullPath = FormatPath(path);
-
-    private static string FormatPath(string path)
-    {
-        if(string.IsNullOrEmpty(path) || !path.Contains('#')) return path;
-        if(GlobalStates.ProjectState.CurrentProject == null) return path;
-
-        return path.Replace("#project#", GlobalStates.ProjectState.CurrentProject.MetaData.Directory)
-            .Replace("#appdata#", RpgEnv.Path.ApplicationDataFolder)
-            .Replace("#exe#", RpgEnv.Path.ExecutableFolder)
-            .Replace("#temp#", RpgEnv.Path.TempFolder);
-    }
+    public readonly string LogicalPath = path;
     
-    public static implicit operator string(FilePath filepath) => filepath.FullPath;
     public static implicit operator FilePath(string filepath) => new(filepath);
 
     public bool Equals(FilePath other)
     {
-        return PureText == other.PureText;
+        return LogicalPath == other.LogicalPath;
     }
 
     public override bool Equals(object? obj)
@@ -51,6 +38,11 @@ public readonly struct FilePath(string path) : IEquatable<FilePath>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(PureText, FullPath);
+        return HashCode.Combine(LogicalPath);
     }
+}
+
+public interface IPathResolver
+{
+    string Resolve(FilePath path);
 }

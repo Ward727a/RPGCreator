@@ -18,18 +18,53 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using System.Numerics;
-using RPGCreator.SDK.Types;
-using RPGCreator.Shared.Types;
+using Arch.Core;
+using Microsoft.Xna.Framework;
+using Vector2 = System.Numerics.Vector2;
 
 namespace RPGCreator.SDK.ECS.Components;
 
-public struct CameraComponent : IComponent
+public struct CameraComponent
 {
-    public float Zoom;
-    public float Rotation;
-    public Vector2 Offset;
-    public Size ViewportSize;
-    public bool IsFollowingEntity;
-    public int FollowedEntity;
+    public bool IsActive = false;
+    
+    public float Rotation = 0.0f;
+    public float Zoom = 1.0f;
+    public Vector2 ViewportSize;
+    
+    public Vector2 Offset = Vector2.Zero; 
+
+    public bool IsFollowingEntity = false;
+    
+    public Entity FollowedEntity = Entity.Null; 
+
+    public Matrix ViewMatrix = Matrix.Identity;
+    public Rectangle BoundingBox = Rectangle.Empty;
+
+    public CameraComponent(Vector2 viewportSize)
+    {
+        ViewportSize = viewportSize;
+    }
+    
+    public Vector2 Origin => new(ViewportSize.X * 0.5f, ViewportSize.Y * 0.5f);
+    
+    public static Matrix GetViewMatrix(in CameraComponent camera, in TransformComponent transform)
+    {
+        var origin = new Vector3(camera.Origin.X, camera.Origin.Y, 0f);
+        return 
+            // 1. Déplace le monde à l'inverse de la position de la caméra
+            Matrix.CreateTranslation(new Vector3(-transform.Position.X, -transform.Position.Y, 0f)) *
+            
+            // 2. Décale par rapport à l'origine (centre de l'écran)
+            Matrix.CreateTranslation(new Vector3(-origin.X, -origin.Y, 0f)) *
+            
+            // 3. Applique la rotation
+            Matrix.CreateRotationZ(camera.Rotation) *
+            
+            // 4. Applique le zoom (échelle)
+            Matrix.CreateScale(camera.Zoom, camera.Zoom, 1f) * // ou Matrix.CreateScale(camera.Zoom, camera.Zoom, 1f)
+            
+            // 5. Replace le tout par rapport à l'origine
+            Matrix.CreateTranslation(origin);
+    }
 }

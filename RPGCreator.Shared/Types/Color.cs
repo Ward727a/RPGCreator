@@ -23,7 +23,7 @@ using RPGCreator.Shared.Attributes;
 namespace RPGCreator.Shared.Types;
 
 
-[EngineType("rpgc", "sdk", "types", "color")]
+[TypeDiscriminator("rpgc", "sdk", "types", "color")]
 public struct Color : IEquatable<Color>
 {
     public byte R, G, B, A;

@@ -1,0 +1,14 @@
+﻿{
+  "ViewId": "rpgc://views/editor_tools/map_draw_tool",
+  "TargetClass": "RPGCreator.Editor.UI.Views.EditorTools.MapDrawTool",
+  "Name": "Map Draw Tool",
+  "Binders": [
+    {
+      "TargetViewId": "rpgc://views/editor_window",
+      "TargetBindId": "menu_item",
+      "Data": {
+        "menu": "Tools|Map Draw"
+      }
+    }
+  ]
+}

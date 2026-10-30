@@ -1,36 +1,36 @@
-using System.Numerics;
+using Microsoft.Xna.Framework;
+using Vector2 = System.Numerics.Vector2;
 
 namespace RPGCreator.SDK.ECS.Components;
 
-public struct TransformComponent : IComponent
+public struct TransformComponent
 {
-    public float X;
-    public float Y;
     /// <summary>
-    /// In degrees
+    /// Position of the entity in the game world.
     /// </summary>
-    public float Rotation;
-    
-    public float ScaleX;
-    public float ScaleY;
+    public Vector2 Position;
 
-    public Vector2 Position
-    {
-        get => new Vector2(X, Y);
-        set
-        {
-            X = value.X;
-            Y = value.Y;
-        }
-    }
+    /// <summary>
+    /// Size of the entity in pixels (Width and Height).
+    /// </summary>
+    public Point Size;
+
+    /// <summary>
+    /// Multiplicator of the sprite rendering scale (1.0 = real size).
+    /// </summary>
+    public Vector2 Scale = Vector2.One;
     
-    public Vector2 Scale
+    
+    public Rectangle Bounds => new(
+        (int)Position.X, 
+        (int)Position.Y, 
+        (int)(Size.X * Scale.X), 
+        (int)(Size.Y * Scale.Y)
+    );
+
+    public TransformComponent(Vector2 position, Point size)
     {
-        get => new Vector2(ScaleX, ScaleY);
-        set
-        {
-            ScaleX = value.X;
-            ScaleY = value.Y;
-        }
+        Position = position;
+        Size = size;
     }
 }

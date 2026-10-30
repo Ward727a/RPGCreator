@@ -6,6 +6,7 @@ public static class ShaUtil
 {
     public static string ComputeSha256(string filePath)
     {
+        
         try
         {
             using var sha256 = System.Security.Cryptography.SHA256.Create();

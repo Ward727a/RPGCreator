@@ -1,0 +1,14 @@
+﻿{
+  "ViewId": "rpgc://views/map_explorer",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.MapExplorer",
+  "Name": "Map Explorer",
+  "Binders": [
+    {
+      "TargetViewId": "rpgc://views/editor_window",
+      "TargetBindId": "menu_item",
+      "Data": {
+        "menu": "\uf019"
+      }
+    }
+  ]
+}

@@ -22,7 +22,7 @@ using RPGCreator.Shared.Attributes;
 
 namespace RPGCreator.Shared.Types;
 
-[EngineType("rpgc", "sdk", "types", "piped_path")]
+[TypeDiscriminator("rpgc", "sdk", "types", "piped_path")]
 public readonly struct PipedPath : IEquatable<PipedPath>
 {
     private const char SeparatorChar = '|';

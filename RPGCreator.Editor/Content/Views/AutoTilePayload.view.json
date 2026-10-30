@@ -1,0 +1,14 @@
+﻿{
+  "ViewId": "rpgc://views/autotile_payload",
+  "TargetClass": "RPGCreator.Editor.UI.Views.EditorTools.Payload.AutoTilePayload",
+  "Name": "AutoTile Payload",
+  "Binders": [
+    {
+      "TargetViewId": "rpgc://views/payload_tool",
+      "TargetBindId": "tileset_type_payload",
+      "Data": {
+        "tileset_type": "rpgc://layer_type/auto_tile_layer"
+      }
+    }
+  ]
+}

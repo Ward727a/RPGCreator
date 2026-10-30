@@ -21,7 +21,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using RPGCreator.SDK.Types;
-using RPGCreator.Shared.Types;
 
 namespace RPGCreator.EngineLib.Serializer.Converters;
 
@@ -36,6 +35,6 @@ public class FilePathJsonConverter : JsonConverter<FilePath>
 
     public override void Write(Utf8JsonWriter writer, FilePath value, JsonSerializerOptions options)
     {
-        writer.WriteStringValue(value.PureText);
+        writer.WriteStringValue(value.LogicalPath);
     }
 }

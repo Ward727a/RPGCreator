@@ -23,7 +23,11 @@
 // 
 #endregion
 
+using Microsoft.Extensions.DependencyInjection;
+using RPGCreator.SDK.Common.Logging;
 using RPGCreator.SDK.Services.EngineService;
+using RPGCreator.Shared.Attributes;
+using RPGCreator.Shared.Enums;
 using Serilog;
 
 namespace RPGCreator.EngineLib.Scheduler
@@ -107,39 +111,49 @@ namespace RPGCreator.EngineLib.Scheduler
     /// - Wait for an object to be loaded <br/>
     /// - Wait for an animation to be completed <br/>
     /// </summary>
+    [EngineService(typeof(IScheduler))]
     public class EngineScheduler : IScheduler
     {
-        private readonly List<BaseTask> _tasks = new();
-        private readonly List<BaseTask> _tasksToAdd = new();
-        private readonly HashSet<Guid> _tasksToRemove = new();
+        private readonly ScopedLogger _logger = Logger.ForContext<EngineScheduler>();
+        
+        private readonly List<BaseTask> _tasks = [];
+        private readonly List<BaseTask> _tasksToAdd = [];
+        private readonly HashSet<Ulid> _tasksToRemove = [];
 
-        internal EngineScheduler()
+        private readonly Lock _addLock = new();
+        private readonly Lock _removeLock = new();
+        
+        public EngineScheduler()
         {
-            Log.Information("EngineScheduler initialized.");
+            _logger.Info("EngineScheduler initialized.");
         }
 
-        public Guid WaitSecond(float seconds, Action callback, bool loop = false)
+        public Ulid WaitSecond(float seconds, Action callback, bool loop = false)
         {
             var task = new WaitSecondTask(seconds, callback);
             task.Loop = loop;
             return AddTask(task);
         }
 
-        public Guid WaitUntil(Func<bool> condition, Action callback)
+        public Ulid WaitUntil(Func<bool> condition, Action callback)
         {
             var task = new WaitUntilTask(condition, callback);
             return AddTask(task);
         }
 
-        public Guid AddTask(BaseTask task)
+        public Ulid AddTask(BaseTask task)
         {
+            _addLock.Enter();
             _tasksToAdd.Add(task);
+            _addLock.Exit();
             return task.Id;
         }
 
-        public void CancelTask(Guid taskId)
+        public void CancelTask(Ulid taskId)
         {
+            _removeLock.Enter();
             _tasksToRemove.Add(taskId);
+            _removeLock.Exit();
         }
 
         public void Update(float deltaTime)
@@ -157,7 +171,9 @@ namespace RPGCreator.EngineLib.Scheduler
                 if (_tasksToRemove.Contains(task.Id))
                 {
                     _tasks.RemoveAt(i);
+                    _removeLock.Enter();
                     _tasksToRemove.Remove(task.Id);
+                    _removeLock.Exit();
                     continue;
                 }
 
@@ -171,7 +187,7 @@ namespace RPGCreator.EngineLib.Scheduler
                     }
                     catch (Exception ex)
                     {
-                        Log.Error(ex, "Error while executing task {TaskId}", task.Id);
+                        _logger.Error(ex, "Error while executing task {TaskId}", args: task.Id);
                     }
                     
                     if(task.CanBeRemoved())

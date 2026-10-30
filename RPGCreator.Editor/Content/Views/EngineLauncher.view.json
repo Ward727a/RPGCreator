@@ -1,0 +1,5 @@
+﻿{
+  "ViewId": "rpgc://views/engine_launcher",
+  "TargetClass": "RPGCreator.Editor.UI.Views.EngineLauncher",
+  "Name": "Engine Launcher"
+}

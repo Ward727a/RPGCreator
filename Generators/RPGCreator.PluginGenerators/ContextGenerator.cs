@@ -18,6 +18,7 @@ namespace RPGCreator.Generators
     {
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
+            return;
             var classDeclarations = context.SyntaxProvider
                 .CreateSyntaxProvider(
                     predicate: static (s, _) => s is ClassDeclarationSyntax { Members.Count: > 0 },

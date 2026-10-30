@@ -1,0 +1,15 @@
+﻿{
+  "ViewId": "rpgc://views/asset_manager/factions",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.AssetsManager.FactionMgr",
+  "Name": "Factions",
+  "Binders": [
+    {
+      "TargetViewId": "rpgc://views/asset_manager",
+      "TargetBindId": "Menu",
+      "Data": {
+        "MenuName": "Factions",
+        "MenuDescription": "Manager of factions"
+      }
+    }
+  ]
+}

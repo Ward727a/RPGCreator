@@ -25,7 +25,6 @@ using RPGCreator.SDK.GameUI.Events.Contexts;
 using RPGCreator.SDK.GameUI.Interfaces;
 using RPGCreator.SDK.GameUI.Visual;
 using RPGCreator.SDK.Inputs;
-using RPGCreator.SDK.Types;
 using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.GameUI.Controls;

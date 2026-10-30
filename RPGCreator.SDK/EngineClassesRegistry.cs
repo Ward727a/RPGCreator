@@ -19,13 +19,15 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Buffers;
+using System.Linq.Expressions;
 using System.Reflection;
+using RPGCreator.SDK.Assets;
 using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Common.Debug;
 using RPGCreator.SDK.Common.Exceptions;
 using RPGCreator.SDK.Common.Logging;
-using RPGCreator.SDK.Types;
 using RPGCreator.SDK.Types.Internals;
+using RPGCreator.Shared.Attributes;
 using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK;
@@ -77,18 +79,56 @@ public static class ClassesRegistry
     {
         public Result<object?> DefaultConstructor();
         public Result<object?> CreateInstance(object? arg);
+        public bool SupportsInstanceCreation { get; }
     }
 
     public class GenericFactory<T> : IEngineClassFactory where T : class, IEngineClass, new()
     {
         public Result<object?> DefaultConstructor() => Result<object?>.Success(new T());
         public Result<object?> CreateInstance(object? arg) => Result<object?>.Success(new T());
+        public bool SupportsInstanceCreation => false;
+    }
+    
+    public class GenericFactoryWithInstance<TDef, TInst> : IEngineClassFactory where TDef : class, IEngineClass, new() where TInst : class, IInstance<TDef>
+    {
+        public bool SupportsInstanceCreation => true;
+        
+        private static readonly Func<TDef, TInst> _compiledInstanceConstructor;
+        static GenericFactoryWithInstance()
+        {
+            var constructorInfo = typeof(TInst).GetConstructor(new[] { typeof(TDef) });
+            if (constructorInfo == null)
+            {
+                throw new CriticalEngineException($"No constructor found for class {typeof(TInst)} that takes a {typeof(TDef)} argument.");
+            }
+            
+            var param = Expression.Parameter(typeof(TDef), "def");
+            var newExpr = Expression.New(constructorInfo, param);
+            var lambda = Expression.Lambda<Func<TDef, TInst>>(newExpr, param);
+            
+            _compiledInstanceConstructor = lambda.Compile();
+        }
+        
+        public Result<object?> DefaultConstructor() => Result<object?>.Success(new TDef());
+        public Result<object?> CreateInstance(object? arg)
+        {
+            if(arg is TDef definition)
+            {
+                return Result<object?>.Success(_compiledInstanceConstructor(definition));
+            }
+
+            if (arg is null)
+                return Result<object?>.Success(new TDef());
+
+            return Result<object?>.Success(Activator.CreateInstance(typeof(TDef), arg));
+        }
     }
     
     public class DefaultEngineClassFactory(
         Func<Result<object?>>? defaultConstructor = null,
         Func<Result<object?>, object?>? createInstance = null) : IEngineClassFactory
     {
+        public bool SupportsInstanceCreation => false;
         public Result<object?> DefaultConstructor()
         {
             return defaultConstructor?.Invoke() ?? Result<object?>.Failure("Default constructor is null");
@@ -102,6 +142,7 @@ public static class ClassesRegistry
 
     private class EmptyEngineClassFactory : IEngineClassFactory
     {
+        public bool SupportsInstanceCreation => false;
         public Result<object?> DefaultConstructor() => Result<object?>.Fail("No class factory defined for this class.");
 
         public Result<object?> CreateInstance(object? arg) =>
@@ -110,6 +151,7 @@ public static class ClassesRegistry
     
     private class AbstractEngineClassFactory : IEngineClassFactory
     {
+        public bool SupportsInstanceCreation => false;
         public Result<object?> DefaultConstructor() => Result<object?>.Fail("An abstract class cannot be instantiated.");
         
         public Result<object?> CreateInstance(object? arg) => Result<object?>.Fail("An abstract class cannot be instantiated.");
@@ -373,6 +415,8 @@ public static class ClassesRegistry
                 Tags = attr.Tags?.Select(t => new StringName(t)).ToArray()
             };
 
+            var hasInstanceType = attr.InstanceType != null;
+            
             Type factoryType;
             if (type.IsAbstract)
             {
@@ -382,7 +426,9 @@ public static class ClassesRegistry
             {
                 try
                 {
-                    factoryType = typeof(GenericFactory<>).MakeGenericType(type);
+                    factoryType = hasInstanceType ? 
+                        typeof(GenericFactoryWithInstance<,>).MakeGenericType(type, attr.InstanceType!)
+                        : typeof(GenericFactory<>).MakeGenericType(type);
                 }
                 catch (Exception err)
                 {

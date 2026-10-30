@@ -1,0 +1,14 @@
+﻿{
+  "ViewId": "rpgc://views/layer_explorer",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.LayerExplorer",
+  "Name": "Layer Explorer",
+  "Binders": [
+    {
+      "TargetViewId": "rpgc://views/editor_window",
+      "TargetBindId": "menu_item",
+      "Data": {
+        "menu": "Tools|Layer Explorer"
+      }
+    }
+  ]
+}

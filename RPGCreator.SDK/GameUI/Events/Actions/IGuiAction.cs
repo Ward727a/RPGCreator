@@ -30,6 +30,4 @@ public interface IGuiAction
 
     void Execute(GuiEventContext context);
     bool Match(GuiEventContext context);
-
-    IGuiAction Clone();
 }

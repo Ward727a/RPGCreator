@@ -20,7 +20,6 @@
 
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using RPGCreator.SDK.Types;
 using RPGCreator.Shared.Types;
 
 namespace RPGCreator.EngineLib.Serializer.Converters;
@@ -48,5 +47,25 @@ public class UrnJsonConverter : JsonConverter<URN>
     public override void Write(Utf8JsonWriter writer, URN value, JsonSerializerOptions options)
     {
         writer.WriteStringValue(value.ToString());
+    }
+
+    public override URN ReadAsPropertyName(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.PropertyName)
+        {
+            var urnString = reader.GetString()?.Trim('"');
+            
+            if(string.IsNullOrWhiteSpace(urnString))
+                return URN.Empty;
+            
+            return URN.Parse(urnString);
+        }
+
+        return URN.Empty;
+    }
+
+    public override void WriteAsPropertyName(Utf8JsonWriter writer, URN value, JsonSerializerOptions options)
+    {
+        writer.WritePropertyName(value.ToString());
     }
 }

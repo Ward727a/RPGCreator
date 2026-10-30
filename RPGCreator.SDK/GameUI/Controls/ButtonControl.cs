@@ -22,7 +22,8 @@ using System.Numerics;
 using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.GameUI.Enums;
 using RPGCreator.SDK.GameUI.Visual;
-using RPGCreator.SDK.Types;
+using RPGCreator.SDK.Services.RuntimeService;
+using RPGCreator.Shared.Attributes;
 using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.GameUI.Controls;
@@ -30,7 +31,7 @@ namespace RPGCreator.SDK.GameUI.Controls;
 [EngineClass("rpgc", "game_ui", "controls", "inputs", "button_control")]
 public partial class ButtonControl : BaseControl
 {
-    private TextControl _textControl = new TextControl() { IsInternal = false };
+    private TextControl _textControl;
 
     public override string DisplayControlName { get; set; } = "Button Control";
     public override string Description { get; set; } = "A control that displays a button.";
@@ -43,15 +44,19 @@ public partial class ButtonControl : BaseControl
     
     public override BaseControl Create()
     {
-        return new ButtonControl();
+        return null!;
     }
 
-    public ButtonControl()
+    public ButtonControl(IFontService fontService)
     {
         Visual = new ButtonVisual();
         Visual.Width = 150;
         Visual.Height = 50;
-        _textControl.Text = "Button";
+        _textControl = new TextControl(fontService)
+        {
+            IsInternal = false,
+            Text = "Button"
+        };
         _textControl.GetExposedProperties();
         _textControl.PositionXUnitProperty.Set(EPositionUnitType.Percentage);
         _textControl.PositionYUnitProperty.Set(EPositionUnitType.Percentage);

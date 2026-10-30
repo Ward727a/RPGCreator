@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using Avalonia;
-using RPGCreator.EngineLib;
 using RPGCreator.UI;
 
 namespace RPGCreator.Desktop;
@@ -16,10 +15,6 @@ public class Program
     [SuppressMessage("ReSharper.DPA", "DPA0002: Excessive memory allocations in SOH", MessageId = "type: System.Byte[]; size: 318MB")] 
     public static void Main(string[] args)
     {
-
-        EngineCore.InitCore();
-        EngineCore.StartCore();
-
         BuildAvaloniaApp()
         .StartWithClassicDesktopLifetime(args);
     }

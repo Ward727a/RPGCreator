@@ -1,0 +1,5 @@
+﻿{
+  "ViewId": "rpgc://views/asset_creator/tileset",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.AssetsCreator.TilesetCreator",
+  "Name": "Tileset Creator"
+}

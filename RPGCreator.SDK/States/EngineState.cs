@@ -19,12 +19,13 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using Fluxor;
+using RPGCreator.Shared.Enums;
 
 namespace RPGCreator.SDK.States;
 
 public record EngineState(
     string ApplicationName,
-    EEngineMode Mode,
+    EngineModeFlags Mode,
     Version ApplicationVersion
 );
 
@@ -34,7 +35,7 @@ public class FeatureEngineState : Feature<EngineState>
 
     protected override EngineState GetInitialState() => new(
         "RPG Creator",
-        EEngineMode.Editor,
+        EngineModeFlags.Editor,
         new Version(0, 1, 0, 0)
     );
 }

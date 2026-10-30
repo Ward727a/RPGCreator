@@ -1,0 +1,29 @@
+﻿{
+  "ViewId": "rpgc://views/asset_manager",
+  "TargetClass": "RPGCreator.Editor.UI.Views.AssetsManagerUiWindow",
+  "Name": "Assets Manager",
+  "DeclareBinders": [
+    {
+      "BindId": "Menu",
+      "DataTemplates": [
+        {
+          "Name": "MenuName",
+          "Type": "rpgc://sdk/common/string"
+        },
+        {
+          "Name": "MenuDescription",
+          "Type": "rpgc://sdk/common/string"
+        }
+      ]
+    }
+  ],
+  "Binders": [
+    {
+      "TargetViewId": "rpgc://views/editor_window",
+      "TargetBindId": "menu_item",
+      "Data": {
+        "menu": "Edit|Assets Manager"
+      }
+    }
+  ]
+}

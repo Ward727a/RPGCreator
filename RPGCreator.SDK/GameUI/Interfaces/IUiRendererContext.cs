@@ -19,7 +19,6 @@
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
 using System.Numerics;
-using RPGCreator.SDK.Types;
 using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.GameUI.Interfaces;
@@ -31,7 +30,7 @@ namespace RPGCreator.SDK.GameUI.Interfaces;
 /// </summary>
 /// <remarks>
 /// This is a very basic interface that only includes a few methods for drawing simple shapes and managing clipping and transformations.<br/>
-/// A more complete implementation of this interface can be found in the RPGCreator.RTP assembly, which includes additional methods for drawing textures, text, nine-slice sprites, and other common UI elements.<br/>
+/// A more complete implementation of this interface can be found in the RPGCreator.Editor assembly, which includes additional methods for drawing textures, text, nine-slice sprites, and other common UI elements.<br/>
 /// As the SDK is made to be as lightweight as possible, the core assembly only includes the most essential methods for rendering UI elements.<br/>
 /// More advanced features are implemented in the RTP assembly to keep the core assembly free of unnecessary dependencies and to allow for more flexibility in how the rendering is implemented by different game runners.
 /// </remarks>

@@ -3,7 +3,7 @@ using RPGCreator.Shared.Attributes;
 
 namespace RPGCreator.Shared.Types;
 
-[EngineType("rpgc", "sdk", "types", "rectangle")]
+[TypeDiscriminator("rpgc", "sdk", "types", "rectangle")]
 public struct Rect : IEquatable<Rect>
 {
     public Vector2 Position;
@@ -13,6 +13,9 @@ public struct Rect : IEquatable<Rect>
     public float Y => Position.Y;
     public float Width => Size.X;
     public float Height => Size.Y;
+    
+    public static readonly Rect Zero = new(0, 0, 0, 0);
+    public static readonly Rect One = new(1, 1, 1, 1);
     
     public Rect(Vector2 position, Vector2 size)
     {

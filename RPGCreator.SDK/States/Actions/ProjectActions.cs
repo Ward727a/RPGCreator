@@ -24,7 +24,14 @@ namespace RPGCreator.SDK.States.Actions;
 
 public static class ProjectActions
 {
+    /// <summary>
+    /// Open a project. Also, will publish a mediator message.
+    /// </summary>
+    /// <param name="ProjectMetaData">The project metadata to open.</param>
     public record OpenProjectAction(ProjectMetaData ProjectMetaData);
+    /// <summary>
+    /// Close the current opened project. Also, will publish a mediator message.
+    /// </summary>
     public record CloseProjectAction();
     
     public record ChangeNameAction(string NewName);

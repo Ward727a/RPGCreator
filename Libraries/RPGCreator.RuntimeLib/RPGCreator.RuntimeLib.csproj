@@ -8,6 +8,13 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\RPGCreator.SDK\RPGCreator.SDK.csproj" />
+      <ProjectReference Include="..\..\Thirdparty\FNA\FNA.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Factories\" />
+      <Folder Include="Services\" />
+      <Folder Include="Types\Graphics\" />
     </ItemGroup>
 
 </Project>

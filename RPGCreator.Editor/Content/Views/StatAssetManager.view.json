@@ -1,0 +1,15 @@
+﻿{
+  "ViewId": "rpgc://views/asset_manager/stats",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.AssetsManager.StatAssetManager",
+  "Name": "Stats",
+  "Binders": [
+    {
+      "TargetViewId": "rpgc://views/asset_manager",
+      "TargetBindId": "Menu",
+      "Data": {
+        "MenuName": "Stats",
+        "MenuDescription": "Manager of stats"
+      }
+    }
+  ]
+}

@@ -20,7 +20,6 @@
 
 using RPGCreator.SDK.GameUI.Events.Actions;
 using RPGCreator.SDK.GameUI.Events.Contexts;
-using RPGCreator.SDK.Types;
 using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.GameUI;

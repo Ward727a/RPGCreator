@@ -21,7 +21,9 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using RPGCreator.SDK.Assets;
+using RPGCreator.SDK.AssetsPre;
 using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.Serializer;
 using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Types;
@@ -41,10 +43,10 @@ public class SerializableData
     {
     }
 
-    public SerializableData(Type type, object? data)
+    public SerializableData(Type type, object? data) : this()
     {
-        if(RegistryServices.Types.HasType(type))
-            DataType = ESerializableDataType.Type;
+        // if(RegistryServices.Types.HasType(type))
+        //     DataType = ESerializableDataType.Type;
         
         if(ClassesRegistry.HasType(type))
             DataType = ESerializableDataType.Class;
@@ -79,7 +81,7 @@ public class SerializableData
         
         return DataType switch
         {
-            ESerializableDataType.Type => RegistryServices.Types.GetKey(type).Value,
+            // ESerializableDataType.Type => RegistryServices.Types.GetKey(type).Value,
             ESerializableDataType.Class => ClassesRegistry.GetUrn(type).Value,
             _ => throw new Exception($"Cannot get URN for type {type.Name} because its data type is not recognized.")
         };
@@ -88,38 +90,8 @@ public class SerializableData
     [JsonConstructor]
     public SerializableData(URN UrnType, object? ObjData)
     {
-        if(RegistryServices.Types.HasKey(UrnType))
-            DataType = ESerializableDataType.Type;
-        
-        if(ClassesRegistry.HasUrn(UrnType))
-            DataType = ESerializableDataType.Class;
-        
-        if (DataType == ESerializableDataType.None)
-        {
-            Logger.Critical("Cannot create SerializableData for urn {0} because it is not registered in the TypesRegistry.", UrnType);
-            Logger.Critical("Please ensure the urn {0} is registered in the TypesRegistry.", UrnType);
-            Logger.Critical("Either by scanning the asm, or register it manually.");
-            throw new Exception($"Cannot create SerializableData for urn {UrnType} because it is not registered in the TypesRegistry.");
-        }
-        
         this.UrnType = UrnType;
-
-        if (ObjData is not JsonElement jsonElement)
-        {
-            this.ObjData = ObjData;
-            return;
-        }
-        
-        var returnType = this.Type;
-        if (returnType != null)
-            this.ObjData = EngineServices.Serializer.Deserialize(jsonElement.GetRawText(), returnType);
-        else
-        {
-            Logger.Critical("Cannot create SerializableData for urn {0} because it is not registered in the TypesRegistry.", UrnType);
-            Logger.Critical("Please ensure the urn {0} is registered in the TypesRegistry.", UrnType);
-            Logger.Critical("Either by scanning the asm, or register it manually.");
-            throw new Exception($"Cannot create SerializableData for urn {UrnType} because it is not registered in the TypesRegistry.");
-        }
+        this.ObjData = ObjData;
     }
     
     [JsonInclude]
@@ -138,14 +110,14 @@ public class SerializableData
             {
                 if (DataType == ESerializableDataType.Type)
                 {
-                    var result = RegistryServices.Types.GetType(UrnType);
-                    if (result.IsSuccess)
-                    {
-                        field = result.Value;
-                        return field;
-                    }
-
-                    Logger.Error("Failed to get type for urn {0}, error: {1}", UrnType, result.Error);
+                    // var result = RegistryServices.Types.GetType(UrnType);
+                    // if (result.IsSuccess)
+                    // {
+                    //     field = result.Value;
+                    //     return field;
+                    // }
+                    //
+                    // Logger.Error("Failed to get type for urn {0}, error: {1}", UrnType, result.Error);
                     return null;
                 }
 
@@ -187,14 +159,14 @@ public class SerializableData
 
 public class SerializableData<TDataType> : SerializableData
 {
-    private static ITypesRegistry TypesRegistry => RegistryServices.Types;
+    private static ITypesRegistry TypesRegistry => null;/*RegistryServices.Types;*/
     
     public SerializableData()
     {
         var type = typeof(TDataType);
         
-        if(RegistryServices.Types.HasType(type))
-            DataType = ESerializableDataType.Type;
+        // if(RegistryServices.Types.HasType(type))
+        //     DataType = ESerializableDataType.Type;
         
         if(ClassesRegistry.HasType(type))
             DataType = ESerializableDataType.Class;

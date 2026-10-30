@@ -21,7 +21,6 @@
 using System.Text.Json.Serialization;
 using CommunityToolkit.HighPerformance.Buffers;
 using RPGCreator.SDK.GameUI;
-using RPGCreator.SDK.Types;
 using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.Graph;
@@ -43,7 +42,7 @@ public record BlueprintParameters(
     public object? DefaultValue { get; set; } = null;
     
     [JsonIgnore]
-    public Type Type => RegistryServices.Types.GetType(TypeUrn).Value ?? throw new Exception($"Type not found: {TypeUrn}");
+    public Type Type => /*RegistryServices.Types.GetType(TypeUrn).Value ??*/ throw new Exception($"Type not found: {TypeUrn}");
 
     [JsonIgnore]
     public string TypeDisplayName

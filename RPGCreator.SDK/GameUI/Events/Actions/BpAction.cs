@@ -21,11 +21,13 @@
 using RPGCreator.SDK.Assets.Definitions.Blueprints;
 using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.Common.Logging;
+using RPGCreator.SDK.GameUI.Core;
 using RPGCreator.SDK.GameUI.Events.Contexts;
 using RPGCreator.SDK.Graph;
 
 namespace RPGCreator.SDK.GameUI.Events.Actions;
 
+[GuiActionMeta("rpgc://gui/actions/bp_action", "Blueprint Action", "Allows to create a custom action from a blueprint.", supportedContexts: typeof(GuiEventContext))]
 public partial class BpAction : IGuiAction
 {
     public string Name => "Blueprint Action";
@@ -38,11 +40,6 @@ public partial class BpAction : IGuiAction
     private BaseBpCompiledLogic _logic;
     
     private readonly CompiledBpContext _compiledBpContext = new(1);
-    
-    public BpAction()
-    {
-        
-    }
 
     public void Execute(GuiEventContext context)
     {
@@ -65,13 +62,5 @@ public partial class BpAction : IGuiAction
             return false;
 
         return BpValue.Type == context.GetType();
-    }
-
-    public IGuiAction Clone()
-    {
-        return new BpAction()
-        {
-            _logic = _logic
-        };
     }
 }

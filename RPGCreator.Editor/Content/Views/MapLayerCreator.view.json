@@ -1,0 +1,5 @@
+﻿{
+  "ViewId": "rpgc://views/map_layer_creator",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.AssetsCreator.MapLayerCreator",
+  "Name": "Layer Creator"
+}

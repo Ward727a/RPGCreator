@@ -18,13 +18,15 @@
 // 
 // For urgent inquiries, sending both an email and a message on Discord is highly recommended for a quicker response.
 
-using RPGCreator.SDK;
+using Microsoft.Extensions.DependencyInjection;
 using RPGCreator.SDK.Serializer;
 using RPGCreator.SDK.Services.EngineService;
+using RPGCreator.Shared.Attributes;
 using RPGCreator.Shared.Types;
 
 namespace RPGCreator.EngineLib.Services.StorageService;
 
+[EngineService(typeof(IFileStorageService))]
 public class JsonFileStorageService : IFileStorageService
 {
     private readonly ISerializerService _serializer;

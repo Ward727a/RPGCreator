@@ -1,0 +1,5 @@
+﻿{
+  "ViewId": "rpgc://views/auto_tile_ruleset/new_autotile_ruleset",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.AssetsManager.AutoTileAssetManager+AutoTileMakerModal",
+  "Name": "AutoTile Creator"
+}

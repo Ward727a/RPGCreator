@@ -1,0 +1,5 @@
+﻿{
+  "ViewId": "rpgc://views/faction_editor",
+  "TargetClass": "RPGCreator.Editor.UI.Views.Widgets.AssetsEditor.FactionEditor",
+  "Name": "Faction Editor"
+}

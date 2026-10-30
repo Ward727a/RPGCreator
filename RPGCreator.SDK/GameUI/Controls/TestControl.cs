@@ -22,7 +22,9 @@ using System.Numerics;
 using RPGCreator.SDK.Common.Attributes;
 using RPGCreator.SDK.GameUI.Enums;
 using RPGCreator.SDK.GameUI.Visual;
-using RPGCreator.SDK.Types;
+using RPGCreator.SDK.Inputs;
+using RPGCreator.SDK.Services.EngineService;
+using RPGCreator.Shared.Attributes;
 using RPGCreator.Shared.Types;
 
 namespace RPGCreator.SDK.GameUI.Controls;
@@ -38,10 +40,12 @@ public partial class TestControl : BaseControl
     public override string Description { get; set; } = "A control that is used for testing purposes only.";
     public override BaseControl Create()
     {
-        return new TestControl();
+        throw new Exception("This control is meant for testing purposes only and should not be created in production code.");
     }
-
-    public TestControl() : this(null, null)
+    
+    private readonly IInputsService _inputSource;
+    
+    public TestControl(IInputsService inputSource) : this(inputSource, null)
     {
     }
 
@@ -65,8 +69,10 @@ public partial class TestControl : BaseControl
     
     #endregion
     
-    public TestControl(Color? color = null, Color? hoverColor = null)
+    public TestControl(IInputsService inputSource, Color? color = null, Color? hoverColor = null)
     {
+        _inputSource = inputSource;
+        
         Visual = new TestVisual()
         {
             Control = this
@@ -117,12 +123,12 @@ public partial class TestControl : BaseControl
 
     protected override void OnDragStart()
     {
-        _grabOffset = GlobalStates.ViewportMouseState.Position - Visual.GlobalBounds.Position;
+        _grabOffset = _inputSource.MouseState.Position - Visual.GlobalBounds.Position;
     }
 
     protected override void OnDragMove(Vector2 deltaPosition)
     {
-        Vector2 targetScreenPos = GlobalStates.ViewportMouseState.Position - _grabOffset;
+        Vector2 targetScreenPos = _inputSource.MouseState.Position - _grabOffset;
 
         if (Parent != null)
         {
